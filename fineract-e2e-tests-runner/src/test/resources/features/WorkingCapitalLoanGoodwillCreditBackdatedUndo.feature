@@ -2,7 +2,8 @@
 @WorkingCapitalLoanGoodwillCreditBackdatedUndoFeature
 Feature: Working Capital Loan Goodwill Credit Backdated and Undo
 
-  Scenario: Backdated goodwill credit clears a delinquent period
+  @TestRailId:C85532
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC1: Verify Working Capital Goodwill Credit backdated/undo - UC1: Backdated goodwill credit clears a delinquent period
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -27,7 +28,8 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 15 January 2026 | Goodwill Credit | 270.0             | 270.0            | 0.0               | 0.0                   | false    |
 
-  Scenario: Backdated goodwill credit and its undo recalculate the delinquency and breach schedules
+  @TestRailId:C85533
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC2: Backdated goodwill credit and its undo recalculate the delinquency and breach schedules
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
@@ -60,7 +62,8 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-02-28 | 59           | 110.70           | 110.70            | null       | null   |
 
-  Scenario: Backdated goodwill credit settling the full balance closes the loan and recognizes the discount
+  @TestRailId:C85534
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC3: Backdated goodwill credit settling the full balance closes the loan and recognizes the discount
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -84,7 +87,8 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | 05 January 2026 | Goodwill Credit           | 10000.0           | false    |
       | 05 January 2026 | Discount Fee Amortization | 1000.0            | false    |
 
-  Scenario: Backdated goodwill credit beyond the outstanding balance moves the loan to overpaid
+  @TestRailId:C85535
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC4: Backdated goodwill credit beyond the outstanding balance moves the loan to overpaid
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -101,7 +105,8 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | overpaymentAmount    | 500.0  |
       | totalPaidPrincipal   | 9000.0 |
 
-  Scenario: Goodwill credit posted on an already overpaid loan increases the overpayment
+  @TestRailId:C85536
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC5: Goodwill credit posted on an already overpaid loan increases the overpayment
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -126,7 +131,8 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | 05 January 2026 | Goodwill Credit | 9500.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 06 January 2026 | Goodwill Credit | 300.0             | 0.0              | 0.0               | 0.0                   | false    |
 
-  Scenario: Undoing a goodwill credit posts a discount fee amortization adjustment on the next COB
+  @TestRailId:C85537
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC6: Undoing a goodwill credit posts a discount fee amortization adjustment on the next COB
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -159,7 +165,8 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | field          | value |
       | realizedIncome | 0.0   |
 
-  Scenario: Undoing the closing goodwill credit re-opens the loan from closed to active
+  @TestRailId:C85538
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC7: Undoing the closing goodwill credit re-opens the loan from closed to active
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -183,7 +190,8 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Goodwill Credit | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
 
-  Scenario: Undoing a goodwill credit that overpaid a closed loan returns it to closed
+  @TestRailId:C85539
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC8: Undoing a goodwill credit that overpaid a closed loan returns it to closed
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -211,7 +219,8 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | 05 January 2026 | Repayment       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 06 January 2026 | Goodwill Credit | 500.0             | 0.0              | 0.0               | 0.0                   | true     |
 
-  Scenario: Goodwill credit dated before the disbursement date is rejected
+  @TestRailId:C85540
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC9: Goodwill credit dated before the disbursement date is rejected (Negative)
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -225,7 +234,8 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | httpCode | errorMessage                                                    |
       | 400      | Failed data validation due to: cannot.be.before.disbursal.date. |
 
-  Scenario: Backdated goodwill credit on a loan with a fee re-allocates the later transaction's fee to principal
+  @TestRailId:C85541
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC10: Backdated goodwill credit on a loan with a fee re-allocates the later transaction's fee to principal
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with payment allocation order:
@@ -259,7 +269,8 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | Fee Amount | Fee Paid | Fee Outstanding |
       | 5.0        | 5.0      | 0.0             |
 
-  Scenario: Undoing a goodwill credit on a loan with a fee re-allocates the remaining transaction's fee portion
+  @TestRailId:C85542
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC11: Undoing a goodwill credit on a loan with a fee re-allocates the remaining transaction's fee portion
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with payment allocation order:
@@ -293,7 +304,8 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | principalOutstanding | 8980.0 |
       | totalPaidPrincipal   | 20.0   |
 
-  Scenario: Backdated goodwill credit posted on a closed loan reprocesses the payments and moves it to overpaid
+  @TestRailId:C85543
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC12: Backdated goodwill credit posted on a closed loan reprocesses the payments and moves it to overpaid
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -318,7 +330,8 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | 05 January 2026 | Goodwill Credit | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Repayment       | 9000.0            | 8500.0           | 0.0               | 0.0                   | false    |
 
-  Scenario: Goodwill credit settling only a fee on a closed loan keeps the loan closed
+  @TestRailId:C85544
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC13: Goodwill credit settling only a fee on a closed loan keeps the loan closed
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with payment allocation order:
