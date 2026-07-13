@@ -12,7 +12,7 @@ flexible, extensible foundation for a wide range of financial services. By
 making robust banking technology openly available, it lowers barriers for
 institutions and innovators to reach underserved and unbanked populations.
 
-Have a look at the [documentation](https://fineract.apache.org/docs/current), the [wiki](https://cwiki.apache.org/confluence/display/FINERACT) or at the [FAQ](https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=91554327), if this README does not answer what you are looking for.
+Have a look at the [documentation](https://fineract.apache.org/docs/stable), the [wiki](https://cwiki.apache.org/confluence/display/FINERACT) or at the [FAQ](https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=91554327), if this README does not answer what you are looking for.
 
 
 COMMUNITY
@@ -30,7 +30,7 @@ In the moment you get started writing code, please consult our [CONTRIBUTING](CO
 REQUIREMENTS
 ============
 
-See [Fineract Development Environment](https://fineract.apache.org/docs/current/#_fineract_development_environment) in the docs for hardware, software, and tool prerequisites and recommendations.
+See [Fineract Development Environment](https://fineract.apache.org/docs/develop/#_fineract_development_environment) in the docs for hardware, software, and tool prerequisites and recommendations.
 
 
 SECURITY
@@ -39,7 +39,7 @@ For a list of known vulnerabilities, see [Apache Fineract Security Reports](http
 
 If you believe you have found a new vulnerability, [let us know privately](https://fineract.apache.org/#contribute).
 
-For details about security during development and deployment, see the documentation [here](https://fineract.apache.org/docs/current/#_security).
+For details about security during development and deployment, see the documentation [here](https://fineract.apache.org/docs/stable/#_security).
 
 PRIVATE FORKS
 ============
@@ -57,7 +57,7 @@ Follow these steps to quickly set up and run Apache Fineract locally.
 
 ### Prerequisites
 
-- [Java JDK](https://fineract.apache.org/docs/current/#_fineract_development_environment)
+- [Java JDK](https://fineract.apache.org/docs/develop/#_fineract_development_environment)
 - PostgreSQL running locally, listening on port 5432 with proper permissions (see [below](#database-and-tables) for how to run PostgreSQL in Docker)
 
 ```bash
@@ -112,7 +112,7 @@ Expected response for fresh instance:
 How to run for production
 ---
 
-Running Fineract _just to try it out_ is relatively easy. If you intend to use it _in a production environment_, be aware that a proper deployment can be complex, costly, and time-consuming. Considerations include: Security, privacy, compliance, performance, service availability, backups, and more. **The Fineract project does not provide a comprehensive guide for deploying Fineract in production.** You might need skills in enterprise Java applications and more. Alternatively, you could pay a vendor for Fineract deployment and maintenance. You will find tips and tricks for [deploying](https://fineract.apache.org/docs/current/#_deployment) and [securing](https://fineract.apache.org/docs/current/#_securing_fineract) Fineract in our official documentation.
+Running Fineract _just to try it out_ is relatively easy. If you intend to use it _in a production environment_, be aware that a proper deployment can be complex, costly, and time-consuming. Considerations include: Security, privacy, compliance, performance, service availability, backups, and more. **The Fineract project does not provide a comprehensive guide for deploying Fineract in production.** You might need skills in enterprise Java applications and more. Alternatively, you could pay a vendor for Fineract deployment and maintenance. You will find tips and tricks for [deploying](https://fineract.apache.org/docs/stable/#_deployment) and [securing](https://fineract.apache.org/docs/stable/#_securing_fineract) Fineract in our official documentation.
 
 
 How to build the JAR file
@@ -329,7 +329,7 @@ Kafka support is also disabled by default. In `docker-compose-postgresql-kafka.y
 During the development Fineract was tested with PLAINTEXT Kafka brokers without authentication and with AWS MSK using IAM authentication. The extra [JAR file](https://github.com/aws/aws-msk-iam-auth/releases) required for IAM authentication is already added to the classpath.
 An example MSK setup can be found in `docker-compose-postgresql-kafka-msk.yml`.
 
-The full list of supported Kafka related properties is documented in the [Fineract Platform documentation](https://fineract.apache.org/docs/current/).
+The full list of supported Kafka related properties is documented in the [Fineract Platform documentation](https://fineract.apache.org/docs/stable/).
 
 
 DATABASE AND TABLES
@@ -392,7 +392,7 @@ NOTE: We keep backwards compatibility until one of the next releases to ensure t
 RELEASES
 ============
 
-[Official releases](https://fineract.apache.org/#downloads) are created quarterly, at the end of each quarter. Our [documented release procedure](https://fineract.apache.org/docs/current/#_releases) follows the [ASF release policy](https://www.apache.org/legal/release-policy.html).
+[Official releases](https://fineract.apache.org/#downloads) are created quarterly, at the end of each quarter. Our [documented release procedure](https://fineract.apache.org/docs/develop/#_releases) follows the [ASF release policy](https://www.apache.org/legal/release-policy.html).
 
 See <https://cwiki.apache.org/confluence/display/FINERACT/Fineract+Releases> for an archive of historical release notes along with JIRA issues relevant to each release.
 
@@ -431,4 +431,4 @@ PLATFORM API
 
 Fineract does not provide a UI, but provides an API. Running Fineract locally, the Swagger documentation can be accessed under `https://localhost:8443/fineract-provider/swagger-ui/index.html`. A live version can be accessed via [this Sandbox](https://sandbox.mifos.community/fineract-provider/swagger-ui/index.html) (not hosted by us).
 
-Apache Fineract supports client code generation using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) based on the [OpenAPI Specification](https://swagger.io/specification/). For more instructions on how to generate client code, check [this section](https://fineract.apache.org/docs/current/#_generate_api_client) of the Fineract documentation. [This video](https://www.youtube.com/watch?v=FlVd-0YAo6c) documents the use of the Swagger-UI.
+Apache Fineract supports client code generation using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) based on the [OpenAPI Specification](https://swagger.io/specification/). For more instructions on how to generate client code, check [this section](https://fineract.apache.org/docs/develop/#_generate_api_client) of the Fineract documentation. [This video](https://www.youtube.com/watch?v=FlVd-0YAo6c) documents the use of the Swagger-UI.

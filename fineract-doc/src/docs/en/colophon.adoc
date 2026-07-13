@@ -4,6 +4,12 @@
 
 *Built on*: {docdate}
 
+Note the version in the URL path:
+
+* Latest stable: https://fineract.apache.org/docs/stable/
+* Bleeding edge: https://fineract.apache.org/docs/develop/
+* Specific version: https://fineract.apache.org/docs/1.14.0/
+
 For document authors and changelog, view code history for the `fineract-doc` directory in https://github.com/apache/fineract/.
 
 toc::[]
