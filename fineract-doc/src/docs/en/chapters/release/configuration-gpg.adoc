@@ -1,4 +1,4 @@
-= GPG
+= Signing releases
 
 Generate GPG key pairs if you don't already have them and publish them. Please use your Apache email address when creating your GPG keypair. If you already have configured GPG and associated your keypair with a non-Apache email address then please consider creating a separate one just for all things related to Fineract (or Apache in general).
 
@@ -224,3 +224,8 @@ gXXeWjafxBmHT1cM8hoBZBYzgTu9nK5UnllWunfaHXiCBG4oQQ==
 =85/F
 -----END PGP PUBLIC KEY BLOCK-----
 ----
+
+See also:
+
+* https://infra.apache.org/release-signing.html[Signing Releases]
+* https://infra.apache.org/openpgp.html[Cryptography with OpenPGP]

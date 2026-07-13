@@ -29,11 +29,8 @@ In the moment you get started writing code, please consult our [CONTRIBUTING](CO
 
 REQUIREMENTS
 ============
-* 16GB RAM and 8 core CPU (minimum hardware for running Fineract -- development and testing may require more)
-* PostgreSQL >= 18.0 ([support for other backend databases is deprecated](https://cwiki.apache.org/confluence/display/FINERACT/FSIP-9%3A+Standardize+on+PostgreSQL))
-* Java >= 21 (Azul Zulu JVM is tested by our CI on GitHub Actions)
 
-Tomcat (min. v10) is only needed if you wish to deploy the Fineract WAR to a separate external servlet container. You do not need to install Tomcat to run Fineract. We recommend the use of the self-contained JAR, which transparently embeds a servlet container using Spring Boot.
+See [Fineract Development Environment](https://fineract.apache.org/docs/current/#_fineract_development_environment) in the docs for hardware, software, and tool prerequisites and recommendations.
 
 
 SECURITY
@@ -60,7 +57,7 @@ Follow these steps to quickly set up and run Apache Fineract locally.
 
 ### Prerequisites
 
-- Java 21 or higher (Azul Zulu is recommended)
+- [Java JDK](https://fineract.apache.org/docs/current/#_fineract_development_environment)
 - PostgreSQL running locally, listening on port 5432 with proper permissions (see [below](#database-and-tables) for how to run PostgreSQL in Docker)
 
 ```bash
