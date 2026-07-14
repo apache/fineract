@@ -98,4 +98,8 @@ public class WorkingCapitalLoanProductRelatedDetails {
 
     @Column(name = "breach_grace_days", nullable = true)
     private Integer breachGraceDays;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "breach_start_type", nullable = false)
+    private WorkingCapitalLoanBreachStartType breachStartType;
 }

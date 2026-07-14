@@ -52,6 +52,7 @@ import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.Work
 import org.apache.fineract.integrationtests.common.workingcapitalloannearbreach.WorkingCapitalNearBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanBreachStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -616,6 +617,101 @@ public class WorkingCapitalLoanProductCRUDTest {
         // Then
         assertThat(exception.getStatus()).isEqualTo(400);
         assertThat(exception.getDeveloperMessage()).contains("near.breach.frequency.must.be.lower.than.breach.frequency");
+    }
+
+    @Test
+    public void testCreateAndRetrieveBreachStartType() {
+        final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
+                .withShortName(uniqueShortName).withBreachStartType(WorkingCapitalLoanBreachStartType.LOAN_CREATION.getCode()).build();
+
+        // When
+        final Long productId = wclProductHelper.createWorkingCapitalLoanProduct(request).getResourceId();
+        assertNotNull(productId);
+
+        // Then - retrieve must round-trip the anchor
+        final GetWorkingCapitalLoanProductsProductIdResponse retrieved = wclProductHelper.retrieveWorkingCapitalLoanProductById(productId);
+        assertNotNull(retrieved.getBreachStartType(), "breachStartType should be present on the retrieved product");
+        assertEquals("LOAN_CREATION", retrieved.getBreachStartType().getCode(),
+                "retrieved breachStartType.code should equal the configured LOAN_CREATION anchor");
+
+        wclProductHelper.deleteWorkingCapitalLoanProductById(productId);
+    }
+
+    @Test
+    public void testBreachStartTypeDefaultsToDisbursementWhenNotProvided() {
+        final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        // No breachStartType provided
+        final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
+                .withShortName(uniqueShortName).build();
+
+        // When
+        final Long productId = wclProductHelper.createWorkingCapitalLoanProduct(request).getResourceId();
+        assertNotNull(productId);
+
+        // Then - the stored value defaults to DISBURSEMENT rather than null
+        final GetWorkingCapitalLoanProductsProductIdResponse retrieved = wclProductHelper.retrieveWorkingCapitalLoanProductById(productId);
+        assertNotNull(retrieved.getBreachStartType(), "breachStartType should default to a value when not provided");
+        assertEquals("DISBURSEMENT", retrieved.getBreachStartType().getCode(),
+                "breachStartType should default to DISBURSEMENT when not provided");
+
+        wclProductHelper.deleteWorkingCapitalLoanProductById(productId);
+    }
+
+    @Test
+    public void testUpdateBreachStartType() {
+        final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final PostWorkingCapitalLoanProductsRequest createRequest = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
+                .withShortName(uniqueShortName).build();
+        final Long productId = wclProductHelper.createWorkingCapitalLoanProduct(createRequest).getResourceId();
+
+        // When - update the breach start-date-type anchor to DISBURSEMENT
+        final PutWorkingCapitalLoanProductsProductIdRequest updateRequest = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
+                .withShortName(uniqueShortName).withBreachStartType(WorkingCapitalLoanBreachStartType.DISBURSEMENT.getCode())
+                .buildUpdateRequest();
+        final PutWorkingCapitalLoanProductsProductIdResponse updateResponse = wclProductHelper
+                .updateWorkingCapitalLoanProductById(productId, updateRequest);
+
+        // Then - update succeeds and the new anchor round-trips on retrieve
+        assertNotNull(updateResponse);
+        assertEquals(productId, updateResponse.getResourceId());
+        final GetWorkingCapitalLoanProductsProductIdResponse retrieved = wclProductHelper.retrieveWorkingCapitalLoanProductById(productId);
+        assertNotNull(retrieved.getBreachStartType(), "breachStartType should be present after update");
+        assertEquals("DISBURSEMENT", retrieved.getBreachStartType().getCode(),
+                "retrieved breachStartType.code should equal the updated DISBURSEMENT anchor");
+
+        wclProductHelper.deleteWorkingCapitalLoanProductById(productId);
+    }
+
+    @Test
+    public void testInvalidBreachStartTypeRejected() {
+        final String uniqueName = "Test wcl Product " + UUID.randomUUID().toString().substring(0, 8);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final PostWorkingCapitalLoanProductsRequest request = new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
+                .withShortName(uniqueShortName).withBreachStartType("FOO").build();
+
+        // When
+        final CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> wclProductHelper.createWorkingCapitalLoanProduct(request));
+
+        // Then
+        assertThat(exception.getStatus()).isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).contains("invalid.breach.start.type");
+    }
+
+    @Test
+    public void testTemplateExposesBreachStartTypeOptions() {
+        // When
+        final GetWorkingCapitalLoanProductsTemplateResponse response = wclProductHelper.retrieveTemplate();
+
+        // Then
+        assertNotNull(response.getBreachStartTypeOptions(), "template should expose a breachStartTypeOptions list");
+        final List<String> optionCodes = response.getBreachStartTypeOptions().stream().map(StringEnumOptionData::getCode).toList();
+        assertTrue(optionCodes.containsAll(List.of("LOAN_CREATION", "DISBURSEMENT")),
+                "breachStartTypeOptions should contain LOAN_CREATION and DISBURSEMENT; actual: " + optionCodes);
     }
 
     private WorkingCapitalBreachData getBreachData(final GetWorkingCapitalLoanProductsTemplateResponse template) {

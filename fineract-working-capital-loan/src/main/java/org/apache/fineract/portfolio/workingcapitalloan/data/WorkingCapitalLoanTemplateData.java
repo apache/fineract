@@ -49,6 +49,7 @@ public class WorkingCapitalLoanTemplateData {
     private Collection<DelinquencyBucketData> delinquencyBucketOptions;
     private List<StringEnumOptionData> periodFrequencyTypeOptions;
     private List<StringEnumOptionData> delinquencyStartTypeOptions;
+    private List<StringEnumOptionData> breachStartTypeOptions;
     private List<WorkingCapitalBreachData> breachOptions;
     private List<StringEnumOptionData> delinquencyMinimumPaymentTypeOptions;
     private List<WorkingCapitalNearBreachData> nearBreachOptions;

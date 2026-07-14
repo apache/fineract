@@ -153,6 +153,23 @@ public class WorkingCapitalLoanApplicationValidationTest {
     }
 
     @Test
+    public void testSubmitWithInvalidBreachStartType() {
+        final Long productId = createProduct();
+        final Long clientId = createClient();
+        final PostWorkingCapitalLoansRequest request = new WorkingCapitalLoanApplicationTestBuilder().withClientId(clientId)
+                .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000))
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT)
+                .withTotalPaymentVolume(BigDecimal.valueOf(5500)).withBreachStartType("FOO").buildSubmitRequest();
+
+        final CallFailedRuntimeException ex = applicationHelper.runSubmitExpectingFailure(request);
+        assertEquals(400, ex.getStatus());
+        assertNotNull(ex.getDeveloperMessage());
+        assertTrue(ex.getDeveloperMessage().contains("invalid.breach.start.type"),
+                "Expected invalid.breach.start.type error: " + ex.getDeveloperMessage());
+        productHelper.deleteWorkingCapitalLoanProductById(productId);
+    }
+
+    @Test
     public void testSubmitWithNegativePrincipal() {
         final Long productId = createProduct();
         final Long clientId = createClient();

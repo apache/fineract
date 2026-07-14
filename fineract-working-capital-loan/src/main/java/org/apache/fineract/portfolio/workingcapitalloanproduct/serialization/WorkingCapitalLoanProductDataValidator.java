@@ -49,6 +49,7 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAccountingRuleType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAdvancedPaymentAllocationsJsonParser;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanBreachStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductDuplicateExternalIdException;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductDuplicateNameException;
@@ -100,6 +101,7 @@ public class WorkingCapitalLoanProductDataValidator {
                     WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName, //
                     WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, //
                     WorkingCapitalLoanProductConstants.breachGraceDaysParamName, //
+                    WorkingCapitalLoanProductConstants.breachStartTypeParamName, //
                     WorkingCapitalLoanProductConstants.accountingRuleParamName, //
                     WorkingCapitalLoanProductConstants.fundSourceAccountIdParamName, //
                     WorkingCapitalLoanProductConstants.loanPortfolioAccountIdParamName, //
@@ -404,6 +406,22 @@ public class WorkingCapitalLoanProductDataValidator {
                 if (delinquencyStartType == null) {
                     baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName)
                             .failWithCode("invalid.delinquency.start.type");
+                }
+            }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element)) {
+            final String breachStartTypeValue = this.fromApiJsonHelper
+                    .extractStringNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element);
+            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.breachStartTypeParamName).value(breachStartTypeValue)
+                    .ignoreIfNull();
+
+            if (breachStartTypeValue != null) {
+                final WorkingCapitalLoanBreachStartType breachStartType = WorkingCapitalLoanBreachStartType
+                        .fromString(breachStartTypeValue);
+                if (breachStartType == null) {
+                    baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.breachStartTypeParamName)
+                            .failWithCode("invalid.breach.start.type");
                 }
             }
         }
