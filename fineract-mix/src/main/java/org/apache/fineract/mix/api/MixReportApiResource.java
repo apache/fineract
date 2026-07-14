@@ -28,6 +28,7 @@ import jakarta.ws.rs.core.MediaType;
 import java.sql.Date;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
+import org.apache.fineract.mix.data.MixReportXBRLDocument;
 import org.apache.fineract.mix.service.MixReportXBRLBuilder;
 import org.apache.fineract.mix.service.MixReportXBRLResultService;
 import org.springframework.stereotype.Component;
@@ -46,12 +47,11 @@ public class MixReportApiResource {
     @Produces({ MediaType.APPLICATION_XML })
     @Operation(summary = "Retrieve Mix XBRL report", operationId = "retrieveMixReport")
     @AlternativeOperationId("retrieveXBRLReport")
-    public String retrieveXBRLReport(@QueryParam("startDate") final Date startDate, @QueryParam("endDate") final Date endDate,
-            @QueryParam("currency") final String currency) {
+    public MixReportXBRLDocument retrieveXBRLReport(@QueryParam("startDate") final Date startDate,
+            @QueryParam("endDate") final Date endDate, @QueryParam("currency") final String currency) {
 
         final var data = xbrlResultService.getXBRLResult(startDate, endDate, currency);
 
-        // TODO: make this type safe?
-        return this.xbrlBuilder.build(data);
+        return this.xbrlBuilder.buildDocumentGraph(data);
     }
 }

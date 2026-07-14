@@ -64,4 +64,21 @@ public class XBRLIntegrationTest {
         assertEquals("AdministrativeExpense", taxonomyList.get(0).get("name"), "Checking for the 1st taxonomy");
     }
 
+    @Test
+    public void shouldSerializeMixXBRLReportToXMLNatively() throws Exception {
+        LOG.info("--------------------VERIFYING NATIVE JAXB XML SERIALIZATION CONTRACT--------------------------");
+
+        this.xbrlHelper = new XBRLIntegrationTestHelper(this.requestSpec, this.responseSpec);
+
+        final String xmlResponse = this.xbrlHelper.getMixReport("2005-01-01", "2005-12-31", "USD");
+
+        LOG.info("GENERATED NATIVE XBRL XML REPORT CONTENT:\n{}", xmlResponse);
+
+        org.junit.jupiter.api.Assertions.assertNotNull(xmlResponse, "The serialized XML output should not be null");
+
+        org.junit.jupiter.api.Assertions.assertTrue(xmlResponse.toLowerCase().contains("xbrl"),
+                "Serialized XML must contain the xbrl root context schema identifier");
+
+        LOG.info("--------------------XML NATIVE SERIALIZATION VERIFIED SUCCESSFULLY--------------------------");
+    }
 }

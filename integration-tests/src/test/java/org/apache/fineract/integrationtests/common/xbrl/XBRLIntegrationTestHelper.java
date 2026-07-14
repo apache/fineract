@@ -61,4 +61,11 @@ public class XBRLIntegrationTestHelper {
         return response;
     }
 
+    public String getMixReport(final String startDate, final String endDate, final String currency) {
+        final String url = "/fineract-provider/api/v1/mixreport?startDate=" + startDate + "&endDate=" + endDate + "&currency=" + currency
+                + "&" + Utils.TENANT_IDENTIFIER;
+        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, null);
+        return response;
+    }
+
 }

@@ -47,6 +47,8 @@ dependencies {
             'org.mapstruct:mapstruct',
 
             'io.github.resilience4j:resilience4j-spring-boot3',
+
+            'jakarta.xml.bind:jakarta.xml.bind-api'
             )
     compileOnly 'com.github.spotbugs:spotbugs-annotations'
     compileOnly 'org.projectlombok:lombok'

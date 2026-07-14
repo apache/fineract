@@ -19,22 +19,24 @@
 package org.apache.fineract.mix.service;
 
 import com.google.common.base.Splitter;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.namespace.QName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.mix.data.MixReportXBRLContextData;
 import org.apache.fineract.mix.data.MixReportXBRLData;
+import org.apache.fineract.mix.data.MixReportXBRLDocument;
 import org.apache.fineract.mix.data.MixReportXBRLNamespaceData;
 import org.apache.fineract.mix.data.MixTaxonomyData;
 import org.apache.fineract.mix.exception.MixReportXBRLMappingInvalidException;
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -42,7 +44,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class MixReportXBRLBuilder {
 
-    // NOTE: see https://www.xbrl.org/taxonomyrecognition/mx_2009-06-19_summary-page.htm
     private static final String SCHEME_URL = "http://www.themix.org";
     private static final String IDENTIFIER = "000000";
     private static final String UNITID_PURE = "Unit1";
@@ -50,63 +51,124 @@ public class MixReportXBRLBuilder {
 
     private final MixReportXBRLNamespaceReadService readNamespaceService;
 
-    // TODO: we should do this with JAXB
     public String build(final MixReportXBRLData xbrlData) {
         return this.build(xbrlData.getResultMap(), xbrlData.getStartDate(), xbrlData.getEndDate(), xbrlData.getCurrency());
     }
 
     public String build(final Map<MixTaxonomyData, BigDecimal> map, final Date startDate, final Date endDate, final String currency) {
+        MixReportXBRLData xbrlData = new MixReportXBRLData(map, startDate, endDate, currency);
+        MixReportXBRLDocument doc = buildDocumentGraph(xbrlData);
+        try {
+            JAXBContext context = JAXBContext.newInstance(MixReportXBRLDocument.class, MixReportXBRLDocument.TaxonomyValue.class);
+            Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            StringWriter writer = new StringWriter();
+            marshaller.marshal(doc, writer);
+            return writer.toString();
+        } catch (Exception e) {
+            log.error("Error marshalling XBRL document", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public MixReportXBRLDocument buildDocumentGraph(final MixReportXBRLData xbrlData) {
+        MixReportXBRLDocument document = new MixReportXBRLDocument();
+
         Integer instantScenarioCounter = 0;
         Integer durationScenarioCounter = 0;
         Map<MixReportXBRLContextData, String> contextMap = new HashMap<>();
-        final Document doc = DocumentHelper.createDocument();
-        Element root = doc.addElement("xbrl");
 
-        root.addElement("schemaRef").addNamespace("link",
-                "http://www.themix.org/sites/default/files/Taxonomy2010/dct/dc-all_2010-08-31.xsd");
-
-        for (final Map.Entry<MixTaxonomyData, BigDecimal> entry : map.entrySet()) {
+        // 1. Build the dynamic taxonomy elements using JAXBElement
+        for (final Map.Entry<MixTaxonomyData, BigDecimal> entry : xbrlData.getResultMap().entrySet()) {
             final MixTaxonomyData taxonomy = entry.getKey();
             final BigDecimal value = entry.getValue();
-            addTaxonomy(root, taxonomy, value, startDate, endDate, instantScenarioCounter, durationScenarioCounter, contextMap);
 
+            if (xbrlData.getStartDate() == null || xbrlData.getEndDate() == null) {
+                throw new MixReportXBRLMappingInvalidException("start date and end date should not be null");
+            }
+
+            final String prefix = taxonomy.getNamespace();
+            String localName = taxonomy.getName();
+            String nsUrl = "";
+            if (prefix != null && !prefix.isEmpty()) {
+                final MixReportXBRLNamespaceData ns = this.readNamespaceService.retrieveNamespaceByPrefix(prefix);
+                if (ns != null) {
+                    nsUrl = ns.getUrl();
+                }
+            }
+
+            MixReportXBRLContextData context = getContextForTaxonomy(taxonomy);
+
+            if (!contextMap.containsKey(context)) {
+                final SimpleDateFormat timeFormat = new SimpleDateFormat("MM_dd_yyyy");
+                final String startDateStr = timeFormat.format(xbrlData.getStartDate());
+                final String endDateStr = timeFormat.format(xbrlData.getEndDate());
+                instantScenarioCounter += 1;
+                durationScenarioCounter += 1;
+                final String contextRefID = context.getPeriodType() == 0 ? "As_Of_" + endDateStr + instantScenarioCounter
+                        : "Duration_" + startDateStr + "_To_" + endDateStr + durationScenarioCounter;
+
+                contextMap.put(context, contextRefID);
+            }
+
+            MixReportXBRLDocument.TaxonomyValue taxValue = new MixReportXBRLDocument.TaxonomyValue(contextMap.get(context),
+                    getUnitRef(taxonomy), getNumberOfDecimalPlaces(value).toString(), value);
+
+            QName qname = new QName(nsUrl, localName, prefix != null ? prefix : "");
+            jakarta.xml.bind.JAXBElement<MixReportXBRLDocument.TaxonomyValue> jaxbElement = new jakarta.xml.bind.JAXBElement<>(qname,
+                    MixReportXBRLDocument.TaxonomyValue.class, taxValue);
+
+            document.getTaxonomyElements().add(jaxbElement);
         }
 
-        addContexts(root, startDate, endDate, contextMap);
-        addCurrencyUnit(root, currency);
-        addNumberUnit(root);
+        // 2. Map Contexts into the structural DTO layout
+        final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
-        doc.setXMLEncoding("UTF-8");
+        for (final Map.Entry<MixReportXBRLContextData, String> entry : contextMap.entrySet()) {
+            final MixReportXBRLContextData context = entry.getKey();
+            MixReportXBRLDocument.XBRLContextDTO contextDTO = new MixReportXBRLDocument.XBRLContextDTO();
+            contextDTO.setId(entry.getValue());
 
-        return doc.asXML();
+            MixReportXBRLDocument.PeriodDTO periodDTO = new MixReportXBRLDocument.PeriodDTO();
+            if (context.getPeriodType() == 0) {
+                periodDTO.setInstant(format.format(xbrlData.getEndDate()));
+            } else {
+                periodDTO.setStartDate(format.format(xbrlData.getStartDate()));
+                periodDTO.setEndDate(format.format(xbrlData.getEndDate()));
+            }
+            contextDTO.setPeriod(periodDTO);
+
+            final String dimension = context.getDimension();
+            final String dimType = context.getDimensionType();
+            if (dimType != null && dimension != null) {
+                MixReportXBRLDocument.ScenarioDTO scenarioDTO = new MixReportXBRLDocument.ScenarioDTO();
+                MixReportXBRLDocument.ExplicitMemberDTO memberDTO = new MixReportXBRLDocument.ExplicitMemberDTO();
+                memberDTO.setDimension(dimType);
+                memberDTO.setValue(dimension);
+                scenarioDTO.setExplicitMember(memberDTO);
+                contextDTO.setScenario(scenarioDTO);
+            }
+
+            document.getContexts().add(contextDTO);
+        }
+
+        // 3. Map Units into structured DTO layout
+        MixReportXBRLDocument.XBRLUnitDTO pureUnit = new MixReportXBRLDocument.XBRLUnitDTO();
+        pureUnit.setId(UNITID_PURE);
+        pureUnit.setMeasure("xbrli:pure");
+        document.getUnits().add(pureUnit);
+
+        MixReportXBRLDocument.XBRLUnitDTO curUnit = new MixReportXBRLDocument.XBRLUnitDTO();
+        curUnit.setId(UNITID_CUR);
+        curUnit.setMeasure("iso4217:" + xbrlData.getCurrency());
+        document.getUnits().add(curUnit);
+
+        return document;
     }
 
-    private Element addTaxonomy(final Element rootElement, final MixTaxonomyData taxonomy, final BigDecimal value, final Date startDate,
-            final Date endDate, Integer instantScenarioCounter, Integer durationScenarioCounter,
-            final Map<MixReportXBRLContextData, String> contextMap) {
-
-        // throw an error is start / endate is null
-        if (startDate == null || endDate == null) {
-            throw new MixReportXBRLMappingInvalidException("start date and end date should not be null");
-        }
-
-        final String prefix = taxonomy.getNamespace();
-        String qname = taxonomy.getName();
-        if (prefix != null && !prefix.isEmpty()) {
-            final MixReportXBRLNamespaceData ns = this.readNamespaceService.retrieveNamespaceByPrefix(prefix);
-            if (ns != null) {
-
-                rootElement.addNamespace(prefix, ns.getUrl());
-            }
-            qname = prefix + ":" + taxonomy.getName();
-
-        }
-        final Element xmlElement = rootElement.addElement(qname);
-
-        final String dimension = taxonomy.getDimension();
-        final SimpleDateFormat timeFormat = new SimpleDateFormat("MM_dd_yyyy");
-
+    private MixReportXBRLContextData getContextForTaxonomy(final MixTaxonomyData taxonomy) {
         MixReportXBRLContextData context = null;
+        final String dimension = taxonomy.getDimension();
         if (dimension != null) {
             final List<String> dims = Splitter.on(':').splitToList(dimension);
 
@@ -122,82 +184,11 @@ public class MixReportXBRLBuilder {
                     taxonomy.getType().equals(MixTaxonomyData.BALANCE_SHEET) || taxonomy.getType().equals(MixTaxonomyData.PORTFOLIO) ? 0
                             : 1);
         }
-
-        if (!contextMap.containsKey(context)) {
-
-            final String startDateStr = timeFormat.format(startDate);
-            final String endDateStr = timeFormat.format(endDate);
-            instantScenarioCounter += 1;
-            durationScenarioCounter += 1;
-            final String contextRefID = context.getPeriodType() == 0 ? "As_Of_" + endDateStr + instantScenarioCounter
-                    : "Duration_" + startDateStr + "_To_" + endDateStr + durationScenarioCounter;
-
-            contextMap.put(context, contextRefID);
-        }
-
-        xmlElement.addAttribute("contextRef", contextMap.get(context));
-        xmlElement.addAttribute("unitRef", getUnitRef(taxonomy));
-        xmlElement.addAttribute("decimals", getNumberOfDecimalPlaces(value).toString());
-
-        // add the child
-        xmlElement.addText(value.toPlainString());
-
-        return xmlElement;
+        return context;
     }
 
     private String getUnitRef(final MixTaxonomyData tx) {
         return tx.isPortfolio() ? UNITID_PURE : UNITID_CUR;
-    }
-
-    /**
-     * Adds the generic number unit
-     */
-    private void addNumberUnit(final Element root) {
-        final Element numerUnit = root.addElement("unit");
-        numerUnit.addAttribute("id", UNITID_PURE);
-        final Element measure = numerUnit.addElement("measure");
-        measure.addText("xbrli:pure");
-
-    }
-
-    /**
-     * Adds the currency unit to the document
-     *
-     * @param currencyCode
-     */
-    private void addCurrencyUnit(final Element root, final String currencyCode) {
-        final Element currencyUnitElement = root.addElement("unit");
-        currencyUnitElement.addAttribute("id", UNITID_CUR);
-        final Element measure = currencyUnitElement.addElement("measure");
-        measure.addText("iso4217:" + currencyCode);
-
-    }
-
-    private void addContexts(final Element root, final Date startDate, final Date endDate,
-            final Map<MixReportXBRLContextData, String> contextMap) {
-        final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        for (final Map.Entry<MixReportXBRLContextData, String> entry : contextMap.entrySet()) {
-            final MixReportXBRLContextData context = entry.getKey();
-            final Element contextElement = root.addElement("context");
-            contextElement.addAttribute("id", entry.getValue());
-            contextElement.addElement("entity").addElement("identifier").addAttribute("scheme", SCHEME_URL).addText(IDENTIFIER);
-
-            final Element periodElement = contextElement.addElement("period");
-
-            if (context.getPeriodType() == 0) {
-                periodElement.addElement("instant").addText(format.format(endDate));
-            } else {
-                periodElement.addElement("startDate").addText(format.format(startDate));
-                periodElement.addElement("endDate").addText(format.format(endDate));
-            }
-
-            final String dimension = context.getDimension();
-            final String dimType = context.getDimensionType();
-            if (dimType != null && dimension != null) {
-                contextElement.addElement("scenario").addElement("explicitMember").addAttribute("dimension", dimType).addText(dimension);
-            }
-        }
-
     }
 
     private Integer getNumberOfDecimalPlaces(final BigDecimal bigDecimal) {
