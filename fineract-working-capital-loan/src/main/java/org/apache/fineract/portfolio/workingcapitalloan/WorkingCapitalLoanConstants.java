@@ -69,6 +69,7 @@ public final class WorkingCapitalLoanConstants {
     public static final String discountExternalIdParameterName = "discountExternalId";
     public static final String noteParamName = "note";
     public static final String rejectedOnDateParamName = "rejectedOnDate";
+    public static final String fraudParamName = "fraud";
 
     // Disbursal / Undo disbursal parameters
     public static final String actualDisbursementDateParamName = "actualDisbursementDate";

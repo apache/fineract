@@ -85,7 +85,7 @@ public class WorkingCapitalLoanTestHelper {
                 .addValue("breach_start_type", "DISBURSEMENT")//
                 // SimpleJdbcInsert without usingColumns() binds explicit NULL for every unmapped
                 // table column, which bypasses the DB default and violates the NOT NULL constraint.
-                .addValue("is_charged_off", false);
+                .addValue("is_charged_off", false).addValue("is_fraud", Boolean.FALSE);
         final Number key = wcLoanInsert.executeAndReturnKey(params);
         return Objects.requireNonNull(key, "Generated key must not be null").longValue();
     }

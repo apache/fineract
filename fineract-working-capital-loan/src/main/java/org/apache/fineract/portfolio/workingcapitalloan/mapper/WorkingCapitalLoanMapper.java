@@ -96,7 +96,7 @@ public interface WorkingCapitalLoanMapper {
     @Mapping(target = "netDisbursalAmount", ignore = true)
     @Mapping(target = "charges", ignore = true)
     @Mapping(target = "originators", ignore = true)
-    @Mapping(target = "fraud", ignore = true)
+    @Mapping(target = "fraud", source = "fraud")
     @Mapping(target = "chargeOffReason", source = "chargeOffReason", qualifiedByName = "chargeOffReasonData")
     WorkingCapitalLoanData toData(WorkingCapitalLoan loan);
 
