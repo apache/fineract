@@ -1,5 +1,5 @@
 {
-  "commitMessagePrefix": "FINERACT-2421: ",
+  "commitMessagePrefix": "FINERACT-2684: ",
   "extends": [
     "config:base",
     "group:allNonMajor",
