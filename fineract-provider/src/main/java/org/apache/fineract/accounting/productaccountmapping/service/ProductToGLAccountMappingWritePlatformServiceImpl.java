@@ -18,10 +18,15 @@
  */
 package org.apache.fineract.accounting.productaccountmapping.service;
 
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForSavings;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
@@ -40,15 +45,8 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-
-import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
