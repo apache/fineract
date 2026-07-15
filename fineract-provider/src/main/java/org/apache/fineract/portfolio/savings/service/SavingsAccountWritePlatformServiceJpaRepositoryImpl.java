@@ -87,6 +87,7 @@ import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -1237,6 +1238,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         }
         final SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNewFromJson(savingsAccount, chargeDefinition, command);
 
+        validateChargeAmountNotZero(savingsAccountCharge, dataValidationErrors);
+
         if (chargeDefinition.isEnableFreeWithdrawal()) {
             savingsAccountCharge.setFreeWithdrawalCount(0);
         }
@@ -2078,6 +2081,20 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private void validateReasonForHold(String reasonForBlock) {
         if (StringUtils.isBlank(reasonForBlock)) {
             throw new PlatformDataIntegrityException("Reason For Block is Mandatory", "error.msg.reason.for.block.mandatory");
+        }
+    }
+
+    private void validateChargeAmountNotZero(final SavingsAccountCharge savingsAccountCharge,
+            final List<ApiParameterError> dataValidationErrors) {
+        if (!ChargeCalculationType.fromInt(savingsAccountCharge.getCharge().getChargeCalculation()).isFlat()) {
+            return;
+        }
+
+        if (savingsAccountCharge.getAmount(savingsAccountCharge.savingsAccount().getCurrency()).isZero()) {
+            final String defaultUserMessage = "This charge cannot be added because the calculated amount becomes zero after rounding.";
+
+            dataValidationErrors
+                    .add(ApiParameterError.parameterError("error.msg.savings.charge.amount.rounded.to.zero", defaultUserMessage, "amount"));
         }
     }
 }

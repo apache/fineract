@@ -242,9 +242,10 @@ public class ShareAccountDataSerializer {
         LocalDate currentDate = DateUtils.getBusinessLocalDate();
         for (ShareAccountCharge charge : charges) {
             if (charge.isActive() && charge.isShareAccountActivation()) {
-                charge.deriveChargeAmount(totalChargeAmount, account.getCurrency());
+                BigDecimal amount = charge.deriveChargeAmount(totalChargeAmount, account.getCurrency());
+                validateChargeAmountNotZero(amount);
                 ShareAccountTransaction chargeTransaction = ShareAccountTransaction.createChargeTransaction(currentDate, charge);
-                ShareAccountChargePaidBy paidBy = new ShareAccountChargePaidBy(chargeTransaction, charge, charge.percentageOrAmount());
+                ShareAccountChargePaidBy paidBy = new ShareAccountChargePaidBy(chargeTransaction, charge, amount);
                 chargeTransaction.addShareAccountChargePaidBy(paidBy);
                 account.addChargeTransaction(chargeTransaction);
             }
@@ -255,6 +256,7 @@ public class ShareAccountDataSerializer {
             for (ShareAccountCharge charge : charges) {
                 if (charge.isActive() && charge.isSharesPurchaseCharge()) {
                     BigDecimal amount = charge.deriveChargeAmount(pending.amount(), account.getCurrency());
+                    validateChargeAmountNotZero(amount);
                     ShareAccountChargePaidBy paidBy = new ShareAccountChargePaidBy(pending, charge, amount);
                     pending.addShareAccountChargePaidBy(paidBy);
                     totalChargeAmount = totalChargeAmount.add(amount);
@@ -1042,5 +1044,14 @@ public class ShareAccountDataSerializer {
         handleRedeemSharesChargeTransactions(account, transaction);
         actualChanges.put(ShareAccountApiConstants.requestedshares_paramname, transaction);
         return actualChanges;
+    }
+
+    private void validateChargeAmountNotZero(BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            List<ApiParameterError> errors = new ArrayList<>();
+            errors.add(ApiParameterError.parameterError("error.msg.share.charge.amount.rounded.to.zero",
+                    "This charge cannot be added because the calculated amount becomes zero after rounding.", "amount"));
+            throw new PlatformApiDataValidationException(errors);
+        }
     }
 }
