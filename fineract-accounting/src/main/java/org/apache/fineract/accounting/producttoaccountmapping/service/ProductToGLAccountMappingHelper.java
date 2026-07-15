@@ -46,13 +46,11 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.infrastructure.core.exception.ResourceNotFoundException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
 import org.apache.fineract.portfolio.paymenttype.exception.PaymentTypeNotFoundException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -68,7 +66,6 @@ public class ProductToGLAccountMappingHelper {
     protected final GLAccountRepositoryWrapper accountRepositoryWrapper;
     private final PaymentTypeRepository paymentTypeRepository;
     private final CodeValueRepository codeValueRepository;
-    private final JdbcTemplate jdbcTemplate;
 
     public void saveProductToAccountMapping(final JsonElement element, final String paramName, final Long productId,
             final int placeHolderTypeId, final GLAccountType expectedAccountType, final PortfolioProductType portfolioProductType) {
@@ -613,18 +610,6 @@ public class ProductToGLAccountMappingHelper {
      */
     private void saveChargeToFundSourceMapping(final Long productId, final Long chargeId, final Long incomeAccountId,
             final PortfolioProductType portfolioProductType, final boolean isPenalty) {
-
-        // The accounting module no longer loads the Charge entity (it is decoupled from the charge domain), so the
-        // existence check that loading the entity used to provide is restored here with a lightweight JDBC lookup.
-        // This keeps acc_product_mapping.charge_id from persisting orphaned references without reintroducing a
-        // compile-time dependency on the charge module.
-        // TODO Vishwas: Need to validate if given charge is fee or Penalty
-        // based on input condition
-        final Integer chargeCount = this.jdbcTemplate.queryForObject("select count(*) from m_charge where id = ?", Integer.class, chargeId);
-        if (chargeCount == null || chargeCount == 0) {
-            throw new ResourceNotFoundException("error.msg.charge.id.invalid", "Charge with identifier " + chargeId + " does not exist",
-                    new Object[] { chargeId });
-        }
 
         GLAccount glAccount;
         /**

@@ -34,7 +34,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -43,9 +42,9 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
     public SavingsProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
             final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
             final GLAccountRepositoryWrapper accountRepositoryWrapper, final PaymentTypeRepository paymentTypeRepository,
-            final CodeValueRepository codeValueRepository, final JdbcTemplate jdbcTemplate) {
+            final CodeValueRepository codeValueRepository) {
         super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, accountRepositoryWrapper, paymentTypeRepository,
-                codeValueRepository, jdbcTemplate);
+                codeValueRepository);
     }
 
     public void saveSavingsToAssetAccountMapping(final JsonElement element, final String paramName, final Long productId,
