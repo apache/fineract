@@ -27,6 +27,7 @@ import java.math.MathContext;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.client.v1.ClientDataV1;
@@ -37,6 +38,10 @@ import org.apache.fineract.avro.loan.v1.LoanInstallmentDelinquencyBucketDataV1;
 import org.apache.fineract.avro.loan.v1.LoanOwnershipTransferDataV1;
 import org.apache.fineract.avro.loan.v1.LoanTransactionAdjustmentDataV1;
 import org.apache.fineract.avro.loan.v1.LoanTransactionDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanAccountDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanChargeDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanCollectionDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanSummaryDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanTransactionDataV1;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.ExternalTransferData;
@@ -44,14 +49,17 @@ import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdDelinquencyPausePeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.GetWorkingCapitalLoanSummary;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsResponse;
+import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
 import org.apache.fineract.client.models.PageExternalTransferData;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.WorkingCapitalCollection;
 import org.apache.fineract.test.data.AssetExternalizationTransferStatus;
 import org.apache.fineract.test.data.AssetExternalizationTransferStatusReason;
 import org.apache.fineract.test.data.TransactionType;
@@ -83,11 +91,23 @@ import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransaction
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionMerchantIssuedRefundPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanTransactionPayoutRefundPostEvent;
 import org.apache.fineract.test.messaging.event.loan.transaction.LoanUndoContractTerminationBusinessEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.AbstractWorkingCapitalLoanEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanApplicationModifiedEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanApprovedEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanBalanceChangedEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanCreatedEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanDelinquencyRangeChangeEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanDisbursalEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanRejectedEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanStatusChangedEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanUndoApprovalEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanUndoDisbursalEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanDisbursalTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanDiscountFeeTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -734,6 +754,125 @@ public class EventCheckHelper {
                 .isEqualTo(FORMATTER_EVENTS.format(body.getTimeline().getApprovedOnDate()))//
                 .extractingData(loanAccountDataV1 -> loanAccountDataV1.getSummary().getCurrency().getCode())
                 .isEqualTo(body.getCurrency().getCode());//
+    }
+
+    public void workingCapitalLoanCreatedEventCheck(final Long loanId) {
+        workingCapitalLoanAccountDataV1Check(WorkingCapitalLoanCreatedEvent.class, loanId);
+    }
+
+    public void workingCapitalLoanApplicationModifiedEventCheck(final Long loanId) {
+        workingCapitalLoanAccountDataV1Check(WorkingCapitalLoanApplicationModifiedEvent.class, loanId);
+    }
+
+    public void workingCapitalLoanApprovedEventCheck(final Long loanId) {
+        workingCapitalLoanAccountDataV1Check(WorkingCapitalLoanApprovedEvent.class, loanId);
+    }
+
+    public void workingCapitalLoanUndoApprovalEventCheck(final Long loanId) {
+        workingCapitalLoanAccountDataV1Check(WorkingCapitalLoanUndoApprovalEvent.class, loanId);
+    }
+
+    public void workingCapitalLoanRejectedEventCheck(final Long loanId) {
+        workingCapitalLoanAccountDataV1Check(WorkingCapitalLoanRejectedEvent.class, loanId);
+    }
+
+    public void workingCapitalLoanDisbursalEventCheck(final Long loanId) {
+        workingCapitalLoanAccountDataV1Check(WorkingCapitalLoanDisbursalEvent.class, loanId);
+    }
+
+    public void workingCapitalLoanUndoDisbursalEventCheck(final Long loanId) {
+        workingCapitalLoanAccountDataV1Check(WorkingCapitalLoanUndoDisbursalEvent.class, loanId);
+    }
+
+    public void workingCapitalLoanStatusChangedEventCheck(final Long loanId) {
+        workingCapitalLoanAccountDataV1Check(WorkingCapitalLoanStatusChangedEvent.class, loanId);
+    }
+
+    public void workingCapitalLoanBalanceChangedEventCheck(final Long loanId) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoansLoanIdResponse body = ok(
+                () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
+
+        eventAssertion.assertEvent(WorkingCapitalLoanBalanceChangedEvent.class, loanId).extractingData(event -> {
+            assertWorkingCapitalLoanAccountData(event, body);
+
+            final WorkingCapitalLoanSummaryDataV1 eventSummary = event.getSummary();
+            final GetWorkingCapitalLoanSummary bodySummary = body.getSummary();
+            assertThat(eventSummary).isNotNull();
+            assertThat(bodySummary).isNotNull();
+            assertThat(areBigDecimalValuesEqual(eventSummary.getPrincipalPaid(), bodySummary.getPrincipalPaid())).isTrue();
+            assertThat(areBigDecimalValuesEqual(eventSummary.getPrincipalOutstanding(), bodySummary.getPrincipalOutstanding())).isTrue();
+            assertThat(areBigDecimalValuesEqual(eventSummary.getTotalOutstanding(), bodySummary.getTotalOutstanding())).isTrue();
+            assertThat(areBigDecimalValuesEqual(event.getTotalOverpaid(), bodySummary.getOverpayment())).isTrue();
+            return null;
+        });
+    }
+
+    public void workingCapitalLoanBalanceChangedEventChargesCheck(final Long loanId, final List<Map<String, String>> expectedCharges) {
+        waitForTransactionCommit();
+        eventAssertion.assertEvent(WorkingCapitalLoanBalanceChangedEvent.class, loanId).extractingData(event -> {
+            final List<WorkingCapitalLoanChargeDataV1> eventCharges = event.getCharges();
+            assertThat(eventCharges).isNotNull().hasSize(expectedCharges.size());
+            IntStream.range(0, expectedCharges.size()).forEach(i -> {
+                final Map<String, String> expected = expectedCharges.get(i);
+                final WorkingCapitalLoanChargeDataV1 actual = eventCharges.get(i);
+                assertThat(actual.getAmount()).isNotNull();
+                assertThat(actual.getAmountAccrued()).isNotNull();
+                assertThat(actual.getAmountUnrecognized()).isNotNull();
+                assertThat(areBigDecimalValuesEqual(actual.getAmount(), new BigDecimal(expected.get("amount")))).isTrue();
+                assertThat(areBigDecimalValuesEqual(actual.getAmountAccrued(), new BigDecimal(expected.get("amountAccrued")))).isTrue();
+                assertThat(areBigDecimalValuesEqual(actual.getAmountUnrecognized(), new BigDecimal(expected.get("amountUnrecognized"))))
+                        .isTrue();
+            });
+            return null;
+        });
+    }
+
+    public void workingCapitalLoanDelinquencyRangeChangeEventCheck(final Long loanId) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoansLoanIdResponse body = ok(
+                () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
+
+        eventAssertion.assertEvent(WorkingCapitalLoanDelinquencyRangeChangeEvent.class, loanId).extractingData(event -> {
+            assertWorkingCapitalLoanAccountData(event, body);
+
+            final WorkingCapitalLoanCollectionDataV1 eventDelinquent = event.getDelinquent();
+            final WorkingCapitalCollection bodyDelinquent = body.getDelinquent();
+            assertThat(eventDelinquent).isNotNull();
+            assertThat(bodyDelinquent).isNotNull();
+            assertThat(areBigDecimalValuesEqual(eventDelinquent.getDelinquentAmount(), bodyDelinquent.getDelinquentAmount())).isTrue();
+            assertThat(areBigDecimalValuesEqual(eventDelinquent.getTotalDelinquentAmount(), bodyDelinquent.getDelinquentPrincipal()))
+                    .isTrue();
+            assertThat(eventDelinquent.getDelinquencySchedule()).isNotEmpty();
+            return null;
+        });
+    }
+
+    private void workingCapitalLoanAccountDataV1Check(final Class<? extends AbstractWorkingCapitalLoanEvent> eventClazz,
+            final Long loanId) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoansLoanIdResponse body = ok(
+                () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
+
+        eventAssertion.assertEvent(eventClazz, loanId).extractingData(event -> {
+            assertWorkingCapitalLoanAccountData(event, body);
+            return null;
+        });
+    }
+
+    private void assertWorkingCapitalLoanAccountData(final WorkingCapitalLoanAccountDataV1 event,
+            final GetWorkingCapitalLoansLoanIdResponse body) {
+        Assertions.assertNotNull(body.getStatus());
+        assertThat(event.getStatus().getId().longValue()).isEqualTo(body.getStatus().getId());
+
+        assertThat(event.getDelinquent()).isNotNull();
+        assertThat(event.getDelinquent().getDelinquencySchedule()).isNotNull();
+
+        if (event.getDisbursementDetails() != null && !event.getDisbursementDetails().isEmpty() && body.getNetDisbursalAmount() != null) {
+            event.getDisbursementDetails()
+                    .forEach(tranche -> assertThat(areBigDecimalValuesEqual(tranche.getNetDisbursalAmount(), body.getNetDisbursalAmount()))
+                            .isTrue());
+        }
     }
 
 }

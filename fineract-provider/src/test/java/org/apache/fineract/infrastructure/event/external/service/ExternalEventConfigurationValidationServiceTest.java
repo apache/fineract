@@ -117,16 +117,21 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "WorkingCapitalLoanDisbursalTransactionBusinessEvent", "WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent",
                 "WorkingCapitalLoanRepaymentTransactionBusinessEvent", "WorkingCapitalLoanDiscountFeeTransactionBusinessEvent",
                 "WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent", "WorkingCapitalLoanChargeAdjustmentPreBusinessEvent",
-                "WorkingCapitalLoanChargeAdjustmentPostBusinessEvent", "WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent");
+                "WorkingCapitalLoanChargeAdjustmentPostBusinessEvent", "WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent",
+                "WorkingCapitalLoanCreatedBusinessEvent", "WorkingCapitalLoanApplicationModifiedBusinessEvent",
+                "WorkingCapitalLoanApprovedBusinessEvent", "WorkingCapitalLoanUndoApprovalBusinessEvent",
+                "WorkingCapitalLoanRejectedBusinessEvent", "WorkingCapitalLoanDisbursalBusinessEvent",
+                "WorkingCapitalLoanUndoDisbursalBusinessEvent", "WorkingCapitalLoanStatusChangedBusinessEvent",
+                "WorkingCapitalLoanBalanceChangedBusinessEvent", "WorkingCapitalLoanDelinquencyRangeChangeBusinessEvent");
 
-        List<FineractPlatformTenant> tenants = Arrays
-                .asList(new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null));
+        List<FineractPlatformTenant> tenants = List
+                .of(new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null));
 
         JdbcTemplate jdbcTemplate = Mockito.mock(JdbcTemplate.class);
         when(tenantDetailsService.findAllTenants()).thenReturn(tenants);
         when(jdbcTemplateFactory.create(any())).thenReturn(jdbcTemplate);
         when(jdbcTemplate.queryForList(anyString(), eq(String.class))).thenReturn(configurations);
-        List<String> sourcePackage = Arrays.asList("org.apache.fineract");
+        List<String> sourcePackage = List.of("org.apache.fineract");
         when(externalEventSourceService.getSourcePackages()).thenReturn(sourcePackage);
         // when
         underTest.afterPropertiesSet();

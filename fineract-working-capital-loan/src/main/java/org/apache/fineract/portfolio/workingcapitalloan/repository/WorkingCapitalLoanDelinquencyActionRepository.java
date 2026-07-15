@@ -35,6 +35,9 @@ public interface WorkingCapitalLoanDelinquencyActionRepository extends JpaReposi
     List<WorkingCapitalLoanDelinquencyAction> findByWorkingCapitalLoanIdAndActionOrderByIdDesc(Long workingCapitalLoanId,
             DelinquencyAction action);
 
+    List<WorkingCapitalLoanDelinquencyAction> findByWorkingCapitalLoanIdAndActionOrderByStartDateAsc(Long workingCapitalLoanId,
+            DelinquencyAction action);
+
     @Query("""
             select case when count(action) > 0 then true else false end from WorkingCapitalLoanDelinquencyAction action
             where action.action = org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.DISABLE

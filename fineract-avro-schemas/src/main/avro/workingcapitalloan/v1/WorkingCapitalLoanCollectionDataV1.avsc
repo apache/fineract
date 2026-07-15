@@ -1,0 +1,98 @@
+{
+    "name": "WorkingCapitalLoanCollectionDataV1",
+    "namespace": "org.apache.fineract.avro.workingcapitalloan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "delinquentDays",
+            "doc": "Days since the oldest active delinquency tag.",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "default": null,
+            "name": "delinquentDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "delinquentAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "lastPaymentDate",
+            "doc": "Date of the last non-reversed repayment-like transaction (repayment, payout refund, goodwill credit, charge adjustment).",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "lastPaymentAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "lastRepaymentDate",
+            "doc": "Date of the last non-reversed repayment transaction.",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "lastRepaymentAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "delinquencyPausePeriods",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.loan.v1.DelinquencyPausePeriodV1"
+                }
+            ]
+        },
+        {
+            "default": null,
+            "name": "delinquencySchedule",
+            "doc": "Current delinquency schedule periods.",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencySchedulePeriodDataV1"
+                }
+            ]
+        },
+        {
+            "default": null,
+            "name": "totalDelinquentAmount",
+            "doc": "Aggregated outstanding of the delinquency schedule periods; always equal to delinquentAmount.",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        }
+    ]
+}

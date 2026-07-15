@@ -83,4 +83,5 @@
   <include relativeToChangelogFile="true" file="parts/0059_wc_loan_balance_principal_adjustment.xml"/>
   <include relativeToChangelogFile="true" file="parts/0060_wc_loan_transaction_allocation_overpayment_portion.xml"/>
   <include relativeToChangelogFile="true" file="parts/0061_wc_breach_range_schedule_base_min_paym_amount.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0062_wc_loan_details_external_events.xml"/>
 </databaseChangeLog>

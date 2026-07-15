@@ -1,0 +1,48 @@
+{
+    "name": "WorkingCapitalLoanDisbursementDetailDataV1",
+    "namespace": "org.apache.fineract.avro.workingcapitalloan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "id",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "default": null,
+            "name": "expectedDisbursementDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "actualDisbursementDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "principal",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "netDisbursalAmount",
+            "doc": "Net amount disbursed to the client after up-front deductions (from the amortization model).",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        }
+    ]
+}
