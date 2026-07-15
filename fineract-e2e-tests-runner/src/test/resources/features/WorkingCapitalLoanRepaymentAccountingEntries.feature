@@ -273,3 +273,72 @@ Feature: Working Capital Loan Repayment Accounting Entries
       | ASSET | 987654       | Fund Receivables | 270.0 |        |
       | ASSET | 112601       | Loans Receivable | 270.0 |        |
       | ASSET | 987654       | Fund Receivables |       | 270.0  |
+
+  @TestRailId:C85604
+  Scenario: Verify Working Capital loan repayment GL entries - UC9: repayment on already closed loan posts only overpayment credit
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes repayment on "10 January 2026" with 9000.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    When Admin sets the business date to "11 January 2026"
+    And Customer makes repayment on "11 January 2026" with 300.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "300.00"
+    And Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "11 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 300.0 |        |
+      | LIABILITY | 245000       | Other Credit Liability    |       | 300.0  |
+
+  @TestRailId:C85605
+  Scenario: Verify Working Capital loan repayment GL entries - UC10: repayment on already overpaid loan posts only overpayment credit
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes repayment on "10 January 2026" with 9200.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "200.00"
+    When Admin sets the business date to "11 January 2026"
+    And Customer makes repayment on "11 January 2026" with 199.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "399.00"
+    And Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "11 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 199.0 |        |
+      | LIABILITY | 245000       | Other Credit Liability    |       | 199.0  |
+
+  @TestRailId:C85606
+  Scenario: Verify Working Capital loan repayment GL entries - UC11: repayment on already overpaid loan with advanced accounting payment channel fund source mapping
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes repayment on "10 January 2026" with 9200.0 transaction amount on Working Capital loan with the following payment details:
+      | paymentType    | accountNumber | checkNumber | routingCode | receiptNumber | bankNumber |
+      | MONEY_TRANSFER |               |             |             |               |            |
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "200.00"
+    When Admin sets the business date to "11 January 2026"
+    And Customer makes repayment on "11 January 2026" with 199.0 transaction amount on Working Capital loan with the following payment details:
+      | paymentType    | accountNumber | checkNumber | routingCode | receiptNumber | bankNumber |
+      | MONEY_TRANSFER |               |             |             |               |            |
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "399.00"
+    And Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "11 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 987654       | Fund Receivables           | 199.0 |        |
+      | LIABILITY | 245000       | Other Credit Liability    |       | 199.0  |
