@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-ext['spring-modulith.version'] = '1.4.11'
 dependencies {
     // Never use "compile" scope, but make all dependencies either 'implementation', 'runtimeOnly' or 'testCompile'.
     // Note that we never use 'api', because Fineract at least currently is a simple monolithic application ("WAR"), not a library.

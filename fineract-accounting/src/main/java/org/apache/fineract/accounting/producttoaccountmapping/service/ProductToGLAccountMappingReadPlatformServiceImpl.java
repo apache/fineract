@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
@@ -36,6 +38,7 @@ import org.apache.fineract.accounting.common.AccountingConstants.SharesProductAc
 import org.apache.fineract.accounting.common.AccountingRuleType;
 import org.apache.fineract.accounting.common.AccountingValidations;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.producttoaccountmapping.data.AdvancedMappingToExpenseAccountData;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.apache.fineract.accounting.producttoaccountmapping.data.ClassificationToGLAccountData;
@@ -47,7 +50,6 @@ import org.apache.fineract.infrastructure.codes.mapper.CodeValueMapper;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -57,7 +59,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
     private final ProductToGLAccountMappingRepository productToGLAccountMappingRepository;
     private final CodeValueMapper codeValueMapper;
-    private final JdbcTemplate jdbcTemplate;
+    private final AccountingChargeReadService accountingChargeReadService;
 
     @Override
     public Map<String, Object> fetchAccountMappingDetailsForLoanProduct(final Long loanProductId, final Integer accountingType) {
@@ -259,23 +261,26 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
     private List<ChargeToGLAccountMapper> fetchChargeToIncomeAccountMappings(final PortfolioProductType portfolioProductType,
             final Long loanProductId, final boolean penalty) {
-        // The accounting module is decoupled from the charge domain, so we cannot navigate a Charge association in
-        // JPQL. We read the charge -> income-account rows via JdbcTemplate rather than a JPA native query: EclipseLink
-        // does not bind Spring Data ":name" parameters in native queries (it expects "#name"), which caused the raw
-        // markers to reach the database. JdbcTemplate uses plain JDBC positional binding and works on all supported
-        // databases. The GL account fields are selected via a join on acc_gl_account so we avoid a per-row lookup.
-        // Column order: [0] gl_account_id, [1] gl_account_name, [2] gl_code, [3] charge_id, [4] charge_name.
-        final String sql = "select ga.id, ga.name, ga.gl_code, c.id, c.name " + "from acc_product_mapping apm "
-                + "inner join m_charge c on c.id = apm.charge_id " + "inner join acc_gl_account ga on ga.id = apm.gl_account_id "
-                + "where apm.product_id = ? and apm.product_type = ? and c.is_penalty = ?";
-        final List<ChargeToGLAccountMapper> chargeToGLAccountMappers = jdbcTemplate.query(sql, (rs, rowNum) -> {
-            final GLAccountData gLAccountData = new GLAccountData().setId(rs.getLong(1)).setName(rs.getString(2))
-                    .setGlCode(rs.getString(3));
-            final ChargeData chargeData = ChargeData.builder().id(rs.getLong(4)).name(rs.getString(5)).penalty(penalty).build();
-            return new ChargeToGLAccountMapper().setCharge(chargeData).setIncomeAccount(gLAccountData);
-        }, loanProductId, portfolioProductType.getValue(), penalty);
+        final List<ProductToGLAccountMapping> mappings = penalty
+                ? productToGLAccountMappingRepository.findAllPenaltyToIncomeAccountMappings(loanProductId, portfolioProductType.getValue())
+                : productToGLAccountMappingRepository.findAllFeeToIncomeAccountMappings(loanProductId, portfolioProductType.getValue());
+        if (mappings.isEmpty()) {
+            return null;
+        }
 
-        return chargeToGLAccountMappers.isEmpty() ? null : chargeToGLAccountMappers;
+        final List<Long> chargeIds = mappings.stream().map(ProductToGLAccountMapping::getChargeId).toList();
+        final Map<Long, ChargeData> chargesById = accountingChargeReadService.findChargesByIds(chargeIds).stream()
+                .collect(Collectors.toMap(ChargeData::getId, Function.identity()));
+
+        final List<ChargeToGLAccountMapper> chargeToGLAccountMappers = new ArrayList<>();
+        for (final ProductToGLAccountMapping mapping : mappings) {
+            final GLAccount glAccount = mapping.getGlAccount();
+            final GLAccountData gLAccountData = new GLAccountData().setId(glAccount.getId()).setName(glAccount.getName())
+                    .setGlCode(glAccount.getGlCode());
+            chargeToGLAccountMappers
+                    .add(new ChargeToGLAccountMapper().setCharge(chargesById.get(mapping.getChargeId())).setIncomeAccount(gLAccountData));
+        }
+        return chargeToGLAccountMappers;
     }
 
     private List<AdvancedMappingToExpenseAccountData> fetchChargeOffReasonMappings(final PortfolioProductType portfolioProductType,

@@ -18,14 +18,10 @@
  */
 package org.apache.fineract.accounting.productaccountmapping.service;
 
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
-import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
-
-import com.google.gson.JsonElement;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
+
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForLoan;
 import org.apache.fineract.accounting.common.AccountingConstants.AccrualAccountsForSavings;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
@@ -41,10 +37,18 @@ import org.apache.fineract.accounting.producttoaccountmapping.service.SavingsPro
 import org.apache.fineract.accounting.producttoaccountmapping.service.ShareProductToGLAccountMappingHelper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.loanproduct.LoanProductConstants;
 import org.apache.fineract.portfolio.savings.DepositAccountType;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
+import static org.apache.fineract.portfolio.savings.SavingsApiConstants.isDormancyTrackingActiveParamName;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -55,11 +59,13 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     private final LoanProductToGLAccountMappingHelper loanProductToGLAccountMappingHelper;
     private final SavingsProductToGLAccountMappingHelper savingsProductToGLAccountMappingHelper;
     private final ShareProductToGLAccountMappingHelper shareProductToGLAccountMappingHelper;
+    private final ChargeRepositoryWrapper chargeRepositoryWrapper;
 
     @Override
     @Transactional
     public void createLoanProductToGLAccountMapping(final Long loanProductId, final JsonCommand command) {
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
+        validateChargesExist(element);
         final Integer accountingRuleTypeId = this.fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
         boolean merchantBuyDownFee = true;
@@ -311,6 +317,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     public void createSavingProductToGLAccountMapping(final Long savingProductId, final JsonCommand command,
             DepositAccountType accountType) {
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
+        validateChargesExist(element);
         final Integer accountingRuleTypeId = this.fromApiJsonHelper.extractIntegerNamed(accountingRuleParamName, element,
                 Locale.getDefault());
 
@@ -354,6 +361,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
 
         this.deserializer.validateForShareProductCreate(command.json());
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
+        validateChargesExist(element);
         final Integer accountingRuleTypeId = this.fromApiJsonHelper.extractIntegerNamed(accountingRuleParamName, element,
                 Locale.getDefault());
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
@@ -415,6 +423,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                     accountingRuleType);
         } /*** else examine and update individual changes ***/
         else {
+            validateChargesExist(element);
             this.loanProductToGLAccountMappingHelper.handleChangesToLoanProductToGLAccountMappings(loanProductId, changes, element,
                     accountingRuleType, enableIncomeCapitalization, enableBuyDownFee, merchantBuyDownFee);
             this.loanProductToGLAccountMappingHelper.updatePaymentChannelToFundSourceMappings(command, element, loanProductId, changes);
@@ -454,6 +463,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                     accountingRuleType);
         } /*** else examine and update individual changes ***/
         else {
+            validateChargesExist(element);
             this.savingsProductToGLAccountMappingHelper.handleChangesToSavingsProductToGLAccountMappings(savingsProductId, changes, element,
                     accountingRuleType);
             this.savingsProductToGLAccountMappingHelper.updatePaymentChannelToFundSourceMappings(command, element, savingsProductId,
@@ -485,11 +495,32 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                     accountingRuleType);
         } /*** else examine and update individual changes ***/
         else {
+            validateChargesExist(element);
             this.shareProductToGLAccountMappingHelper.handleChangesToSharesProductToGLAccountMappings(shareProductId, changes, element,
                     accountingRuleType);
             this.shareProductToGLAccountMappingHelper.updatePaymentChannelToFundSourceMappings(command, element, shareProductId, changes);
             this.shareProductToGLAccountMappingHelper.updateChargesToIncomeAccountMappings(command, element, shareProductId, changes);
         }
         return changes;
+    }
+
+    private void validateChargesExist(final JsonElement element) {
+        validateChargesExist(element, LoanProductAccountingParams.FEE_INCOME_ACCOUNT_MAPPING.getValue());
+        validateChargesExist(element, LoanProductAccountingParams.PENALTY_INCOME_ACCOUNT_MAPPING.getValue());
+    }
+
+    private void validateChargesExist(final JsonElement element, final String arrayName) {
+        final JsonArray chargeToIncomeAccountMappingArray = this.fromApiJsonHelper.extractJsonArrayNamed(arrayName, element);
+        if (chargeToIncomeAccountMappingArray == null) {
+            return;
+        }
+        for (int i = 0; i < chargeToIncomeAccountMappingArray.size(); i++) {
+            final JsonElement chargeIdElement = chargeToIncomeAccountMappingArray.get(i).getAsJsonObject()
+                    .get(LoanProductAccountingParams.CHARGE_ID.getValue());
+            // A missing chargeId is reported by the mapping helper as a mandatory field error, so it is skipped here.
+            if (chargeIdElement != null && !chargeIdElement.isJsonNull()) {
+                this.chargeRepositoryWrapper.findOneWithNotFoundDetection(chargeIdElement.getAsLong());
+            }
+        }
     }
 }
