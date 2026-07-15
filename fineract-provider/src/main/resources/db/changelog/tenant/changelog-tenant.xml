@@ -274,4 +274,5 @@
     <include file="parts/0252_trial_balance_summary_update_originator_external_ids.xml" relativeToChangelogFile="true" />
     <include file="parts/0253_remove_unused_entity_access.xml" relativeToChangelogFile="true" />
     <include file="parts/0254_transaction_summary_reports_exclude_reage_and_fix_amortization_mapping_sign.xml" relativeToChangelogFile="true" />
+    <include file="parts/0255_add_undo_accounttransfer_permission.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
