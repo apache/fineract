@@ -20,24 +20,36 @@ package org.apache.fineract.portfolio.delinquency.service;
 
 import static java.time.Month.JANUARY;
 import static org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction.PAUSE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentPeriodAndRuleRepository;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRangeRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyTagHistoryRepository;
 import org.apache.fineract.portfolio.delinquency.domain.LoanInstallmentDelinquencyTagRepository;
+import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyBucketMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.DelinquencyRangeMapper;
 import org.apache.fineract.portfolio.delinquency.mapper.LoanDelinquencyTagMapper;
 import org.apache.fineract.portfolio.delinquency.validator.LoanDelinquencyActionData;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
+import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
+import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,6 +86,16 @@ class DelinquencyReadPlatformServiceImplTest {
 
     @Mock
     private LoanDelinquencyActionRepository loanDelinquencyActionRepository;
+    @Mock
+    private DelinquencyMinimumPaymentPeriodAndRuleRepository minimumPaymentPeriodAndRuleRepository;
+    @Mock
+    private DelinquencyEffectivePauseHelper delinquencyEffectivePauseHelper;
+    @Mock
+    private ConfigurationDomainService configurationDomainService;
+    @Mock
+    private LoanTransactionRepository loanTransactionRepository;
+    @Mock
+    private PossibleNextRepaymentCalculationServiceDiscovery possibleNextRepaymentCalculationServiceDiscovery;
 
     @InjectMocks
     private DelinquencyReadPlatformServiceImpl underTest;
@@ -192,4 +214,50 @@ class DelinquencyReadPlatformServiceImplTest {
         return new DelinquencyPausePeriod(active, LocalDate.parse(startDate), LocalDate.parse(endDate));
     }
 
+    @Test
+    public void testCalculateLoanCollectionDataWhenLoanProductIsNullAndLoanIsPendingApproval() {
+        // given
+        Loan loan = mock(Loan.class);
+        when(loan.isSubmittedAndPendingApproval()).thenReturn(true);
+        when(loan.getLoanProduct()).thenReturn(null);
+        when(loanRepository.findById(1L)).thenReturn(Optional.of(loan));
+        // when
+        CollectionData result = underTest.calculateLoanCollectionData(1L);
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getAvailableDisbursementAmountWithOverApplied()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    public void testCalculateAvailableDisbursementAmountWithOverAppliedWhenLoanProductIsNull() {
+        // given
+        Loan loan = mock(Loan.class);
+        when(loan.getLoanProduct()).thenReturn(null);
+        when(loan.getApprovedPrincipal()).thenReturn(BigDecimal.valueOf(5000));
+        when(loan.getDisbursedAmount()).thenReturn(BigDecimal.valueOf(2000));
+        when(loan.getLoanRepaymentScheduleDetail()).thenReturn(mock(LoanProductRelatedDetail.class));
+        // when
+        BigDecimal result = underTest.calculateAvailableDisbursementAmountWithOverApplied(loan);
+        // then
+        assertThat(result).isEqualByComparingTo(BigDecimal.valueOf(3000));
+    }
+
+    @Test
+    public void testCalculateAvailableDisbursementAmountWithOverAppliedWhenLoanProductPresentAndOverApplyEnabled() {
+        // given
+        Loan loan = mock(Loan.class);
+        LoanProduct loanProduct = mock(LoanProduct.class);
+        when(loan.getLoanProduct()).thenReturn(loanProduct);
+        when(loanProduct.isAllowApprovedDisbursedAmountsOverApplied()).thenReturn(true);
+        when(loanProduct.getOverAppliedCalculationType()).thenReturn("flat");
+        when(loanProduct.getOverAppliedNumber()).thenReturn(500);
+        when(loan.getProposedPrincipal()).thenReturn(BigDecimal.valueOf(10000));
+        when(loan.getApprovedPrincipal()).thenReturn(BigDecimal.valueOf(10000));
+        when(loan.getDisbursedAmount()).thenReturn(BigDecimal.ZERO);
+        when(loan.getLoanRepaymentScheduleDetail()).thenReturn(mock(LoanProductRelatedDetail.class));
+        // when
+        BigDecimal result = underTest.calculateAvailableDisbursementAmountWithOverApplied(loan);
+        // then
+        assertThat(result).isEqualByComparingTo(BigDecimal.valueOf(10500));
+    }
 }
