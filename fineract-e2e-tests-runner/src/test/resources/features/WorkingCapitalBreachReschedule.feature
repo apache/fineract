@@ -323,6 +323,7 @@ Feature: Working Capital Breach Reschedule Action
       | 4            | 2019-05-31 | 2019-06-29 | 30           | 500.00           | 500.00            | null       | null   |
     Then Admin closes the Working Capital loan with a full repayment on "15 June 2019"
 
+  @TestRailId:C85588
   Scenario: Verify breach reschedule inherits each partial group from the latest action that set it
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
