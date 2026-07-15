@@ -935,6 +935,14 @@ public class WorkingCapitalLoanDataValidator {
             baseDataValidator.reset().parameter("transaction").failWithCode("transaction.already.undone", transaction.getId());
         }
 
+        final LoanStatus loanStatus = loan.getLoanStatus();
+        final boolean undoAllowedForStatus = LoanStatus.ACTIVE.equals(loanStatus) || LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loanStatus)
+                || LoanStatus.OVERPAID.equals(loanStatus);
+        if (!undoAllowedForStatus) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
+                    .failWithCode("undo.transaction.not.allowed.for.loan.status");
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 }
