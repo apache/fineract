@@ -27,7 +27,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationPlan;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationRequest;
@@ -65,7 +64,6 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
     private final WorkingCapitalLoanAllocationRequestFactory allocationRequestFactory;
     private final WorkingCapitalLoanAllocationApplier allocationApplier;
     private final WorkingCapitalLoanBalanceUpdater balanceUpdater;
-    private final WorkingCapitalLoanChargePaymentHandler chargePaymentHandler;
     private final WorkingCapitalLoanAmortizationScheduleWriteService amortizationScheduleWriteService;
 
     @Override
@@ -118,11 +116,8 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
             charge.setPaid(false);
         }
 
-        // Charge adjustments settle a charge outside the repayment allocation, so re-apply them after the reset above;
-        // otherwise the replayed repayments would re-settle the already-adjusted portion.
         final Map<Long, WorkingCapitalLoanCharge> chargesById = charges.stream()
                 .collect(Collectors.toMap(WorkingCapitalLoanCharge::getId, Function.identity()));
-        reapplyChargeAdjustments(allTransactions, chargesById, balance);
 
         // Re-allocate every non-reversed repayment-like transaction in chronological order.
         final List<WorkingCapitalLoanTransaction> replayable = allTransactions.stream()
@@ -175,22 +170,5 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
                 .filter(txn -> !txn.isReversed() && txn.getTransactionType().isRepaymentType())
                 .map(WorkingCapitalLoanTransaction::getTransactionAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
         return replayableTotal.compareTo(balance.getPrincipal()) > 0;
-    }
-
-    private void reapplyChargeAdjustments(final List<WorkingCapitalLoanTransaction> allTransactions,
-            final Map<Long, WorkingCapitalLoanCharge> chargesById, final WorkingCapitalLoanBalance balance) {
-        for (final WorkingCapitalLoanTransaction txn : allTransactions) {
-            if (txn.isReversed() || txn.getTypeOf() != LoanTransactionType.CHARGE_ADJUSTMENT) {
-                continue;
-            }
-            txn.getLoanTransactionRelations().stream()
-                    .filter(relation -> relation.getRelationType() == LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT
-                            && relation.getToCharge() != null)
-                    .findFirst().map(relation -> chargesById.get(relation.getToCharge().getId())).ifPresent(charge -> {
-                        final BigDecimal amount = txn.getTransactionAmount();
-                        chargePaymentHandler.applyChargePayment(charge, amount);
-                        balanceUpdater.applyChargePayment(balance, charge, amount);
-                    });
-        }
     }
 }

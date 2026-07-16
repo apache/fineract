@@ -18,11 +18,9 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
-import java.math.BigDecimal;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationPlan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
 import org.springframework.stereotype.Component;
 
 /**
@@ -49,21 +47,5 @@ public class WorkingCapitalLoanBalanceUpdater {
         balance.setFeePaid(MathUtil.nullToZero(balance.getFeePaid()).add(plan.feeChargesPortion()));
         balance.setPenaltyPaid(MathUtil.nullToZero(balance.getPenaltyPaid()).add(plan.penaltyChargesPortion()));
         balance.setOverpaymentAmount(MathUtil.nullToZero(balance.getOverpaymentAmount()).add(plan.overpaymentPortion()));
-    }
-
-    /**
-     * Refreshes the matching fee/penalty bucket for a single charge payment (the charge adjustment flow, which settles
-     * one charge directly without going through an allocation plan).
-     */
-    public void applyChargePayment(final WorkingCapitalLoanBalance balance, final WorkingCapitalLoanCharge charge,
-            final BigDecimal amount) {
-        if (!MathUtil.isGreaterThanZero(amount)) {
-            return;
-        }
-        if (charge.isPenaltyCharge()) {
-            balance.setPenaltyPaid(MathUtil.nullToZero(balance.getPenaltyPaid()).add(amount));
-        } else {
-            balance.setFeePaid(MathUtil.nullToZero(balance.getFeePaid()).add(amount));
-        }
     }
 }

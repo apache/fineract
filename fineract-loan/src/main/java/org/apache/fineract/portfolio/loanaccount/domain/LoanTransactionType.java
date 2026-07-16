@@ -192,7 +192,7 @@ public enum LoanTransactionType {
 
     public boolean isRepaymentType() {
         return (isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund() || isDownPayment()
-                || isInterestPaymentWaiver());
+                || isInterestPaymentWaiver() || isChargeAdjustment());
     }
 
     public boolean isRecoveryRepayment() {

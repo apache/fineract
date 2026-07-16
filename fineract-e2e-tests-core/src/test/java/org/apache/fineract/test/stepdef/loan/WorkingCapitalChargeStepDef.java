@@ -455,21 +455,6 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         log.debug("WC penalty charge adjustment response: {}", response);
     }
 
-    @When("Admin makes a charge adjustment for the last added charge with {double} amount and transaction date {string} on working capital loan")
-    public void makeWcChargeAdjustmentWithDate(final Double amount, final String transactionDate) {
-        final Long loanId = getLoanId();
-        final Long loanChargeId = getLastAddedLoanChargeId();
-        final LocalDate parsedDate = LocalDate.parse(transactionDate, FORMATTER);
-        final PostWorkingCapitalLoansLoanIdChargesChargeIdRequest request = new PostWorkingCapitalLoansLoanIdChargesChargeIdRequest()
-                .amount(BigDecimal.valueOf(amount)).transactionDate(parsedDate.format(FORMATTER_API)).dateFormat(DATE_FORMAT_API)
-                .locale("en");
-        final PostWorkingCapitalLoansLoanIdChargesChargeIdResponse response = ok(
-                () -> fineractClient.workingCapitalLoanCharges().adjustLoanCharge(loanId, loanChargeId, request, "adjustment"));
-        Assertions.assertNotNull(response);
-        testContext().set(TestContextKey.WORKING_CAPITAL_CHARGE_ADJUSTMENT_RESPONSE, response);
-        log.debug("WC charge adjustment with date response: {}", response);
-    }
-
     @Then("Making a charge adjustment with {double} amount on working capital loan results an error with the following data:")
     public void makeWcChargeAdjustmentFails(final Double amount, final DataTable table) {
         final Long loanId = getLoanId();

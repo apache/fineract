@@ -632,7 +632,7 @@ public class WorkingCapitalLoanDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateRepayment(final String json, final WorkingCapitalLoan loan, LoanTransactionType goodwillCredit) {
+    public void validateRepayment(final String json, final WorkingCapitalLoan loan, LoanTransactionType transactionType) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -698,13 +698,13 @@ public class WorkingCapitalLoanDataValidator {
         validatePaymentDetails(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
-        if (LoanTransactionType.REPAYMENT.equals(goodwillCredit)) {
+        if (LoanTransactionType.REPAYMENT.equals(transactionType)) {
             if (!LoanStatus.ACTIVE.equals(loan.getLoanStatus()) && !LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loan.getLoanStatus())
                     && !LoanStatus.OVERPAID.equals(loan.getLoanStatus())) {
                 throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
                         "Repayment is allowed only for active/overpaid loans", WorkingCapitalLoanConstants.loanStatusParamName);
             }
-        } else if (LoanTransactionType.GOODWILL_CREDIT.equals(goodwillCredit)) {
+        } else if (LoanTransactionType.GOODWILL_CREDIT.equals(transactionType)) {
             if (!LoanStatus.ACTIVE.equals(loan.getLoanStatus()) && !LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loan.getLoanStatus())
                     && !LoanStatus.OVERPAID.equals(loan.getLoanStatus())) {
                 throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",

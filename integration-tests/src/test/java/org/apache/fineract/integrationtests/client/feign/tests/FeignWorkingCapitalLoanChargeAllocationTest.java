@@ -21,14 +21,18 @@ package org.apache.fineract.integrationtests.client.feign.tests;
 import static org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper.assertEqualBigDecimal;
 import static org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper.findCharge;
 import static org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper.findTransaction;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetBalance;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
@@ -171,8 +175,7 @@ public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegratio
 
             // A 40 charge adjustment partially settles the 100 fee charge and bumps the fee bucket by 40.
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-05");
-            wcLoanHelper.adjustCharge(loanId, feeLoanChargeId,
-                    WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(40), "05 January 2026"));
+            wcLoanHelper.adjustCharge(loanId, feeLoanChargeId, WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(40)));
 
             WorkingCapitalLoanChargeData feeCharge = findCharge(wcLoanHelper.getCharges(loanId), feeLoanChargeId);
             assertEqualBigDecimal(BigDecimal.valueOf(40), feeCharge.getAmountPaid(), "Fee charge amount paid should be 40");
@@ -183,6 +186,138 @@ public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegratio
             assertEqualBigDecimal(BigDecimal.valueOf(40), balance.getFeePaid(), "Fee paid bucket should reflect the 40 adjustment");
             assertEqualBigDecimal(BigDecimal.valueOf(60), balance.getFeeOutstanding(), "Fee outstanding should be 100 - 40");
             assertEqualBigDecimal(BigDecimal.ZERO, balance.getPrincipalPaid(), "A charge adjustment must not touch the principal bucket");
+        });
+    }
+
+    @Test
+    void testUndoChargeAdjustmentRestoresChargeAndBalance() {
+        final Long[] loanIdHolder = new Long[1];
+        final Long[] adjustmentTransactionIdHolder = new Long[1];
+        final Long[] feeLoanChargeIdHolder = new Long[1];
+        businessDateHelper.runAt("2026-01-01", () -> {
+            Long client = clientHelper.createClient("01 January 2026");
+            loanIdHolder[0] = createAndDisburseLoanOnDate(client, BigDecimal.valueOf(9000), "01 January 2026");
+            feeLoanChargeIdHolder[0] = addCharge(loanIdHolder[0], false, 100, "01 January 2026");
+
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-05");
+            adjustmentTransactionIdHolder[0] = wcLoanHelper.adjustCharge(loanIdHolder[0], feeLoanChargeIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(40)));
+        });
+        businessDateHelper.runAt("2026-01-10", () -> {
+            wcLoanHelper.undoLoanTransaction(loanIdHolder[0], adjustmentTransactionIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.undoTransaction());
+
+            GetWorkingCapitalLoanTransactionIdResponse reversedAdjustment = wcLoanHelper.getTransactions(loanIdHolder[0]).stream()
+                    .filter(txn -> adjustmentTransactionIdHolder[0].equals(txn.getId())).findFirst()
+                    .orElseThrow(() -> new AssertionError("Charge adjustment transaction not found"));
+            assertEquals(Boolean.TRUE, reversedAdjustment.getReversed(), "Charge adjustment transaction should be flagged reversed");
+
+            WorkingCapitalLoanChargeData feeCharge = findCharge(wcLoanHelper.getCharges(loanIdHolder[0]), feeLoanChargeIdHolder[0]);
+            assertEqualBigDecimal(BigDecimal.ZERO, feeCharge.getAmountPaid(), "Fee charge amount paid should be restored to 0");
+            assertEqualBigDecimal(BigDecimal.valueOf(100), feeCharge.getAmountOutstanding(),
+                    "Fee charge outstanding should be restored to 100");
+            assertNotEquals(Boolean.TRUE, feeCharge.getPaid(), "Fee charge should no longer be flagged paid");
+
+            GetBalance balance = balanceOf(loanIdHolder[0]);
+            assertEqualBigDecimal(BigDecimal.ZERO, balance.getFeePaid(), "Fee paid bucket should be restored to 0");
+            assertEqualBigDecimal(BigDecimal.valueOf(100), balance.getFeeOutstanding(), "Fee outstanding should be restored to 100");
+            assertEqualBigDecimal(BigDecimal.ZERO, balance.getPrincipalPaid(), "Principal bucket remains untouched");
+        });
+    }
+
+    @Test
+    void testUndoAlreadyReversedChargeAdjustmentFails() {
+        final Long[] loanIdHolder = new Long[1];
+        final Long[] adjustmentTransactionIdHolder = new Long[1];
+        final Long[] feeLoanChargeIdHolder = new Long[1];
+        businessDateHelper.runAt("2026-01-01", () -> {
+            Long client = clientHelper.createClient("01 January 2026");
+            loanIdHolder[0] = createAndDisburseLoanOnDate(client, BigDecimal.valueOf(9000), "01 January 2026");
+            feeLoanChargeIdHolder[0] = addCharge(loanIdHolder[0], false, 100, "01 January 2026");
+        });
+        businessDateHelper.runAt("2026-01-05", () -> {
+            adjustmentTransactionIdHolder[0] = wcLoanHelper.adjustCharge(loanIdHolder[0], feeLoanChargeIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(40)));
+        });
+        businessDateHelper.runAt("2026-01-10", () -> {
+            wcLoanHelper.undoLoanTransaction(loanIdHolder[0], adjustmentTransactionIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.undoTransaction());
+
+            final CallFailedRuntimeException ex = assertThrows(CallFailedRuntimeException.class,
+                    () -> wcLoanHelper.undoLoanTransaction(loanIdHolder[0], adjustmentTransactionIdHolder[0],
+                            WorkingCapitalLoanRequestBuilders.undoTransaction()));
+            assertEquals(400, ex.getStatus(), "Undoing an already-reversed charge adjustment must fail");
+        });
+    }
+
+    @Test
+    void testUndoChargeAdjustmentIsAllowedWhileLoanIsClosed() {
+        final Long[] loanIdHolder = new Long[1];
+        final Long[] adjustmentTransactionIdHolder = new Long[1];
+        final Long[] feeLoanChargeIdHolder = new Long[1];
+        businessDateHelper.runAt("2026-01-01", () -> {
+            Long client = clientHelper.createClient("01 January 2026");
+            loanIdHolder[0] = createAndDisburseLoanOnDate(client, BigDecimal.valueOf(9000), "01 January 2026");
+            // Due well after the repayment below, so it's an "in advance" charge and doesn't compete with
+            // principal in the repayment that closes the loan.
+            feeLoanChargeIdHolder[0] = addCharge(loanIdHolder[0], false, 100, "31 January 2026");
+        });
+        businessDateHelper.runAt("2026-01-02", () -> {
+            wcLoanHelper.makeRepayment(loanIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(9000), "02 January 2026"));
+            GetWorkingCapitalLoansLoanIdResponse loanDetails = wcLoanHelper.getLoanDetails(loanIdHolder[0]);
+            assertNotNull(loanDetails.getStatus());
+            assertEquals("loanStatusType.closed.obligations.met", loanDetails.getStatus().getCode(),
+                    "Loan should be fully closed after the principal-only repayment");
+
+            adjustmentTransactionIdHolder[0] = wcLoanHelper.adjustCharge(loanIdHolder[0], feeLoanChargeIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(40)));
+        });
+        businessDateHelper.runAt("2026-01-03", () -> {
+            wcLoanHelper.undoLoanTransaction(loanIdHolder[0], adjustmentTransactionIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.undoTransaction());
+
+            List<GetWorkingCapitalLoanTransactionIdResponse> transactions = wcLoanHelper.getTransactions(loanIdHolder[0]);
+            GetWorkingCapitalLoanTransactionIdResponse reversedAdjustment = transactions.stream()
+                    .filter(txn -> adjustmentTransactionIdHolder[0].equals(txn.getId())).findFirst()
+                    .orElseThrow(() -> new AssertionError("Charge adjustment transaction not found"));
+            assertEquals(Boolean.TRUE, reversedAdjustment.getReversed(), "Charge adjustment transaction should be flagged reversed");
+
+            WorkingCapitalLoanChargeData feeCharge = findCharge(wcLoanHelper.getCharges(loanIdHolder[0]), feeLoanChargeIdHolder[0]);
+            assertEqualBigDecimal(BigDecimal.ZERO, feeCharge.getAmountPaid(), "Fee charge amount paid restored to 0");
+            assertEqualBigDecimal(BigDecimal.valueOf(100), feeCharge.getAmountOutstanding(), "Fee charge outstanding restored to 100");
+
+            assertEquals("loanStatusType.closed.obligations.met", wcLoanHelper.getLoanDetails(loanIdHolder[0]).getStatus().getCode(),
+                    "Loan remains closed — the adjustment only ever touched the fee bucket, never principal");
+        });
+    }
+
+    @Test
+    void testChargeAdjustmentSurvivesReprocessingTriggeredByBackdatedRepayment() {
+        final Long[] loanIdHolder = new Long[1];
+        final Long[] feeLoanChargeIdHolder = new Long[1];
+        businessDateHelper.runAt("2026-01-01", () -> {
+            Long client = clientHelper.createClient("01 January 2026");
+            loanIdHolder[0] = createAndDisburseLoanOnDate(client, BigDecimal.valueOf(9000), "01 January 2026");
+            feeLoanChargeIdHolder[0] = addCharge(loanIdHolder[0], false, 100, "01 January 2026");
+        });
+        businessDateHelper.runAt("2026-01-20", () -> {
+            wcLoanHelper.adjustCharge(loanIdHolder[0], feeLoanChargeIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(40)));
+        });
+        businessDateHelper.runAt("2026-01-25", () -> {
+            wcLoanHelper.makeRepayment(loanIdHolder[0],
+                    WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(100), "10 January 2026"));
+
+            GetBalance balance = balanceOf(loanIdHolder[0]);
+            assertEqualBigDecimal(BigDecimal.valueOf(100), balance.getFeePaid(), "Fee is fully settled by the earlier-dated repayment");
+            assertEqualBigDecimal(BigDecimal.valueOf(40), balance.getPrincipalPaid(),
+                    "The charge adjustment's 40 must still be accounted for — redistributed onto principal since the fee is already settled");
+            assertEqualBigDecimal(BigDecimal.valueOf(8960), balance.getPrincipalOutstanding(), "Principal outstanding is 9000 - 40");
+
+            WorkingCapitalLoanChargeData feeCharge = findCharge(wcLoanHelper.getCharges(loanIdHolder[0]), feeLoanChargeIdHolder[0]);
+            assertEqualBigDecimal(BigDecimal.valueOf(100), feeCharge.getAmountPaid(), "Fee charge fully paid once, not lost");
+            assertEquals(Boolean.TRUE, feeCharge.getPaid(), "Fee charge should be flagged paid");
         });
     }
 

@@ -49,13 +49,13 @@ public class WorkingCapitalLoanChargeDataValidator {
             throw new InvalidJsonException();
         }
 
-        final Set<String> allowedParameters = new HashSet<>(Arrays.asList(WorkingCapitalLoanChargeConstants.amountParamName,
-                WorkingCapitalLoanChargeConstants.transactionDateParamName, WorkingCapitalLoanChargeConstants.externalIdParamName,
-                WorkingCapitalLoanChargeConstants.localeParamName, WorkingCapitalLoanChargeConstants.dateFormatParamName,
-                WorkingCapitalLoanChargeConstants.noteParamName, WorkingCapitalLoanChargeConstants.paymentDetailsParamName,
-                WorkingCapitalLoanChargeConstants.paymentTypeIdParamName, WorkingCapitalLoanChargeConstants.accountNumberParamName,
-                WorkingCapitalLoanChargeConstants.checkNumberParamName, WorkingCapitalLoanChargeConstants.routingCodeParamName,
-                WorkingCapitalLoanChargeConstants.receiptNumberParamName, WorkingCapitalLoanChargeConstants.bankNumberParamName));
+        final Set<String> allowedParameters = new HashSet<>(
+                Arrays.asList(WorkingCapitalLoanChargeConstants.amountParamName, WorkingCapitalLoanChargeConstants.externalIdParamName,
+                        WorkingCapitalLoanChargeConstants.localeParamName, WorkingCapitalLoanChargeConstants.dateFormatParamName,
+                        WorkingCapitalLoanChargeConstants.noteParamName, WorkingCapitalLoanChargeConstants.paymentDetailsParamName,
+                        WorkingCapitalLoanChargeConstants.paymentTypeIdParamName, WorkingCapitalLoanChargeConstants.accountNumberParamName,
+                        WorkingCapitalLoanChargeConstants.checkNumberParamName, WorkingCapitalLoanChargeConstants.routingCodeParamName,
+                        WorkingCapitalLoanChargeConstants.receiptNumberParamName, WorkingCapitalLoanChargeConstants.bankNumberParamName));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         fromJsonHelper.checkForUnsupportedParameters(typeOfMap, json, allowedParameters);
@@ -69,13 +69,6 @@ public class WorkingCapitalLoanChargeDataValidator {
         final BigDecimal amount = this.fromJsonHelper.extractBigDecimalWithLocaleNamed(WorkingCapitalLoanChargeConstants.amountParamName,
                 element);
         baseDataValidator.reset().parameter(WorkingCapitalLoanChargeConstants.amountParamName).value(amount).notNull().positiveAmount();
-
-        if (this.fromJsonHelper.parameterExists(WorkingCapitalLoanChargeConstants.transactionDateParamName, element)) {
-            final LocalDate transactionDate = this.fromJsonHelper
-                    .extractLocalDateNamed(WorkingCapitalLoanChargeConstants.transactionDateParamName, element);
-            baseDataValidator.reset().parameter(WorkingCapitalLoanChargeConstants.transactionDateParamName).value(transactionDate)
-                    .notBlank();
-        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

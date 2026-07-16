@@ -62,7 +62,6 @@ import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapita
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanNoteRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
-import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionAllocationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanChargeConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanChargeDataValidator;
@@ -80,14 +79,12 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
     private final ExternalIdFactory externalIdFactory;
     private final WorkingCapitalLoanBalanceRepository balanceRepository;
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
-    private final WorkingCapitalLoanTransactionAllocationRepository allocationRepository;
     private final WorkingCapitalLoanTransactionRelationRepository relationRepository;
     private final PaymentDetailWritePlatformService paymentDetailService;
     private final WorkingCapitalLoanNoteRepository noteRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
-    private final WorkingCapitalLoanChargePaymentHandler chargePaymentHandler;
-    private final WorkingCapitalLoanBalanceUpdater balanceUpdater;
+    private final WorkingCapitalLoanTransactionProcessor transactionProcessor;
 
     @Override
     public CommandProcessingResult createLoanCharge(Long loanId, JsonCommand command) {
@@ -127,7 +124,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         }
 
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanChargeConstants.amountParamName);
-        final LocalDate transactionDate = resolveTransactionDate(command);
+        final LocalDate transactionDate = ThreadLocalContextUtil.getBusinessDate();
         final ExternalId externalId = externalIdFactory.createFromCommand(command, WorkingCapitalLoanChargeConstants.externalIdParamName);
 
         chargeAdjustmentEntranceValidation(loan, wcCharge, amount);
@@ -150,16 +147,8 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         adjustmentTx.getLoanTransactionRelations().add(relation);
         transactionRepository.saveAndFlush(adjustmentTx);
 
-        final WorkingCapitalLoanTransactionAllocation allocation = WorkingCapitalLoanTransactionAllocation.forChargeAdjustment(adjustmentTx,
-                amount, wcCharge.isPenaltyCharge());
-        allocationRepository.saveAndFlush(allocation);
-
-        final WorkingCapitalLoanBalance balance = balanceRepository.findByWcLoan_Id(loan.getId())
-                .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
-        chargePaymentHandler.applyChargePayment(wcCharge, amount);
-        balanceUpdater.applyChargePayment(balance, wcCharge, amount);
-        loanChargeRepository.save(wcCharge);
-        balanceRepository.save(balance);
+        final WorkingCapitalLoanTransactionAllocation allocation = transactionProcessor.processRepaymentLikeTransaction(loan, adjustmentTx,
+                LoanTransactionType.CHARGE_ADJUSTMENT, transactionDate, amount);
 
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
             accountingProcessor.postJournalEntries(loan, adjustmentTx, allocation, false);
@@ -185,11 +174,6 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
-    }
-
-    private LocalDate resolveTransactionDate(final JsonCommand command) {
-        final LocalDate requested = command.localDateValueOfParameterNamed(WorkingCapitalLoanChargeConstants.transactionDateParamName);
-        return requested != null ? requested : ThreadLocalContextUtil.getBusinessDate();
     }
 
     private void chargeAdjustmentEntranceValidation(final WorkingCapitalLoan loan, final WorkingCapitalLoanCharge wcCharge,

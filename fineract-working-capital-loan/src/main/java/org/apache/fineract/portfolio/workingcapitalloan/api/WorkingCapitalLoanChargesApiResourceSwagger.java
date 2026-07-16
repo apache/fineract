@@ -73,8 +73,6 @@ final class WorkingCapitalLoanChargesApiResourceSwagger {
         public String locale;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
-        @Schema(example = "29 April 2013")
-        public String transactionDate;
         @Schema(example = "786444UUUYYH7")
         public String externalId;
         @Schema(example = "some note")
@@ -97,9 +95,9 @@ final class WorkingCapitalLoanChargesApiResourceSwagger {
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String resourceExternalId;
         @Schema(example = "12")
-        public Long subEntityId;
+        public Long subResourceId;
         @Schema(example = "a1b2c3d4-0000-0000-0000-000000000000")
-        public String subEntityExternalId;
+        public String subResourceExternalId;
     }
 
 }
