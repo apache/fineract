@@ -1,5 +1,6 @@
 name: Fineract Sonarqube
 on:
+  workflow_dispatch:
   workflow_call:
     secrets:
       SONAR_ORGANIZATION:
