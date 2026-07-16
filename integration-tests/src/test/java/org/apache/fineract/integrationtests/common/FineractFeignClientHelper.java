@@ -18,12 +18,15 @@
  */
 package org.apache.fineract.integrationtests.common;
 
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.integrationtests.ConfigProperties;
 
 public final class FineractFeignClientHelper {
+
+    private static final int READ_TIMEOUT_SECONDS = 180;
 
     private static final FineractFeignClient DEFAULT_FINERACT_FEIGN_CLIENT = createNewFineractFeignClient(ConfigProperties.Backend.USERNAME,
             ConfigProperties.Backend.PASSWORD);
@@ -46,7 +49,7 @@ public final class FineractFeignClientHelper {
             Consumer<FineractFeignClient.Builder> customizer) {
         String url = System.getProperty("fineract.it.url", buildURI());
         FineractFeignClient.Builder builder = FineractFeignClient.builder().baseUrl(url).credentials(username, password)
-                .disableSslVerification(true);
+                .disableSslVerification(true).readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         customizer.accept(builder);
         return builder.build();
     }
