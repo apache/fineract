@@ -51,7 +51,6 @@ war {
     def legalFiles = [
         file("$rootDir/LICENSE_RELEASE"),
         file("$rootDir/NOTICE_RELEASE"),
-        file("$rootDir/DISCLAIMER")
     ].findAll { it.exists() }
     
     if (!legalFiles.empty) {
@@ -134,7 +133,6 @@ distributions {
             rename ('LICENSE_RELEASE', 'LICENSE')
             rename ('NOTICE_RELEASE', 'NOTICE')
 
-            from "$rootDir/DISCLAIMER"
             from "$rootDir/README.md"
 
             from "$rootDir/fineract-doc/build/docs/pdf/en/index.pdf"
