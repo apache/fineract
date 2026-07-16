@@ -41,7 +41,13 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
 
     void extendPeriodsForPause(WorkingCapitalLoan loan, LocalDate pauseStart, LocalDate pauseEnd);
 
-    void rescheduleMinimumPayment(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyAction rescheduleAction);
+    /**
+     * Re-derives the base expectation of the current period and the boundaries of future periods from the effective
+     * reschedule parameters resolved from the persisted RESCHEDULE actions; a newly created reschedule action must
+     * therefore be saved before this is called. Amounts, the remaining-balance cap and expired-period evaluation are
+     * left to {@link #reprocessDelinquencySchedule(WorkingCapitalLoan)}, which the caller must invoke afterwards.
+     */
+    void rescheduleMinimumPayment(WorkingCapitalLoan loan);
 
     void resumeActivePause(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyAction activePause,
             WorkingCapitalLoanDelinquencyAction resumeAction);

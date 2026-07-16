@@ -16,20 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.workingcapitalloan.repository;
+package org.apache.fineract.portfolio.workingcapitalloan.service;
 
-import java.util.List;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.math.BigDecimal;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyFrequencyType;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentType;
 
-@Repository
-public interface WorkingCapitalLoanDelinquencyActionRepository extends JpaRepository<WorkingCapitalLoanDelinquencyAction, Long> {
-
-    List<WorkingCapitalLoanDelinquencyAction> findByWorkingCapitalLoanIdOrderById(Long workingCapitalLoanId);
-
-    List<WorkingCapitalLoanDelinquencyAction> findByWorkingCapitalLoanIdAndActionOrderByIdDesc(Long workingCapitalLoanId,
-            DelinquencyAction action);
-
+/**
+ * Reschedule parameters resolved per group: each group ({@code minimumPayment}+{@code minimumPaymentType}, or
+ * {@code frequency}+{@code frequencyType}) inherits independently from the latest RESCHEDULE action that set it,
+ * falling back to the product configuration only if no action ever set it.
+ */
+record EffectiveDelinquencyRescheduleParams(BigDecimal minimumPayment, DelinquencyMinimumPaymentType minimumPaymentType, Integer frequency,
+        DelinquencyFrequencyType frequencyType) {
 }

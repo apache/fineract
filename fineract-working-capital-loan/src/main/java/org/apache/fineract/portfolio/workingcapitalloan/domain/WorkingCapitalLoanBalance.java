@@ -27,10 +27,12 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import java.math.BigDecimal;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 
 /**
  * Stores all balances of a working capital loan (one row per loan). Updated from allocations; accounting depends on
@@ -100,6 +102,14 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
         final WorkingCapitalLoanBalance balance = new WorkingCapitalLoanBalance();
         balance.wcLoan = loan;
         return balance;
+    }
+
+    public void applyDisbursement(final BigDecimal disbursedAmount) {
+        final BigDecimal discount = Optional.ofNullable(wcLoan.getLoanProductRelatedDetails())
+                .map(WorkingCapitalLoanProductRelatedDetails::getDiscount).orElse(BigDecimal.ZERO);
+        this.totalDiscountFee = discount;
+        this.principal = disbursedAmount.add(discount);
+        this.overpaymentAmount = BigDecimal.ZERO;
     }
 
     public BigDecimal getPrincipalOutstanding() {

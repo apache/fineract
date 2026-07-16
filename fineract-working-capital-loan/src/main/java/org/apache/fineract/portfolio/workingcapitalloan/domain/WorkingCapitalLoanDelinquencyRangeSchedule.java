@@ -61,6 +61,9 @@ public class WorkingCapitalLoanDelinquencyRangeSchedule extends AbstractAuditabl
     @Column(name = "expected_amount", scale = 6, precision = 19)
     private BigDecimal expectedAmount;
 
+    @Column(name = "base_expected_amount", scale = 6, precision = 19)
+    private BigDecimal baseExpectedAmount;
+
     @Column(name = "paid_amount", scale = 6, precision = 19)
     private BigDecimal paidAmount;
 

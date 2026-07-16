@@ -512,7 +512,7 @@ Feature: Working Capital Loan Undo Transaction
     Then WC loan delinquency range schedule periods have specific data:
       | periodNumber | fromDate        | toDate          | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
       | 1            | 01 January 2026 | 30 January 2026 | 200            | 700        | 0                 | true                  |
-      | 2            | 31 January 2026 | 01 March 2026   | 200            | 200        | 0                 | true                  |
+      | 2            | 31 January 2026 | 01 March 2026   | 100            | 200        | 0                 | true                  |
     When Customer undo "1"th working capital transaction made on "30 January 2026"
     Then WC loan delinquency range schedule periods have specific data:
       | periodNumber | fromDate        | toDate          | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |

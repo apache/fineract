@@ -516,6 +516,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 txnExternalId, amount, relatedDisbursementTransaction.getTransactionDate(), classification, paymentDetail);
 
         updateBalanceForDiscountChange(loan, amount, false);
+        // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived.
+        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
         loanRepository.saveAndFlush(loan);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(discountTransaction.getId())
@@ -586,6 +588,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         amortizationScheduleWriteService.applyDiscountFeeAdjustment(loan);
         updateBalanceForDiscountChange(loan, amount, true);
+        // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived.
+        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
         stateMachine.determineAndTransition(loan, transactionDate);
         transactionProcessor.triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
@@ -639,6 +643,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         amortizationScheduleWriteService.applyDiscountFeeAdjustment(loan);
         updateBalanceForDiscountChange(loan, adjustmentTransaction.getTransactionAmount().negate(), true);
+        // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived.
+        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
         loanRepository.saveAndFlush(loan);
 
         final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName);
@@ -942,16 +948,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     }
 
     private void updateBalanceOnDisburse(final WorkingCapitalLoan loan, final BigDecimal disbursedAmount) {
-        WorkingCapitalLoanBalance balance = this.balanceRepository.findByWcLoan_Id(loan.getId()).orElse(null);
-        if (balance == null) {
-            balance = WorkingCapitalLoanBalance.createFor(loan);
-        }
-        final BigDecimal discount = loan.getLoanProductRelatedDetails() != null && loan.getLoanProductRelatedDetails().getDiscount() != null
-                ? loan.getLoanProductRelatedDetails().getDiscount()
-                : BigDecimal.ZERO;
-        balance.setTotalDiscountFee(discount);
-        balance.setPrincipal(disbursedAmount.add(discount));
-        balance.setOverpaymentAmount(BigDecimal.ZERO);
+        final WorkingCapitalLoanBalance balance = this.balanceRepository.findByWcLoan_Id(loan.getId())
+                .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
+        balance.applyDisbursement(disbursedAmount);
         this.balanceRepository.saveAndFlush(balance);
     }
 

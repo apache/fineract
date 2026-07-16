@@ -41,8 +41,10 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.data.ProjectedAmortizationScheduleGenerateRequest;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanAmortizationScheduleWriteService;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanDelinquencyRangeScheduleService;
@@ -61,6 +63,7 @@ public class InternalWorkingCapitalLoanApiResource implements InitializingBean {
 
     private final WorkingCapitalLoanAmortizationScheduleWriteService writeService;
     private final WorkingCapitalLoanRepository loanRepository;
+    private final WorkingCapitalLoanBalanceRepository balanceRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService rangeScheduleService;
 
     @Override
@@ -98,7 +101,8 @@ public class InternalWorkingCapitalLoanApiResource implements InitializingBean {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Activate a Working Capital Loan (testing only)", description = """
-            Sets the WC loan status to ACTIVE and records a disbursement detail with the given date.
+            Sets the WC loan status to ACTIVE, records a disbursement detail with the given date and
+            initializes the loan balance as a real disbursement would.
             Also generates the initial delinquency range schedule period if a delinquency bucket is configured.
 
             DO NOT USE THIS IN PRODUCTION! Disbursement must go through the proper disbursement flow.""")
@@ -119,6 +123,13 @@ public class InternalWorkingCapitalLoanApiResource implements InitializingBean {
 
         loan.setLoanStatus(LoanStatus.ACTIVE);
         loanRepository.saveAndFlush(loan);
+
+        // The balance must reflect the faked disbursement (as the real disbursement flow does),
+        // otherwise the schedule generation caps the period to the zero remaining balance.
+        final WorkingCapitalLoanBalance balance = balanceRepository.findByWcLoan_Id(loanId)
+                .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
+        balance.applyDisbursement(loan.getApprovedPrincipal());
+        balanceRepository.saveAndFlush(balance);
 
         rangeScheduleService.generateInitialPeriod(loan);
 

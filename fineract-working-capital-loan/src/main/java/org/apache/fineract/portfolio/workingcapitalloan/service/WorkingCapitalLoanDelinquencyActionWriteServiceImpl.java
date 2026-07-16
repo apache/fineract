@@ -44,7 +44,6 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
     private final WorkingCapitalLoanDelinquencyActionRepository actionRepository;
     private final WorkingCapitalLoanDelinquencyActionParseAndValidator validator;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService rangeScheduleService;
-    private final WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
 
     @Transactional
     @Override
@@ -63,8 +62,8 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
         if (DelinquencyAction.PAUSE.equals(action.getAction())) {
             rangeScheduleService.extendPeriodsForPause(workingCapitalLoan, action.getStartDate(), action.getEndDate());
         } else if (DelinquencyAction.RESCHEDULE.equals(action.getAction())) {
-            rangeScheduleService.rescheduleMinimumPayment(workingCapitalLoan, action);
-            delinquencyRangeScheduleService.reprocessDelinquencySchedule(workingCapitalLoan);
+            rangeScheduleService.rescheduleMinimumPayment(workingCapitalLoan);
+            rangeScheduleService.reprocessDelinquencySchedule(workingCapitalLoan);
         } else if (DelinquencyAction.RESUME.equals(action.getAction())) {
             final WorkingCapitalLoanDelinquencyAction activePause = validator.findActivePauseForResume(existing,
                     DateUtils.getBusinessLocalDate());
