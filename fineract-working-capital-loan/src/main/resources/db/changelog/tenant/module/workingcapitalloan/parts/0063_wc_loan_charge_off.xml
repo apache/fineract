@@ -26,7 +26,7 @@
     <!-- Charge-off is a pure accounting tag on the WC loan account: it does not affect the -->
     <!-- portfolio (balance, schedule) and the loan stays ACTIVE. The ChargeOffReasons code -->
     <!-- (m_code) is already seeded by the core tenant changelog (0079); it is reused here. -->
-    <changeSet author="fineract" id="wcl-0062-1">
+    <changeSet author="fineract" id="wcl-0063-1">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="m_wc_loan"/>
             <not>
@@ -45,7 +45,7 @@
     </changeSet>
 
     <!-- Foreign keys for the charge-off columns -->
-    <changeSet author="fineract" id="wcl-0062-2">
+    <changeSet author="fineract" id="wcl-0063-2">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="m_wc_loan"/>
             <columnExists tableName="m_wc_loan" columnName="charge_off_reason_cv_id"/>
@@ -65,7 +65,7 @@
 
     <!-- Permissions: create BOTH charge-off and undo charge-off (Term Loan only seeded -->
     <!-- CHARGEOFF_LOAN and left UNDOCHARGEOFF without a permission; we do not replicate that gap). -->
-    <changeSet author="fineract" id="wcl-0062-3">
+    <changeSet author="fineract" id="wcl-0063-3">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_permission WHERE code = 'CHARGEOFF_WORKINGCAPITALLOAN'</sqlCheck>
         </preConditions>
@@ -78,7 +78,7 @@
         </insert>
     </changeSet>
 
-    <changeSet author="fineract" id="wcl-0062-4">
+    <changeSet author="fineract" id="wcl-0063-4">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_permission WHERE code = 'UNDOCHARGEOFF_WORKINGCAPITALLOAN'</sqlCheck>
         </preConditions>
