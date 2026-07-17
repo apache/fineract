@@ -77,17 +77,30 @@ public class WorkingCapitalLoanChargeAccrualService {
     }
 
     /**
-     * Posts, on early closure, any pending charge accrual that the due-date COB step would not have reached yet because
-     * the charge due date is still in the future. Once the loan is closed it is no longer picked up by the end-of-day
-     * job, so the accrual is accelerated to the closing date to make sure the income is recognized. Charges already
-     * accrued are skipped by the idempotency guard; in submitted-date mode charges are accrued when added, so this is a
-     * no-op there.
+     * Accrues any pending charge income once the loan has reached a closed or overpaid state, no matter which operation
+     * closed it (repayment, goodwill credit, charge adjustment, credit balance refund, discount-fee adjustment). It is
+     * a no-op while the loan is still active, so callers can invoke it unconditionally after any balance-changing
+     * operation. Mirrors how the term/progressive loan reacts to loan-closure events.
+     */
+    public void accrueOnClosure(final WorkingCapitalLoan loan, final LocalDate closingDate) {
+        if (!loan.getLoanStatus().isClosed() && !loan.getLoanStatus().isOverpaid()) {
+            return;
+        }
+        processClosureAccruals(loan, closingDate);
+    }
+
+    /**
+     * Posts, on early closure, any pending charge accrual that has not been recognized yet. Once the loan is closed it
+     * is no longer picked up by the end-of-day job, so the accrual is accelerated to the closing date to make sure the
+     * income is recognized. This runs regardless of the {@code charge-accrual-date} mode: the idempotency guard skips
+     * charges already accrued (the common case in submitted-date mode, where charges are accrued when added), while
+     * charges that slipped through every accrual step are caught here. That gap is real when the mode changes between
+     * the charge being added and the loan closing: a charge added under due-date with a future due date is never
+     * accrued on add, never reached by the due-date COB step, and would be missed at closure if this were gated on the
+     * mode.
      */
     public void processClosureAccruals(final WorkingCapitalLoan loan, final LocalDate closingDate) {
         if (isAccrualPostingDisabled(loan)) {
-            return;
-        }
-        if (!DUE_DATE.equalsIgnoreCase(retrieveChargeAccrualDateConfig())) {
             return;
         }
         final List<WorkingCapitalLoanCharge> activeCharges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());

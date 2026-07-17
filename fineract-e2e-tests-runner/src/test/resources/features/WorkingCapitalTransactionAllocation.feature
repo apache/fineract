@@ -174,6 +174,8 @@ Feature: Working Capital Transaction Allocation
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 12 January 2026 | Repayment    | 9040.0            | 9000.0           | 15.0              | 25.0                  | false    |
+      | 12 January 2026 | Accrual      | 15.0              | 0.0              | 15.0              | 0.0                   | false    |
+      | 12 January 2026 | Accrual      | 25.0              | 0.0              | 0.0               | 25.0                  | false    |
 
   @TestRailId:C85418
   Scenario: Verify Working Capital Repayment transaction that overpays loon with following CBR trn and with fee and penalty added with DUE_PRINCIPAL_FEE_PENALTY allocation - UC7
@@ -202,6 +204,8 @@ Feature: Working Capital Transaction Allocation
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 12 January 2026 | Repayment    | 9200.0            | 9000.0           | 15.0              | 25.0                  | false    |
+      | 12 January 2026 | Accrual      | 15.0              | 0.0              | 15.0              | 0.0                   | false    |
+      | 12 January 2026 | Accrual      | 25.0              | 0.0              | 0.0               | 25.0                  | false    |
 # --- make CBR trn to refund overpaid amount --- #
     And Customer makes credit balance refund on "12 January 2026" with 160.0 transaction amount on Working Capital loan
     And Working capital loan account has the correct data:
@@ -211,6 +215,8 @@ Feature: Working Capital Transaction Allocation
       | transactionDate | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 12 January 2026 | Repayment             | 9200.0            | 9000.0           | 15.0              | 25.0                  | false    |
+      | 12 January 2026 | Accrual               | 15.0              | 0.0              | 15.0              | 0.0                   | false    |
+      | 12 January 2026 | Accrual               | 25.0              | 0.0              | 0.0               | 25.0                  | false    |
       | 12 January 2026 | Credit Balance Refund | 160.0             | 160.0            | 0.0               | 0.0                   | false    |
 
   @TestRailId:C85419

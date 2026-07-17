@@ -21,6 +21,7 @@ package org.apache.fineract.test.stepdef.common;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.cucumber.java.After;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
 import java.util.Collections;
@@ -41,6 +42,12 @@ public class GlobalConfigurationStepDef {
 
     @Autowired
     private FineractFeignClient fineractClient;
+
+    // restore the default even when a scenario fails mid-way, so the submitted-date setting cannot leak
+    @After("@WorkingCapitalLoanChargeAccrualFeature")
+    public void restoreChargeAccrualDateConfig() {
+        globalConfigurationHelper.setGlobalConfigValueString("charge-accrual-date", "due-date");
+    }
 
     @Given("Global configuration {string} is disabled")
     public void disableGlobalConfiguration(String configKey) {
