@@ -57,6 +57,8 @@ public final class WorkingCapitalLoanConstants {
     public static final String PAYOUT_REFUND_COMMAND = "payoutRefund";
     public static final String DISCOUNT_FEE_LOAN_COMMAND = "discountFee";
     public static final String DISCOUNT_FEE_ADJUSTMENT_LOAN_COMMAND = "discountFeeAdjustment";
+    public static final String CHARGE_OFF_LOAN_COMMAND = "chargeOff";
+    public static final String UNDO_CHARGE_OFF_LOAN_COMMAND = "undoChargeOff";
 
     // Approval / Rejection / Undo-approval parameters
     public static final String RESOURCE_NAME = WCL_RESOURCE_NAME;
@@ -85,6 +87,7 @@ public final class WorkingCapitalLoanConstants {
     public static final String receiptNumberParamName = "receiptNumber";
     public static final String bankNumberParamName = "bankNumber";
     public static final String transactionDateParamName = "transactionDate";
+    public static final String chargeOffReasonIdParamName = "chargeOffReasonId";
     public static final String transactionTypeParamName = "transactionType";
     public static final String transactionIdParamName = "transactionId";
     public static final String loanStatusParamName = "loanStatus";

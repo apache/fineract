@@ -32,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.CurrencyData;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanCommandTemplateData;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
@@ -61,6 +62,11 @@ public class WorkingCapitalLoanActionTemplateStepDef extends AbstractStepDef {
 
     @Then("The working capital loan disburse template has the following data:")
     public void verifyDisburseTemplateData(final DataTable table) {
+        verifyTemplateData(table);
+    }
+
+    @Then("The working capital loan charge-off template has the following data:")
+    public void verifyChargeOffTemplateData(final DataTable table) {
         verifyTemplateData(table);
     }
 
@@ -124,6 +130,19 @@ public class WorkingCapitalLoanActionTemplateStepDef extends AbstractStepDef {
                         softly.assertThat(response.getPaymentTypeOptions()).as(field).isNotNull().isNotEmpty();
                     } else {
                         softly.assertThat(response.getPaymentTypeOptions()).as(field).isNullOrEmpty();
+                    }
+                }
+                case "chargeOffAmount" ->
+                    softly.assertThat(response.getChargeOffAmount()).as(field).isNotNull().isEqualByComparingTo(new BigDecimal(value));
+                case "chargeOffDate" ->
+                    softly.assertThat(response.getChargeOffDate()).as(field).isNotNull().isEqualTo(LocalDate.parse(value));
+                case "currency" ->
+                    softly.assertThat(response.getCurrency()).as(field).isNotNull().extracting(CurrencyData::getCode).isEqualTo(value);
+                case "chargeOffReasonOptionsPresent" -> {
+                    if (Boolean.parseBoolean(value)) {
+                        softly.assertThat(response.getChargeOffReasonOptions()).as(field).isNotNull().isNotEmpty();
+                    } else {
+                        softly.assertThat(response.getChargeOffReasonOptions()).as(field).isNullOrEmpty();
                     }
                 }
                 default -> softly.fail("Unknown template field in DataTable: " + field);

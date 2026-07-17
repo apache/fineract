@@ -742,7 +742,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         handleNote(loan, command, changes);
 
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntries(loan, transaction, allocation, false);
+            accountingProcessor.postJournalEntries(loan, transaction, allocation, loan.isChargedOff());
         }
 
         notifyPostBusinessEvent(transactionType, transaction, loan);
@@ -880,7 +880,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         this.loanRepository.saveAndFlush(loan);
 
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntries(loan, creditBalanceRefundTransaction, allocation, false);
+            accountingProcessor.postJournalEntries(loan, creditBalanceRefundTransaction, allocation, loan.isChargedOff());
         }
 
         businessEventNotifierService.notifyPostBusinessEvent(

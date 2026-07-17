@@ -169,6 +169,26 @@ public class WorkingCapitalLoanHelper {
         return FeignCalls.fail(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "creditBalanceRefund", request));
     }
 
+    public Long chargeOffByLoanId(final Long loanId, final PostWorkingCapitalLoanTransactionsRequest request) {
+        return FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "chargeOff", request))
+                .getResourceId();
+    }
+
+    public Long undoChargeOffByLoanId(final Long loanId, final PostWorkingCapitalLoanTransactionsRequest request) {
+        return FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "undoChargeOff", request))
+                .getResourceId();
+    }
+
+    public CallFailedRuntimeException runChargeOffByLoanIdExpectingFailure(final Long loanId,
+            final PostWorkingCapitalLoanTransactionsRequest request) {
+        return FeignCalls.fail(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "chargeOff", request));
+    }
+
+    public CallFailedRuntimeException runUndoChargeOffByLoanIdExpectingFailure(final Long loanId,
+            final PostWorkingCapitalLoanTransactionsRequest request) {
+        return FeignCalls.fail(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "undoChargeOff", request));
+    }
+
     public GetWorkingCapitalLoanTransactionsResponse retrieveTransactionsByLoanId(final Long loanId) {
         return FeignCalls.ok(() -> transactionsApi().retrieveWorkingCapitalLoanTransactionsById(loanId));
     }

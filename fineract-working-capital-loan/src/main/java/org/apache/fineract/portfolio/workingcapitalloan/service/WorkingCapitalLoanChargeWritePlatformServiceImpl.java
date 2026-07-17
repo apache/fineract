@@ -34,6 +34,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
@@ -115,6 +116,11 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
 
         final LoanStatus statusBeforeCharge = loan.getLoanStatus();
+        // New charges cannot be added once the loan is charged off (modify/waive/pay of existing charges stay allowed).
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.wc.loan.is.charged.off",
+                    "Adding a charge to Working Capital Loan " + loanId + " is not allowed. The loan is charged off.", loanId);
+        }
 
         WorkingCapitalLoanCharge loanCharge = assemblyChargeFromCommand(loan, command);
 
@@ -284,7 +290,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
                 LoanTransactionType.CHARGE_ADJUSTMENT, transactionDate, amount);
 
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntries(loan, adjustmentTx, allocation, false);
+            accountingProcessor.postJournalEntries(loan, adjustmentTx, allocation, loan.isChargedOff());
         }
 
         final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanChargeConstants.noteParamName);

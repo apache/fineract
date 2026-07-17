@@ -76,7 +76,7 @@ class WorkingCapitalLoanDataValidatorUpdateRateTest {
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
 
         final FromJsonHelper fromApiJsonHelper = new FromJsonHelper();
-        validator = new WorkingCapitalLoanDataValidator(fromApiJsonHelper, null, null, null, null);
+        validator = new WorkingCapitalLoanDataValidator(fromApiJsonHelper, null, null, null, null, null);
 
         // Default: active loan, current rate = 10, product min = 1, max = 95
         lenient().when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);

@@ -159,7 +159,7 @@ Feature: Working Capital Loan Details
       | originators.size                               | 0                            |
       | enableInstallmentLevelDelinquency              | true                         |
       | fraud                                          | null                         |
-      | chargedOff                                     | null                         |
+      | chargedOff                                     | false                        |
     And Working capital loan details has the auto-generated fields present
 
   @TestRailId:C85424
