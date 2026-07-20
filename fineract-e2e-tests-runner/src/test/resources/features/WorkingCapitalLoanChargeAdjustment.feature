@@ -469,3 +469,168 @@ Feature: WorkingCapitalLoanChargeAdjustmentFeature
 #    --- Close loan ---
     When Admin closes the Working Capital loan with a full repayment on "25 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  @TestRailId:C85617
+  Scenario: Verify Working Capital charge adjustment - UC14: adjustment on closed loan books overpayment and moves loan to OVERPAID
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 January 2026" due date and 100.0 transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "10 January 2026" with 9100 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
+    And Working Capital loan balance payload contains the following fields:
+      | field             | value |
+      | overpaymentAmount | 0.0   |
+    When Admin makes a charge adjustment for the last added charge with 100.0 amount on working capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance payload contains the following fields:
+      | field             | value |
+      | overpaymentAmount | 100.0 |
+    # Fee buckets must stay untouched - the full adjustment amount is overpayment, not a second charge payment
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
+
+  @TestRailId:C85618
+  Scenario: Verify Working Capital charge adjustment - UC15: partial adjustment on closed loan is fully booked as overpayment
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 January 2026" due date and 100.0 transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "10 January 2026" with 9100 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    When Admin makes a charge adjustment for the last added charge with 40.0 amount on working capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance payload contains the following fields:
+      | field             | value |
+      | overpaymentAmount | 40.0  |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
+
+  @TestRailId:C85619
+  Scenario: Verify Working Capital charge adjustment - UC16: adjustment on already overpaid loan increases the overpayment
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 January 2026" due date and 100.0 transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "10 January 2026" with 9300 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance payload contains the following fields:
+      | field             | value |
+      | overpaymentAmount | 200.0 |
+    When Admin makes a charge adjustment for the last added charge with 100.0 amount on working capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance payload contains the following fields:
+      | field             | value |
+      | overpaymentAmount | 300.0 |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
+
+  @TestRailId:C85620
+  Scenario: Verify Working Capital charge adjustment - UC17: penalty charge adjustment on closed loan books overpayment
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "01 January 2026" due date and 50.0 transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "10 January 2026" with 9050 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    When Admin makes a charge adjustment for the last added charge with 50.0 amount on working capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance payload contains the following fields:
+      | field             | value |
+      | overpaymentAmount | 50.0  |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 0.0        | 0.0             | 0.0      | 50.0           | 0.0                 | 50.0         |
+
+  @TestRailId:C85621
+  Scenario: Verify Working Capital charge adjustment - UC18: adjustment on closed loan with an outstanding charge settles the charge and keeps the loan closed
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # Charge is due only on 20 January - the repayment on 05 January must not settle it
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 January 2026" due date and 100.0 transaction amount
+    And Customer makes repayment on "05 January 2026" with 9000 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 100.0           | 0.0      | 0.0            | 0.0                 | 0.0          |
+    # The adjustment settles the still-outstanding charge (there is nothing left to overpay), so the loan stays closed
+    When Admin makes a charge adjustment for the last added charge with 100.0 amount on working capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working Capital loan balance payload contains the following fields:
+      | field             | value |
+      | overpaymentAmount | 0.0   |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
+
+  @TestRailId:C85622
+  Scenario: Verify Working Capital charge adjustment - UC19: second adjustment on closed loan exceeding available amount results an error
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 January 2026" due date and 100.0 transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "10 January 2026" with 9100 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    When Admin makes a charge adjustment for the last added charge with 60.0 amount on working capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance payload contains the following fields:
+      | field             | value |
+      | overpaymentAmount | 60.0  |
+    # Available for adjustment = 100 (charge amount) - 60 (already adjusted) = 40, so 50 must be rejected
+    Then Making a charge adjustment with 50.0 amount on working capital loan results an error with the following data:
+      | httpCode | errorMessage                                                                         |
+      | 403      | Transaction amount cannot be higher than the available charge amount for adjustment |
+    And Working Capital loan balance payload contains the following fields:
+      | field             | value |
+      | overpaymentAmount | 60.0  |
+
+  @TestRailId:C85623
+  Scenario: Verify Working Capital charge adjustment - UC20: reversal of adjustment on closed loan reverts the overpayment and restores closed status
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 January 2026" due date and 100.0 transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "10 January 2026" with 9100 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    When Admin makes a charge adjustment for the last added charge with 100.0 amount on working capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance payload contains the following fields:
+      | field             | value |
+      | overpaymentAmount | 100.0 |
+    When Admin reverts the last charge adjustment on working capital loan
+    # The undo must restore the pre-adjustment state: closed loan, no overpayment, fee still settled by the repayment
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working Capital loan balance payload contains the following fields:
+      | field             | value |
+      | overpaymentAmount | 0.0   |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
