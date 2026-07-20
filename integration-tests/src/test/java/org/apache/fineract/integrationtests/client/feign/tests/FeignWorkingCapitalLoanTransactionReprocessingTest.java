@@ -261,6 +261,46 @@ public class FeignWorkingCapitalLoanTransactionReprocessingTest extends FeignInt
         });
     }
 
+    @Test
+    void testBackdatedRepayment_priorReversedTransactionInSuffix_isNotDoubleCounted() {
+        businessDateHelper.runAt("2026-01-01", () -> {
+            Long clientForTest = clientHelper.createClient("01 January 2026");
+            Long loanId = createAndDisburseLoanOnDate(clientForTest, BigDecimal.valueOf(9000), "01 January 2026");
+
+            // Day 10: repayment 3000, then undo it (charge-free, not overpaid → simple undo). It is now reversed but
+            // sits on day 10, inside the suffix of the later backdated day-5 repayment.
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-10");
+            final Long reversedDay10 = wcLoanHelper.makeRepayment(loanId,
+                    WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(3000), "10 January 2026"));
+            wcLoanHelper.undoTransaction(loanId, reversedDay10, WorkingCapitalLoanRequestBuilders.undoTransaction());
+
+            // Day 20: repayment 8000 (loan back to 9000 outstanding after the undo, so 1000 remains).
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-20");
+            wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(8000), "20 January 2026"));
+
+            // Backdated day 5: repayment 5000. Non-reversed repaid is now 8000 + 5000 = 13000 on a 9000 loan → overpaid
+            // by 4000, which triggers the suffix reprocess with boundary = day 5. The suffix contains the reversed
+            // day-10 transaction, which must be ignored.
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-25");
+            wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(5000), "05 January 2026"));
+
+            GetWorkingCapitalLoansLoanIdResponse afterBackdated = wcLoanHelper.getLoanDetails(loanId);
+            assertNotNull(afterBackdated.getBalance(), "Balance should exist after the backdated repayment");
+            assertEqualBigDecimal(BigDecimal.valueOf(9000), afterBackdated.getBalance().getPrincipalPaid(),
+                    "Principal paid should be capped at 9000 (reversed day-10 must not be counted)");
+            assertEqualBigDecimal(BigDecimal.valueOf(4000), afterBackdated.getBalance().getOverpaymentAmount(),
+                    "Overpayment should be exactly 4000 (13000 - 9000); a double-counted reversal would skew this");
+            assertEqualBigDecimal(BigDecimal.ZERO, afterBackdated.getBalance().getPrincipalOutstanding(),
+                    "Principal should be fully repaid");
+
+            // Chronological redistribution over the two live repayments: day-5 (5000) allocates first against the full
+            // 9000, then day-20 (8000) covers the remaining 4000 principal and books 4000 overpayment.
+            List<GetWorkingCapitalLoanTransactionIdResponse> transactions = wcLoanHelper.getTransactions(loanId);
+            assertAllocation(findTransaction(transactions, LocalDate.of(2026, 1, 5), BigDecimal.valueOf(5000)), BigDecimal.valueOf(5000));
+            assertAllocation(findTransaction(transactions, LocalDate.of(2026, 1, 20), BigDecimal.valueOf(8000)), BigDecimal.valueOf(4000));
+        });
+    }
+
     private Long createAndDisburseLoanOnDate(Long clientIdParam, BigDecimal principal, String date) {
         Long productId = createProduct();
         Long loanId = submitAndTrack(clientIdParam, productId, principal, date);

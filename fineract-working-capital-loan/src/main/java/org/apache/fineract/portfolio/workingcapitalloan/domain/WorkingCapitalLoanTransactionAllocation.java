@@ -72,11 +72,11 @@ public class WorkingCapitalLoanTransactionAllocation extends AbstractAuditableWi
     public static WorkingCapitalLoanTransactionAllocation forPrincipalAllocation(final WorkingCapitalLoanTransaction transaction,
             final BigDecimal principalAmount) {
         final WorkingCapitalLoanTransactionAllocation allocation = new WorkingCapitalLoanTransactionAllocation();
-        allocation.wcLoanTransaction = transaction;
         allocation.principalPortion = principalAmount != null ? principalAmount : BigDecimal.ZERO;
         allocation.feeChargesPortion = BigDecimal.ZERO;
         allocation.penaltyChargesPortion = BigDecimal.ZERO;
         allocation.overpaymentPortion = BigDecimal.ZERO;
+        allocation.link(transaction);
         return allocation;
     }
 
@@ -84,44 +84,44 @@ public class WorkingCapitalLoanTransactionAllocation extends AbstractAuditableWi
             final BigDecimal principalAmount, final BigDecimal feeAmount, final BigDecimal penaltyAmount,
             final BigDecimal overpaymentAmount) {
         final WorkingCapitalLoanTransactionAllocation allocation = new WorkingCapitalLoanTransactionAllocation();
-        allocation.wcLoanTransaction = transaction;
         allocation.principalPortion = MathUtil.nullToZero(principalAmount);
         allocation.feeChargesPortion = MathUtil.nullToZero(feeAmount);
         allocation.penaltyChargesPortion = MathUtil.nullToZero(penaltyAmount);
         allocation.overpaymentPortion = MathUtil.nullToZero(overpaymentAmount);
+        allocation.link(transaction);
         return allocation;
     }
 
     public static WorkingCapitalLoanTransactionAllocation forDisbursementDiscount(final WorkingCapitalLoanTransaction transaction,
             final BigDecimal principalAmount) {
         final WorkingCapitalLoanTransactionAllocation allocation = new WorkingCapitalLoanTransactionAllocation();
-        allocation.wcLoanTransaction = transaction;
         allocation.principalPortion = MathUtil.nullToZero(principalAmount);
         allocation.feeChargesPortion = BigDecimal.ZERO;
         allocation.penaltyChargesPortion = BigDecimal.ZERO;
         allocation.overpaymentPortion = BigDecimal.ZERO;
+        allocation.link(transaction);
         return allocation;
     }
 
     public static WorkingCapitalLoanTransactionAllocation forDiscountFeeAdjustment(final WorkingCapitalLoanTransaction transaction,
             final BigDecimal principalAmount) {
         final WorkingCapitalLoanTransactionAllocation allocation = new WorkingCapitalLoanTransactionAllocation();
-        allocation.wcLoanTransaction = transaction;
         allocation.principalPortion = MathUtil.nullToZero(principalAmount);
         allocation.feeChargesPortion = BigDecimal.ZERO;
         allocation.penaltyChargesPortion = BigDecimal.ZERO;
         allocation.overpaymentPortion = BigDecimal.ZERO;
+        allocation.link(transaction);
         return allocation;
     }
 
     public static WorkingCapitalLoanTransactionAllocation forChargeAccrual(final WorkingCapitalLoanTransaction transaction,
             final BigDecimal amount, final boolean isPenalty) {
         final WorkingCapitalLoanTransactionAllocation allocation = new WorkingCapitalLoanTransactionAllocation();
-        allocation.wcLoanTransaction = transaction;
         allocation.principalPortion = BigDecimal.ZERO;
         allocation.feeChargesPortion = isPenalty ? BigDecimal.ZERO : MathUtil.nullToZero(amount);
         allocation.penaltyChargesPortion = isPenalty ? MathUtil.nullToZero(amount) : BigDecimal.ZERO;
         allocation.overpaymentPortion = BigDecimal.ZERO;
+        allocation.link(transaction);
         return allocation;
     }
 
@@ -132,11 +132,17 @@ public class WorkingCapitalLoanTransactionAllocation extends AbstractAuditableWi
     public static WorkingCapitalLoanTransactionAllocation forCreditBalanceRefund(final WorkingCapitalLoanTransaction transaction,
             final BigDecimal excessPrincipal, final BigDecimal overpaymentConsumed) {
         final WorkingCapitalLoanTransactionAllocation allocation = new WorkingCapitalLoanTransactionAllocation();
-        allocation.wcLoanTransaction = transaction;
         allocation.principalPortion = MathUtil.nullToZero(excessPrincipal);
         allocation.feeChargesPortion = BigDecimal.ZERO;
         allocation.penaltyChargesPortion = BigDecimal.ZERO;
         allocation.overpaymentPortion = MathUtil.nullToZero(overpaymentConsumed);
+        allocation.link(transaction);
         return allocation;
+    }
+
+    /** Wires both sides of the one-to-one so the transaction's eager inverse reflects this allocation immediately. */
+    private void link(final WorkingCapitalLoanTransaction transaction) {
+        this.wcLoanTransaction = transaction;
+        transaction.attachAllocation(this);
     }
 }

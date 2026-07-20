@@ -1869,7 +1869,7 @@ Feature: Credit Balance Refund
       | 1316.49       | 47.06    | 0.0  | 0.0       | 1363.55 | 1363.55 | 227.0      | 0.0  | 0.0         |
 
     @TestRailId:C78812
-    Examples: LAST_INSTALLMENT future-installment rule (the configuration that originally reproduced PS-3087)
+    Examples: LAST_INSTALLMENT future-installment rule (the configuration that originally created the issue)
       | rule             | loanProduct                                                                                        |
       | LAST_INSTALLMENT | LP2_ADV_PYMNT_INT_DAILY_EMI_ACTUAL_ACTUAL_INT_REFUND_FULL_ZERO_INT_CHARGE_OFF_ACC_LAST_INSTALLMENT |
 

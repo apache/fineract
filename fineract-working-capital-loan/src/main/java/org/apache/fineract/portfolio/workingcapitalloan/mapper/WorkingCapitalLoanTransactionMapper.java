@@ -49,6 +49,7 @@ public interface WorkingCapitalLoanTransactionMapper {
     @Mapping(target = "penaltyChargesPortion", source = "allocation.penaltyChargesPortion")
     @Mapping(target = "overpaymentPortion", source = "allocation.overpaymentPortion")
     @Mapping(target = "currency", source = "wcLoan", qualifiedByName = "currencyData")
+    @Mapping(target = "chargePaidByList", ignore = true)
     WorkingCapitalLoanTransactionData toData(WorkingCapitalLoanTransaction transaction);
 
     @Named("loanTransactionTypeToEnumData")

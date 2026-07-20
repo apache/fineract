@@ -734,16 +734,11 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 transactionDate, classification, txnExternalId);
         this.transactionRepository.saveAndFlush(transaction);
 
-        final WorkingCapitalLoanTransactionAllocation allocation = transactionProcessor.processRepaymentLikeTransaction(loan, transaction,
-                transactionType, transactionDate, transactionAmount);
+        transactionProcessor.processRepaymentLikeTransaction(loan, transaction, transactionDate, transactionAmount);
 
         changes.put("status", loan.getLoanStatus());
 
         handleNote(loan, command, changes);
-
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntries(loan, transaction, allocation, loan.isChargedOff());
-        }
 
         notifyPostBusinessEvent(transactionType, transaction, loan);
 
@@ -966,22 +961,28 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         transaction.setReversedOnDate(reversedOnDate);
         changes.put("reversedOnDate", reversedOnDate);
 
-        boolean lastMonetaryAction = transactionProcessor.isLastMonetaryAction(transaction);
-        boolean isAccountingOnly = isAccountingOnlyTransaction(transaction);
-        boolean isChargesInvolved = isChargesInvolved(loan);
+        final boolean lastMonetaryAction = transactionProcessor.isLastMonetaryAction(transaction);
+        final boolean isAccountingOnly = isAccountingOnlyTransaction(transaction);
+        final boolean isChargesInvolved = isChargesInvolved(loan);
         if (lastMonetaryAction && !isChargesInvolved) {
+            // Nothing monetary sorts after this transaction and no charge competes for it, so its whole effect is its
+            // own stored allocation: unwinding that in place is exact and no replay is needed.
             if (!isAccountingOnly) {
                 amortizationScheduleWriteService.applyRepaymentUndo(loan, transaction.getTransactionDate(),
                         transaction.getAllocation().getPrincipalPortion());
             }
             // TODO: undo charges balances
             updateBalanceAfterUndo(loan, transaction);
+        } else if (isAccountingOnly) {
+            updateBalanceAfterUndo(loan, transaction);
+        } else if (!isChargesInvolved) {
+            // Later transactions depend on the order, but the loan is charge-free, so only the suffix on/after the
+            // reversed transaction's date can have shifted; the prefix is never read. The reversed transaction is still
+            // counted in the balance at this point, so it is passed in to be rewound (but not replayed).
+            transactionReprocessingService.reprocessChargeFreeSuffix(loan, transaction.getTransactionDate(), transaction);
         } else {
-            if (!isAccountingOnly) {
-                transactionReprocessingService.reprocessTransactions(loan);
-            } else {
-                updateBalanceAfterUndo(loan, transaction);
-            }
+            // Charges reshuffle across the whole history: only a full reset+replay is correct.
+            transactionReprocessingService.reprocessTransactions(loan);
         }
 
         if (!isAccountingOnly) {

@@ -80,6 +80,9 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
 
     boolean existsByExternalId(ExternalId externalId);
 
+    List<WorkingCapitalLoanTransaction> findByWcLoan_IdAndTransactionDateGreaterThanEqualOrderByTransactionDateAscIdAsc(Long wcLoanId,
+            LocalDate boundaryDate);
+
     @Query("""
             SELECT t.transactionDate, SUM(t.transactionAmount)
             FROM WorkingCapitalLoanTransaction t

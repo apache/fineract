@@ -122,6 +122,17 @@
                 "null",
                 "bigdecimal"
             ]
+        },
+        {
+            "default": null,
+            "name": "chargePaidByList",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanChargePaidByDataV1"
+                }
+            ]
         }
     ]
 }

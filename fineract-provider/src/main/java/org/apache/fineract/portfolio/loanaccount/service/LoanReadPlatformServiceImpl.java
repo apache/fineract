@@ -1781,7 +1781,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         if (frequencyType == null) {
             return null;
         }
-        // Per PS-2795: calculated start date = current date + 1 unit of original frequency type
+        // calculated start date = current date + 1 unit of original frequency type
         return switch (frequencyType) {
             case DAYS -> businessDate.plusDays(1);
             case WEEKS -> businessDate.plusWeeks(1);

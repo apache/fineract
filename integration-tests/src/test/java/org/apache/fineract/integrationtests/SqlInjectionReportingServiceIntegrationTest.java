@@ -54,7 +54,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * Comprehensive integration tests for SQL injection prevention in reporting functionality (PS-2667).
+ * Comprehensive integration tests for SQL injection prevention in reporting functionality.
  *
  * Tests the migration from ESAPI to native database escaping and validates that CVE-2025-5878 is fixed. Covers
  * ReadReportingServiceImpl security measures through actual API endpoints.
