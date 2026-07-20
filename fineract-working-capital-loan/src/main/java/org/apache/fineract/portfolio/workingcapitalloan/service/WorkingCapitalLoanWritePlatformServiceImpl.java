@@ -591,7 +591,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived.
         delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
-        stateMachine.determineAndTransition(loan, transactionDate);
+        final List<WorkingCapitalLoanCharge> activeCharges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
+        stateMachine.determineAndTransition(loan, transactionDate, activeCharges);
         transactionProcessor.triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
         changes.put("status", loan.getLoanStatus());
 
@@ -921,7 +922,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             accountingProcessor.postReversalJournalEntries(loan, transaction);
         }
 
-        stateMachine.determineAndTransition(loan, transaction.getReversedOnDate());
+        stateMachine.determineAndTransition(loan, transaction.getReversedOnDate(), charges);
         changes.put("status", loan.getLoanStatus());
 
         handleNote(loan, command, changes);
