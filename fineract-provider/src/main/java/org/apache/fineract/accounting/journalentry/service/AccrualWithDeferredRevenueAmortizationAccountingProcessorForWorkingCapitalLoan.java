@@ -85,6 +85,13 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                     throw new NotImplementedException("Charge off is not implemented yet for Goodwill Credit for Working Capital Loan");
                 }
             }
+            case LoanTransactionType.PAYOUT_REFUND -> {
+                if (!isChargedOff) {
+                    postPayoutRefundJournalEntries(loan, txn, principalPortion, feesPortion, penaltiesPortion, overpaymentPortion);
+                } else {
+                    throw new NotImplementedException("Charge off is not implemented yet for Payout Refund on Working Capital Loan");
+                }
+            }
             case LoanTransactionType.CREDIT_BALANCE_REFUND -> postCreditBalanceRefundJournalEntries(loan, txn);
             case LoanTransactionType.CHARGE_ADJUSTMENT -> postChargeAdjustmentJournalEntries(loan, txn, principalPortion, feesPortion,
                     penaltiesPortion, overpaymentPortion, isChargedOff);
@@ -119,6 +126,19 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                         && relation.getRelationType() == LoanTransactionRelationTypeEnum.CHARGE_ADJUSTMENT)
                 .findFirst().map(relation -> relation.getToCharge().isPenaltyCharge()).orElseThrow(() -> new IllegalStateException(
                         "Charge adjustment transaction " + txn.getId() + " is missing its link to the adjusted charge"));
+    }
+
+    private void postPayoutRefundJournalEntries(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn, BigDecimal principalPortion,
+            BigDecimal feesPortion, BigDecimal penaltiesPortion, BigDecimal overpaymentPortion) {
+        JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
+        // debit
+        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.FUND_SOURCE,
+                MathUtil.add(principalPortion, penaltiesPortion, feesPortion, overpaymentPortion));
+        // credit
+        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion);
+        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
+        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
+        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion);
     }
 
     private void postGoodwillCreditJournalEntries(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn, BigDecimal principalPortion,
