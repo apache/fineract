@@ -65,12 +65,12 @@ class SmsCampaignValidatorTest {
                 {
                   "campaignName": "Repayment reminders",
                   "campaignType": 1,
-                  "triggerType": %d,
+                  "triggerType": TRIGGER_TYPE,
                   "runReportId": 1,
                   "message": "Your repayment is due",
                   "locale": "en"
                 }
-                """.formatted(SmsCampaignTriggerType.SCHEDULE.getValue());
+                """.replace("TRIGGER_TYPE", String.valueOf(SmsCampaignTriggerType.SCHEDULE.getValue()));
 
         PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
                 () -> validator.validateCreate(json));

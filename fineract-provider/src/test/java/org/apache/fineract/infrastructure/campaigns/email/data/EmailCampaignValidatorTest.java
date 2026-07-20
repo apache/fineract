@@ -64,13 +64,13 @@ class EmailCampaignValidatorTest {
         String json = """
                 {
                   "campaignName": "Loan reminders",
-                  "campaignType": %d,
+                  "campaignType": CAMPAIGN_TYPE,
                   "businessRuleId": 1,
                   "emailSubject": "Reminder",
                   "emailMessage": "Your repayment is due",
                   "paramValue": "value"
                 }
-                """.formatted(EmailCampaignType.SCHEDULE.getValue());
+                """.replace("CAMPAIGN_TYPE", String.valueOf(EmailCampaignType.SCHEDULE.getValue()));
 
         PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
                 () -> validator.validateCreate(json));
