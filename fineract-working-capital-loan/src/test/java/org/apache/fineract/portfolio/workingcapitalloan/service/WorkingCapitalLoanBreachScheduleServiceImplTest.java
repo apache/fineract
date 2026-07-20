@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import static org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType.BUSINESS_DATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
@@ -56,7 +55,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -141,13 +139,11 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
 
         underTest.recalculatePastDueAmount(loan);
 
-        final ArgumentCaptor<WorkingCapitalLoanBalance> captor = ArgumentCaptor.forClass(WorkingCapitalLoanBalance.class);
-        verify(balanceRepository).saveAndFlush(captor.capture());
-        assertEquals(0, BigDecimal.valueOf(160).compareTo(captor.getValue().getBreachPastDueAmount()));
+        assertEquals(0, BigDecimal.valueOf(160).compareTo(balance.getBreachPastDueAmount()));
     }
 
     @Test
-    void recalculatePastDueAmount_clearedPeriodsContributeZero() {
+    void recalculatePastDueAmount_settledPeriodsContributeZeroBalance() {
         final List<WorkingCapitalLoanBreachSchedule> periods = List.of(
                 period(1, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 10), BigDecimal.valueOf(100), BigDecimal.valueOf(100),
                         BigDecimal.ZERO),
@@ -158,9 +154,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
 
         underTest.recalculatePastDueAmount(loan);
 
-        final ArgumentCaptor<WorkingCapitalLoanBalance> captor = ArgumentCaptor.forClass(WorkingCapitalLoanBalance.class);
-        verify(balanceRepository).saveAndFlush(captor.capture());
-        assertEquals(0, BigDecimal.ZERO.compareTo(captor.getValue().getBreachPastDueAmount()));
+        assertEquals(0, BigDecimal.ZERO.compareTo(balance.getBreachPastDueAmount()));
     }
 
     @Test
@@ -175,26 +169,24 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
 
         underTest.recalculatePastDueAmount(loan);
 
-        final ArgumentCaptor<WorkingCapitalLoanBalance> captor = ArgumentCaptor.forClass(WorkingCapitalLoanBalance.class);
-        verify(balanceRepository).saveAndFlush(captor.capture());
-        assertEquals(0, BigDecimal.valueOf(100).compareTo(captor.getValue().getBreachPastDueAmount()));
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(balance.getBreachPastDueAmount()));
     }
 
     @Test
-    void recalculatePastDueAmount_excludesResetPeriods() {
-        final WorkingCapitalLoanBreachSchedule resetPeriod = period(1, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 10),
+    void recalculatePastDueAmount_startsFromLatestResetPeriod() {
+        final WorkingCapitalLoanBreachSchedule priorPeriod = period(1, LocalDate.of(2026, 4, 20), LocalDate.of(2026, 4, 30),
                 BigDecimal.valueOf(100), BigDecimal.ZERO, BigDecimal.valueOf(100));
-        resetPeriod.reset();
-        final WorkingCapitalLoanBreachSchedule normalPeriod = period(2, LocalDate.of(2026, 5, 11), LocalDate.of(2026, 5, 20),
+        final WorkingCapitalLoanBreachSchedule resetPeriod = period(2, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 10),
                 BigDecimal.valueOf(100), BigDecimal.ZERO, BigDecimal.valueOf(100));
-        when(repository.findByLoanIdOrderByPeriodNumberAsc(LOAN_ID)).thenReturn(List.of(resetPeriod, normalPeriod));
+        resetPeriod.setReset(true);
+        final WorkingCapitalLoanBreachSchedule normalPeriod = period(3, LocalDate.of(2026, 5, 11), LocalDate.of(2026, 5, 20),
+                BigDecimal.valueOf(100), BigDecimal.ZERO, BigDecimal.valueOf(100));
+        when(repository.findByLoanIdOrderByPeriodNumberAsc(LOAN_ID)).thenReturn(List.of(priorPeriod, resetPeriod, normalPeriod));
         when(balanceRepository.findByWcLoan_Id(LOAN_ID)).thenReturn(Optional.of(balance));
 
         underTest.recalculatePastDueAmount(loan);
 
-        final ArgumentCaptor<WorkingCapitalLoanBalance> captor = ArgumentCaptor.forClass(WorkingCapitalLoanBalance.class);
-        verify(balanceRepository).saveAndFlush(captor.capture());
-        assertEquals(0, BigDecimal.valueOf(100).compareTo(captor.getValue().getBreachPastDueAmount()));
+        assertEquals(0, BigDecimal.valueOf(200).compareTo(balance.getBreachPastDueAmount()));
     }
 
     @Test
@@ -231,24 +223,22 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         underTest.applyRepayment(LOAN_ID, transactionDate, BigDecimal.valueOf(60));
 
         assertEquals(0, BigDecimal.valueOf(40).compareTo(currentPeriod.getOutstandingAmount()));
-        final ArgumentCaptor<WorkingCapitalLoanBalance> captor = ArgumentCaptor.forClass(WorkingCapitalLoanBalance.class);
-        verify(balanceRepository).saveAndFlush(captor.capture());
-        assertEquals(0, BigDecimal.valueOf(40).compareTo(captor.getValue().getBreachPastDueAmount()));
+        assertEquals(0, BigDecimal.valueOf(40).compareTo(balance.getBreachPastDueAmount()));
     }
 
     @Test
-    void applyRepayment_skipsResetPeriod() {
+    void applyRepayment_updatesResetPeriod() {
         final LocalDate transactionDate = LocalDate.of(2026, 5, 15);
         final WorkingCapitalLoanBreachSchedule resetPeriod = period(1, LocalDate.of(2026, 5, 11), LocalDate.of(2026, 5, 20),
                 BigDecimal.valueOf(100), BigDecimal.ZERO, BigDecimal.valueOf(100));
-        resetPeriod.reset();
+        resetPeriod.setReset(true);
         when(repository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, transactionDate, transactionDate))
                 .thenReturn(Optional.of(resetPeriod));
 
         underTest.applyRepayment(LOAN_ID, transactionDate, BigDecimal.valueOf(60));
 
-        assertNull(resetPeriod.getPaidAmount());
-        verify(balanceRepository, never()).saveAndFlush(any());
+        assertEquals(0, BigDecimal.valueOf(60).compareTo(resetPeriod.getPaidAmount()));
+        assertEquals(0, BigDecimal.valueOf(40).compareTo(resetPeriod.getOutstandingAmount()));
     }
 
     @Test
@@ -276,9 +266,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
 
         assertEquals(0, BigDecimal.ZERO.compareTo(currentPeriod.getPaidAmount()));
         assertEquals(0, BigDecimal.valueOf(100).compareTo(currentPeriod.getOutstandingAmount()));
-        final ArgumentCaptor<WorkingCapitalLoanBalance> captor = ArgumentCaptor.forClass(WorkingCapitalLoanBalance.class);
-        verify(balanceRepository).saveAndFlush(captor.capture());
-        assertEquals(0, BigDecimal.valueOf(100).compareTo(captor.getValue().getBreachPastDueAmount()));
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(balance.getBreachPastDueAmount()));
     }
 
     @Test
@@ -301,18 +289,19 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
     }
 
     @Test
-    void applyRepaymentUndo_skipsResetPeriod() {
+    void applyRepaymentUndo_updatesResetPeriod() {
         final LocalDate transactionDate = LocalDate.of(2026, 5, 15);
         final WorkingCapitalLoanBreachSchedule resetPeriod = period(1, LocalDate.of(2026, 5, 11), LocalDate.of(2026, 5, 20),
                 BigDecimal.valueOf(100), BigDecimal.valueOf(60), BigDecimal.valueOf(40));
-        resetPeriod.reset();
+        resetPeriod.setReset(true);
         when(repository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, transactionDate, transactionDate))
                 .thenReturn(Optional.of(resetPeriod));
 
         underTest.applyRepaymentUndo(LOAN_ID, transactionDate, BigDecimal.valueOf(60));
 
-        assertNull(resetPeriod.getPaidAmount());
-        verify(balanceRepository, never()).saveAndFlush(any());
+        assertEquals(0, BigDecimal.ZERO.compareTo(resetPeriod.getPaidAmount()));
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(resetPeriod.getOutstandingAmount()));
+        assertEquals(Boolean.TRUE, resetPeriod.getBreach());
     }
 
     @Test
@@ -341,14 +330,12 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
                 BigDecimal.valueOf(100), BigDecimal.ZERO, BigDecimal.valueOf(100));
         when(repository.findByLoanIdOrderByPeriodNumberAsc(LOAN_ID)).thenReturn(List.of(onlyPeriod));
         when(breachActionRepository.findByWorkingCapitalLoanIdOrderById(LOAN_ID)).thenReturn(List.of());
-        when(breachActionRepository.findTopByWorkingCapitalLoanIdAndActionOrderByIdDesc(anyLong(), any())).thenReturn(Optional.empty());
+        when(breachActionRepository.findByWorkingCapitalLoanIdAndActionOrderByIdDesc(anyLong(), any())).thenReturn(List.of());
         when(balanceRepository.findByWcLoan_Id(LOAN_ID)).thenReturn(Optional.of(balance));
 
         underTest.recalculatePeriodsForPauses(loan);
 
-        final ArgumentCaptor<WorkingCapitalLoanBalance> captor = ArgumentCaptor.forClass(WorkingCapitalLoanBalance.class);
-        verify(balanceRepository).saveAndFlush(captor.capture());
-        assertEquals(0, BigDecimal.valueOf(100).compareTo(captor.getValue().getBreachPastDueAmount()));
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(balance.getBreachPastDueAmount()));
     }
 
     @Test
@@ -371,16 +358,14 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         assertEquals(0, BigDecimal.valueOf(100).compareTo(period2.getOutstandingAmount()));
         assertEquals(Boolean.TRUE, period2.getBreach());
 
-        final ArgumentCaptor<WorkingCapitalLoanBalance> captor = ArgumentCaptor.forClass(WorkingCapitalLoanBalance.class);
-        verify(balanceRepository).saveAndFlush(captor.capture());
-        assertEquals(0, BigDecimal.valueOf(100).compareTo(captor.getValue().getBreachPastDueAmount()));
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(balance.getBreachPastDueAmount()));
     }
 
     @Test
-    void reprocessBreachSchedule_leavesResetPeriodsUntouched() {
+    void reprocessBreachSchedule_recalculatesResetPeriods() {
         final WorkingCapitalLoanBreachSchedule resetPeriod = period(1, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 10),
                 BigDecimal.valueOf(100), BigDecimal.ZERO, BigDecimal.valueOf(100));
-        resetPeriod.reset();
+        resetPeriod.setReset(true);
         final WorkingCapitalLoanBreachSchedule normalPeriod = period(2, LocalDate.of(2026, 5, 11), LocalDate.of(2026, 5, 20),
                 BigDecimal.valueOf(100), BigDecimal.ZERO, BigDecimal.valueOf(100));
 
@@ -392,12 +377,10 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
 
         underTest.reprocessBreachSchedule(loan);
 
-        assertNull(resetPeriod.getOutstandingAmount());
-        assertNull(resetPeriod.getPaidAmount());
-        assertNull(resetPeriod.getBreach());
+        assertEquals(0, BigDecimal.ZERO.compareTo(resetPeriod.getOutstandingAmount()));
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(resetPeriod.getPaidAmount()));
+        assertEquals(Boolean.FALSE, resetPeriod.getBreach());
 
-        final ArgumentCaptor<WorkingCapitalLoanBalance> captor = ArgumentCaptor.forClass(WorkingCapitalLoanBalance.class);
-        verify(balanceRepository).saveAndFlush(captor.capture());
-        assertEquals(0, BigDecimal.valueOf(100).compareTo(captor.getValue().getBreachPastDueAmount()));
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(balance.getBreachPastDueAmount()));
     }
 }

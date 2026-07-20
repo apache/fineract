@@ -141,6 +141,7 @@ public class WorkingCapitalBreachScheduleStepDef extends AbstractStepDef {
                 verifyNullableBigDecimal(actual.getOutstandingAmount(), expectedValue, "Outstanding amount", rowNumber);
             case "nearBreach" -> verifyNullableBoolean(actual.getNearBreach(), expectedValue, "Near breach", rowNumber);
             case "breach" -> verifyNullableBoolean(actual.getBreach(), expectedValue, "Breach", rowNumber);
+            case "reset" -> verifyNullableBoolean(actual.getReset(), expectedValue, "Reset", rowNumber);
             default -> throw new IllegalArgumentException("Unknown field name: " + fieldName);
         }
     }

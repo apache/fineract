@@ -73,16 +73,4 @@ public class WorkingCapitalLoanBreachSchedule extends AbstractAuditableWithUTCDa
 
     @Column(name = "reset", nullable = false)
     private boolean reset;
-
-    public void reset() {
-        this.reset = true;
-        this.breach = null;
-        this.nearBreach = null;
-        this.outstandingAmount = null;
-        this.paidAmount = null;
-    }
-
-    public BigDecimal getMinPaymentAmount() {
-        return reset ? null : this.minPaymentAmount;
-    }
 }

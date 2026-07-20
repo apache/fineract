@@ -1,4 +1,5 @@
 @WorkingCapital
+@WorkingCapitalBreach
 @WorkingCapitalBreachRescheduleActionFeature @WCCOBFeature
 Feature: Working Capital Breach Reschedule Action
 

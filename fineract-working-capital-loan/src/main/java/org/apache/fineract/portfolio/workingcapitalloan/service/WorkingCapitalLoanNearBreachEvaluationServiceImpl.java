@@ -62,10 +62,6 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImpl implements Workin
                     effectiveDate);
             return;
         }
-        if (period.isReset()) {
-            log.debug("Skipping near breach evaluation for WC loan {} - breach period got reset {}", loan.getId(), period.getId());
-            return;
-        }
         final WorkingCapitalNearBreach config = loan.getLoanProductRelatedDetails().getNearBreach();
 
         final BigDecimal effectiveThreshold;
