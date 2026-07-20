@@ -486,25 +486,204 @@ Feature: Working Capital Delinquency Reset Action
     Then Admin closes the Working Capital loan with a full repayment on "11 April 2026"
     And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
-  @TestRailId:TODO_ADD_4
-  Scenario: Verify multiple Reset Delinquency Action with start new period
+  @TestRailId:C89749
+  Scenario: Verify Working Capital delinquency reset / delinquency reset undo - UC9: delinquency reset with start new period
     When Admin sets the business date to "01 January 2026"
-    When Admin creates a client with random data
-    When Admin creates a working capital loan with the following data:
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP        | 01 January 2026 | 01 January 2026          | 10000           | 10000              | 1                 | 0.0      |
-    When Admin successfully approves the working capital loan on "01 January 2026" with "10000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully approves the working capital loan on "01 January 2026" with "10000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "10000" EUR transaction amount
-
-    When Admin sets the business date to "15 February 2026"
-    When Admin runs inline COB job for Working Capital Loan
+#  --- Initial state ---
+    And Admin sets the business date to "15 February 2026"
+    And Admin runs inline COB job for Working Capital Loan
     Then WC loan delinquency range schedule has the following periods:
       | periodNumber | fromDate        | toDate          | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
       | 1            | 01 January 2026 | 30 January 2026 | 300            | 0          | 300               | false                 |
       | 2            | 31 January 2026 | 01 March 2026   | 300            | 0          | 300               |                       |
+#    --- Delinquency reset with start new period ---
     When Admin creates WC delinquency reset action with start new period
     Then WC loan delinquency range schedule has the following periods:
       | periodNumber | fromDate         | toDate           | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
       | 1            | 01 January 2026  | 30 January 2026  |                |            |                   |                       |
       | 2            | 31 January 2026  | 14 February 2026 |                |            |                   |                       |
       | 3            | 15 February 2026 | 16 March 2026    | 300            | 0          | 300               |                       |
+
+  @TestRailId:C89750
+  Scenario: Verify Working Capital delinquency reset / delinquency reset undo - UC10: 2 installments overdue and backdated payments with start new period
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 30 DAYS and minimumPayment 25 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 800             | 800                | 1                  | 0.0      |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
+#  --- Backdated payments covering period 1 fully and period 2 partially ---
+    When Admin sets the business date to "25 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "25 January 2026" with 200.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "20 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "20 February 2026" with 100.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "15 April 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate      | toDate        | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 | 200         | 200        | 0                 | true                  |
+      | 2            | 31 January 2026 | 01 March 2026   | 200         | 100        | 100               | false                 |
+      | 3            | 02 March 2026   | 31 March 2026   | 200         | 0          | 200               | false                 |
+      | 4            | 01 April 2026   | 30 April 2026   | 200         | 0          | 200               |                       |
+#    --- Delinquency reset with start new period at 15 April 2026 ---
+    When Admin creates WC delinquency reset action with start new period
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate        | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 |             |            |                   |                       |
+      | 2            | 31 January 2026 | 01 March 2026   |             |            |                   |                       |
+      | 3            | 02 March 2026   | 31 March 2026   |             |            |                   |                       |
+      | 4            | 01 April 2026   | 14 April 2026   |             |            |                   |                       |
+      | 5            | 15 April 2026   | 14 May 2026     | 200         | 0          | 200               |                       |
+    When Admin sets the business date to "16 May 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate        | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 |             |            |                   |                       |
+      | 2            | 31 January 2026 | 01 March 2026   |             |            |                   |                       |
+      | 3            | 02 March 2026   | 31 March 2026   |             |            |                   |                       |
+      | 4            | 01 April 2026   | 14 April 2026   |             |            |                   |                       |
+      | 5            | 15 April 2026   | 14 May 2026     | 200         | 0          | 200               | false                 |
+      | 6            | 15 May 2026     | 13 June 2026    | 200         | 0          | 200               |                       |
+#    --- Backdated repayment applied against the still-open period (5) created after reset ---
+    When Admin sets the business date to "20 May 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "20 May 2026" with 150.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "14 June 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate        | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 |             |            |                   |                       |
+      | 2            | 31 January 2026 | 01 March 2026   |             |            |                   |                       |
+      | 3            | 02 March 2026   | 31 March 2026   |             |            |                   |                       |
+      | 4            | 01 April 2026   | 14 April 2026   |             |            |                   |                       |
+      | 5            | 15 April 2026   | 14 May 2026     | 200         | 150        | 50                | false                 |
+      | 6            | 15 May 2026     | 13 June 2026    | 200         | 0          | 200               | false                 |
+      | 7            | 14 June 2026    | 13 July 2026    | 200         | 0          | 200               |                       |
+#    --- Backdated payment into an already reset period has no effect on the delinquency schedule ---
+    And Customer makes repayment on "01 March 2026" with 100.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "17 June 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate        | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 |             |            |                   |                       |
+      | 2            | 31 January 2026 | 01 March 2026   |             |            |                   |                       |
+      | 3            | 02 March 2026   | 31 March 2026   |             |            |                   |                       |
+      | 4            | 01 April 2026   | 14 April 2026   |             |            |                   |                       |
+      | 5            | 15 April 2026   | 14 May 2026     | 200         | 150        | 50                | false                 |
+      | 6            | 15 May 2026     | 13 June 2026    | 200         | 0          | 200               | false                 |
+      | 7            | 14 June 2026    | 13 July 2026    | 200         | 0          | 200               |                       |
+
+  @TestRailId:C89751
+  Scenario: Verify Working Capital delinquency reset / delinquency reset undo - UC11: overpaid and overdue installments with start new period
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 30 DAYS and minimumPayment 25 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 800             | 800                | 1                  | 0.0      |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
+#  --- Period 1 overpaid, period 2 partially paid ---
+    When Admin sets the business date to "25 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "25 January 2026" with 300.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "20 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "20 February 2026" with 50.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "15 April 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate        | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 | 200         | 300        | 0                 | true                  |
+      | 2            | 31 January 2026 | 01 March 2026   | 200         | 50         | 150               | false                 |
+      | 3            | 02 March 2026   | 31 March 2026   | 200         | 0          | 200               | false                 |
+      | 4            | 01 April 2026   | 30 April 2026   | 200         | 0          | 200               |                       |
+#    --- Delinquency reset with start new period at 15 April 2026 ---
+    When Admin creates WC delinquency reset action with start new period
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate        | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 |             |            |                   |                       |
+      | 2            | 31 January 2026 | 01 March 2026   |             |            |                   |                       |
+      | 3            | 02 March 2026   | 31 March 2026   |             |            |                   |                       |
+      | 4            | 01 April 2026   | 14 April 2026   |             |            |                   |                       |
+      | 5            | 15 April 2026   | 14 May 2026     | 200         | 0          | 200               |                       |
+    When Admin sets the business date to "16 May 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate        | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 |             |            |                   |                       |
+      | 2            | 31 January 2026 | 01 March 2026   |             |            |                   |                       |
+      | 3            | 02 March 2026   | 31 March 2026   |             |            |                   |                       |
+      | 4            | 01 April 2026   | 14 April 2026   |             |            |                   |                       |
+      | 5            | 15 April 2026   | 14 May 2026     | 200         | 0          | 200               | false                 |
+      | 6            | 15 May 2026     | 13 June 2026    | 200         | 0          | 200               |                       |
+    When Admin sets the business date to "15 June 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate        | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 |             |            |                   |                       |
+      | 2            | 31 January 2026 | 01 March 2026   |             |            |                   |                       |
+      | 3            | 02 March 2026   | 31 March 2026   |             |            |                   |                       |
+      | 4            | 01 April 2026   | 14 April 2026   |             |            |                   |                       |
+      | 5            | 15 April 2026   | 14 May 2026     | 200         | 0          | 200               | false                 |
+      | 6            | 15 May 2026     | 13 June 2026    | 200         | 0          | 200               | false                 |
+      | 7            | 14 June 2026    | 13 July 2026    | 200         | 0          | 200               |                       |
+
+  @TestRailId:C89752
+  Scenario: Verify Working Capital delinquency reset / delinquency reset undo - UC12: delinquency pause followed by reset with start new period
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates WC Delinquency Bucket with frequency 30 DAYS and minimumPayment 25 PERCENTAGE
+    And Admin creates a new Working Capital Loan Product with delinquency bucket
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 800             | 800                | 1                  | 0.0      |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
+#  --- Period 1 fully paid, period 2 partially paid ---
+    When Admin sets the business date to "25 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "25 January 2026" with 200.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "20 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "20 February 2026" with 100.0 transaction amount on Working Capital loan
+    When Admin sets the business date to "20 March 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate        | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 | 200         | 200        | 0                 | true                  |
+      | 2            | 31 January 2026 | 01 March 2026   | 200         | 100        | 100               | false                 |
+      | 3            | 02 March 2026   | 31 March 2026   | 200         | 0          | 200               |                       |
+#    --- 10-day delinquency pause starting on the current business date ---
+    And Admin initiate a Working Capital loan delinquency pause with startDate "20 March 2026" and endDate "29 March 2026"
+    When Admin sets the business date to "11 April 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate        | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 | 200         | 200        | 0                 | true                  |
+      | 2            | 31 January 2026 | 01 March 2026   | 200         | 100        | 100               | false                 |
+      | 3            | 02 March 2026   | 10 April 2026   | 200         | 0          | 200               | false                 |
+      | 4            | 11 April 2026   | 10 May 2026     | 200         | 0          | 200               |                       |
+#    --- Delinquency reset with start new period at 15 April 2026 ---
+    When Admin sets the business date to "15 April 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin creates WC delinquency reset action with start new period
+    Then WC loan delinquency range schedule has the following periods:
+      | periodNumber | fromDate        | toDate        | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
+      | 1            | 01 January 2026 | 30 January 2026 |             |            |                   |                       |
+      | 2            | 31 January 2026 | 01 March 2026   |             |            |                   |                       |
+      | 3            | 02 March 2026   | 10 April 2026   |             |            |                   |                       |
+      | 4            | 11 April 2026   | 14 April 2026   |             |            |                   |                       |
+      | 5            | 15 April 2026   | 14 May 2026     | 200         | 0          | 200               |                       |
