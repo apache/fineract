@@ -126,7 +126,7 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
                 frequencyType, minimumPayment, minimumPaymentType);
     }
 
-    @When("Admin creates WC delinquency reset action")
+    @When("Admin creates a Working Capital delinquency reset")
     public void createResetAction() {
         final PostWorkingCapitalLoansDelinquencyActionRequest request = new PostWorkingCapitalLoansDelinquencyActionRequest();
         request.setAction("reset");
@@ -135,7 +135,7 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
         executeRescheduleAction(request);
     }
 
-    @When("Admin creates WC delinquency undo reset action")
+    @When("Admin creates Working Capital delinquency reset undo")
     public void createUndoResetAction() {
         final PostWorkingCapitalLoansDelinquencyActionRequest request = new PostWorkingCapitalLoansDelinquencyActionRequest();
         request.setAction("undo_reset");
@@ -293,7 +293,7 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
 
     private void executeRescheduleAction(final PostWorkingCapitalLoansDelinquencyActionRequest request) {
         final Long loanId = getLoanId();
-        log.info("Creating RESCHEDULE action for WC loan {}: {}", loanId, request);
+        log.debug("Creating RESCHEDULE action for WC loan {}: {}", loanId, request);
 
         final PostWorkingCapitalLoansDelinquencyActionResponse result = ok(
                 () -> fineractFeignClient.workingCapitalLoanDelinquencyActions().createDelinquencyAction(loanId, request));
