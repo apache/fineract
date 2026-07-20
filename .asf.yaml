@@ -32,6 +32,9 @@ github:
       required_conversation_resolution: true
       required_pull_request_reviews:
         required_approving_review_count: 1
+        # Dismiss stale pull request approvals when new commits are pushed.
+        # New, reviewable commits pushed will dismiss previous pull request review approvals.
+        dismiss_stale_reviews: true
 notifications:
   commits: commits@fineract.apache.org
   pullrequests: issues@fineract.apache.org
