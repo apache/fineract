@@ -99,7 +99,7 @@ public class WorkingCapitalLoanTransactionProcessor {
         // Breach schedule is maintained incrementally here; reprocessing does not rebuild it.
         breachScheduleService.applyRepayment(loanId, transactionDate, transactionAmount);
 
-        stateMachine.determineAndTransition(loan, transactionDate);
+        stateMachine.determineAndTransition(loan, transactionDate, charges);
         triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
 
         return allocation;

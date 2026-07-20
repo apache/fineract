@@ -331,7 +331,7 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | 10 January 2026 | Repayment       | 9000.0            | 8500.0           | 0.0               | 0.0                   | false    |
 
   @TestRailId:C85544
-  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC13: Goodwill credit settling only a fee on a closed loan keeps the loan closed
+  Scenario: Verify Working Capital Goodwill Credit backdated/undo - UC13: Goodwill credit settling the remaining due fee closes the loan
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with payment allocation order:
@@ -349,7 +349,7 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
     When Admin sets the business date to "05 January 2026"
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "05 January 2026" due date and 35.0 transaction amount
     And Customer makes repayment on "05 January 2026" with 9000 transaction amount on Working Capital loan
-    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Working Capital loan status will be "ACTIVE"
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Paid | Fee Outstanding |
       | 35.0       | 0.0      | 35.0            |

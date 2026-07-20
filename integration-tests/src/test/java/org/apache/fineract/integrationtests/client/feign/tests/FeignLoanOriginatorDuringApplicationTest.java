@@ -66,7 +66,7 @@ public class FeignLoanOriginatorDuringApplicationTest extends FeignIntegrationTe
         final Long clientId = clientHelper.createClient();
 
         final List<PostLoansOriginatorData> originators = List.of(new PostLoansOriginatorData().id(originatorId));
-        final Long loanId = loanHelper.createSubmittedLoanWithOriginators(clientId, originators);
+        final Long loanId = loanHelper.createSubmittedLoanWithOriginators(clientId, originators).getLoanId();
 
         assertThat(loanId).isNotNull();
         final var loanDetails = loanHelper.getLoanDetailsWithAssociations(loanId, "originators");
@@ -84,7 +84,7 @@ public class FeignLoanOriginatorDuringApplicationTest extends FeignIntegrationTe
         final Long clientId = clientHelper.createClient();
 
         final List<PostLoansOriginatorData> originators = List.of(new PostLoansOriginatorData().externalId(originatorExternalId));
-        final Long loanId = loanHelper.createSubmittedLoanWithOriginators(clientId, originators);
+        final Long loanId = loanHelper.createSubmittedLoanWithOriginators(clientId, originators).getLoanId();
 
         assertThat(loanId).isNotNull();
         final var loanDetails = loanHelper.getLoanDetailsWithAssociations(loanId, "originators");
@@ -105,7 +105,7 @@ public class FeignLoanOriginatorDuringApplicationTest extends FeignIntegrationTe
 
             final List<PostLoansOriginatorData> originators = List
                     .of(new PostLoansOriginatorData().externalId(newOriginatorExternalId).name("New Merchant Created During Loan"));
-            final Long loanId = loanHelper.createSubmittedLoanWithOriginators(clientId, originators);
+            final Long loanId = loanHelper.createSubmittedLoanWithOriginators(clientId, originators).getLoanId();
 
             assertThat(loanId).isNotNull();
 
@@ -149,7 +149,7 @@ public class FeignLoanOriginatorDuringApplicationTest extends FeignIntegrationTe
 
         final List<PostLoansOriginatorData> originators = List.of(new PostLoansOriginatorData().id(originatorId1),
                 new PostLoansOriginatorData().externalId(externalId2));
-        final Long loanId = loanHelper.createSubmittedLoanWithOriginators(clientId, originators);
+        final Long loanId = loanHelper.createSubmittedLoanWithOriginators(clientId, originators).getLoanId();
 
         final var loanDetails = loanHelper.getLoanDetailsWithAssociations(loanId, "originators");
         assertThat(loanDetails.getOriginators()).hasSize(2);
@@ -201,7 +201,7 @@ public class FeignLoanOriginatorDuringApplicationTest extends FeignIntegrationTe
     public void testCreateLoanWithoutOriginatorsStillWorks() {
         final Long clientId = clientHelper.createClient();
 
-        final Long loanId = loanHelper.createSubmittedLoan(clientId);
+        final Long loanId = loanHelper.createSubmittedLoan(clientId).getLoanId();
 
         assertThat(loanId).isNotNull();
 
@@ -217,7 +217,7 @@ public class FeignLoanOriginatorDuringApplicationTest extends FeignIntegrationTe
 
         final List<PostLoansOriginatorData> originators = List.of(new PostLoansOriginatorData().id(originatorId),
                 new PostLoansOriginatorData().externalId(externalId));
-        final Long loanId = loanHelper.createSubmittedLoanWithOriginators(clientId, originators);
+        final Long loanId = loanHelper.createSubmittedLoanWithOriginators(clientId, originators).getLoanId();
 
         final var loanDetails = loanHelper.getLoanDetailsWithAssociations(loanId, "originators");
         assertThat(loanDetails.getOriginators()).hasSize(1);
@@ -233,7 +233,7 @@ public class FeignLoanOriginatorDuringApplicationTest extends FeignIntegrationTe
         try {
             final int threadCount = 10;
             final String sharedOriginatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
-            final Long productId = loanHelper.createSimpleLoanProduct();
+            final Long productId = loanHelper.createSimpleLoanProduct().getResourceId();
 
             final List<Long> clientIds = new ArrayList<>();
             for (int i = 0; i < threadCount; i++) {
@@ -253,7 +253,7 @@ public class FeignLoanOriginatorDuringApplicationTest extends FeignIntegrationTe
                         startLatch.await();
                         final List<PostLoansOriginatorData> originators = List.of(
                                 new PostLoansOriginatorData().externalId(sharedOriginatorExternalId).name("Parallel Created Originator"));
-                        final Long loanId = loanHelper.createSubmittedLoanWithOriginators(clientId, productId, originators);
+                        final Long loanId = loanHelper.createSubmittedLoanWithOriginators(clientId, productId, originators).getLoanId();
                         results.add(loanId);
                     } catch (final Exception e) {
                         exceptions.add(e);

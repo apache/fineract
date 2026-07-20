@@ -33,6 +33,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -47,32 +48,33 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanUndoChargeOffReverseExternalIdTest {
+public class LoanUndoChargeOffReverseExternalIdTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
-    private LoanTransactionHelper loanTransactionHelper;
-    private AccountHelper accountHelper;
-    private Account assetAccount;
-    private Account incomeAccount;
-    private Account expenseAccount;
-    private Account overpaymentAccount;
+    protected ResponseSpecification responseSpec;
+    protected RequestSpecification requestSpec;
 
     @BeforeEach
-    public void setup() {
+    public void setupREST() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.assetAccount = this.accountHelper.createAssetAccount();
-        this.incomeAccount = this.accountHelper.createIncomeAccount();
-        this.expenseAccount = this.accountHelper.createExpenseAccount();
-        this.overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        this.restAccountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        this.assetAccount = this.restAccountHelper.createAssetAccount();
+        this.incomeAccount = this.restAccountHelper.createIncomeAccount();
+        this.expenseAccount = this.restAccountHelper.createExpenseAccount();
+        this.overpaymentAccount = this.restAccountHelper.createLiabilityAccount();
     }
+
+    private LoanTransactionHelper loanTransactionHelper;
+
+    private AccountHelper restAccountHelper;
+    private Account assetAccount;
+    private Account incomeAccount;
+    private Account expenseAccount;
+    private Account overpaymentAccount;
 
     @Test
     public void loanUndoChargeOffReverseExternalIdTest() {

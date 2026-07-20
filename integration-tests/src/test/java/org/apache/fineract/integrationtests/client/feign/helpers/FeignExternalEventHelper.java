@@ -50,6 +50,10 @@ public class FeignExternalEventHelper {
         return ok(() -> internalEventsApi.getAllExternalEvents(Map.of("type", type)));
     }
 
+    public List<ExternalEventResponse> getAllExternalEvents() {
+        return ok(() -> internalEventsApi.getAllExternalEvents(Map.of()));
+    }
+
     public void deleteAllExternalEvents() {
         ok(() -> {
             internalEventsApi.deleteAllExternalEvents();

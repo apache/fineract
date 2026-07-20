@@ -91,8 +91,8 @@ public class LoanTestLifecycleExtension implements AfterEachCallback, BeforeEach
         GetLoansLoanIdTransactionsTemplateResponse prepayDetail = this.loanTransactionHelper.getPrepaymentAmount(loanId,
                 dateFormatter.format(cleanupDate), DATE_FORMAT);
         LocalDate transactionDate = prepayDetail.getDate();
-        Double amount = prepayDetail.getAmount();
-        Double netDisbursalAmount = prepayDetail.getNetDisbursalAmount();
+        Double amount = prepayDetail.getAmount() != null ? prepayDetail.getAmount().doubleValue() : 0.0;
+        Double netDisbursalAmount = prepayDetail.getNetDisbursalAmount() != null ? prepayDetail.getNetDisbursalAmount().doubleValue() : 0.0;
         Double repayAmount = Double.compare(amount, 0.0) > 0 ? amount : netDisbursalAmount;
         loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_FORMAT)
                 .transactionDate(dateFormatter.format(transactionDate)).locale("en").transactionAmount(repayAmount));

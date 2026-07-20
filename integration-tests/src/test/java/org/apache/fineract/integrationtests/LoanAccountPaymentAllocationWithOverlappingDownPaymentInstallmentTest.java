@@ -22,60 +22,33 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.UUID;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTest extends BaseLoanIntegrationTest {
+public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private ClientHelper clientHelper;
     private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-    }
 
     @Test
     public void loanAccountWithEnableDownPaymentAndEnableAutoRepaymentForDownPaymentWithOverlappingInstallmentPaymentAllocationTest() {
-        try {
+        runAt("03 March 2023", () -> {
 
             // Test with
             // Enable Down Payment
@@ -83,12 +56,7 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // Payment Strategy DEFAULT payment allocation strategy "Penalties, Fees, Interest, Principal order"
             // Overlapping down payment and regular installment
 
-            // Set business date
             LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
-
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -98,11 +66,11 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
             Boolean enableAutoRepaymentForDownPayment = true;
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Long clientId = createClient();
 
             // Loan Product creation with down-payment configuration
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithEnableDownPaymentAndMultipleDisbursements(
-                    loanTransactionHelper, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
+                    enableDownPayment, "25", enableAutoRepaymentForDownPayment);
 
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
@@ -112,37 +80,31 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
             // create loan account with DEFAULT payment allocation strategy "Penalties, Fees, Interest, Principal order"
 
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
                     loanExternalIdStr, LoanProductTestBuilder.DEFAULT_STRATEGY);
 
             // add charge PENALTY with due date as overlapping installment due date
 
-            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
-
             LocalDate targetDate = LocalDate.of(2023, 4, 3);
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            Long penalty1LoanChargeId = addCharge(loanId, true, 10.0, penaltyCharge1AddedDate);
 
             assertNotNull(penalty1LoanChargeId);
 
             // add charge FEE with due date as overlapping installment due date
-            Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+            Long fee = createLoanSpecifiedDueDateCharge(10.0);
 
             targetDate = LocalDate.of(2023, 4, 3);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), feeCharge1AddedDate, "5.15"));
+            Long feeLoanChargeId = addLoanCharge(loanId, fee, feeCharge1AddedDate, 5.15).getResourceId();
 
             assertNotNull(feeLoanChargeId);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             // verify down-payment details for Loan
             assertNotNull(loanDetails);
@@ -151,14 +113,14 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             assertEquals(enableAutoRepaymentForDownPayment, loanDetails.getEnableAutoRepaymentForDownPayment());
 
             // first disbursement
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "500");
+            disburseLoanWithAmount(loanId, "03 March 2023", 500.0);
 
             // verify down-payment transaction created
             checkDownPaymentTransaction(disbursementDate, 125.0f, 0.0f, 0.0f, 0.0f, loanId);
 
             // verify loan schedule
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -179,14 +141,14 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // second disbursement with overlapping installment i.e same due date as regular repayment due date
 
             disbursementDate = LocalDate.of(2023, 4, 3);
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 April 2023", loanId, "1000");
+            updateBusinessDate("03 April 2023");
+            disburseLoanWithAmount(loanId, "03 April 2023", 1000.0);
 
             checkDownPaymentTransaction(disbursementDate, 250.0f, 0.0f, 0.0f, 0.0f, loanId);
 
             // verify loan schedule
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -211,11 +173,11 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
             // make repayment for fully paying and verify that regular installment gets fully paid on 3rd april
 
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 April 2023").locale("en")
                             .transactionAmount(577.65));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -238,16 +200,12 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(5), 4, 562.5, 0.0, 0.0, 562.5, 0.0, 0.0, 0.0, 0.0,
                     false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
-        } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(false));
-        }
-
+        });
     }
 
     @Test
     public void loanAccountWithEnableDownPaymentAndDisableAutoRepaymentForDownPaymentWithOverlappingInstallmentPaymentAllocationTest() {
-        try {
+        runAt("03 March 2023", () -> {
 
             // Test with
             // Enable Down Payment
@@ -256,12 +214,7 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // "interest-principal-penalties-fees-order-strategy"
             // Overlapping down payment and regular installment
 
-            // Set business date
             LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
-
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -271,11 +224,11 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
             Boolean enableAutoRepaymentForDownPayment = false;
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Long clientId = createClient();
 
             // Loan Product creation with down-payment configuration
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithEnableDownPaymentAndMultipleDisbursements(
-                    loanTransactionHelper, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
+                    enableDownPayment, "25", enableAutoRepaymentForDownPayment);
 
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
@@ -285,37 +238,31 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
             // create loan account with "interest-principal-penalties-fees-order-strategy"
 
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
                     loanExternalIdStr, LoanProductTestBuilder.INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY);
 
             // add charge PENALTY with due date as overlapping installment due date
 
-            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
-
             LocalDate targetDate = LocalDate.of(2023, 4, 3);
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
+            Long penalty1LoanChargeId = addCharge(loanId, true, 10.0, penaltyCharge1AddedDate);
 
             assertNotNull(penalty1LoanChargeId);
 
             // add charge FEE with due date as overlapping installment due date
-            Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
+            Long fee = createLoanSpecifiedDueDateCharge(10.0);
 
             targetDate = LocalDate.of(2023, 4, 3);
             final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
-                    LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), feeCharge1AddedDate, "5.15"));
+            Long feeLoanChargeId = addLoanCharge(loanId, fee, feeCharge1AddedDate, 5.15).getResourceId();
 
             assertNotNull(feeLoanChargeId);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             // verify down-payment details for Loan
             assertNotNull(loanDetails);
@@ -324,16 +271,16 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             assertEquals(enableAutoRepaymentForDownPayment, loanDetails.getEnableAutoRepaymentForDownPayment());
 
             // first disbursement
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "500");
+            disburseLoanWithAmount(loanId, "03 March 2023", 500.0);
 
             // make repayment on 3rd March
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 March 2023").locale("en")
                             .transactionAmount(125.0));
 
             // verify loan schedule
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -354,17 +301,17 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             // second disbursement with overlapping installment i.e same due date as regular repayment due date
 
             disbursementDate = LocalDate.of(2023, 4, 3);
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 April 2023", loanId, "1000");
+            updateBusinessDate("03 April 2023");
+            disburseLoanWithAmount(loanId, "03 April 2023", 1000.0);
 
             // make repayment on 3rd April
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 April 2023").locale("en")
                             .transactionAmount(250.0));
 
             // verify loan schedule
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -389,11 +336,11 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
             // make repayment for fully paying and verify that regular installment gets fully paid on 3rd april
 
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 April 2023").locale("en")
                             .transactionAmount(577.65));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -416,28 +363,17 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(5), 4, 562.5, 0.0, 0.0, 562.5, 0.0, 0.0, 0.0, 0.0,
                     false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
-        } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(false));
-        }
-
+        });
     }
 
     @Test
     public void loanAccountWithEnableDownPaymentAndDisableAutoRepaymentForDownPaymentWithOverlappingInstallmentForMultipleDisbursementsOnSameDayTest() {
-        try {
+        runAt("03 March 2023", () -> {
 
             // Test with
             // Enable Down Payment
             // Disable Auto Repayment For Down Payment
             // Overlapping down payment and regular installment with multiple disbursements on same day
-
-            // Set business date
-            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
-
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -447,11 +383,11 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
             Boolean enableAutoRepaymentForDownPayment = false;
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Long clientId = createClient();
 
             // Loan Product creation with down-payment configuration
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithEnableDownPaymentAndMultipleDisbursements(
-                    loanTransactionHelper, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
+                    enableDownPayment, "25", enableAutoRepaymentForDownPayment);
 
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
@@ -461,12 +397,12 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
             // create loan account
 
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
                     loanExternalIdStr, LoanProductTestBuilder.DEFAULT_STRATEGY);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             // verify down-payment details for Loan
             assertNotNull(loanDetails);
@@ -475,16 +411,16 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             assertEquals(enableAutoRepaymentForDownPayment, loanDetails.getEnableAutoRepaymentForDownPayment());
 
             // first disbursement
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "200");
+            disburseLoanWithAmount(loanId, "03 March 2023", 200.0);
 
             // make repayment on 3rd March
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 March 2023").locale("en")
                             .transactionAmount(50.0));
 
             // verify loan schedule
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -504,18 +440,17 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
             // second disbursement with overlapping installment i.e same due date as regular repayment due date
 
-            disbursementDate = LocalDate.of(2023, 4, 3);
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 April 2023", loanId, "200");
+            updateBusinessDate("03 April 2023");
+            disburseLoanWithAmount(loanId, "03 April 2023", 200.0);
 
             // make repayment on 3rd April
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 April 2023").locale("en")
                             .transactionAmount(50.0));
 
             // verify loan schedule
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -540,16 +475,16 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
             // same day third disbursement with overlapping installment i.e same due date as regular repayment due date
             // 3-April
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 April 2023", loanId, "200");
+            disburseLoanWithAmount(loanId, "03 April 2023", 200.0);
 
             // make repayment on 3rd April
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 April 2023").locale("en")
                             .transactionAmount(50.0));
 
             // verify loan schedule
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -578,11 +513,11 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
                     false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
             // make repayment for fully paying and verify that regular installment gets fully paid on 3rd april
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_3 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_3 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 April 2023").locale("en")
                             .transactionAmount(225.0));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -610,29 +545,18 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(7), 5, 225.0, 0.0, 0.0, 225.0, 0.0, 0.0, 0.0, 0.0,
                     false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
-        } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(false));
-        }
-
+        });
     }
 
     @Test
     public void loanAccountWithEnableDownPaymentWithAdvancedPaymentAllocationWithProgressiveScheduleGenerationMultipleDisbursementsOnSameDayTest() {
-        try {
+        runAt("03 March 2023", () -> {
 
             // Test with
             // Enable Down Payment
             // Disable Auto Repayment For Down Payment
             // Overlapping down payment and regular installment with multiple disbursements on same day
             // Progressive Schedule generation with Advanced Payment Allocation
-
-            // Set business date
-            LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
-
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -642,14 +566,14 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
             Boolean enableAutoRepaymentForDownPayment = false;
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Long clientId = createClient();
 
             String futureInstallmentAllocationRule = "NEXT_INSTALLMENT";
             AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation(futureInstallmentAllocationRule);
 
             // Loan Product creation with down-payment configuration and progressive schedule
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithAdvancedPaymentStrategyAndProgressiveLoanSchedule(
-                    loanTransactionHelper, enableDownPayment, "25", enableAutoRepaymentForDownPayment, defaultAllocation);
+                    enableDownPayment, "25", enableAutoRepaymentForDownPayment, defaultAllocation);
 
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
@@ -659,12 +583,12 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
             // create loan account
 
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
                     loanExternalIdStr, "advanced-payment-allocation-strategy");
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             // verify down-payment details for Loan
             assertNotNull(loanDetails);
@@ -673,16 +597,16 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             assertEquals(enableAutoRepaymentForDownPayment, loanDetails.getEnableAutoRepaymentForDownPayment());
 
             // first disbursement
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "200");
+            disburseLoanWithAmount(loanId, "03 March 2023", 200.0);
 
             // make repayment on 3rd March
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 March 2023").locale("en")
                             .transactionAmount(50.0));
 
             // verify loan schedule
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -702,18 +626,17 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
             // second disbursement with overlapping installment i.e same due date as regular repayment due date
 
-            disbursementDate = LocalDate.of(2023, 4, 3);
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 April 2023", loanId, "200");
+            updateBusinessDate("03 April 2023");
+            disburseLoanWithAmount(loanId, "03 April 2023", 200.0);
 
             // make repayment on 3rd April
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 April 2023").locale("en")
                             .transactionAmount(50.0));
 
             // verify loan schedule
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -738,16 +661,16 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
             // same day third disbursement with overlapping installment i.e same due date as regular repayment due date
             // 3-April
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 April 2023", loanId, "200");
+            disburseLoanWithAmount(loanId, "03 April 2023", 200.0);
 
             // make repayment on 3rd April
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 April 2023").locale("en")
                             .transactionAmount(50.0));
 
             // verify loan schedule
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -776,11 +699,11 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
                     false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
             // make repayment for fully paying and verify that regular installment gets fully paid on 3rd april
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_3 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_3 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 April 2023").locale("en")
                             .transactionAmount(225.0));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -808,11 +731,7 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             verifyPeriodDetails(loanDetails.getRepaymentSchedule().getPeriods().get(7), 5, 375.0, 150.0, 150.0, 225.0, 0.0, 0.0, 0.0, 0.0,
                     false, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3));
 
-        } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(false));
-        }
-
+        });
     }
 
     private void verifyDisbursementPeriod(GetLoansLoanIdRepaymentPeriod period, LocalDate disbursementDate, double disbursedAmount) {
@@ -837,25 +756,24 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
         assertEquals(isComplete, period.getComplete());
     }
 
-    private Integer createLoanAccountMultipleRepaymentsDisbursement(final Integer clientID, final Long loanProductID,
-            final String externalId, final String repaymentStartegy) {
+    private Long createLoanAccountMultipleRepaymentsDisbursement(final Long clientId, final Long loanProductId, final String externalId,
+            final String repaymentStrategy) {
 
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("2")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("2").withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance()
                 .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate("03 March 2023").withSubmittedOnDate("03 March 2023").withLoanType("individual")
-                .withExternalId(externalId).withRepaymentStrategy(repaymentStartegy)
-                .build(clientID.toString(), loanProductID.toString(), null);
+                .withExternalId(externalId).withRepaymentStrategy(repaymentStrategy)
+                .build(clientId.toString(), loanProductId.toString(), null);
 
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan("03 March 2023", "1000", loanId, null);
+        final Long loanId = applyForLoanFromJson(loanApplicationJSON);
+        approveLoan(loanId, approveLoanRequest(1000.0, "03 March 2023"));
         return loanId;
     }
 
-    private GetLoanProductsProductIdResponse createLoanProductWithEnableDownPaymentAndMultipleDisbursements(
-            LoanTransactionHelper loanTransactionHelper, Boolean enableDownPayment, String disbursedAmountPercentageForDownPayment,
-            boolean enableAutoRepaymentForDownPayment) {
+    private GetLoanProductsProductIdResponse createLoanProductWithEnableDownPaymentAndMultipleDisbursements(Boolean enableDownPayment,
+            String disbursedAmountPercentageForDownPayment, boolean enableAutoRepaymentForDownPayment) {
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("2").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
@@ -863,13 +781,13 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
                 .withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment)
                 .build(null);
-        final Integer loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
-        return loanTransactionHelper.getLoanProduct(loanProductId);
+        final Long loanProductId = createLoanProductFromJson(loanProductJSON);
+        return retrieveLoanProduct(loanProductId);
     }
 
     private GetLoanProductsProductIdResponse createLoanProductWithAdvancedPaymentStrategyAndProgressiveLoanSchedule(
-            LoanTransactionHelper loanTransactionHelper, Boolean enableDownPayment, String disbursedAmountPercentageForDownPayment,
-            boolean enableAutoRepaymentForDownPayment, AdvancedPaymentData... advancedPaymentData) {
+            Boolean enableDownPayment, String disbursedAmountPercentageForDownPayment, boolean enableAutoRepaymentForDownPayment,
+            AdvancedPaymentData... advancedPaymentData) {
 
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("2").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
@@ -878,33 +796,26 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
                 .withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment)
                 .addAdvancedPaymentAllocation(advancedPaymentData).withLoanScheduleType(LoanScheduleType.PROGRESSIVE).build(null);
-        final Integer loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
-        return loanTransactionHelper.getLoanProduct(loanProductId);
+        final Long loanProductId = createLoanProductFromJson(loanProductJSON);
+        return retrieveLoanProduct(loanProductId);
     }
 
     private void checkDownPaymentTransaction(final LocalDate transactionDate, final Float principalPortion, final Float interestPortion,
-            final Float feePortion, final Float penaltyPortion, final Integer loanID) {
-        ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(this.requestSpec,
-                this.responseSpec, loanID);
+            final Float feePortion, final Float penaltyPortion, final Long loanId) {
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+        assertNotNull(loanDetails.getTransactions());
         boolean isTransactionFound = false;
-        for (int i = 0; i < transactions.size(); i++) {
-            HashMap transactionType = (HashMap) transactions.get(i).get("type");
-            boolean isDownPaymentTransaction = (Boolean) transactionType.get("downPayment");
-
-            if (isDownPaymentTransaction) {
-                ArrayList<Integer> downPaymentDateAsArray = (ArrayList<Integer>) transactions.get(i).get("date");
-                LocalDate downPaymentEntryDate = LocalDate.of(downPaymentDateAsArray.get(0), downPaymentDateAsArray.get(1),
-                        downPaymentDateAsArray.get(2));
-
-                if (DateUtils.isEqual(transactionDate, downPaymentEntryDate)) {
+        for (GetLoansLoanIdTransactions transaction : loanDetails.getTransactions()) {
+            if ("Down Payment".equals(transaction.getType().getValue())) {
+                if (DateUtils.isEqual(transactionDate, transaction.getDate())) {
                     isTransactionFound = true;
-                    assertEquals(principalPortion, Float.valueOf(String.valueOf(transactions.get(i).get("principalPortion"))),
+                    assertEquals(principalPortion, Float.valueOf(String.valueOf(transaction.getPrincipalPortion())),
                             "Mismatch in transaction amounts");
-                    assertEquals(interestPortion, Float.valueOf(String.valueOf(transactions.get(i).get("interestPortion"))),
+                    assertEquals(interestPortion, Float.valueOf(String.valueOf(transaction.getInterestPortion())),
                             "Mismatch in transaction amounts");
-                    assertEquals(feePortion, Float.valueOf(String.valueOf(transactions.get(i).get("feeChargesPortion"))),
+                    assertEquals(feePortion, Float.valueOf(String.valueOf(transaction.getFeeChargesPortion())),
                             "Mismatch in transaction amounts");
-                    assertEquals(penaltyPortion, Float.valueOf(String.valueOf(transactions.get(i).get("penaltyChargesPortion"))),
+                    assertEquals(penaltyPortion, Float.valueOf(String.valueOf(transaction.getPenaltyChargesPortion())),
                             "Mismatch in transaction amounts");
                     break;
                 }

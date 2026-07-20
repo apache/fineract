@@ -22,77 +22,92 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.fineract.accounting.common.AccountingConstants;
-import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
-import org.apache.fineract.client.models.GetSavingsAccountTransactionsPageItem;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.DeleteFinancialActivityAccountsResponse;
+import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
+import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
+import org.apache.fineract.client.models.PostFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
-import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
+import org.apache.fineract.client.models.SavingsAccountData;
+import org.apache.fineract.client.models.SavingsAccountTransactionData;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignRawHttpHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
-import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends BaseLoanIntegrationTest {
+public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends FeignLoanTestBase {
 
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE = new BigDecimal(25);
+    private static final String LOAN_BALANCE_CHANGED_EVENT = "LoanBalanceChangedBusinessEvent";
+
+    private static FeignSavingsHelper savingsHelper;
+    private static FeignSavingsProductHelper savingsProductHelper;
+    private static FinancialActivityAccountHelper financialActivityAccountHelper;
+
+    @BeforeAll
+    public static void setupSavingsAndFinancialActivityHelpers() {
+        FineractFeignClient client = FineractFeignClientHelper.getFineractFeignClient();
+        savingsHelper = new FeignSavingsHelper(client);
+        savingsProductHelper = new FeignSavingsProductHelper(client);
+        financialActivityAccountHelper = new FinancialActivityAccountHelper(null);
+    }
 
     @Test
     public void loanDisbursementToSavingsWithAutoDownPaymentAndStandingInstructionsTest() {
         runAt("01 March 2023", () -> {
-            enableLoanBalanceChangedBusinessEvent();
-            ExternalEventHelper.deleteAllExternalEvents(requestSpec, createResponseSpecification(Matchers.is(204)));
+            externalEventHelper.enableBusinessEvent(LOAN_BALANCE_CHANGED_EVENT);
+            deleteAllExternalEvents();
 
-            // loan external Id
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
-            // Create Loan Product
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment();
 
-            SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+            Long savingsAccountId = createApproveActivateSavingsAccountDailyPosting(clientId, "01 March 2023");
 
-            // Create approve and activate savings account
-            Integer savingsAccountId = createApproveActivateSavingsAccountDailyPosting(clientId.intValue(), "01 March 2023",
-                    savingsAccountHelper);
-
-            // create Financial Activity Mapping for Liability Transfer
             mapLiabilityTransferFinancialActivity(loanProductId);
 
-            // Apply and Approve Loan
-            Long loanId = createLoanWithLinkedAccountAndStandingInstructions(clientId.intValue(), loanProductId, savingsAccountId,
-                    loanExternalIdStr);
+            String loanApplicationJSON = new org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder()
+                    .withPrincipal("1000").withLoanTermFrequency("45").withLoanTermFrequencyAsDays().withNumberOfRepayments("3")
+                    .withRepaymentEveryAfter("15").withRepaymentFrequencyTypeAsDays().withInterestRatePerPeriod("0")
+                    .withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualPrincipalPayments()
+                    .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("01 March 2023")
+                    .withSubmittedOnDate("01 March 2023").withLoanType("individual").withExternalId(loanExternalIdStr)
+                    .withCreateStandingInstructionAtDisbursement()
+                    .build(clientId.toString(), loanProductId.toString(), savingsAccountId.toString());
 
-            // disburse to savings
-            PostLoansLoanIdResponse responseLoanDisburseToSavings = loanTransactionHelper.disburseToSavingsLoan(loanExternalIdStr,
+            Long loanId = applyForLoanFromJson(loanApplicationJSON);
+            approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 March 2023"));
+
+            PostLoansLoanIdResponse responseLoanDisburseToSavings = disburseToSavings(loanId,
                     new PostLoansLoanIdRequest().actualDisbursementDate("01 March 2023").transactionAmount(new BigDecimal("1000"))
                             .locale("en").dateFormat("dd MMMM yyyy"));
 
             assertEquals(loanExternalIdStr, responseLoanDisburseToSavings.getResourceExternalId());
 
-            // verify repayment schedule
             verifyRepaymentSchedule(loanId, //
                     installment(1000.0, null, "01 March 2023"), //
                     installment(250.0, true, "01 March 2023"), //
@@ -101,170 +116,103 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
                     installment(250.0, false, "15 April 2023")//
             );
 
-            // verify Disbursement Transaction is account transfer
-            verifyTransactionIsAccountTransfer(LocalDate.of(2023, 3, 1), 1000.0f, loanId.intValue(), "disbursement");
+            verifyTransactionIsAccountTransfer(LocalDate.of(2023, 3, 1), 1000.0, loanId, "disbursement");
 
-            // verify Down payment Transaction is account transfer
-            verifyTransactionIsAccountTransfer(LocalDate.of(2023, 3, 1), 250.0f, loanId.intValue(), "downPayment");
+            verifyTransactionIsAccountTransfer(LocalDate.of(2023, 3, 1), 250.0, loanId, "downPayment");
 
-            // verify savings transactions
-            verifySavingsTransactions(savingsAccountId, savingsAccountHelper);
+            verifySavingsTransactions(savingsAccountId);
 
             verifyBusinessEvent();
-            disableLoanBalanceChangedBusinessEvent();
+            externalEventHelper.disableBusinessEvent(LOAN_BALANCE_CHANGED_EVENT);
         });
     }
 
-    private void verifySavingsTransactions(final Integer savingsId, final SavingsAccountHelper savingsAccountHelper) {
-        Map<String, Object> queryParams = new HashMap<>();
-        SavingsAccountTransactionsSearchResponse transactionsResponse = savingsAccountHelper.searchSavingsTransactions(savingsId,
-                queryParams);
+    private void verifySavingsTransactions(final Long savingsId) {
+        SavingsAccountData savingsAccount = savingsHelper.getSavingsDetails(savingsId);
+        List<SavingsAccountTransactionData> pageItemsList = savingsAccount.getTransactions();
 
-        Assertions.assertNotNull(transactionsResponse);
-        assertEquals(2, transactionsResponse.getTotal());
-        Assertions.assertNotNull(transactionsResponse.getContent());
-        List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getContent());
+        Assertions.assertNotNull(pageItemsList);
         assertEquals(2, pageItemsList.size());
 
-        // check withdrawal
-        GetSavingsAccountTransactionsPageItem withDrawalTransaction = pageItemsList.get(0);
+        SavingsAccountTransactionData withDrawalTransaction = pageItemsList.get(0);
         assertEquals("savingsAccountTransactionType.withdrawal", withDrawalTransaction.getTransactionType().getCode());
         assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(250), withDrawalTransaction.getAmount()));
-        assertEquals("DEBIT", withDrawalTransaction.getEntryType().getValue());
+        assertEquals(SavingsAccountTransactionData.EntryTypeEnum.DEBIT, withDrawalTransaction.getEntryType());
         assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(750), withDrawalTransaction.getRunningBalance()));
 
-        // check deposit
-        GetSavingsAccountTransactionsPageItem depositTransaction = pageItemsList.get(1);
+        SavingsAccountTransactionData depositTransaction = pageItemsList.get(1);
         assertEquals("savingsAccountTransactionType.deposit", depositTransaction.getTransactionType().getCode());
         assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(1000), depositTransaction.getAmount()));
-        assertEquals("CREDIT", depositTransaction.getEntryType().getValue());
+        assertEquals(SavingsAccountTransactionData.EntryTypeEnum.CREDIT, depositTransaction.getEntryType());
         assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(1000), depositTransaction.getRunningBalance()));
-
     }
 
     private void mapLiabilityTransferFinancialActivity(Long loanProductId) {
-        FinancialActivityAccountHelper financialActivityAccountHelper = new FinancialActivityAccountHelper(requestSpec);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper.retrieveLoanProductById(loanProductId);
-        Integer financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
-                AccountingConstants.FinancialActivity.LIABILITY_TRANSFER.getValue(),
-                getLoanProductsProductIdResponse.getAccountingMappings().getFundSourceAccount().getId().intValue(), responseSpec,
-                CommonConstants.RESPONSE_RESOURCE_ID);
-        assertNotNull(financialActivityAccountId);
+        Long fundSourceAccountId = retrieveLoanProduct(loanProductId).getAccountingMappings().getFundSourceAccount().getId();
+        PostFinancialActivityAccountsResponse response = financialActivityAccountHelper
+                .createFinancialActivityAccount(new PostFinancialActivityAccountsRequest()
+                        .financialActivityId((long) AccountingConstants.FinancialActivity.LIABILITY_TRANSFER.getValue())
+                        .glAccountId(fundSourceAccountId));
+        assertNotNull(response.getResourceId());
     }
 
-    private Long createLoanWithLinkedAccountAndStandingInstructions(final Integer clientID, final Long loanProductID,
-            final Integer savingsId, final String externalId) {
-
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("45")
-                .withLoanTermFrequencyAsDays().withNumberOfRepayments("3").withRepaymentEveryAfter("15").withRepaymentFrequencyTypeAsDays()
-                .withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualPrincipalPayments()
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("01 March 2023")
-                .withSubmittedOnDate("01 March 2023").withLoanType("individual").withExternalId(externalId)
-                .withCreateStandingInstructionAtDisbursement().build(clientID.toString(), loanProductID.toString(), savingsId.toString());
-
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan("01 March 2023", "1000", loanId, null);
-        return loanId.longValue();
+    private Long createApproveActivateSavingsAccountDailyPosting(final Long clientId, final String startDate) {
+        final Long savingsProductId = createSavingsProductDailyPosting();
+        assertNotNull(savingsProductId);
+        return savingsHelper.createApproveActivateSavings(clientId, savingsProductId, startDate);
     }
 
-    private Integer createApproveActivateSavingsAccountDailyPosting(final Integer clientID, final String startDate,
-            final SavingsAccountHelper savingsAccountHelper) {
-        final Integer savingsProductID = createSavingsProductDailyPosting();
-        assertNotNull(savingsProductID);
-        return savingsAccountHelper.createApproveActivateSavingsAccount(clientID, savingsProductID, startDate);
-    }
-
-    private Integer createSavingsProductDailyPosting() {
-        SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-        final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance().build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    private Long createSavingsProductDailyPosting() {
+        return savingsProductHelper.createSavingsProduct(SavingsRequestBuilders.defaultSavingsProduct()).getResourceId();
     }
 
     private Long createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment() {
-        boolean multiDisburseEnabled = true;
         PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
-        product.setMultiDisburseLoan(multiDisburseEnabled);
+        product.setMultiDisburseLoan(true);
         product.setNumberOfRepayments(3);
         product.setRepaymentEvery(15);
-
-        if (!multiDisburseEnabled) {
-            product.disallowExpectedDisbursements(null);
-            product.setAllowApprovedDisbursedAmountsOverApplied(null);
-            product.overAppliedCalculationType(null);
-            product.overAppliedNumber(null);
-        }
-
         product.setEnableDownPayment(true);
         product.setDisbursedAmountPercentageForDownPayment(DOWN_PAYMENT_PERCENTAGE);
         product.setEnableAutoRepaymentForDownPayment(true);
-
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
-                .retrieveLoanProductById(loanProductResponse.getResourceId());
-        assertNotNull(getLoanProductsProductIdResponse);
-        return loanProductResponse.getResourceId();
-
+        return createLoanProduct(product);
     }
 
-    private void verifyTransactionIsAccountTransfer(final LocalDate transactionDate, final Float transactionAmount, final Integer loanID,
+    private void verifyTransactionIsAccountTransfer(final LocalDate transactionDate, final double transactionAmount, final Long loanId,
             final String transactionOfType) {
-        ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(requestSpec, responseSpec, loanID);
+        // The generated Feign transaction model does not expose the "transfer" sub-object, so fetch the raw loan JSON
+        // to
+        // assert the disbursement/down-payment was actually posted as an account transfer to the linked savings
+        // account.
+        String loanJson = FeignRawHttpHelper.get("/loans/" + loanId + "?associations=transactions");
+        JsonArray transactions = JsonParser.parseString(loanJson).getAsJsonObject().getAsJsonArray("transactions");
         boolean isTransactionFound = false;
-        for (int i = 0; i < transactions.size(); i++) {
-            HashMap transactionType = (HashMap) transactions.get(i).get("type");
-            boolean isTransaction = (Boolean) transactionType.get(transactionOfType);
+        for (JsonElement element : transactions) {
+            JsonObject transaction = element.getAsJsonObject();
+            JsonObject type = transaction.getAsJsonObject("type");
+            boolean isTransaction = type.has(transactionOfType) && type.get(transactionOfType).getAsBoolean();
+            if (isTransaction && transactionDate.equals(toLocalDate(transaction.getAsJsonArray("date")))) {
+                isTransactionFound = true;
+                assertEquals(transactionAmount, transaction.get("amount").getAsDouble(), "Mismatch in transaction amounts");
 
-            if (isTransaction) {
-                ArrayList<Integer> transactionDateAsArray = (ArrayList<Integer>) transactions.get(i).get("date");
-                LocalDate transactionEntryDate = LocalDate.of(transactionDateAsArray.get(0), transactionDateAsArray.get(1),
-                        transactionDateAsArray.get(2));
-
-                if (transactionDate.isEqual(transactionEntryDate)) {
-                    isTransactionFound = true;
-                    assertEquals(transactionAmount, Float.valueOf(String.valueOf(transactions.get(i).get("amount"))),
-                            "Mismatch in transaction amounts");
-
-                    // verify transfer details
-                    assertNotNull(transactions.get(i).get("transfer"));
-
-                    final HashMap<String, Object> actualTransferMap = (HashMap) transactions.get(i).get("transfer");
-
-                    assertEquals(transactionAmount, Float.valueOf(String.valueOf(actualTransferMap.get("transferAmount"))));
-
-                    ArrayList<Integer> transferDate = (ArrayList<Integer>) actualTransferMap.get("transferDate");
-
-                    LocalDate dateOfTransfer = LocalDate.of(transferDate.get(0), transferDate.get(1), transferDate.get(2));
-                    assertTrue(transactionDate.isEqual(dateOfTransfer));
-
-                    break;
-                }
+                // verify the transfer details: this is the behaviour the test exists to prove
+                assertTrue(transaction.has("transfer") && transaction.get("transfer").isJsonObject(),
+                        "Transaction is not an account transfer");
+                JsonObject transfer = transaction.getAsJsonObject("transfer");
+                assertEquals(transactionAmount, transfer.get("transferAmount").getAsDouble(), "Mismatch in transfer amount");
+                assertEquals(transactionDate, toLocalDate(transfer.getAsJsonArray("transferDate")), "Mismatch in transfer date");
+                break;
             }
         }
-
         assertTrue(isTransactionFound, "No Transaction entries are posted");
-
     }
 
-    private void enableLoanBalanceChangedBusinessEvent() {
-        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, "{\"externalEventConfigurations\":{\"LoanBalanceChangedBusinessEvent\":true}}\n");
-        Assertions.assertEquals(updatedConfigurations.size(), 1);
-        Assertions.assertTrue(updatedConfigurations.containsKey("LoanBalanceChangedBusinessEvent"));
-        Assertions.assertTrue(updatedConfigurations.get("LoanBalanceChangedBusinessEvent"));
-    }
-
-    private void disableLoanBalanceChangedBusinessEvent() {
-        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, "{\"externalEventConfigurations\":{\"LoanBalanceChangedBusinessEvent\":false}}\n");
-        Assertions.assertEquals(updatedConfigurations.size(), 1);
-        Assertions.assertTrue(updatedConfigurations.containsKey("LoanBalanceChangedBusinessEvent"));
-        Assertions.assertFalse(updatedConfigurations.get("LoanBalanceChangedBusinessEvent"));
+    private static LocalDate toLocalDate(final JsonArray dateArray) {
+        return LocalDate.of(dateArray.get(0).getAsInt(), dateArray.get(1).getAsInt(), dateArray.get(2).getAsInt());
     }
 
     private void verifyBusinessEvent() {
-        List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
-        String type = "LoanBalanceChangedBusinessEvent";
+        List<ExternalEventResponse> allExternalEvents = externalEventHelper.getAllExternalEvents();
+        String type = LOAN_BALANCE_CHANGED_EVENT;
 
         final Optional<ExternalEventResponse> optionalExternalEventDTO = allExternalEvents.stream()
                 .filter(event -> event.getType().equals(type)).findFirst();
@@ -277,19 +225,14 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
                 DOWN_PAYMENT_PERCENTAGE.doubleValue());
     }
 
-    /**
-     * Delete the Financial activities
-     */
     @AfterEach
     public void tearDown() {
-        FinancialActivityAccountHelper financialActivityAccountHelper = new FinancialActivityAccountHelper(requestSpec);
-        List<HashMap> financialActivities = financialActivityAccountHelper.getAllFinancialActivityAccounts(responseSpec);
-        for (HashMap financialActivity : financialActivities) {
-            Integer financialActivityAccountId = (Integer) financialActivity.get("id");
-            Integer deletedFinancialActivityAccountId = financialActivityAccountHelper
-                    .deleteFinancialActivityAccount(financialActivityAccountId, responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
-            Assertions.assertNotNull(deletedFinancialActivityAccountId);
-            Assertions.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
+        List<GetFinancialActivityAccountsResponse> financialActivities = financialActivityAccountHelper.getAllFinancialActivityAccounts();
+        for (GetFinancialActivityAccountsResponse financialActivity : financialActivities) {
+            DeleteFinancialActivityAccountsResponse deletedFinancialActivityAccount = financialActivityAccountHelper
+                    .deleteFinancialActivityAccount(financialActivity.getId());
+            Assertions.assertNotNull(deletedFinancialActivityAccount);
+            Assertions.assertEquals(financialActivity.getId(), deletedFinancialActivityAccount.getResourceId());
         }
     }
 }

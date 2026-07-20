@@ -31,7 +31,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.GetCodesResponse;
@@ -49,6 +48,7 @@ import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -68,38 +68,42 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
+public class LoanChargeOffAccountingTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
-    private LoanTransactionHelper loanTransactionHelper;
-    private JournalEntryHelper journalEntryHelper;
-    private AccountHelper accountHelper;
-    private Account assetAccount;
-    private Account incomeAccount;
-    private Account expenseAccount;
-    private Account overpaymentAccount;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
-    private InlineLoanCOBHelper inlineLoanCOBHelper;
+    protected RequestSpecification requestSpec;
+    protected ResponseSpecification responseSpec;
+    protected LoanTransactionHelper loanTransactionHelper;
+    protected AccountHelper accountHelper;
+    protected JournalEntryHelper journalEntryHelper;
 
     @BeforeEach
-    public void setup() {
+    @SuppressWarnings("removal")
+    public void setupREST() {
         Utils.initializeRESTAssured();
+
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.assetAccount = this.accountHelper.createAssetAccount();
-        this.incomeAccount = this.accountHelper.createIncomeAccount();
-        this.expenseAccount = this.accountHelper.createExpenseAccount();
-        this.overpaymentAccount = this.accountHelper.createLiabilityAccount();
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
         this.inlineLoanCOBHelper = new InlineLoanCOBHelper(this.requestSpec, this.responseSpec);
+
+        this.assetAccount = getAccounts().getLoansReceivableAccount();
+        this.incomeAccount = getAccounts().getInterestIncomeAccount();
+        this.expenseAccount = getAccounts().getChargeOffExpenseAccount();
+        this.overpaymentAccount = getAccounts().getOverpaymentAccount();
     }
+
+    private Account assetAccount;
+    private Account incomeAccount;
+    private Account expenseAccount;
+    private Account overpaymentAccount;
+
+    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    private InlineLoanCOBHelper inlineLoanCOBHelper;
 
     @Test
     public void loanChargeOffAccountingTreatmentTestForPeriodicAccrualAccounting() {
@@ -115,8 +119,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
             // EXPENSE-writeOffAccountId,goodwillCreditAccountId,chargeOffExpenseAccountId,chargeOffFraudExpenseAccountId
             // LIABILITY-overpaymentLiabilityAccountId
 
-            final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting(assetAccount, incomeAccount, expenseAccount,
-                    overpaymentAccount);
+            final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting();
             final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
             final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
 
@@ -272,8 +275,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
             // EXPENSE-writeOffAccountId,goodwillCreditAccountId,chargeOffExpenseAccountId,chargeOffFraudExpenseAccountId
             // LIABILITY-overpaymentLiabilityAccountId
 
-            final Integer loanProductID = createLoanProductWithCashBasedAccounting(assetAccount, incomeAccount, expenseAccount,
-                    overpaymentAccount);
+            final Integer loanProductID = createLoanProductWithCashBasedAccounting();
             final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
             final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
 
@@ -448,8 +450,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
             // EXPENSE-writeOffAccountId,goodwillCreditAccountId,chargeOffExpenseAccountId,chargeOffFraudExpenseAccountId
             // LIABILITY-overpaymentLiabilityAccountId
 
-            final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting(assetAccount, incomeAccount, expenseAccount,
-                    overpaymentAccount);
+            final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting();
             final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
             final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
 
@@ -507,8 +508,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
             // EXPENSE-writeOffAccountId,goodwillCreditAccountId,chargeOffExpenseAccountId,chargeOffFraudExpenseAccountId
             // LIABILITY-overpaymentLiabilityAccountId
 
-            final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting(assetAccount, incomeAccount, expenseAccount,
-                    overpaymentAccount);
+            final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting();
             final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
             final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
 
@@ -586,8 +586,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
             // EXPENSE-writeOffAccountId,goodwillCreditAccountId,chargeOffExpenseAccountId,chargeOffFraudExpenseAccountId
             // LIABILITY-overpaymentLiabilityAccountId
 
-            final Integer loanProductID = createLoanProductWithCashBasedAccounting(assetAccount, incomeAccount, expenseAccount,
-                    overpaymentAccount);
+            final Integer loanProductID = createLoanProductWithCashBasedAccounting();
             final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
             final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
 
@@ -648,8 +647,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
             // EXPENSE-writeOffAccountId,goodwillCreditAccountId,chargeOffExpenseAccountId,chargeOffFraudExpenseAccountId
             // LIABILITY-overpaymentLiabilityAccountId
 
-            final Integer loanProductID = createLoanProductWithCashBasedAccounting(assetAccount, incomeAccount, expenseAccount,
-                    overpaymentAccount);
+            final Integer loanProductID = createLoanProductWithCashBasedAccounting();
             final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
             final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
 
@@ -729,8 +727,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            final Integer loanProductId = this.createLoanProductWithInterestRecalculation(assetAccount, incomeAccount, expenseAccount,
-                    overpaymentAccount);
+            final Integer loanProductId = this.createLoanProductWithInterestRecalculation();
             final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
             final Integer loanId = this.createLoanEntityWithEntitiesForTestResceduleWithLatePayment(clientId, loanProductId);
@@ -754,7 +751,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
 
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 9, 6));
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
+            inlineLoanCOBHelper.executeInlineCOB(loanId.longValue());
             GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
             assertTrue(loanDetails.getTransactions().get(0).getType().getDisbursement());
             assertTrue(loanDetails.getTransactions().get(1).getType().getAccrual());
@@ -774,7 +771,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
 
             // no accrual
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 9, 7));
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
+            inlineLoanCOBHelper.executeInlineCOB(loanId.longValue());
             loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
             assertTrue(loanDetails.getTransactions().get(0).getType().getDisbursement());
             assertTrue(loanDetails.getTransactions().get(1).getType().getAccrual());
@@ -783,7 +780,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
             assertEquals(4, loanDetails.getTransactions().size());
 
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 9, 8));
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
+            inlineLoanCOBHelper.executeInlineCOB(loanId.longValue());
             PeriodicAccrualAccountingHelper.runPeriodicAccrualAccounting(dateFormatter.format(LocalDate.of(2020, 9, 8)));
             loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
             assertTrue(loanDetails.getTransactions().get(0).getType().getDisbursement());
@@ -795,7 +792,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
             loanTransactionHelper.undoChargeOffLoan((long) loanId, new PostLoansLoanIdTransactionsRequest());
             // generate accrual again
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 9, 9));
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
+            inlineLoanCOBHelper.executeInlineCOB(loanId.longValue());
             loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
             assertTrue(loanDetails.getTransactions().get(0).getType().getDisbursement());
             assertTrue(loanDetails.getTransactions().get(1).getType().getAccrual());
@@ -812,7 +809,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
 
             loanTransactionHelper.makeLoanRepayment(loanId.longValue(), new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
                     .transactionDate("10 September 2020").locale("en").transactionAmount(15825.23));
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
+            inlineLoanCOBHelper.executeInlineCOB(loanId.longValue());
             loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
             assertTrue(loanDetails.getTransactions().get(0).getType().getDisbursement());
             assertTrue(loanDetails.getTransactions().get(1).getType().getAccrual());
@@ -853,8 +850,9 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
                     new PostLoansLoanIdTransactionsRequest().transactionDate("02 January 2023").locale("en").dateFormat("dd MMMM yyyy")
                             .chargeOffReasonId(chargeOffReason.getSubResourceId()));
             // verify journal entries
-            verifyTRJournalEntries(chargeOffTransaction.getResourceId(), journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, chargeOffDelinquentExpenseAccount, "DEBIT"));
+            verifyTRJournalEntries(chargeOffTransaction.getResourceId(),
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, chargeOffDelinquentExpenseAccount, JournalEntry.TransactionType.DEBIT.name()));
         });
     }
 
@@ -885,8 +883,9 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
                     new PostLoansLoanIdTransactionsRequest().transactionDate("02 January 2023").locale("en").dateFormat("dd MMMM yyyy")
                             .chargeOffReasonId(secondChargeOffReasonResponse.getSubResourceId()));
             // verify journal entries
-            verifyTRJournalEntries(chargeOffTransaction.getResourceId(), journalEntry(1000.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(1000.0, chargeOffExpenseAccount, "DEBIT"));
+            verifyTRJournalEntries(chargeOffTransaction.getResourceId(),
+                    journalEntry(1000.0, getAccounts().getLoansReceivableAccount(), JournalEntry.TransactionType.CREDIT.name()), //
+                    journalEntry(1000.0, getAccounts().getChargeOffExpenseAccount(), JournalEntry.TransactionType.DEBIT.name()));
         });
     }
 
@@ -948,27 +947,27 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
                 .outstandingLoanBalance(10000.0)//
                 .charges(Collections.emptyList())//
                 .accountingRule(3)//
-                .fundSourceAccountId(fundSource.getAccountID().longValue())//
-                .loanPortfolioAccountId(loansReceivableAccount.getAccountID().longValue())//
-                .transfersInSuspenseAccountId(suspenseAccount.getAccountID().longValue())//
-                .interestOnLoanAccountId(interestIncomeAccount.getAccountID().longValue())//
-                .incomeFromFeeAccountId(feeIncomeAccount.getAccountID().longValue())//
-                .incomeFromPenaltyAccountId(penaltyIncomeAccount.getAccountID().longValue())//
-                .incomeFromRecoveryAccountId(recoveriesAccount.getAccountID().longValue())//
-                .writeOffAccountId(writtenOffAccount.getAccountID().longValue())//
-                .overpaymentLiabilityAccountId(overpaymentAccount.getAccountID().longValue())//
-                .receivableInterestAccountId(interestReceivableAccount.getAccountID().longValue())//
-                .receivableFeeAccountId(feeReceivableAccount.getAccountID().longValue())//
-                .receivablePenaltyAccountId(penaltyReceivableAccount.getAccountID().longValue())//
-                .goodwillCreditAccountId(goodwillExpenseAccount.getAccountID().longValue())//
-                .incomeFromGoodwillCreditInterestAccountId(interestIncomeChargeOffAccount.getAccountID().longValue())//
-                .incomeFromGoodwillCreditFeesAccountId(feeChargeOffAccount.getAccountID().longValue())//
-                .incomeFromGoodwillCreditPenaltyAccountId(feeChargeOffAccount.getAccountID().longValue())//
-                .incomeFromChargeOffInterestAccountId(interestIncomeChargeOffAccount.getAccountID().longValue())//
-                .incomeFromChargeOffFeesAccountId(feeChargeOffAccount.getAccountID().longValue())//
-                .incomeFromChargeOffPenaltyAccountId(penaltyChargeOffAccount.getAccountID().longValue())//
-                .chargeOffExpenseAccountId(chargeOffExpenseAccount.getAccountID().longValue())//
-                .chargeOffFraudExpenseAccountId(chargeOffFraudExpenseAccount.getAccountID().longValue())//
+                .fundSourceAccountId(getAccounts().getFundSource().getAccountID().longValue())//
+                .loanPortfolioAccountId(getAccounts().getLoansReceivableAccount().getAccountID().longValue())//
+                .transfersInSuspenseAccountId(getAccounts().getSuspenseAccount().getAccountID().longValue())//
+                .interestOnLoanAccountId(getAccounts().getInterestIncomeAccount().getAccountID().longValue())//
+                .incomeFromFeeAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())//
+                .incomeFromPenaltyAccountId(getAccounts().getPenaltyIncomeAccount().getAccountID().longValue())//
+                .incomeFromRecoveryAccountId(getAccounts().getRecoveriesAccount().getAccountID().longValue())//
+                .writeOffAccountId(getAccounts().getWrittenOffAccount().getAccountID().longValue())//
+                .overpaymentLiabilityAccountId(getAccounts().getOverpaymentAccount().getAccountID().longValue())//
+                .receivableInterestAccountId(getAccounts().getInterestReceivableAccount().getAccountID().longValue())//
+                .receivableFeeAccountId(getAccounts().getFeeReceivableAccount().getAccountID().longValue())//
+                .receivablePenaltyAccountId(getAccounts().getPenaltyReceivableAccount().getAccountID().longValue())//
+                .goodwillCreditAccountId(getAccounts().getGoodwillExpenseAccount().getAccountID().longValue())//
+                .incomeFromGoodwillCreditInterestAccountId(getAccounts().getInterestIncomeChargeOffAccount().getAccountID().longValue())//
+                .incomeFromGoodwillCreditFeesAccountId(getAccounts().getFeeChargeOffAccount().getAccountID().longValue())//
+                .incomeFromGoodwillCreditPenaltyAccountId(getAccounts().getFeeChargeOffAccount().getAccountID().longValue())//
+                .incomeFromChargeOffInterestAccountId(getAccounts().getInterestIncomeChargeOffAccount().getAccountID().longValue())//
+                .incomeFromChargeOffFeesAccountId(getAccounts().getFeeChargeOffAccount().getAccountID().longValue())//
+                .incomeFromChargeOffPenaltyAccountId(getAccounts().getPenaltyChargeOffAccount().getAccountID().longValue())//
+                .chargeOffExpenseAccountId(getAccounts().getChargeOffExpenseAccount().getAccountID().longValue())//
+                .chargeOffFraudExpenseAccountId(getAccounts().getChargeOffFraudExpenseAccount().getAccountID().longValue())//
                 .addChargeOffReasonToExpenseAccountMappingsItem(
                         new PostChargeOffReasonToExpenseAccountMappings().chargeOffReasonCodeValueId(chargeOffReason.getSubResourceId())
                                 .expenseAccountId(chargeOffDelinquentExpenseAccount.getAccountID().longValue()))
@@ -981,7 +980,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
     }
 
     private GetCodesResponse fetchChargeOffReasonCode() {
-        return codeHelper.retrieveCodes().stream().filter(c -> "ChargeOffReasons".equals(c.getName())).findFirst().orElseThrow();
+        return codeHelper.retrieveCodeByName("ChargeOffReasons");
     }
 
     private Integer createLoanAccount(final Integer clientID, final Integer loanProductID, final String externalId) {
@@ -999,18 +998,20 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
         return loanId;
     }
 
-    private Integer createLoanProductWithPeriodicAccrualAccounting(final Account... accounts) {
+    private Integer createLoanProductWithPeriodicAccrualAccounting() {
 
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentAfterEvery("1")
                 .withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
-                .withAccountingRulePeriodicAccrual(accounts).withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
-                .build(null);
+                .withAccountingRulePeriodicAccrual(new org.apache.fineract.integrationtests.common.accounting.Account[] {
+                        getAccounts().getLoansReceivableAccount(), getAccounts().getInterestIncomeAccount(),
+                        getAccounts().getChargeOffExpenseAccount(), getAccounts().getOverpaymentAccount() })
+                .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0").build(null);
 
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
-    private Integer createLoanProductWithInterestRecalculation(final Account... accounts) {
+    private Integer createLoanProductWithInterestRecalculation() {
         final String interestRecalculationCompoundingMethod = LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE;
         final String rescheduleStrategyMethod = LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS;
         final String recalculationRestFrequencyType = LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY;
@@ -1033,17 +1034,23 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
                 .withInterestRecalculationCompoundingFrequencyDetails(recalculationCompoundingFrequencyType,
                         recalculationCompoundingFrequencyInterval, recalculationCompoundingFrequencyOnDayType,
                         recalculationCompoundingFrequencyDayOfWeekType)
-                .withAccountingRulePeriodicAccrual(accounts).build(null);
+                .withAccountingRulePeriodicAccrual(new org.apache.fineract.integrationtests.common.accounting.Account[] {
+                        getAccounts().getLoansReceivableAccount(), getAccounts().getInterestIncomeAccount(),
+                        getAccounts().getChargeOffExpenseAccount(), getAccounts().getOverpaymentAccount() })
+                .build(null);
 
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
-    private Integer createLoanProductWithCashBasedAccounting(final Account... accounts) {
+    private Integer createLoanProductWithCashBasedAccounting() {
 
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentAfterEvery("1")
                 .withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
-                .withAccountingRuleAsCashBased(accounts).withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0").build(null);
+                .withAccountingRuleAsCashBased(new org.apache.fineract.integrationtests.common.accounting.Account[] {
+                        getAccounts().getLoansReceivableAccount(), getAccounts().getInterestIncomeAccount(),
+                        getAccounts().getChargeOffExpenseAccount(), getAccounts().getOverpaymentAccount() })
+                .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0").build(null);
 
         return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
@@ -1064,7 +1071,7 @@ public class LoanChargeOffAccountingTest extends BaseLoanIntegrationTest {
         Integer loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
 
         this.loanTransactionHelper.approveLoan(submittedDate, loanId);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(submittedDate, loanId, "10000.00");
+        disburseLoanWithNetDisbursalAmount(loanId.longValue(), submittedDate, "10000.00");
         return loanId;
     }
 
