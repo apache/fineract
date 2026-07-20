@@ -26,35 +26,31 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Objects;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.LoanApprovedAmountHistoryData;
-import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutLoansApprovedAmountResponse;
 import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountResponse;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.externalevents.LoanBusinessEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
+public class LoanModifyApprovedAmountTest extends FeignLoanTestBase {
 
     @Test
     public void testValidLoanApprovedAmountModification() {
         BigDecimal sixHundred = BigDecimal.valueOf(600.0);
         BigDecimal thousand = BigDecimal.valueOf(1000.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
             PutLoansApprovedAmountResponse putLoansApprovedAmountResponse = modifyLoanApprovedAmount(loanId, sixHundred);
@@ -75,11 +71,10 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
         externalEventHelper.enableBusinessEvent("LoanApprovedAmountChangedBusinessEvent");
         BigDecimal sixHundred = BigDecimal.valueOf(600.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
 
@@ -92,18 +87,17 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
 
     @Test
     public void testValidLoanApprovedAmountModificationInvalidRequest() {
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long loanProductId = createLoanProduct(create4IProgressive());
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> modifyLoanApprovedAmount(loanId, null));
 
-            assertEquals(400, exception.getResponse().code());
+            assertEquals(400, exception.getStatus());
             assertTrue(exception.getMessage().contains("validation.msg.loan.approved.amount.amount.cannot.be.blank"));
         });
     }
@@ -112,16 +106,16 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
     public void testValidLoanApprovedAmountModificationInvalidLoanStatus() {
         BigDecimal sixHundred = BigDecimal.valueOf(600.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
-                    loanProductsResponse.getResourceId(), "1 January 2024", 1000.0, 10.0, 4, null));
+            Long appliedLoanId = applyForLoan(
+                    applyLP2ProgressiveLoanRequest(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null));
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> modifyLoanApprovedAmount(postLoansResponse.getResourceId(), sixHundred));
+                    () -> modifyLoanApprovedAmount(appliedLoanId, sixHundred));
 
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage()
                     .contains("validation.msg.loan.approved.amount.loan.status.not.valid.for.approved.amount.modification"));
         });
@@ -130,22 +124,21 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
     @Test
     public void testShouldFailWhenApprovedAmountIsSame() {
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             BigDecimal sameApprovedAmount = loanDetails.getApprovedPrincipal();
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> modifyLoanApprovedAmount(loanId, sameApprovedAmount));
 
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage()
                     .contains("validation.msg.loan.approved.amount.amount.must.be.different.from.current.approved.amount"));
         });
@@ -155,16 +148,15 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
     public void testModifyLoanApprovedAmountTooHigh() {
         BigDecimal twoThousand = BigDecimal.valueOf(2000.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> modifyLoanApprovedAmount(loanId, twoThousand));
 
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage()
                     .contains("validation.msg.loan.approved.amount.amount.can't.be.greater.than.maximum.applied.loan.amount.calculation"));
         });
@@ -175,11 +167,10 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
         BigDecimal thousand = BigDecimal.valueOf(1000.0);
         BigDecimal fifteenHundred = BigDecimal.valueOf(1500.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             PutLoansApprovedAmountResponse putLoansApprovedAmountResponse = modifyLoanApprovedAmount(loanId, fifteenHundred);
 
@@ -198,42 +189,38 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
     public void testModifyLoanApprovedAmountWithNegativeAmount() {
         BigDecimal sixHundred = BigDecimal.valueOf(600.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> modifyLoanApprovedAmount(loanId, sixHundred.negate()));
 
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage().contains("validation.msg.loan.approved.amount.amount.not.greater.than.zero"));
         });
     }
 
     @Test
     public void testModifyLoanApprovedAmountCapitalizedIncomeCountsAsPrincipal() {
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressiveWithCapitalizedIncome());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressiveWithCapitalizedIncome());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             disburseLoan(loanId, BigDecimal.valueOf(500), "1 January 2024");
-            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
-                    "1 January 2024", 500.0);
+            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = addCapitalizedIncomeTransaction(loanId, "1 January 2024",
+                    500.0);
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> modifyLoanApprovedAmount(loanId, BigDecimal.valueOf(500.0)));
 
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage()
                     .contains("validation.msg.loan.approved.amount.amount.less.than.disbursed.principal.and.capitalized.income"));
 
-            loanTransactionHelper.reverseLoanTransaction(capitalizedIncomeResponse.getLoanId(), capitalizedIncomeResponse.getResourceId(),
-                    "1 January 2024");
+            reverseLoanTransaction(capitalizedIncomeResponse.getLoanId(), capitalizedIncomeResponse.getResourceId(), "1 January 2024");
 
             Assertions.assertDoesNotThrow(() -> modifyLoanApprovedAmount(loanId, BigDecimal.valueOf(500.0)));
         });
@@ -241,19 +228,18 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
 
     @Test
     public void testModifyLoanApprovedAmountFutureExpectedDisbursementsCountAsPrincipal() {
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().disallowExpectedDisbursements(false).allowApprovedDisbursedAmountsOverApplied(null)
-                        .overAppliedCalculationType(null).overAppliedNumber(null));
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive().disallowExpectedDisbursements(false)
+                .allowApprovedDisbursedAmountsOverApplied(null).overAppliedCalculationType(null).overAppliedNumber(null));
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 7.0, 6, (request) -> request.disbursementData(List.of(new PostLoansDisbursementData()
-                            .expectedDisbursementDate("1 January 2024").principal(BigDecimal.valueOf(1000.0)))));
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 7.0, 6,
+                    (request) -> request.disbursementData(List.of(new PostLoansDisbursementData().expectedDisbursementDate("1 January 2024")
+                            .principal(BigDecimal.valueOf(1000.0)))));
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> modifyLoanApprovedAmount(loanId, BigDecimal.valueOf(500.0)));
 
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage()
                     .contains("validation.msg.loan.approved.amount.amount.less.than.disbursed.principal.and.capitalized.income"));
         });
@@ -266,11 +252,10 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
         BigDecimal eightHundred = BigDecimal.valueOf(800.0);
         BigDecimal thousand = BigDecimal.valueOf(1000.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             modifyLoanApprovedAmount(loanId, BigDecimal.valueOf(800.0));
             modifyLoanApprovedAmount(loanId, BigDecimal.valueOf(600.0));
@@ -299,12 +284,11 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
         // Test that disbursement validation properly respects reduced approved amounts
         // Scenario: Reduce approved amount and verify disbursements are limited to new amount
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
             // Create loan with applied amount $1000
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             // Reduce approved amount to $900
             PutLoansApprovedAmountResponse modifyResponse = modifyLoanApprovedAmount(loanId, BigDecimal.valueOf(900.0));
@@ -321,7 +305,7 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
             // Try to disburse additional $1200 (total $1550, should fail as it exceeds $1000 × 150% = $1350)
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> disburseLoan(loanId, BigDecimal.valueOf(1200), "1 January 2024"));
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage().contains("amount.can't.be.greater.than.maximum.applied.loan.amount.calculation"),
                     "Should fail when total disbursements exceed modified approved amount × over-applied percentage");
         });
@@ -332,12 +316,11 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
         // Test multiple disbursements with increasing and decreasing approved amount modifications
         // Validates that each disbursement respects the current approved amount limits
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
             // Create loan with $1000 applied amount
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             // First disbursement: $300
             disburseLoan(loanId, BigDecimal.valueOf(300), "1 January 2024");
@@ -360,7 +343,7 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
             // Fourth disbursement: $800 (total $1600, should fail as it exceeds $1000 × 150% = $1500)
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> disburseLoan(loanId, BigDecimal.valueOf(800), "1 January 2024"));
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage().contains("amount.can't.be.greater.than.maximum.applied.loan.amount.calculation"));
         });
     }
@@ -369,24 +352,22 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
     public void testApprovedAmountModificationWithCapitalizedIncomeScenario() {
         // Test approved amount modification interaction with capitalized income
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressiveWithCapitalizedIncome());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressiveWithCapitalizedIncome());
         runAt("1 January 2024", () -> {
             // Create loan with $1000 applied amount
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             // Disburse $300
             disburseLoan(loanId, BigDecimal.valueOf(300), "1 January 2024");
 
             // Add capitalized income of $200 (total disbursed equivalent: $500)
-            loanTransactionHelper.addCapitalizedIncome(loanId, "1 January 2024", 200.0);
+            addCapitalizedIncomeTransaction(loanId, "1 January 2024", 200.0);
 
             // Try to reduce approved amount to $400 (should fail as disbursed + capitalized = $500)
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> modifyLoanApprovedAmount(loanId, BigDecimal.valueOf(400.0)));
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage()
                     .contains("validation.msg.loan.approved.amount.amount.less.than.disbursed.principal.and.capitalized.income"));
 
@@ -401,24 +382,23 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
     @Test
     public void testUndoDisbursementAfterApprovedAmountReduction() {
         // Test undo disbursement functionality after approved amount reduction
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             modifyLoanApprovedAmount(loanId, BigDecimal.valueOf(800.0));
             disburseLoan(loanId, BigDecimal.valueOf(600), "1 January 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             if (loanDetails.getSummary() != null && loanDetails.getSummary().getPrincipalDisbursed() != null) {
                 assertEquals(BigDecimal.valueOf(600.0), loanDetails.getSummary().getPrincipalDisbursed().setScale(1, RoundingMode.HALF_UP));
             }
 
             PostLoansLoanIdRequest undoRequest = new PostLoansLoanIdRequest().note("Undo disbursement for testing");
-            Assertions.assertDoesNotThrow(() -> loanTransactionHelper.undoDisbursalLoan(loanId, undoRequest));
+            Assertions.assertDoesNotThrow(() -> undoDisbursement(loanId, undoRequest));
 
-            GetLoansLoanIdResponse loanDetailsAfterUndo = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetailsAfterUndo = getLoanDetails(loanId);
             BigDecimal activeDisbursedAmount = BigDecimal.ZERO;
             if (loanDetailsAfterUndo.getTransactions() != null && !loanDetailsAfterUndo.getTransactions().isEmpty()) {
                 activeDisbursedAmount = loanDetailsAfterUndo.getTransactions().stream()
@@ -430,7 +410,7 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
 
             Assertions.assertDoesNotThrow(() -> modifyLoanApprovedAmount(loanId, BigDecimal.valueOf(400.0)));
 
-            GetLoansLoanIdResponse finalLoanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse finalLoanDetails = getLoanDetails(loanId);
             assertEquals(BigDecimal.valueOf(400.0), finalLoanDetails.getApprovedPrincipal().setScale(1, RoundingMode.HALF_UP));
         });
     }
@@ -438,11 +418,10 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
     @Test
     public void testUndoLastDisbursementWithMultipleDisbursements() {
         // Test undo last disbursement in multi-disbursement scenario with approved amount modifications
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             disburseLoan(loanId, BigDecimal.valueOf(300), "1 January 2024");
             modifyLoanApprovedAmount(loanId, BigDecimal.valueOf(1200.0));
@@ -450,15 +429,15 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
             modifyLoanApprovedAmount(loanId, BigDecimal.valueOf(800.0));
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             if (loanDetails.getSummary() != null && loanDetails.getSummary().getPrincipalDisbursed() != null) {
                 assertEquals(BigDecimal.valueOf(800.0), loanDetails.getSummary().getPrincipalDisbursed().setScale(1, RoundingMode.HALF_UP));
             }
 
             PostLoansLoanIdRequest undoLastRequest = new PostLoansLoanIdRequest().note("Undo last disbursement");
-            Assertions.assertDoesNotThrow(() -> loanTransactionHelper.undoLastDisbursalLoan(loanId, undoLastRequest));
+            Assertions.assertDoesNotThrow(() -> undoLastDisbursement(loanId, undoLastRequest));
 
-            GetLoansLoanIdResponse loanDetailsAfterUndo = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetailsAfterUndo = getLoanDetails(loanId);
             BigDecimal activeDisbursedAmount = BigDecimal.ZERO;
             if (loanDetailsAfterUndo.getTransactions() != null && !loanDetailsAfterUndo.getTransactions().isEmpty()) {
                 activeDisbursedAmount = loanDetailsAfterUndo.getTransactions().stream()
@@ -472,7 +451,7 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> modifyLoanApprovedAmount(loanId, BigDecimal.valueOf(600.0)));
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage()
                     .contains("validation.msg.loan.approved.amount.amount.less.than.disbursed.principal.and.capitalized.income"));
         });
@@ -481,25 +460,24 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
     @Test
     public void testDisbursementValidationAfterUndoWithReducedApprovedAmount() {
         // Test disbursement validation after undo disbursement with reduced approved amount
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             modifyLoanApprovedAmount(loanId, BigDecimal.valueOf(600.0));
             disburseLoan(loanId, BigDecimal.valueOf(500), "1 January 2024");
 
             PostLoansLoanIdRequest undoRequest = new PostLoansLoanIdRequest().note("Undo for testing validation");
-            loanTransactionHelper.undoDisbursalLoan(loanId, undoRequest);
+            undoDisbursement(loanId, undoRequest);
 
             Assertions.assertDoesNotThrow(() -> disburseLoan(loanId, BigDecimal.valueOf(700), "1 January 2024"));
 
-            loanTransactionHelper.undoDisbursalLoan(loanId, undoRequest);
+            undoDisbursement(loanId, undoRequest);
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> disburseLoan(loanId, BigDecimal.valueOf(1600), "1 January 2024"));
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage().contains("amount.can't.be.greater.than.maximum.applied.loan.amount.calculation"));
         });
     }
@@ -511,11 +489,10 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
         BigDecimal nineHundred = BigDecimal.valueOf(900.0);
         BigDecimal thousand = BigDecimal.valueOf(1000.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
             PutLoansAvailableDisbursementAmountResponse putLoansAvailableDisbursementAmountResponse = modifyLoanAvailableDisbursementAmount(
@@ -543,11 +520,10 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
         externalEventHelper.enableBusinessEvent("LoanApprovedAmountChangedBusinessEvent");
         BigDecimal sixHundred = BigDecimal.valueOf(600.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
 
@@ -560,18 +536,17 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
 
     @Test
     public void testValidLoanAvailableDisbursementAmountModificationInvalidRequest() {
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long loanProductId = createLoanProduct(create4IProgressive());
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> modifyLoanAvailableDisbursementAmount(loanId, null));
 
-            assertEquals(400, exception.getResponse().code());
+            assertEquals(400, exception.getStatus());
             assertTrue(exception.getMessage().contains("validation.msg.loan.available.disbursement.amount.amount.cannot.be.blank"));
         });
     }
@@ -580,16 +555,16 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
     public void testValidLoanAvailableDisbursementAmountModificationInvalidLoanStatus() {
         BigDecimal sixHundred = BigDecimal.valueOf(600.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
-                    loanProductsResponse.getResourceId(), "1 January 2024", 1000.0, 10.0, 4, null));
+            Long appliedLoanId = applyForLoan(
+                    applyLP2ProgressiveLoanRequest(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null));
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> modifyLoanAvailableDisbursementAmount(postLoansResponse.getResourceId(), sixHundred));
+                    () -> modifyLoanAvailableDisbursementAmount(appliedLoanId, sixHundred));
 
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(
                     exception.getMessage().contains("validation.msg.loan.available.disbursement.amount.loan.must.be.approved.or.active"));
         });
@@ -599,16 +574,15 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
     public void testModifyLoanAvailableDisbursementAmountHigherThanApprovedAmount() {
         BigDecimal twoThousand = BigDecimal.valueOf(2000.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> modifyLoanAvailableDisbursementAmount(loanId, twoThousand));
 
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage().contains(
                     "validation.msg.loan.available.disbursement.amount.amount.can't.be.greater.than.maximum.available.disbursement.amount.calculation"));
         });
@@ -618,42 +592,38 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
     public void testModifyLoanAvailableDisbursementAmountWithNegativeAmount() {
         BigDecimal sixHundred = BigDecimal.valueOf(600.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> modifyLoanAvailableDisbursementAmount(loanId, sixHundred.negate()));
 
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage().contains("validation.msg.loan.available.disbursement.amount.amount.not.zero.or.greater"));
         });
     }
 
     @Test
     public void testModifyLoanAvailableDisbursementAmountCapitalizedIncomeCountsAsPrincipal() {
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressiveWithCapitalizedIncome());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressiveWithCapitalizedIncome());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             disburseLoan(loanId, BigDecimal.valueOf(500), "1 January 2024");
-            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
-                    "1 January 2024", 500.0);
+            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = addCapitalizedIncomeTransaction(loanId, "1 January 2024",
+                    500.0);
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> modifyLoanAvailableDisbursementAmount(loanId, BigDecimal.valueOf(600.0)));
 
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage().contains(
                     "validation.msg.loan.available.disbursement.amount.amount.can't.be.greater.than.maximum.available.disbursement.amount.calculation"));
 
-            loanTransactionHelper.reverseLoanTransaction(capitalizedIncomeResponse.getLoanId(), capitalizedIncomeResponse.getResourceId(),
-                    "1 January 2024");
+            reverseLoanTransaction(capitalizedIncomeResponse.getLoanId(), capitalizedIncomeResponse.getResourceId(), "1 January 2024");
 
             Assertions.assertDoesNotThrow(() -> modifyLoanAvailableDisbursementAmount(loanId, BigDecimal.valueOf(600.0)));
         });
@@ -665,14 +635,13 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
         BigDecimal eightHundred = BigDecimal.valueOf(800.0);
         BigDecimal thousand = BigDecimal.valueOf(1000.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().disallowExpectedDisbursements(false).allowApprovedDisbursedAmountsOverApplied(null)
-                        .overAppliedCalculationType(null).overAppliedNumber(null));
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive().disallowExpectedDisbursements(false)
+                .allowApprovedDisbursedAmountsOverApplied(null).overAppliedCalculationType(null).overAppliedNumber(null));
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 7.0, 6, (request) -> request.disbursementData(List.of(new PostLoansDisbursementData()
-                            .expectedDisbursementDate("1 January 2024").principal(BigDecimal.valueOf(800.0)))));
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 7.0, 6,
+                    (request) -> request.disbursementData(List.of(new PostLoansDisbursementData().expectedDisbursementDate("1 January 2024")
+                            .principal(BigDecimal.valueOf(800.0)))));
 
             disburseLoan(loanId, BigDecimal.valueOf(800), "1 January 2024");
 
@@ -697,11 +666,10 @@ public class LoanModifyApprovedAmountTest extends BaseLoanIntegrationTest {
         BigDecimal eightHundred = BigDecimal.valueOf(800.0);
         BigDecimal thousand = BigDecimal.valueOf(1000.0);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(create4IProgressive());
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    1000.0, 10.0, 4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "1 January 2024", 1000.0, 10.0, 4, null);
 
             modifyLoanAvailableDisbursementAmount(loanId, BigDecimal.valueOf(800.0));
             modifyLoanAvailableDisbursementAmount(loanId, BigDecimal.valueOf(600.0));

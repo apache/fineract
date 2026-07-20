@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,6 +33,7 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.accounting.Account;
 
 public class FeignJournalEntryHelper {
 
@@ -66,11 +68,11 @@ public class FeignJournalEntryHelper {
         assertNotNull(journalEntries);
         assertNotNull(journalEntries.getPageItems());
 
-        List<JournalEntryTransactionItem> actualEntries = new ArrayList<>(journalEntries.getPageItems());
+        List<JournalEntryTransactionItem> actualEntries = journalEntries.getPageItems();
         assertEquals(expectedEntries.length, actualEntries.size(),
-                "Expected " + expectedEntries.length + " journal entries but found " + actualEntries.size());
+                "Expected " + expectedEntries.length + " journal entries but found " + actualEntries.size() + ": " + actualEntries);
 
-        verifyJournalEntriesMatch(actualEntries, expectedEntries);
+        verifyJournalEntriesMatch(new ArrayList<>(actualEntries), expectedEntries);
     }
 
     private static void verifyJournalEntriesMatch(List<JournalEntryTransactionItem> actualEntries, LoanTestData.Journal[] expectedEntries) {
@@ -90,9 +92,16 @@ public class FeignJournalEntryHelper {
     }
 
     private static boolean matchesJournalEntry(JournalEntryTransactionItem item, LoanTestData.Journal expected) {
-        return Objects.equals(item.getAmount(), expected.amount)
+        return amountsMatch(item.getAmount(), expected.amount)
                 && Objects.equals(item.getGlAccountId(), expected.account.getAccountID().longValue())
                 && Objects.requireNonNull(item.getEntryType()).getValue().equals(expected.type);
+    }
+
+    private static boolean amountsMatch(Double actual, Double expected) {
+        if (actual == null || expected == null) {
+            return Objects.equals(actual, expected);
+        }
+        return Math.abs(actual - expected) < 0.01;
     }
 
     public void verifyJournalEntriesSequentially(Long loanId, LoanTestData.Journal... expectedEntries) {
@@ -105,12 +114,61 @@ public class FeignJournalEntryHelper {
         for (int i = 0; i < expectedEntries.length && i < sortedEntries.size(); i++) {
             LoanTestData.Journal expected = expectedEntries[i];
             JournalEntryTransactionItem item = sortedEntries.get(i);
-            boolean found = Objects.equals(item.getAmount(), expected.amount)
+            boolean found = amountsMatch(item.getAmount(), expected.amount)
                     && Objects.equals(item.getGlAccountId(), expected.account.getAccountID().longValue())
                     && Objects.requireNonNull(item.getEntryType()).getValue().equals(expected.type);
             assertTrue(found, "Journal entry mismatch at position " + i + ". Wanted: " + expected + " Actual: " + item);
         }
         assertEquals(expectedEntries.length, journalEntries.getPageItems().size(),
                 "There were more journal entries expected than actually present.");
+    }
+
+    public void checkJournalEntryForAssetAccount(Account assetAccount, String date, LoanTestData.Journal... accountEntries) {
+        checkJournalEntryForAccount(assetAccount, date, accountEntries);
+    }
+
+    public void checkJournalEntryForLiabilityAccount(Account liabilityAccount, String date, LoanTestData.Journal... accountEntries) {
+        checkJournalEntryForAccount(liabilityAccount, date, accountEntries);
+    }
+
+    public void checkJournalEntryForIncomeAccount(Account incomeAccount, String date, LoanTestData.Journal... accountEntries) {
+        checkJournalEntryForAccount(incomeAccount, date, accountEntries);
+    }
+
+    public void checkJournalEntryForExpenseAccount(Account expenseAccount, String date, LoanTestData.Journal... accountEntries) {
+        checkJournalEntryForAccount(expenseAccount, date, accountEntries);
+    }
+
+    private void checkJournalEntryForAccount(Account account, String date, LoanTestData.Journal... accountEntries) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("glAccountId", account.getAccountID());
+        queryParams.put("type", account.getAccountType());
+        queryParams.put("fromDate", date);
+        queryParams.put("toDate", date);
+        queryParams.put("orderBy", "id");
+        queryParams.put("sortOrder", "desc");
+        queryParams.put("locale", "en");
+        queryParams.put("dateFormat", "dd MMMM yyyy");
+
+        GetJournalEntriesTransactionIdResponse journalEntries = ok(
+                () -> fineractClient.journalEntries().retrieveAllJournalEntries(queryParams));
+        List<JournalEntryTransactionItem> actualEntries = journalEntries.getPageItems();
+        assertNotNull(actualEntries);
+
+        List<JournalEntryTransactionItem> remaining = new ArrayList<>(actualEntries);
+        for (LoanTestData.Journal expected : accountEntries) {
+            if (expected.amount > 0) {
+                int matchIndex = -1;
+                for (int i = 0; i < remaining.size(); i++) {
+                    if (matchesJournalEntry(remaining.get(i), expected)) {
+                        matchIndex = i;
+                        break;
+                    }
+                }
+                assertTrue(matchIndex >= 0,
+                        "Journal entry not found for account " + account.getAccountID() + " on " + date + ": " + expected);
+                remaining.remove(matchIndex);
+            }
+        }
     }
 }

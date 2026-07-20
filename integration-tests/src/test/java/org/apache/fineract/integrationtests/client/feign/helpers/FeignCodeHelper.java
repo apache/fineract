@@ -41,4 +41,12 @@ public class FeignCodeHelper {
                 new PostCodeValuesDataRequest().name(value).position(position).description(value).isActive(true)));
         return response.getSubResourceId();
     }
+
+    public GetCodesResponse retrieveCodeByName(String codeName) {
+        return ok(() -> fineractClient.codes().retrieveOneCodeByName(codeName));
+    }
+
+    public PostCodeValueDataResponse createCodeValue(Long codeId, PostCodeValuesDataRequest request) {
+        return ok(() -> fineractClient.codeValues().createCodeValue(codeId, request));
+    }
 }

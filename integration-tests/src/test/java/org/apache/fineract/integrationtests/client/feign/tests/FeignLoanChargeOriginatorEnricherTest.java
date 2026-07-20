@@ -62,7 +62,7 @@ public class FeignLoanChargeOriginatorEnricherTest extends FeignIntegrationTest 
             final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
             final Long originatorId = originatorHelper.createOriginator(originatorExternalId, "Test Originator", "ACTIVE");
             final Long clientId = clientHelper.createClient();
-            final Long loanId = loanHelper.createSubmittedLoan(clientId);
+            final Long loanId = loanHelper.createSubmittedLoan(clientId).getLoanId();
             originatorHelper.attachOriginatorToLoan(loanId, originatorId);
 
             final Long chargeId = createFlatFeeCharge(50.0);
@@ -110,7 +110,7 @@ public class FeignLoanChargeOriginatorEnricherTest extends FeignIntegrationTest 
             final Long originatorId1 = originatorHelper.createOriginator(externalId1, "Originator One", "ACTIVE");
             final Long originatorId2 = originatorHelper.createOriginator(externalId2, "Originator Two", "ACTIVE");
             final Long clientId = clientHelper.createClient();
-            final Long loanId = loanHelper.createSubmittedLoan(clientId);
+            final Long loanId = loanHelper.createSubmittedLoan(clientId).getLoanId();
             originatorHelper.attachOriginatorToLoan(loanId, originatorId1);
             originatorHelper.attachOriginatorToLoan(loanId, originatorId2);
 
@@ -151,7 +151,7 @@ public class FeignLoanChargeOriginatorEnricherTest extends FeignIntegrationTest 
         try {
             // Given: a loan without originators
             final Long clientId = clientHelper.createClient();
-            final Long loanId = loanHelper.createSubmittedLoan(clientId);
+            final Long loanId = loanHelper.createSubmittedLoan(clientId).getLoanId();
 
             final Long chargeId = createFlatFeeCharge(50.0);
 
@@ -176,7 +176,7 @@ public class FeignLoanChargeOriginatorEnricherTest extends FeignIntegrationTest 
     }
 
     private Long createFlatFeeCharge(double amount) {
-        return chargesHelper.createLoanSpecifiedDueDateCharge(amount);
+        return chargesHelper.createLoanSpecifiedDueDateCharge(amount).getResourceId();
     }
 
     private Long extractLoanId(ExternalEventResponse event) {

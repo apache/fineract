@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DATETIME_PATTERN;
-
 import java.math.BigDecimal;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
@@ -52,7 +50,7 @@ public class LoanPayOffTest extends FeignLoanTestBase {
         runAt("01 June 2024", () -> {
             GetLoansLoanIdTransactionsTemplateResponse prepayAmount = getPrepaymentAmount(loanId, null, DATETIME_PATTERN);
 
-            Assertions.assertEquals(250.0, prepayAmount.getAmount());
+            Assertions.assertEquals(0, new BigDecimal("250.00").compareTo(BigDecimal.valueOf(prepayAmount.getAmount())));
 
             addRepaymentForLoan(loanId, 250.0, "01 June 2024");
 

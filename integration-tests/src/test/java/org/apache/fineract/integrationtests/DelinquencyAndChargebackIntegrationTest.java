@@ -24,72 +24,48 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.AdvancedPaymentData;
-import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.DelinquencyRangeData;
-import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentSchedule;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PaymentAllocationOrder;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @Slf4j
-public class DelinquencyAndChargebackIntegrationTest extends BaseLoanIntegrationTest {
+public class DelinquencyAndChargebackIntegrationTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
     private static final String principalAmount = "1200.00";
     private static final Double doubleZERO = Double.valueOf("0.00");
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-
-        loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-    }
+    private static final DateTimeFormatter BUSINESS_DATE_FORMAT = DateTimeFormatter.ofPattern(LoanTestData.DATETIME_PATTERN);
 
     @ParameterizedTest
     @MethodSource("loanProductFactory")
-    public void testLoanClassificationStepAsPartOfCOB(LoanProductTestBuilder loanProductTestBuilder) {
+    public void testLoanClassificationStepAsPartOfCOB(String strategyCode, boolean advancedAllocation) {
         try {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+            updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
 
             final LocalDate todaysDate = Utils.getDateAsLocalDate("01 April 2012");
@@ -97,227 +73,171 @@ public class DelinquencyAndChargebackIntegrationTest extends BaseLoanIntegration
             log.info("Current Business date {}", businessDate);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
 
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
-            // Delinquency Bucket
             final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
+            final Long clientId = createClient("01 January 2012");
+            final Long loanProductId = createLoanProduct(strategyCode, advancedAllocation, delinquencyBucketId);
 
-            // Client and Loan account creation
-            final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-            final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    delinquencyBucket.getId(), loanProductTestBuilder);
-            assertNotNull(getLoanProductsProductResponse);
-
-            // Older date to have more than one overdue installment
-            String operationDate = Utils.dateFormatter.format(businessDate);
+            String operationDate = formatBusinessDate(businessDate);
             log.info("Operation date  {}", businessDate);
 
-            // Create Loan Account
-            final Integer loanId = createLoanAccount(loanTransactionHelper, clientId.toString(),
-                    getLoanProductsProductResponse.getId().toString(), operationDate, "12",
-                    loanProductTestBuilder.getTransactionProcessingStrategyCode());
+            final Long loanId = createLoanAccount(clientId, loanProductId, operationDate, "12", strategyCode);
 
-            // Move the Business date 1 month to apply the first repayment
             businessDate = businessDate.plusMonths(1);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
             log.info("Current Business date {}", businessDate);
 
             String amountVal = "100.00";
-            Float transactionAmount = Float.valueOf(amountVal);
-            operationDate = Utils.dateFormatter.format(businessDate);
-            PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate,
-                    transactionAmount, loanId);
+            operationDate = formatBusinessDate(businessDate);
+            PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate,
+                    Double.valueOf(amountVal));
             assertNotNull(loanIdTransactionsResponse);
             Long transactionId = loanIdTransactionsResponse.getResourceId();
-            loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 0);
+            reviewLoanTransactionRelations(loanId, transactionId, 0);
 
-            // Move the Business date 1 month more to apply the second repayment
             businessDate = businessDate.plusMonths(1);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
             log.info("Current Business date {}", businessDate);
 
-            operationDate = Utils.dateFormatter.format(businessDate);
-            loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, transactionAmount, loanId);
+            operationDate = formatBusinessDate(businessDate);
+            loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, Double.valueOf(amountVal));
             assertNotNull(loanIdTransactionsResponse);
             transactionId = loanIdTransactionsResponse.getResourceId();
-            loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 0);
+            reviewLoanTransactionRelations(loanId, transactionId, 0);
 
-            // Get loan details expecting to have not a delinquency classification and 1,000 as Outstanding
-            GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            GetLoansLoanIdResponse getLoansLoanIdResponse = getLoanDetails(loanId);
             validateLoanAccount(getLoansLoanIdResponse, "0.00", "1000.00", 0, doubleZERO);
 
-            // Move the Business date n days to apply the chargeback for the previous repayment
             businessDate = businessDate.plusDays(21);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
             log.info("Current Business date {}", businessDate);
 
-            // Apply the Chargeback transaction
-            final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, amountVal, 0,
-                    responseSpec);
-            loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 1);
+            applyChargebackTransaction(loanId, transactionId, amountVal, 0);
+            reviewLoanTransactionRelations(loanId, transactionId, 1);
 
-            // Validate the account expecting to have an adjustment for 100.00 and Outstanding 1,100
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
-            // Past Due Days in Zero because the Charge back transaction exists and It was done with the current date
             validateLoanAccount(getLoansLoanIdResponse, amountVal, "1100.00", 0, Double.valueOf("0.00"));
 
-            // Move the Business date n days to run the COB
             businessDate = businessDate.plusDays(14);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
             log.info("Current Business date {}", businessDate);
 
-            // Run the Loan inline COB Job
-            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
+            executeInlineCOB(loanId);
 
-            // Get loan details expecting to have a delinquency classification
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             validateLoanAccount(getLoansLoanIdResponse, amountVal, "1100.00", 14, Double.valueOf("200.00"));
 
-            // Move the Business date few days to apply the repayment for Chargeback
             businessDate = todaysDate.plusDays(4);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
             log.info("Current Business date {}", businessDate);
 
-            operationDate = Utils.dateFormatter.format(businessDate);
-            loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, transactionAmount, loanId);
+            operationDate = formatBusinessDate(businessDate);
+            loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, Double.valueOf(amountVal));
             assertNotNull(loanIdTransactionsResponse);
             transactionId = loanIdTransactionsResponse.getResourceId();
-            loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 0);
+            reviewLoanTransactionRelations(loanId, transactionId, 0);
 
-            // Get loan details expecting to have a delinquency classification
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             validateLoanAccount(getLoansLoanIdResponse, amountVal, "1000.00", 4, Double.valueOf("100.00"));
 
-            // Apply a partial repayment
-            operationDate = Utils.dateFormatter.format(businessDate);
-            transactionAmount = Float.valueOf("50.00");
-            loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, transactionAmount, loanId);
+            loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, 50.0);
             assertNotNull(loanIdTransactionsResponse);
             transactionId = loanIdTransactionsResponse.getResourceId();
-            loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 0);
-            // Get loan details expecting to have a delinquency classification
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            reviewLoanTransactionRelations(loanId, transactionId, 0);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             validateLoanAccount(getLoansLoanIdResponse, amountVal, "950.00", 4, Double.valueOf("50.00"));
         } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+            updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
     @ParameterizedTest
     @MethodSource("loanProductFactory")
-    public void testLoanClassificationStepAsPartOfCOBRepeated(LoanProductTestBuilder loanProductTestBuilder) {
+    public void testLoanClassificationStepAsPartOfCOBRepeated(String strategyCode, boolean advancedAllocation) {
         try {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+            updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
 
-            List<LocalDate> expectedDates = new ArrayList();
+            List<LocalDate> expectedDates = new ArrayList<>();
 
             LocalDate businessDate = LocalDate.parse("2022-01-01", DateUtils.DEFAULT_DATE_FORMATTER);
             log.info("Current Business date {}", businessDate);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
 
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
-            // Delinquency Bucket
             final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
+            final Long clientId = createClient("01 January 2012");
+            final Long loanProductId = createLoanProduct(strategyCode, advancedAllocation, delinquencyBucketId);
 
-            // Client and Loan account creation
-            final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-            final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    delinquencyBucket.getId(), loanProductTestBuilder);
-            assertNotNull(getLoanProductsProductResponse);
-
-            // Older date to have more than one overdue installment
-            String operationDate = Utils.dateFormatter.format(businessDate);
+            String operationDate = formatBusinessDate(businessDate);
             log.info("Operation date  {}", businessDate);
 
-            // Create Loan Account
-            final Integer loanId = createLoanAccount(loanTransactionHelper, clientId.toString(),
-                    getLoanProductsProductResponse.getId().toString(), operationDate, "3",
-                    loanProductTestBuilder.getTransactionProcessingStrategyCode());
+            final Long loanId = createLoanAccount(clientId, loanProductId, operationDate, "3", strategyCode);
 
-            // Move the Business date 1 month to apply the first repayment
             businessDate = businessDate.plusMonths(1);
             expectedDates.add(businessDate);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
             log.info("Current Business date {}", businessDate);
 
             String amountVal = "400.00";
-            Float transactionAmount = Float.valueOf(amountVal);
-            operationDate = Utils.dateFormatter.format(businessDate);
-            PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate,
-                    transactionAmount, loanId);
+            operationDate = formatBusinessDate(businessDate);
+            PostLoansLoanIdTransactionsResponse loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate,
+                    Double.valueOf(amountVal));
             assertNotNull(loanIdTransactionsResponse);
             Long transactionId = loanIdTransactionsResponse.getResourceId();
-            loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 0);
+            reviewLoanTransactionRelations(loanId, transactionId, 0);
 
-            // Move the Business date 1 month more to apply the second repayment
             businessDate = businessDate.plusMonths(1);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
             log.info("Current Business date {}", businessDate);
 
-            operationDate = Utils.dateFormatter.format(businessDate);
+            operationDate = formatBusinessDate(businessDate);
             expectedDates.add(businessDate);
-            loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, transactionAmount, loanId);
+            loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, Double.valueOf(amountVal));
             assertNotNull(loanIdTransactionsResponse);
             transactionId = loanIdTransactionsResponse.getResourceId();
-            loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 0);
+            reviewLoanTransactionRelations(loanId, transactionId, 0);
 
-            // Get loan details expecting to have not a delinquency classification and 1,000 as Outstanding
-            GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            GetLoansLoanIdResponse getLoansLoanIdResponse = getLoanDetails(loanId);
             validateLoanAccount(getLoansLoanIdResponse, "0.00", "400.00", 0, doubleZERO);
 
-            // Move the Business date n days to apply the chargeback for the previous repayment
             businessDate = businessDate.plusDays(15);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
             log.info("Current Business date {}", businessDate);
 
-            // Apply the Chargeback transaction
-            final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId, transactionId, amountVal, 0,
-                    responseSpec);
-            loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 1);
+            applyChargebackTransaction(loanId, transactionId, amountVal, 0);
+            reviewLoanTransactionRelations(loanId, transactionId, 1);
 
-            // Validate the account expecting to have an adjustment for 100.00 and Outstanding 1,100
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             assertNotNull(getLoansLoanIdResponse);
-            // Past Due Days in Zero because the Charge back transaction exists and It was done with the current date
             validateLoanAccount(getLoansLoanIdResponse, amountVal, "800.00", 0, Double.valueOf("0.00"));
 
-            // Move the Business date n days to run the COB
             businessDate = businessDate.plusDays(23);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
             log.info("Current Business date {}", businessDate);
 
-            // Run the Loan inline COB Job
-            inlineLoanCOBHelper.executeInlineCOB(Long.valueOf(loanId));
+            executeInlineCOB(loanId);
 
-            // Get loan details expecting to have a delinquency classification
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             validateLoanAccount(getLoansLoanIdResponse, amountVal, "800.00", 23, Double.valueOf("800.00"));
 
-            // Move the Business date few days to apply the repayment for Chargeback
             businessDate = LocalDate.parse("2022-03-20", DateUtils.DEFAULT_DATE_FORMATTER);
             expectedDates.add(businessDate);
-            operationDate = Utils.dateFormatter.format(businessDate);
-            loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, transactionAmount, loanId);
+            operationDate = formatBusinessDate(businessDate);
+            loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, Double.valueOf(amountVal));
             assertNotNull(loanIdTransactionsResponse);
             transactionId = loanIdTransactionsResponse.getResourceId();
-            loanTransactionHelper.reviewLoanTransactionRelations(loanId, transactionId, 0);
+            reviewLoanTransactionRelations(loanId, transactionId, 0);
 
-            // Get loan details expecting to have a delinquency classification
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             validateLoanAccount(getLoansLoanIdResponse, amountVal, "400.00", 7, Double.valueOf("400.00"));
 
-            // Pay the Loan to get this as Closed
-            loanIdTransactionsResponse = loanTransactionHelper.makeLoanRepayment(operationDate, transactionAmount, loanId);
+            loanIdTransactionsResponse = makeLoanRepayment(loanId, "Repayment", operationDate, Double.valueOf(amountVal));
             assertNotNull(loanIdTransactionsResponse);
-            getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
+            getLoansLoanIdResponse = getLoanDetails(loanId);
             assertEquals(Long.valueOf(LoanStatus.CLOSED_OBLIGATIONS_MET.getValue()), getLoansLoanIdResponse.getStatus().getId());
             log.info("Loan id {} with status {}", loanId, getLoansLoanIdResponse.getStatus().getCode());
 
-            // Evaluate Installments
             GetLoansLoanIdRepaymentSchedule getLoanRepaymentSchedule = getLoansLoanIdResponse.getRepaymentSchedule();
             assertNotNull(getLoanRepaymentSchedule);
             log.info("Loan with {} periods", getLoanRepaymentSchedule.getPeriods().size());
@@ -331,32 +251,34 @@ public class DelinquencyAndChargebackIntegrationTest extends BaseLoanIntegration
                 }
             }
         } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+            updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
-    private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Long delinquencyBucketId, LoanProductTestBuilder loanProductTestBuilder) {
-        final HashMap<String, Object> loanProductMap = loanProductTestBuilder.build(null, delinquencyBucketId);
-        final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
-        return loanTransactionHelper.getLoanProduct(loanProductId);
+    private Long createLoanProduct(String strategyCode, boolean advancedAllocation, Long delinquencyBucketId) {
+        PostLoanProductsRequest product = fourPeriod1MonthWithoutInterest(strategyCode).delinquencyBucketId(delinquencyBucketId)
+                .principal(Double.valueOf(principalAmount)).numberOfRepayments(12);
+        if (advancedAllocation) {
+            product.addPaymentAllocationItem(LoanRequestBuilders.paymentAllocation("REPAYMENT", "NEXT_INSTALLMENT", "PAST_DUE_PENALTY",
+                    "PAST_DUE_FEE", "PAST_DUE_INTEREST", "PAST_DUE_PRINCIPAL", "DUE_PENALTY", "DUE_FEE", "DUE_INTEREST", "DUE_PRINCIPAL",
+                    "IN_ADVANCE_PENALTY", "IN_ADVANCE_FEE", "IN_ADVANCE_PRINCIPAL", "IN_ADVANCE_INTEREST"));
+        }
+        return createLoanProduct(product);
     }
 
-    private Integer createLoanAccount(final LoanTransactionHelper loanTransactionHelper, final String clientId, final String loanProductId,
-            final String operationDate, final String periods, String repaymentStrategy) {
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount).withLoanTermFrequency(periods)
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments(periods).withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("0") //
-                .withExpectedDisbursementDate(operationDate) //
-                .withInterestTypeAsDecliningBalance() //
-                .withSubmittedOnDate(operationDate) //
-                .withRepaymentStrategy(repaymentStrategy) //
-                .build(clientId, loanProductId, null);
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan(operationDate, principalAmount, loanId, null);
-        loanTransactionHelper.disburseLoanWithNetDisbursalAmount(operationDate, loanId, principalAmount);
+    private Long createLoanAccount(final Long clientId, final Long loanProductId, final String operationDate, final String periods,
+            String repaymentStrategy) {
+        PostLoansRequest request = applyLoanRequest(clientId, loanProductId, operationDate, Double.valueOf(principalAmount),
+                Integer.valueOf(periods),
+                req -> req.repaymentEvery(1).repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)
+                        .loanTermFrequency(Integer.valueOf(periods)).loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)
+                        .interestRatePerPeriod(BigDecimal.ZERO).interestType(LoanTestData.InterestType.DECLINING_BALANCE)
+                        .expectedDisbursementDate(operationDate).submittedOnDate(operationDate)
+                        .transactionProcessingStrategyCode(repaymentStrategy));
+        Long loanId = applyForLoan(request);
+        approveLoan(loanId, approveLoanRequest(Double.valueOf(principalAmount), operationDate));
+        disburseLoan(loanId, operationDate, Double.valueOf(principalAmount));
         return loanId;
     }
 
@@ -369,36 +291,20 @@ public class DelinquencyAndChargebackIntegrationTest extends BaseLoanIntegration
         if (delinquencyRange != null) {
             log.info("Loan Delinquency Range is {}", delinquencyRange.getClassification());
         }
-        loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
-        loanTransactionHelper.evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, Double.valueOf(adjustments));
+        evaluateLoanSummaryAdjustments(getLoansLoanIdResponse, Double.valueOf(adjustments));
         DelinquencyBucketsHelper.evaluateLoanCollectionData(getLoansLoanIdResponse, pastDueDays, delinquentAmount);
-
-        loanTransactionHelper.validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf(outstanding));
+        validateLoanPrincipalOustandingBalance(getLoansLoanIdResponse, Double.valueOf(outstanding));
 
         return delinquencyRange;
     }
 
-    private static AdvancedPaymentData createRepaymentPaymentAllocation() {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("REPAYMENT");
-        advancedPaymentData.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_INTEREST, PaymentAllocationType.PAST_DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_INTEREST,
-                PaymentAllocationType.DUE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
+    private static String formatBusinessDate(LocalDate date) {
+        return date.format(BUSINESS_DATE_FORMAT);
     }
 
     private static Stream<Arguments> loanProductFactory() {
-        return Stream.of(Arguments.of(Named.of("DEFAULT_STRATEGY", new LoanProductTestBuilder().withRepaymentStrategy(DEFAULT_STRATEGY))),
-                Arguments.of(Named.of("ADVANCED_PAYMENT_ALLOCATION_STRATEGY",
-                        new LoanProductTestBuilder().withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
-                                .addAdvancedPaymentAllocation(createDefaultPaymentAllocation(), createRepaymentPaymentAllocation()))));
+        return Stream.of(Arguments.of(Named.of("DEFAULT_STRATEGY", DEFAULT_STRATEGY), false),
+                Arguments.of(Named.of("ADVANCED_PAYMENT_ALLOCATION_STRATEGY", ADVANCED_PAYMENT_ALLOCATION_STRATEGY), true));
     }
 
 }

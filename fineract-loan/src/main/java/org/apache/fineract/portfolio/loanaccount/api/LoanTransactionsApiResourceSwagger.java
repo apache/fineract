@@ -126,6 +126,15 @@ final class LoanTransactionsApiResourceSwagger {
         public Double netDisbursalAmount;
 
         public List<GetCodeValuesDataResponse> classificationOptions;
+
+        @Schema(example = "2")
+        public Integer numberOfPastInstallments;
+        @Schema(example = "3")
+        public Integer numberOfFutureInstallments;
+        @Schema(example = "[2009, 8, 1]")
+        public LocalDate nextInstallmentDueDate;
+        @Schema(example = "[2009, 8, 1]")
+        public LocalDate calculatedStartDate;
     }
 
     public static final class GetLoanCurrency {

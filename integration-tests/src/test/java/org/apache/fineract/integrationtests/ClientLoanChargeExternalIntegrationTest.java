@@ -18,131 +18,77 @@
  */
 package org.apache.fineract.integrationtests;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class ClientLoanChargeExternalIntegrationTest {
+public class ClientLoanChargeExternalIntegrationTest extends FeignLoanTestBase {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ClientLoanChargeExternalIntegrationTest.class);
-
-    public static final String MINIMUM_OPENING_BALANCE = "1000.0";
-    public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     private static final String NONE = "1";
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
+    private static Long clientId;
 
     @BeforeEach
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        clientId = createClient("20 September 2011");
     }
 
     @Test
     public void checkNewClientLoanChargeSavesExternalId() {
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Long loanProductId = createLoanProduct(false, NONE);
 
-        final Integer loanProductID = createLoanProduct(false, NONE);
+        final Long loanId = applyForLoanApplication(clientId, loanProductId, "12,000.00");
+        approveLoan(loanId, approveLoanRequest(12000.0, "20 September 2011"));
+        disburseLoanWithNetDisbursalAmount(loanId, "20 September 2011", "12,000.00");
 
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
-        HashMap loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00");
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        final Long chargeDefId = chargesHelper.createLoanSpecifiedDueDatePercentageAmountAndInterestFee(1.0).getResourceId();
 
-        final Integer charge = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, "1", false));
+        final String externalId = "extId" + loanId.toString();
+        PostLoansLoanIdChargesResponse chargeResponse = addLoanCharge(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeDefId)
+                .amount(1.0).dueDate("22 September 2011").externalId(externalId).dateFormat("dd MMMM yyyy").locale("en"));
+        assertNotNull(chargeResponse);
+        Long chargeId = chargeResponse.getResourceId();
 
-        final float amount = 1.0f;
-        final String externalId = "extId" + loanID.toString();
-        final Integer chargeID = this.loanTransactionHelper.addChargesForLoan(loanID,
-                getLoanChargeAsJSON(String.valueOf(charge), "22 September 2011", String.valueOf(amount), externalId));
-        Assertions.assertNotNull(chargeID);
-
-        HashMap loanChargeMap = this.loanTransactionHelper.getLoanCharge(loanID, chargeID);
-        Assertions.assertNotNull(loanChargeMap.get("externalId"));
-        Assertions.assertEquals(loanChargeMap.get("externalId"), externalId, "Incorrect External Id Saved");
-
+        GetLoansLoanIdChargesChargeIdResponse loanCharge = getLoanCharge(loanId, chargeId);
+        assertNotNull(loanCharge.getExternalId());
+        assertEquals(externalId, loanCharge.getExternalId(), "Incorrect External Id Saved");
     }
 
     @Test
     public void checkNewClientLoanChargeFindsDuplicateExternalId() {
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Long loanProductId = createLoanProduct(false, NONE);
 
-        final Integer loanProductID = createLoanProduct(false, NONE);
+        final Long loanId = applyForLoanApplication(clientId, loanProductId, "12,000.00");
+        approveLoan(loanId, approveLoanRequest(12000.0, "20 September 2011"));
+        disburseLoanWithNetDisbursalAmount(loanId, "20 September 2011", "12,000.00");
 
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
-        HashMap loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00");
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        final Long chargeDefId = chargesHelper.createLoanSpecifiedDueDatePercentageAmountAndInterestFee(1.0).getResourceId();
 
-        final Integer charge = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, "1", false));
+        final String externalId = "extId" + loanId.toString();
+        PostLoansLoanIdChargesResponse chargeResponse = addLoanCharge(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeDefId)
+                .amount(1.0).dueDate("22 September 2011").externalId(externalId).dateFormat("dd MMMM yyyy").locale("en"));
+        assertNotNull(chargeResponse);
 
-        final String externalId = "extId" + loanID.toString();
-        final float amount = 1.0f;
-        final Integer chargeID = this.loanTransactionHelper.addChargesForLoan(loanID,
-                getLoanChargeAsJSON(String.valueOf(charge), "22 September 2011", String.valueOf(amount), externalId));
-        Assertions.assertNotNull(chargeID);
-
-        final float amount2 = 2.0f;
-        ResponseSpecification responseSpec403 = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final Integer chargeID2 = this.loanTransactionHelper.addChargesForLoan(loanID,
-                getLoanChargeAsJSON(String.valueOf(charge), "23 September 2011", String.valueOf(amount2), externalId), responseSpec403);
-
-        Assertions.assertNull(chargeID2);
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> addLoanCharge(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeDefId).amount(2.0)
+                        .dueDate("23 September 2011").externalId(externalId).dateFormat("dd MMMM yyyy").locale("en")));
+        assertEquals(403, exception.getStatus());
+        assertErrorGlobalisationCode(exception, "error.msg.loan.charge.duplicate.externalId");
     }
 
-    private static String getLoanChargeAsJSON(final String chargeId, final String dueDate, final String amount, final String externalId) {
-        final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", "en_GB");
-        map.put("dateFormat", "dd MMMM yyyy");
-        map.put("amount", amount);
-        map.put("dueDate", dueDate);
-        map.put("chargeId", chargeId);
-        map.put("externalId", externalId);
-        String json = new Gson().toJson(map);
-        LOG.info("{}", json);
-        return json;
-    }
-
-    private Integer createLoanProduct(final boolean multiDisburseLoan, final String accountingRule, final Account... accounts) {
-        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
+    private Long createLoanProduct(final boolean multiDisburseLoan, final String accountingRule) {
         LoanProductTestBuilder builder = new LoanProductTestBuilder() //
                 .withPrincipal("12,000.00") //
                 .withNumberOfRepayments("4") //
@@ -153,17 +99,15 @@ public class ClientLoanChargeExternalIntegrationTest {
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //
                 .withTranches(multiDisburseLoan) //
-                .withAccounting(accountingRule, accounts);
+                .withAccounting(accountingRule, new org.apache.fineract.integrationtests.common.accounting.Account[0]);
         if (multiDisburseLoan) {
             builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
         }
         final String loanProductJSON = builder.build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return createLoanProductFromJson(loanProductJSON);
     }
 
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
-            final String savingsId, String principal, List<HashMap> collaterals) {
-        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+    private Long applyForLoanApplication(final Long clientId, final Long loanProductId, String principal) {
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
                 .withLoanTermFrequency("4") //
@@ -177,8 +121,7 @@ public class ClientLoanChargeExternalIntegrationTest {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
-                .withCollaterals(collaterals).withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+                .build(clientId.toString(), loanProductId.toString(), null);
+        return applyForLoanFromJson(loanApplicationJSON);
     }
-
 }
