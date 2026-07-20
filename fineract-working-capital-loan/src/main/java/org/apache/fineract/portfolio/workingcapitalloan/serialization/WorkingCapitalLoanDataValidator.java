@@ -123,6 +123,8 @@ public class WorkingCapitalLoanDataValidator {
     private static final int NOTE_MAX_LENGTH = 1000;
     private static final int EXTERNAL_ID_MAX_LENGTH = 100;
     private static final int PAYMENT_DETAIL_STRING_MAX_LENGTH = 50;
+    private static final Set<LoanStatus> REPAYMENT_LIKE_TXN_ALLOWED_LOAN_STATUSES = Set.of(LoanStatus.ACTIVE,
+            LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID);
 
     public void validateDiscountTransaction(final WorkingCapitalLoan loan, final String json, BigDecimal discountAmount,
             final String note) {
@@ -698,25 +700,24 @@ public class WorkingCapitalLoanDataValidator {
         validatePaymentDetails(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
-        if (LoanTransactionType.REPAYMENT.equals(transactionType)) {
-            if (!LoanStatus.ACTIVE.equals(loan.getLoanStatus()) && !LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loan.getLoanStatus())
-                    && !LoanStatus.OVERPAID.equals(loan.getLoanStatus())) {
-                throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
-                        "Repayment is allowed only for active/overpaid loans", WorkingCapitalLoanConstants.loanStatusParamName);
-            }
-        } else if (LoanTransactionType.PAYOUT_REFUND.equals(transactionType)) {
-            if (!LoanStatus.ACTIVE.equals(loan.getLoanStatus()) && !LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loan.getLoanStatus())
-                    && !LoanStatus.OVERPAID.equals(loan.getLoanStatus())) {
-                throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
-                        "Payout Refund is allowed only for active/overpaid loans", WorkingCapitalLoanConstants.loanStatusParamName);
-            }
-        } else if (LoanTransactionType.GOODWILL_CREDIT.equals(transactionType)) {
-            if (!LoanStatus.ACTIVE.equals(loan.getLoanStatus()) && !LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loan.getLoanStatus())
-                    && !LoanStatus.OVERPAID.equals(loan.getLoanStatus())) {
-                throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
-                        "Goodwill Credit is allowed only for active/closed obligations met/overpaid loans",
-                        WorkingCapitalLoanConstants.loanStatusParamName);
-            }
+        validateRepaymentAllowedForLoanStatus(loan.getLoanStatus(), transactionType);
+    }
+
+    private void validateRepaymentAllowedForLoanStatus(final LoanStatus loanStatus, final LoanTransactionType transactionType) {
+        if (transactionType == null || REPAYMENT_LIKE_TXN_ALLOWED_LOAN_STATUSES.contains(loanStatus)) {
+            return;
+        }
+
+        final String errorMessage = switch (transactionType) {
+            case REPAYMENT -> "Repayment is allowed only for active/closed obligations met/overpaid loans";
+            case PAYOUT_REFUND -> "Payout Refund is allowed only for active/closed obligations met/overpaid loans";
+            case GOODWILL_CREDIT -> "Goodwill Credit is allowed only for active/closed obligations met/overpaid loans";
+            default -> null;
+        };
+
+        if (errorMessage != null) {
+            throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed", errorMessage,
+                    WorkingCapitalLoanConstants.loanStatusParamName);
         }
     }
 

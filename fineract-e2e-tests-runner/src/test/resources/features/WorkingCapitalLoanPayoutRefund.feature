@@ -763,8 +763,8 @@ Feature: Working Capital Loan Payout Refund
       | product.name | status   |
       | WCLP         | Approved |
     When Initiating a "PAYOUT_REFUND" transaction on "01 January 2026" with 100.0 transaction amount on Working Capital loan results an error with the following data:
-      | httpCode | errorMessage                                            |
-      | 400      | Payout Refund is allowed only for active/overpaid loans |
+      | httpCode | errorMessage                                                                   |
+      | 400      | Payout Refund is allowed only for active/closed obligations met/overpaid loans |
 
   @TestRailId:C85640
   Scenario: Verify working capital loan Payout Refund backdated/undo transaction - UC17: Payout Refund with negative amount results an error (Negative)
