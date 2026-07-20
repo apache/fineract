@@ -27,8 +27,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
-import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.data.OfficeData;
 import org.apache.fineract.organisation.office.service.OfficeReadPlatformService;
@@ -55,11 +55,16 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 @RequiredArgsConstructor
 public class SearchReadServiceImpl implements SearchReadService {
 
+    private static final String CONDITION_BETWEEN = "between";
+    private static final String PARAM_LOAN_DATE_OPTION = "loanDateOption";
+    private static final String PARAM_OUTSTANDING_AMOUNT_PERCENTAGE_CONDITION = "outStandingAmountPercentageCondition";
+    private static final String PARAM_OUTSTANDING_AMOUNT_CONDITION = "outstandingAmountCondition";
+    private static final String VALID_SEARCH_CONDITIONS = "=, >, >=, <, <=, between";
+
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
-    private final SqlValidator sqlValidator;
 
     @Override
     public List<SearchData> retriveMatchingData(final SearchConditions searchConditions) {
@@ -250,24 +255,52 @@ public class SearchReadServiceImpl implements SearchReadService {
     }
 
     private AdHocQuerySearchConditions convertToSearchConditions(final AdHocQuerySearchRequest request) {
-        if (request.getLoanDateOption() != null) {
-            sqlValidator.validate(request.getLoanDateOption());
-        }
-        if (request.getOutStandingAmountPercentageCondition() != null) {
-            sqlValidator.validate(request.getOutStandingAmountPercentageCondition());
-        }
-        if (request.getOutstandingAmountCondition() != null) {
-            sqlValidator.validate(request.getOutstandingAmountCondition());
-        }
+        validateLoanDateOption(request.getLoanDateOption());
+        final boolean includeOutStandingAmountPercentage = Boolean.TRUE.equals(request.getIncludeOutStandingAmountPercentage());
+        final boolean includeOutstandingAmount = Boolean.TRUE.equals(request.getIncludeOutstandingAmount());
+        final String outStandingAmountPercentageCondition = validateSearchCondition(request.getOutStandingAmountPercentageCondition(),
+                PARAM_OUTSTANDING_AMOUNT_PERCENTAGE_CONDITION, includeOutStandingAmountPercentage);
+        final String outstandingAmountCondition = validateSearchCondition(request.getOutstandingAmountCondition(),
+                PARAM_OUTSTANDING_AMOUNT_CONDITION, includeOutstandingAmount);
 
         return AdHocQuerySearchConditions.instance(request.getLoanStatus(), request.getLoanProducts(), request.getOffices(),
-                request.getLoanDateOption(), request.getLoanFromDate(), request.getLoanToDate(),
-                request.getIncludeOutStandingAmountPercentage() != null ? request.getIncludeOutStandingAmountPercentage() : false,
-                request.getOutStandingAmountPercentageCondition(), request.getMinOutStandingAmountPercentage(),
-                request.getMaxOutStandingAmountPercentage(), request.getOutStandingAmountPercentage(),
-                request.getIncludeOutstandingAmount() != null ? request.getIncludeOutstandingAmount() : false,
-                request.getOutstandingAmountCondition(), request.getMinOutstandingAmount(), request.getMaxOutstandingAmount(),
+                request.getLoanDateOption(), request.getLoanFromDate(), request.getLoanToDate(), includeOutStandingAmountPercentage,
+                outStandingAmountPercentageCondition, request.getMinOutStandingAmountPercentage(),
+                request.getMaxOutStandingAmountPercentage(), request.getOutStandingAmountPercentage(), includeOutstandingAmount,
+                outstandingAmountCondition, request.getMinOutstandingAmount(), request.getMaxOutstandingAmount(),
                 request.getOutstandingAmount());
+    }
+
+    private static void validateLoanDateOption(final String loanDateOption) {
+        if (StringUtils.isBlank(loanDateOption) || SearchConstants.SearchLoanDate.getAllValues().contains(loanDateOption)) {
+            return;
+        }
+        throw invalidSearchParameter(PARAM_LOAN_DATE_OPTION, loanDateOption,
+                String.join(", ", SearchConstants.SearchLoanDate.getAllValues()));
+    }
+
+    private static String validateSearchCondition(final String condition, final String parameterName, final boolean required) {
+        if (StringUtils.isBlank(condition)) {
+            if (required) {
+                throw invalidSearchParameter(parameterName, condition, VALID_SEARCH_CONDITIONS);
+            }
+            return condition;
+        }
+
+        final String trimmedCondition = condition.trim();
+        if (CONDITION_BETWEEN.equalsIgnoreCase(trimmedCondition)) {
+            return CONDITION_BETWEEN;
+        }
+        return switch (trimmedCondition) {
+            case "=", ">", ">=", "<", "<=" -> trimmedCondition;
+            default -> throw invalidSearchParameter(parameterName, condition, VALID_SEARCH_CONDITIONS);
+        };
+    }
+
+    private static PlatformApiDataValidationException invalidSearchParameter(final String parameterName, final String value,
+            final String expectedValues) {
+        return new PlatformApiDataValidationException("validation.msg.search.parameter.is.not.one.of.expected.enumerations",
+                "The parameter `" + parameterName + "` must be one of [ " + expectedValues + " ].", parameterName, value);
     }
 
     private static final class AdHocQuerySearchMapper implements RowMapper<AdHocSearchQueryData> {
