@@ -1,3 +1,4 @@
+@SerialChargeAccrualConfig
 @LoanAccrualFeature
 Feature: LoanAccrualTransaction
 
@@ -1993,3 +1994,21 @@ Feature: LoanAccrualTransaction
       | 18 November 2025 | Accrual Activity | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "17 November 2025"
     Then LoanTransactionAccrualActivityPostBusinessEvent is raised on "18 November 2025"
+
+  @TestRailId:C85643
+  Scenario: Core parity - accrual is posted on early loan closure even when charge-accrual-date is submitted-date
+    When Global config "charge-accrual-date" value set to "due-date"
+    When Admin sets the business date to "01 June 2023"
+    When Admin creates a client with random data
+    When Admin creates a new default Loan with date: "01 June 2023"
+    And Admin successfully approves the loan on "01 June 2023" with "1000" amount and expected disbursement date on "01 June 2023"
+    When Admin successfully disburse the loan on "01 June 2023" with "1000" EUR transaction amount
+    When Admin adds "LOAN_SNOOZE_FEE" due date charge with "20 June 2023" due date and 10 EUR transaction amount
+    When Global config "charge-accrual-date" value set to "submitted-date"
+    When Admin sets the business date to "05 June 2023"
+    And Customer makes "AUTOPAY" repayment on "05 June 2023" with 1010 EUR transaction amount
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan Transactions tab has a transaction with date: "05 June 2023", and with the following data:
+      | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+      | Accrual          | 10.0   | 0.0       | 0.0      | 10.0 | 0.0       | 0.0          |
+    When Global config "charge-accrual-date" value set to "due-date"

@@ -1,3 +1,4 @@
+@SerialChargeAccrualConfig
 @LoanAccrualActivityFeature
 Feature: LoanAccrualActivity - Part1
 
@@ -5467,4 +5468,3 @@ Feature: LoanAccrualActivity - Part1
       | 25 March 2025    | Accrual Activity | 0.44   | 0.0       | 0.44     | 0.0  | 0.0       | 0.0          | false    | true     |
     And "Accrual Activity" transaction on "25 March 2025" got reverse-replayed on "28 March 2025"
     And External ID of replayed "Accrual Activity" on "25 March 2025" is matching with "saved-external-id"
-

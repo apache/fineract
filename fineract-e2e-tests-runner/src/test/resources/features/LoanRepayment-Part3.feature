@@ -1,3 +1,4 @@
+@SerialChargeAccrualConfig
 @Repayment
 Feature: LoanRepayment - Part3
 
@@ -3507,4 +3508,3 @@ Feature: LoanRepayment - Part3
       | 26 October 2025    | Disbursement     | 4.0     | 0.0       |  0.0     | 0.0  | 0.0        | 4.0          | false    | false    |
       | 27 October 2025    | Repayment        | 4.0     | 4.0       |  0.0     | 0.0  | 0.0        | 0.0          | false    | false    |
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
-

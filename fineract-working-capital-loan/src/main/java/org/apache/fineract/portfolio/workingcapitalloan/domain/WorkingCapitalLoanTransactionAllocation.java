@@ -100,4 +100,13 @@ public class WorkingCapitalLoanTransactionAllocation extends AbstractAuditableWi
         return allocation;
     }
 
+    public static WorkingCapitalLoanTransactionAllocation forChargeAccrual(final WorkingCapitalLoanTransaction transaction,
+            final BigDecimal amount, final boolean isPenalty) {
+        final WorkingCapitalLoanTransactionAllocation allocation = new WorkingCapitalLoanTransactionAllocation();
+        allocation.wcLoanTransaction = transaction;
+        allocation.principalPortion = BigDecimal.ZERO;
+        allocation.feeChargesPortion = isPenalty ? BigDecimal.ZERO : MathUtil.nullToZero(amount);
+        allocation.penaltyChargesPortion = isPenalty ? MathUtil.nullToZero(amount) : BigDecimal.ZERO;
+        return allocation;
+    }
 }

@@ -1,3 +1,4 @@
+@SerialChargeAccrualConfig
 @LoanFeature
 Feature: Loan - Part2
 
@@ -2578,4 +2579,3 @@ Feature: Loan - Part2
       | NSF fee | true      | Specified due date | 17 October 2023   | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
       | NSF fee | true      | Specified due date | 16 October 2023   | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
       | NSF fee | true      | Specified due date | 17 September 2023 | Flat             | 20.0 | 20.0 | 0.0    | 0.0         |
-

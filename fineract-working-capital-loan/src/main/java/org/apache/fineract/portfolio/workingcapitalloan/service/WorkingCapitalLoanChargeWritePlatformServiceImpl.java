@@ -103,6 +103,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
     private final WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
     private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
     private final ProjectedAmortizationScheduleRepositoryWrapper scheduleRepositoryWrapper;
+    private final WorkingCapitalLoanChargeAccrualService chargeAccrualService;
 
     @Transactional
     @Override
@@ -139,6 +140,8 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         if (loan.getLoanStatus() != statusBeforeCharge) {
             changes.put("status", loan.getLoanStatus());
         }
+
+        chargeAccrualService.processOnChargeAdded(loan, loanCharge);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

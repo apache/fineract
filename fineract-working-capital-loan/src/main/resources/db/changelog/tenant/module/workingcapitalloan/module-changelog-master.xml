@@ -76,4 +76,5 @@
   <include relativeToChangelogFile="true" file="parts/0052_wc_loan_balance_breach_pastdue_amount.xml"/>
   <include relativeToChangelogFile="true" file="parts/0053_wc_loan_breach_reset_history_drop.xml"/>
   <include relativeToChangelogFile="true" file="parts/0054_wc_loan_delinquency_reset.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0055_wc_loan_charge_accrual_business_step.xml"/>
 </databaseChangeLog>

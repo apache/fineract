@@ -16,6 +16,7 @@ Feature: Working Capital COB Job
       | WC_BREACH_SCHEDULE                 | 4     |
       | WC_NEAR_BREACH_EVALUATION          | 5     |
       | WC_DISCOUNT_FEE_AMORTIZATION       | 6     |
+      | WC_CHARGE_ACCRUAL                  | 7     |
     Then Admin verifies scheduler job "WC_COB" has display name "Working Capital Loan COB"
     Then Admin verifies scheduler job "WC_COB" has active status "false"
 
