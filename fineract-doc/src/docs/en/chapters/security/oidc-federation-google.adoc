@@ -39,8 +39,6 @@ Google's standard ID tokens do **not** include a `fineract_tenant` claim. The te
 . Enter a name such as `fineract-oidc-test` and click *Create*.
 . Wait for the project to be created (a few seconds), then select it from the project selector.
 
-image::oidc-google/01-new-project.png[Creating a new Google Cloud project,width=600]
-
 == Step 2: Configure the OAuth Consent Screen
 
 The OAuth consent screen is shown to users when they authorize your application. It must be configured before creating credentials.
