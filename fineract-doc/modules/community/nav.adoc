@@ -1,3 +1,0 @@
-.Community
-* xref:index.adoc[Introduction]
-* xref:governance.adoc[Governance]
