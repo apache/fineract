@@ -58,4 +58,8 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
      */
     void reprocessDelinquencySchedule(WorkingCapitalLoan loan);
 
+    void resetPeriods(WorkingCapitalLoan workingCapitalLoan, WorkingCapitalLoanDelinquencyAction action);
+
+    void undoResetPeriods(WorkingCapitalLoan workingCapitalLoan, WorkingCapitalLoanDelinquencyAction action,
+            List<WorkingCapitalLoanDelinquencyAction> byWorkingCapitalLoanIdOrderById);
 }

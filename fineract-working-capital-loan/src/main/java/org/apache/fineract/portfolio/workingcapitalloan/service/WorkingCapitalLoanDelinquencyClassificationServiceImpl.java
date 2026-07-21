@@ -85,7 +85,7 @@ public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements W
                 .findByLoanIdOrderByPeriodNumberAsc(loan.getId());
 
         for (WorkingCapitalLoanDelinquencyRangeSchedule range : delinquencyRangeScheduleList) {
-            if (range.getToDate().isBefore(businessDate)) {
+            if (!Objects.equals(range.getReset(), true) && range.getToDate().isBefore(businessDate)) {
                 long rangeDelinquentDays = range.getOutstandingAmount().compareTo(BigDecimal.ZERO) > 0
                         ? DateUtils.getDifferenceInDays(range.getToDate(), businessDate)
                         : 0L;
@@ -137,6 +137,7 @@ public class WorkingCapitalLoanDelinquencyClassificationServiceImpl implements W
      * @param businessDate
      *            the date on which the tagging operation is performed
      */
+    @Override
     public void applyDelinquencyTagForRange(final WorkingCapitalLoan loan, final WorkingCapitalLoanDelinquencyRangeSchedule range,
             final DelinquencyRange currentRange, final LocalDate businessDate) {
         List<WorkingCapitalLoanDelinquencyRangeScheduleTagHistory> updatedList = new ArrayList<>();

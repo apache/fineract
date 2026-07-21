@@ -20,7 +20,9 @@
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import java.time.LocalDate;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 
 public interface WorkingCapitalLoanDelinquencyClassificationService {
 
@@ -28,4 +30,6 @@ public interface WorkingCapitalLoanDelinquencyClassificationService {
 
     void classifyDelinquency(WorkingCapitalLoan loan, LocalDate businessDate);
 
+    void applyDelinquencyTagForRange(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyRangeSchedule range,
+            DelinquencyRange currentRange, LocalDate businessDate);
 }
