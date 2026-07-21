@@ -42,6 +42,13 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
 
     List<WorkingCapitalLoanDelinquencyRangeScheduleData> retrieveRangeSchedule(Long loanId);
 
+    /**
+     * Shifts the boundaries of every period overlapping or following {@code pauseStart} by the inclusive length of the
+     * pause, including periods that have already been evaluated (minPaymentCriteriaMet != null) so a backdated pause
+     * can also reach into a period that was previously closed.
+     * {@link #reprocessDelinquencySchedule(WorkingCapitalLoan)} is expected to be invoked afterwards to re-derive their
+     * evaluation.
+     */
     void extendPeriodsForPause(WorkingCapitalLoan loan, LocalDate pauseStart, LocalDate pauseEnd);
 
     /**

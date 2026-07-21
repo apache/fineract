@@ -342,7 +342,8 @@ Feature: Working Capital Delinquency Pause
       | 2            | 2026-03-14 | 2026-04-17 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 14             |
       | 3            | 2026-04-18 | 2026-05-25 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
 
-  @TestRailId:C74486
+# TODO: this test should be removed or reworked, as backdated delinquency pauses are now allowed
+  @Skip @TestRailId:C74486
   Scenario: Verify working capital loan delinquency pause - UC7: backdated delinquency pause to an already evaluated period results an error (Negative)
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data

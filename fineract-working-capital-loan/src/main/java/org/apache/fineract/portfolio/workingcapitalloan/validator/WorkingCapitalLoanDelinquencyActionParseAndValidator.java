@@ -182,7 +182,6 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
         validateBothDatesProvided(action, dataValidator);
         validateStartBeforeEnd(action, dataValidator);
         validateNotBeforeDisbursement(action, workingCapitalLoan, dataValidator);
-        validateNotInEvaluatedPeriod(action, workingCapitalLoan, dataValidator);
         validateNoOverlap(action, existing, dataValidator);
     }
 
@@ -427,21 +426,6 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
         if (firstDisbursementDate != null && firstDisbursementDate.isAfter(action.getStartDate())) {
             failParameterValidation(dataValidator, START_DATE, "must.be.after.first.disbursal.date",
                     "Start date of pause period must be after first disbursal date");
-        }
-    }
-
-    private void validateNotInEvaluatedPeriod(final WorkingCapitalLoanDelinquencyAction action, final WorkingCapitalLoan workingCapitalLoan,
-            final DataValidatorBuilder dataValidator) {
-        if (action.getStartDate() == null) {
-            return;
-        }
-        final List<WorkingCapitalLoanDelinquencyRangeSchedule> periods = rangeScheduleRepository
-                .findByLoanIdOrderByPeriodNumberAsc(workingCapitalLoan.getId());
-        final boolean startsInEvaluatedPeriod = periods.stream().filter(p -> p.getMinPaymentCriteriaMet() != null)
-                .anyMatch(p -> !action.getStartDate().isAfter(p.getToDate()));
-        if (startsInEvaluatedPeriod) {
-            failParameterValidation(dataValidator, START_DATE, "pause.in.evaluated.period",
-                    "Pause start date cannot fall within or before an already evaluated delinquency range period");
         }
     }
 
