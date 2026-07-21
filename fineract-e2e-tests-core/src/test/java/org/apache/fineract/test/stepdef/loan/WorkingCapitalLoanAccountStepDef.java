@@ -2098,6 +2098,9 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 case "totalDiscountFeeAdjustment" ->
                     actualValues.add(response.getBalance() == null || response.getBalance().getTotalDiscountFeeAdjustment() == null ? null
                             : new Utils.DoubleFormatter(response.getBalance().getTotalDiscountFeeAdjustment().doubleValue()).format());
+                case "breachPastDueAmount" ->
+                    actualValues.add(response.getBalance() == null || response.getBalance().getBreachPastDueAmount() == null ? null
+                            : new Utils.DoubleFormatter(response.getBalance().getBreachPastDueAmount().doubleValue()).format());
                 default -> throw new IllegalStateException(String.format("Header name %s cannot be found", headerName));
             }
         }

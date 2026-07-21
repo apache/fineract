@@ -73,4 +73,6 @@
   <include relativeToChangelogFile="true" file="parts/0049_wc_loan_breach_reset.xml"/>
   <include relativeToChangelogFile="true" file="parts/0050_wc_loan_breach_disable.xml"/>
   <include relativeToChangelogFile="true" file="parts/0051_wc_delinquency_range_schedule_base_expected_amount.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0052_wc_loan_balance_breach_pastdue_amount.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0053_wc_loan_breach_reset_history_drop.xml"/>
 </databaseChangeLog>

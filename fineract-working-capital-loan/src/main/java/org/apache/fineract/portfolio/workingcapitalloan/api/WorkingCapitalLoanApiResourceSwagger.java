@@ -408,6 +408,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal totalDiscountFee;
         @Schema(example = "500.00")
         public BigDecimal totalDiscountFeeAdjustment;
+        @Schema(example = "250.00", description = "Cumulative breach past due amount, summed from each breach schedule period's outstanding amount")
+        public BigDecimal breachPastDueAmount;
     }
 
     @Schema(description = "Single disbursement detail (expected and actual)")

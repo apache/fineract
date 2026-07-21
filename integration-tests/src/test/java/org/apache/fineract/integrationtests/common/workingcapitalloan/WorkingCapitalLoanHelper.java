@@ -25,6 +25,7 @@ import org.apache.fineract.client.feign.services.WorkingCapitalLoanTransactionsA
 import org.apache.fineract.client.feign.services.WorkingCapitalLoansApi;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.feign.util.FeignCalls;
+import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
@@ -140,6 +141,11 @@ public class WorkingCapitalLoanHelper {
     public Long makeRepaymentByLoanExternalId(final String loanExternalId, final PostWorkingCapitalLoanTransactionsRequest request) {
         return FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionByExternalId(loanExternalId, request,
                 Map.of("command", "repayment"))).getResourceId();
+    }
+
+    public void undoTransactionById(final Long loanId, final Long transactionId) {
+        FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, transactionId,
+                "undo", new ExecuteWorkingCapitalLoanTransactionCommandRequest()));
     }
 
     public Long makeCreditBalanceRefundByLoanId(final Long loanId, final PostWorkingCapitalLoanTransactionsRequest request) {

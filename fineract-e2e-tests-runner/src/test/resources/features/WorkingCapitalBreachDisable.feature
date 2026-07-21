@@ -1,4 +1,5 @@
 @WorkingCapital
+@WorkingCapitalBreach
 @WorkingCapitalBreachDisableFeature
 Feature: Working Capital Breach Disable
 
