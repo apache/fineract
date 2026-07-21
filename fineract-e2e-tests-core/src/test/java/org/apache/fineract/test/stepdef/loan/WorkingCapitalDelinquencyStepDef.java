@@ -37,6 +37,7 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActio
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
+import org.apache.fineract.test.api.FineractClientConfiguration;
 import org.apache.fineract.test.factory.WorkingCapitalLoanRequestFactory;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
@@ -47,50 +48,32 @@ public class WorkingCapitalDelinquencyStepDef extends AbstractStepDef {
 
     private final FineractFeignClient fineractClient;
     private final WorkingCapitalLoanRequestFactory workingCapitalLoanRequestFactory;
+    private final FineractClientConfiguration fineractClientConfiguration;
 
     @When("Admin initiate a Working Capital loan delinquency pause with startDate {string} and endDate {string}")
     public void initiateDelinquencyPause(String startDate, String endDate) {
-        Long loanId = extractLoanId();
-        PostWorkingCapitalLoansDelinquencyActionRequest request = buildDelinquencyActionRequest("pause", startDate, endDate);
-        PostWorkingCapitalLoansDelinquencyActionResponse response = createDelinquencyActionById(loanId, request);
-
-        log.debug("Delinquency pause initiated for loan {} with startDate: {}, endDate: {}, response: {}", loanId, startDate, endDate,
-                response);
+        createDelinquencyAction("pause", startDate, endDate, false);
     }
 
     @When("Admin initiate a Working Capital loan delinquency pause by external ID with startDate {string} and endDate {string}")
     public void initiateDelinquencyPauseByExternalId(String startDate, String endDate) {
-        String loanExternalId = extractLoanExternalId();
-        PostWorkingCapitalLoansDelinquencyActionRequest request = buildDelinquencyActionRequest("pause", startDate, endDate);
-        PostWorkingCapitalLoansDelinquencyActionResponse response = createDelinquencyActionByExternalId(loanExternalId, request);
-
-        log.debug("Delinquency pause initiated for loan externalId {} with startDate: {}, endDate: {}, response: {}", loanExternalId,
-                startDate, endDate, response);
+        createDelinquencyAction("pause", startDate, endDate, true);
     }
 
     @When("Admin initiate a Working Capital loan delinquency resume with startDate {string}")
     public void initiateDelinquencyResume(final String startDate) {
-        final Long loanId = extractLoanId();
-        final PostWorkingCapitalLoansDelinquencyActionRequest request = buildResumeRequest(startDate);
-        final PostWorkingCapitalLoansDelinquencyActionResponse response = createDelinquencyActionById(loanId, request);
-
-        log.debug("Delinquency resume initiated for loan {} with startDate: {}, response: {}", loanId, startDate, response);
+        createDelinquencyAction("resume", startDate, null, false);
     }
 
     @When("Admin initiate a Working Capital loan delinquency resume by external ID with startDate {string}")
     public void initiateDelinquencyResumeByExternalId(final String startDate) {
-        final String loanExternalId = extractLoanExternalId();
-        final PostWorkingCapitalLoansDelinquencyActionRequest request = buildResumeRequest(startDate);
-        final PostWorkingCapitalLoansDelinquencyActionResponse response = createDelinquencyActionByExternalId(loanExternalId, request);
-
-        log.debug("Delinquency resume initiated for loan externalId {} with startDate: {}, response: {}", loanExternalId, startDate,
-                response);
+        createDelinquencyAction("resume", startDate, null, true);
     }
 
     @Then("Initiating a Working Capital loan delinquency resume with startDate {string} results an error with the following data:")
     public void initiateDelinquencyResumeResultsAnErrorWithDetails(final String startDate, final DataTable table) {
         final Long loanId = extractLoanId();
-        final PostWorkingCapitalLoansDelinquencyActionRequest request = buildResumeRequest(startDate);
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = buildDelinquencyActionRequest("resume", startDate, null);
 
         final CallFailedRuntimeException exception = fail(
                 () -> fineractClient.workingCapitalLoanDelinquencyActions().createDelinquencyAction(loanId, request));
@@ -108,8 +91,7 @@ public class WorkingCapitalDelinquencyStepDef extends AbstractStepDef {
     public void initiateDelinquencyPauseResultsAnErrorWithDetails(String startDate, String endDate, DataTable table) {
         Long loanId = extractLoanId();
 
-        PostWorkingCapitalLoansDelinquencyActionRequest request = workingCapitalLoanRequestFactory
-                .defaultWorkingCapitalLoansDelinquencyActionRequest("pause").startDate(startDate).endDate(endDate);
+        PostWorkingCapitalLoansDelinquencyActionRequest request = buildDelinquencyActionRequest("pause", startDate, endDate);
 
         CallFailedRuntimeException exception = fail(
                 () -> fineractClient.workingCapitalLoanDelinquencyActions().createDelinquencyAction(loanId, request));
@@ -219,11 +201,6 @@ public class WorkingCapitalDelinquencyStepDef extends AbstractStepDef {
                 .endDate(endDate);
     }
 
-    private PostWorkingCapitalLoansDelinquencyActionRequest buildResumeRequest(final String startDate) {
-        return workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansDelinquencyActionRequest("resume").startDate(startDate)
-                .endDate(null);
-    }
-
     private PostWorkingCapitalLoansDelinquencyActionResponse createDelinquencyActionById(Long loanId,
             PostWorkingCapitalLoansDelinquencyActionRequest request) {
         return ok(() -> fineractClient.workingCapitalLoanDelinquencyActions().createDelinquencyAction(loanId, request));
@@ -232,6 +209,24 @@ public class WorkingCapitalDelinquencyStepDef extends AbstractStepDef {
     private PostWorkingCapitalLoansDelinquencyActionResponse createDelinquencyActionByExternalId(String loanExternalId,
             PostWorkingCapitalLoansDelinquencyActionRequest request) {
         return ok(() -> fineractClient.workingCapitalLoanDelinquencyActions().createDelinquencyActionByExternalId(loanExternalId, request));
+    }
+
+    private PostWorkingCapitalLoansDelinquencyActionResponse createDelinquencyAction(String action, String startDate, String endDate,
+            boolean byExternalId) {
+        PostWorkingCapitalLoansDelinquencyActionRequest request = buildDelinquencyActionRequest(action, startDate, endDate);
+        if (byExternalId) {
+            String loanExternalId = extractLoanExternalId();
+            PostWorkingCapitalLoansDelinquencyActionResponse response = createDelinquencyActionByExternalId(loanExternalId, request);
+            log.debug("Delinquency {} initiated for loan externalId {} with startDate: {}, endDate: {}, response: {}", action,
+                    loanExternalId, startDate, endDate, response);
+            return response;
+        }
+
+        Long loanId = extractLoanId();
+        PostWorkingCapitalLoansDelinquencyActionResponse response = createDelinquencyActionById(loanId, request);
+        log.debug("Delinquency {} initiated for loan {} with startDate: {}, endDate: {}, response: {}", action, loanId, startDate, endDate,
+                response);
+        return response;
     }
 
     private List<WorkingCapitalLoanDelinquencyActionData> retrieveDelinquencyActions(Long loanId) {
@@ -355,6 +350,87 @@ public class WorkingCapitalDelinquencyStepDef extends AbstractStepDef {
         assertThat(exception.getStatus()).as("HTTP status code should be " + expectedHttpCode)
                 .isEqualTo(Integer.parseInt(expectedHttpCode));
         assertThat(exception.getMessage()).as("Should contain error message").contains(expectedErrorMessage);
+    }
+
+    @When("Admin initiate a Working Capital loan delinquency disable with startDate {string}")
+    public void initiateDelinquencyDisable(String startDate) {
+        createDelinquencyAction("disable", startDate, null, false);
+    }
+
+    @When("Admin initiate a Working Capital loan delinquency enable with startDate {string}")
+    public void initiateDelinquencyEnable(String startDate) {
+        createDelinquencyAction("enable", startDate, null, false);
+    }
+
+    @When("Admin initiate a Working Capital loan delinquency disable by external ID with startDate {string}")
+    public void initiateDelinquencyDisableByExternalId(String startDate) {
+        createDelinquencyAction("disable", startDate, null, true);
+    }
+
+    @When("Admin initiate a Working Capital loan delinquency enable by external ID with startDate {string}")
+    public void initiateDelinquencyEnableByExternalId(String startDate) {
+        createDelinquencyAction("enable", startDate, null, true);
+    }
+
+    @Then("Initiating a Working Capital loan delinquency disable with startDate {string} results an error with the following data:")
+    public void initiateDelinquencyDisableResultsAnError(String startDate, DataTable table) {
+        initiateDelinquencyActionResultsAnError("disable", startDate, null, table);
+    }
+
+    @Then("Initiating a Working Capital loan delinquency enable with startDate {string} results an error with the following data:")
+    public void initiateDelinquencyEnableResultsAnError(String startDate, DataTable table) {
+        initiateDelinquencyActionResultsAnError("enable", startDate, null, table);
+    }
+
+    @Then("Initiating a Working Capital loan delinquency disable with startDate {string} and endDate {string} results an error with the following data:")
+    public void initiateDelinquencyDisableWithEndDateResultsAnError(String startDate, String endDate, DataTable table) {
+        initiateDelinquencyActionResultsAnError("disable", startDate, endDate, table);
+    }
+
+    private void initiateDelinquencyActionResultsAnError(String action, String startDate, String endDate, DataTable table) {
+        Long loanId = extractLoanId();
+        PostWorkingCapitalLoansDelinquencyActionRequest request = buildDelinquencyActionRequest(action, startDate, endDate);
+
+        CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoanDelinquencyActions().createDelinquencyAction(loanId, request));
+
+        verifyDelinquencyPauseErrorWithTable(exception, table);
+        log.info("Verified delinquency {} initiation failed with expected error for loan {}", action, loanId);
+    }
+
+    @Then("Created user with no CREATE_WC_DELINQUENCY_DISABLE permission gets an error when initiate a Working Capital loan delinquency disable with startDate {string}")
+    public void initiateDelinquencyDisableWithoutPermissionResultsAnError(String startDate) {
+        final Long loanId = extractLoanId();
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = buildDelinquencyActionRequest("disable", startDate, null);
+        final FineractFeignClient userClient = userClient();
+
+        final CallFailedRuntimeException exception = fail(
+                () -> userClient.workingCapitalLoanDelinquencyActions().createDelinquencyAction(loanId, request));
+
+        assertThat(exception.getStatus()).as("HTTP status code should be 403").isEqualTo(403);
+        assertThat(exception.getDeveloperMessage()).as("Should contain authorization error message")
+                .contains("User has no authority to CREATE wc_delinquency_disables");
+        log.info("Verified delinquency disable denied for user without CREATE_WC_DELINQUENCY_DISABLE permission on loan {}", loanId);
+    }
+
+    @Then("Created user with no READ_WC_DELINQUENCY_ACTION permission gets an error when retrieving Working Capital loan delinquency actions")
+    public void retrieveDelinquencyActionsWithoutPermissionResultsAnError() {
+        final Long loanId = extractLoanId();
+        final FineractFeignClient userClient = userClient();
+
+        final CallFailedRuntimeException exception = fail(
+                () -> userClient.workingCapitalLoanDelinquencyActions().retrieveDelinquencyActions(loanId));
+
+        assertThat(exception.getStatus()).as("HTTP status code should be 403").isEqualTo(403);
+        assertThat(exception.getDeveloperMessage()).as("Should contain authorization error message")
+                .contains("User has no authority to READ wc_delinquency_actions");
+        log.info("Verified delinquency actions retrieval denied for user without READ_WC_DELINQUENCY_ACTION permission on loan {}", loanId);
+    }
+
+    private FineractFeignClient userClient() {
+        final String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
+        final String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
+        return fineractClientConfiguration.fineractFeignClientForUser(username, password);
     }
 
 }
