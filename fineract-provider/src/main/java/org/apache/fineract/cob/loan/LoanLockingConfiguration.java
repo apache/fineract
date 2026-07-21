@@ -20,6 +20,7 @@ package org.apache.fineract.cob.loan;
 
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -32,11 +33,13 @@ public class LoanLockingConfiguration {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
+    private DatabaseSpecificSQLGenerator sqlGenerator;
+    @Autowired
     private FineractProperties fineractProperties;
 
     @Bean
     @ConditionalOnMissingBean(name = "retrieveLoanLockingService")
     public LockingService retrieveLoanLockingService() {
-        return new LoanLockingServiceImpl(jdbcTemplate, fineractProperties);
+        return new LoanLockingServiceImpl(jdbcTemplate, sqlGenerator, fineractProperties);
     }
 }

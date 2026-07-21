@@ -18,6 +18,10 @@
  */
 package org.apache.fineract.infrastructure.core.service.database;
 
+import java.sql.Array;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -62,5 +66,20 @@ public class DatabaseSpecificSQLGeneratorTest {
         String sql = "SELECT 1 FROM test_table WHERE asd=2 OFFSET 2 LIMIT 50";
         String countQuery = databaseSpecificSQLGenerator.countQueryResult(sql);
         Assertions.assertEquals("SELECT COUNT(*) FROM (SELECT 1 FROM test_table WHERE asd=2) AS temp", countQuery);
+    }
+
+    @Test
+    public void testInParametersForOnPostgresReleasesConnectionAfterArrayCreation() throws SQLException {
+        Mockito.when(databaseTypeResolver.databaseType()).thenReturn(DatabaseType.POSTGRESQL);
+        final Connection connection = Mockito.mock(Connection.class);
+        final Array idArray = Mockito.mock(Array.class);
+        Mockito.when(dataSource.getConnection()).thenReturn(connection);
+        Mockito.when(connection.createArrayOf(Mockito.eq("bigint"), Mockito.any(Long[].class))).thenReturn(idArray);
+
+        final Object[] parameters = databaseSpecificSQLGenerator.inParametersFor(List.of(1L, 2L, 3L));
+
+        Assertions.assertArrayEquals(new Object[] { idArray }, parameters);
+        Mockito.verify(connection).createArrayOf("bigint", new Long[] { 1L, 2L, 3L });
+        Mockito.verify(connection).close();
     }
 }

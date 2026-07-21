@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.service.database;
 import static java.lang.String.format;
 
 import java.math.BigInteger;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
@@ -353,10 +354,13 @@ public class DatabaseSpecificSQLGenerator {
     public Object[] inParametersFor(List<Long> ids) {
         return switch (getDialect()) {
             case POSTGRESQL -> {
+                final Connection con = DataSourceUtils.getConnection(dataSource);
                 try {
-                    yield new Object[] { DataSourceUtils.getConnection(dataSource).createArrayOf("bigint", ids.toArray(new Long[0])) };
+                    yield new Object[] { con.createArrayOf("bigint", ids.toArray(new Long[0])) };
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                } finally {
+                    DataSourceUtils.releaseConnection(con, dataSource);
                 }
             }
             case MYSQL -> ids.toArray();
