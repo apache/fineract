@@ -21,6 +21,7 @@ package org.apache.fineract.accounting.producttoaccountmapping.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -87,7 +88,7 @@ public class WorkingCapitalLoanProductAdvancedAccountingReadHelper {
             return null;
         }
 
-        final List<Long> chargeIds = mappings.stream().map(ProductToGLAccountMapping::getChargeId).toList();
+        final Set<Long> chargeIds = mappings.stream().map(ProductToGLAccountMapping::getChargeId).collect(Collectors.toSet());
         final Map<Long, ChargeData> chargesById = accountingChargeReadService.findChargesByIds(chargeIds).stream()
                 .collect(Collectors.toMap(ChargeData::getId, Function.identity()));
 

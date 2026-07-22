@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.portfolio.charge.service;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.accounting.producttoaccountmapping.service.AccountingChargeReadService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
@@ -38,7 +38,7 @@ public class AccountingChargeReadServiceImpl implements AccountingChargeReadServ
     private final ChargeRepository chargeRepository;
 
     @Override
-    public List<ChargeData> findChargesByIds(final Collection<Long> chargeIds) {
+    public List<ChargeData> findChargesByIds(final Set<Long> chargeIds) {
         if (chargeIds == null || chargeIds.isEmpty()) {
             return List.of();
         }
