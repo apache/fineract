@@ -133,10 +133,10 @@ Feature: WorkingCapitalLoanAccount
       | WCLP         | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 100.0             | 0.0               | 100.0              | 1.0               | 0.0              |
     When Admin modifies the working capital loan with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      |                 |                          | 500.0           |                    |                   |          |
+      |                 |                          | 200.0           |                    |                   |          |
     Then Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | status                         | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 500.0             | 0.0               | 100.0              | 1.0               | 0.0              |
+      | WCLP         | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 200.0             | 0.0               | 100.0              | 1.0               | 0.0              |
 
   @TestRailId:C70260
   Scenario: Modify Working Capital Loan account in Submitted and pending approval state - UC3: Change submittedOnDate
@@ -425,11 +425,11 @@ Feature: WorkingCapitalLoanAccount
     Then Working capital loan creation was successful
     When Admin modifies the working capital loan with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      |                 |                          | 500.0           |                    |                   |          |
+      |                 |                          | 200.0           |                    |                   |          |
     Then Working capital loan modification response contains changes for "principalAmount"
     And Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | status                         | proposedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 500.0             | 100.0              | 1.0               | 0.0              |
+      | WCLP         | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 200.0             | 100.0              | 1.0               | 0.0              |
 
   @TestRailId:C72337
   Scenario: Approve Working Capital Loan account - UC1: Approve loan in SUBMITTED AND PENDING APPROVAL state with default values
