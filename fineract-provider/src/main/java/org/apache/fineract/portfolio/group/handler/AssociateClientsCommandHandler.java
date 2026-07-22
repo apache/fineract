@@ -18,25 +18,33 @@
  */
 package org.apache.fineract.portfolio.group.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.group.data.AssociateClientsRequest;
+import org.apache.fineract.portfolio.group.data.AssociateClientsResponse;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "GROUP", action = "UNASSIGNSTAFF")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class UnassignGroupStaffCommandHandler implements NewCommandSourceHandler {
+public class AssociateClientsCommandHandler implements CommandHandler<AssociateClientsRequest, AssociateClientsResponse> {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+    private final GroupingTypesWritePlatformService writePlatformService;
 
-    @Transactional
+    @Retry(name = "commandAssociateClients", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.groupWritePlatformService.unassignGroupOrCenterStaff(command.entityId(), command);
+    @Transactional
+    public AssociateClientsResponse handle(Command<AssociateClientsRequest> command) {
+        return writePlatformService.associateClientsToGroup(command.getPayload());
+    }
+
+    @Override
+    public AssociateClientsResponse fallback(Command<AssociateClientsRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }
