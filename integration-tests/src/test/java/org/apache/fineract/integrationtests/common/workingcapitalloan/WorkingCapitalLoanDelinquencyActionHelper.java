@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests.common.workingcapitalloan;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +55,26 @@ public final class WorkingCapitalLoanDelinquencyActionHelper {
     public static List<WorkingCapitalLoanDelinquencyActionData> retrieveDelinquencyActions(final Long loanId) {
         return ok(() -> FineractFeignClientHelper.getFineractFeignClient().workingCapitalLoanDelinquencyActions()
                 .retrieveDelinquencyActions(loanId));
+    }
+
+    public static PostWorkingCapitalLoansDelinquencyActionResponse disableDelinquency(final Long loanId) {
+        log.info("Disabling delinquency evaluation for loan {}", loanId);
+        return createDelinquencyAction(loanId, "disable", LocalDate.now(ZoneId.systemDefault()), null);
+    }
+
+    public static PostWorkingCapitalLoansDelinquencyActionResponse enableDelinquency(final Long loanId) {
+        log.info("Enabling delinquency evaluation for loan {}", loanId);
+        return createDelinquencyAction(loanId, "enable", LocalDate.now(ZoneId.systemDefault()), null);
+    }
+
+    public static PostWorkingCapitalLoansDelinquencyActionResponse disableDelinquencyByExternalId(final String loanExternalId) {
+        log.info("Disabling delinquency evaluation for loan externalId={}", loanExternalId);
+        return createDelinquencyActionByExternalId(loanExternalId, "disable", LocalDate.now(ZoneId.systemDefault()), null);
+    }
+
+    public static PostWorkingCapitalLoansDelinquencyActionResponse enableDelinquencyByExternalId(final String loanExternalId) {
+        log.info("Enabling delinquency evaluation for loan externalId={}", loanExternalId);
+        return createDelinquencyActionByExternalId(loanExternalId, "enable", LocalDate.now(ZoneId.systemDefault()), null);
     }
 
     public static PostWorkingCapitalLoansDelinquencyActionResponse createDelinquencyActionByExternalId(final String loanExternalId,

@@ -35,6 +35,8 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
 
     void applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal amount);
 
+    void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate businessDate, BigDecimal amount);
+
     void evaluateExpiredPeriods(WorkingCapitalLoan loan, LocalDate businessDate);
 
     List<WorkingCapitalLoanDelinquencyRangeScheduleData> retrieveRangeSchedule(Long loanId);

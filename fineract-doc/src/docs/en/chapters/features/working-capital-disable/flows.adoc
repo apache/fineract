@@ -1,0 +1,95 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+= Runtime Flows
+
+== Disable sequence
+
+The sequence is the same for both features; the only per-feature step is the disable-time
+side effect (delinquency lifts the active classification; breach only persists the row).
+
+.Disable — request to persistence
+[plantuml,format=svg]
+----
+include::{diagramsdir}/wc-disable-sequence.puml[]
+----
+
+== Enable sequence
+
+On enable the validator confirms an active disable exists, the write service persists a
+dedicated `ENABLE` row and closes the open disable (at `enableDate - 1`), and then each feature
+recomputes its own schedule.
+
+.Enable — closing the window and recomputing
+[plantuml,format=svg]
+----
+include::{diagramsdir}/wc-enable-sequence.puml[]
+----
+
+== Decision flow (validation)
+
+The activity below captures the validation gate shared by disable and enable.
+
+.Disable / Enable validation gate
+[plantuml,format=svg]
+....
+@startuml
+start
+:Receive action disable or enable;
+if (Base and disable permission granted?) then (no)
+  :Reject 403;
+  stop
+endif
+if (Loan is ACTIVE?) then (no)
+  :Reject 400 invalid.loan.state;
+  stop
+endif
+if (startDate equals business date?) then (no)
+  :Reject 400 must.be.current.business.date;
+  stop
+endif
+if (endDate provided?) then (yes)
+  :Reject 400 must.not.be.provided.for.disable.or.enable;
+  stop
+endif
+if (action is disable?) then (yes)
+  if (Already disabled?) then (yes)
+    :Reject 400 already.disabled;
+    stop
+  endif
+  :Persist DISABLE row, end_date null;
+  :Feature side effect;
+  note right: delinquency lifts classification
+else (enable)
+  if (Active disable exists?) then (no)
+    :Reject 400 no.active.disable.to.enable;
+    stop
+  endif
+  :Persist ENABLE row;
+  :Close DISABLE row, stamp end_date = enableDate - 1;
+  :Recompute schedule;
+  note right
+    delinquency: extend periods + re-classify
+    breach: reprocess breach schedule
+  end note
+endif
+:Return 200 with resourceId;
+stop
+@enduml
+....

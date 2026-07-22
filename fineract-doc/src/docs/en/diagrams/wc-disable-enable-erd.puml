@@ -1,0 +1,43 @@
+@startuml
+' Licensed to the Apache Software Foundation (ASF) under one or more
+' contributor license agreements. See the NOTICE file distributed with
+' this work for additional information regarding copyright ownership.
+' The ASF licenses this file to you under the Apache License, Version 2.0.
+
+skinparam linetype ortho
+hide circle
+
+entity "m_wc_loan" as loan {
+  * id : BIGINT <<PK>>
+}
+
+entity "m_wc_loan_delinquency_action" as del {
+  * id : BIGINT <<PK>>
+  --
+  * wc_loan_id : BIGINT <<FK>>
+  * action : VARCHAR(128)
+  * start_date : DATE
+  end_date : DATE  <<null while DISABLE active>>
+  minimum_payment : DECIMAL(19,6)
+  minimum_payment_type : VARCHAR(50)
+  frequency : INT
+  frequency_type : VARCHAR(50)
+}
+
+entity "m_wc_loan_breach_action" as bre {
+  * id : BIGINT <<PK>>
+  --
+  * wc_loan_id : BIGINT <<FK>>
+  * action : VARCHAR(128)
+  * start_date : DATE
+  end_date : DATE  <<null while DISABLE active>>
+  minimum_payment : DECIMAL(19,6)
+  minimum_payment_type : VARCHAR
+  frequency : INT
+  frequency_type : VARCHAR
+}
+
+loan ||--o{ del : "wc_loan_id"
+loan ||--o{ bre : "wc_loan_id"
+
+@enduml

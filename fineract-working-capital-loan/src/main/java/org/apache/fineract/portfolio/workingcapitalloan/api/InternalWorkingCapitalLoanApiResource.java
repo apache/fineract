@@ -32,6 +32,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import lombok.RequiredArgsConstructor;
@@ -121,13 +122,25 @@ public class InternalWorkingCapitalLoanApiResource implements InitializingBean {
         detail.setActualAmount(loan.getApprovedPrincipal());
         loan.getDisbursementDetails().add(detail);
 
+        // Mirror updateBalanceOnDisburse from the real disbursement flow: without the balance principal, any
+        // repayment allocates fully to overpayment and flips the loan to OVERPAID.
+        WorkingCapitalLoanBalance balance = loan.getBalance();
+        if (balance == null) {
+            balance = WorkingCapitalLoanBalance.createFor(loan);
+            loan.setBalance(balance);
+        }
+        final BigDecimal discount = loan.getLoanProductRelatedDetails() != null && loan.getLoanProductRelatedDetails().getDiscount() != null
+                ? loan.getLoanProductRelatedDetails().getDiscount()
+                : BigDecimal.ZERO;
+        balance.setTotalDiscountFee(discount);
+        balance.setPrincipal(loan.getApprovedPrincipal().add(discount));
+        balance.setOverpaymentAmount(BigDecimal.ZERO);
+
         loan.setLoanStatus(LoanStatus.ACTIVE);
         loanRepository.saveAndFlush(loan);
 
         // The balance must reflect the faked disbursement (as the real disbursement flow does),
         // otherwise the schedule generation caps the period to the zero remaining balance.
-        final WorkingCapitalLoanBalance balance = balanceRepository.findByWcLoan_Id(loanId)
-                .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
         balance.applyDisbursement(loan.getApprovedPrincipal());
         balanceRepository.saveAndFlush(balance);
 
