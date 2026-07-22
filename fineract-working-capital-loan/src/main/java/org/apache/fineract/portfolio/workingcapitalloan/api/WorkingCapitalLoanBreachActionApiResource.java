@@ -141,7 +141,7 @@ public class WorkingCapitalLoanBreachActionApiResource {
     }
 
     private String extractAction(final String apiRequestBodyAsJson) {
-        if (!StringUtils.isNotBlank(apiRequestBodyAsJson)) {
+        if (StringUtils.isBlank(apiRequestBodyAsJson)) {
             return null;
         }
         final JsonElement json = fromJsonHelper.parse(apiRequestBodyAsJson);

@@ -91,7 +91,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
 
         validateLoanIsActive(dataValidator, workingCapitalLoan);
         validateBreachConfigurationExists(dataValidator, workingCapitalLoan);
-        if (!isDisableStateChange(actionString) && !UNDO_RESET_ACTION.equalsIgnoreCase(actionString)) {
+        if (!isDisableStateChange(actionString)) {
             validateBreachNotDisabled(dataValidator, workingCapitalLoan.getId());
         }
 

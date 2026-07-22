@@ -36,6 +36,7 @@
         </addColumn>
     </changeSet>
     <changeSet id="wcl-0054-2" author="fineract">
+        <validCheckSum>9:aea88977eb87a35caea063805bde783e</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">SELECT COUNT(*)
                                          FROM m_permission
@@ -48,12 +49,15 @@
             <column name="action_name" value="CREATE"/>
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
-        <insert tableName="m_permission">
-            <column name="grouping" value="portfolio"/>
-            <column name="code" value="CREATE_WC_DELINQUENCY_UNDO_RESET"/>
-            <column name="entity_name" value="WC_DELINQUENCY_UNDO_RESET"/>
-            <column name="action_name" value="CREATE"/>
-            <column name="can_maker_checker" valueBoolean="false"/>
-        </insert>
+    </changeSet>
+    <changeSet id="wcl-0054-3" author="fineract">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">SELECT COUNT(*)
+                                         FROM m_permission
+                                         WHERE code = 'CREATE_WC_DELINQUENCY_UNDO_RESET'</sqlCheck>
+        </preConditions>
+        <delete tableName="m_permission">
+            <where>code='CREATE_WC_DELINQUENCY_UNDO_RESET'</where>
+        </delete>
     </changeSet>
 </databaseChangeLog>
