@@ -52,33 +52,6 @@ public class WorkingCapitalLoanAllocationRequestFactory {
                 getAllocationRule(loan, transactionType).getAllocationTypes(), balance.getPrincipalOutstanding(), chargeBalances);
     }
 
-    /**
-     * Builds the allocation request for a charge adjustment. When the product configures its own CHARGE_ADJUSTMENT
-     * allocation order, that order is honored and the adjustment spreads across charges/principal like a repayment.
-     * Otherwise an adjustment settles only its own charge: the request is scoped to that single charge with no
-     * principal outstanding, which keeps the amount on the charge's fee/penalty bucket and prevents the fallback
-     * (default) order - which ranks DUE_PRINCIPAL ahead of the IN_ADVANCE buckets - from diverting a not-yet-due charge
-     * onto principal.
-     */
-    public WorkingCapitalLoanAllocationRequest buildForChargeAdjustment(@NonNull final WorkingCapitalLoan loan,
-            @NonNull final WorkingCapitalLoanBalance balance, @NonNull final List<WorkingCapitalLoanCharge> charges,
-            @NonNull final WorkingCapitalLoanCharge adjustedCharge, @NonNull final LocalDate transactionDate,
-            @NonNull final BigDecimal amount) {
-        if (hasConfiguredAllocationRule(loan, LoanTransactionType.CHARGE_ADJUSTMENT)) {
-            return build(loan, balance, charges, transactionDate, amount, LoanTransactionType.CHARGE_ADJUSTMENT);
-        }
-        final ChargeBalance chargeBalance = new ChargeBalance(adjustedCharge.getId(), adjustedCharge.getAmountOutstanding(),
-                adjustedCharge.getDueDate(), adjustedCharge.isPenaltyCharge());
-        return new WorkingCapitalLoanAllocationRequest(transactionDate, amount, getDefaultAllocationRule(loan).getAllocationTypes(),
-                BigDecimal.ZERO, List.of(chargeBalance));
-    }
-
-    private boolean hasConfiguredAllocationRule(@NonNull final WorkingCapitalLoan loan,
-            @NonNull final LoanTransactionType transactionType) {
-        return loan.getPaymentAllocationRules().stream()
-                .anyMatch(rule -> transactionType.equals(rule.getTransactionType().getLoanTransactionType()));
-    }
-
     @NonNull
     private WorkingCapitalLoanPaymentAllocationRule getAllocationRule(@NonNull final WorkingCapitalLoan loan,
             @NonNull final LoanTransactionType transactionType) {

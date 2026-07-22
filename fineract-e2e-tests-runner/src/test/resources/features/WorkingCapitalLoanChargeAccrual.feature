@@ -205,20 +205,20 @@ Feature: Working Capital Loan Charge Accrual
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 July 2026    | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 July 2026    | Charge Adjustment | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+      | 10 July 2026    | Charge Adjustment | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
-      | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
+      | 100.0      | 100.0           | 0.0      | 0.0            | 0.0                 | 0.0          |
     And Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "10 July 2026" which has the following Journal entries:
-      | Type   | Account code | Account name            | Debit | Credit |
-      | INCOME | 404007       | Fee Income              | 100.0 |        |
-      | ASSET  | 112603       | Interest/Fee Receivable |       | 100.0  |
+      | Type   | Account code | Account name     | Debit | Credit |
+      | INCOME | 404007       | Fee Income       | 100.0 |        |
+      | ASSET  | 112601       | Loans Receivable |       | 100.0  |
     When Admin sets the business date to "16 July 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 July 2026    | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 July 2026    | Charge Adjustment | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+      | 10 July 2026    | Charge Adjustment | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
       | 15 July 2026    | Accrual           | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
     And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "15 July 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
@@ -241,20 +241,20 @@ Feature: Working Capital Loan Charge Accrual
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 August 2026  | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 August 2026  | Charge Adjustment | 50.0              | 0.0              | 0.0               | 50.0                  | false    |
+      | 10 August 2026  | Charge Adjustment | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
-      | 0.0        | 0.0             | 0.0      | 50.0           | 0.0                 | 50.0         |
+      | 0.0        | 0.0             | 0.0      | 50.0           | 50.0                | 0.0          |
     And Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "10 August 2026" which has the following Journal entries:
-      | Type   | Account code | Account name            | Debit | Credit |
-      | INCOME | 404007       | Fee Income              | 50.0  |        |
-      | ASSET  | 112603       | Interest/Fee Receivable |       | 50.0   |
+      | Type   | Account code | Account name     | Debit | Credit |
+      | INCOME | 404007       | Fee Income       | 50.0  |        |
+      | ASSET  | 112601       | Loans Receivable |       | 50.0   |
     When Admin sets the business date to "16 August 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 August 2026  | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 August 2026  | Charge Adjustment | 50.0              | 0.0              | 0.0               | 50.0                  | false    |
+      | 10 August 2026  | Charge Adjustment | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
       | 15 August 2026  | Accrual           | 50.0              | 0.0              | 0.0               | 50.0                  | false    |
     And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "15 August 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
@@ -277,20 +277,20 @@ Feature: Working Capital Loan Charge Accrual
     Then Working Capital Loan has transactions:
       | transactionDate  | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 November 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 November 2026 | Charge Adjustment | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
+      | 10 November 2026 | Charge Adjustment | 40.0              | 40.0             | 0.0               | 0.0                   | false    |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
-      | 100.0      | 60.0            | 40.0     | 0.0            | 0.0                 | 0.0          |
+      | 100.0      | 100.0           | 0.0      | 0.0            | 0.0                 | 0.0          |
     And Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "10 November 2026" which has the following Journal entries:
-      | Type   | Account code | Account name            | Debit | Credit |
-      | INCOME | 404007       | Fee Income              | 40.0  |        |
-      | ASSET  | 112603       | Interest/Fee Receivable |       | 40.0   |
+      | Type   | Account code | Account name     | Debit | Credit |
+      | INCOME | 404007       | Fee Income       | 40.0  |        |
+      | ASSET  | 112601       | Loans Receivable |       | 40.0   |
     When Admin sets the business date to "16 November 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital Loan has transactions:
       | transactionDate  | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 November 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 November 2026 | Charge Adjustment | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
+      | 10 November 2026 | Charge Adjustment | 40.0              | 40.0             | 0.0               | 0.0                   | false    |
       | 15 November 2026 | Accrual           | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
     And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "15 November 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
@@ -313,20 +313,20 @@ Feature: Working Capital Loan Charge Accrual
     Then Working Capital Loan has transactions:
       | transactionDate  | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 December 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 December 2026 | Charge Adjustment | 25.0              | 0.0              | 0.0               | 25.0                  | false    |
+      | 10 December 2026 | Charge Adjustment | 25.0              | 25.0             | 0.0               | 0.0                   | false    |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
-      | 0.0        | 0.0             | 0.0      | 60.0           | 35.0                | 25.0         |
+      | 0.0        | 0.0             | 0.0      | 60.0           | 60.0                | 0.0          |
     And Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "10 December 2026" which has the following Journal entries:
-      | Type   | Account code | Account name            | Debit | Credit |
-      | INCOME | 404007       | Fee Income              | 25.0  |        |
-      | ASSET  | 112603       | Interest/Fee Receivable |       | 25.0   |
+      | Type   | Account code | Account name     | Debit | Credit |
+      | INCOME | 404007       | Fee Income       | 25.0  |        |
+      | ASSET  | 112601       | Loans Receivable |       | 25.0   |
     When Admin sets the business date to "16 December 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital Loan has transactions:
       | transactionDate  | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 December 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 December 2026 | Charge Adjustment | 25.0              | 0.0              | 0.0               | 25.0                  | false    |
+      | 10 December 2026 | Charge Adjustment | 25.0              | 25.0             | 0.0               | 0.0                   | false    |
       | 15 December 2026 | Accrual           | 60.0              | 0.0              | 0.0               | 60.0                  | false    |
     And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "15 December 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
@@ -463,18 +463,18 @@ Feature: Working Capital Loan Charge Accrual
       | transactionDate   | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 September 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 September 2026 | Accrual           | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
-      | 10 September 2026 | Charge Adjustment | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+      | 10 September 2026 | Charge Adjustment | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
-      | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
+      | 100.0      | 100.0           | 0.0      | 0.0            | 0.0                 | 0.0          |
     And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "10 September 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 100.0 |        |
       | INCOME | 404007       | Fee Income              |       | 100.0  |
     And Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "10 September 2026" which has the following Journal entries:
-      | Type   | Account code | Account name            | Debit | Credit |
-      | INCOME | 404007       | Fee Income              | 100.0 |        |
-      | ASSET  | 112603       | Interest/Fee Receivable |       | 100.0  |
+      | Type   | Account code | Account name     | Debit | Credit |
+      | INCOME | 404007       | Fee Income       | 100.0 |        |
+      | ASSET  | 112601       | Loans Receivable |       | 100.0  |
     And Admin sets the business date to "25 September 2026"
     When Global config "charge-accrual-date" value set to "due-date"
     Then Admin closes the Working Capital loan with a full repayment on "25 September 2026"

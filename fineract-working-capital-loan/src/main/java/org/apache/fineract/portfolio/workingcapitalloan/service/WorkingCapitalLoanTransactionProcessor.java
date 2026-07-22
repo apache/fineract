@@ -34,7 +34,6 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelation;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionAllocationRepository;
@@ -68,23 +67,11 @@ public class WorkingCapitalLoanTransactionProcessor {
         final WorkingCapitalLoanBalance balance = balanceRepository.findByWcLoan_Id(loanId)
                 .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
         final List<WorkingCapitalLoanCharge> charges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loanId);
-
-        WorkingCapitalLoanAllocationRequest allocationRequest;
-        if (transactionType == LoanTransactionType.CHARGE_ADJUSTMENT) {
-            final WorkingCapitalLoanTransactionRelation loanTransactionRelation = transaction.getLoanTransactionRelations().stream()
-                    .filter(e -> e.getToCharge() != null).findFirst().orElseThrow();
-            final WorkingCapitalLoanCharge adjustedCharge = loanTransactionRelation.getToCharge();
-            // The factory honors a configured CHARGE_ADJUSTMENT allocation order when the product defines one;
-            // otherwise it scopes the adjustment to its own charge (no principal) so a not-yet-due charge is not
-            // diverted onto principal.
-            allocationRequest = allocationRequestFactory.buildForChargeAdjustment(loan, balance, charges, adjustedCharge, transactionDate,
-                    transactionAmount);
-        } else {
-            // Decide the allocation across penalty/fee/principal following the loan's configured payment allocation
-            // order (principal-only when no order is configured), then materialize it onto the charges and refresh the
-            // balance.
-            allocationRequest = allocationRequestFactory.build(loan, balance, charges, transactionDate, transactionAmount, transactionType);
-        }
+        // Decide the allocation across penalty/fee/principal following the loan's configured payment allocation
+        // order (principal-only when no order is configured), then materialize it onto the charges and refresh the
+        // balance.
+        final WorkingCapitalLoanAllocationRequest allocationRequest = allocationRequestFactory.build(loan, balance, charges,
+                transactionDate, transactionAmount, transactionType);
         final WorkingCapitalLoanAllocationPlan allocationPlan = allocationProcessor.plan(allocationRequest);
         final WorkingCapitalLoanTransactionAllocation allocation = allocationApplier.apply(transaction, null, allocationPlan, charges);
         balanceUpdater.apply(balance, allocationPlan);
