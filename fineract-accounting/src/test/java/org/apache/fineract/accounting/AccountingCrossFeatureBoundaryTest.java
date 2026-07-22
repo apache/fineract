@@ -39,7 +39,7 @@ import org.springframework.modulith.core.ApplicationModules;
 
 class AccountingCrossFeatureBoundaryTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AccountingCrossFeatureBoundaryTest.class);
+    private static final Logger log = LoggerFactory.getLogger(AccountingCrossFeatureBoundaryTest.class);
 
     private static final String BASE = "org.apache.fineract";
     private static final String ACCOUNTING_PACKAGE = "org.apache.fineract.accounting";
@@ -112,19 +112,19 @@ class AccountingCrossFeatureBoundaryTest {
             }
         });
 
-        LOG.info("==== Accounting cross-feature dependency report ====");
-        LOG.info("base package         : {}", BASE);
-        LOG.info("-- source type -> referenced feature packages [owning artifact : status] --");
+        log.info("==== Accounting cross-feature dependency report ====");
+        log.info("base package         : {}", BASE);
+        log.info("-- source type -> referenced feature packages [owning artifact : status] --");
 
         sourceTypeToTargets.forEach((source, targets) -> {
-            LOG.info("source type          : {}", source);
-            LOG.info("referenced targets   : {}", targets);
+            log.info("source type          : {}", source);
+            log.info("referenced targets   : {}", targets);
         });
 
-        LOG.info("-- allowed dependencies --");
-        LOG.info("allowed from core    : {}", allowedFromCore);
-        LOG.info("-- dependency violations --");
-        LOG.info("violation features   : {}", violationFeatures);
+        log.info("-- allowed dependencies --");
+        log.info("allowed from core    : {}", allowedFromCore);
+        log.info("-- dependency violations --");
+        log.info("violation features   : {}", violationFeatures);
     }
 
     @Test

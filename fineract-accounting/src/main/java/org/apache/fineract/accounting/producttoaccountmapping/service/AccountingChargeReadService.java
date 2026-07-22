@@ -18,11 +18,11 @@
  */
 package org.apache.fineract.accounting.producttoaccountmapping.service;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 
 public interface AccountingChargeReadService {
 
-    List<ChargeData> findChargesByIds(Collection<Long> chargeIds);
+    List<ChargeData> findChargesByIds(Set<Long> chargeIds);
 }
