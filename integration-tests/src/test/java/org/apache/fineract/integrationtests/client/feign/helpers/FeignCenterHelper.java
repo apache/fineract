@@ -30,12 +30,14 @@ import org.apache.fineract.client.models.DeleteCentersCenterIdResponse;
 import org.apache.fineract.client.models.GetCentersCenterIdResponse;
 import org.apache.fineract.client.models.GetCentersPageItems;
 import org.apache.fineract.client.models.GetCentersResponse;
+import org.apache.fineract.client.models.GroupAssignStaffRequest;
+import org.apache.fineract.client.models.GroupAssignStaffResponse;
+import org.apache.fineract.client.models.GroupUnassignStaffRequest;
+import org.apache.fineract.client.models.GroupUnassignStaffResponse;
 import org.apache.fineract.client.models.PostCentersCenterIdChanges;
 import org.apache.fineract.client.models.PostCentersCenterIdRequest;
 import org.apache.fineract.client.models.PostCentersRequest;
 import org.apache.fineract.client.models.PostCentersResponse;
-import org.apache.fineract.client.models.PostGroupsGroupIdChanges;
-import org.apache.fineract.client.models.PostGroupsGroupIdRequest;
 import org.apache.fineract.client.models.PutCentersCenterIdRequest;
 import org.apache.fineract.client.models.PutCentersChanges;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
@@ -47,8 +49,6 @@ public class FeignCenterHelper {
     private static final String CREATED_DATE = "29 December 2014";
     private static final String GROUP_MEMBERS_ASSOCIATION = "groupMembers";
     private static final String ASSOCIATE_GROUPS_COMMAND = "associateGroups";
-    private static final String ASSIGN_STAFF_COMMAND = "assignStaff";
-    private static final String UNASSIGN_STAFF_COMMAND = "unassignStaff";
 
     private final FineractFeignClient fineractClient;
     private final NonPagedListingApi nonPagedListingApi;
@@ -58,27 +58,37 @@ public class FeignCenterHelper {
         this.nonPagedListingApi = fineractClient.create(NonPagedListingApi.class);
     }
 
-    /** Creates a center in {@code pending} status (active=false). */
+    /**
+     * Creates a center in {@code pending} status (active=false).
+     */
     public PostCentersResponse createCenter(String name, Long officeId) {
         return createCenter(centerRequest(name, officeId, null, null, null, null));
     }
 
-    /** Creates an {@code active} center with the given activation date. */
+    /**
+     * Creates an {@code active} center with the given activation date.
+     */
     public PostCentersResponse createActiveCenter(String name, Long officeId, String activationDate) {
         return createCenter(centerRequest(name, officeId, null, null, null, activationDate));
     }
 
-    /** Convenience: an {@code active} center in the default office (1) with a generated name. */
+    /**
+     * Convenience: an {@code active} center in the default office (1) with a generated name.
+     */
     public PostCentersResponse createActiveCenter() {
         return createActiveCenter(Utils.uniqueRandomStringGenerator("Center_Name_", 5), 1L, CREATED_DATE);
     }
 
-    /** Convenience: an {@code active} center in the default office (1) with a generated name and the given staff. */
+    /**
+     * Convenience: an {@code active} center in the default office (1) with a generated name and the given staff.
+     */
     public PostCentersResponse createActiveCenterWithStaff(Long staffId) {
         return createCenter(centerRequest(Utils.uniqueRandomStringGenerator("Center_Name_", 5), 1L, null, staffId, null, CREATED_DATE));
     }
 
-    /** Creates a center with external id, staff and group members; active iff an {@code activationDate} is supplied. */
+    /**
+     * Creates a center with external id, staff and group members; active iff an {@code activationDate} is supplied.
+     */
     public PostCentersResponse createCenter(String name, Long officeId, String externalId, Long staffId, List<Long> groupMembers,
             String activationDate) {
         return createCenter(centerRequest(name, officeId, externalId, staffId, groupMembers, activationDate));
@@ -120,7 +130,9 @@ public class FeignCenterHelper {
         return ok(() -> fineractClient.centers().retrieveOneCenter(centerId, Map.of("associations", GROUP_MEMBERS_ASSOCIATION)));
     }
 
-    /** Retrieves a center expecting failure (e.g. after deletion, or a non-existent id); returns the thrown error. */
+    /**
+     * Retrieves a center expecting failure (e.g. after deletion, or a non-existent id); returns the thrown error.
+     */
     public CallFailedRuntimeException retrieveCenterExpectingError(Long centerId) {
         return fail(() -> fineractClient.centers().retrieveOneCenter(centerId, Map.of("associations", GROUP_MEMBERS_ASSOCIATION)));
     }
@@ -138,30 +150,45 @@ public class FeignCenterHelper {
         return response.getPageItems() == null ? List.of() : new ArrayList<>(response.getPageItems());
     }
 
-    /** Updates a center with the given fields; returns the {@code changes} object. */
+    /**
+     * Updates a center with the given fields; returns the {@code changes} object.
+     */
     public PutCentersChanges updateCenter(Long centerId, PutCentersCenterIdRequest request) {
         return ok(() -> fineractClient.centers().updateCenter(centerId, request)).getChanges();
     }
 
-    /** Associates groups with the center; returns the associated group ids from the {@code changes} response. */
+    /**
+     * Associates groups with the center; returns the associated group ids from the {@code changes} response.
+     */
     public List<Long> associateGroups(Long centerId, List<Long> groupMembers) {
         PostCentersCenterIdChanges changes = ok(() -> fineractClient.centers().handleCommandsCenter(centerId,
                 new PostCentersCenterIdRequest().groupMembers(groupMembers), ASSOCIATE_GROUPS_COMMAND)).getChanges();
         return changes.getGroupMembers().stream().map(Long::valueOf).toList();
     }
 
-    /** Assigns a staff member to the center; returns the {@code changes} object. */
-    public PostGroupsGroupIdChanges assignStaff(Long centerId, Long staffId) {
-        return postGroupCommand(centerId, ASSIGN_STAFF_COMMAND, new PostGroupsGroupIdRequest().staffId(staffId));
+    /**
+     * Assigns a staff member to the center; returns the staffId from changes.
+     */
+    public Long assignStaff(Long centerId, Long staffId) {
+        GroupAssignStaffRequest request = new GroupAssignStaffRequest().staffId(staffId);
+        GroupAssignStaffResponse response = ok(() -> fineractClient.groups().assignStaff(centerId, request));
+        return extractStaffId(response.getChanges());
     }
 
-    /** Unassigns the staff member from the center; returns the {@code changes} object (staffId becomes null). */
-    public PostGroupsGroupIdChanges unassignStaff(Long centerId, Long staffId) {
-        return postGroupCommand(centerId, UNASSIGN_STAFF_COMMAND, new PostGroupsGroupIdRequest().staffId(staffId));
+    /**
+     * Unassigns the staff member from the center; returns the staffId after (null if unset).
+     */
+    public Long unassignStaff(Long centerId, Long staffId) {
+        GroupUnassignStaffRequest request = new GroupUnassignStaffRequest().staffId(staffId);
+        GroupUnassignStaffResponse response = ok(() -> fineractClient.groups().unassignLoanOfficerGroup(centerId, request));
+        return extractStaffId(response.getChanges());
     }
 
-    // A center is a group server-side: the /centers command endpoint rejects assignStaff/unassignStaff.
-    private PostGroupsGroupIdChanges postGroupCommand(Long centerId, String command, PostGroupsGroupIdRequest request) {
-        return ok(() -> fineractClient.groups().handleCommandsGroup(centerId, request, Map.of("command", command))).getChanges();
+    private static Long extractStaffId(Map<String, Object> changes) {
+        if (changes == null) {
+            return null;
+        }
+        Object v = changes.get("staffId");
+        return v == null ? null : Long.valueOf(v.toString());
     }
 }

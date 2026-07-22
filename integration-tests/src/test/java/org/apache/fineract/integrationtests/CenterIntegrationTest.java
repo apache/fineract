@@ -197,7 +197,7 @@ public class CenterIntegrationTest {
         Long centerId = centerHelper.createActiveCenter().getResourceId();
         assertEquals(centerId, centerHelper.retrieveCenter(centerId).getId());
 
-        assertEquals(staffId, centerHelper.assignStaff(centerId, staffId).getStaffId(), "Verify assigned staff id is the same as id sent");
+        assertEquals(staffId, centerHelper.assignStaff(centerId, staffId), "Verify assigned staff id is the same as id sent");
 
         GetCentersCenterIdResponse center = centerHelper.retrieveCenter(centerId);
         assertNotNull(center);
@@ -213,13 +213,13 @@ public class CenterIntegrationTest {
         Long centerId = centerHelper.createActiveCenter().getResourceId();
         assertEquals(centerId, centerHelper.retrieveCenter(centerId).getId());
 
-        assertEquals(staffId, centerHelper.assignStaff(centerId, staffId).getStaffId(), "Verify assigned staff id is the same as id sent");
+        assertEquals(staffId, centerHelper.assignStaff(centerId, staffId), "Verify assigned staff id is the same as id sent");
         GetCentersCenterIdResponse centerWithStaffAssigned = centerHelper.retrieveCenter(centerId);
         assertNotNull(centerWithStaffAssigned);
         assertEquals(centerId, centerWithStaffAssigned.getId());
         assertEquals(staffId, centerWithStaffAssigned.getStaffId());
 
-        assertNull(centerHelper.unassignStaff(centerId, staffId).getStaffId(), "Verify staffId is null after unassigning");
+        assertNull(centerHelper.unassignStaff(centerId, staffId), "Verify staffId is null after unassigning");
         GetCentersCenterIdResponse centerWithStaffUnassigned = centerHelper.retrieveCenter(centerId);
         assertNotNull(centerWithStaffUnassigned);
         assertEquals(centerId, centerWithStaffUnassigned.getId());

@@ -16,28 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.portfolio.group.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.group.data.GroupUnassignStaffRequest;
+import org.apache.fineract.portfolio.group.data.GroupUnassignStaffResponse;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "GROUP", action = "ASSOCIATECLIENTS")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class AssociateClientsToGroupCommandHandler implements NewCommandSourceHandler {
+public class GroupUnassignStaffCommandHandler implements CommandHandler<GroupUnassignStaffRequest, GroupUnassignStaffResponse> {
 
     private final GroupingTypesWritePlatformService writePlatformService;
 
-    @Transactional
+    @Retry(name = "commandGroupUnassignStaff", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    public GroupUnassignStaffResponse handle(Command<GroupUnassignStaffRequest> command) {
+        return writePlatformService.unassignGroupStaff(command.getPayload());
+    }
 
-        return this.writePlatformService.associateClientsToGroup(command.entityId(), command);
+    @Override
+    public GroupUnassignStaffResponse fallback(Command<GroupUnassignStaffRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }

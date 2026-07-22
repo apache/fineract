@@ -108,8 +108,7 @@ public class GroupHelper {
     @Deprecated(forRemoval = true)
     public static Integer associateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final String clientMember) {
-        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=associateClients&"
-                + Utils.TENANT_IDENTIFIER;
+        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "/associateClients?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------Associate Client To A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
     }
@@ -120,7 +119,7 @@ public class GroupHelper {
     @Deprecated(forRemoval = true)
     public static Integer disAssociateClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final String clientMember) {
-        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=disassociateClients&"
+        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "/disassociateClients?"
                 + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------Disassociate Client To A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, associateClientAsJSON(clientMember), "groupId");
@@ -132,7 +131,7 @@ public class GroupHelper {
     @Deprecated(forRemoval = true)
     public static Integer activateGroup(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId) {
-        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "?command=activate&" + Utils.TENANT_IDENTIFIER;
+        final String GROUP_ASSOCIATE_URL = "/fineract-provider/api/v1/groups/" + groupId + "/activate?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------Activate A GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSOCIATE_URL, activateGroupAsJSON(""), "groupId");
     }
@@ -165,9 +164,8 @@ public class GroupHelper {
     @Deprecated(forRemoval = true)
     public static Object assignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,
             final Long staffId) {
-        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
-                + "&command=assignStaff";
-        LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
+        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "/assignStaff?" + Utils.TENANT_IDENTIFIER;
+        LOG.info("---------------------------------ASSIGN STAFF TO GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL, assignStaffAsJSON(staffId), "changes");
     }
 
@@ -177,8 +175,7 @@ public class GroupHelper {
     @Deprecated(forRemoval = true)
     public static Object assignStaffInheritStaffForClientAccounts(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, final String groupId, final String staffId) {
-        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
-                + "&command=assignStaff";
+        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "/assignStaff?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------DELETE GROUP---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL,
                 assignStaffAndInheritStaffForClientAccountsAsJSON(staffId), "changes");
