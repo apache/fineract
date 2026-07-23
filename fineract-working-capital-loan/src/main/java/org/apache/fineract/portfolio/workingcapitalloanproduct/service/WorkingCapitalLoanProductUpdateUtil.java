@@ -29,6 +29,7 @@ import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanBreachStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes;
@@ -141,6 +142,16 @@ public class WorkingCapitalLoanProductUpdateUtil {
             final String newValue = command.stringValueOfParameterNamed(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName);
             changes.put(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, newValue);
             relatedDetail.setDelinquencyStartType(WorkingCapitalLoanDelinquencyStartType.fromString(newValue));
+        }
+        final String currentBreachStartType = (relatedDetail.getBreachStartType() != null) ? relatedDetail.getBreachStartType().name()
+                : null;
+        if (command.isChangeInStringParameterNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName, currentBreachStartType)) {
+            final String newValue = command.stringValueOfParameterNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName);
+            final WorkingCapitalLoanBreachStartType parsedBreachStartType = WorkingCapitalLoanBreachStartType.fromString(newValue);
+            final WorkingCapitalLoanBreachStartType newBreachStartType = parsedBreachStartType != null ? parsedBreachStartType
+                    : WorkingCapitalLoanBreachStartType.DISBURSEMENT;
+            changes.put(WorkingCapitalLoanProductConstants.breachStartTypeParamName, newBreachStartType.getCode());
+            relatedDetail.setBreachStartType(newBreachStartType);
         }
         return changes;
     }

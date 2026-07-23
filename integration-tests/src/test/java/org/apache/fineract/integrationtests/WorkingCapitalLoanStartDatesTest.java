@@ -136,6 +136,56 @@ public class WorkingCapitalLoanStartDatesTest {
         });
     }
 
+    // Breach anchor = LOAN_CREATION -> breachStartDate must be submittedOnDate (2025-12-20) + breachGraceDays (5) =
+    // 2025-12-25 (rather than anchoring on the disbursement date 2026-01-01).
+    @Test
+    public void testBreachStartDateUsesLoanCreationDateWhenConfigured() {
+        AtomicLong loanIdRef = new AtomicLong();
+
+        // given - a WC loan submitted on 2025-12-20 but disbursed on 2026-01-01, with breachStartType = LOAN_CREATION
+        BusinessDateHelper.runAt("01 January 2026", () -> {
+            loanIdRef.set(createDisbursedLoanWithBreachStartType(SUBMITTED_ON_DATE, "LOAN_CREATION"));
+        });
+
+        BusinessDateHelper.runAt("21 January 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
+                    new InlineJobRequest().addLoanIdsItem(loanId)));
+
+            final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
+            final GetWorkingCapitalLoansLoanIdResponse response = loanHelper.retrieveLoan(loanId);
+
+            // breachStartDate must anchor on the loan submitted-on (creation) date, not the disbursement date, plus the
+            // breachGraceDays.
+            assertEquals(SUBMITTED_ON_DATE.plusDays(BREACH_GRACE_DAYS), response.getBreachStartDate(),
+                    "breachStartDate should anchor on submittedOnDate + breachGraceDays when breachStartType = LOAN_CREATION");
+        });
+    }
+
+    // Breach anchor = DISBURSEMENT (explicit) -> breachStartDate must be disbursementDate (2026-01-01) +
+    // breachGraceDays
+    // (5) = 2026-01-06.
+    @Test
+    public void testBreachStartDateUsesDisbursementDateWhenConfigured() {
+        AtomicLong loanIdRef = new AtomicLong();
+
+        BusinessDateHelper.runAt("01 January 2026", () -> {
+            loanIdRef.set(createDisbursedLoanWithBreachStartType(null, "DISBURSEMENT"));
+        });
+
+        BusinessDateHelper.runAt("21 January 2026", () -> {
+            final Long loanId = loanIdRef.get();
+            ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
+                    new InlineJobRequest().addLoanIdsItem(loanId)));
+
+            final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
+            final GetWorkingCapitalLoansLoanIdResponse response = loanHelper.retrieveLoan(loanId);
+
+            assertEquals(DISBURSEMENT_DATE.plusDays(BREACH_GRACE_DAYS), response.getBreachStartDate(),
+                    "breachStartDate should anchor on disbursementDate + breachGraceDays when breachStartType = DISBURSEMENT");
+        });
+    }
+
     @Test
     public void testStartDatesAreNullForHealthyLoan() {
         BusinessDateHelper.runAt("01 January 2026", () -> {
@@ -206,6 +256,53 @@ public class WorkingCapitalLoanStartDatesTest {
         loanHelper.approveById(loanId, WorkingCapitalLoanApplicationTestBuilder.buildApproveRequest(DISBURSEMENT_DATE, PRINCIPAL, null));
         loanHelper.disburseById(loanId, WorkingCapitalLoanDisbursementTestBuilder.buildDisburseRequest(DISBURSEMENT_DATE, PRINCIPAL));
         log.info("Created disbursed WC loan {} for start-date validation", loanId);
+        return loanId;
+    }
+
+    /**
+     * Mirrors {@link #createDisbursedLoan(LocalDate, String)} but configures the product with an explicit breach
+     * start-date-type anchor.
+     */
+    private Long createDisbursedLoanWithBreachStartType(final LocalDate submittedOnDate, final String breachStartType) {
+        final List<Long> rangeIds = createDelinquencyRanges();
+        final PostDelinquencyBucketResponse bucketResponse = WorkingCapitalLoanDelinquencyRangeScheduleHelper
+                .createWorkingCapitalLoanDelinquencyBucket(rangeIds, DELINQUENCY_FREQUENCY_DAYS, 0, DELINQUENCY_MIN_PAYMENT_PERCENT, 1);
+        assertNotNull(bucketResponse);
+
+        final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
+        final Long breachId = breachHelper.create(breachHelper.createBreachRequest(Utils.uniqueRandomStringGenerator("WCL_Breach_", 6),
+                BREACH_FREQUENCY_DAYS, "DAYS", "FLAT", BREACH_AMOUNT));
+        assertNotNull(breachId);
+
+        final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
+        final String uniqueName = "WCL Product " + UUID.randomUUID().toString().substring(0, 8);
+        final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
+        final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder() //
+                .withName(uniqueName) //
+                .withShortName(uniqueShortName) //
+                .withDelinquencyBucketId(bucketResponse.getResourceId()) //
+                .withDelinquencyGraceDays(DELINQUENCY_GRACE_DAYS) //
+                .withBreachId(breachId) //
+                .withBreachGraceDays(BREACH_GRACE_DAYS) //
+                .withBreachStartType(breachStartType) //
+                .build()).getResourceId();
+        assertNotNull(productId);
+
+        final Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
+        final Long loanId = loanHelper.submit(new WorkingCapitalLoanApplicationTestBuilder() //
+                .withClientId(clientId) //
+                .withProductId(productId) //
+                .withPrincipal(PRINCIPAL) //
+                .withSubmittedOnDate(submittedOnDate) //
+                .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
+                .withTotalPaymentVolume(TOTAL_PAYMENT_VOLUME) //
+                .buildSubmitRequest());
+        assertNotNull(loanId);
+
+        loanHelper.approveById(loanId, WorkingCapitalLoanApplicationTestBuilder.buildApproveRequest(DISBURSEMENT_DATE, PRINCIPAL, null));
+        loanHelper.disburseById(loanId, WorkingCapitalLoanDisbursementTestBuilder.buildDisburseRequest(DISBURSEMENT_DATE, PRINCIPAL));
+        log.info("Created disbursed WC loan {} with breachStartType={} for start-date validation", loanId, breachStartType);
         return loanId;
     }
 

@@ -76,6 +76,7 @@ public interface WorkingCapitalLoanMapper {
     @Mapping(target = "delinquencyGraceDays", source = "loanProductRelatedDetails.delinquencyGraceDays")
     @Mapping(target = "delinquencyStartType", source = "loanProductRelatedDetails", qualifiedByName = "delinquencyStartTypeData")
     @Mapping(target = "breachGraceDays", source = "loanProductRelatedDetails.breachGraceDays")
+    @Mapping(target = "breachStartType", source = "loanProductRelatedDetails", qualifiedByName = "breachStartTypeData")
     @Mapping(target = "breachStartDate", ignore = true)
     @Mapping(target = "delinquencyStartDate", ignore = true)
     @Mapping(target = "delinquent", ignore = true)
@@ -119,6 +120,11 @@ public interface WorkingCapitalLoanMapper {
     default StringEnumOptionData delinquencyStartTypeData(final WorkingCapitalLoanProductRelatedDetails detail) {
         return (detail != null && detail.getDelinquencyStartType() != null) ? detail.getDelinquencyStartType().toStringEnumOptionData()
                 : null;
+    }
+
+    @Named("breachStartTypeData")
+    default StringEnumOptionData breachStartTypeData(final WorkingCapitalLoanProductRelatedDetails detail) {
+        return (detail != null && detail.getBreachStartType() != null) ? detail.getBreachStartType().toStringEnumOptionData() : null;
     }
 
     @Named("amortizationTypeData")

@@ -37,6 +37,7 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapit
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalPaymentAllocationData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAccountingRuleType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanBreachStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes;
@@ -73,6 +74,7 @@ public interface WorkingCapitalLoanProductMapper {
     @Mapping(target = "delinquencyGraceDays", source = "relatedDetail.delinquencyGraceDays")
     @Mapping(target = "delinquencyStartType", source = "relatedDetail.delinquencyStartType", qualifiedByName = "delinquencyStartTypeToStringEnumOptionData")
     @Mapping(target = "breachGraceDays", source = "relatedDetail.breachGraceDays")
+    @Mapping(target = "breachStartType", source = "relatedDetail.breachStartType", qualifiedByName = "breachStartTypeToStringEnumOptionData")
     @Mapping(target = "accountingRule", source = "accountingRule", qualifiedByName = "accountingRuleToStringEnumOptionData")
     @Mapping(target = "accountingMappings", ignore = true)
     @Mapping(target = "paymentChannelToFundSourceMappings", ignore = true)
@@ -95,6 +97,7 @@ public interface WorkingCapitalLoanProductMapper {
     @Mapping(target = "applyTemplate", ignore = true)
     @Mapping(target = "delinquencyBucketOptions", ignore = true)
     @Mapping(target = "delinquencyStartTypeOptions", ignore = true)
+    @Mapping(target = "breachStartTypeOptions", ignore = true)
     @Mapping(target = "delinquencyMinimumPaymentTypeOptions", ignore = true)
     @Mapping(target = "nearBreachOptions", ignore = true)
     @Mapping(target = "chargeOffReasonOptions", ignore = true)
@@ -136,6 +139,11 @@ public interface WorkingCapitalLoanProductMapper {
     default StringEnumOptionData delinquencyStartTypeToStringEnumOptionData(
             final WorkingCapitalLoanDelinquencyStartType delinquencyStartType) {
         return delinquencyStartType != null ? delinquencyStartType.getValueAsStringEnumOptionData() : null;
+    }
+
+    @Named("breachStartTypeToStringEnumOptionData")
+    default StringEnumOptionData breachStartTypeToStringEnumOptionData(final WorkingCapitalLoanBreachStartType breachStartType) {
+        return breachStartType != null ? breachStartType.getValueAsStringEnumOptionData() : null;
     }
 
     @Named("paymentAllocationRulesToData")
