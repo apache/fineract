@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.serialization.gson.JsonExclude;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
 /**
@@ -75,14 +76,24 @@ public final class ProjectedAmortizationScheduleModel {
     private final int npvDayCount;
     private final LocalDate expectedDisbursementDate;
 
-    /** {@code (TPV × periodPaymentRate) / npvDayCount} — constant across payments. */
+    /** {@code (TPV × periodPaymentRate) / npvDayCount} — constant across all but the final payment. */
     private final Money expectedPaymentAmount;
+
+    /**
+     * Final-period payment: the remainder {@code (netDisbursementAmount + discountFeeAmount) − (originalPaymentNumber −
+     * 1) × expectedPaymentAmount}. Equals {@link #expectedPaymentAmount} when the schedule divides evenly.
+     */
+    private final Money finalPaymentAmount;
 
     /** {@code roundUp((netDisbursementAmount + discountFeeAmount) / expectedPaymentAmount)} */
     @SerializedName(value = "originalPaymentNumber", alternate = "loanTerm")
     private final int originalPaymentNumber;
 
-    /** Periodic EIR from {@code RATE(originalPaymentNumber, -expectedPayment, netDisbursementAmount)}. */
+    /**
+     * Periodic effective rate, solved as {@code IRR([−netDisbursement, expectedPayment × (n−1), finalPayment])} and
+     * seeded with a linear rate estimate. Because the cash flow carries the smaller final remainder payment rather than
+     * assuming a uniform payment throughout, this is zero exactly when the loan carries no discount fee.
+     */
     private final BigDecimal effectiveInterestRate;
 
     @JsonExclude
@@ -112,8 +123,8 @@ public final class ProjectedAmortizationScheduleModel {
 
     private ProjectedAmortizationScheduleModel(final Money discountFeeAmount, final Money netDisbursementAmount,
             final Money totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount,
-            final LocalDate expectedDisbursementDate, final Money expectedPaymentAmount, final int originalPaymentNumber,
-            final BigDecimal effectiveInterestRate, final MathContext mc, final CurrencyData currency,
+            final LocalDate expectedDisbursementDate, final Money expectedPaymentAmount, final Money finalPaymentAmount,
+            final int originalPaymentNumber, final BigDecimal effectiveInterestRate, final MathContext mc, final CurrencyData currency,
             final LocalDate currentBusinessDate) {
         this.discountFeeAmount = discountFeeAmount;
         this.netDisbursementAmount = netDisbursementAmount;
@@ -122,6 +133,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.npvDayCount = npvDayCount;
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.expectedPaymentAmount = expectedPaymentAmount;
+        this.finalPaymentAmount = finalPaymentAmount;
         this.originalPaymentNumber = originalPaymentNumber;
         this.effectiveInterestRate = effectiveInterestRate;
         this.mc = mc;
@@ -149,6 +161,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.npvDayCount = 0;
         this.expectedDisbursementDate = null;
         this.expectedPaymentAmount = null;
+        this.finalPaymentAmount = null;
         this.originalPaymentNumber = 0;
         this.effectiveInterestRate = null;
         this.mc = mc;
@@ -269,10 +282,27 @@ public final class ProjectedAmortizationScheduleModel {
         return last.startDayIndex() + last.segmentTerm() - overlap;
     }
 
+    /**
+     * {@code (TPV × periodPaymentRate) / npvDayCount / 100}, rounded to the loan currency's decimal places. Rounding is
+     * intrinsic: the daily payment is what the borrower is billed, so it must be an amount actually payable in the loan
+     * currency (matches the reference model's {@code ROUND(TPV*rate/dayCount, 2)} and the platform's Money rounding).
+     *
+     * <p>
+     * A positive payment rate always bills something, so when the exact amount is positive but too small to survive the
+     * rounding it is raised to one minor currency unit rather than collapsing to zero. Zero is not a payment the
+     * borrower can make: it would leave the schedule with no way to repay the balance, and dividing the gross payable
+     * by it to derive the term is undefined. Only this degenerate case is affected — any amount that already rounds to
+     * a payable value is untouched.
+     */
     private static BigDecimal computeDailyPayment(final BigDecimal totalPaymentValue, final BigDecimal periodPaymentRate,
-            final int npvDayCount, final MathContext mc) {
-        return totalPaymentValue.multiply(periodPaymentRate, mc).divide(BigDecimal.valueOf(npvDayCount), mc).divide(BigDecimal.valueOf(100),
-                mc);
+            final int npvDayCount, final int currencyScale, final MathContext mc) {
+        final BigDecimal exact = totalPaymentValue.multiply(periodPaymentRate, mc).divide(BigDecimal.valueOf(npvDayCount), mc)
+                .divide(BigDecimal.valueOf(100), mc);
+        final BigDecimal rounded = exact.setScale(currencyScale, mc.getRoundingMode());
+        if (rounded.signum() == 0 && exact.signum() > 0) {
+            return BigDecimal.ONE.movePointLeft(currencyScale);
+        }
+        return rounded;
     }
 
     /**
@@ -280,14 +310,16 @@ public final class ProjectedAmortizationScheduleModel {
      * inputs are treated as calculable so the caller's mandatory-field validation reports them instead.
      */
     public static boolean isEirCalculable(final BigDecimal discountFeeAmount, final BigDecimal netDisbursementAmount,
-            final BigDecimal totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount, final MathContext mc) {
+            final BigDecimal totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount, MonetaryCurrency currency,
+            final MathContext mc) {
         if (discountFeeAmount == null || netDisbursementAmount == null || totalPaymentVolume == null || periodPaymentRate == null) {
             return true;
         }
         if (netDisbursementAmount.signum() <= 0 || npvDayCount <= 0) {
             return false;
         }
-        final BigDecimal dailyPayment = computeDailyPayment(totalPaymentVolume, periodPaymentRate, npvDayCount, mc);
+        final BigDecimal dailyPayment = computeDailyPayment(totalPaymentVolume, periodPaymentRate, npvDayCount,
+                currency.getDigitsAfterDecimal(), mc);
         if (dailyPayment.signum() <= 0) {
             return false;
         }
@@ -295,8 +327,17 @@ public final class ProjectedAmortizationScheduleModel {
         if (totalDays.signum() <= 0 || totalDays.compareTo(BigDecimal.valueOf(MAX_CALCULABLE_TOTAL_DAYS)) > 0) {
             return false;
         }
+        final BigDecimal grossPayable = netDisbursementAmount.add(discountFeeAmount, mc);
+        final int paymentNumber = grossPayable.divide(dailyPayment, mc).setScale(0, RoundingMode.UP).intValueExact();
+        if (paymentNumber <= 0) {
+            throw new IllegalArgumentException("computed paymentNumber must be positive, got: " + paymentNumber);
+        }
+
+        // The final period pays only the remainder of the gross payable after the (n-1) full daily payments. When the
+        // schedule divides evenly this equals the daily payment.
+        final BigDecimal finalPayment = grossPayable.subtract(dailyPayment.multiply(BigDecimal.valueOf(paymentNumber - 1L), mc), mc);
         try {
-            TvmFunctions.rate(totalDays.intValueExact(), dailyPayment.negate(), netDisbursementAmount, mc);
+            TvmFunctions.irr(buildEirCashFlows(netDisbursementAmount, dailyPayment, finalPayment, paymentNumber), mc);
         } catch (final ArithmeticException | IllegalArgumentException | IllegalStateException e) {
             return false;
         }
@@ -320,22 +361,63 @@ public final class ProjectedAmortizationScheduleModel {
             throw new IllegalArgumentException("npvDayCount must be positive");
         }
 
-        final BigDecimal expectedPayment = computeDailyPayment(totalPaymentVolume, periodPaymentRate, npvDayCount, mc);
-        if (expectedPayment.signum() <= 0) {
-            throw new IllegalArgumentException("expectedPaymentAmount must be positive (check totalPaymentVolume and periodPaymentRate)");
-        }
-
-        final int originalPaymentNumber = netDisbursementAmount.add(discountFeeAmount, mc).divide(expectedPayment, mc)
-                .setScale(0, RoundingMode.UP).intValueExact();
-        if (originalPaymentNumber <= 0) {
-            throw new IllegalArgumentException("computed originalPaymentNumber must be positive, got: " + originalPaymentNumber);
-        }
-
-        final BigDecimal eir = TvmFunctions.rate(originalPaymentNumber, expectedPayment.negate(), netDisbursementAmount, mc);
+        final ScheduleParams params = computeScheduleParams(netDisbursementAmount, discountFeeAmount, totalPaymentVolume, periodPaymentRate,
+                npvDayCount, currency, mc);
 
         return new ProjectedAmortizationScheduleModel(Money.of(currency, discountFeeAmount, mc),
                 Money.of(currency, netDisbursementAmount, mc), Money.of(currency, totalPaymentVolume, mc), periodPaymentRate, npvDayCount,
-                expectedDisbursementDate, Money.of(currency, expectedPayment, mc), originalPaymentNumber, eir, mc, currency, currentDate);
+                expectedDisbursementDate, Money.of(currency, params.dailyPayment(), mc), Money.of(currency, params.finalPayment(), mc),
+                params.paymentNumber(), params.eir(), mc, currency, currentDate);
+    }
+
+    /**
+     * Derives the amortization parameters for a schedule (or a rate-change sub-schedule): the currency-rounded daily
+     * payment, the round-up payment count, the smaller remainder final payment, and the EIR as the IRR of the resulting
+     * non-uniform cash-flow series. Shared by {@link #generate} and {@link #applyRateChange} so the base schedule and
+     * every rate segment are computed identically.
+     */
+    private static ScheduleParams computeScheduleParams(final BigDecimal netDisbursement, final BigDecimal discountFee,
+            final BigDecimal totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount, final CurrencyData currency,
+            final MathContext mc) {
+        // The daily payment is rounded to the loan currency, so every downstream value — payment number, remainder, EIR
+        // and balances — is derived from the same amount the borrower is actually billed.
+        final BigDecimal dailyPayment = computeDailyPayment(totalPaymentVolume, periodPaymentRate, npvDayCount, currency.getDecimalPlaces(),
+                mc);
+        if (dailyPayment.signum() <= 0) {
+            throw new IllegalArgumentException("daily payment must be positive (check totalPaymentVolume and periodPaymentRate)");
+        }
+
+        final BigDecimal grossPayable = netDisbursement.add(discountFee, mc);
+        final int paymentNumber = grossPayable.divide(dailyPayment, mc).setScale(0, RoundingMode.UP).intValueExact();
+        if (paymentNumber <= 0) {
+            throw new IllegalArgumentException("computed paymentNumber must be positive, got: " + paymentNumber);
+        }
+
+        // The final period pays only the remainder of the gross payable after the (n-1) full daily payments. When the
+        // schedule divides evenly this equals the daily payment.
+        final BigDecimal finalPayment = grossPayable.subtract(dailyPayment.multiply(BigDecimal.valueOf(paymentNumber - 1L), mc), mc);
+
+        // EIR is the IRR of the actual (non-uniform) cash-flow series. The IRR seeds its Newton-Raphson search from a
+        // linear estimate of the series, so no separate uniform-annuity RATE solve is needed.
+        final BigDecimal eir = TvmFunctions.irr(buildEirCashFlows(netDisbursement, dailyPayment, finalPayment, paymentNumber), mc);
+
+        return new ScheduleParams(dailyPayment, paymentNumber, finalPayment, eir);
+    }
+
+    /**
+     * Builds the cash-flow series for the EIR/IRR solve:
+     * {@code [−netDisbursement, dailyPayment × (n−1), finalPayment]}. The day-0 flow is the negated outstanding
+     * balance; the periodic payments follow, the last being the remainder.
+     */
+    private static List<BigDecimal> buildEirCashFlows(final BigDecimal netDisbursementAmount, final BigDecimal dailyPayment,
+            final BigDecimal finalPayment, final int paymentNumber) {
+        final List<BigDecimal> cashFlows = new ArrayList<>(paymentNumber + 1);
+        cashFlows.add(netDisbursementAmount.negate());
+        for (int i = 0; i < paymentNumber - 1; i++) {
+            cashFlows.add(dailyPayment);
+        }
+        cashFlows.add(finalPayment);
+        return cashFlows;
     }
 
     /** First-period offset: 0 when a disbursement-date repayment shifts the grid onto the disbursement date, else 1. */
@@ -479,8 +561,9 @@ public final class ProjectedAmortizationScheduleModel {
 
         // Segment starts on the period whose date == rateChangeDate. Convert the calendar-day rawSplitDayIndex
         // to a period number via the first-period offset (0 when a disbursement-date repayment shifted the grid),
-        // else the new rate starts one day early. Clamped to the base term (past-term change starts there).
-        final int splitDayIndex = Math.min(rawSplitDayIndex + (1 - currentFirstPeriodDayOffset()), originalPaymentNumber);
+        // else the new rate starts one day early. Clamped to the active (effective) term so a change at/after the
+        // current end of an already-segmented schedule starts on the final period.
+        final int splitDayIndex = Math.min(rawSplitDayIndex + (1 - currentFirstPeriodDayOffset()), effectiveTotalTerm());
 
         // Remove existing segments at or after split (supports overwrite on second rate change)
         // Guard against null rateSegments from V1 model deserialization
@@ -500,15 +583,17 @@ public final class ProjectedAmortizationScheduleModel {
             }
         }
 
-        // Compute balance at split: if past term, use remaining principal; otherwise use base amortization
+        // Compute balance at split: if past the active term, use remaining principal; otherwise follow the currently
+        // active segment chain (earlier rate changes still apply) up to the period before the split.
         final BigDecimal balanceAtSplit;
-        if (rawSplitDayIndex >= originalPaymentNumber) {
+        if (rawSplitDayIndex >= effectiveTotalTerm()) {
             balanceAtSplit = netDisbursementAmount.getAmount().subtract(paymentsReceived, mc);
         } else if (splitDayIndex > 1) {
-            // Balance at the end of the LAST base period (splitDayIndex-1), not at splitDayIndex itself
-            final int lastBasePeriod = splitDayIndex - 1;
-            final BalancesAndAmortizations ba = computeBaseBalancesUpTo(lastBasePeriod);
-            balanceAtSplit = ba.balances().get(lastBasePeriod - 1).getAmount();
+            // Balance at the end of the LAST period before the split (splitDayIndex-1), computed segment-aware so a
+            // prior rate change's payment/EIR is honoured, not the base schedule's.
+            final int lastPeriodBeforeSplit = splitDayIndex - 1;
+            final BalancesAndAmortizations ba = computeBalancesAndAmortizations(lastPeriodBeforeSplit);
+            balanceAtSplit = ba.balances().get(lastPeriodBeforeSplit - 1).getAmount();
         } else {
             balanceAtSplit = netDisbursementAmount.getAmount();
         }
@@ -519,18 +604,26 @@ public final class ProjectedAmortizationScheduleModel {
 
         final BigDecimal newNetDisb = balanceAtSplit;
         final BigDecimal newDiscount;
-        if (rawSplitDayIndex >= originalPaymentNumber) {
+        if (rawSplitDayIndex >= effectiveTotalTerm()) {
             newDiscount = origDiscount.add(origNet, mc).subtract(balanceAtSplit, mc).subtract(paymentsReceived, mc);
         } else {
-            final BigDecimal baseExpectedPayment = expectedPaymentAmount.getAmount();
-            final BigDecimal consumedByBaseSchedule = baseExpectedPayment.multiply(BigDecimal.valueOf(splitDayIndex - 1L), mc);
-            final BigDecimal remainingTotal = origNet.add(origDiscount, mc).subtract(consumedByBaseSchedule, mc).subtract(paymentsReceived,
-                    mc);
+            // Periods billed before the split are 1..(splitDayIndex-1); sum their expected payments segment-aware so a
+            // prior rate change's payment amount is counted (not the base payment). The loop is empty for a day-0/day-1
+            // change (segment covers the whole schedule), so nothing is spuriously added back to the discount.
+            BigDecimal consumedBeforeSplit = BigDecimal.ZERO;
+            for (int day = 1; day < splitDayIndex; day++) {
+                consumedBeforeSplit = consumedBeforeSplit.add(expectedPaymentForDay(day), mc);
+            }
+            // Stay entirely on the expected track: balanceAtSplit and consumedBeforeSplit both come from the projected
+            // schedule, which already assumes each period before the split was paid. Deducting the actual payments
+            // received here as well would remove them a second time and understate the fee the segment still has to
+            // earn. (The past-term branch above rebases on an actual-payment balance, so it deducts them there.)
+            final BigDecimal remainingTotal = origNet.add(origDiscount, mc).subtract(consumedBeforeSplit, mc);
             newDiscount = remainingTotal.subtract(balanceAtSplit, mc);
         }
         final int scale = currency.getDecimalPlaces();
-        final BigDecimal newDailyPayment = computeDailyPayment(tpv, newPeriodPaymentRate, npvDayCount, mc).setScale(scale,
-                mc.getRoundingMode());
+        final BigDecimal newDailyPayment = computeDailyPayment(tpv, newPeriodPaymentRate, npvDayCount, currency.getDecimalPlaces(), mc)
+                .setScale(scale, mc.getRoundingMode());
         final BigDecimal fractionalTotalDays = newNetDisb.add(newDiscount, mc).divide(newDailyPayment, mc).setScale(scale,
                 mc.getRoundingMode());
         // Checked on the BigDecimal so int overflow cannot slip past the cap; the EIR solver may still succeed on an
@@ -539,31 +632,20 @@ public final class ProjectedAmortizationScheduleModel {
             throw new IllegalStateException("rate change produces a term of " + fractionalTotalDays + " days, above the calculable cap of "
                     + MAX_CALCULABLE_TOTAL_DAYS);
         }
-        final int newTerm = fractionalTotalDays.intValue();
 
-        // When daily payment exceeds remaining gross (e.g., very short-term loan with high TPV),
-        // the fractional term rounds to 0. Use at least 1 period.
-        final int safeTerm = Math.max(newTerm, 1);
         if (newNetDisb.signum() <= 0) {
             throw new IllegalArgumentException("balance at split must be positive for rate change");
         }
 
-        final BigDecimal newEir = TvmFunctions.rate(safeTerm, newDailyPayment.negate(), newNetDisb, mc);
+        // The segment is a fresh sub-schedule of the remaining balance + discount at the new rate: round-up term,
+        // remainder final payment and IRR EIR, computed identically to the base schedule.
+        final ScheduleParams segment = computeScheduleParams(newNetDisb, newDiscount, tpv, newPeriodPaymentRate, npvDayCount, currency, mc);
 
-        rateSegments.add(new RateSegment(splitDayIndex, money(newDailyPayment), safeTerm, newEir, money(newNetDisb), money(newDiscount)));
+        rateSegments.add(new RateSegment(splitDayIndex, money(segment.dailyPayment()), segment.paymentNumber(), segment.eir(),
+                money(newNetDisb), money(newDiscount), money(segment.finalPayment())));
         rateSegments.sort(Comparator.comparingInt(RateSegment::startDayIndex));
 
         rebuildPayments();
-    }
-
-    /**
-     * Removes the last rate change segment without triggering a rebuild. Use when a subsequent operation (e.g.,
-     * {@link #applyRateChange}) will rebuild anyway.
-     */
-    public void clearLastRateSegment() {
-        if (rateSegments != null && !rateSegments.isEmpty()) {
-            rateSegments.removeLast();
-        }
     }
 
     private void rebuildPayments() {
@@ -692,9 +774,7 @@ public final class ProjectedAmortizationScheduleModel {
             if (hasPositivePayment) {
                 actualAmortization = actualAmortizations.get(i);
                 cumulativeActualAmort = cumulativeActualAmort.add(actualAmortization, mc).min(discountFee);
-                final BigDecimal eir = seg != null ? seg.effectiveInterestRate() : effectiveInterestRate;
-                final BigDecimal onePlusRate = BigDecimal.ONE.add(eir, mc);
-                runningActualBalance = runningActualBalance.multiply(onePlusRate, mc).subtract(periodPayment, mc);
+                runningActualBalance = runningActualBalance.subtract(periodPayment, mc).add(actualAmortization, mc);
                 incomeModification = actualAmortization.subtract(safeExpectedAmort, mc);
             } else {
                 actualAmortization = null;
@@ -817,11 +897,27 @@ public final class ProjectedAmortizationScheduleModel {
      * {@code expectedAmort[i] = balance[i] + expectedPayment - balance[i-1]}
      */
     private BalancesAndAmortizations computeBalancesAndAmortizations() {
-        final int totalTerm = effectiveTotalTerm();
-        final List<Money> balances = new ArrayList<>(totalTerm);
-        final List<Money> expectedAmortizations = new ArrayList<>(totalTerm);
+        final BalancesAndAmortizations ba = computeBalancesAndAmortizations(effectiveTotalTerm());
+        // Per-period amortizations (the interest earned each day) sum to the discount fee by construction — a rate
+        // change preserves the total (the segment's discount is derived to keep it) — but rounding each to the currency
+        // scale leaves a few-cent drift, so the deferred (discount-fee) balance would not close to exactly zero at
+        // payoff. Settle the drift on the final period(s) so the amortizations sum exactly to the fee.
+        settleAmortizationRoundingToFee(ba.expectedAmortizations());
+        return ba;
+    }
+
+    /**
+     * Walks the declining-balance recursion {@code balance[i] = balance[i-1]×(1+EIR) - expectedPayment} for the first
+     * {@code upToDayIndex} periods, honouring every active {@link RateSegment} (its EIR, payment and the balance reset
+     * at its {@code startDayIndex}). The returned amortization list is <em>not</em> rounding-settled — callers that
+     * need the full schedule (not a bounded prefix used to read the balance at a split) apply
+     * {@link #settleAmortizationRoundingToFee} themselves.
+     */
+    private BalancesAndAmortizations computeBalancesAndAmortizations(final int upToDayIndex) {
+        final List<Money> balances = new ArrayList<>(upToDayIndex);
+        final List<Money> expectedAmortizations = new ArrayList<>(upToDayIndex);
         BigDecimal prevBalance = netDisbursementAmount.getAmount();
-        for (int i = 0; i < totalTerm; i++) {
+        for (int i = 0; i < upToDayIndex; i++) {
             final int dayIndex = i + 1;
             final RateSegment seg = segmentForDay(dayIndex);
             // At segment boundary, reset balance to segment's net disbursement
@@ -829,7 +925,7 @@ public final class ProjectedAmortizationScheduleModel {
                 prevBalance = seg.netDisbursementAtSplit().getAmount();
             }
             final BigDecimal eir = seg != null ? seg.effectiveInterestRate() : effectiveInterestRate;
-            final BigDecimal payment = seg != null ? seg.expectedPaymentAmount().getAmount() : expectedPaymentAmount.getAmount();
+            final BigDecimal payment = expectedPaymentForDay(dayIndex);
             final BigDecimal onePlusRate = BigDecimal.ONE.add(eir, mc);
             final BigDecimal balance = prevBalance.multiply(onePlusRate, mc).subtract(payment, mc);
             balances.add(money(balance));
@@ -837,6 +933,23 @@ public final class ProjectedAmortizationScheduleModel {
             prevBalance = balance;
         }
         return new BalancesAndAmortizations(balances, expectedAmortizations);
+    }
+
+    /**
+     * Settles the amortization rounding drift so the per-period amounts sum exactly to the discount fee, letting the
+     * deferred discount-fee balance close to zero at payoff. The drift (a few cents, from rounding each period to the
+     * currency scale) is placed on the final period; because a declining-balance schedule tapers to pennies at the end,
+     * any part the final period cannot absorb without going negative spills back to earlier periods.
+     */
+    private void settleAmortizationRoundingToFee(final List<Money> amortizations) {
+        final BigDecimal amortSum = amortizations.stream().map(Money::getAmount).reduce(BigDecimal.ZERO, (a, b) -> a.add(b, mc));
+        BigDecimal drift = discountFeeAmount.getAmount().subtract(amortSum, mc);
+        for (int i = amortizations.size() - 1; i >= 0 && drift.signum() != 0; i--) {
+            final BigDecimal current = amortizations.get(i).getAmount();
+            final BigDecimal settled = current.add(drift, mc).max(BigDecimal.ZERO);
+            amortizations.set(i, money(settled));
+            drift = drift.subtract(settled.subtract(current, mc), mc);
+        }
     }
 
     private PaymentAnalysis analyzePayments(final List<BigDecimal> payments, final int appliedCount) {
@@ -913,11 +1026,16 @@ public final class ProjectedAmortizationScheduleModel {
     private void buildTailPeriodsAndComputeNpv(final List<ProjectedPayment> tailPayments, final BigDecimal shortfall,
             final int appliedCount) {
         final int totalTerm = effectiveTotalTerm();
+        // Catch-up periods bill the regular daily payment of whichever rate is in force at the end of the schedule, not
+        // expectedPaymentForDay(totalTerm): that final period pays only the remainder needed to close the balance, and
+        // a one-off closing amount is meaningless repeated across the days needed to recover missed payments.
+        final RateSegment lastSegment = segmentForDay(totalTerm);
+        final BigDecimal tailExpectedPayment = lastSegment != null ? lastSegment.expectedPaymentAmount().getAmount()
+                : expectedPaymentAmount.getAmount();
         BigDecimal remaining = shortfall;
         int tailIndex = 0;
         while (remaining.signum() > 0) {
             final int periodNo = totalTerm + tailIndex + 1;
-            final BigDecimal tailExpectedPayment = expectedPaymentForDay(totalTerm); // use last segment's payment
             final long dl = paymentsLeft(periodNo, appliedCount);
             final BigDecimal df = safeDiscountFactor(dl, totalTerm);
             final BigDecimal forecast = remaining.min(tailExpectedPayment);
@@ -964,22 +1082,21 @@ public final class ProjectedAmortizationScheduleModel {
 
     private BigDecimal expectedPaymentForDay(final int dayIndex) {
         final RateSegment seg = segmentForDay(dayIndex);
-        return seg != null ? seg.expectedPaymentAmount().getAmount() : expectedPaymentAmount.getAmount();
-    }
-
-    private BalancesAndAmortizations computeBaseBalancesUpTo(final int upToDayIndex) {
-        final BigDecimal onePlusRate = BigDecimal.ONE.add(effectiveInterestRate, mc);
-        final BigDecimal basePayment = expectedPaymentAmount.getAmount();
-        final List<Money> balances = new ArrayList<>(upToDayIndex);
-        final List<Money> expectedAmortizations = new ArrayList<>(upToDayIndex);
-        BigDecimal prevBalance = netDisbursementAmount.getAmount();
-        for (int i = 0; i < upToDayIndex; i++) {
-            final BigDecimal balance = prevBalance.multiply(onePlusRate, mc).subtract(basePayment, mc);
-            balances.add(money(balance));
-            expectedAmortizations.add(money(balance.add(basePayment, mc).subtract(prevBalance, mc)));
-            prevBalance = balance;
+        if (seg != null) {
+            // Only the final segment runs to completion; its last period pays the remainder of its gross payable. An
+            // intermediate segment is cut off by the next rate change, so it keeps billing its daily payment to the
+            // cut. effectiveTotalTerm() is the last segment's final day, so a segment day equal to it is always the
+            // last segment's last period; an intermediate segment's days are all below it and keep billing the daily.
+            if (seg.finalPaymentAmount() != null && dayIndex == effectiveTotalTerm()) {
+                return seg.finalPaymentAmount().getAmount();
+            }
+            return seg.expectedPaymentAmount().getAmount();
         }
-        return new BalancesAndAmortizations(balances, expectedAmortizations);
+        // Base schedule: the final period pays only the remainder of the gross payable.
+        if (finalPaymentAmount != null && dayIndex == originalPaymentNumber) {
+            return finalPaymentAmount.getAmount();
+        }
+        return expectedPaymentAmount.getAmount();
     }
 
     private Money money(final BigDecimal amount) {
@@ -992,11 +1109,15 @@ public final class ProjectedAmortizationScheduleModel {
     private record PaymentAnalysis(BigDecimal shortfall, BigDecimal excess) {
     }
 
+    /** Amortization parameters shared by the base schedule and each rate-change segment. */
+    private record ScheduleParams(BigDecimal dailyPayment, int paymentNumber, BigDecimal finalPayment, BigDecimal eir) {
+    }
+
     public record ActualPayment(LocalDate date, Money amount) {
     }
 
     public record RateSegment(int startDayIndex, Money expectedPaymentAmount, int segmentTerm, BigDecimal effectiveInterestRate,
-            Money netDisbursementAtSplit, Money discountAtSplit) {
+            Money netDisbursementAtSplit, Money discountAtSplit, Money finalPaymentAmount) {
     }
 
     /** Principal re-injected on a date by an over-refunding credit balance refund. */

@@ -1962,7 +1962,7 @@ Feature: Working Capital Loan Repayment
       | 197       | 16 July 2026     | 50.00                 |                     | 149.68          | 0.21                       |                          | 0.33                       |                          |
       | 198       | 17 July 2026     | 50.00                 |                     | 99.84           | 0.16                       |                          | 0.17                       |                          |
       | 199       | 18 July 2026     | 50.00                 |                     | 49.95           | 0.11                       |                          | 0.06                       |                          |
-      | 200       | 19 July 2026     | 50.00                 |                     | 0.00            | 0.05                       |                          | 0.01                       |                          |
+      | 200       | 19 July 2026     | 50.00                 |                     | 0.00            | 0.06                       |                          | 0.00                       |                          |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -2172,7 +2172,7 @@ Feature: Working Capital Loan Repayment
       | 197       | 16 July 2026     | 50.00                 |                     | 149.68          | 0.21                       |                          | 0.33                       |                          |
       | 198       | 17 July 2026     | 50.00                 |                     | 99.84           | 0.16                       |                          | 0.17                       |                          |
       | 199       | 18 July 2026     | 50.00                 |                     | 49.95           | 0.11                       |                          | 0.06                       |                          |
-      | 200       | 19 July 2026     | 50.00                 |                     | 0.00            | 0.05                       |                          | 0.01                       |                          |
+      | 200       | 19 July 2026     | 50.00                 |                     | 0.00            | 0.06                       |                          | 0.00                       |                          |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -4936,7 +4936,7 @@ Feature: Working Capital Loan Repayment
       | 197       | 17 July 2019     | 50.00                 |                     | 149.68          |               | 0.21                       |                          | 0.33                       |
       | 198       | 18 July 2019     | 50.00                 |                     | 99.84           |               | 0.16                       |                          | 0.17                       |
       | 199       | 19 July 2019     | 50.00                 |                     | 49.95           |               | 0.11                       |                          | 0.06                       |
-      | 200       | 20 July 2019     | 50.00                 |                     | 0.00            |               | 0.05                       |                          | 0.01                       |
+      | 200       | 20 July 2019     | 50.00                 |                     | 0.00            |               | 0.06                       |                          | 0.00                       |
     When Admin sets the business date to "02 January 2019"
     And Customer makes repayment on "02 January 2019" with 50 transaction amount on Working Capital loan
     When Admin sets the business date to "03 January 2019"
@@ -5145,7 +5145,7 @@ Feature: Working Capital Loan Repayment
       | 197       | 17 July 2019     | 50.00                 |                     | 149.68          |               | 0.21                       |                          | 0.33                       |
       | 198       | 18 July 2019     | 50.00                 |                     | 99.84           |               | 0.16                       |                          | 0.17                       |
       | 199       | 19 July 2019     | 50.00                 |                     | 49.95           |               | 0.11                       |                          | 0.06                       |
-      | 200       | 20 July 2019     | 50.00                 |                     | 0.00            |               | 0.05                       |                          | 0.01                       |
+      | 200       | 20 July 2019     | 50.00                 |                     | 0.00            |               | 0.06                       |                          | 0.00                       |
 
   @TestRailId:C83023
   Scenario: Verify working capital loan repayment - UC19: actualBalance and actualDiscountFeeBalance progression across multiple on-time repayments
@@ -5170,4 +5170,4 @@ Feature: Working Capital Loan Repayment
       | 3         | 04 January 2019 | 50.00                 | 50.00               | 8878.70         | 8878.70       | 9.52                       | 9.52                     | 971.30                     | 971.30                   |
       | 4         | 05 January 2019 | 50.00                 |                     | 8838.18         |               | 9.48                       |                          | 961.82                     |                          |
       | 5         | 06 January 2019 | 50.00                 |                     | 8797.62         |               | 9.44                       |                          | 952.38                     |                          |
-      | 200       | 20 July 2019    | 50.00                 |                     | 0.00            |               | 0.05                       |                          | 0.01                       |                          |
+      | 200       | 20 July 2019    | 50.00                 |                     | 0.00            |               | 0.06                       |                          | 0.00                       |                          |

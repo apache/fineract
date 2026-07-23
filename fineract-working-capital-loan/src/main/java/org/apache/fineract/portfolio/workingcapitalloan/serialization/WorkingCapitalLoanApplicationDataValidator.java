@@ -355,7 +355,7 @@ public class WorkingCapitalLoanApplicationDataValidator {
         final MathContext mc = MoneyHelper.getMathContext();
         final BigDecimal effectiveDiscount = resolveEffectiveDiscount(discount, product);
         if (!ProjectedAmortizationScheduleModel.isEirCalculable(effectiveDiscount, principal, totalPaymentVolume, periodPaymentRate,
-                product.getRelatedDetail().getNpvDayCount(), mc)) {
+                product.getRelatedDetail().getNpvDayCount(), product.getCurrency(), mc)) {
             dataValidationErrors.add(eirNotCalculableError());
         }
     }
@@ -386,7 +386,7 @@ public class WorkingCapitalLoanApplicationDataValidator {
         final MathContext mc = MoneyHelper.getMathContext();
         final BigDecimal discount = details.getDiscountProposed() != null ? details.getDiscountProposed() : BigDecimal.ZERO;
         if (!ProjectedAmortizationScheduleModel.isEirCalculable(discount, loan.getProposedPrincipal(), loan.getTotalPaymentVolume(),
-                details.getPeriodPaymentRate(), details.getNpvDayCount(), mc)) {
+                details.getPeriodPaymentRate(), details.getNpvDayCount(), loan.getLoanProduct().getCurrency(), mc)) {
             final List<ApiParameterError> errors = new ArrayList<>();
             errors.add(eirNotCalculableError());
             throw new PlatformApiDataValidationException(errors);
