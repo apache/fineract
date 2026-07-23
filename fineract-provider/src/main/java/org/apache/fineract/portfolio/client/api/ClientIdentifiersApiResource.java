@@ -20,11 +20,9 @@ package org.apache.fineract.portfolio.client.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -41,21 +39,27 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.portfolio.client.command.ClientIdentifierCreateCommand;
+import org.apache.fineract.portfolio.client.command.ClientIdentifierDeleteCommand;
+import org.apache.fineract.portfolio.client.command.ClientIdentifierUpdateCommand;
 import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierCreateRequest;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierCreateResponse;
 import org.apache.fineract.portfolio.client.data.ClientIdentifierData;
-import org.apache.fineract.portfolio.client.data.ClientIdentifierRequest;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierDeleteRequest;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierDeleteResponse;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierUpdateRequest;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierUpdateResponse;
 import org.apache.fineract.portfolio.client.exception.DuplicateClientIdentifierException;
 import org.apache.fineract.portfolio.client.service.ClientIdentifierReadPlatformService;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
@@ -79,7 +83,7 @@ public class ClientIdentifiersApiResource {
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final DefaultToApiJsonSerializer<ClientIdentifierData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CommandDispatcher dispatcher;
 
     @GET
     @Produces({ MediaType.APPLICATION_JSON })
@@ -87,9 +91,7 @@ public class ClientIdentifiersApiResource {
             + "clients/1/identifiers\n" + "\n" + "\n" + "clients/1/identifiers?fields=documentKey,documentType,description")
     public List<ClientIdentifierData> retrieveAllClientIdentifiers(
             @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
-
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-
         return this.clientIdentifierReadPlatformService.retrieveClientIdentifiers(clientId);
     }
 
@@ -101,11 +103,8 @@ public class ClientIdentifiersApiResource {
     @AlternativeOperationId("newClientIdentifierDetails")
     public ClientIdentifierData newClientIdentifierDetails(
             @PathParam("clientId") @Parameter(description = "clientId") final Long clientId) {
-
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-
         final List<CodeValueData> codeValues = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Customer Identifier");
-
         return ClientIdentifierData.template(codeValues);
     }
 
@@ -114,26 +113,17 @@ public class ClientIdentifiersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Create an Identifier for a Client", operationId = "createClientIdentifier", description = "Mandatory Fields\n"
             + "documentKey, documentTypeId ")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.PostClientsClientIdIdentifiersRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.PostClientsClientIdIdentifiersResponse.class)))
-    public CommandProcessingResult createClientIdentifier(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
+    public ClientIdentifierCreateResponse createClientIdentifier(
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+            @RequestBody(required = true) @Valid ClientIdentifierCreateRequest request) {
+        request.setClientId(clientId);
         try {
-            final CommandWrapper commandRequest = new CommandWrapperBuilder().createClientIdentifier(clientId)
-                    .withJson(apiRequestBodyAsJson).build();
-
-            return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            final var command = new ClientIdentifierCreateCommand();
+            command.setPayload(request);
+            final Supplier<ClientIdentifierCreateResponse> response = dispatcher.dispatch(command);
+            return response.get();
         } catch (final DuplicateClientIdentifierException e) {
-            DuplicateClientIdentifierException rethrowas = e;
-            if (e.getDocumentTypeId() != null) {
-                // need to fetch client info
-                final ClientData clientInfo = this.clientReadPlatformService.retrieveClientByIdentifier(e.getDocumentTypeId(),
-                        e.getIdentifierKey());
-                rethrowas = new DuplicateClientIdentifierException(clientInfo.getDisplayName(), clientInfo.getOfficeName(),
-                        e.getIdentifierType(), e.getIdentifierKey());
-            }
-            throw rethrowas;
+            throw enrichDuplicateIdentifierException(e);
         }
     }
 
@@ -144,22 +134,17 @@ public class ClientIdentifiersApiResource {
             + "clients/1/identifier/2\n" + "\n" + "\n" + "clients/1/identifier/2?template=true\n" + "\n"
             + "clients/1/identifiers/2?fields=documentKey,documentType,description")
     @AlternativeOperationId("retrieveClientIdentifiers")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.GetClientsClientIdIdentifiersResponse.class)))
     public String retrieveClientIdentifiers(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("identifierId") @Parameter(description = "identifierId") final Long clientIdentifierId,
             @Context final UriInfo uriInfo) {
-
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
-
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
         ClientIdentifierData clientIdentifierData = this.clientIdentifierReadPlatformService.retrieveClientIdentifier(clientId,
                 clientIdentifierId);
         if (settings.isTemplate()) {
             final Collection<CodeValueData> codeValues = this.codeValueReadPlatformService.retrieveCodeValuesByCode("Customer Identifier");
             clientIdentifierData = ClientIdentifierData.template(clientIdentifierData, codeValues);
         }
-
         return this.toApiJsonSerializer.serialize(settings, clientIdentifierData, CLIENT_IDENTIFIER_DATA_PARAMETERS);
     }
 
@@ -169,27 +154,19 @@ public class ClientIdentifiersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Client Identifier", operationId = "updateClientIdentifier", description = "Updates a Client Identifier")
     @AlternativeOperationId("updateClientIdentifer")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientIdentifierRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.PutClientsClientIdIdentifiersIdentifierIdResponse.class)))
-    public CommandProcessingResult updateClientIdentifer(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public ClientIdentifierUpdateResponse updateClientIdentifier(
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("identifierId") @Parameter(description = "identifierId") final Long clientIdentifierId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
-
+            @RequestBody(required = true) @Valid ClientIdentifierUpdateRequest request) {
+        request.setId(clientIdentifierId);
+        request.setClientId(clientId);
         try {
-            final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClientIdentifier(clientId, clientIdentifierId)
-                    .withJson(apiRequestBodyAsJson).build();
-
-            return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
+            final var command = new ClientIdentifierUpdateCommand();
+            command.setPayload(request);
+            final Supplier<ClientIdentifierUpdateResponse> response = dispatcher.dispatch(command);
+            return response.get();
         } catch (final DuplicateClientIdentifierException e) {
-            DuplicateClientIdentifierException reThrowAs = e;
-            if (e.getDocumentTypeId() != null) {
-                final ClientData clientInfo = this.clientReadPlatformService.retrieveClientByIdentifier(e.getDocumentTypeId(),
-                        e.getIdentifierKey());
-                reThrowAs = new DuplicateClientIdentifierException(clientInfo.getDisplayName(), clientInfo.getOfficeName(),
-                        e.getIdentifierType(), e.getIdentifierKey());
-            }
-            throw reThrowAs;
+            throw enrichDuplicateIdentifierException(e);
         }
     }
 
@@ -197,12 +174,23 @@ public class ClientIdentifiersApiResource {
     @Path("{identifierId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Client Identifier", operationId = "deleteClientIdentifier", description = "Deletes a Client Identifier")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.DeleteClientsClientIdIdentifiersIdentifierIdResponse.class)))
-    public CommandProcessingResult deleteClientIdentifier(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
+    public ClientIdentifierDeleteResponse deleteClientIdentifier(
+            @PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("identifierId") @Parameter(description = "identifierId") final Long clientIdentifierId) {
+        final var request = ClientIdentifierDeleteRequest.builder().id(clientIdentifierId).clientId(clientId).build();
+        final var command = new ClientIdentifierDeleteCommand();
+        command.setPayload(request);
+        final Supplier<ClientIdentifierDeleteResponse> response = dispatcher.dispatch(command);
+        return response.get();
+    }
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteClientIdentifier(clientId, clientIdentifierId).build();
-
-        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    private DuplicateClientIdentifierException enrichDuplicateIdentifierException(final DuplicateClientIdentifierException e) {
+        if (e.getDocumentTypeId() != null) {
+            final ClientData clientInfo = this.clientReadPlatformService.retrieveClientByIdentifier(e.getDocumentTypeId(),
+                    e.getIdentifierKey());
+            return new DuplicateClientIdentifierException(clientInfo.getDisplayName(), clientInfo.getOfficeName(), e.getIdentifierType(),
+                    e.getIdentifierKey());
+        }
+        return e;
     }
 }

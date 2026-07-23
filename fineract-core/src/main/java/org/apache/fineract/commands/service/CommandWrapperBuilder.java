@@ -960,24 +960,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder updateClientIdentifier(final Long clientId, final Long clientIdentifierId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_CLIENTIDENTIFIER;
-        this.entityId = clientIdentifierId;
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/identifiers/" + clientIdentifierId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteClientIdentifier(final Long clientId, final Long clientIdentifierId) {
-        this.actionName = ACTION_DELETE;
-        this.entityName = ENTITY_CLIENTIDENTIFIER;
-        this.entityId = clientIdentifierId;
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/identifiers/" + clientIdentifierId;
-        return this;
-    }
-
     public CommandWrapperBuilder createClient() {
         this.actionName = ACTION_CREATE;
         this.entityName = ENTITY_CLIENT;
