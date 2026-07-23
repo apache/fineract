@@ -159,6 +159,18 @@ public class WorkingCapitalBreachActionStepDef extends AbstractStepDef {
         log.info("Verified breach resume initiation failed with expected error for loan {}", loanId);
     }
 
+    @Then("Initiating a Working Capital loan breach undo reset results an error with the following data:")
+    public void initiateBreachUndoResetResultsAnError(final DataTable table) {
+        final Long loanId = extractLoanId();
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanBreachActions().createBreachAction(loanId,
+                workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansBreachActionRequest("undo_reset")));
+
+        verifyBreachActionErrorWithTable(exception, table);
+
+        log.info("Verified breach resume initiation failed with expected error for loan {}", loanId);
+    }
+
     @Then("Initiating a Working Capital loan breach pause with startDate {string} and endDate {string} results an error with the following data:")
     public void initiateBreachPauseResultsAnError(final String startDate, final String endDate, final DataTable table) {
         initiateBreachActionResultsAnError("pause", startDate, endDate, table);

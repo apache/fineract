@@ -270,8 +270,10 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
         }
 
         if (transactionAmount.compareTo(BigDecimal.ZERO) > 0) {
+            // Unpay newest-first (the mirror of repayment, which pays oldest-first): the query is ordered by period
+            // number ascending, so reversing it yields a deterministic newest-to-oldest iteration.
             List<WorkingCapitalLoanDelinquencyRangeSchedule> pastPeriods = loanDelinquencyRangeScheduleRepository
-                    .findByLoanIdAndToDateIsBefore(loanId, businessDate);
+                    .findByLoanIdAndToDateIsBeforeOrderByPeriodNumberAsc(loanId, businessDate);
             for (WorkingCapitalLoanDelinquencyRangeSchedule period : pastPeriods.reversed()) {
                 BigDecimal unpayAmount = unpayPeriod(period, transactionAmount, false, delinquencyDisabled);
                 transactionAmount = transactionAmount.subtract(unpayAmount);
@@ -600,16 +602,13 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
         if (periodFromDate == null || periodToDate == null) {
             return;
         }
-        // A reversed delinquency disable behaves like a pause: the disabled window does not count towards
-        // delinquency, so late-generated periods overlapping it are extended the same way.
+        // Only pauses shift period dates. A delinquency disable is NOT treated as a pause (matching breach): while
+        // disabled, evaluation is suppressed, but the disabled days are not excluded from the period dates.
         final List<WorkingCapitalLoanDelinquencyAction> pauseActions = recordedActions.stream()
-                .filter(action -> action != null && (DelinquencyAction.PAUSE.equals(action.getAction())
-                        || (DelinquencyAction.DISABLE.equals(action.getAction()) && action.getEndDate() != null)))
-                .toList();
+                .filter(action -> action != null && DelinquencyAction.PAUSE.equals(action.getAction())).toList();
         for (final WorkingCapitalLoanDelinquencyAction pause : pauseActions) {
             final LocalDate pauseStart = pause.getStartDate();
-            final LocalDate pauseEnd = DelinquencyAction.DISABLE.equals(pause.getAction()) ? pause.getEndDate()
-                    : WorkingCapitalLoanDelinquencyPauseUtils.resolveEffectivePauseEnd(pause, recordedActions);
+            final LocalDate pauseEnd = WorkingCapitalLoanDelinquencyPauseUtils.resolveEffectivePauseEnd(pause, recordedActions);
             if (pauseStart == null || pauseEnd == null || pauseEnd.isBefore(pauseStart)) {
                 continue;
             }

@@ -37,8 +37,8 @@ Feature: Working Capital Delinquency Disable
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-02-05 | 300.0          | 0.0        | 300.0             | false                 | 300.0            | 1              |
-      | 2            | 2026-02-06 | 2026-03-07 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-30 | 300.0          | 0.0        | 300.0             | false                 | 300.0            | 7              |
+      | 2            | 2026-01-31 | 2026-03-01 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
     # Close the loan
     Then Admin closes the Working Capital loan with a full repayment on "06 February 2026"
     And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -61,7 +61,7 @@ Feature: Working Capital Delinquency Disable
     And Admin initiate a Working Capital loan delinquency disable with startDate "15 January 2026"
     # 2nd attempt for Disable delinquency evaluation
     Then Initiating a Working Capital loan delinquency disable with startDate "15 January 2026" results an error with the following data:
-      | httpCode | errorMessage                                                                                            |
+      | httpCode | errorMessage                                                                                                         |
       | 400      | Delinquency evaluation is already disabled for this Working Capital loan. It must be enabled before disabling again. |
     # Close the loan
     Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
@@ -83,7 +83,7 @@ Feature: Working Capital Delinquency Disable
     And Admin runs inline COB job for Working Capital Loan by loanId
 #    Attempt for enable
     Then Initiating a Working Capital loan delinquency enable with startDate "15 January 2026" results an error with the following data:
-      | httpCode | errorMessage                                                                |
+      | httpCode | errorMessage                                                                    |
       | 400      | There is no active delinquency disable to enable for this Working Capital loan. |
     # Close the loan
     Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
@@ -104,13 +104,13 @@ Feature: Working Capital Delinquency Disable
     When Admin sets the business date to "15 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Initiating a Working Capital loan delinquency disable with startDate "10 January 2026" results an error with the following data:
-      | httpCode | errorMessage                                                          |
+      | httpCode | errorMessage                                                               |
       | 400      | Start date of a disable or enable action must be the current business date |
     And Initiating a Working Capital loan delinquency enable with startDate "10 January 2026" results an error with the following data:
-      | httpCode | errorMessage                                                          |
+      | httpCode | errorMessage                                                               |
       | 400      | Start date of a disable or enable action must be the current business date |
     And Initiating a Working Capital loan delinquency disable with startDate "15 January 2026" and endDate "20 January 2026" results an error with the following data:
-      | httpCode | errorMessage                                                    |
+      | httpCode | errorMessage                                                 |
       | 400      | End date must not be provided for a disable or enable action |
     # Close the loan
     Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
@@ -133,10 +133,10 @@ Feature: Working Capital Delinquency Disable
     # Disable delinquency evaluation
     And Admin initiate a Working Capital loan delinquency disable with startDate "15 January 2026"
     Then Initiating a Working Capital loan delinquency pause with startDate "15 January 2026" and endDate "20 January 2026" results an error with the following data:
-      | httpCode | errorMessage                                                                                                           |
+      | httpCode | errorMessage                                                                                                                             |
       | 400      | Delinquency pause, resume and reschedule actions are not allowed while delinquency evaluation is disabled for this Working Capital loan. |
     And Initiating a Working Capital loan delinquency resume with startDate "15 January 2026" results an error with the following data:
-      | httpCode | errorMessage                                                                                                           |
+      | httpCode | errorMessage                                                                                                                             |
       | 400      | Delinquency pause, resume and reschedule actions are not allowed while delinquency evaluation is disabled for this Working Capital loan. |
     And Admin fails to create WC delinquency reschedule action with minimumPayment 2 PERCENTAGE and frequency 15 DAYS with error containing "not allowed while delinquency evaluation is disabled"
     # Close the loan
@@ -247,7 +247,7 @@ Feature: Working Capital Delinquency Disable
     And Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-30 | 300.0          | 300.0      | 0.0               | true                  | 0.0              | 0              |
-      | 2            | 2026-02-22 | 2026-03-23 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+      | 2            | 2026-01-31 | 2026-03-01 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
     # Close the loan
     Then Admin closes the Working Capital loan with a full repayment on "05 February 2026"
     And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -283,7 +283,7 @@ Feature: Working Capital Delinquency Disable
     And Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
       | 1            | 2026-01-01 | 2026-01-30 | 300.0          | 0.0        | 300.0             | false                 | 300.0            | 6              |
-      | 2            | 2026-02-22 | 2026-03-23 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+      | 2            | 2026-01-31 | 2026-03-01 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
     # Close the loan
     Then Admin closes the Working Capital loan with a full repayment on "05 February 2026"
     And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -340,8 +340,8 @@ Feature: Working Capital Delinquency Disable
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan delinquency range schedule has the following data:
       | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-31 | 300.0          | 0.0        | 300.0             | false                 | 300.0            | 1              |
-      | 2            | 2026-02-01 | 2026-03-02 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
+      | 1            | 2026-01-01 | 2026-01-30 | 300.0          | 0.0        | 300.0             | false                 | 300.0            | 2              |
+      | 2            | 2026-01-31 | 2026-03-01 | 300.0          | 0.0        | 300.0             | null                  | null             | null           |
     # Close the loan
     Then Admin closes the Working Capital loan with a full repayment on "01 February 2026"
     And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -390,5 +390,5 @@ Feature: Working Capital Delinquency Disable
     When Admin sets the business date to "15 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Initiating a Working Capital loan delinquency disable with startDate "15 January 2026" results an error with the following data:
-      | httpCode | errorMessage                                                   |
+      | httpCode | errorMessage                                                              |
       | 400      | Delinquency actions can be created only for active Working Capital loans. |

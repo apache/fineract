@@ -62,6 +62,7 @@ public class WorkingCapitalLoanDelinquencyActionApiResource {
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "WC_DELINQUENCY_ACTION";
     private static final String DISABLE_RESOURCE_NAME_FOR_PERMISSIONS = "WC_DELINQUENCY_DISABLE";
+    private static final String RESET_RESOURCE_NAME_FOR_PERMISSIONS = "WC_DELINQUENCY_RESET";
     private static final String RESPONSE_OK = "OK";
     private static final String RESPONSE_BAD_REQUEST = "Bad Request";
     private static final String RESPONSE_LOAN_NOT_FOUND = "Working Capital Loan not found";
@@ -84,8 +85,12 @@ public class WorkingCapitalLoanDelinquencyActionApiResource {
     public CommandProcessingResult createDelinquencyAction(@PathParam("loanId") @Parameter(description = "loanId") final Long loanId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         this.context.authenticatedUser().validateHasCreatePermission(RESOURCE_NAME_FOR_PERMISSIONS);
-        if (isDisableOrEnableAction(extractAction(apiRequestBodyAsJson))) {
+        final String action = extractAction(apiRequestBodyAsJson);
+        if (isDisableOrEnableAction(action)) {
             this.context.authenticatedUser().validateHasCreatePermission(DISABLE_RESOURCE_NAME_FOR_PERMISSIONS);
+        }
+        if (isResetAction(action)) {
+            this.context.authenticatedUser().validateHasCreatePermission(RESET_RESOURCE_NAME_FOR_PERMISSIONS);
         }
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createWorkingCapitalLoanDelinquencyAction(loanId) //
@@ -133,7 +138,7 @@ public class WorkingCapitalLoanDelinquencyActionApiResource {
     }
 
     private String extractAction(final String apiRequestBodyAsJson) {
-        if (!StringUtils.isNotBlank(apiRequestBodyAsJson)) {
+        if (StringUtils.isBlank(apiRequestBodyAsJson)) {
             return null;
         }
         final JsonElement json = fromJsonHelper.parse(apiRequestBodyAsJson);
@@ -142,6 +147,10 @@ public class WorkingCapitalLoanDelinquencyActionApiResource {
 
     private boolean isDisableOrEnableAction(final String action) {
         return CommandParameterUtil.is(action, "disable") || CommandParameterUtil.is(action, "enable");
+    }
+
+    private boolean isResetAction(final String action) {
+        return CommandParameterUtil.is(action, "reset") || CommandParameterUtil.is(action, "undo_reset");
     }
 
     private Long resolveExternalId(final String loanExternalIdStr) {

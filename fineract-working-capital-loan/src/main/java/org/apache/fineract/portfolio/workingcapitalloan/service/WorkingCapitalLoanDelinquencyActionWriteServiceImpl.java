@@ -26,7 +26,6 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
@@ -42,14 +41,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements WorkingCapitalLoanDelinquencyActionWriteService {
 
-    private static final String RESET_RESOURCE_NAME_FOR_PERMISSIONS = "WC_DELINQUENCY_RESET";
-    private static final String UNDO_RESET_RESOURCE_NAME_FOR_PERMISSIONS = "WC_DELINQUENCY_UNDO_RESET";
-
     private final WorkingCapitalLoanRepository loanRepository;
     private final WorkingCapitalLoanDelinquencyActionRepository actionRepository;
     private final WorkingCapitalLoanDelinquencyActionParseAndValidator validator;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService rangeScheduleService;
-    private final PlatformSecurityContext context;
     private final WorkingCapitalLoanDelinquencyClassificationService classificationService;
 
     @Transactional
@@ -72,14 +67,14 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
             // Mirror breach action management: close the open disable at the day before the enable date so the loan
             // stops being considered disabled from the enable date on.
             final LocalDate enableDate = action.getStartDate();
+            // The validator (validateDisableState) already rejects an enable when no active disable exists, so an open
+            // disable is guaranteed to be present here - mirroring the breach action flow.
             final WorkingCapitalLoanDelinquencyAction activeDisable = validator.findActiveDisable(existing);
             activeDisable.setEndDate(enableDate.minusDays(1));
-            // Effect specific to delinquency (breach reprocesses its own breach schedule instead): the disabled window
-            // is treated as a pause so it does not count towards delinquency, then classification is recomputed as of
-            // the enable date.
-            rangeScheduleService.extendPeriodsForPause(workingCapitalLoan, activeDisable.getStartDate(), enableDate);
-            rangeScheduleService.evaluateExpiredPeriods(workingCapitalLoan, enableDate);
-            classificationService.classifyDelinquency(workingCapitalLoan, enableDate);
+            // As in breach, the disabled window is NOT treated as a pause - period dates are not shifted. Reprocessing
+            // re-evaluates and reclassifies delinquency as of the current business date, so the disabled days are not
+            // excluded from the schedule.
+            rangeScheduleService.reprocessDelinquencySchedule(workingCapitalLoan);
         } else if (DelinquencyAction.PAUSE.equals(action.getAction())) {
             rangeScheduleService.extendPeriodsForPause(workingCapitalLoan, action.getStartDate(), action.getEndDate());
         } else if (DelinquencyAction.RESCHEDULE.equals(action.getAction())) {
@@ -90,10 +85,8 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
                     DateUtils.getBusinessLocalDate());
             rangeScheduleService.resumeActivePause(workingCapitalLoan, activePause, action);
         } else if (DelinquencyAction.RESET.equals(action.getAction())) {
-            context.authenticatedUser().validateHasCreatePermission(RESET_RESOURCE_NAME_FOR_PERMISSIONS);
             rangeScheduleService.resetPeriods(workingCapitalLoan, action);
         } else if (DelinquencyAction.UNDO_RESET.equals(action.getAction())) {
-            context.authenticatedUser().validateHasCreatePermission(UNDO_RESET_RESOURCE_NAME_FOR_PERMISSIONS);
             List<WorkingCapitalLoanDelinquencyAction> byWorkingCapitalLoanIdOrderById = actionRepository
                     .findByWorkingCapitalLoanIdOrderById(workingCapitalLoanId);
             rangeScheduleService.undoResetPeriods(workingCapitalLoan, action, byWorkingCapitalLoanIdOrderById);

@@ -39,11 +39,13 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,6 +71,10 @@ class WorkingCapitalLoanDelinquencyDisableValidatorTest {
     private WorkingCapitalLoanDelinquencyActionRepository actionRepository;
     @Mock
     private WorkingCapitalLoan loan;
+    @Mock
+    private WorkingCapitalLoanProductRelatedDetails productRelatedDetails;
+    @Mock
+    private DelinquencyBucket delinquencyBucket;
 
     private WorkingCapitalLoanDelinquencyActionParseAndValidator validator;
     private LocalDate today;
@@ -86,6 +92,8 @@ class WorkingCapitalLoanDelinquencyDisableValidatorTest {
         ThreadLocalContextUtil.setBusinessDates(businessDates);
         when(loan.getId()).thenReturn(LOAN_ID);
         when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
+        when(loan.getLoanProductRelatedDetails()).thenReturn(productRelatedDetails);
+        when(productRelatedDetails.getDelinquencyBucket()).thenReturn(delinquencyBucket);
     }
 
     @AfterEach
