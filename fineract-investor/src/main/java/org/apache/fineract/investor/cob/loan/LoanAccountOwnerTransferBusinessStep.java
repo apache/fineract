@@ -176,13 +176,16 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
 
     private ExternalAssetOwnerTransfer sellAsset(final Loan loan, final LocalDate settlementDate,
             final ExternalAssetOwnerTransfer externalAssetOwnerTransfer) {
+        // Link the remaining deferred income amortization to the current owner before the
+        // loan <-> owner mapping is removed for the transfer.
+        recognizeRemainingDeferredIncomeOnLoanSale(loan, settlementDate);
+
         ExternalAssetOwner previousOwner = determinePreviousOwnerAndCleanupIfNeeded(loan, settlementDate, externalAssetOwnerTransfer);
         ExternalTransferStatus activeStatus = determineActiveStatus(externalAssetOwnerTransfer);
 
         ExternalAssetOwnerTransfer newTransfer = activatePendingEntry(settlementDate, externalAssetOwnerTransfer, activeStatus,
                 previousOwner);
 
-        recognizeRemainingDeferredIncomeOnLoanSale(loan, settlementDate);
         loanJournalEntryPoster.postJournalEntriesForExternalOwnerTransfer(loan, newTransfer, previousOwner);
         return newTransfer;
     }
