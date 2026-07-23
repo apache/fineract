@@ -23,10 +23,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ClientIdentifierCreateRequest;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.PageClientSearchData;
-import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostOfficesResponse;
@@ -303,7 +303,7 @@ public class ClientSearchTest extends FeignIntegrationTest {
         request1.setMobileNo(Utils.randomStringGenerator("", 8, Utils.SOURCE_SET_NUMBERS));
         PostClientsResponse clientResponse = clientHelper.createClient(request1);
         final Long documentType = 1L;
-        PostClientsClientIdIdentifiersRequest identifierRequest = clientIdentifier(documentType);
+        ClientIdentifierCreateRequest identifierRequest = clientIdentifier(documentType);
         final String documentKey = identifierRequest.getDocumentKey();
         clientHelper.createClientIdentifier(clientResponse.getClientId(), identifierRequest);
 
@@ -326,7 +326,7 @@ public class ClientSearchTest extends FeignIntegrationTest {
         request1.setMobileNo(Utils.randomStringGenerator("", 8, Utils.SOURCE_SET_NUMBERS));
         PostClientsResponse clientResponse = clientHelper.createClient(request1);
         final Long documentType = 1L;
-        PostClientsClientIdIdentifiersRequest identifierRequest = clientIdentifier(documentType);
+        ClientIdentifierCreateRequest identifierRequest = clientIdentifier(documentType);
         final String documentKey = identifierRequest.getDocumentKey();
         clientHelper.createClientIdentifier(clientResponse.getClientId(), identifierRequest);
 
@@ -353,9 +353,9 @@ public class ClientSearchTest extends FeignIntegrationTest {
         Long documentTypeIdTwo = codeHelper.createCodeValue(codeId, Utils.randomStringGenerator("DocType_", 6), 2);
 
         String documentKeyToken = Utils.randomStringGenerator("DUP_ID_", 6);
-        PostClientsClientIdIdentifiersRequest identifierOne = new PostClientsClientIdIdentifiersRequest().documentTypeId(documentTypeIdOne)
+        ClientIdentifierCreateRequest identifierOne = new ClientIdentifierCreateRequest().documentTypeId(documentTypeIdOne)
                 .documentKey(documentKeyToken + "_A").description("Test").status("Active");
-        PostClientsClientIdIdentifiersRequest identifierTwo = new PostClientsClientIdIdentifiersRequest().documentTypeId(documentTypeIdTwo)
+        ClientIdentifierCreateRequest identifierTwo = new ClientIdentifierCreateRequest().documentTypeId(documentTypeIdTwo)
                 .documentKey(documentKeyToken + "_B").description("Test").status("Active");
         clientHelper.createClientIdentifier(clientResponse.getClientId(), identifierOne);
         clientHelper.createClientIdentifier(clientResponse.getClientId(), identifierTwo);
@@ -501,8 +501,8 @@ public class ClientSearchTest extends FeignIntegrationTest {
         }
     }
 
-    private static PostClientsClientIdIdentifiersRequest clientIdentifier(final Long documentType) {
-        return new PostClientsClientIdIdentifiersRequest().documentTypeId(documentType).documentKey(Utils.randomStringGenerator("ID_", 10))
+    private static ClientIdentifierCreateRequest clientIdentifier(final Long documentType) {
+        return new ClientIdentifierCreateRequest().documentTypeId(documentType).documentKey(Utils.randomStringGenerator("ID_", 10))
                 .description(Utils.randomStringGenerator("Desc_", 50)).status("Active");
     }
 

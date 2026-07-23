@@ -153,7 +153,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_BATCH_BUSINESS_STEP;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CENTER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CLIENT;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CLIENTIDENTIFIER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CLIENT_COLLATERAL_PRODUCT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CODE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CODEVALUE;
@@ -938,33 +937,6 @@ public class CommandWrapperBuilder {
         this.entityName = "WC_NEAR_BREACH_ACTION";
         this.entityId = loanId;
         this.href = "/working-capital-loans/" + loanId + "/near-breach-actions";
-        return this;
-    }
-
-    public CommandWrapperBuilder createClientIdentifier(final Long clientId) {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_CLIENTIDENTIFIER;
-        this.entityId = null;
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/identifiers/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateClientIdentifier(final Long clientId, final Long clientIdentifierId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_CLIENTIDENTIFIER;
-        this.entityId = clientIdentifierId;
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/identifiers/" + clientIdentifierId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteClientIdentifier(final Long clientId, final Long clientIdentifierId) {
-        this.actionName = ACTION_DELETE;
-        this.entityName = ENTITY_CLIENTIDENTIFIER;
-        this.entityId = clientIdentifierId;
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/identifiers/" + clientIdentifierId;
         return this;
     }
 

@@ -249,6 +249,10 @@ public final class ApiAuthorizationRules {
             rule(HttpMethod.POST, "/api/*/*/*/calendars", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CALENDAR"),
             rule(HttpMethod.PUT, "/api/*/*/*/calendars/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CALENDAR"),
             rule(HttpMethod.DELETE, "/api/*/*/*/calendars/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CALENDAR"),
+            // client identifier
+            rule(HttpMethod.POST, "/api/*/clients/*/identifiers", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CLIENTIDENTIFIER"),
+            rule(HttpMethod.PUT, "/api/*/clients/*/identifiers/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CLIENTIDENTIFIER"),
+            rule(HttpMethod.DELETE, "/api/*/clients/*/identifiers/*", ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CLIENTIDENTIFIER"),
             // share accounts and share products
             rule(HttpMethod.GET, "/api/*/accounts/*/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SHAREACCOUNT"),
             rule(HttpMethod.GET, "/api/*/products/*/**", ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SHAREPRODUCT"),
