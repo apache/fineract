@@ -147,7 +147,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
             tableRequiredBeforeClientActivation = entityDatatableChecksRepository.findByEntityAndStatus(entityName, status);
         } else {
             tableRequiredBeforeClientActivation = entityDatatableChecksRepository.findByEntityAndStatusAndSubtype(entityName, status,
-                    entitySubtype.toUpperCase());
+                    entitySubtype);
         }
 
         if (tableRequiredBeforeClientActivation != null) {
