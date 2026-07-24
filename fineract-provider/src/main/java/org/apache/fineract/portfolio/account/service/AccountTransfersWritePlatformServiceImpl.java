@@ -567,7 +567,6 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     @Override
     @Transactional
     public CommandProcessingResult refundByTransfer(JsonCommand command) {
-        // TODO Auto-generated method stub
         this.accountTransfersDataValidator.validate(command);
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed(transferDateParamName);

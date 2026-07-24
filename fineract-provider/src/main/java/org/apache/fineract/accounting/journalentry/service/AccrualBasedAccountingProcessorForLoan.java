@@ -2169,7 +2169,6 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
     }
 
     private void createJournalEntriesForRefundForActiveLoan(LoanDTO loanDTO, LoanTransactionDTO loanTransactionDTO, Office office) {
-        // TODO Auto-generated method stub
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();

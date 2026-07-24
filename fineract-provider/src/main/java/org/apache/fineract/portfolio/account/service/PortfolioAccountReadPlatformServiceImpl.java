@@ -370,7 +370,6 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
 
     @Override
     public PortfolioAccountData retrieveOneByPaidInAdvance(Long accountId, Integer accountTypeId) {
-        // TODO Auto-generated method stub
         Object[] sqlParams = new Object[] { accountId, accountId };
         PortfolioAccountData accountData = null;
         // String currencyCode = null;

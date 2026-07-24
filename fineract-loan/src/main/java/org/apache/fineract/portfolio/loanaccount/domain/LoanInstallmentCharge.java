@@ -73,9 +73,7 @@ public class LoanInstallmentCharge extends AbstractPersistableCustom<Long> imple
     @Column(name = "waived", nullable = false)
     private boolean waived = false;
 
-    public LoanInstallmentCharge() {
-        // TODO Auto-generated constructor stub
-    }
+    public LoanInstallmentCharge() {}
 
     @Override
     public int compareTo(LoanInstallmentCharge o) {
