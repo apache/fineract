@@ -129,6 +129,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public Long nearBreachId;
         @Schema(example = "0", description = "Number of days to shift the start of the first breach schedule period after disbursement")
         public Integer breachGraceDays;
+        @Schema(example = "DISBURSEMENT", description = "Breach start type: LOAN_CREATION or DISBURSEMENT")
+        public String breachStartType;
 
         // Configurable attributes
         public PostAllowAttributeOverrides allowAttributeOverrides;
@@ -333,6 +335,7 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public StringEnumOptionData delinquencyStartType;
         @Schema(example = "0", description = "Number of days to shift the start of the first breach schedule period after disbursement")
         public Integer breachGraceDays;
+        public StringEnumOptionData breachStartType;
 
         // Configurable attributes
         public GetConfigurableAttributes allowAttributeOverrides;
@@ -447,6 +450,7 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public List<WorkingCapitalNearBreachData> nearBreachOptions;
         public List<StringEnumOptionData> advancedPaymentAllocationTypes;
         public List<StringEnumOptionData> delinquencyStartTypeOptions;
+        public List<StringEnumOptionData> breachStartTypeOptions;
         public List<StringEnumOptionData> delinquencyMinimumPaymentTypeOptions;
         public List<EnumOptionData> advancedPaymentAllocationTransactionTypes;
         public List<GetWorkingCapitalLoanProductsResponse.GetDelinquencyBucket> delinquencyBucketOptions;
@@ -518,6 +522,7 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public GetWorkingCapitalLoanNearBreach nearBreach;
         @Schema(example = "0", description = "Number of days to shift the start of the first breach schedule period after disbursement")
         public Integer breachGraceDays;
+        public StringEnumOptionData breachStartType;
 
         // Configurable attributes
         public GetWorkingCapitalLoanProductsResponse.GetConfigurableAttributes allowAttributeOverrides;
@@ -601,6 +606,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public Long nearBreachId;
         @Schema(example = "0", description = "Number of days to shift the start of the first breach schedule period after disbursement")
         public Integer breachGraceDays;
+        @Schema(example = "DISBURSEMENT", description = "Breach start type: LOAN_CREATION or DISBURSEMENT")
+        public String breachStartType;
 
         // Configurable attributes
         public PostWorkingCapitalLoanProductsRequest.PostAllowAttributeOverrides allowAttributeOverrides;

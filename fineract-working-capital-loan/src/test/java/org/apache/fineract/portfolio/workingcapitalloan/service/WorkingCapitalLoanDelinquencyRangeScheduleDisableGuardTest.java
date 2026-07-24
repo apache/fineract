@@ -102,7 +102,7 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
         final WorkingCapitalLoanDelinquencyRangeSchedule pastPeriod = pastOpenPeriod();
         when(rangeScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, today, today))
                 .thenReturn(Optional.empty());
-        when(rangeScheduleRepository.findByLoanIdAndToDateIsBefore(LOAN_ID, today)).thenReturn(List.of(pastPeriod));
+        when(rangeScheduleRepository.findByLoanIdAndToDateIsBeforeOrderByPeriodNumberAsc(LOAN_ID, today)).thenReturn(List.of(pastPeriod));
 
         rangeScheduleService.applyRepaymentUndo(loan, today, new BigDecimal("100"));
 
@@ -117,7 +117,7 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
         final WorkingCapitalLoanDelinquencyRangeSchedule pastPeriod = pastOpenPeriod();
         when(rangeScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, today, today))
                 .thenReturn(Optional.empty());
-        when(rangeScheduleRepository.findByLoanIdAndToDateIsBefore(LOAN_ID, today)).thenReturn(List.of(pastPeriod));
+        when(rangeScheduleRepository.findByLoanIdAndToDateIsBeforeOrderByPeriodNumberAsc(LOAN_ID, today)).thenReturn(List.of(pastPeriod));
 
         rangeScheduleService.applyRepaymentUndo(loan, today, new BigDecimal("100"));
 
@@ -142,6 +142,43 @@ class WorkingCapitalLoanDelinquencyRangeScheduleDisableGuardTest {
         assertThat(pastPeriod.getMinPaymentCriteriaMet()).isTrue();
         assertThat(pastPeriod.getDelinquentAmount()).isEqualByComparingTo(new BigDecimal("100"));
         assertThat(pastPeriod.getDelinquentDays()).isEqualTo(5L);
+    }
+
+    @Test
+    void repaymentUndoUnpaysNewestPastPeriodFirst() {
+        when(classificationService.isDelinquencyDisabled(loan, today)).thenReturn(false);
+        // Two fully-paid past periods; the repository returns them ordered by period number ascending (oldest first).
+        final WorkingCapitalLoanDelinquencyRangeSchedule olderPeriod = fullyPaidPastPeriod(1, today.minusDays(66), today.minusDays(36));
+        final WorkingCapitalLoanDelinquencyRangeSchedule newerPeriod = fullyPaidPastPeriod(2, today.minusDays(35), today.minusDays(6));
+        when(rangeScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, today, today))
+                .thenReturn(Optional.empty());
+        when(rangeScheduleRepository.findByLoanIdAndToDateIsBeforeOrderByPeriodNumberAsc(LOAN_ID, today))
+                .thenReturn(List.of(olderPeriod, newerPeriod));
+
+        // The undo only covers a single period's payment.
+        rangeScheduleService.applyRepaymentUndo(loan, today, new BigDecimal("100"));
+
+        // It must reverse the most recent payment first: the newer period is unpaid, the older one is left untouched.
+        assertThat(newerPeriod.getPaidAmount()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(newerPeriod.getOutstandingAmount()).isEqualByComparingTo(new BigDecimal("100"));
+        assertThat(newerPeriod.getMinPaymentCriteriaMet()).isFalse();
+        assertThat(olderPeriod.getPaidAmount()).isEqualByComparingTo(new BigDecimal("100"));
+        assertThat(olderPeriod.getOutstandingAmount()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(olderPeriod.getMinPaymentCriteriaMet()).isTrue();
+    }
+
+    private WorkingCapitalLoanDelinquencyRangeSchedule fullyPaidPastPeriod(final int periodNumber, final LocalDate fromDate,
+            final LocalDate toDate) {
+        final WorkingCapitalLoanDelinquencyRangeSchedule period = new WorkingCapitalLoanDelinquencyRangeSchedule();
+        period.setLoan(loan);
+        period.setPeriodNumber(periodNumber);
+        period.setFromDate(fromDate);
+        period.setToDate(toDate);
+        period.setExpectedAmount(new BigDecimal("100"));
+        period.setPaidAmount(new BigDecimal("100"));
+        period.setOutstandingAmount(BigDecimal.ZERO);
+        period.setMinPaymentCriteriaMet(true);
+        return period;
     }
 
     private WorkingCapitalLoanDelinquencyRangeSchedule pastOpenPeriod() {

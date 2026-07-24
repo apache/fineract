@@ -5548,7 +5548,7 @@ CREATE TABLE IF NOT EXISTS `m_tellers` (
   `valid_to` date DEFAULT NULL,
   `state` SMALLINT DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `m_tellers_name_unq` (`name`),
+  UNIQUE KEY `m_tellers_office_name_unq` (`office_id`, `name`),
   KEY `IK_m_tellers_m_office` (`office_id`),
   KEY `FK_m_tellers_gl_account_debit_account_id` (`debit_account_id`),
   KEY `FK_m_tellers_gl_account_credit_account_id` (`credit_account_id`),

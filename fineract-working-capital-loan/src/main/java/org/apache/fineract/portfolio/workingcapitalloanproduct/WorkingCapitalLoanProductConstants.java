@@ -71,6 +71,7 @@ public final class WorkingCapitalLoanProductConstants {
 
     // Breach grace
     public static final String breachGraceDaysParamName = "breachGraceDays";
+    public static final String breachStartTypeParamName = "breachStartType";
 
     // Accounting
     public static final String accountingRuleParamName = "accountingRule";

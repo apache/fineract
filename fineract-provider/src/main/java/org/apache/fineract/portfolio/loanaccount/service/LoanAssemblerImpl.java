@@ -41,7 +41,6 @@ import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrappe
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.configuration.service.TemporaryConfigurationServiceContainer;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.api.JsonQuery;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
@@ -69,6 +68,7 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
+import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.GroupLoanIndividualMonitoringAccount;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
@@ -89,7 +89,6 @@ import org.apache.fineract.portfolio.loanaccount.exception.MultiDisbursementData
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanChargeMapper;
 import org.apache.fineract.portfolio.loanaccount.mapper.LoanCollateralManagementMapper;
 import org.apache.fineract.portfolio.loanaccount.service.schedule.LoanScheduleComponent;
@@ -128,7 +127,6 @@ public class LoanAssemblerImpl implements LoanAssembler {
     private final AccountNumberGenerator accountNumberGenerator;
     private final GLIMAccountInfoWritePlatformService glimAccountInfoWritePlatformService;
     private final LoanCollateralAssembler loanCollateralAssembler;
-    private final LoanScheduleCalculationPlatformService calculationPlatformService;
     private final LoanDisbursementDetailsAssembler loanDisbursementDetailsAssembler;
     private final LoanChargeMapper loanChargeMapper;
     private final LoanCollateralManagementMapper loanCollateralManagementMapper;
@@ -137,6 +135,9 @@ public class LoanAssemblerImpl implements LoanAssembler {
     private final LoanChargeService loanChargeService;
     private final LoanOfficerService loanOfficerService;
     private final LoanScheduleComponent loanSchedule;
+    // FINERACT-2665: recalculate the schedule from the loan's own state (same as approval/reschedule/holidays).
+    private final LoanScheduleService loanScheduleService;
+    private final LoanUtilService loanUtilService;
 
     @Override
     public Loan assembleFrom(final Long accountId) {
@@ -860,13 +861,23 @@ public class LoanAssemblerImpl implements LoanAssembler {
         if (changes.containsKey("recalculateLoanSchedule")) {
             changes.remove("recalculateLoanSchedule");
 
-            final JsonElement parsedQuery = this.fromApiJsonHelper.parse(command.json());
-            final JsonQuery query = JsonQuery.from(command.json(), parsedQuery, this.fromApiJsonHelper);
-
-            final LoanScheduleModel loanScheduleModel = this.calculationPlatformService.calculateLoanSchedule(query, false);
-            loanSchedule.updateLoanSchedule(loan, loanScheduleModel);
-            loanAccrualsProcessingService.reprocessExistingAccruals(loan, false);
+            // FINERACT-2665: recalculate from the loan's own (already-modified) state, exactly like every other
+            // recalc path (approval, reschedule, apply-holidays). loan.modifyApplication has applied the fields the
+            // request provided and left omitted ones unchanged, so the incoming request JSON is not re-read here -
+            // an omitted field is simply ignored and its existing value flows through.
+            //
+            // Charges are recalculated BEFORE the schedule is regenerated: the schedule generator bakes each period's
+            // feeChargesDue from the charge amounts as they currently stand on the loan, so a percentage-based charge
+            // whose base changed (e.g. principal/interest) must be re-derived first, otherwise the regenerated
+            // schedule reports a stale feeChargesDue. It is recalculated again afterwards to re-derive amounts against
+            // the new schedule and to refresh the total-charges-due-at-disbursement summary (which
+            // regenerateRepaymentSchedule does not touch).
             loanChargeService.recalculateAllCharges(loan);
+            final ScheduleGeneratorDTO scheduleGeneratorDTO = this.loanUtilService.buildScheduleGeneratorDTO(loan, null);
+            this.loanScheduleService.regenerateRepaymentSchedule(loan, scheduleGeneratorDTO);
+            loanChargeService.recalculateAllCharges(loan);
+            // Accruals are reprocessed here to mirror the approval/undo-approval flow.
+            loanAccrualsProcessingService.reprocessExistingAccruals(loan, false);
         }
 
         // Changes to modify loan rates.

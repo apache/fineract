@@ -72,6 +72,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
         final DataValidatorBuilder dataValidator = createValidator();
         final WorkingCapitalLoanDelinquencyAction parsedAction = parseCommand(command, workingCapitalLoan, dataValidator);
         validateLoanIsActive(workingCapitalLoan, dataValidator);
+        validateDelinquencyConfigurationExists(workingCapitalLoan, dataValidator);
 
         final DelinquencyAction action = parsedAction.getAction();
         if (DelinquencyAction.DISABLE.equals(action) || DelinquencyAction.ENABLE.equals(action)) {
@@ -358,6 +359,15 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
         if (!workingCapitalLoan.getLoanStatus().isActive()) {
             failGeneralValidation(dataValidator, "invalid.loan.state",
                     "Delinquency actions can be created only for active Working Capital loans.");
+        }
+    }
+
+    private void validateDelinquencyConfigurationExists(final WorkingCapitalLoan workingCapitalLoan,
+            final DataValidatorBuilder dataValidator) {
+        if (workingCapitalLoan.getLoanProductRelatedDetails() == null
+                || workingCapitalLoan.getLoanProductRelatedDetails().getDelinquencyBucket() == null) {
+            failGeneralValidation(dataValidator, "no.delinquency.configuration",
+                    "Delinquency actions require a delinquency bucket configured for the Working Capital loan.");
         }
     }
 

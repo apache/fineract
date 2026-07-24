@@ -122,6 +122,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     public static final String DELINQUENCY_START_TYPE_FIELD_NAME = "delinquencyStartType";
     public static final String BREACH_GRACE_DAYS_FIELD_NAME = "breachGraceDays";
     public static final String BREACH_ID_FIELD_NAME = "breachId";
+    public static final String BREACH_START_TYPE_FIELD_NAME = "breachStartType";
     public static final String NEAR_BREACH_ID_FIELD_NAME = "nearBreachId";
     public static final String LOCALE_FIELD_NAME = "locale";
 
@@ -343,6 +344,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         final String breachGraceDaysStr = data.get(BREACH_GRACE_DAYS_FIELD_NAME);
         final Integer breachGraceDays = breachGraceDaysStr != null && !breachGraceDaysStr.isEmpty() ? Integer.valueOf(breachGraceDaysStr)
                 : null;
+        final String breachStartTypeStr = data.get(BREACH_START_TYPE_FIELD_NAME);
+        final String breachStartType = breachStartTypeStr != null && !breachStartTypeStr.isEmpty() ? breachStartTypeStr : null;
 
         final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
         final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory
@@ -350,7 +353,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
                 .name(name) //
                 .breachId(breachId) //
                 .delinquencyGraceDays(graceDays) //
-                .breachGraceDays(breachGraceDays);
+                .breachGraceDays(breachGraceDays) //
+                .breachStartType(breachStartType);
 
         final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
@@ -387,6 +391,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         final String breachGraceDaysStr = data.get(BREACH_GRACE_DAYS_FIELD_NAME);
         final Integer breachGraceDays = breachGraceDaysStr != null && !breachGraceDaysStr.isEmpty() ? Integer.valueOf(breachGraceDaysStr)
                 : null;
+        final String breachStartTypeStr = data.get(BREACH_START_TYPE_FIELD_NAME);
+        final String breachStartType = breachStartTypeStr != null && !breachStartTypeStr.isEmpty() ? breachStartTypeStr : null;
 
         final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
         final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory
@@ -395,7 +401,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
                 .breachId(breachId) //
                 .nearBreachId(nearBreachId) //
                 .delinquencyGraceDays(graceDays) //
-                .breachGraceDays(breachGraceDays);
+                .breachGraceDays(breachGraceDays) //
+                .breachStartType(breachStartType);
 
         final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);

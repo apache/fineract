@@ -43,7 +43,9 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActio
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
+import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
@@ -298,21 +300,36 @@ public class WorkingCapitalLoanDelinquencyDisableIntegrationTest {
      * disabled days, so the window does not count towards delinquency.
      */
     @Test
-    public void testUndoDisableExtendsOpenPeriodsLikePause() {
+    public void testUndoDisableDoesNotShiftPeriods() {
         final Long loanId = setupActiveLoan();
+        final LocalDate disableDate = LocalDate.now(ZoneId.systemDefault());
+        final LocalDate enableDate = disableDate.plusDays(3);
 
         final List<WorkingCapitalLoanDelinquencyRangeScheduleData> periodsBefore = WorkingCapitalLoanDelinquencyRangeScheduleHelper
                 .getDelinquencyRangeSchedule(loanId);
         final LocalDate toDateBefore = periodsBefore.getFirst().getToDate();
 
-        WorkingCapitalLoanDelinquencyActionHelper.disableDelinquency(loanId);
-        WorkingCapitalLoanDelinquencyActionHelper.enableDelinquency(loanId);
+        final GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                new PutGlobalConfigurationsRequest().enabled(true));
+        try {
+            // Disable on the current business date, advance three days, then enable.
+            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disableDate);
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanId, "disable", disableDate, null);
+            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, enableDate);
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanId, "enable", enableDate, null);
 
-        final List<WorkingCapitalLoanDelinquencyRangeScheduleData> periodsAfter = WorkingCapitalLoanDelinquencyRangeScheduleHelper
-                .getDelinquencyRangeSchedule(loanId);
-        // Same-day disable+undo is a 1-day inclusive window, so the open period is extended by 1 day.
-        assertEquals(toDateBefore.plusDays(1), periodsAfter.getFirst().getToDate(),
-                "The open period must be extended by the disabled days on undo");
+            final List<WorkingCapitalLoanDelinquencyRangeScheduleData> periodsAfter = WorkingCapitalLoanDelinquencyRangeScheduleHelper
+                    .getDelinquencyRangeSchedule(loanId);
+            // Matching breach: a disable is NOT treated as a pause, so re-enabling must not shift the period dates -
+            // the
+            // reprocess only re-evaluates and reclassifies delinquency.
+            assertEquals(toDateBefore, periodsAfter.getFirst().getToDate(),
+                    "Re-enabling delinquency must not shift period dates (a disable is not a pause)");
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
     }
 
     // ===================== Helper Methods =====================

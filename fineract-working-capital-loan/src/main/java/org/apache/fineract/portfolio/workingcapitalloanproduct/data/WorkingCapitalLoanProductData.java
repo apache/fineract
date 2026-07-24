@@ -89,6 +89,7 @@ public class WorkingCapitalLoanProductData implements Serializable {
     private Integer delinquencyGraceDays;
     private StringEnumOptionData delinquencyStartType;
     private Integer breachGraceDays;
+    private StringEnumOptionData breachStartType;
 
     // Configurable attributes (allowAttributeOverrides)
     private WorkingCapitalLoanProductConfigurableAttributesData allowAttributeOverrides;
@@ -112,6 +113,7 @@ public class WorkingCapitalLoanProductData implements Serializable {
     private List<StringEnumOptionData> periodFrequencyTypeOptions;
     private List<StringEnumOptionData> advancedPaymentAllocationTypes;
     private List<StringEnumOptionData> delinquencyStartTypeOptions;
+    private List<StringEnumOptionData> breachStartTypeOptions;
     private List<StringEnumOptionData> delinquencyMinimumPaymentTypeOptions;
     private List<EnumOptionData> advancedPaymentAllocationTransactionTypes;
     private Collection<DelinquencyBucketData> delinquencyBucketOptions;
@@ -132,6 +134,7 @@ public class WorkingCapitalLoanProductData implements Serializable {
         setDelinquencyBucketOptions(productTemplate.getDelinquencyBucketOptions());
         setBreachOptions(productTemplate.getBreachOptions());
         setDelinquencyStartTypeOptions(productTemplate.getDelinquencyStartTypeOptions());
+        setBreachStartTypeOptions(productTemplate.getBreachStartTypeOptions());
         setAccountingRuleOptions(productTemplate.getAccountingRuleOptions());
         setAccountingMappingOptions(productTemplate.getAccountingMappingOptions());
         setPaymentTypeOptions(productTemplate.getPaymentTypeOptions());

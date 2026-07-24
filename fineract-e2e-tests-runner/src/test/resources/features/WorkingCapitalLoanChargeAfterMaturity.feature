@@ -152,13 +152,13 @@ Feature: Working Capital Loan Charge After Maturity
       | balance.principalOutstanding | 1000.0     |
       | timeline.actualMaturityDate  | 2026-10-01 |
       | delinquencyStartDate         | present    |
-      | breachStartDate              | null       |
+      | breachStartDate              | 2026-01-01 |
     And Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-01 | 2026-02-28 | 59           | 12.30            | 12.30             | null       | null   |
-      | 2            | 2026-03-01 | 2026-04-30 | 61           | 12.30            | 12.30             | null       | null   |
-      | 3            | 2026-05-01 | 2026-06-30 | 61           | 12.30            | 12.30             | null       | null   |
-      | 4            | 2026-07-01 | 2026-08-31 | 62           | 12.30            | 12.30             | null       | null   |
+      | 1            | 2026-01-01 | 2026-02-28 | 59           | 12.30            | 12.30             | null       | true   |
+      | 2            | 2026-03-01 | 2026-04-30 | 61           | 12.30            | 12.30             | null       | true   |
+      | 3            | 2026-05-01 | 2026-06-30 | 61           | 12.30            | 12.30             | null       | true   |
+      | 4            | 2026-07-01 | 2026-08-31 | 62           | 12.30            | 12.30             | null       | true   |
       | 5            | 2026-09-01 | 2026-10-31 | 61           | 12.30            | 12.30             | null       | null   |
     Then Admin closes the Working Capital loan with a full repayment on "01 October 2026"
     And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
