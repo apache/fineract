@@ -36,7 +36,6 @@ public class ExternalServicesReadPlatformServiceImpl implements ExternalServices
 
     @Override
     public ExternalServicesData getExternalServiceDetailsByServiceName(String serviceName) {
-        // TODO Auto-generated method stub
         final ResultSetExtractor<ExternalServicesData> resultSetExtractor = new ExternalServicesDetailsDataExtractor();
         String serviceNameToUse = null;
         switch (serviceName) {
@@ -68,7 +67,6 @@ public class ExternalServicesReadPlatformServiceImpl implements ExternalServices
 
         @Override
         public ExternalServicesData extractData(ResultSet rs) throws SQLException, DataAccessException {
-            // TODO Auto-generated method stub
             Long id = (long) 0;
             String name = null;
             while (rs.next()) {

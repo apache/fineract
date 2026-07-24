@@ -161,7 +161,6 @@ public class TellerWritePlatformServiceJpaImpl implements TellerWritePlatformSer
     @Override
     @Transactional
     public CommandProcessingResult deleteTeller(Long tellerId) {
-        // TODO Auto-generated method stub
 
         Teller teller = tellerRepositoryWrapper.findOneWithNotFoundDetection(tellerId);
         Set<Cashier> isTellerIdPresentInCashier = teller.getCashiers();

@@ -41,9 +41,7 @@ public class LoanProductTrancheDetails {
     @Column(name = "allow_full_term_for_tranche")
     private boolean allowFullTermForTranche;
 
-    protected LoanProductTrancheDetails() {
-        // TODO Auto-generated constructor stub
-    }
+    protected LoanProductTrancheDetails() {}
 
     public LoanProductTrancheDetails(final boolean multiDisburseLoan, final Integer maxTrancheCount,
             final BigDecimal outstandingLoanBalance, final boolean allowFullTermForTranche) {
