@@ -25,7 +25,7 @@ When enabled, Fineract accepts signed JWTs issued by the configured IdP as Beare
 
 == Architecture Overview
 
-image::oidc/architecture.png[OIDC Federation Architecture — Multi-Tenant,width=100%]
+image::oidc-architecture.png[OIDC Federation Architecture — Multi-Tenant,width=100%]
 
 The key design principle is **one IdP per tenant**: each Fineract tenant has its own IdP record in the master database, keyed by the JWT `iss` claim. A single Fineract instance can serve multiple tenants, each authenticating against a completely different IdP (Keycloak, Google, Azure AD, etc.) without any server restart.
 

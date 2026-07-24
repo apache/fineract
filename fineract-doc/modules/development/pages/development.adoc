@@ -1,3 +1,0 @@
-= Introduction
-
-There are lots of ways to contribute to Apache Fineract: coding, testing, improving the build process and tools, or contributing to the documentation. This guide provides information that will not only help you get started as a contributor, but that you'll find handy to refer to even as an old hand.

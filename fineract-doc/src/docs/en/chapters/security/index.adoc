@@ -16,4 +16,8 @@ include::oauth.adoc[leveloffset=+1]
 
 include::2fa.adoc[leveloffset=+1]
 
+include::oidc-federation.adoc[leveloffset=+1]
+
+include::oidc-federation-google.adoc[leveloffset=+1]
+
 include::harden.adoc[leveloffset=+1]
