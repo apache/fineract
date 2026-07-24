@@ -32,4 +32,15 @@ public interface LoanOriginatorLinkingService {
      *            JSON array of originator data from loan request
      */
     void processOriginatorsForLoanApplication(Long loanId, JsonArray originatorsArray);
+
+    /**
+     * Process originators provided during loan disbursement. Reconciles the loan's originator mappings to match the
+     * provided array.
+     *
+     * @param loanId
+     *            the loan ID to reconcile originators for
+     * @param originatorsArray
+     *            JSON array of originator data from loan disbursement request; {@code null} means no-op
+     */
+    void processOriginatorsForLoanDisbursement(Long loanId, JsonArray originatorsArray);
 }

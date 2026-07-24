@@ -22,13 +22,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -51,15 +61,19 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
+import org.apache.fineract.portfolio.loanaccount.data.ScheduleGeneratorDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanAccountDomainService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanBuilder;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
@@ -69,7 +83,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanSummary;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanTransactionValidator;
+import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorNotActiveException;
+import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
@@ -162,6 +179,9 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
 
     @Mock
     private LoanScheduleService loanScheduleService;
+
+    @Mock
+    private LoanOriginatorLinkingService loanOriginatorLinkingService;
 
     @InjectMocks
     private LoanWritePlatformServiceJpaRepositoryImpl loanWritePlatformService;
@@ -560,5 +580,197 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         // the fix block is skipped. updateLoanSummaryDerivedFields is called exactly once
         // (the standard call inside the private disburseLoan helper).
         verify(loanBalanceService, times(1)).updateLoanSummaryDerivedFields(loan);
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void disburseLoan_withOmittedOriginators_shouldNotProcessOriginators() {
+        final DisbursementFixture fixture = setupHappyPathDisbursement(null, null);
+
+        final CommandProcessingResult result = loanWritePlatformService.disburseLoan(LOAN_ID, fixture.command, false);
+
+        assertEquals(LOAN_ID, result.getLoanId());
+        verify(fixture.command, never()).arrayOfParameterNamed(LoanApiConstants.ORIGINATORS_PARAM);
+        verify(loanOriginatorLinkingService, never()).processOriginatorsForLoanDisbursement(anyLong(), any());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void disburseLoan_withNullOriginators_shouldNotProcessOriginators() {
+        final DisbursementFixture fixture = setupHappyPathDisbursement(JsonNull.INSTANCE, null);
+
+        final CommandProcessingResult result = loanWritePlatformService.disburseLoan(LOAN_ID, fixture.command, false);
+
+        assertEquals(LOAN_ID, result.getLoanId());
+        verify(fixture.command, never()).arrayOfParameterNamed(LoanApiConstants.ORIGINATORS_PARAM);
+        verify(loanOriginatorLinkingService, never()).processOriginatorsForLoanDisbursement(anyLong(), any());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void disburseLoan_withEmptyOriginators_shouldProcessOriginators() {
+        final JsonArray originators = new JsonArray();
+        final DisbursementFixture fixture = setupHappyPathDisbursement(originators, originators);
+
+        final CommandProcessingResult result = loanWritePlatformService.disburseLoan(LOAN_ID, fixture.command, false);
+
+        assertEquals(LOAN_ID, result.getLoanId());
+        verify(loanOriginatorLinkingService).processOriginatorsForLoanDisbursement(eq(LOAN_ID), eq(originators));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void disburseLoan_withOriginatorsOnHappyPath_shouldReturnResultAndProcessOriginators() {
+        final JsonArray originators = new JsonArray();
+        final JsonObject originator = new JsonObject();
+        originator.addProperty("externalId", "ORIGINATOR-A");
+        originators.add(originator);
+        final DisbursementFixture fixture = setupHappyPathDisbursement(originators, originators);
+
+        final CommandProcessingResult result = loanWritePlatformService.disburseLoan(LOAN_ID, fixture.command, false);
+
+        verify(loanOriginatorLinkingService).processOriginatorsForLoanDisbursement(eq(LOAN_ID), eq(originators));
+        assertEquals(LOAN_ID, result.getLoanId());
+        assertEquals(2L, result.getClientId());
+        verify(loanTransactionRepository).saveAndFlush(any(LoanTransaction.class));
+        assertEquals(LoanTransactionType.DISBURSEMENT, fixture.loanTransactions.getFirst().getTypeOf());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void disburseLoan_whenOriginatorProcessingThrowsNotFound_shouldPropagateException() {
+        final JsonArray originators = new JsonArray();
+        final JsonObject originator = new JsonObject();
+        originator.addProperty("id", 999L);
+        originators.add(originator);
+        final DisbursementFixture fixture = setupDisbursementThroughOriginatorProcessing(originators, originators);
+        doThrow(new LoanOriginatorNotFoundException(999L)).when(loanOriginatorLinkingService)
+                .processOriginatorsForLoanDisbursement(eq(LOAN_ID), eq(originators));
+
+        assertThrows(LoanOriginatorNotFoundException.class, () -> loanWritePlatformService.disburseLoan(LOAN_ID, fixture.command, false));
+
+        verify(loanOriginatorLinkingService).processOriginatorsForLoanDisbursement(eq(LOAN_ID), eq(originators));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void disburseLoan_whenOriginatorProcessingThrowsNotActive_shouldPropagateException() {
+        final JsonArray originators = new JsonArray();
+        final JsonObject originator = new JsonObject();
+        originator.addProperty("id", 5L);
+        originators.add(originator);
+        final DisbursementFixture fixture = setupDisbursementThroughOriginatorProcessing(originators, originators);
+        doThrow(new LoanOriginatorNotActiveException(5L, "INACTIVE")).when(loanOriginatorLinkingService)
+                .processOriginatorsForLoanDisbursement(eq(LOAN_ID), eq(originators));
+
+        assertThrows(LoanOriginatorNotActiveException.class, () -> loanWritePlatformService.disburseLoan(LOAN_ID, fixture.command, false));
+
+        verify(loanOriginatorLinkingService).processOriginatorsForLoanDisbursement(eq(LOAN_ID), eq(originators));
+    }
+
+    private DisbursementFixture setupHappyPathDisbursement(final JsonElement originatorsElement, final JsonArray extractedOriginators) {
+        final DisbursementFixture fixture = setupDisbursementThroughOriginatorProcessing(originatorsElement, extractedOriginators);
+        stubPostOriginatorDisbursementSteps(fixture);
+        return fixture;
+    }
+
+    private DisbursementFixture setupDisbursementThroughOriginatorProcessing(final JsonElement originatorsElement,
+            final JsonArray extractedOriginators) {
+        setupMoneyHelper();
+        final LocalDate actualDisbursementDate = DateUtils.parseLocalDate("2025-05-20");
+        final MonetaryCurrency currency = new MonetaryCurrency("USD", 2, 0);
+        final Money principal = Money.of(currency, BigDecimal.valueOf(100));
+        final DisbursementFixture fixture = new DisbursementFixture();
+        final ScheduleGeneratorDTO scheduleGeneratorDTO = mock(ScheduleGeneratorDTO.class);
+        final LoanProduct loanProduct = mock(LoanProduct.class);
+        final LoanProductRelatedDetail loanProductRelatedDetail = mock(LoanProductRelatedDetail.class);
+        final LoanRepaymentScheduleInstallment installment = mock(LoanRepaymentScheduleInstallment.class);
+        final Office office = mock(Office.class);
+        final Loan loan = mock(Loan.class);
+        fixture.command = mock(JsonCommand.class);
+        fixture.loan = loan;
+
+        when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);
+        when(loan.loanProduct()).thenReturn(loanProduct);
+        when(loan.getLoanProduct()).thenReturn(loanProduct);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
+        when(loan.getLoanRepaymentScheduleDetail()).thenReturn(loanProductRelatedDetail);
+        when(loanProductRelatedDetail.getLoanScheduleType()).thenReturn(null);
+        when(loanProductRelatedDetail.isEnableDownPayment()).thenReturn(false);
+        when(loanProduct.isDisallowExpectedDisbursements()).thenReturn(false);
+        when(loanProduct.isMultiDisburseLoan()).thenReturn(false);
+        when(loanProduct.isIncludeInBorrowerCycle()).thenReturn(false);
+        when(loanProduct.getId()).thenReturn(1L);
+        when(loan.getCurrency()).thenReturn(currency);
+        when(loan.getStatus()).thenReturn(LoanStatus.APPROVED);
+        when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
+        when(loanLifecycleStateMachine.dryTransition(LoanEvent.LOAN_DISBURSED, loan)).thenReturn(LoanStatus.ACTIVE);
+        when(loanUtilService.buildScheduleGeneratorDTO(loan, null)).thenReturn(scheduleGeneratorDTO);
+        when(configurationDomainService.isPaymentTypeApplicableForDisbursementCharge()).thenReturn(false);
+        when(loan.getPrincipal()).thenReturn(principal);
+        when(loanDisbursementService.adjustDisburseAmount(loan, fixture.command, actualDisbursementDate)).thenReturn(principal);
+        when(externalIdFactory.createFromCommand(fixture.command, LoanApiConstants.externalIdParameterName)).thenReturn(ExternalId.empty());
+        when(loan.getTotalOverpaidAsMoney()).thenReturn(Money.zero(currency));
+        when(loan.getOffice()).thenReturn(office);
+        when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(installment));
+        when(loan.fetchRepaymentScheduleInstallment(1)).thenReturn(installment);
+        when(installment.getDueDate()).thenReturn(actualDisbursementDate.plusMonths(1));
+        when(loan.getSummary()).thenReturn(LoanSummary.create(BigDecimal.ZERO));
+        when(loan.getClientId()).thenReturn(2L);
+        when(loan.isGroupLoan()).thenReturn(false);
+        when(loan.isMultiDisburmentLoan()).thenReturn(false);
+        when(loan.isTopup()).thenReturn(false);
+        when(loan.isInterestBearingAndInterestRecalculationEnabled()).thenReturn(false);
+        when(loan.isAutoRepaymentForDownPaymentEnabled()).thenReturn(false);
+        when(loan.isDisbursementMissed()).thenReturn(false);
+        when(loan.isCumulativeSchedule()).thenReturn(false);
+        when(loan.isProgressiveSchedule()).thenReturn(false);
+        when(loan.shouldCreateStandingInstructionAtDisbursement()).thenReturn(false);
+        when(loan.deriveSumTotalOfChargesDueAtDisbursement()).thenReturn(BigDecimal.ZERO);
+        when(loan.getActiveCharges()).thenReturn(Set.of());
+        when(loan.getTermsCount()).thenReturn(0L);
+        when(loan.getNextPossibleRepaymentDateForRescheduling()).thenReturn(actualDisbursementDate.plusMonths(1));
+        when(loan.getExternalId()).thenReturn(ExternalId.empty());
+        when(loan.getId()).thenReturn(LOAN_ID);
+        when(loanRepositoryWrapper.getClientOrJLGLoansDisbursedAfter(any(), anyLong())).thenReturn(List.of());
+        when(loanRepositoryWrapper.saveAndFlush(loan)).thenReturn(loan);
+        when(fixture.command.commandId()).thenReturn(4L);
+        when(fixture.command.localDateValueOfParameterNamed(anyString()))
+                .thenAnswer(invocation -> "actualDisbursementDate".equals(invocation.getArgument(0)) ? actualDisbursementDate : null);
+        when(fixture.command.bigDecimalValueOfParameterNamed(anyString())).thenReturn(null);
+        when(fixture.command.extractLocale()).thenReturn(Locale.US);
+        when(fixture.command.locale()).thenReturn("en");
+        when(fixture.command.dateFormat()).thenReturn("MM/dd/yyyy");
+        when(fixture.command.stringValueOfParameterNamed(anyString()))
+                .thenAnswer(invocation -> "actualDisbursementDate".equals(invocation.getArgument(0)) ? "05/20/2025" : null);
+        when(fixture.command.parameterExists("postDatedChecks")).thenReturn(false);
+        when(fixture.command.hasNonNullParameter(LoanApiConstants.ORIGINATORS_PARAM))
+                .thenReturn(originatorsElement != null && !originatorsElement.isJsonNull());
+        if (extractedOriginators != null) {
+            when(fixture.command.arrayOfParameterNamed(LoanApiConstants.ORIGINATORS_PARAM)).thenReturn(extractedOriginators);
+        }
+        doAnswer(invocation -> {
+            final LoanTransaction loanTransaction = invocation.getArgument(0);
+            fixture.loanTransactions.add(loanTransaction);
+            return loanTransaction;
+        }).when(loanTransactionRepository).saveAndFlush(any(LoanTransaction.class));
+
+        return fixture;
+    }
+
+    private void stubPostOriginatorDisbursementSteps(final DisbursementFixture fixture) {
+        final Loan loan = fixture.loan;
+        when(loan.getLoanTransactions()).thenReturn(fixture.loanTransactions);
+        when(loanRepositoryWrapper.saveAndFlush(loan)).thenReturn(loan);
+        when(loan.getId()).thenReturn(LOAN_ID);
+        when(loan.getOfficeId()).thenReturn(3L);
+        when(loan.getGroupId()).thenReturn(null);
+    }
+
+    private static final class DisbursementFixture {
+
+        private JsonCommand command;
+        private Loan loan;
+        private final List<LoanTransaction> loanTransactions = new ArrayList<>();
     }
 }
