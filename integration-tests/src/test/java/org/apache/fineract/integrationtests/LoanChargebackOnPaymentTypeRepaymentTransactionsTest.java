@@ -22,315 +22,198 @@ import static org.apache.fineract.integrationtests.common.loans.LoanProductTestB
 import static org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
-import org.apache.fineract.client.models.AdvancedPaymentData;
-import org.apache.fineract.client.models.DelinquencyBucketResponse;
-import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
-import org.apache.fineract.client.models.PaymentAllocationOrder;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
-
-    private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpecErr503;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
-    private LoanTransactionHelper loanTransactionHelper;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-    }
+public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest extends FeignLoanTestBase {
 
     @ParameterizedTest
     @MethodSource("loanProductFactory")
-    public void loanTransactionChargebackForPaymentTypeRepaymentTransactionTest(LoanProductTestBuilder loanProductTestBuilder) {
-        // Loan ExternalId
+    public void loanTransactionChargebackForPaymentTypeRepaymentTransactionTest(String strategyCode, boolean advancedAllocation) {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        // Delinquency Bucket
         final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
-        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
 
-        // Client and Loan account creation
+        final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long loanProductId = createLoanProduct(strategyCode, advancedAllocation, delinquencyBucketId);
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                delinquencyBucketId, loanProductTestBuilder);
-        assertNotNull(getLoanProductsProductResponse);
+        final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr, strategyCode);
 
-        final Integer loanId = createLoanAccount(clientId, getLoanProductsProductResponse.getId(), loanExternalIdStr,
-                loanProductTestBuilder.getTransactionProcessingStrategyCode());
+        final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
+                new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN).transactionDate("5 September 2022")
+                        .locale(LoanTestData.LOCALE).transactionAmount(500.0));
 
-        // make Repayment
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("5 September 2022").locale("en")
-                        .transactionAmount(500.0));
-
-        // verify transaction relation and outstanding balance
         reviewLoanTransactionRelations(loanId, repaymentTransaction_1.getResourceId(), 0, Double.valueOf("500.00"));
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
         assertEquals(500.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
-        // chargeback on Repayment
-        PostLoansLoanIdTransactionsResponse chargebackTransactionResponse = loanTransactionHelper.chargebackLoanTransaction(
-                loanExternalIdStr, repaymentTransaction_1.getResourceId(),
-                new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(500.0).paymentTypeId(1L));
+        PostLoansLoanIdTransactionsResponse chargebackTransactionResponse = chargebackLoanTransaction(loanExternalIdStr,
+                repaymentTransaction_1.getResourceId(), new PostLoansLoanIdTransactionsTransactionIdRequest().locale(LoanTestData.LOCALE)
+                        .transactionAmount(500.0).paymentTypeId(1L));
 
-        // verify transaction relation and outstanding balance
         assertNotNull(chargebackTransactionResponse);
         reviewLoanTransactionRelations(loanId, repaymentTransaction_1.getResourceId(), 1, Double.valueOf("500.00"));
         reviewLoanTransactionRelations(loanId, chargebackTransactionResponse.getResourceId(), 0, Double.valueOf("1000.00"));
-        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = getLoanDetails(loanId);
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
         assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
-        // Goodwill Credit
-        final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = loanTransactionHelper.makeGoodwillCredit((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("6 September 2022").locale("en")
-                        .transactionAmount(200.0));
+        final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = makeGoodwillCredit(loanId,
+                new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN).transactionDate("6 September 2022")
+                        .locale(LoanTestData.LOCALE).transactionAmount(200.0));
 
-        // verify transaction relation and outstanding balance
         reviewLoanTransactionRelations(loanId, goodwillCredit_1.getResourceId(), 0, Double.valueOf("300.00"));
 
-        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = getLoanDetails(loanId);
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
         assertEquals(800.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
-        // chargeback on Goodwill Credit Transaction
-        chargebackTransactionResponse = loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr, goodwillCredit_1.getResourceId(),
-                new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(200.0).paymentTypeId(1L));
+        chargebackTransactionResponse = chargebackLoanTransaction(loanExternalIdStr, goodwillCredit_1.getResourceId(),
+                new PostLoansLoanIdTransactionsTransactionIdRequest().locale(LoanTestData.LOCALE).transactionAmount(200.0)
+                        .paymentTypeId(1L));
 
-        // verify transaction relation and outstanding balance
         assertNotNull(chargebackTransactionResponse);
         reviewLoanTransactionRelations(loanId, goodwillCredit_1.getResourceId(), 1, Double.valueOf("300.00"));
         reviewLoanTransactionRelations(loanId, chargebackTransactionResponse.getResourceId(), 0, Double.valueOf("1000.00"));
 
-        // Payout Refund
+        final PostLoansLoanIdTransactionsResponse payoutRefund_1 = makePayoutRefund(loanId,
+                new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN).transactionDate("7 September 2022")
+                        .locale(LoanTestData.LOCALE).transactionAmount(300.0));
 
-        final PostLoansLoanIdTransactionsResponse payoutRefund_1 = loanTransactionHelper.makePayoutRefund((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 September 2022").locale("en")
-                        .transactionAmount(300.0));
-
-        // verify transaction relation and outstanding balance
         reviewLoanTransactionRelations(loanId, payoutRefund_1.getResourceId(), 0, Double.valueOf("0.00"));
 
-        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = getLoanDetails(loanId);
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
         assertEquals(700.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
-        // chargeback on Payout Refund Transaction
-        chargebackTransactionResponse = loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr, payoutRefund_1.getResourceId(),
-                new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(300.0).paymentTypeId(1L));
+        chargebackTransactionResponse = chargebackLoanTransaction(loanExternalIdStr, payoutRefund_1.getResourceId(),
+                new PostLoansLoanIdTransactionsTransactionIdRequest().locale(LoanTestData.LOCALE).transactionAmount(300.0)
+                        .paymentTypeId(1L));
 
-        // verify transaction relation and outstanding balance
         assertNotNull(chargebackTransactionResponse);
         reviewLoanTransactionRelations(loanId, payoutRefund_1.getResourceId(), 1, Double.valueOf("0.00"));
         reviewLoanTransactionRelations(loanId, chargebackTransactionResponse.getResourceId(), 0, Double.valueOf("1000.00"));
 
-        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = getLoanDetails(loanId);
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
         assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
-        // Merchant Issued Refund
+        final PostLoansLoanIdTransactionsResponse merchantIssuedRefund_1 = makeMerchantIssuedRefund(loanId,
+                new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN).transactionDate("8 September 2022")
+                        .locale(LoanTestData.LOCALE).transactionAmount(100.0));
 
-        final PostLoansLoanIdTransactionsResponse merchantIssuedRefund_1 = loanTransactionHelper.makeMerchantIssuedRefund((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en")
-                        .transactionAmount(100.0));
-
-        // verify transaction relation and outstanding balance
         reviewLoanTransactionRelations(loanId, merchantIssuedRefund_1.getResourceId(), 0, Double.valueOf("0.00"));
 
-        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = getLoanDetails(loanId);
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
         assertEquals(900.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
 
-        // chargeback on Merchant Issued Refund Transaction
-        chargebackTransactionResponse = loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr,
-                merchantIssuedRefund_1.getResourceId(),
-                new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(100.0));
+        chargebackTransactionResponse = chargebackLoanTransaction(loanExternalIdStr, merchantIssuedRefund_1.getResourceId(),
+                new PostLoansLoanIdTransactionsTransactionIdRequest().locale(LoanTestData.LOCALE).transactionAmount(100.0));
 
-        // verify transaction relation and outstanding balance
         assertNotNull(chargebackTransactionResponse);
         reviewLoanTransactionRelations(loanId, merchantIssuedRefund_1.getResourceId(), 1, Double.valueOf("0.00"));
         reviewLoanTransactionRelations(loanId, chargebackTransactionResponse.getResourceId(), 0, Double.valueOf("1000.00"));
 
-        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = getLoanDetails(loanId);
         assertNotNull(loanDetails);
         assertTrue(loanDetails.getStatus().getActive());
         assertNotNull(loanDetails.getSummary());
         assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding()));
-
     }
 
     @ParameterizedTest
     @MethodSource("loanProductFactory")
-    public void loanChargebackNotAllowedForReversedPaymentTypeRepaymentTest(LoanProductTestBuilder loanProductTestBuilder) {
-        // Loan ExternalId
+    public void loanChargebackNotAllowedForReversedPaymentTypeRepaymentTest(String strategyCode, boolean advancedAllocation) {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        // Delinquency Bucket
         final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
-        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
 
-        // Client and Loan account creation
+        final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        final Long loanProductId = createLoanProduct(strategyCode, advancedAllocation, delinquencyBucketId);
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                delinquencyBucketId, loanProductTestBuilder);
-        assertNotNull(getLoanProductsProductResponse);
+        final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr, strategyCode);
 
-        final Integer loanId = createLoanAccount(clientId, getLoanProductsProductResponse.getId(), loanExternalIdStr,
-                loanProductTestBuilder.getTransactionProcessingStrategyCode());
+        final PostLoansLoanIdTransactionsResponse merchantIssuedRefund_2 = makeMerchantIssuedRefund(loanId,
+                new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN).transactionDate("8 September 2022")
+                        .locale(LoanTestData.LOCALE).transactionAmount(50.0));
 
-        // Merchant Refund
-        final PostLoansLoanIdTransactionsResponse merchantIssuedRefund_2 = loanTransactionHelper.makeMerchantIssuedRefund((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en")
-                        .transactionAmount(50.0));
+        reverseRepayment(loanId, merchantIssuedRefund_2.getResourceId(), "8 September 2022");
 
-        // reverse Merchant Refund
-        loanTransactionHelper.reverseRepayment(loanId, merchantIssuedRefund_2.getResourceId().intValue(), "8 September 2022");
-
-        // apply Chargeback should give 503 error
-        final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId,
-                merchantIssuedRefund_2.getResourceId(), "50.00", 1, responseSpecErr503);
-
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> applyChargebackTransaction(loanId, merchantIssuedRefund_2.getResourceId(), 50.0, getPaymentTypeId(1)));
+        assertEquals(503, exception.getStatus());
     }
 
-    private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Long delinquencyBucketId, LoanProductTestBuilder loanProductTestBuilder) {
-        final HashMap<String, Object> loanProductMap = loanProductTestBuilder.build(null, delinquencyBucketId);
-        final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
-        return loanTransactionHelper.getLoanProduct(loanProductId);
+    private Long createLoanProduct(String strategyCode, boolean advancedAllocation, Long delinquencyBucketId) {
+        PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct().principal(1000.0)
+                .numberOfRepayments(1).repaymentEvery(1).repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS_L)
+                .interestRateFrequencyType(LoanTestData.InterestRateFrequencyType.MONTHS)
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL).interestType(LoanTestData.InterestType.FLAT)
+                .daysInMonthType(LoanTestData.DaysInMonthType.DAYS_30).daysInYearType(LoanTestData.DaysInYearType.DAYS_365)
+                .transactionProcessingStrategyCode(strategyCode).delinquencyBucketId(delinquencyBucketId);
+        if (advancedAllocation) {
+            product.loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()).loanScheduleProcessingType("HORIZONTAL")
+                    .addPaymentAllocationItem(LoanRequestBuilders.defaultPaymentAllocation())
+                    .addPaymentAllocationItem(LoanRequestBuilders.paymentAllocation("REPAYMENT", "NEXT_INSTALLMENT", "PAST_DUE_PENALTY",
+                            "PAST_DUE_FEE", "PAST_DUE_INTEREST", "PAST_DUE_PRINCIPAL", "DUE_PENALTY", "DUE_FEE", "DUE_INTEREST",
+                            "DUE_PRINCIPAL", "IN_ADVANCE_PENALTY", "IN_ADVANCE_FEE", "IN_ADVANCE_PRINCIPAL", "IN_ADVANCE_INTEREST"));
+        }
+        return createLoanProduct(product);
     }
 
-    private Integer createLoanAccount(final Integer clientID, final Long loanProductID, final String externalId,
-            final String repaymentStrategy) {
+    private Long createLoanAccount(final Long clientId, final Long loanProductId, final String externalId, final String repaymentStrategy) {
+        PostLoansRequest request = applyLoanRequest(clientId, loanProductId, "01 September 2022", 1000.0, 1,
+                req -> req.externalId(externalId).expectedDisbursementDate("03 September 2022").repaymentEvery(1)
+                        .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS).loanTermFrequency(1)
+                        .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)
+                        .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL).interestType(LoanTestData.InterestType.FLAT)
+                        .transactionProcessingStrategyCode(repaymentStrategy));
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
-                .withExternalId(externalId).withRepaymentStrategy(repaymentStrategy)
-                .build(clientID.toString(), loanProductID.toString(), null);
-
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan("02 September 2022", "1000", loanId, null);
-        loanTransactionHelper.disburseLoanWithNetDisbursalAmount("03 September 2022", loanId, "1000");
+        Long loanId = applyForLoan(request);
+        approveLoan(loanId, approveLoanRequest(1000.0, "02 September 2022", "03 September 2022"));
+        disburseLoan(loanId, "03 September 2022", 1000.0);
         return loanId;
     }
 
-    private void reviewLoanTransactionRelations(final Integer loanId, final Long transactionId, final Integer expectedSize,
-            final Double outstandingBalance) {
-
-        GetLoansLoanIdTransactionsTransactionIdResponse getLoansTransactionResponse = loanTransactionHelper.getLoanTransaction(loanId,
-                transactionId.intValue());
-        assertNotNull(getLoansTransactionResponse);
-        assertNotNull(getLoansTransactionResponse.getTransactionRelations());
-        assertEquals(expectedSize, getLoansTransactionResponse.getTransactionRelations().size());
-        // Outstanding amount
-        assertEquals(outstandingBalance, getLoansTransactionResponse.getOutstandingLoanBalance());
-    }
-
-    private static AdvancedPaymentData createRepaymentPaymentAllocation() {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("REPAYMENT");
-        advancedPaymentData.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_INTEREST, PaymentAllocationType.PAST_DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_INTEREST,
-                PaymentAllocationType.DUE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
-    }
-
-    private static AdvancedPaymentData createDefaultPaymentAllocation() {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("DEFAULT");
-        advancedPaymentData.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
-    }
-
-    private static List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
-        AtomicInteger integer = new AtomicInteger(1);
-        return Arrays.stream(paymentAllocationTypes).map(pat -> {
-            PaymentAllocationOrder paymentAllocationOrder = new PaymentAllocationOrder();
-            paymentAllocationOrder.setPaymentAllocationRule(pat.name());
-            paymentAllocationOrder.setOrder(integer.getAndIncrement());
-            return paymentAllocationOrder;
-        }).toList();
-    }
-
     private static Stream<Arguments> loanProductFactory() {
-        return Stream.of(Arguments.of(Named.of("DEFAULT_STRATEGY", new LoanProductTestBuilder().withRepaymentStrategy(DEFAULT_STRATEGY))),
-                Arguments.of(Named.of("ADVANCED_PAYMENT_ALLOCATION_STRATEGY",
-                        new LoanProductTestBuilder().withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
-                                .addAdvancedPaymentAllocation(createDefaultPaymentAllocation(), createRepaymentPaymentAllocation()))));
+        return Stream.of(Arguments.of(Named.of("DEFAULT_STRATEGY", DEFAULT_STRATEGY), false),
+                Arguments.of(Named.of("ADVANCED_PAYMENT_ALLOCATION_STRATEGY", ADVANCED_PAYMENT_ALLOCATION_STRATEGY), true));
     }
 
 }

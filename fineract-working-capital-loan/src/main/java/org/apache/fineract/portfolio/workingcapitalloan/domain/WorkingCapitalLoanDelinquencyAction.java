@@ -71,4 +71,7 @@ public class WorkingCapitalLoanDelinquencyAction extends AbstractAuditableWithUT
     @Column(name = "frequency_type")
     private DelinquencyFrequencyType frequencyType;
 
+    @Column(name = "start_new_period")
+    private Boolean startNewPeriod = false;
+
 }

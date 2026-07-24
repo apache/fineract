@@ -1,4 +1,5 @@
 @WorkingCapital
+@WorkingCapitalBreach
 @WorkingCapitalBreachPauseFeature
 Feature: Working Capital Breach Pause
 

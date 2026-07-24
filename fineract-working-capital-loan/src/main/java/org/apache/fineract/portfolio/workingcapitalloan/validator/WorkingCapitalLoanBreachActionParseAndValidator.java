@@ -52,9 +52,9 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
-import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanActiveBreachResetResolver;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalBreachAmountCalculationType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanBreachStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.springframework.stereotype.Component;
 
@@ -71,7 +71,6 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     private static final String ENABLE_ACTION = "enable";
 
     private final FromJsonHelper jsonHelper;
-    private final WorkingCapitalLoanRepository loanRepository;
     private final WorkingCapitalLoanBreachScheduleRepository breachScheduleRepository;
     private final WorkingCapitalLoanActiveBreachResetResolver activeBreachResetResolver;
     private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
@@ -91,7 +90,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
 
         validateLoanIsActive(dataValidator, workingCapitalLoan);
         validateBreachConfigurationExists(dataValidator, workingCapitalLoan);
-        if (!isDisableStateChange(actionString) && !UNDO_RESET_ACTION.equalsIgnoreCase(actionString)) {
+        if (!isDisableStateChange(actionString)) {
             validateBreachNotDisabled(dataValidator, workingCapitalLoan.getId());
         }
 
@@ -349,18 +348,35 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
 
     private void validateNotBeforeScheduleStart(final DataValidatorBuilder dataValidator, final LocalDate startDate,
             final WorkingCapitalLoan workingCapitalLoan) {
-        loanRepository.findFirstActualDisbursementDate(workingCapitalLoan.getId())
-                .map(disbursementDate -> disbursementDate.plusDays(getBreachGraceDays(workingCapitalLoan)))
+        breachScheduleRepository.findTopByLoanIdOrderByPeriodNumberAsc(workingCapitalLoan.getId())
+                .map(WorkingCapitalLoanBreachSchedule::getFromDate).or(() -> resolveExpectedScheduleStart(workingCapitalLoan))
                 .ifPresent(scheduleStartDate -> dataValidator.reset().parameter(START_DATE).value(startDate)
                         .validateDateAfterOrEqual(scheduleStartDate));
     }
 
+    /**
+     * Mirrors the anchor resolution of the breach schedule generation for loans whose schedule has not been generated
+     * yet (e.g. a pause placed between disbursement and the first COB run).
+     */
+    private Optional<LocalDate> resolveExpectedScheduleStart(final WorkingCapitalLoan workingCapitalLoan) {
+        final WorkingCapitalLoanProductRelatedDetails details = workingCapitalLoan.getLoanProductRelatedDetails();
+        final WorkingCapitalLoanBreachStartType breachStartType = (details == null || details.getBreachStartType() == null)
+                ? WorkingCapitalLoanBreachStartType.DISBURSEMENT
+                : details.getBreachStartType();
+        final Optional<LocalDate> anchorDate = WorkingCapitalLoanBreachStartType.LOAN_CREATION.equals(breachStartType)
+                ? Optional.ofNullable(workingCapitalLoan.getSubmittedOnDate())
+                : firstActualDisbursementDate(workingCapitalLoan);
+        return anchorDate.map(anchor -> anchor.plusDays(getBreachGraceDays(workingCapitalLoan)));
+    }
+
+    private Optional<LocalDate> firstActualDisbursementDate(final WorkingCapitalLoan workingCapitalLoan) {
+        return workingCapitalLoan.getDisbursementDetails().stream().map(WorkingCapitalLoanDisbursementDetails::getActualDisbursementDate)
+                .filter(Objects::nonNull).min(LocalDate::compareTo);
+    }
+
     private int getBreachGraceDays(final WorkingCapitalLoan workingCapitalLoan) {
         final WorkingCapitalLoanProductRelatedDetails details = workingCapitalLoan.getLoanProductRelatedDetails();
-        if (details == null || details.getBreachGraceDays() == null) {
-            return 0;
-        }
-        return details.getBreachGraceDays();
+        return (details == null || details.getBreachGraceDays() == null) ? 0 : details.getBreachGraceDays();
     }
 
     private void validateNoOverlap(final DataValidatorBuilder dataValidator, final LocalDate startDate, final LocalDate endDate,

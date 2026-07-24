@@ -18,25 +18,17 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.math.BigDecimal;
+import java.util.List;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,28 +36,20 @@ import org.slf4j.LoggerFactory;
  * Client Loan Integration Test for checking Loan Application Repayments Schedule, loan charges, penalties, loan
  * repayments and verifying accounting transactions
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest {
+public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest extends FeignLoanTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientLoanNonTrancheMultipleDisbursementsIntegrationTest.class);
 
     private static final String APPLIED_FOR_PRINCIPAL = "12,000.0";
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
+    private Long clientId;
 
     @BeforeEach
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        clientId = createClient();
     }
 
-    private Integer createLoanProduct(final boolean isInterestRecalculationEnabled) {
+    private Long createLoanProduct(final boolean isInterestRecalculationEnabled) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder() //
                 .withPrincipal(APPLIED_FOR_PRINCIPAL) //
@@ -102,11 +86,11 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest {
                             recalculationCompoundingFrequencyDayOfWeekType);
         }
         final String loanProductJSON = builder.build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return createLoanProductFromJson(loanProductJSON);
     }
 
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String savingsId, String principal,
-            String submitDate, String repaymentsNo) {
+    private Long applyForLoanApplication(final Long clientId, final Long loanProductID, String principal, String submitDate,
+            String repaymentsNo) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal(principal) //
@@ -122,8 +106,8 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest {
                 .withExpectedDisbursementDate(submitDate) //
                 .withTranches(null) //
                 .withSubmittedOnDate(submitDate) //
-                .build(clientID.toString(), loanProductID.toString(), savingsId);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+                .build(clientId.toString(), loanProductID.toString(), null);
+        return applyForLoanFromJson(loanApplicationJSON);
     }
 
     /***
@@ -131,125 +115,103 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest {
      */
     @Test
     public void checkThatNonTrancheMultiDisbursalsCreateAScheduleOnFirstDisbursalTest() {
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-
         /***
          * Create loan product allowing non-tranche multiple disbursals with interest recalculation
          */
         boolean isInterestRecalculationEnabled = true;
-        final Integer loanProductID = createLoanProduct(isInterestRecalculationEnabled);
+        final Long loanProductID = createLoanProduct(isInterestRecalculationEnabled);
         Assertions.assertNotNull(loanProductID);
 
         /***
          * Apply for loan application and verify loan status
          */
-        final String savingsId = null;
         String submitDate = "01 January 2021";
         Integer repaymentsNo = 3;
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, savingsId, APPLIED_FOR_PRINCIPAL, submitDate,
-                repaymentsNo.toString());
+        final Long loanID = applyForLoanApplication(clientId, loanProductID, APPLIED_FOR_PRINCIPAL, submitDate, repaymentsNo.toString());
         Assertions.assertNotNull(loanID);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
-        final Float approved = 9000.00f;
-        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(submitDate, null, approved.toString(), loanID, null);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-        ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        final Double approved = 9000.00;
+        approveLoan(loanID, approveLoanRequest(approved, submitDate));
+        verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
         LOG.info("-------------------------------DISBURSE non-tranch multi-disbursal loan       ----------");
-        final String netDisbursedAmt = null;
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithTransactionAmount(submitDate, loanID, approved.toString());
+        disburseLoanWithAmount(loanID, submitDate, approved);
+        verifyLoanStatus(loanID, LoanStatus.ACTIVE);
 
-        GetLoansLoanIdResponse getLoansLoanIdResponse = this.loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
-        Assertions.assertNotNull(getLoansLoanIdResponse);
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanID);
+        Assertions.assertNotNull(loanDetails);
 
-        this.loanTransactionHelper.printRepaymentSchedule(getLoansLoanIdResponse);
+        List<GetLoansLoanIdRepaymentPeriod> schedule = loanDetails.getRepaymentSchedule().getPeriods();
+        // count repayment periods only (period != null)
+        long repaymentPeriodCount = schedule.stream().filter(p -> p.getPeriod() != null).count();
+        Assertions.assertEquals(repaymentsNo.longValue(), repaymentPeriodCount);
 
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
-        Integer loanScheduleLineCount = loanSchedule.size() - 1;
-        Assertions.assertEquals(repaymentsNo, loanScheduleLineCount);
-
-        HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
-        Assertions.assertEquals(approved, loanSummary.get("principalDisbursed"));
-        Assertions.assertEquals(approved, loanSummary.get("principalOutstanding"));
+        Assertions.assertTrue(BigDecimal.valueOf(approved).compareTo(loanDetails.getSummary().getPrincipalDisbursed()) == 0);
+        Assertions.assertTrue(BigDecimal.valueOf(approved).compareTo(loanDetails.getSummary().getPrincipalOutstanding()) == 0);
 
         LOG.info("------------------------------- 2nd DISBURSE non-tranch multi-disbursal loan       ----------");
-        final Float anotherDisbursalAmount = 900.00f;
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(submitDate, loanID,
-                anotherDisbursalAmount.toString(), netDisbursedAmt);
+        final Double anotherDisbursalAmount = 900.00;
+        disburseLoan(loanID, submitDate, anotherDisbursalAmount);
+        verifyLoanStatus(loanID, LoanStatus.ACTIVE);
 
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
-        loanScheduleLineCount = loanSchedule.size() - 2;
-        Assertions.assertEquals(repaymentsNo, loanScheduleLineCount);
+        loanDetails = getLoanDetails(loanID);
+        schedule = loanDetails.getRepaymentSchedule().getPeriods();
+        repaymentPeriodCount = schedule.stream().filter(p -> p.getPeriod() != null).count();
+        Assertions.assertEquals(repaymentsNo.longValue(), repaymentPeriodCount);
 
-        loanSummary = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
-        Float disbursedSum = approved + anotherDisbursalAmount;
-        Assertions.assertEquals(disbursedSum, loanSummary.get("principalDisbursed"));
-        Assertions.assertEquals(disbursedSum, loanSummary.get("principalOutstanding"));
+        Double disbursedSum = approved + anotherDisbursalAmount;
+        Assertions.assertTrue(BigDecimal.valueOf(disbursedSum).compareTo(loanDetails.getSummary().getPrincipalDisbursed()) == 0);
+        Assertions.assertTrue(BigDecimal.valueOf(disbursedSum).compareTo(loanDetails.getSummary().getPrincipalOutstanding()) == 0);
 
         LOG.info("------------------------------- 3rd DISBURSE non-tranch multi-disbursal loan       ----------");
-        final Float thirdDisbursalAmount = 500.00f;
+        final Double thirdDisbursalAmount = 500.00;
         String thirdDisbursalDate = "03 February 2021";
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(thirdDisbursalDate, loanID,
-                thirdDisbursalAmount.toString(), netDisbursedAmt);
+        disburseLoan(loanID, thirdDisbursalDate, thirdDisbursalAmount);
+        verifyLoanStatus(loanID, LoanStatus.ACTIVE);
 
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
-        loanScheduleLineCount = loanSchedule.size() - 3;
-        Assertions.assertEquals(repaymentsNo, loanScheduleLineCount);
+        loanDetails = getLoanDetails(loanID);
+        schedule = loanDetails.getRepaymentSchedule().getPeriods();
+        repaymentPeriodCount = schedule.stream().filter(p -> p.getPeriod() != null).count();
+        Assertions.assertEquals(repaymentsNo.longValue(), repaymentPeriodCount);
 
-        loanSummary = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
         disbursedSum = disbursedSum + thirdDisbursalAmount;
-        Assertions.assertEquals(disbursedSum, loanSummary.get("principalDisbursed"));
-        Assertions.assertEquals(disbursedSum, loanSummary.get("principalOutstanding"));
-
+        Assertions.assertTrue(BigDecimal.valueOf(disbursedSum).compareTo(loanDetails.getSummary().getPrincipalDisbursed()) == 0);
+        Assertions.assertTrue(BigDecimal.valueOf(disbursedSum).compareTo(loanDetails.getSummary().getPrincipalOutstanding()) == 0);
     }
 
     @Test
     public void checkThatNonTrancheMultiDisbursalsCreateAScheduleOnSubmitAndApprovalTest() {
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-
         /***
          * Create loan product allowing non-tranche multiple disbursals with interest recalculation
          */
         boolean isInterestRecalculationEnabled = true;
-        final Integer loanProductID = createLoanProduct(isInterestRecalculationEnabled);
+        final Long loanProductID = createLoanProduct(isInterestRecalculationEnabled);
         Assertions.assertNotNull(loanProductID);
 
         /***
          * Apply for loan application and verify loan status
          */
-        final String savingsId = null;
         String submitDate = "01 January 2022";
         Integer repaymentsNo = 3;
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, savingsId, APPLIED_FOR_PRINCIPAL, submitDate,
-                repaymentsNo.toString());
+        final Long loanID = applyForLoanApplication(clientId, loanProductID, APPLIED_FOR_PRINCIPAL, submitDate, repaymentsNo.toString());
         Assertions.assertNotNull(loanID);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-        ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
-        Integer loanScheduleLineCount = loanSchedule.size() - 1; // exclude disbursement line
-        Assertions.assertEquals(repaymentsNo, loanScheduleLineCount);
+        verifyLoanStatus(loanID, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
+
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanID);
+        List<GetLoansLoanIdRepaymentPeriod> schedule = loanDetails.getRepaymentSchedule().getPeriods();
+        long repaymentPeriodCount = schedule.stream().filter(p -> p.getPeriod() != null).count();
+        Assertions.assertEquals(repaymentsNo.longValue(), repaymentPeriodCount);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
-        final Float approved = 9000.00f;
-        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(submitDate, null, approved.toString(), loanID, null);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-        loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
-        loanScheduleLineCount = loanSchedule.size() - 1;
-        Assertions.assertEquals(repaymentsNo, loanScheduleLineCount);
+        final Double approved = 9000.00;
+        approveLoan(loanID, approveLoanRequest(approved, submitDate));
+        verifyLoanStatus(loanID, LoanStatus.APPROVED);
 
+        loanDetails = getLoanDetails(loanID);
+        schedule = loanDetails.getRepaymentSchedule().getPeriods();
+        repaymentPeriodCount = schedule.stream().filter(p -> p.getPeriod() != null).count();
+        Assertions.assertEquals(repaymentsNo.longValue(), repaymentPeriodCount);
     }
 }

@@ -28,13 +28,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestCalculationPeriodType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RecalculationRestFrequencyType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class LoanNextPaymentDueAmountIntegrationTest extends BaseLoanIntegrationTest {
+public class LoanNextPaymentDueAmountIntegrationTest extends FeignLoanTestBase {
 
     ObjectMapper objectMapper = new ObjectMapper();
     private static final String LOAN_ACCOUNT_DATA_V_1 = "org.apache.fineract.avro.loan.v1.LoanAccountDataV1";
@@ -47,16 +48,15 @@ public class LoanNextPaymentDueAmountIntegrationTest extends BaseLoanIntegration
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("15 January 2023", () -> {
 
-            Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
-            Long loanProductId = loanProductHelper.createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false))
-                    .getResourceId();
+            Long loanProductId = createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false));
 
             Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "01 January 2023", 100.0, 9.9, 4, null);
             loanIdRef.set(loanId);
 
             deleteAllExternalEvents();
-            loanTransactionHelper.disburseLoan(loanId, "01 January 2023", 100.0);
+            disburseLoan(loanId, "01 January 2023", 100.0);
 
             verifyRepaymentSchedule(loanId, //
                     installment(100.000000, null, "01 January 2023"), //
@@ -67,25 +67,25 @@ public class LoanNextPaymentDueAmountIntegrationTest extends BaseLoanIntegration
             );
             verifyAllLoanAccountTypedExternalEventHasNextPaymentDueAmount("2023-02-01", 25.52d);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("31 January 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
     }
@@ -98,16 +98,15 @@ public class LoanNextPaymentDueAmountIntegrationTest extends BaseLoanIntegration
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("15 January 2023", () -> {
 
-            Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
-            Long loanProductId = loanProductHelper.createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false))
-                    .getResourceId();
+            Long loanProductId = createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(false));
 
             Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "01 January 2023", 100.0, 9.9, 4, null);
             loanIdRef.set(loanId);
 
             deleteAllExternalEvents();
-            loanTransactionHelper.disburseLoan(loanId, "01 January 2023", 100.0);
+            disburseLoan(loanId, "01 January 2023", 100.0);
 
             verifyAllLoanAccountTypedExternalEventHasNextPaymentDueAmount("2023-02-01", 25.52d);
 
@@ -124,31 +123,31 @@ public class LoanNextPaymentDueAmountIntegrationTest extends BaseLoanIntegration
 
             verifyAllLoanAccountTypedExternalEventHasNextPaymentDueAmount("2023-03-01", 25.52d);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("31 January 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("2 March 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
             deleteAllExternalEvents();
             addRepaymentForLoan(loanId, 25.52d, "02 March 2023");
@@ -174,18 +173,17 @@ public class LoanNextPaymentDueAmountIntegrationTest extends BaseLoanIntegration
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("15 February 2023", () -> {
 
-            Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
-            Long loanProductId = loanProductHelper
-                    .createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(true).recalculationRestFrequencyInterval(1)
-                            .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD))
-                    .getResourceId();
+            Long loanProductId = createLoanProduct(
+                    create4IProgressive().isInterestRecalculationEnabled(true).recalculationRestFrequencyInterval(1)
+                            .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD));
 
             Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "01 January 2023", 100.0, 9.9, 4, null);
             loanIdRef.set(loanId);
 
             deleteAllExternalEvents();
-            loanTransactionHelper.disburseLoan(loanId, "01 January 2023", 100.0);
+            disburseLoan(loanId, "01 January 2023", 100.0);
 
             verifyRepaymentSchedule(loanId, //
                     installment(100.000000, null, "01 January 2023"), //
@@ -197,25 +195,25 @@ public class LoanNextPaymentDueAmountIntegrationTest extends BaseLoanIntegration
 
             verifyAllLoanAccountTypedExternalEventHasNextPaymentDueAmount("2023-02-01", 25.52d);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("31 January 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 2, 1), BigDecimal.valueOf(25.52d));
         });
     }
@@ -228,18 +226,18 @@ public class LoanNextPaymentDueAmountIntegrationTest extends BaseLoanIntegration
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("15 February 2023", () -> {
 
-            Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
-            Long loanProductId = loanProductHelper.createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(true)
+            Long loanProductId = createLoanProduct(create4IProgressive().isInterestRecalculationEnabled(true)
                     .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY).recalculationRestFrequencyInterval(1)
-                    .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)).getResourceId();
+                    .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY));
 
             Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "01 January 2023", 100.0, 9.9, 4, null);
 
             loanIdRef.set(loanId);
 
             deleteAllExternalEvents();
-            loanTransactionHelper.disburseLoan(loanId, "01 January 2023", 100.0);
+            disburseLoan(loanId, "01 January 2023", 100.0);
 
             verifyRepaymentSchedule(loanId, //
                     installment(100.000000, null, "01 January 2023"), //
@@ -255,27 +253,27 @@ public class LoanNextPaymentDueAmountIntegrationTest extends BaseLoanIntegration
 
             verifyAllLoanAccountTypedExternalEventHasNextPaymentDueAmount("2023-03-01", 25.52d);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
 
         });
         runAt("31 January 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             verifyNextPayment(loanDetails, LocalDate.of(2023, 3, 1), BigDecimal.valueOf(25.52d));
         });
 
@@ -291,7 +289,7 @@ public class LoanNextPaymentDueAmountIntegrationTest extends BaseLoanIntegration
      *            expected amount
      */
     private void verifyAllLoanAccountTypedExternalEventHasNextPaymentDueAmount(String dueDate, Double amount) {
-        List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+        List<ExternalEventResponse> allExternalEvents = externalEventHelper.getAllExternalEvents();
         allExternalEvents.stream().filter(e -> LOAN_ACCOUNT_DATA_V_1.equals(e.getSchema()))
                 .forEach(event -> verifyLoanEvent(event, data -> verifyNextPayment(data, dueDate, BigDecimal.valueOf(amount))));
 

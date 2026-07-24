@@ -36,6 +36,8 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -106,6 +108,29 @@ public class WorkingCapitalLoanChargeDataValidator {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
+    }
+
+    /**
+     * Validates a specified-due-date charge against the target loan: the due date is mandatory, cannot fall in the past
+     * and the loan must be active, closed (obligations met) or overpaid so a charge can be raised after the loan
+     * matured. Non specified-due-date charges carry no due date and are unaffected.
+     */
+    public void validateCreateLoanChargeAgainstLoan(final LoanStatus loanStatus, final ChargeTimeType chargeTimeType,
+            final LocalDate dueDate, final LocalDate businessDate) {
+        if (chargeTimeType != ChargeTimeType.SPECIFIED_DUE_DATE) {
+            return;
+        }
+        if (dueDate == null) {
+            throw new PlatformApiDataValidationException("field.is.mandatory", "Field is mandatory",
+                    WorkingCapitalLoanChargeConstants.dueDateParamName);
+        }
+        if (dueDate.isBefore(businessDate)) {
+            throw new PlatformApiDataValidationException("dueDate.cannot.be.in.the.past", "DueDate cannot be in the past",
+                    WorkingCapitalLoanChargeConstants.dueDateParamName);
+        }
+        if (!(loanStatus.isActive() || loanStatus.isClosedObligationsMet() || loanStatus.isOverpaid())) {
+            throw new PlatformApiDataValidationException("loan.should.be.active", "Loan should be in active status", "workingCapitalLoan");
+        }
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {

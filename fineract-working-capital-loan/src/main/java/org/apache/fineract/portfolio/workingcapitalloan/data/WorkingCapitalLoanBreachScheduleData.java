@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record WorkingCapitalLoanBreachScheduleData(Long id, Long loanId, Integer periodNumber, LocalDate fromDate, LocalDate toDate,
-        Integer numberOfDays, BigDecimal minPaymentAmount, BigDecimal outstandingAmount, Boolean nearBreach, Boolean breach) {
+        Integer numberOfDays, BigDecimal minPaymentAmount, BigDecimal outstandingAmount, Boolean nearBreach, Boolean breach,
+        Boolean reset) {
 
 }

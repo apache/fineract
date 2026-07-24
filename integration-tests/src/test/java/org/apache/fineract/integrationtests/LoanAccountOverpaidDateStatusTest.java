@@ -40,9 +40,11 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
@@ -50,21 +52,24 @@ import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHe
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class LoanAccountOverpaidDateStatusTest extends BaseLoanIntegrationTest {
+public class LoanAccountOverpaidDateStatusTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
-    private LoanTransactionHelper loanTransactionHelper;
+    protected RequestSpecification requestSpec;
+    protected ResponseSpecification responseSpec;
+    protected LoanTransactionHelper loanTransactionHelper;
+    protected JournalEntryHelper journalEntryHelper;
 
     @BeforeEach
-    public void setup() {
+    @SuppressWarnings("removal")
+    public void setupREST() {
         Utils.initializeRESTAssured();
+
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+
         this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
     }
 
     @Test
@@ -135,7 +140,7 @@ public class LoanAccountOverpaidDateStatusTest extends BaseLoanIntegrationTest {
             assertEquals(loanDetailsOverpaid_1.getOverpaidOnDate(), LocalDate.of(2022, 9, 11));
 
             // Credit balance refund to reset overpaid status
-            loanTransactionHelper.creditBalanceRefund("12 September 2022", Float.valueOf(100), null, loanId, "");
+            loanTransactionHelper.creditBalanceRefund("12 September 2022", Float.valueOf("100"), null, loanId, "");
             GetLoansLoanIdResponse loanDetailsNotOverpaidAfterCBR = loanTransactionHelper.getLoanDetails((long) loanId);
             assertFalse(loanDetailsNotOverpaidAfterCBR.getStatus().getOverpaid());
             assertNull(loanDetailsNotOverpaidAfterCBR.getOverpaidOnDate());

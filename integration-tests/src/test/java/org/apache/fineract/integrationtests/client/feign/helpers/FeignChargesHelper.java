@@ -66,20 +66,28 @@ public class FeignChargesHelper {
         return fail(() -> fineractClient.charges().retrieveOneCharge(chargeId));
     }
 
-    public Long createLoanSpecifiedDueDateCharge(double amount) {
-        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDateFee(amount)).getResourceId();
+    public PostChargesResponse createLoanSpecifiedDueDateCharge(double amount) {
+        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDateFee(amount));
     }
 
-    public Long createLoanSpecifiedDueDateCharge(double amount, String currencyCode) {
-        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDateFee(amount, currencyCode)).getResourceId();
+    public PostChargesResponse createLoanSpecifiedDueDateCharge(double amount, String currencyCode) {
+        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDateFee(amount, currencyCode));
     }
 
-    public Long createLoanDisbursementCharge(double amount) {
-        return createCharge(ChargeRequestBuilders.loanDisbursementFee(amount)).getResourceId();
+    public PostChargesResponse createLoanDisbursementCharge(double amount) {
+        return createCharge(ChargeRequestBuilders.loanDisbursementFee(amount));
     }
 
-    public Long createClientSpecifiedDueDateCharge(double amount) {
-        return createCharge(ChargeRequestBuilders.clientSpecifiedDueDateFee(amount)).getResourceId();
+    public PostChargesResponse createLoanSpecifiedDueDatePenalty(double amount) {
+        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDatePenalty(amount));
+    }
+
+    public PostChargesResponse createLoanSpecifiedDueDatePercentageAmountAndInterestFee(double amount) {
+        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDatePercentageAmountAndInterestFee(amount));
+    }
+
+    public PostChargesResponse createClientSpecifiedDueDateCharge(double amount) {
+        return createCharge(ChargeRequestBuilders.clientSpecifiedDueDateFee(amount));
     }
 
     public PostClientsClientIdChargesResponse addClientCharge(Long clientId, PostClientsClientIdChargesRequest request) {

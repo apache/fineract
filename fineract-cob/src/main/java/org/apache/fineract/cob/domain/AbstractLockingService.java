@@ -20,27 +20,28 @@ package org.apache.fineract.cob.domain;
 
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 @Slf4j
 public abstract class AbstractLockingService implements LockingService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final FineractProperties fineractProperties;
 
-    protected AbstractLockingService(JdbcTemplate jdbcTemplate, FineractProperties fineractProperties) {
+    protected AbstractLockingService(JdbcTemplate jdbcTemplate, DatabaseSpecificSQLGenerator sqlGenerator,
+            FineractProperties fineractProperties) {
         this.jdbcTemplate = jdbcTemplate;
-        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        this.sqlGenerator = sqlGenerator;
         this.fineractProperties = fineractProperties;
     }
 
@@ -64,8 +65,10 @@ public abstract class AbstractLockingService implements LockingService {
         if (loanIds.isEmpty()) {
             return Collections.emptyList();
         }
-        String sql = "SELECT loan_id FROM " + getTableName() + " WHERE loan_id IN (:ids)";
-        return namedParameterJdbcTemplate.queryForList(sql, Map.of("ids", loanIds), Long.class);
+        // Uses DatabaseSpecificSQLGenerator.in() to emit ANY(?) on PostgreSQL instead of IN($1,...$N),
+        // so all batch sizes share one query plan instead of one per distinct size.
+        final String sql = "SELECT loan_id FROM " + getTableName() + " WHERE " + sqlGenerator.in("loan_id", loanIds);
+        return jdbcTemplate.queryForList(sql, Long.class, sqlGenerator.inParametersFor(loanIds));
     }
 
     @Override
@@ -73,8 +76,9 @@ public abstract class AbstractLockingService implements LockingService {
         if (loanIds.isEmpty()) {
             return Collections.emptyList();
         }
-        String sql = "SELECT loan_id FROM " + getTableName() + " WHERE loan_id IN (:ids) AND lock_owner = :owner";
-        return namedParameterJdbcTemplate.queryForList(sql, Map.of("ids", loanIds, "owner", lockOwner.name()), Long.class);
+        final String sql = "SELECT loan_id FROM " + getTableName() + " WHERE " + sqlGenerator.in("loan_id", loanIds)
+                + " AND lock_owner = ?";
+        return jdbcTemplate.queryForList(sql, Long.class, paramsWithLockOwner(loanIds, lockOwner));
     }
 
     @Override
@@ -94,8 +98,8 @@ public abstract class AbstractLockingService implements LockingService {
         if (loanIds.isEmpty()) {
             return;
         }
-        String sql = "DELETE FROM " + getTableName() + " WHERE loan_id IN (:ids) AND lock_owner = :owner";
-        namedParameterJdbcTemplate.update(sql, Map.of("ids", loanIds, "owner", lockOwner.name()));
+        final String sql = "DELETE FROM " + getTableName() + " WHERE " + sqlGenerator.in("loan_id", loanIds) + " AND lock_owner = ?";
+        jdbcTemplate.update(sql, paramsWithLockOwner(loanIds, lockOwner));
     }
 
     @Override
@@ -105,6 +109,13 @@ public abstract class AbstractLockingService implements LockingService {
         if (updated == 0) {
             log.warn("No lock found to update error for loan id: {} with owner: {}", loanId, lockOwner);
         }
+    }
+
+    private Object[] paramsWithLockOwner(final List<Long> loanIds, final LockOwner lockOwner) {
+        final List<Object> params = new ArrayList<>();
+        Collections.addAll(params, sqlGenerator.inParametersFor(loanIds));
+        params.add(lockOwner.name());
+        return params.toArray();
     }
 
     private int getInClauseParameterSizeLimit() {

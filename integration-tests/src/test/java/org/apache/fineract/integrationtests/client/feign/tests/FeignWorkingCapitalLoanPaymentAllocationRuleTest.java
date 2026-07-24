@@ -238,7 +238,10 @@ public class FeignWorkingCapitalLoanPaymentAllocationRuleTest extends FeignInteg
             Long client = clientHelper.createClient("01 May 2026");
             loanIdHolder[0] = createAndDisburseLoanOnDate(client, BigDecimal.valueOf(40), "01 May 2026",
                     createProductWithChargeAdjustmentOverride());
-            feeLoanChargeIdHolder[0] = addFeeCharge(loanIdHolder[0], 40, "01 May 2026");
+            // Fee is in advance (due after every business date exercised below) so it does not count as a due
+            // obligation: once the charge adjustment settles the principal the loan legitimately closes, which is the
+            // precondition this test needs before undoing the adjustment to prove the loan reactivates.
+            feeLoanChargeIdHolder[0] = addFeeCharge(loanIdHolder[0], 40, "01 June 2026");
 
             GetWorkingCapitalLoansLoanIdResponse loanDetails = wcLoanHelper.getLoanDetails(loanIdHolder[0]);
             assertNotNull(loanDetails.getStatus());

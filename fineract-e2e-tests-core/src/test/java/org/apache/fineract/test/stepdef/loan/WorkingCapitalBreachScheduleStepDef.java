@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
@@ -100,6 +101,19 @@ public class WorkingCapitalBreachScheduleStepDef extends AbstractStepDef {
         log.info("Successfully verified {} breach schedule entries for loan {}", schedule.size(), loanId);
     }
 
+    @Then("Working Capital loan balance has breach past due amount {string}")
+    public void verifyBreachPastDueAmount(final String expectedAmount) {
+        final Long loanId = extractLoanId();
+        final GetWorkingCapitalLoansLoanIdResponse loanDetails = ok(
+                () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
+
+        assertThat(loanDetails.getBalance()).as("Balance section for loan %d", loanId).isNotNull();
+        assertThat(loanDetails.getBalance().getBreachPastDueAmount()).as("Breach past due amount for loan %d", loanId)
+                .isEqualByComparingTo(new BigDecimal(expectedAmount));
+
+        log.info("Verified breach past due amount {} for loan {}", expectedAmount, loanId);
+    }
+
     private Long extractLoanId() {
         final PostWorkingCapitalLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         return loanResponse.getLoanId();
@@ -127,6 +141,7 @@ public class WorkingCapitalBreachScheduleStepDef extends AbstractStepDef {
                 verifyNullableBigDecimal(actual.getOutstandingAmount(), expectedValue, "Outstanding amount", rowNumber);
             case "nearBreach" -> verifyNullableBoolean(actual.getNearBreach(), expectedValue, "Near breach", rowNumber);
             case "breach" -> verifyNullableBoolean(actual.getBreach(), expectedValue, "Breach", rowNumber);
+            case "reset" -> verifyNullableBoolean(actual.getReset(), expectedValue, "Reset", rowNumber);
             default -> throw new IllegalArgumentException("Unknown field name: " + fieldName);
         }
     }

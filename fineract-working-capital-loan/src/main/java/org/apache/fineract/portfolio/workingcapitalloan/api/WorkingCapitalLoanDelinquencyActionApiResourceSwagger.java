@@ -48,6 +48,8 @@ public final class WorkingCapitalLoanDelinquencyActionApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "en")
         public String locale;
+        @Schema(example = "false")
+        public Boolean startNewPeriod;
     }
 
     @Schema(description = "PostWorkingCapitalLoansDelinquencyActionResponse")

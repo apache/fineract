@@ -1,0 +1,30 @@
+@startuml
+' Licensed to the Apache Software Foundation (ASF) under one or more
+' contributor license agreements. See the NOTICE file distributed with
+' this work for additional information regarding copyright ownership.
+' The ASF licenses this file to you under the Apache License, Version 2.0.
+
+actor "Loan Officer" as user
+participant "ApiResource" as api
+participant "WriteServiceImpl" as svc
+participant "ParseAndValidator" as val
+participant "ActionRepository" as repo
+database "m_wc_loan_*_action" as db
+
+user -> api : POST .../delinquency-actions\n{ "action":"enable", "startDate": today }
+api -> svc : createAction(loanId, command) (via CREATE command)
+svc -> val : validateAndParse(command, loan, existing)
+val -> repo : isDisabledAsOf(loanId, today)
+repo --> val : true (active DISABLE found)
+val --> svc : parsed ENABLE action
+svc -> db : close active DISABLE (set end_date)
+note right of db : Delinquency: end_date = today\nBreach: end_date = today - 1 day
+alt Delinquency
+  svc -> svc : extend open periods by disabled days\n(pause-like) + re-classify as of today
+else Breach
+  svc -> svc : reprocessBreachSchedule(loan)\n(apply repayments accrued while disabled)
+end
+svc --> api : CommandProcessingResult
+api --> user : 200 OK
+
+@enduml

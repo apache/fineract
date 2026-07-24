@@ -23,25 +23,31 @@ import java.math.RoundingMode;
 import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
-import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class LoanSummaryTest extends BaseLoanIntegrationTest {
+public class LoanSummaryTest extends FeignLoanTestBase {
 
     private static BusinessStepHelper.BusinessStepsSnapshot originalConfig;
     private static final BusinessStepHelper businessStepHelper = new BusinessStepHelper();
-    Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+    Long clientId;
     Long loanId;
 
     @BeforeAll
     static void setup() {
         originalConfig = businessStepHelper.getConfigurationSnapshot("LOAN_CLOSE_OF_BUSINESS");
+    }
+
+    @BeforeEach
+    void initClient() {
+        if (clientId == null) {
+            clientId = createClient();
+        }
     }
 
     @AfterAll
@@ -53,11 +59,9 @@ public class LoanSummaryTest extends BaseLoanIntegrationTest {
     public void testUnpaidPayableNotDueInterestForProgressiveLoanInCaseOfEarlyRepayment() {
         businessStepHelper.updateSteps("LOAN_CLOSE_OF_BUSINESS", "ADD_PERIODIC_ACCRUAL_ENTRIES", "LOAN_INTEREST_RECALCULATION");
         runAt("1 January 2024", () -> {
-            final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(create4IProgressive());
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(clientId,
-                    loanProductsResponse.getResourceId(), "01 January 2024", 1000.0, 9.99, 6, null));
-            loanId = postLoansResponse.getLoanId();
-            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(1000.0, "01 January 2024"));
+            Long loanProductId = createLoanProduct(create4IProgressive());
+            loanId = applyForLoan(applyLP2ProgressiveLoanRequest(clientId, loanProductId, "01 January 2024", 1000.0, 9.99, 6, null));
+            approveLoan(loanId, approveLoanRequest(1000.0, "01 January 2024"));
             disburseLoan(loanId, BigDecimal.valueOf(250.0), "01 January 2024");
         });
         runAt("7 january 2024", () -> {
@@ -65,17 +69,17 @@ public class LoanSummaryTest extends BaseLoanIntegrationTest {
             disburseLoan(loanId, BigDecimal.valueOf(400.0), "05 January 2024");
         });
         runAt("15 January 2024", () -> {
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(List.of(loanId));
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(BigDecimal.valueOf(3.05),
                     loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
-            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "15 January 2024", 171.43);
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            makeLoanRepayment(loanId, "Repayment", "15 January 2024", 171.43);
+            loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
         });
         runAt("16 January 2024", () -> {
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(List.of(loanId));
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(BigDecimal.valueOf(0.22),
                     loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
             verifyTransactions(loanId, transaction(250.0, "Disbursement", "01 January 2024"),
@@ -84,8 +88,8 @@ public class LoanSummaryTest extends BaseLoanIntegrationTest {
                     transaction(0.27, "Accrual", "15 January 2024"));
         });
         runAt("17 January 2024", () -> {
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(List.of(loanId));
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(BigDecimal.valueOf(0.44),
                     loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
             verifyTransactions(loanId, transaction(250.0, "Disbursement", "01 January 2024"),
@@ -94,8 +98,8 @@ public class LoanSummaryTest extends BaseLoanIntegrationTest {
                     transaction(0.27, "Accrual", "15 January 2024"), transaction(0.22, "Accrual", "16 January 2024"));
         });
         runAt("18 January 2024", () -> {
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(List.of(loanId));
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(BigDecimal.valueOf(0.67),
                     loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
             verifyTransactions(loanId, transaction(250.0, "Disbursement", "01 January 2024"),
@@ -105,7 +109,7 @@ public class LoanSummaryTest extends BaseLoanIntegrationTest {
                     transaction(0.22, "Accrual", "17 January 2024"));
         });
         runAt("19 January 2024", () -> {
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(List.of(loanId));
             verifyTransactions(loanId, transaction(250.0, "Disbursement", "01 January 2024"),
                     transaction(350.0, "Disbursement", "04 January 2024"), transaction(400.0, "Disbursement", "05 January 2024"),
                     transaction(2.78, "Accrual", "14 January 2024"), transaction(171.43, "Repayment", "15 January 2024"),
@@ -118,96 +122,91 @@ public class LoanSummaryTest extends BaseLoanIntegrationTest {
     public void testUnpaidPayableNotDueInterestForProgressiveLoanInCaseOfEarlyRepaymentAlmostFullyPaid2ndPeriod() {
         businessStepHelper.updateSteps("LOAN_CLOSE_OF_BUSINESS", "LOAN_INTEREST_RECALCULATION");
         runAt("15 March 2025", () -> {
-            final PostLoanProductsResponse loanProductsResponse = loanProductHelper.createLoanProduct(
+            Long loanProductId = createLoanProduct(
                     create4IProgressive().interestRatePerPeriod(35.99).numberOfRepayments(12).isInterestRecalculationEnabled(true));
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(clientId,
-                    loanProductsResponse.getResourceId(), "15 March 2025", 296.79, 35.99, 12, null));
-            loanId = postLoansResponse.getLoanId();
-            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(296.79, "15 March 2025"));
+            loanId = applyForLoan(applyLP2ProgressiveLoanRequest(clientId, loanProductId, "15 March 2025", 296.79, 35.99, 12, null));
+            approveLoan(loanId, approveLoanRequest(296.79, "15 March 2025"));
             disburseLoan(loanId, BigDecimal.valueOf(296.79), "15 March 2025");
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(List.of(loanId));
         });
         runAt("16 March 2025", () -> {
-            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "16 March 2025", 59.0);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            makeLoanRepayment(loanId, "Repayment", "16 March 2025", 59.0);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
             Assertions.assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(List.of(loanId));
         });
         runAt("17 March 2025", () -> {
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
             Assertions.assertEquals(BigDecimal.valueOf(0.23),
                     loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(List.of(loanId));
         });
         runAt("18 March 2025", () -> {
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
             Assertions.assertEquals(BigDecimal.valueOf(0.46),
                     loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(List.of(loanId));
         });
         runAt("14 May 2025", () -> {
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
             Assertions.assertEquals(BigDecimal.valueOf(13.81),
                     loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(List.of(loanId));
         });
 
         runAt("15 May 2025", () -> {
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
             Assertions.assertEquals(BigDecimal.valueOf(14.05),
                     loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(List.of(loanId));
         });
 
         runAt("14 June 2025", () -> {
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
             Assertions.assertEquals(BigDecimal.valueOf(20.96),
                     loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(List.of(loanId));
         });
         runAt("15 June 2025", () -> {
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(BigDecimal.valueOf(21.19),
                     loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
             Assertions.assertEquals(BigDecimal.ZERO, loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(List.of(loanId));
         });
         runAt("16 June 2025", () -> {
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertEquals(BigDecimal.valueOf(21.19),
                     loanDetails.getSummary().getTotalUnpaidPayableDueInterest().stripTrailingZeros());
             Assertions.assertEquals(BigDecimal.valueOf(0.24),
                     loanDetails.getSummary().getTotalUnpaidPayableNotDueInterest().stripTrailingZeros());
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(List.of(loanId));
         });
     }
 
     @Test
     public void testCapitalizedIncomeExistsInRepaymentScheduleAndModifiesPrincipal() {
         runAt("01 March 2023", () -> {
-            final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                    .createLoanProduct(create4IProgressiveWithCapitalizedIncome());
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(clientId,
-                    loanProductsResponse.getResourceId(), "01 March 2023", 10000.00, 12.00, 4, null));
-            loanId = postLoansResponse.getLoanId();
-            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(10000.00, "01 March 2023"));
+            Long loanProductId = createLoanProduct(create4IProgressiveWithCapitalizedIncome());
+            loanId = applyForLoan(applyLP2ProgressiveLoanRequest(clientId, loanProductId, "01 March 2023", 10000.00, 12.00, 4, null));
+            approveLoan(loanId, approveLoanRequest(10000.00, "01 March 2023"));
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 March 2023");
         });
         runAt("02 March 2023", () -> {
-            loanTransactionHelper.addCapitalizedIncome(loanId, "02 March 2023", 100.00);
+            addCapitalizedIncome(loanId, "02 March 2023", 100.00);
         });
 
         BigDecimal thousand = BigDecimal.valueOf(1000.0);
         BigDecimal hundred = BigDecimal.valueOf(100.0);
         BigDecimal thousandOneHundred = BigDecimal.valueOf(1100.0);
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
         Assertions.assertEquals(thousand, loanDetails.getPrincipal().setScale(1, RoundingMode.HALF_UP));
         Assertions.assertEquals(thousand, loanDetails.getSummary().getPrincipalDisbursed().setScale(1, RoundingMode.HALF_UP));

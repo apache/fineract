@@ -64,6 +64,7 @@ import org.apache.fineract.portfolio.workingcapitalloannearbreach.repository.Wor
 import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.data.WorkingCapitalPaymentAllocationData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAdvancedPaymentAllocationsJsonParser;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanBreachStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductPaymentAllocationRule;
@@ -218,9 +219,17 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                         ? fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element)
                         : null;
         if (delinquencyStartTypeValue != null) {
-            detail.setDelinquencyStartType(WorkingCapitalLoanDelinquencyStartType.valueOf(delinquencyStartTypeValue));
+            detail.setDelinquencyStartType(WorkingCapitalLoanDelinquencyStartType.fromString(delinquencyStartTypeValue));
         } else {
             detail.setDelinquencyStartType(productDetail.getDelinquencyStartType());
+        }
+        final String breachStartTypeValue = fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachStartTypeParamName,
+                element) ? fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element)
+                        : null;
+        if (breachStartTypeValue != null) {
+            detail.setBreachStartType(WorkingCapitalLoanBreachStartType.fromString(breachStartTypeValue));
+        } else {
+            detail.setBreachStartType(productDetail.getBreachStartType());
         }
 
         if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, element)) {
@@ -438,12 +447,28 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                             .extractStringNamed(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, element);
                     if (delinquencyStartTypeValue != null) {
                         final WorkingCapitalLoanDelinquencyStartType type = WorkingCapitalLoanDelinquencyStartType
-                                .valueOf(delinquencyStartTypeValue);
+                                .fromString(delinquencyStartTypeValue);
                         detail.setDelinquencyStartType(type);
                         changes.put(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, type.getCode());
                     } else {
                         detail.setDelinquencyStartType(null);
                         changes.put(WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, null);
+                    }
+                }
+            }
+            if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element)) {
+                final String existingValue = detail.getBreachStartType() != null ? detail.getBreachStartType().name() : null;
+                if (command.isChangeInStringParameterNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName, existingValue)) {
+                    final String breachStartTypeValue = fromApiJsonHelper
+                            .extractStringNamed(WorkingCapitalLoanProductConstants.breachStartTypeParamName, element);
+                    if (breachStartTypeValue != null) {
+                        final WorkingCapitalLoanBreachStartType type = WorkingCapitalLoanBreachStartType.fromString(breachStartTypeValue);
+                        detail.setBreachStartType(type);
+                        changes.put(WorkingCapitalLoanProductConstants.breachStartTypeParamName, type.getCode());
+                    } else {
+                        detail.setBreachStartType(WorkingCapitalLoanBreachStartType.DISBURSEMENT);
+                        changes.put(WorkingCapitalLoanProductConstants.breachStartTypeParamName,
+                                WorkingCapitalLoanBreachStartType.DISBURSEMENT.getCode());
                     }
                 }
             }

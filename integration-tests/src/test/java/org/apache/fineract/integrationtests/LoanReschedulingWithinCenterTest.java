@@ -19,382 +19,287 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostClientsRequest;
+import org.apache.fineract.client.models.PostLoansDisbursementData;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupCenterHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.CalendarHelper;
-import org.apache.fineract.integrationtests.common.CenterDomain;
-import org.apache.fineract.integrationtests.common.CenterHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.GroupHelper;
-import org.apache.fineract.integrationtests.common.OfficeHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoanReschedulingWithinCenterTest extends BaseLoanIntegrationTest {
+public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanReschedulingWithinCenterTest.class);
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private ResponseSpecification generalResponseSpec;
-    private LoanApplicationApprovalTest loanApplicationApprovalTest;
+    private static final Long LEGAL_FORM_PERSON = 1L;
 
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.loanApplicationApprovalTest = new LoanApplicationApprovalTest();
-        this.generalResponseSpec = new ResponseSpecBuilder().build();
+    private static FeignOfficeHelper officeHelper;
 
-        globalConfigurationHelper.verifyAllDefaultGlobalConfigurations();
+    @BeforeAll
+    public static void setupOfficeHelper() {
+        officeHelper = new FeignOfficeHelper(FineractFeignClientHelper.getFineractFeignClient());
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testCenterReschedulingLoansWithInterestRecalculationEnabled() {
-
-        Integer officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
+        Long officeId = officeHelper.createOffice(LocalDate.of(2007, 7, 1)).getResourceId();
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
         String externalId = UUID.randomUUID().toString();
-        int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
-        int[] groupMembers = generateGroupMembers(1, officeId);
+        int staffId = FeignGroupCenterHelper.createStaff(officeId.intValue()).intValue();
+        long groupId = FeignGroupCenterHelper.createGroup(officeId.intValue());
         final String centerActivationDate = "01 July 2007";
-        Integer centerId = CenterHelper.createCenter(name, officeId, externalId, staffId, groupMembers, centerActivationDate, requestSpec,
-                responseSpec);
-        CenterDomain center = CenterHelper.retrieveByID(centerId, requestSpec, responseSpec);
-        Integer groupId = groupMembers[0];
-        Assertions.assertNotNull(center);
-        Assertions.assertTrue(center.getStaffId() == staffId);
-        Assertions.assertTrue(center.isActive() == true);
+        Long centerId = FeignGroupCenterHelper.createCenter(name, officeId.intValue(), externalId, staffId, new long[] { groupId },
+                centerActivationDate);
+        JsonObject center = FeignGroupCenterHelper.retrieveCenter(centerId);
+        assertNotNull(center);
+        assertEquals(staffId, center.get("staffId").getAsInt());
+        assertTrue(center.get("active").getAsBoolean());
 
         Long calendarId = createCalendarMeeting(centerId);
 
-        Integer clientId = createClient(officeId);
+        Long clientId = createClient(officeId.intValue(), "01 July 2014");
 
-        associateClientsToGroup(groupId, clientId);
+        FeignGroupCenterHelper.associateClientToGroup(groupId, clientId);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
         Calendar today = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         today.add(Calendar.DAY_OF_MONTH, -14);
-        // CREATE A LOAN PRODUCT
         final String disbursalDate = dateFormat.format(today.getTime());
         final String recalculationRestFrequencyDate = "01 January 2012";
         final boolean isMultiTrancheLoan = false;
 
+        Long collateralId = FeignGroupCenterHelper.createCollateralProduct();
+        assertNotNull(collateralId);
+        Long clientCollateralId = FeignGroupCenterHelper.createClientCollateral(clientId, collateralId);
+        assertNotNull(clientCollateralId);
+
         List<HashMap> collaterals = new ArrayList<>();
+        collaterals.add(collateral(clientCollateralId.intValue(), BigDecimal.valueOf(1)));
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                String.valueOf(clientId), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-
-        // CREATE LOAN MULTIDISBURSAL PRODUCT WITH INTEREST RECALCULATION
-        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.RBI_INDIA_STRATEGY,
+        Long loanProductId = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.RBI_INDIA_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                 LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
                 LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", recalculationRestFrequencyDate,
-                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, isMultiTrancheLoan, null, null);
+                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, isMultiTrancheLoan);
 
-        // APPLY FOR TRANCHE LOAN WITH INTEREST RECALCULATION
-        final Integer loanId = applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductID, disbursalDate,
-                recalculationRestFrequencyDate, LoanApplicationTestBuilder.RBI_INDIA_STRATEGY, new ArrayList<HashMap>(0), null,
-                collaterals);
+        Long loanId = applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductId, disbursalDate,
+                recalculationRestFrequencyDate, LoanApplicationTestBuilder.RBI_INDIA_STRATEGY, collaterals);
 
-        // Test for loan account is created
-        Assertions.assertNotNull(loanId);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
+        assertNotNull(loanId);
+        verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        // Test for loan account is created, can be approved
-        this.loanTransactionHelper.approveLoan(disbursalDate, loanId);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+        approveLoan(loanId, approveLoanRequest(10000.0, disbursalDate));
+        verifyLoanStatus(loanId, LoanStatus.APPROVED);
 
-        // Test for loan account approved can be disbursed
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, loanId,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
+        GetLoansLoanIdResponse approvedLoan = getLoanDetails(loanId);
+        disburseLoanWithNetDisbursalAmount(loanId, disbursalDate, approvedLoan.getNetDisbursalAmount().toPlainString());
+        verifyLoanStatus(loanId, LoanStatus.ACTIVE);
 
         LOG.info("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
-        Calendar todaysdate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        todaysdate.add(Calendar.DAY_OF_MONTH, 14);
-        String oldMeetingDate = dateFormat.format(todaysdate.getTime());
-        todaysdate.add(Calendar.DAY_OF_MONTH, 1);
-        final String centerMeetingNewStartDate = dateFormat.format(todaysdate.getTime());
-        CalendarHelper.updateMeetingCalendarForCenter(centerId.longValue(), calendarId.toString(), oldMeetingDate,
-                centerMeetingNewStartDate);
+        Calendar rescheduledDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        rescheduledDate.add(Calendar.DAY_OF_MONTH, 14);
+        String oldMeetingDate = dateFormat.format(rescheduledDate.getTime());
+        rescheduledDate.add(Calendar.DAY_OF_MONTH, 1);
+        final String centerMeetingNewStartDate = dateFormat.format(rescheduledDate.getTime());
+        CalendarHelper.updateMeetingCalendarForCenter(centerId, calendarId.toString(), oldMeetingDate, centerMeetingNewStartDate);
 
-        ArrayList loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec, loanId);
-        // VERIFY RESCHEDULED DATE
-        ArrayList dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(2)).get("dueDate");
-        assertEquals(getDateAsArray(todaysdate, 0), dueDateLoanSchedule);
-
-        // VERIFY THE INTEREST
-        Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(2)).get("interestDue");
-        assertEquals("90.82", String.valueOf(interestDue));
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+        GetLoansLoanIdRepaymentPeriod installment = loanDetails.getRepaymentSchedule().getPeriods().get(2);
+        assertEquals(toLocalDate(rescheduledDate), installment.getDueDate());
+        assertEquals(0, new BigDecimal("90.82").compareTo(installment.getInterestDue()));
     }
 
-    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal amount) {
-        collaterals.add(collaterals(collateralId, amount));
+    @Test
+    public void testCenterReschedulingMultiTrancheLoansWithInterestRecalculationEnabled() {
+        Long officeId = officeHelper.createOffice(LocalDate.of(2007, 7, 1)).getResourceId();
+        String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
+        String externalId = UUID.randomUUID().toString();
+        int staffId = FeignGroupCenterHelper.createStaff(officeId.intValue()).intValue();
+        long groupId = FeignGroupCenterHelper.createGroup(officeId.intValue());
+        final String centerActivationDate = "01 July 2007";
+        Long centerId = FeignGroupCenterHelper.createCenter(name, officeId.intValue(), externalId, staffId, new long[] { groupId },
+                centerActivationDate);
+        JsonObject center = FeignGroupCenterHelper.retrieveCenter(centerId);
+        assertNotNull(center);
+        assertEquals(staffId, center.get("staffId").getAsInt());
+        assertTrue(center.get("active").getAsBoolean());
+
+        Long calendarId = createCalendarMeeting(centerId);
+
+        Long clientId = createClient(officeId.intValue(), "01 July 2014");
+
+        FeignGroupCenterHelper.associateClientToGroup(groupId, clientId);
+
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
+        Calendar today = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        today.add(Calendar.DAY_OF_MONTH, -14);
+        final String approveDate = dateFormat.format(today.getTime());
+        final String expectedDisbursementDate = dateFormat.format(today.getTime());
+        final String disbursementDate = dateFormat.format(today.getTime());
+        final String recalculationRestFrequencyDate = "01 January 2012";
+        final boolean isMultiTrancheLoan = true;
+
+        Long loanProductId = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.RBI_INDIA_STRATEGY,
+                LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
+                LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
+                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", recalculationRestFrequencyDate,
+                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, isMultiTrancheLoan);
+
+        Calendar secondTrancheDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        secondTrancheDate.add(Calendar.DAY_OF_MONTH, -7);
+        String secondDisbursement = dateFormat.format(secondTrancheDate.getTime());
+
+        List<PostLoansDisbursementData> createTranches = List.of(LoanRequestBuilders.applyTrancheDetail(disbursementDate, 5000.0),
+                LoanRequestBuilders.applyTrancheDetail(secondDisbursement, 5000.0));
+        List<PostLoansDisbursementData> approveTranches = List.of(LoanRequestBuilders.applyTrancheDetail(disbursementDate, 5000.0),
+                LoanRequestBuilders.applyTrancheDetail(secondDisbursement, 5000.0));
+
+        Long collateralId = FeignGroupCenterHelper.createCollateralProduct();
+        assertNotNull(collateralId);
+        Long clientCollateralId = FeignGroupCenterHelper.createClientCollateral(clientId, collateralId);
+        assertNotNull(clientCollateralId);
+
+        List<HashMap> collaterals = new ArrayList<>();
+        collaterals.add(collateral(clientCollateralId.intValue(), BigDecimal.valueOf(1)));
+
+        Long loanId = applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductId, disbursementDate,
+                recalculationRestFrequencyDate, LoanApplicationTestBuilder.RBI_INDIA_STRATEGY, createTranches, collaterals);
+
+        verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
+
+        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
+        approveLoanFromJson(loanId,
+                LoanRequestBuilders.approveLoanWithTranchesJson(10000.0, approveDate, expectedDisbursementDate, approveTranches));
+        GetLoansLoanIdResponse approvedLoan = getLoanDetails(loanId);
+        verifyLoanStatus(approvedLoan, LoanStatus.APPROVED);
+        verifyLoanStatus(approvedLoan, status -> Boolean.TRUE.equals(status.getWaitingForDisbursal()));
+
+        disburseLoanWithNetDisbursalAmount(loanId, disbursementDate, "5000");
+
+        LOG.info("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
+        Calendar rescheduledDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
+        rescheduledDate.add(Calendar.DAY_OF_MONTH, 14);
+        String oldMeetingDate = dateFormat.format(rescheduledDate.getTime());
+        rescheduledDate.add(Calendar.DAY_OF_MONTH, 1);
+        final String centerMeetingNewStartDate = dateFormat.format(rescheduledDate.getTime());
+        CalendarHelper.updateMeetingCalendarForCenter(centerId, calendarId.toString(), oldMeetingDate, centerMeetingNewStartDate);
+
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+        GetLoansLoanIdRepaymentPeriod installment = loanDetails.getRepaymentSchedule().getPeriods().get(3);
+        assertEquals(toLocalDate(rescheduledDate), installment.getDueDate());
+        assertEquals(0, new BigDecimal("41.05").compareTo(installment.getInterestDue()));
+
+        disburseLoanWithNetDisbursalAmount(loanId, secondDisbursement, "5000");
     }
 
-    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal amount) {
-        HashMap<String, String> collateral = new HashMap<String, String>(1);
+    private Long createClient(int officeId, String activationDate) {
+        PostClientsRequest request = new PostClientsRequest()//
+                .officeId((long) officeId)//
+                .legalFormId(LEGAL_FORM_PERSON)//
+                .firstname(Utils.randomFirstNameGenerator())//
+                .lastname(Utils.randomLastNameGenerator())//
+                .externalId(Utils.randomStringGenerator("EXT_", 7))//
+                .active(true)//
+                .activationDate(activationDate)//
+                .dateFormat(LoanTestData.DATETIME_PATTERN)//
+                .locale(LoanTestData.LOCALE);
+        return clientHelper.createClient(request).getClientId();
+    }
+
+    @SuppressWarnings("rawtypes")
+    private HashMap collateral(Integer collateralId, BigDecimal amount) {
+        HashMap collateral = new HashMap(2);
         collateral.put("clientCollateralId", collateralId.toString());
         collateral.put("amount", amount.toString());
         return collateral;
     }
 
-    private void associateClientsToGroup(Integer groupId, Integer clientId) {
-        // Associate client to the group
-        GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupId.toString(), clientId.toString());
-        GroupHelper.verifyGroupMembers(this.requestSpec, this.responseSpec, groupId, clientId);
-    }
-
-    private Integer createClient(Integer officeId) {
-        // CREATE CLIENT
-        final String clientActivationDate = "01 July 2014";
-        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, clientActivationDate, officeId.toString());
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
-        return clientId;
-    }
-
-    private Long createCalendarMeeting(Integer centerId) {
+    private Long createCalendarMeeting(Long centerId) {
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
         Calendar today = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         final String startDate = dateFormat.format(today.getTime());
-        final String frequency = "2"; // 2:Weekly
-        final String interval = "2"; // Every one week
+        final String frequency = "2";
+        final String interval = "2";
         Integer repeatsOnDay = today.get(Calendar.DAY_OF_WEEK) - 1;
 
         if (repeatsOnDay.intValue() == 0) {
             repeatsOnDay = 7;
         }
 
-        Long calendarId = CalendarHelper
-                .createMeetingForGroup(centerId.longValue(), startDate, frequency, interval, repeatsOnDay.toString()).getResourceId();
+        Long calendarId = CalendarHelper.createMeetingForGroup(centerId, startDate, frequency, interval, repeatsOnDay.toString())
+                .getResourceId();
         LOG.info("calendarId {}", calendarId);
         return calendarId;
     }
 
-    @SuppressWarnings("rawtypes")
-    @Test
-    public void testCenterReschedulingMultiTrancheLoansWithInterestRecalculationEnabled() {
-
-        Integer officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
-        String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
-        String externalId = UUID.randomUUID().toString();
-        int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
-        int[] groupMembers = generateGroupMembers(1, officeId);
-        final String centerActivationDate = "01 July 2007";
-        Integer centerId = CenterHelper.createCenter(name, officeId, externalId, staffId, groupMembers, centerActivationDate, requestSpec,
-                responseSpec);
-        CenterDomain center = CenterHelper.retrieveByID(centerId, requestSpec, responseSpec);
-        Integer groupId = groupMembers[0];
-        Assertions.assertNotNull(center);
-        Assertions.assertTrue(center.getStaffId() == staffId);
-        Assertions.assertTrue(center.isActive() == true);
-
-        Long calendarId = createCalendarMeeting(centerId);
-
-        Integer clientId = createClient(officeId);
-
-        associateClientsToGroup(groupId, clientId);
-
-        // CREATE A LOAN PRODUCT
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
-        dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
-        Calendar today = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        today.add(Calendar.DAY_OF_MONTH, -14);
-        // CREATE A LOAN PRODUCT
-        final String approveDate = dateFormat.format(today.getTime());
-        final String expectedDisbursementDate = dateFormat.format(today.getTime());
-        final String disbursementDate = dateFormat.format(today.getTime());
-        final String approvalAmount = "10000";
-        final String recalculationRestFrequencyDate = "01 January 2012";
-        final boolean isMultiTrancheLoan = true;
-
-        // CREATE LOAN MULTIDISBURSAL PRODUCT WITH INTEREST RECALCULATION
-        final Integer loanProductID = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.RBI_INDIA_STRATEGY,
-                LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
-                LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
-                LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", recalculationRestFrequencyDate,
-                LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, null, isMultiTrancheLoan, null, null);
-
-        Calendar secondTrancheDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        secondTrancheDate.add(Calendar.DAY_OF_MONTH, -7);
-        String secondDisbursement = dateFormat.format(secondTrancheDate.getTime());
-
-        // CREATE TRANCHES
-        List<HashMap> createTranches = new ArrayList<>();
-        createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail(disbursementDate, "5000"));
-        createTranches.add(this.loanApplicationApprovalTest.createTrancheDetail(secondDisbursement, "5000"));
-
-        // APPROVE TRANCHES
-        List<HashMap> approveTranches = new ArrayList<>();
-        approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail(disbursementDate, "5000"));
-        approveTranches.add(this.loanApplicationApprovalTest.createTrancheDetail(secondDisbursement, "5000"));
-
-        List<HashMap> collaterals = new ArrayList<>();
-
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                String.valueOf(clientId), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-
-        // APPLY FOR TRANCHE LOAN WITH INTEREST RECALCULATION
-        final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductID,
-                disbursementDate, recalculationRestFrequencyDate, LoanApplicationTestBuilder.RBI_INDIA_STRATEGY, new ArrayList<HashMap>(0),
-                createTranches, collaterals);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
-
-        // VALIDATE THE LOAN STATUS
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
-                loanID, approveTranches);
-
-        // VALIDATE THE LOAN IS APPROVED
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-
-        // DISBURSE THE FIRST TRANCHE
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursementDate, loanID, "5000");
-
-        LOG.info("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
-        Calendar todaysdate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
-        todaysdate.add(Calendar.DAY_OF_MONTH, 14);
-        String oldMeetingDate = dateFormat.format(todaysdate.getTime());
-        todaysdate.add(Calendar.DAY_OF_MONTH, 1);
-        final String centerMeetingNewStartDate = dateFormat.format(todaysdate.getTime());
-        CalendarHelper.updateMeetingCalendarForCenter(centerId.longValue(), calendarId.toString(), oldMeetingDate,
-                centerMeetingNewStartDate);
-
-        ArrayList loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec, loanID);
-        // VERIFY RESCHEDULED DATE
-        ArrayList dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(3)).get("dueDate");
-        assertEquals(getDateAsArray(todaysdate, 0), dueDateLoanSchedule);
-
-        // VERIFY THE INTEREST
-        Float interestDue = (Float) ((HashMap) loanRepaymnetSchedule.get(3)).get("interestDue");
-        assertEquals("41.05", String.valueOf(interestDue));
-
-        // DISBURSE THE SECOND TRANCHE (for let the loan test lifecycle callback to close the loan
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(secondDisbursement, loanID, "5000");
-    }
-
-    private Integer createLoanProductWithInterestRecalculation(final String repaymentStrategy,
+    private Long createLoanProductWithInterestRecalculation(final String repaymentStrategy,
             final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
             final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
-            final String recalculationRestFrequencyDate, final String preCloseInterestCalculationStrategy, final Account[] accounts,
-            final boolean isMultiTrancheLoan, final Integer recalculationRestFrequencyOnDayType,
-            final Integer recalculationRestFrequencyDayOfWeekType) {
-        final String recalculationCompoundingFrequencyType = null;
-        final String recalculationCompoundingFrequencyInterval = null;
-        final String recalculationCompoundingFrequencyDate = null;
-        final Integer recalculationCompoundingFrequencyOnDayType = null;
-        final Integer recalculationCompoundingFrequencyDayOfWeekType = null;
-        return createLoanProductWithInterestRecalculation(repaymentStrategy, interestRecalculationCompoundingMethod,
-                rescheduleStrategyMethod, recalculationRestFrequencyType, recalculationRestFrequencyInterval,
-                recalculationRestFrequencyDate, recalculationCompoundingFrequencyType, recalculationCompoundingFrequencyInterval,
-                recalculationCompoundingFrequencyDate, preCloseInterestCalculationStrategy, accounts, null, false, isMultiTrancheLoan,
-                recalculationCompoundingFrequencyOnDayType, recalculationCompoundingFrequencyDayOfWeekType,
-                recalculationRestFrequencyOnDayType, recalculationRestFrequencyDayOfWeekType);
-    }
-
-    private Integer createLoanProductWithInterestRecalculation(final String repaymentStrategy,
-            final String interestRecalculationCompoundingMethod, final String rescheduleStrategyMethod,
-            final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
-            final String recalculationRestFrequencyDate, final String recalculationCompoundingFrequencyType,
-            final String recalculationCompoundingFrequencyInterval, final String recalculationCompoundingFrequencyDate,
-            final String preCloseInterestCalculationStrategy, final Account[] accounts, final String chargeId,
-            boolean isArrearsBasedOnOriginalSchedule, final boolean isMultiTrancheLoan,
-            final Integer recalculationCompoundingFrequencyOnDayType, final Integer recalculationCompoundingFrequencyDayOfWeekType,
-            final Integer recalculationRestFrequencyOnDayType, final Integer recalculationRestFrequencyDayOfWeekType) {
-        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        LoanProductTestBuilder builder = new LoanProductTestBuilder().withPrincipal("10000.00").withNumberOfRepayments("12")
+            final String recalculationRestFrequencyDate, final String preCloseInterestCalculationStrategy,
+            final boolean isMultiTrancheLoan) {
+        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("10000.00").withNumberOfRepayments("12")
                 .withRepaymentAfterEvery("2").withRepaymentTypeAsWeek().withinterestRatePerPeriod("2")
                 .withInterestRateFrequencyTypeAsMonths().withTranches(isMultiTrancheLoan)
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withRepaymentStrategy(repaymentStrategy)
                 .withInterestTypeAsDecliningBalance()
                 .withInterestRecalculationDetails(interestRecalculationCompoundingMethod, rescheduleStrategyMethod,
                         preCloseInterestCalculationStrategy)
-                .withInterestRecalculationRestFrequencyDetails(recalculationRestFrequencyType, recalculationRestFrequencyInterval,
-                        recalculationRestFrequencyOnDayType, recalculationRestFrequencyDayOfWeekType)
-                .withInterestRecalculationCompoundingFrequencyDetails(recalculationCompoundingFrequencyType,
-                        recalculationCompoundingFrequencyInterval, recalculationCompoundingFrequencyOnDayType,
-                        recalculationCompoundingFrequencyDayOfWeekType);
-        if (accounts != null) {
-            builder = builder.withAccountingRulePeriodicAccrual(accounts);
-        }
-
-        if (isArrearsBasedOnOriginalSchedule) {
-            builder = builder.withArrearsConfiguration();
-        }
-
-        final String loanProductJSON = builder.build(chargeId);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+                .withInterestRecalculationRestFrequencyDetails(recalculationRestFrequencyType, recalculationRestFrequencyInterval, null,
+                        null)
+                .withInterestRecalculationCompoundingFrequencyDetails(null, null, null, null).build(null);
+        return createLoanProductFromJson(loanProductJSON);
     }
 
-    @SuppressWarnings("rawtypes")
-    private Integer applyForLoanApplicationForInterestRecalculation(final Integer clientID, Integer groupId, Long calendarId,
-            final Integer loanProductID, final String disbursementDate, final String restStartDate, final String repaymentStrategy,
-            final List<HashMap> charges, List<HashMap> tranches, List<HashMap> collaterals) {
-        final String graceOnInterestPayment = null;
-        final String compoundingStartDate = null;
-        final String graceOnPrincipalPayment = null;
-        return applyForLoanApplicationForInterestRecalculation(clientID, groupId, calendarId, loanProductID, disbursementDate,
-                restStartDate, compoundingStartDate, repaymentStrategy, charges, graceOnInterestPayment, graceOnPrincipalPayment, tranches,
-                collaterals);
+    private Long applyForLoanApplicationForInterestRecalculation(final Long clientId, Long groupId, Long calendarId,
+            final Long loanProductId, final String disbursementDate, final String restStartDate, final String repaymentStrategy,
+            List<HashMap> collaterals) {
+        return applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductId, disbursementDate,
+                restStartDate, repaymentStrategy, null, collaterals);
     }
 
-    @SuppressWarnings({ "rawtypes", "unused" })
-    private Integer applyForLoanApplicationForInterestRecalculation(final Integer clientID, Integer groupId, Long calendarId,
-            final Integer loanProductID, final String disbursementDate, final String restStartDate, final String compoundingStartDate,
-            final String repaymentStrategy, final List<HashMap> charges, final String graceOnInterestPayment,
-            final String graceOnPrincipalPayment, List<HashMap> tranches, List<HashMap> collaterals) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Long applyForLoanApplicationForInterestRecalculation(final Long clientId, Long groupId, Long calendarId,
+            final Long loanProductId, final String disbursementDate, final String restStartDate, final String repaymentStrategy,
+            List<PostLoansDisbursementData> tranches, List<HashMap> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+        List<HashMap> trancheMaps = null;
+        if (tranches != null) {
+            trancheMaps = tranches.stream().map(tranche -> {
+                HashMap map = new HashMap();
+                map.put("expectedDisbursementDate", tranche.getExpectedDisbursementDate());
+                map.put("principal", tranche.getPrincipal().toPlainString());
+                return map;
+            }).toList();
+        }
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
                 .withPrincipal("10000.00") //
                 .withLoanTermFrequency("24") //
@@ -405,42 +310,17 @@ public class LoanReschedulingWithinCenterTest extends BaseLoanIntegrationTest {
                 .withInterestRatePerPeriod("2").withLoanType("jlg") //
                 .withCalendarID(calendarId.toString()).withAmortizationTypeAsEqualInstallments() //
                 .withFixedEmiAmount("") //
-                .withTranches(tranches).withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeAsDays() //
+                .withTranches(trancheMaps).withInterestTypeAsDecliningBalance() //
                 .withInterestCalculationPeriodTypeAsDays() //
                 .withExpectedDisbursementDate(disbursementDate) //
                 .withSubmittedOnDate(disbursementDate) //
                 .withRepaymentStrategy(repaymentStrategy) //
-                .withCollaterals(collaterals).withCharges(charges)//
-                .build(clientID.toString(), groupId.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+                .withCollaterals(collaterals).withCharges(new ArrayList<>())//
+                .build(clientId.toString(), groupId.toString(), loanProductId.toString(), null);
+        return applyForLoanFromJson(loanApplicationJSON);
     }
 
-    private int[] generateGroupMembers(int size, int officeId) {
-        int[] groupMembers = new int[size];
-        for (int i = 0; i < groupMembers.length; i++) {
-            final HashMap<String, String> map = new HashMap<>();
-            map.put("officeId", "" + officeId);
-            map.put("name", Utils.uniqueRandomStringGenerator("Group_Name_", 5));
-            map.put("externalId", UUID.randomUUID().toString());
-            map.put("dateFormat", "dd MMMM yyyy");
-            map.put("locale", "en");
-            map.put("active", "true");
-            map.put("activationDate", "04 March 2011");
-
-            groupMembers[i] = Utils.performServerPost(requestSpec, responseSpec,
-                    "/fineract-provider/api/v1/groups?" + Utils.TENANT_IDENTIFIER, new Gson().toJson(map), "groupId");
-        }
-        return groupMembers;
+    private static LocalDate toLocalDate(Calendar calendar) {
+        return LocalDate.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH));
     }
-
-    private List getDateAsArray(Calendar date, int addPeriod) {
-        return getDateAsArray(date, addPeriod, Calendar.DAY_OF_MONTH);
-    }
-
-    private List getDateAsArray(Calendar date, int addvalue, int type) {
-        date.add(type, addvalue);
-        return new ArrayList<>(Arrays.asList(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, date.get(Calendar.DAY_OF_MONTH)));
-    }
-
 }

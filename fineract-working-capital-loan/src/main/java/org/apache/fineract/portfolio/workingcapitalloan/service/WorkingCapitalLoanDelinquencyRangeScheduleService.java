@@ -24,16 +24,19 @@ import java.util.List;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 
 public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
 
     void generateInitialPeriod(WorkingCapitalLoan loan);
 
-    void generateNextPeriodIfNeeded(WorkingCapitalLoan loan, LocalDate businessDate);
+    List<WorkingCapitalLoanDelinquencyRangeSchedule> generateNextPeriodIfNeeded(WorkingCapitalLoan loan, LocalDate businessDate);
 
     boolean hasSchedule(Long loanId);
 
     void applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal amount);
+
+    void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate businessDate, BigDecimal amount);
 
     void evaluateExpiredPeriods(WorkingCapitalLoan loan, LocalDate businessDate);
 
@@ -58,4 +61,8 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
      */
     void reprocessDelinquencySchedule(WorkingCapitalLoan loan);
 
+    void resetPeriods(WorkingCapitalLoan workingCapitalLoan, WorkingCapitalLoanDelinquencyAction action);
+
+    void undoResetPeriods(WorkingCapitalLoan workingCapitalLoan, WorkingCapitalLoanDelinquencyAction action,
+            List<WorkingCapitalLoanDelinquencyAction> byWorkingCapitalLoanIdOrderById);
 }

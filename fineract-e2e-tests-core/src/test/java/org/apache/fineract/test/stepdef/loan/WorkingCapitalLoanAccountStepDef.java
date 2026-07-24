@@ -206,15 +206,20 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
     @When("Admin creates a working capital loan using created product with the following data:")
     public void createWorkingCapitalLoanUsingCreatedProduct(final DataTable table) {
-        submitLoanUsingCreatedProduct(table, null);
+        submitLoanUsingCreatedProduct(table, null, null);
     }
 
     @When("Admin creates a working capital loan using created product with breachGraceDays {int} and the following data:")
     public void createWorkingCapitalLoanUsingCreatedProductWithBreachGraceDays(final int breachGraceDays, final DataTable table) {
-        submitLoanUsingCreatedProduct(table, breachGraceDays);
+        submitLoanUsingCreatedProduct(table, breachGraceDays, null);
     }
 
-    private void submitLoanUsingCreatedProduct(final DataTable table, final Integer breachGraceDays) {
+    @When("Admin creates a working capital loan using created product with breachStartType {string} and the following data:")
+    public void createWorkingCapitalLoanUsingCreatedProductWithBreachStartType(final String breachStartType, final DataTable table) {
+        submitLoanUsingCreatedProduct(table, null, breachStartType);
+    }
+
+    private void submitLoanUsingCreatedProduct(final DataTable table, final Integer breachGraceDays, final String breachStartType) {
         final List<List<String>> data = table.asLists();
         final List<String> rawData = data.get(1);
         final Long clientId = extractClientId();
@@ -236,6 +241,9 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .discount(discount != null && !discount.isEmpty() ? new BigDecimal(discount) : null);
         if (breachGraceDays != null) {
             loansRequest.breachGraceDays(breachGraceDays);
+        }
+        if (breachStartType != null) {
+            loansRequest.breachStartType(breachStartType);
         }
         testContext().set(TestContextKey.LOAN_CREATE_REQUEST, loansRequest);
 
@@ -2098,6 +2106,9 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 case "totalDiscountFeeAdjustment" ->
                     actualValues.add(response.getBalance() == null || response.getBalance().getTotalDiscountFeeAdjustment() == null ? null
                             : new Utils.DoubleFormatter(response.getBalance().getTotalDiscountFeeAdjustment().doubleValue()).format());
+                case "breachPastDueAmount" ->
+                    actualValues.add(response.getBalance() == null || response.getBalance().getBreachPastDueAmount() == null ? null
+                            : new Utils.DoubleFormatter(response.getBalance().getBreachPastDueAmount().doubleValue()).format());
                 default -> throw new IllegalStateException(String.format("Header name %s cannot be found", headerName));
             }
         }

@@ -51,5 +51,7 @@ public interface WorkingCapitalLoanBreachScheduleService {
 
     void recalculatePeriodsForPauses(WorkingCapitalLoan loan);
 
+    void recalculatePastDueAmount(WorkingCapitalLoan loan);
+
     void reprocessBreachSchedule(WorkingCapitalLoan loan);
 }

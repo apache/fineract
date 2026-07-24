@@ -20,45 +20,34 @@ package org.apache.fineract.integrationtests;
 
 import static org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity.LIABILITY_TRANSFER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.AdvancedPaymentData;
-import org.apache.fineract.client.models.BusinessDateUpdateRequest;
+import org.apache.fineract.client.models.DeleteFinancialActivityAccountsResponse;
+import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
+import org.apache.fineract.client.models.PostFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
-import org.apache.fineract.client.models.PostLoansRequest;
-import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsTransactionHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -68,147 +57,75 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends BaseLoanIntegrationTest {
+public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends FeignLoanTestBase {
 
     private static final String DATETIME_PATTERN = "dd MMMM yyyy";
-    private static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
     private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern(DATETIME_PATTERN).toFormatter();
-    private static RequestSpecification requestSpec;
-    private static ResponseSpecification responseSpec;
-    private static LoanTransactionHelper loanTransactionHelper;
-    private static AccountHelper accountHelper;
-    private static Integer commonLoanProductId;
-    private static PostClientsResponse client;
-    private static BusinessDateHelper businessDateHelper;
-    private static SchedulerJobHelper scheduleJobHelper;
-    private static SavingsAccountHelper savingsAccountHelper;
-    private static SavingsProductHelper savingsProductHelper;
+
+    private static FeignSavingsHelper savingsHelper;
+    private static FeignSavingsProductHelper savingsProductHelper;
+    private static FeignSavingsTransactionHelper savingsTransactionHelper;
     private static FinancialActivityAccountHelper financialActivityAccountHelper;
-    private static Integer financialActivityAccountId;
-    private static Account liabilityTransferAccount;
 
     @BeforeAll
-    public static void setup() {
-        Utils.initializeRESTAssured();
-        ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        requestSpec.header("Fineract-Platform-TenantId", "default");
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-
-        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        accountHelper = new AccountHelper(requestSpec, responseSpec);
-        final Account assetAccount = accountHelper.createAssetAccount();
-        final Account incomeAccount = accountHelper.createIncomeAccount();
-        final Account expenseAccount = accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
-        client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        businessDateHelper = new BusinessDateHelper();
-        scheduleJobHelper = new SchedulerJobHelper(requestSpec);
-        savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-        savingsProductHelper = new SavingsProductHelper();
-        commonLoanProductId = createLoanProduct("500", "15", "4", assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
-        financialActivityAccountHelper = new FinancialActivityAccountHelper(requestSpec);
-
-        List<HashMap> financialActivities = financialActivityAccountHelper.getAllFinancialActivityAccounts(responseSpec);
-        if (financialActivities.isEmpty()) {
-            /** Setup liability transfer account **/
-            /** Create a Liability and an Asset Transfer Account **/
-            liabilityTransferAccount = accountHelper.createLiabilityAccount();
-            Assertions.assertNotNull(liabilityTransferAccount);
-
-            /*** Create A Financial Activity to Account Mapping **/
-            financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
-                    LIABILITY_TRANSFER.getValue(), liabilityTransferAccount.getAccountID(), responseSpec,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
-            Assertions.assertNotNull(financialActivityAccountId);
-        } else {
-            boolean existFinancialActivity = false;
-            for (HashMap financialActivity : financialActivities) {
-                HashMap financialActivityData = (HashMap) financialActivity.get("financialActivityData");
-                if (financialActivityData.get("id").equals(FinancialActivityAccountsTest.LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID)) {
-                    HashMap glAccountData = (HashMap) financialActivity.get("glAccountData");
-                    liabilityTransferAccount = new Account((Integer) glAccountData.get("id"), Account.AccountType.LIABILITY);
-                    financialActivityAccountId = (Integer) financialActivity.get("id");
-                    existFinancialActivity = true;
-                    break;
-                }
-            }
-            if (!existFinancialActivity) {
-                liabilityTransferAccount = accountHelper.createLiabilityAccount();
-                Assertions.assertNotNull(liabilityTransferAccount);
-
-                /*** Create A Financial Activity to Account Mapping **/
-                financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
-                        LIABILITY_TRANSFER.getValue(), liabilityTransferAccount.getAccountID(), responseSpec,
-                        CommonConstants.RESPONSE_RESOURCE_ID);
-                Assertions.assertNotNull(financialActivityAccountId);
-            }
-        }
+    public static void setupSavingsAndFinancialActivityHelpers() {
+        FineractFeignClient client = FineractFeignClientHelper.getFineractFeignClient();
+        savingsHelper = new FeignSavingsHelper(client);
+        savingsProductHelper = new FeignSavingsProductHelper(client);
+        savingsTransactionHelper = new FeignSavingsTransactionHelper(client);
+        financialActivityAccountHelper = new FinancialActivityAccountHelper(null);
     }
 
     @AfterAll
-    public static void tearDown() {
-        Integer deletedFinancialActivityAccountId = financialActivityAccountHelper
-                .deleteFinancialActivityAccount(financialActivityAccountId, responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
-        Assertions.assertNotNull(deletedFinancialActivityAccountId);
-        Assertions.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
+    public static void tearDownFinancialActivityAccounts() {
+        List<GetFinancialActivityAccountsResponse> financialActivities = financialActivityAccountHelper.getAllFinancialActivityAccounts();
+        for (GetFinancialActivityAccountsResponse financialActivity : financialActivities) {
+            DeleteFinancialActivityAccountsResponse deletedFinancialActivityAccount = financialActivityAccountHelper
+                    .deleteFinancialActivityAccount(financialActivity.getId());
+            Assertions.assertNotNull(deletedFinancialActivityAccount);
+            Assertions.assertEquals(financialActivity.getId(), deletedFinancialActivityAccount.getResourceId());
+        }
     }
 
     @Test
     public void feeAndPenaltyChargePaymentWithDefaultAllocationRuleTest() {
-        try {
-
+        runAt("15 February 2023", () -> {
             final String jobName = "Transfer Fee For Loans From Savings";
             final String startDate = "10 April 2022";
 
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(true));
-            businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                    .date("2023.02.15").dateFormat("yyyy.MM.dd").locale("en"));
+            Long clientId = createClient();
+            Long loanProductId = createLoanProduct("500", "15", "4");
 
-            final Integer savingsId = createSavingsAccountDailyPosting(client.getClientId().intValue(), startDate);
+            Long savingsId = createSavingsAccountDailyPosting(clientId, startDate);
+            savingsTransactionHelper.deposit(savingsId, "10000", startDate);
 
-            savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+            mapLiabilityTransferFinancialActivity();
 
-            final PostLoansResponse loanResponse = applyForLoanApplication(client.getClientId(), commonLoanProductId, 1000L, 45, 15, 3,
-                    BigDecimal.ZERO, "01 January 2023", "01 January 2023");
+            Long loanId = applyForLoanApplication(clientId, loanProductId, savingsId, 1000L, 45, 15, 3, BigDecimal.ZERO, "01 January 2023",
+                    "01 January 2023");
 
-            int loanId = loanResponse.getLoanId().intValue();
+            approveLoan(loanId, new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                    .approvedOnDate("01 January 2023").locale("en"));
 
-            loanTransactionHelper.updateLoan(loanId,
-                    updateLoanJson(client.getClientId().intValue(), commonLoanProductId, savingsId.toString()));
-
-            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
-                            .approvedOnDate("01 January 2023").locale("en"));
-
-            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
-                            .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en"));
+            disburseLoan(loanId, new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+                    .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en"));
 
             final double feePortion = 50.0d;
             final double penaltyPortion = 100.0d;
 
-            Integer fee = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateWithAccountTransferJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT,
-                            String.valueOf(feePortion), false));
-
-            Integer penalty = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanSpecifiedDueDateWithAccountTransferJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT,
-                            String.valueOf(penaltyPortion), true));
+            Long fee = chargesHelper.createCharge(ChargeRequestBuilders.loanSpecifiedDueDateAccountTransferFee(feePortion, false))
+                    .getResourceId();
+            Long penalty = chargesHelper.createCharge(ChargeRequestBuilders.loanSpecifiedDueDateAccountTransferFee(penaltyPortion, true))
+                    .getResourceId();
 
             LocalDate targetDate = LocalDate.of(2023, 1, 3);
             final String penaltyChargeAddedDate = DATE_FORMATTER.format(targetDate);
-            loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
-                    .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), penaltyChargeAddedDate, String.valueOf(feePortion)));
+            addLoanCharge(loanId, fee, penaltyChargeAddedDate, feePortion);
+            addLoanCharge(loanId, penalty, penaltyChargeAddedDate, penaltyPortion);
 
-            loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(
-                    String.valueOf(penalty), penaltyChargeAddedDate, String.valueOf(penaltyPortion)));
+            verifyNoAccrualTransactionForRepayment(loanId);
 
-            loanTransactionHelper.noAccrualTransactionForRepayment(loanId);
-
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             assertEquals(5, loanDetails.getRepaymentSchedule().getPeriods().size());
             assertEquals(feePortion, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesDue()));
@@ -223,9 +140,9 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends BaseLoan
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod()));
             assertEquals(LocalDate.of(2023, 1, 16), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
 
-            scheduleJobHelper.executeAndAwaitJob(jobName);
+            schedulerHelper.executeAndAwaitJob(jobName);
 
-            loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+            loanDetails = getLoanDetails(loanId);
             assertEquals(5, loanDetails.getRepaymentSchedule().getPeriods().size());
             assertEquals(feePortion, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesDue()));
             assertEquals(0.0d, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getFeeChargesOutstanding()));
@@ -236,34 +153,39 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends BaseLoan
             assertEquals(250.0d,
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalOutstandingForPeriod()));
             assertEquals(LocalDate.of(2023, 1, 16), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-        } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(false));
-        }
+        });
     }
 
-    private Integer createSavingsAccountDailyPosting(final Integer clientID, String startDate) {
-        final Integer savingsProductID = createSavingsProductDailyPosting();
-        Assertions.assertNotNull(savingsProductID);
-        final Integer savingsId = savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID, ACCOUNT_TYPE_INDIVIDUAL,
-                startDate);
+    private Long createSavingsAccountDailyPosting(final Long clientId, String startDate) {
+        final Long savingsProductId = createSavingsProductDailyPosting();
+        Assertions.assertNotNull(savingsProductId);
+        final Long savingsId = savingsHelper.createApproveActivateSavings(clientId, savingsProductId, startDate);
         Assertions.assertNotNull(savingsId);
-        HashMap savingsStatusHashMap = savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-        savingsStatusHashMap = savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
         return savingsId;
     }
 
-    private Integer createSavingsProductDailyPosting() {
-        final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance()
-                .withMinimumOpenningBalance("10000.0").build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    private Long createSavingsProductDailyPosting() {
+        return savingsProductHelper
+                .createSavingsProduct(SavingsRequestBuilders.defaultSavingsProduct().minRequiredOpeningBalance(new BigDecimal("10000.0")))
+                .getResourceId();
     }
 
-    private static Integer createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
-            final Account... accounts) {
+    private void mapLiabilityTransferFinancialActivity() {
+        financialActivityAccountHelper.getAllFinancialActivityAccounts()
+                .forEach(mapping -> financialActivityAccountHelper.deleteFinancialActivityAccount(mapping.getId()));
+        Long liabilityAccountId = getAccounts().getOverpaymentAccount().getAccountID().longValue();
+        PostFinancialActivityAccountsResponse response = financialActivityAccountHelper
+                .createFinancialActivityAccount(new PostFinancialActivityAccountsRequest()
+                        .financialActivityId((long) LIABILITY_TRANSFER.getValue()).glAccountId(liabilityAccountId));
+        Assertions.assertNotNull(response.getResourceId());
+    }
+
+    private Long createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments) {
+        Account assetAccount = getAccounts().getLoansReceivableAccount();
+        Account incomeAccount = getAccounts().getInterestIncomeAccount();
+        Account expenseAccount = getAccounts().getChargeOffExpenseAccount();
+        Account overpaymentAccount = getAccounts().getOverpaymentAccount();
+
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation();
         AdvancedPaymentData goodwillCreditAllocation = createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT");
         AdvancedPaymentData merchantIssuedRefundAllocation = createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION");
@@ -274,65 +196,32 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends BaseLoan
                 .withEnableDownPayment(true, "25", true).withinterestRatePerPeriod("0").withInterestRateFrequencyTypeAsMonths()
                 .withRepaymentStrategy(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
                 .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL)
-                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRulePeriodicAccrual(accounts)
+                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
+                .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
                 .addAdvancedPaymentAllocation(defaultAllocation, goodwillCreditAllocation, merchantIssuedRefundAllocation,
                         payoutRefundAllocation)
                 .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0").build(null);
-        return loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return createLoanProductFromJson(loanProductJSON);
     }
 
-    private static PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final Long principal,
+    private Long applyForLoanApplication(final Long clientId, final Long loanProductId, final Long savingsId, final Long principal,
             final int loanTermFrequency, final int repaymentAfterEvery, final int numberOfRepayments, final BigDecimal interestRate,
             final String expectedDisbursementDate, final String submittedOnDate) {
         log.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
-                .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
-                .transactionProcessingStrategyCode(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()).locale("en").submittedOnDate(submittedOnDate)
-                .amortizationType(1).interestRatePerPeriod(interestRate).interestCalculationPeriodType(1).interestType(0)
-                .repaymentFrequencyType(0).repaymentEvery(repaymentAfterEvery).repaymentFrequencyType(0)
-                .numberOfRepayments(numberOfRepayments).loanTermFrequency(loanTermFrequency).loanTermFrequencyType(0)
-                .principal(BigDecimal.valueOf(principal)).loanType("individual"));
-    }
-
-    private String updateLoanJson(final Integer clientID, final Integer loanProductID, String savingsId) {
-        log.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal("1,000.00") //
-                .withLoanTermFrequency("45") //
-                .withLoanTermFrequencyAsDays() //
-                .withNumberOfRepayments("3") //
-                .withRepaymentEveryAfter("15") //
-                .withRepaymentFrequencyTypeAsDays() //
-                .withInterestRatePerPeriod("0") //
+        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000.00").withLoanTermFrequency("45")
+                .withLoanTermFrequencyAsDays().withNumberOfRepayments("3").withRepaymentEveryAfter("15").withRepaymentFrequencyTypeAsDays()
+                .withInterestRatePerPeriod("0")
                 .withRepaymentStrategy(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()) //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate("01 January 2023") //
-                .withSubmittedOnDate("01 January 2023") //
-                .withCollaterals(collaterals) //
-                .build(clientID.toString(), loanProductID.toString(), savingsId);
-        return loanApplicationJSON;
+                .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()).withAmortizationTypeAsEqualInstallments()
+                .withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
+                .withExpectedDisbursementDate(expectedDisbursementDate).withSubmittedOnDate(submittedOnDate)
+                .build(clientId.toString(), loanProductId.toString(), savingsId.toString());
+        return applyForLoanFromJson(loanApplicationJSON);
     }
 
-    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
-        collaterals.add(collaterals(collateralId, quantity));
-    }
-
-    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
-        HashMap<String, String> collateral = new HashMap<>(2);
-        collateral.put("clientCollateralId", collateralId.toString());
-        collateral.put("quantity", quantity.toString());
-        return collateral;
+    private void verifyNoAccrualTransactionForRepayment(Long loanId) {
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+        loanDetails.getTransactions().forEach(
+                transaction -> assertFalse(Boolean.TRUE.equals(transaction.getType().getAccrual()), "Accrual entries are posted!"));
     }
 }

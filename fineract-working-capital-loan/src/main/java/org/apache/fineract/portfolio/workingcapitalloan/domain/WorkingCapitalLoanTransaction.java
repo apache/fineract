@@ -131,6 +131,14 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         return txn;
     }
 
+    public static WorkingCapitalLoanTransaction payoutRefund(final WorkingCapitalLoan loan, final BigDecimal amount,
+            final PaymentDetail paymentDetail, final LocalDate transactionDate, final CodeValue classification,
+            final ExternalId externalId) {
+        final WorkingCapitalLoanTransaction txn = new WorkingCapitalLoanTransaction();
+        txn.initialize(loan, LoanTransactionType.PAYOUT_REFUND, transactionDate, amount, paymentDetail, classification, externalId);
+        return txn;
+    }
+
     public static WorkingCapitalLoanTransaction creditBalanceRefund(final WorkingCapitalLoan loan, final BigDecimal amount,
             final PaymentDetail paymentDetail, final LocalDate transactionDate, final CodeValue classification,
             final ExternalId externalId) {
@@ -191,6 +199,13 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
             final BigDecimal amount, final LocalDate transactionDate, final PaymentDetail paymentDetail) {
         final WorkingCapitalLoanTransaction transaction = new WorkingCapitalLoanTransaction();
         transaction.initialize(loan, LoanTransactionType.CHARGE_ADJUSTMENT, transactionDate, amount, paymentDetail, null, externalId);
+        return transaction;
+    }
+
+    public static WorkingCapitalLoanTransaction accrual(final WorkingCapitalLoan loan, final ExternalId externalId, final BigDecimal amount,
+            final LocalDate transactionDate) {
+        final WorkingCapitalLoanTransaction transaction = new WorkingCapitalLoanTransaction();
+        transaction.initialize(loan, LoanTransactionType.ACCRUAL, transactionDate, amount, null, null, externalId);
         return transaction;
     }
 

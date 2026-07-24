@@ -21,7 +21,6 @@ package org.apache.fineract.integrationtests.common.externalevents;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.collections4.CollectionUtils;
@@ -59,14 +58,24 @@ public class LoanBusinessEvent extends BusinessEvent {
         Object statusRes = externalEvent.getPayLoad().get("status");
         Map<String, Object> summary = summaryRes instanceof Map ? (Map<String, Object>) summaryRes : Map.of();
         Map<String, Object> status = statusRes instanceof Map ? (Map<String, Object>) statusRes : Map.of();
-        var principalDisbursed = summary.get("principalDisbursed");
 
-        var principalOutstanding = summary.get("principalOutstanding");
-        Double statusId = (Double) status.get("id");
-        return super.verify(externalEvent, formatter) && Objects.equals(statusId, getStatusId().doubleValue())
-                && Objects.equals(principalDisbursed, getPrincipalDisbursed())
-                && Objects.equals(principalOutstanding, getPrincipalOutstanding()) && loanTermVariationsMatch(
+        return super.verify(externalEvent, formatter) && numbersEqual(status.get("id"), getStatusId())
+                && numbersEqual(summary.get("principalDisbursed"), getPrincipalDisbursed())
+                && numbersEqual(summary.get("principalOutstanding"), getPrincipalOutstanding()) && loanTermVariationsMatch(
                         (List<Map<String, Object>>) externalEvent.getPayLoad().get("loanTermVariations"), loanTermVariationType);
+    }
+
+    private static boolean numbersEqual(Object actual, Number expected) {
+        if (actual == null && expected == null) {
+            return true;
+        }
+        if (actual == null || expected == null) {
+            return false;
+        }
+        if (!(actual instanceof Number actualNumber)) {
+            return false;
+        }
+        return Double.compare(actualNumber.doubleValue(), expected.doubleValue()) == 0;
     }
 
     private boolean loanTermVariationsMatch(final List<Map<String, Object>> loanTermVariations, final List<String> expectedTypes) {

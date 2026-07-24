@@ -27,6 +27,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.feign.FineractFeignClient;
@@ -34,6 +35,8 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
+import org.apache.fineract.client.models.PutLoansLoanIdRequest;
+import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.test.data.loanproduct.DefaultLoanProduct;
 import org.apache.fineract.test.data.loanproduct.LoanProductResolver;
 import org.apache.fineract.test.factory.LoanRequestFactory;
@@ -42,6 +45,9 @@ import org.apache.fineract.test.support.TestContextKey;
 
 @RequiredArgsConstructor
 public class LoanOverrideFieldsStepDef extends AbstractStepDef {
+
+    private static final String DATE_FORMAT = "dd MMMM yyyy";
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
     private final FineractFeignClient fineractClient;
     private final LoanRequestFactory loanRequestFactory;
@@ -73,6 +79,11 @@ public class LoanOverrideFieldsStepDef extends AbstractStepDef {
             case "graceOnPrincipalPayment" -> loanDetails.getGraceOnPrincipalPayment();
             case "graceOnInterestPayment" -> loanDetails.getGraceOnInterestPayment();
             case "graceOnArrearsAgeing" -> loanDetails.getGraceOnArrearsAgeing();
+            case "interestType" -> loanDetails.getInterestType().getId().intValue();
+            case "amortizationType" -> loanDetails.getAmortizationType().getId().intValue();
+            case "interestCalculationPeriodType" -> loanDetails.getInterestCalculationPeriodType().getId().intValue();
+            case "repaymentEvery" -> loanDetails.getRepaymentEvery();
+            case "principal" -> loanDetails.getPrincipal().intValue();
             default -> throw new IllegalArgumentException("Unknown override field: " + fieldName);
         };
     }
@@ -113,8 +124,62 @@ public class LoanOverrideFieldsStepDef extends AbstractStepDef {
             case "graceOnInterestPayment" -> request.graceOnInterestPayment(isNull ? null : Integer.valueOf(value));
             case "graceOnPrincipalPayment" -> request.graceOnPrincipalPayment(isNull ? null : Integer.valueOf(value));
             case "graceOnArrearsAgeing" -> request.graceOnArrearsAgeing(isNull ? null : Integer.valueOf(value));
+            case "interestType" -> request.interestType(isNull ? null : Integer.valueOf(value));
+            case "amortizationType" -> request.amortizationType(isNull ? null : Integer.valueOf(value));
+            case "interestCalculationPeriodType" -> request.interestCalculationPeriodType(isNull ? null : Integer.valueOf(value));
+            case "repaymentEvery" -> request.repaymentEvery(isNull ? null : Integer.valueOf(value));
             default -> throw new IllegalArgumentException("Unknown override field: " + fieldName);
         }
+    }
+
+    @When("Admin modifies the loan, changing principal to {string} and omitting the override-enabled schedule fields")
+    public void modifyLoanOmittingOverrideEnabledScheduleFields(final String newPrincipal) throws IOException {
+        modifyLoanPrincipal(newPrincipal, null);
+    }
+
+    @When("Admin modifies the loan, changing principal to {string} and setting interestType to {string}")
+    public void modifyLoanSettingInterestType(final String newPrincipal, final String interestType) throws IOException {
+        modifyLoanPrincipal(newPrincipal, Integer.valueOf(interestType));
+    }
+
+    /**
+     * Modifies the loan application, always changing the principal so that the schedule has to be recalculated.
+     * {@code interestType} is only sent when explicitly given; when it is {@code null} the parameter is left out of the
+     * request entirely, together with the other override-enabled schedule fields (amortizationType,
+     * interestCalculationPeriodType, repaymentEvery). Those fields are optional on modify, so omitting them must leave
+     * the loan's existing values untouched rather than fail.
+     */
+    private void modifyLoanPrincipal(final String newPrincipal, final Integer interestType) throws IOException {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assertNotNull(loanResponse);
+        final Long loanId = loanResponse.getLoanId();
+
+        final GetLoansLoanIdResponse loanDetails = ok(
+                () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false")));
+        assertNotNull(loanDetails);
+
+        final PutLoansLoanIdRequest modifyRequest = new PutLoansLoanIdRequest()//
+                .productId(loanDetails.getLoanProductId())//
+                .clientId(loanDetails.getClientId())//
+                .principal(Long.valueOf(newPrincipal))//
+                .loanTermFrequency(loanDetails.getTermFrequency())//
+                .loanTermFrequencyType(loanDetails.getTermPeriodFrequencyType().getId().intValue())//
+                .numberOfRepayments(loanDetails.getNumberOfRepayments())//
+                .repaymentFrequencyType(loanDetails.getRepaymentFrequencyType().getId().intValue())//
+                .interestRatePerPeriod(loanDetails.getInterestRatePerPeriod())//
+                .expectedDisbursementDate(FORMATTER.format(loanDetails.getTimeline().getExpectedDisbursementDate()))//
+                .submittedOnDate(FORMATTER.format(loanDetails.getTimeline().getSubmittedOnDate()))//
+                .dateFormat(DATE_FORMAT)//
+                .locale("en")//
+                .loanType("individual");//
+
+        if (interestType != null) {
+            modifyRequest.interestType(interestType);
+        }
+
+        final PutLoansLoanIdResponse modifyResponse = ok(
+                () -> fineractClient.loans().updateLoanApplication(loanId, modifyRequest, Map.of()));
+        testContext().set(TestContextKey.LOAN_MODIFY_RESPONSE, modifyResponse);
     }
 
 }

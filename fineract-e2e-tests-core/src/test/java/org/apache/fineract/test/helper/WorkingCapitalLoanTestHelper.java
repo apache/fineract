@@ -81,7 +81,8 @@ public class WorkingCapitalLoanTestHelper {
                 .addValue("principal", DEFAULT_PRINCIPAL)//
                 .addValue("principal_amount_proposed", DEFAULT_PRINCIPAL)//
                 .addValue("approved_principal", DEFAULT_PRINCIPAL)//
-                .addValue("total_payment_volume", DEFAULT_PRINCIPAL);
+                .addValue("total_payment_volume", DEFAULT_PRINCIPAL)//
+                .addValue("breach_start_type", "DISBURSEMENT");
         final Number key = wcLoanInsert.executeAndReturnKey(params);
         return Objects.requireNonNull(key, "Generated key must not be null").longValue();
     }

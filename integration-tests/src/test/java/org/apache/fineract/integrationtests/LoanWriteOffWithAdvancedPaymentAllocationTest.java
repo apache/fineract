@@ -18,296 +18,158 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.math.BigDecimal;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PaymentAllocationOrder;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class LoanWriteOffWithAdvancedPaymentAllocationTest {
-
-    private static LoanTransactionHelper LOAN_TRANSACTION_HELPER;
-    private static ResponseSpecification RESPONSE_SPEC;
-    private static RequestSpecification REQUEST_SPEC;
-    private static ClientHelper CLIENT_HELPER;
-    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
-
-    @BeforeAll
-    public static void setupTests() {
-        Utils.initializeRESTAssured();
-        REQUEST_SPEC = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        REQUEST_SPEC.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        RESPONSE_SPEC = new ResponseSpecBuilder().expectStatusCode(200).build();
-        LOAN_TRANSACTION_HELPER = new LoanTransactionHelper(REQUEST_SPEC, RESPONSE_SPEC);
-        CLIENT_HELPER = new ClientHelper(REQUEST_SPEC, RESPONSE_SPEC);
-    }
+public class LoanWriteOffWithAdvancedPaymentAllocationTest extends FeignLoanTestBase {
 
     @Test
     public void loanWriteOffWithAdvancedPaymentAllocationTest() {
-        // create loan product with Advanced Payment Allocation Strategy with default allocation with future installment
-        // allocation as NEXT_INSTALLMENT
-        String futureInstallmentAllocationRule = "NEXT_INSTALLMENT";
-        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation(futureInstallmentAllocationRule);
+        runAt("03 September 2022", () -> {
+            String loanExternalIdStr = UUID.randomUUID().toString();
+            Long clientId = createClient("01 September 2022");
+            Long loanProductId = createApaLoanProduct();
+            Long loanId = createAndDisburseLoan(clientId, loanProductId, loanExternalIdStr);
 
-        Integer loanProductId = createLoanProduct(defaultAllocation);
-        Assertions.assertNotNull(loanProductId);
+            runAt("05 September 2022", () -> addCharge(loanId, false, 200, "05 September 2022"));
 
-        String loanExternalIdStr = UUID.randomUUID().toString();
-        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-        final Integer loanId = createLoanAccountAndDisbursePrincipalAmount(clientId, loanProductId, loanExternalIdStr);
+            runAt("09 September 2022", () -> addRepaymentForLoan(loanId, 100.0, "9 September 2022"));
 
-        // apply charges
-        Integer feeCharge = ChargesHelper.createCharges(REQUEST_SPEC, RESPONSE_SPEC,
-                ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "200", false));
+            runAt("10 September 2022", () -> {
+                writeOffLoan(loanExternalIdStr, LoanRequestBuilders.writeOff("10 September 2022").note("test WriteOff"));
 
-        LocalDate targetDate = LocalDate.of(2022, 9, 5);
-        final String feeCharge1AddedDate = DATE_FORMATTER.format(targetDate);
-        Integer feeLoanChargeId = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId,
-                LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeCharge1AddedDate, "200"));
+                GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+                assertTrue(loanDetails.getStatus().getClosedWrittenOff());
 
-        // make Repayment
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en")
-                        .transactionAmount(100.0));
-
-        // write off loan and verify amount
-        final PostLoansLoanIdTransactionsResponse writeOffTransaction = LOAN_TRANSACTION_HELPER.writeOffLoanAccount(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
-                        .note("test WriteOff"));
-
-        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanId);
-        assertTrue(loanDetails.getStatus().getClosedWrittenOff());
-
-        // verify amounts for write-off transaction
-        verifyTransaction(LocalDate.of(2022, 9, 10), 1100.0f, 1000.0f, 0.0f, 100.0f, 0.0f, loanId, "writeOff");
-
+                var writeOffTx = loanDetails.getTransactions().stream().filter(tx -> Boolean.TRUE.equals(tx.getType().getWriteOff()))
+                        .findFirst().orElseThrow();
+                assertEquals(1100.0, Utils.getDoubleValue(writeOffTx.getAmount()));
+                assertEquals(1000.0, Utils.getDoubleValue(writeOffTx.getPrincipalPortion()));
+                assertEquals(0.0, Utils.getDoubleValue(writeOffTx.getInterestPortion()));
+                assertEquals(100.0, Utils.getDoubleValue(writeOffTx.getFeeChargesPortion()));
+                assertEquals(0.0, Utils.getDoubleValue(writeOffTx.getPenaltyChargesPortion()));
+            });
+        });
     }
 
     @Test
     public void loanUndoRepaymentAfterWriteOffShouldGiveErrorTest() {
-        // create loan product with Advanced Payment Allocation Strategy with default allocation with future installment
-        // allocation as NEXT_INSTALLMENT
-        String futureInstallmentAllocationRule = "NEXT_INSTALLMENT";
-        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation(futureInstallmentAllocationRule);
+        runAt("03 September 2022", () -> {
+            String loanExternalIdStr = UUID.randomUUID().toString();
+            Long clientId = createClient("01 September 2022");
+            Long loanProductId = createApaLoanProduct();
+            Long loanId = createAndDisburseLoan(clientId, loanProductId, loanExternalIdStr);
 
-        Integer loanProductId = createLoanProduct(defaultAllocation);
-        Assertions.assertNotNull(loanProductId);
+            AtomicReference<Long> repaymentTransactionId = new AtomicReference<>();
+            runAt("09 September 2022", () -> repaymentTransactionId.set(addRepaymentForLoan(loanId, 250.0, "9 September 2022")));
 
-        String loanExternalIdStr = UUID.randomUUID().toString();
-        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-        final Integer loanId = createLoanAccountAndDisbursePrincipalAmount(clientId, loanProductId, loanExternalIdStr);
+            runAt("10 September 2022", () -> {
+                writeOffLoan(loanExternalIdStr, LoanRequestBuilders.writeOff("10 September 2022").note("test WriteOff"));
+                assertTrue(getLoanDetails(loanId).getStatus().getClosedWrittenOff());
 
-        // make Repayment
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en")
-                        .transactionAmount(250.0));
+                CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                        () -> reverseLoanTransaction(loanExternalIdStr, repaymentTransactionId.get(),
+                                new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("9 September 2022").locale("en")
+                                        .dateFormat("dd MMMM yyyy").transactionAmount(0.0)));
 
-        // write off loan
-        final PostLoansLoanIdTransactionsResponse writeOffTransaction = LOAN_TRANSACTION_HELPER.writeOffLoanAccount(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
-                        .note("test WriteOff"));
-
-        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanId);
-        assertTrue(loanDetails.getStatus().getClosedWrittenOff());
-
-        // reverse repayment
-        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                () -> LOAN_TRANSACTION_HELPER.reverseLoanTransaction(loanExternalIdStr, repaymentTransaction.getResourceId(),
-                        new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("9 September 2022").locale("en")
-                                .dateFormat("dd MMMM yyyy").transactionAmount(0.0)));
-
-        assertEquals(403, exception.getResponse().code());
-        assertTrue(exception.getMessage().contains("error.msg.loan.written.off.update.not.allowed"));
+                assertEquals(403, exception.getStatus());
+                assertTrue(exception.getMessage().contains("error.msg.loan.written.off.update.not.allowed"));
+            });
+        });
     }
 
     @Test
     public void loanBackdatedRepaymentAfterWriteOffShouldGiveErrorTest() {
-        // create loan product with Advanced Payment Allocation Strategy with default allocation with future installment
-        // allocation as NEXT_INSTALLMENT
-        String futureInstallmentAllocationRule = "NEXT_INSTALLMENT";
-        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation(futureInstallmentAllocationRule);
+        runAt("03 September 2022", () -> {
+            String loanExternalIdStr = UUID.randomUUID().toString();
+            Long clientId = createClient("01 September 2022");
+            Long loanProductId = createApaLoanProduct();
+            Long loanId = createAndDisburseLoan(clientId, loanProductId, loanExternalIdStr);
 
-        Integer loanProductId = createLoanProduct(defaultAllocation);
-        Assertions.assertNotNull(loanProductId);
+            runAt("09 September 2022", () -> addRepaymentForLoan(loanId, 250.0, "9 September 2022"));
 
-        String loanExternalIdStr = UUID.randomUUID().toString();
-        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-        final Integer loanId = createLoanAccountAndDisbursePrincipalAmount(clientId, loanProductId, loanExternalIdStr);
+            runAt("10 September 2022", () -> {
+                writeOffLoan(loanExternalIdStr, LoanRequestBuilders.writeOff("10 September 2022").note("test WriteOff"));
+                assertTrue(getLoanDetails(loanId).getStatus().getClosedWrittenOff());
 
-        // make Repayment
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en")
-                        .transactionAmount(250.0));
+                CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                        () -> addRepayment(loanId, LoanRequestBuilders.repayLoan(50.0, "8 September 2022")));
 
-        // write off loan
-        final PostLoansLoanIdTransactionsResponse writeOffTransaction = LOAN_TRANSACTION_HELPER.writeOffLoanAccount(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
-                        .note("test WriteOff"));
-
-        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanId);
-        assertTrue(loanDetails.getStatus().getClosedWrittenOff());
-
-        // backdate repayment after write-off
-        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                () -> LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest()
-                        .dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en").transactionAmount(50.0)));
-
-        assertEquals(400, exception.getResponse().code());
-        assertTrue(exception.getMessage().contains("error.msg.loan.must.be.active.fully.paid.or.overpaid"));
+                assertEquals(400, exception.getStatus());
+                assertTrue(exception.getMessage().contains("error.msg.loan.must.be.active.fully.paid.or.overpaid"));
+            });
+        });
     }
 
     @Test
     public void loanUndoWriteOffShouldGiveErrorTest() {
-        // create loan product with Advanced Payment Allocation Strategy with default allocation with future installment
-        // allocation as NEXT_INSTALLMENT
-        String futureInstallmentAllocationRule = "NEXT_INSTALLMENT";
-        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation(futureInstallmentAllocationRule);
+        runAt("03 September 2022", () -> {
+            String loanExternalIdStr = UUID.randomUUID().toString();
+            Long clientId = createClient("01 September 2022");
+            Long loanProductId = createApaLoanProduct();
+            Long loanId = createAndDisburseLoan(clientId, loanProductId, loanExternalIdStr);
 
-        Integer loanProductId = createLoanProduct(defaultAllocation);
-        Assertions.assertNotNull(loanProductId);
+            runAt("09 September 2022", () -> addRepaymentForLoan(loanId, 250.0, "9 September 2022"));
 
-        String loanExternalIdStr = UUID.randomUUID().toString();
-        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-        final Integer loanId = createLoanAccountAndDisbursePrincipalAmount(clientId, loanProductId, loanExternalIdStr);
+            AtomicReference<PostLoansLoanIdTransactionsResponse> writeOffTransaction = new AtomicReference<>();
+            runAt("10 September 2022", () -> {
+                writeOffTransaction
+                        .set(writeOffLoan(loanExternalIdStr, LoanRequestBuilders.writeOff("10 September 2022").note("test WriteOff")));
+                assertTrue(getLoanDetails(loanId).getStatus().getClosedWrittenOff());
+            });
 
-        // make Repayment
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en")
-                        .transactionAmount(250.0));
+            runAt("10 September 2022", () -> {
+                CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                        () -> reverseLoanTransaction(loanExternalIdStr, writeOffTransaction.get().getResourceId(),
+                                new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("8 September 2022").locale("en")
+                                        .dateFormat("dd MMMM yyyy").transactionAmount(0.0)));
 
-        // write off loan
-        final PostLoansLoanIdTransactionsResponse writeOffTransaction = LOAN_TRANSACTION_HELPER.writeOffLoanAccount(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
-                        .note("test WriteOff"));
-
-        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanId);
-        assertTrue(loanDetails.getStatus().getClosedWrittenOff());
-
-        // reverse write-off
-        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                () -> LOAN_TRANSACTION_HELPER.reverseLoanTransaction(loanExternalIdStr, writeOffTransaction.getResourceId(),
-                        new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("8 September 2022").locale("en")
-                                .dateFormat("dd MMMM yyyy").transactionAmount(0.0)));
-
-        assertEquals(403, exception.getResponse().code());
-        assertTrue(exception.getMessage().contains("error.msg.loan.written.off.update.not.allowed"));
+                assertEquals(403, exception.getStatus());
+                assertTrue(exception.getMessage().contains("error.msg.loan.written.off.update.not.allowed"));
+            });
+        });
     }
 
-    private Integer createLoanProduct(AdvancedPaymentData... advancedPaymentData) {
+    private Long createApaLoanProduct() {
+        AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
         String loanProductCreateJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
-                .addAdvancedPaymentAllocation(advancedPaymentData).withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
+                .addAdvancedPaymentAllocation(defaultAllocation).withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
                 .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL).build();
-        return LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductCreateJSON);
-
+        return createLoanProductFromJson(loanProductCreateJSON);
     }
 
-    private AdvancedPaymentData createDefaultPaymentAllocation(String futureInstallmentAllocationRule) {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("DEFAULT");
-        advancedPaymentData.setFutureInstallmentAllocationRule(futureInstallmentAllocationRule);
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
-    }
-
-    private List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
-        AtomicInteger integer = new AtomicInteger(1);
-        return Arrays.stream(paymentAllocationTypes).map(pat -> {
-            PaymentAllocationOrder paymentAllocationOrder = new PaymentAllocationOrder();
-            paymentAllocationOrder.setPaymentAllocationRule(pat.name());
-            paymentAllocationOrder.setOrder(integer.getAndIncrement());
-            return paymentAllocationOrder;
-        }).toList();
-    }
-
-    private Integer createLoanAccountAndDisbursePrincipalAmount(final Integer clientID, final Integer loanProductID,
-            final String externalId) {
-
+    private Long createAndDisburseLoan(Long clientId, Long loanProductId, String externalId) {
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("30")
                 .withLoanTermFrequencyAsDays().withNumberOfRepayments("1").withRepaymentEveryAfter("30").withRepaymentFrequencyTypeAsDays()
                 .withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance().withAmortizationTypeAsEqualPrincipalPayments()
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("03 September 2022")
                 .withSubmittedOnDate("01 September 2022").withLoanType("individual").withExternalId(externalId)
-                .withRepaymentStrategy("advanced-payment-allocation-strategy").build(clientID.toString(), loanProductID.toString(), null);
+                .withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY).build(clientId.toString(), loanProductId.toString(), null);
 
-        final Integer loanId = LOAN_TRANSACTION_HELPER.getLoanId(loanApplicationJSON);
-        LOAN_TRANSACTION_HELPER.approveLoan("02 September 2022", "1000", loanId, null);
-        LOAN_TRANSACTION_HELPER.disburseLoanWithTransactionAmount("03 September 2022", loanId, "1000");
+        Long loanId = applyForLoanFromJson(loanApplicationJSON);
+        approveLoan(loanId, approveLoanRequest(1000.0, "02 September 2022"));
+        disburseLoan(loanId, BigDecimal.valueOf(1000), "03 September 2022");
         return loanId;
     }
-
-    private void verifyTransaction(final LocalDate transactionDate, final Float transactionAmount, final Float principalPortion,
-            final Float interestPortion, final Float feePortion, final Float penaltyPortion, final Integer loanID,
-            final String transactionOfType) {
-        ArrayList<HashMap> transactions = (ArrayList<HashMap>) LOAN_TRANSACTION_HELPER.getLoanTransactions(REQUEST_SPEC, RESPONSE_SPEC,
-                loanID);
-        boolean isTransactionFound = false;
-        for (int i = 0; i < transactions.size(); i++) {
-            HashMap transactionType = (HashMap) transactions.get(i).get("type");
-            boolean isTransaction = (Boolean) transactionType.get(transactionOfType);
-
-            if (isTransaction) {
-                ArrayList<Integer> transactionDateAsArray = (ArrayList<Integer>) transactions.get(i).get("date");
-                LocalDate transactionEntryDate = LocalDate.of(transactionDateAsArray.get(0), transactionDateAsArray.get(1),
-                        transactionDateAsArray.get(2));
-
-                if (transactionDate.isEqual(transactionEntryDate)) {
-                    isTransactionFound = true;
-                    assertEquals(transactionAmount, Float.valueOf(String.valueOf(transactions.get(i).get("amount"))),
-                            "Mismatch in transaction amounts");
-                    assertEquals(principalPortion, Float.valueOf(String.valueOf(transactions.get(i).get("principalPortion"))),
-                            "Mismatch in transaction amounts");
-                    assertEquals(interestPortion, Float.valueOf(String.valueOf(transactions.get(i).get("interestPortion"))),
-                            "Mismatch in transaction amounts");
-                    assertEquals(feePortion, Float.valueOf(String.valueOf(transactions.get(i).get("feeChargesPortion"))),
-                            "Mismatch in transaction amounts");
-                    assertEquals(penaltyPortion, Float.valueOf(String.valueOf(transactions.get(i).get("penaltyChargesPortion"))),
-                            "Mismatch in transaction amounts");
-                    break;
-                }
-            }
-        }
-        assertTrue(isTransactionFound, "No Transaction entries are posted");
-    }
-
 }

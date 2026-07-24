@@ -61,11 +61,11 @@ public class FeignLoanAdjustmentOriginatorEnricherTest extends FeignLoanTestBase
             final String originatorExternalId = FeignLoanOriginatorHelper.generateUniqueExternalId();
             final Long originatorId = originatorHelper.createOriginator(originatorExternalId, "Test Originator", "ACTIVE");
             final Long clientId = createClient();
-            final Long productId = loanHelper.createSimpleLoanProduct();
+            final Long productId = loanHelper.createSimpleLoanProduct().getResourceId();
             final String today = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
 
             // Create loan, attach originator, approve, disburse
-            final Long loanId = loanHelper.createSubmittedLoan(clientId, productId, today, 10000.0, 12);
+            final Long loanId = loanHelper.createSubmittedLoan(clientId, productId, today, 10000.0, 12).getLoanId();
             originatorHelper.attachOriginatorToLoan(loanId, originatorId);
             approveLoan(loanId, LoanRequestBuilders.approveLoan(10000.0, today));
             disburseLoan(loanId, LoanRequestBuilders.disburseLoan(10000.0, today));
@@ -90,7 +90,7 @@ public class FeignLoanAdjustmentOriginatorEnricherTest extends FeignLoanTestBase
         externalEventHelper.enableBusinessEvent(ADJUST_EVENT);
         try {
             final Long clientId = createClient();
-            final Long productId = loanHelper.createSimpleLoanProduct();
+            final Long productId = loanHelper.createSimpleLoanProduct().getResourceId();
             final String today = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
 
             final Long loanId = createApproveAndDisburseLoan(clientId, productId, today, 10000.0, 12);
@@ -120,7 +120,7 @@ public class FeignLoanAdjustmentOriginatorEnricherTest extends FeignLoanTestBase
             final String today = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
 
             // Create loan with accrual accounting, attach originator, approve, disburse
-            final Long loanId = loanHelper.createSubmittedLoan(clientId, productId, today, 10000.0, 4);
+            final Long loanId = loanHelper.createSubmittedLoan(clientId, productId, today, 10000.0, 4).getLoanId();
             originatorHelper.attachOriginatorToLoan(loanId, originatorId);
             approveLoan(loanId, LoanRequestBuilders.approveLoan(10000.0, today));
             disburseLoan(loanId, LoanRequestBuilders.disburseLoan(10000.0, today));
@@ -155,7 +155,7 @@ public class FeignLoanAdjustmentOriginatorEnricherTest extends FeignLoanTestBase
             final String today = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
 
             // Create loan with accrual accounting, attach originator, approve, disburse
-            final Long loanId = loanHelper.createSubmittedLoan(clientId, productId, today, 10000.0, 4);
+            final Long loanId = loanHelper.createSubmittedLoan(clientId, productId, today, 10000.0, 4).getLoanId();
             originatorHelper.attachOriginatorToLoan(loanId, originatorId);
             approveLoan(loanId, LoanRequestBuilders.approveLoan(10000.0, today));
             disburseLoan(loanId, LoanRequestBuilders.disburseLoan(10000.0, today));
@@ -191,6 +191,6 @@ public class FeignLoanAdjustmentOriginatorEnricherTest extends FeignLoanTestBase
     }
 
     private Long createFlatFeeCharge(double amount, String currencyCode) {
-        return chargesHelper.createLoanSpecifiedDueDateCharge(amount, currencyCode);
+        return chargesHelper.createLoanSpecifiedDueDateCharge(amount, currencyCode).getResourceId();
     }
 }

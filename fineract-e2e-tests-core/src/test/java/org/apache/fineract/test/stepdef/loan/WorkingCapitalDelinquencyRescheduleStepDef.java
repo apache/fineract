@@ -126,6 +126,34 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
                 frequencyType, minimumPayment, minimumPaymentType);
     }
 
+    @When("Admin creates a Working Capital delinquency reset")
+    public void createResetAction() {
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = new PostWorkingCapitalLoansDelinquencyActionRequest();
+        request.setAction("reset");
+        request.setLocale("en");
+
+        executeRescheduleAction(request);
+    }
+
+    @When("Admin creates Working Capital delinquency reset undo")
+    public void createUndoResetAction() {
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = new PostWorkingCapitalLoansDelinquencyActionRequest();
+        request.setAction("undo_reset");
+        request.setLocale("en");
+
+        executeRescheduleAction(request);
+    }
+
+    @When("Admin creates WC delinquency reset action with start new period")
+    public void createResetActionWithStartNewPeriod() {
+        final PostWorkingCapitalLoansDelinquencyActionRequest request = new PostWorkingCapitalLoansDelinquencyActionRequest();
+        request.setAction("reset");
+        request.setLocale("en");
+        request.setStartNewPeriod(true);
+
+        executeRescheduleAction(request);
+    }
+
     @When("Admin creates WC delinquency reschedule action with the following parameters:")
     public void createRescheduleAction(final DataTable table) {
         final Map<String, String> params = table.asMaps().get(0);
@@ -275,7 +303,7 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
 
     private void executeRescheduleAction(final PostWorkingCapitalLoansDelinquencyActionRequest request) {
         final Long loanId = getLoanId();
-        log.info("Creating RESCHEDULE action for WC loan {}: {}", loanId, request);
+        log.debug("Creating RESCHEDULE action for WC loan {}: {}", loanId, request);
 
         final PostWorkingCapitalLoansDelinquencyActionResponse result = ok(
                 () -> fineractFeignClient.workingCapitalLoanDelinquencyActions().createDelinquencyAction(loanId, request));
@@ -318,9 +346,15 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
             case "periodNumber" -> assertThat(actual.getPeriodNumber()).as(label).isEqualTo(Integer.parseInt(expected));
             case "fromDate" -> assertThat(actual.getFromDate()).as(label).isEqualTo(LocalDate.parse(expected, DATE_FORMAT));
             case "toDate" -> assertThat(actual.getToDate()).as(label).isEqualTo(LocalDate.parse(expected, DATE_FORMAT));
-            case "expectedAmount" -> assertThat(actual.getExpectedAmount()).as(label).isEqualByComparingTo(new BigDecimal(expected));
-            case "paidAmount" -> assertThat(actual.getPaidAmount()).as(label).isEqualByComparingTo(new BigDecimal(expected));
-            case "outstandingAmount" -> assertThat(actual.getOutstandingAmount()).as(label).isEqualByComparingTo(new BigDecimal(expected));
+            case "expectedAmount" -> verifyOptionalField(expected,
+                    v -> assertThat(actual.getExpectedAmount()).as(label).isEqualByComparingTo(new BigDecimal(expected)),
+                    () -> assertThat(actual.getExpectedAmount()).as(label).isNull());
+            case "paidAmount" -> verifyOptionalField(expected,
+                    v -> assertThat(actual.getPaidAmount()).as(label).isEqualByComparingTo(new BigDecimal(expected)),
+                    () -> assertThat(actual.getPaidAmount()).as(label).isNull());
+            case "outstandingAmount" -> verifyOptionalField(expected,
+                    v -> assertThat(actual.getOutstandingAmount()).as(label).isEqualByComparingTo(new BigDecimal(expected)),
+                    () -> assertThat(actual.getOutstandingAmount()).as(label).isNull());
             case "minPaymentCriteriaMet" -> verifyOptionalField(expected,
                     v -> assertThat(actual.getMinPaymentCriteriaMet()).as(label).isEqualTo(Boolean.parseBoolean(v)),
                     () -> assertThat(actual.getMinPaymentCriteriaMet()).as(label).isNull());
