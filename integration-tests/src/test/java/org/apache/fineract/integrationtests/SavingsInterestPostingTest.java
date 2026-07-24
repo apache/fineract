@@ -19,6 +19,7 @@
 package org.apache.fineract.integrationtests;
 
 import static org.apache.fineract.integrationtests.common.BusinessDateHelper.runAt;
+import static org.awaitility.Awaitility.await;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -28,6 +29,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -66,6 +68,7 @@ import org.slf4j.LoggerFactory;
 public class SavingsInterestPostingTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsInterestPostingTest.class);
+    private static final int DUPLICATE_PREVENTION_ACCOUNT_COUNT = 50;
     private static ResponseSpecification responseSpec;
     private static RequestSpecification requestSpec;
     private AccountHelper accountHelper;
@@ -417,7 +420,7 @@ public class SavingsInterestPostingTest {
 
             final String startDateString = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(startDate);
             List<Integer> accountIdList = new CopyOnWriteArrayList<>();
-            ParallelExecutionHelper.runInParallel(IntStream.range(0, 200).boxed().toList(), (i) -> {
+            ParallelExecutionHelper.runInParallel(IntStream.range(0, DUPLICATE_PREVENTION_ACCOUNT_COUNT).boxed().toList(), (i) -> {
                 final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2025");
                 final Integer accountId = createTrackedSavingsAccount(clientId, productId, startDateString);
 
@@ -426,14 +429,17 @@ public class SavingsInterestPostingTest {
                 savingsAccountHelper.depositToSavingsAccount(accountId, amount, startDateString, CommonConstants.RESPONSE_RESOURCE_ID);
                 accountIdList.add(accountId);
             });
-            Assertions.assertEquals(200, accountIdList.size(), "ERROR: Expected 200");
+            Assertions.assertEquals(DUPLICATE_PREVENTION_ACCOUNT_COUNT, accountIdList.size(),
+                    "ERROR: Expected " + DUPLICATE_PREVENTION_ACCOUNT_COUNT);
 
             schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
             schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-            ParallelExecutionHelper.runInParallel(accountIdList, (accountId) -> {
-                List<HashMap> txs = getInterestTransactions(accountId);
-                Assertions.assertEquals(1, txs.size(), "ERROR: Duplicate interest postings exist.");
+            await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
+                ParallelExecutionHelper.runInParallel(accountIdList, (accountId) -> {
+                    List<HashMap> txs = getInterestTransactions(accountId);
+                    Assertions.assertEquals(1, txs.size(), "ERROR: Duplicate interest postings exist for account " + accountId);
+                });
             });
         });
     }

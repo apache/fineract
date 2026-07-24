@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.common;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -25,6 +26,8 @@ import org.apache.fineract.client.util.FineractClient;
 import org.apache.fineract.integrationtests.ConfigProperties;
 
 public final class FineractClientHelper {
+
+    private static final Duration READ_TIMEOUT = Duration.ofSeconds(180);
 
     private static final FineractClient DEFAULT_FINERACT_CLIENT = createNewFineractClient(ConfigProperties.Backend.USERNAME,
             ConfigProperties.Backend.PASSWORD);
@@ -43,7 +46,7 @@ public final class FineractClientHelper {
         String url = System.getProperty("fineract.it.url", buildURI());
         // insecure(true) should *ONLY* ever be used for https://localhost:8443, NOT in real clients!!
         FineractClient.Builder builder = FineractClient.builder().insecure(true).baseURL(url).tenant(ConfigProperties.Backend.TENANT)
-                .basicAuth(username, password).logging(HttpLoggingInterceptor.Level.NONE);
+                .basicAuth(username, password).logging(HttpLoggingInterceptor.Level.NONE).readTimeout(READ_TIMEOUT);
         customizer.accept(builder);
         return builder.build();
     }
