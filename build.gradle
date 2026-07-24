@@ -20,8 +20,6 @@
 buildscript {
     ext {
         jacocoVersion = '0.8.14'
-        retrofitVersion = '2.9.0'
-        okhttpVersion = '4.9.3'
         fineractCustomProjects = []
         fineractJavaProjects = subprojects.findAll{
             [
@@ -840,10 +838,10 @@ configure(project.fineractCustomProjects) {
                 'org.awaitility:awaitility',
                 'io.github.classgraph:classgraph',
                 'io.cucumber:cucumber-core',
-                'io.cucumber:cucumber-java:7.34.3',
-                'io.cucumber:cucumber-java8:7.34.3',
-                'io.cucumber:cucumber-junit-platform-engine:7.34.3',
-                'io.cucumber:cucumber-spring:7.34.3',
+                'io.cucumber:cucumber-java',
+                'io.cucumber:cucumber-java8',
+                'io.cucumber:cucumber-junit-platform-engine',
+                'io.cucumber:cucumber-spring',
                 )
 
         testCompileOnly('org.projectlombok:lombok')

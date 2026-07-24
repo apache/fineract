@@ -56,7 +56,7 @@ dependencies {
             'org.mapstruct:mapstruct',
 
             'io.github.resilience4j:resilience4j-spring-boot3',
-            'org.reflections:reflections:0.10.2',
+            'org.reflections:reflections',
             )
     compileOnly 'com.github.spotbugs:spotbugs-annotations'
     testCompileOnly 'com.github.spotbugs:spotbugs-annotations'
