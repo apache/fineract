@@ -24,6 +24,7 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import org.apache.fineract.infrastructure.core.data.ValidationConstants;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,7 +51,6 @@ public final class ClientDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
-    private static final String MOBILE_NUMBER_REGEX = "^\\+?[0-9]{7,15}$";
 
     @Autowired
     public ClientDataValidator(final FromJsonHelper fromApiJsonHelper,
@@ -165,7 +165,7 @@ public final class ClientDataValidator {
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.mobileNoParamName, element)) {
             final String mobileNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.mobileNoParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.mobileNoParamName).value(mobileNo).ignoreIfNull()
-                    .matchesRegularExpression(MOBILE_NUMBER_REGEX).notExceedingLengthOf(50);
+                    .matchesRegularExpression(ValidationConstants.MOBILE_NUMBER_REGEX).notExceedingLengthOf(50);
         }
 
         final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(ClientApiConstants.activeParamName, element);
@@ -451,7 +451,7 @@ public final class ClientDataValidator {
             atLeastOneParameterPassedForUpdate = true;
             final String mobileNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.mobileNoParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.mobileNoParamName).value(mobileNo).ignoreIfNull()
-                    .matchesRegularExpression(MOBILE_NUMBER_REGEX).notExceedingLengthOf(50);
+                    .matchesRegularExpression(ValidationConstants.MOBILE_NUMBER_REGEX).notExceedingLengthOf(50);
         }
 
         final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(ClientApiConstants.activeParamName, element);
