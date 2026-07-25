@@ -81,6 +81,7 @@ import org.apache.fineract.client.feign.services.InterOperationApi;
 import org.apache.fineract.client.feign.services.InterestRateChartApi;
 import org.apache.fineract.client.feign.services.InterestRateSlabAKAInterestBandsApi;
 import org.apache.fineract.client.feign.services.InternalCobApi;
+import org.apache.fineract.client.feign.services.InternalExternalEventsApi;
 import org.apache.fineract.client.feign.services.InternalWorkingCapitalLoansApi;
 import org.apache.fineract.client.feign.services.JournalEntriesApi;
 import org.apache.fineract.client.feign.services.LikelihoodApi;
@@ -463,6 +464,10 @@ public final class FineractFeignClient {
 
     public InternalCobApi internalCob() {
         return create(InternalCobApi.class);
+    }
+
+    public InternalExternalEventsApi internalExternalEvents() {
+        return create(InternalExternalEventsApi.class);
     }
 
     public JournalEntriesApi journalEntries() {
