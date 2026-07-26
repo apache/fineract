@@ -158,7 +158,7 @@ public class ChartOfAccountsWorkbook extends AbstractWorkbookPopulator {
         for (Integer i = 0; i < accountTypesNoDuplicatesList.size(); i++) {
             Name tags = chartOfAccountsWorkbook.createName();
             Integer[] tagValueBeginEndIndexes = accountTypeToBeginEndIndexesofAccountNames.get(i);
-            if (accountTypeToBeginEndIndexesofAccountNames != null) {
+            if (tagValueBeginEndIndexes != null) {
                 setSanitized(tags, "Tags_" + accountTypesNoDuplicatesList.get(i));
                 tags.setRefersToFormula(TemplatePopulateImportConstants.CHART_OF_ACCOUNTS_SHEET_NAME + "!$V$" + tagValueBeginEndIndexes[0]
                         + ":$V$" + tagValueBeginEndIndexes[1]);
