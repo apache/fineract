@@ -368,3 +368,31 @@ git log --first-parent develop
 git log --no-merges
 git log --max-parents=1
 ```
+
+## Security reports
+
+We rely on the talent and generosity of security researchers to help us find and fix potential vulnerabilities.
+Here are our guidelines for submitting security reports.
+
+Security reports must:
+
+- Be private. Reporters must follow responsible disclosure.
+- Refer to a release version or a commit on the `develop` (main integration) branch.
+- Describe and demonstrate a vulnerability via reproducible proof-of-concept.
+- Include repro steps performed directly on a Fineract backend (API server) sandbox you control, not `demo.mifos.org` nor `sandbox.mifos.community` nor any other third-party demo/deployment.
+
+The most useful and triage-able reports will:
+
+- Use open data formats such as Markdown text, `curl` or [HTTPie](https://github.com/httpie/cli) commands, Bash script. Consider including a compressed [HAR file](https://en.wikipedia.org/wiki/HAR_%28file_format%29) as well.
+- Include repro environment description (this is your "sandbox")
+    - Host OS or container details
+    - RDBMS vendor and version
+    - Java vendor and version
+    - Any and all non-default configuration, local modifications, Java properties, env vars, etc.
+    - Run command (`./gradlew devRun`, `java -jar ...`, WAR in Tomcat version X.Y.Z, etc.)
+- Include example data (API calls or a loadable database dump).
+- Repro without internal test APIs enabled. Use a production-like profile, not `SPRING_PROFILES_ACTIVE=test`, to avoid dev-only endpoints and warnings. You should not see `DO NOT USE THIS IN PRODUCTION!` in your server log.
+
+Review the [ASF guidance for creating security reports](https://www.apache.org/security/).
+
+[Here's the process](https://www.apache.org/security/committers.html) we'll follow while handling your report.
