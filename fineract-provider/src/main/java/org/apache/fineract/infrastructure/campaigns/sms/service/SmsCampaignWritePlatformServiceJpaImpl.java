@@ -56,6 +56,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
@@ -526,7 +527,8 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 campaignMessage = new CampaignPreviewData(textMessageTemplate, 0);
             }
         } catch (final IOException e) {
-            // TODO throw something here
+            throw new PlatformDataIntegrityException("error.msg.sms.campaign.preview.parsing.error",
+                    "Error occurred while parsing campaign params for SMS campaign preview message", e.getMessage(), e);
         }
         return campaignMessage;
     }
