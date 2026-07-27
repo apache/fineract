@@ -25,6 +25,5 @@ public class DuplicateGuarantorException extends AbstractPlatformDomainRuleExcep
     public DuplicateGuarantorException(final String action, final String postFix, final String defaultUserMessage,
             final Object... defaultUserMessageArgs) {
         super("error.msg." + action + "." + postFix, defaultUserMessage, defaultUserMessageArgs);
-        // TODO Auto-generated constructor stub
     }
 }

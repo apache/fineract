@@ -37,9 +37,7 @@ public class DepositAccountInterestIncentive extends AbstractPersistableCustom<L
     @Embedded
     private InterestIncentivesFields interestIncentivesFields;
 
-    protected DepositAccountInterestIncentive() {
-        // TODO Auto-generated constructor stub
-    }
+    protected DepositAccountInterestIncentive() {}
 
     public DepositAccountInterestIncentive(final DepositAccountInterestRateChartSlabs depositAccountInterestRateChartSlabs,
             final InterestIncentivesFields interestIncentivesFields) {
