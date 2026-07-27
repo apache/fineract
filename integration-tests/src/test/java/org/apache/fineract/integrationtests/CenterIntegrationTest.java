@@ -19,271 +19,249 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
-import org.apache.fineract.integrationtests.common.CenterDomain;
-import org.apache.fineract.integrationtests.common.CenterHelper;
-import org.apache.fineract.integrationtests.common.GroupHelper;
-import org.apache.fineract.integrationtests.common.OfficeHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.junit.jupiter.api.Assertions;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.GetCentersCenterIdResponse;
+import org.apache.fineract.client.models.GetCentersGroupMembers;
+import org.apache.fineract.client.models.GetCentersPageItems;
+import org.apache.fineract.client.models.PutCentersCenterIdRequest;
+import org.apache.fineract.client.models.PutCentersChanges;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCenterHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/** Center integration tests. */
 public class CenterIntegrationTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CenterIntegrationTest.class);
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
+    private static final LocalDate OFFICE_OPENING_DATE = LocalDate.of(2007, 7, 1);
+    private static final String GROUP_ACTIVATION_DATE = "04 March 2011";
+    private static final int NOT_FOUND = 404;
+
+    private FeignCenterHelper centerHelper;
+    private FeignStaffHelper staffHelper;
+    private FeignGroupHelper groupHelper;
+    private FeignOfficeHelper officeHelper;
 
     @BeforeEach
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        FineractFeignClient fineractClient = FineractFeignClientHelper.getFineractFeignClient();
+        this.centerHelper = new FeignCenterHelper(fineractClient);
+        this.staffHelper = new FeignStaffHelper(fineractClient);
+        this.groupHelper = new FeignGroupHelper(fineractClient);
+        this.officeHelper = new FeignOfficeHelper(fineractClient);
     }
 
     @Test
     public void testBasicCenterCreation() {
-        int officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
+        Long officeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getResourceId();
 
-        String name = "TestBasicCreation" + new Timestamp(new java.util.Date().getTime());
-        int resourceId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);
-        CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
+        String name = "TestBasicCreation" + new Timestamp(new Date().getTime());
+        Long resourceId = centerHelper.createCenter(name, officeId).getResourceId();
+        GetCentersCenterIdResponse center = centerHelper.retrieveCenter(resourceId);
 
-        Assertions.assertNotNull(center);
-        Assertions.assertTrue(center.getName().equals(name));
-        Assertions.assertTrue(center.getOfficeId() == officeId);
-        Assertions.assertTrue(center.isActive() == false);
+        assertNotNull(center);
+        assertEquals(name, center.getName());
+        assertEquals(officeId, center.getOfficeId());
+        assertFalse(center.getActive());
 
         // Test retrieval by listing all centers
-        int id = CenterHelper.listCenters(requestSpec, responseSpec).get(0).getId();
-        Assertions.assertTrue(id > 0);
+        Long id = centerHelper.listCenters().get(0).getId();
+        assertTrue(id > 0);
 
-        CenterDomain retrievedCenter = CenterHelper.retrieveByID(id, requestSpec, responseSpec);
-        Assertions.assertNotNull(retrievedCenter);
-        Assertions.assertNotNull(retrievedCenter.getName());
-        Assertions.assertNotNull(retrievedCenter.getHierarchy());
-        Assertions.assertNotNull(retrievedCenter.getOfficeName());
-
+        GetCentersCenterIdResponse retrievedCenter = centerHelper.retrieveCenter(id);
+        assertNotNull(retrievedCenter);
+        assertNotNull(retrievedCenter.getName());
+        assertNotNull(retrievedCenter.getHierarchy());
+        assertNotNull(retrievedCenter.getOfficeName());
     }
 
     @Test
     public void testFullCenterCreation() {
-
-        int officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
-        String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
+        Long officeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getResourceId();
+        String name = "TestFullCreation" + new Timestamp(new Date().getTime());
         String externalId = UUID.randomUUID().toString();
-        int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
-        int[] groupMembers = generateGroupMembers(3, officeId);
-        int resourceId = CenterHelper.createCenter(name, officeId, externalId, staffId, groupMembers, requestSpec, responseSpec);
-        CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
+        Long staffId = staffHelper.createStaff().getResourceId();
+        List<Long> groupMembers = generateGroupMembers(3, officeId);
+        Long resourceId = centerHelper.createCenter(name, officeId, externalId, staffId, groupMembers, null).getResourceId();
+        GetCentersCenterIdResponse center = centerHelper.retrieveCenter(resourceId);
 
-        Assertions.assertNotNull(center);
-        Assertions.assertTrue(center.getName().equals(name));
-        Assertions.assertTrue(center.getOfficeId() == officeId);
-        Assertions.assertTrue(center.getExternalId().equals(externalId));
-        Assertions.assertTrue(center.getStaffId() == staffId);
-        Assertions.assertTrue(center.isActive() == false);
-        Assertions.assertArrayEquals(center.getGroupMembers(), groupMembers);
+        assertNotNull(center);
+        assertEquals(name, center.getName());
+        assertEquals(officeId, center.getOfficeId());
+        assertEquals(externalId, center.getExternalId());
+        assertEquals(staffId, center.getStaffId());
+        assertFalse(center.getActive());
+        assertEquals(groupMembers, groupMemberIds(center));
     }
 
     @Test
     public void testListCenters() {
-        ArrayList<CenterDomain> paginatedList = CenterHelper.paginatedListCenters(requestSpec, responseSpec);
-        ArrayList<CenterDomain> list = CenterHelper.listCenters(requestSpec, responseSpec);
+        List<GetCentersPageItems> paginatedList = centerHelper.paginatedListCenters();
+        List<GetCentersPageItems> list = centerHelper.listCenters();
 
-        Assertions.assertNotNull(paginatedList);
-        Assertions.assertNotNull(list);
-        Assertions.assertTrue(
-                Arrays.equals(paginatedList.toArray(new CenterDomain[paginatedList.size()]), list.toArray(new CenterDomain[list.size()])));
+        assertNotNull(paginatedList);
+        assertNotNull(list);
+        // Neither listing declares an order, so compare them by id.
+        assertEquals(byId(paginatedList), byId(list));
     }
 
     @Test
     public void testVoidCenterRetrieval() {
-        ArrayList<CenterDomain> arr = CenterHelper.listCentersOrdered(requestSpec, responseSpec);
-        int id = arr.get(arr.size() - 1).getId() + 1;
-        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
-        CenterDomain center = CenterHelper.retrieveByID(id, requestSpec, responseSpec);
-        Assertions.assertNotNull(center);
+        List<GetCentersPageItems> arr = centerHelper.listCentersOrdered();
+        long nonExistentId = arr.get(arr.size() - 1).getId() + 1;
+
+        assertEquals(NOT_FOUND, centerHelper.retrieveCenterExpectingError(nonExistentId).getStatus(),
+                "Expected 404 for non-existent center");
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testCenterUpdate() {
-        int officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
-        String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
+        Long officeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getResourceId();
+        String name = "TestFullCreation" + new Timestamp(new Date().getTime());
         String externalId = UUID.randomUUID().toString();
-        int staffId = StaffHelper.createStaff(requestSpec, responseSpec);
-        int[] groupMembers = generateGroupMembers(3, officeId);
-        int resourceId = CenterHelper.createCenter(name, officeId, externalId, staffId, groupMembers, requestSpec, responseSpec);
+        Long staffId = staffHelper.createStaff().getResourceId();
+        List<Long> groupMembers = generateGroupMembers(3, officeId);
+        Long resourceId = centerHelper.createCenter(name, officeId, externalId, staffId, groupMembers, null).getResourceId();
 
-        String newName = "TestCenterUpdateNew" + new Timestamp(new java.util.Date().getTime());
+        String newName = "TestCenterUpdateNew" + new Timestamp(new Date().getTime());
         String newExternalId = UUID.randomUUID().toString();
-        int newStaffId = StaffHelper.createStaff(requestSpec, responseSpec);
-        int[] associateGroupMembers = generateGroupMembers(2, officeId);
+        Long newStaffId = staffHelper.createStaff().getResourceId();
+        List<Long> associateGroupMembers = generateGroupMembers(2, officeId);
 
-        int[] associateResponse = CenterHelper.associateGroups(resourceId, associateGroupMembers, requestSpec, responseSpec);
-        Arrays.sort(associateResponse);
-        Arrays.sort(associateGroupMembers);
-        Assertions.assertArrayEquals(associateResponse, associateGroupMembers);
+        List<Long> associateResponse = centerHelper.associateGroups(resourceId, associateGroupMembers);
+        assertEquals(associateGroupMembers.stream().sorted().toList(), associateResponse.stream().sorted().toList());
 
-        int[] newGroupMembers = new int[5];
-        for (int i = 0; i < 5; i++) {
-            if (i < 3) {
-                newGroupMembers[i] = groupMembers[i];
-            } else {
-                newGroupMembers[i] = associateGroupMembers[i % 3];
-            }
-        }
+        List<Long> newGroupMembers = new ArrayList<>(groupMembers);
+        newGroupMembers.addAll(associateGroupMembers);
 
-        HashMap request = new HashMap();
-        request.put("name", newName);
-        request.put("externalId", newExternalId);
-        request.put("staffId", newStaffId);
-        HashMap response = CenterHelper.updateCenter(resourceId, request, requestSpec, responseSpec);
-        Assertions.assertNotNull(response);
-        Assertions.assertEquals(newName, response.get("name"));
-        Assertions.assertEquals(newExternalId, response.get("externalId"));
-        Assertions.assertEquals(Integer.valueOf(newStaffId), Integer.valueOf(response.get("staffId").toString()));
+        PutCentersCenterIdRequest request = new PutCentersCenterIdRequest().name(newName).externalId(newExternalId).staffId(newStaffId);
+        PutCentersChanges changes = centerHelper.updateCenter(resourceId, request);
+        assertNotNull(changes);
+        assertEquals(newName, changes.getName());
+        assertEquals(newExternalId, changes.getExternalId());
+        assertEquals(newStaffId, changes.getStaffId());
 
-        CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
-        Assertions.assertNotNull(center);
-        Assertions.assertEquals(newName, center.getName());
-        Assertions.assertEquals(newExternalId, center.getExternalId());
-        Assertions.assertEquals((Integer) newStaffId, center.getStaffId());
-        Assertions.assertArrayEquals(newGroupMembers, center.getGroupMembers());
+        GetCentersCenterIdResponse center = centerHelper.retrieveCenter(resourceId);
+        assertNotNull(center);
+        assertEquals(newName, center.getName());
+        assertEquals(newExternalId, center.getExternalId());
+        assertEquals(newStaffId, center.getStaffId());
+        assertEquals(newGroupMembers, groupMemberIds(center));
     }
 
     @Test
     public void testCenterDeletion() {
-        int officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
-        String name = "TestBasicCreation" + new Timestamp(new java.util.Date().getTime());
-        int resourceId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);
+        Long officeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getResourceId();
+        String name = "TestBasicCreation" + new Timestamp(new Date().getTime());
+        Long resourceId = centerHelper.createCenter(name, officeId).getResourceId();
 
-        CenterHelper.deleteCenter(resourceId, requestSpec, responseSpec);
-        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
-        CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
-        Assertions.assertNotNull(center);
-    }
+        centerHelper.deleteCenter(resourceId);
 
-    private int[] generateGroupMembers(int size, int officeId) {
-        int[] groupMembers = new int[size];
-        for (int i = 0; i < groupMembers.length; i++) {
-            final HashMap<String, String> map = new HashMap<>();
-            map.put("officeId", "" + officeId);
-            map.put("name", Utils.uniqueRandomStringGenerator("Group_Name_", 5));
-            map.put("externalId", UUID.randomUUID().toString());
-            map.put("dateFormat", "dd MMMM yyyy");
-            map.put("locale", "en");
-            map.put("active", "true");
-            map.put("activationDate", "04 March 2011");
-
-            groupMembers[i] = Utils.performServerPost(requestSpec, responseSpec,
-                    "/fineract-provider/api/v1/groups?" + Utils.TENANT_IDENTIFIER, new Gson().toJson(map), "groupId");
-        }
-        return groupMembers;
+        // Verify the delete took effect: a subsequent retrieval must 404.
+        assertEquals(NOT_FOUND, centerHelper.retrieveCenterExpectingError(resourceId).getStatus(), "Expected 404 after deletion");
     }
 
     @Test
     public void testStaffAssignmentDuringCenterCreation() {
+        Long staffId = staffHelper.createStaff().getResourceId();
+        assertNotNull(staffId);
 
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        LOG.info("--------------creating first staff with id------------- {}", staffId);
-        Assertions.assertNotNull(staffId);
-
-        final int centerWithStaffId = CenterHelper.createCenterWithStaffId(this.requestSpec, this.responseSpec, staffId);
-        final CenterDomain center = CenterHelper.retrieveByID(centerWithStaffId, requestSpec, responseSpec);
-        Assertions.assertNotNull(center);
-        Assertions.assertTrue(center.getId() == centerWithStaffId);
-        Assertions.assertTrue(center.getStaffId().intValue() == staffId);
-        Assertions.assertTrue(center.isActive() == true);
+        Long centerId = centerHelper.createActiveCenterWithStaff(staffId).getResourceId();
+        GetCentersCenterIdResponse center = centerHelper.retrieveCenter(centerId);
+        assertNotNull(center);
+        assertEquals(centerId, center.getId());
+        assertEquals(staffId, center.getStaffId());
+        assertTrue(center.getActive());
     }
 
     @Test
     public void testAssignStaffToCenter() {
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        LOG.info("--------------creating first staff with id------------- {}", staffId);
-        Assertions.assertNotNull(staffId);
+        Long staffId = staffHelper.createStaff().getResourceId();
+        assertNotNull(staffId);
 
-        final Integer groupID = CenterHelper.createCenter(this.requestSpec, this.responseSpec);
-        CenterHelper.verifyCenterCreatedOnServer(this.requestSpec, this.responseSpec, groupID);
+        Long centerId = centerHelper.createActiveCenter().getResourceId();
+        assertEquals(centerId, centerHelper.retrieveCenter(centerId).getId());
 
-        final HashMap assignStaffToCenterResponseMap = (HashMap) CenterHelper.assignStaff(this.requestSpec, this.responseSpec,
-                groupID.toString(), staffId.longValue());
-        assertEquals(assignStaffToCenterResponseMap.get("staffId"), staffId, "Verify assigned staff id is the same as id sent");
+        assertEquals(staffId, centerHelper.assignStaff(centerId, staffId).getStaffId(), "Verify assigned staff id is the same as id sent");
 
-        final CenterDomain center = CenterHelper.retrieveByID(groupID, requestSpec, responseSpec);
-        Assertions.assertNotNull(center);
-        Assertions.assertTrue(center.getId().intValue() == groupID);
-        Assertions.assertTrue(center.getStaffId().intValue() == staffId);
-
+        GetCentersCenterIdResponse center = centerHelper.retrieveCenter(centerId);
+        assertNotNull(center);
+        assertEquals(centerId, center.getId());
+        assertEquals(staffId, center.getStaffId());
     }
 
     @Test
     public void testUnassignStaffToCenter() {
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        LOG.info("--------------creating first staff with id------------- {}", staffId);
-        Assertions.assertNotNull(staffId);
+        Long staffId = staffHelper.createStaff().getResourceId();
+        assertNotNull(staffId);
 
-        final Integer groupID = CenterHelper.createCenter(this.requestSpec, this.responseSpec);
-        CenterHelper.verifyCenterCreatedOnServer(this.requestSpec, this.responseSpec, groupID);
+        Long centerId = centerHelper.createActiveCenter().getResourceId();
+        assertEquals(centerId, centerHelper.retrieveCenter(centerId).getId());
 
-        final HashMap assignStaffToCenterResponseMap = (HashMap) CenterHelper.assignStaff(this.requestSpec, this.responseSpec,
-                groupID.toString(), staffId.longValue());
-        assertEquals(assignStaffToCenterResponseMap.get("staffId"), staffId, "Verify assigned staff id is the same as id sent");
-        final CenterDomain centerWithStaffAssigned = CenterHelper.retrieveByID(groupID, requestSpec, responseSpec);
-        Assertions.assertNotNull(centerWithStaffAssigned);
-        Assertions.assertTrue(centerWithStaffAssigned.getId().intValue() == groupID);
-        Assertions.assertTrue(centerWithStaffAssigned.getStaffId().intValue() == staffId);
+        assertEquals(staffId, centerHelper.assignStaff(centerId, staffId).getStaffId(), "Verify assigned staff id is the same as id sent");
+        GetCentersCenterIdResponse centerWithStaffAssigned = centerHelper.retrieveCenter(centerId);
+        assertNotNull(centerWithStaffAssigned);
+        assertEquals(centerId, centerWithStaffAssigned.getId());
+        assertEquals(staffId, centerWithStaffAssigned.getStaffId());
 
-        final HashMap unassignStaffToCenterResponseMap = (HashMap) CenterHelper.unassignStaff(this.requestSpec, this.responseSpec,
-                groupID.toString(), staffId.longValue());
-        assertEquals(unassignStaffToCenterResponseMap.get("staffId"), null, "Verify staffId is null after unassigning ");
-        final CenterDomain centerWithStaffUnssigned = CenterHelper.retrieveByID(groupID, requestSpec, responseSpec);
-        Assertions.assertNotNull(centerWithStaffUnssigned);
-        Assertions.assertTrue(centerWithStaffUnssigned.getId().intValue() == groupID);
-        Assertions.assertTrue(centerWithStaffUnssigned.getStaffId() == null);
-
+        assertNull(centerHelper.unassignStaff(centerId, staffId).getStaffId(), "Verify staffId is null after unassigning");
+        GetCentersCenterIdResponse centerWithStaffUnassigned = centerHelper.retrieveCenter(centerId);
+        assertNotNull(centerWithStaffUnassigned);
+        assertEquals(centerId, centerWithStaffUnassigned.getId());
+        assertNull(centerWithStaffUnassigned.getStaffId());
     }
 
     @Test
     public void testCentersOrphanGroups() {
+        Long officeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getResourceId();
 
-        int officeId = new OfficeHelper().createOffice(LocalDate.of(2007, 7, 1)).getResourceId().intValue();
+        String name = "TestBasicCreation" + new Timestamp(new Date().getTime());
+        Long resourceId = centerHelper.createCenter(name, officeId).getResourceId();
+        GetCentersCenterIdResponse center = centerHelper.retrieveCenter(resourceId);
+        assertNotNull(center);
 
-        String name = "TestBasicCreation" + new Timestamp(new java.util.Date().getTime());
-        int resourceId = CenterHelper.createCenter(name, officeId, requestSpec, responseSpec);
-        CenterDomain center = CenterHelper.retrieveByID(resourceId, requestSpec, responseSpec);
+        Long id = centerHelper.listCenters().get(0).getId();
+        assertTrue(id > 0);
 
-        Assertions.assertNotNull(center);
+        GetCentersCenterIdResponse retrievedCenter = centerHelper.retrieveCenter(id);
+        assertNotNull(retrievedCenter);
+        assertNotNull(retrievedCenter.getName());
+        assertNotNull(retrievedCenter.getHierarchy());
+        assertNotNull(retrievedCenter.getOfficeName());
 
-        int id = CenterHelper.listCenters(requestSpec, responseSpec).get(0).getId();
-        Assertions.assertTrue(id > 0);
+        centerHelper.associateGroups(resourceId, generateGroupMembers(2, officeId));
+        // All groups now have a center as parent, so there are no orphan groups for the office.
+        assertTrue(groupHelper.retrieveOrphanGroups(officeId).isEmpty());
+    }
 
-        CenterDomain retrievedCenter = CenterHelper.retrieveByID(id, requestSpec, responseSpec);
-        Assertions.assertNotNull(retrievedCenter);
-        Assertions.assertNotNull(retrievedCenter.getName());
-        Assertions.assertNotNull(retrievedCenter.getHierarchy());
-        Assertions.assertNotNull(retrievedCenter.getOfficeName());
+    private List<Long> generateGroupMembers(int size, Long officeId) {
+        List<Long> groupMembers = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            groupMembers.add(groupHelper.createActiveGroup(officeId, GROUP_ACTIVATION_DATE).getGroupId());
+        }
+        return groupMembers;
+    }
 
-        int[] groupMembers = generateGroupMembers(2, officeId);
-        CenterHelper.associateGroups(resourceId, groupMembers, requestSpec, responseSpec);
-        GroupHelper.verifyOrphanGroupDetails(requestSpec, responseSpec, officeId);
+    private static List<Long> groupMemberIds(GetCentersCenterIdResponse center) {
+        return center.getGroupMembers().stream().map(GetCentersGroupMembers::getId).toList();
+    }
+
+    private static List<GetCentersPageItems> byId(List<GetCentersPageItems> centers) {
+        return centers.stream().sorted(Comparator.comparing(GetCentersPageItems::getId)).toList();
     }
 }
