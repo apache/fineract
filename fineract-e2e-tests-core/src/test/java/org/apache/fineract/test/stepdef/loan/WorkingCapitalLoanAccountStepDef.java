@@ -388,43 +388,58 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @Then("Creating a working capital loan with principal amount greater than Working Capital Loan Product max will result an error:")
     public void creatingAWorkingCapitalLoanWithPrincipalAmountGreaterThanWorkingCapitalLoanProductMaxWillResultAnError(
             final DataTable table) {
-        final List<List<String>> data = table.asLists();
-        final List<String> loanData = data.get(1);
-
-        final String loanProduct = loanData.getFirst();
-        final Long clientId = extractClientId();
-        final Long loanProductId = resolveLoanProductId(loanProduct);
-        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequest(clientId, loanProductId, loanData);
-
-        final CallFailedRuntimeException exception = fail(
-                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
-        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
-
-        assertHttpStatus(exception, 400);
-        assertValidationError(exception, "validation.msg.WORKINGCAPITALLOAN.principalAmount.must.be.less.than.or.equal.to.max");
-
-        log.info("Verified working capital loan creation failed with principal amount exceeding max");
+        String errorMessage = "validation.msg.WORKINGCAPITALLOAN.principalAmount.must.be.less.than.or.equal.to.max";
+        creatingAWorkingCapitalLoanWithInvalidDataResultAnError(table, errorMessage);
     }
 
     @Then("Creating a working capital loan with principal amount smaller than Working Capital Loan Product min will result an error:")
     public void creatingAWorkingCapitalLoanWithPrincipalAmountSmallerThanWorkingCapitalLoanProductMinWillResultAnError(
             final DataTable table) {
+        String errorMessage = "validation.msg.WORKINGCAPITALLOAN.principalAmount.must.be.greater.than.or.equal.to.min";
+        creatingAWorkingCapitalLoanWithInvalidDataResultAnError(table, errorMessage);
+    }
+
+    @Then("Creating a working capital loan with input values that cause unable to calculate a valid EIR will result into an error:")
+    public void creatingAWorkingCapitalLoanWithInvalidInputValuesCauseUnableToCalculateEIrResultAnError(final DataTable table) {
+        String errorMessage = ErrorMessageHelper.workingCapitalInputValuesCauseUnableCalculateEIrFailure();
+        creatingAWorkingCapitalLoanWithInvalidDataResultAnError(table, errorMessage);
+    }
+
+    @Then("Creating a working capital loan using created product with input values that cause unable to calculate a valid EIR will result into an error:")
+    public void creatingAWorkingCapitalLoanUsingLpWithInvalidInputValuesCauseUnableToCalculateEIrResultAnError(final DataTable table) {
         final List<List<String>> data = table.asLists();
         final List<String> loanData = data.get(1);
-
-        final String loanProduct = loanData.getFirst();
         final Long clientId = extractClientId();
-        final Long loanProductId = resolveLoanProductId(loanProduct);
-        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequest(clientId, loanProductId, loanData);
+        final PostWorkingCapitalLoanProductsResponse productResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
+        final Long loanProductId = productResponse.getResourceId();
+
+        final String submittedOnDate = loanData.get(0);
+        final String expectedDisbursementDate = loanData.get(1);
+        final String principal = loanData.get(2);
+        final String totalPaymentVolume = loanData.get(3);
+        final String periodPaymentRate = loanData.get(4);
+        final String discount = loanData.get(5);
+
+        assert loanProductId != null;
+        final PostWorkingCapitalLoansRequest loansRequest = workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansRequest(clientId)//
+                .productId(loanProductId)//
+                .submittedOnDate(submittedOnDate)//
+                .expectedDisbursementDate(expectedDisbursementDate)//
+                .principalAmount(new BigDecimal(principal))//
+                .totalPaymentVolume(new BigDecimal(totalPaymentVolume))//
+                .periodPaymentRate(new BigDecimal(periodPaymentRate))//
+                .discount(discount != null && !discount.isEmpty() ? new BigDecimal(discount) : null);//
 
         final CallFailedRuntimeException exception = fail(
                 () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
         testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
 
         assertHttpStatus(exception, 400);
-        assertValidationError(exception, "validation.msg.WORKINGCAPITALLOAN.principalAmount.must.be.greater.than.or.equal.to.min");
+        String errorMessage = ErrorMessageHelper.workingCapitalInputValuesCauseUnableCalculateEIrErrorCodeFailure();
+        assertValidationError(exception, errorMessage);
 
-        log.info("Verified working capital loan creation failed with principal amount below min");
+        log.info("Verified working capital loan creation failed with principal amount exceeding max");
     }
 
     @Then("Creating a working capital loan with missing mandatory fields will result an error:")
@@ -902,6 +917,15 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     public void modifyLoanWithInvalidPeriodPaymentRateFailure(String periodPaymentRate, String errorMessage) {
         final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest() //
                 .periodPaymentRate(new BigDecimal(periodPaymentRate));//
+        verifyModifyWorkingCapitalLoanAccountFailure(modifyRequest, 400, errorMessage);
+    }
+
+    @Then("Admin failed to modify working capital loan with total payment value {string} that cause unable to calculate EIR")
+    public void modifyLoanWithTotalPaymentValueCauseUnableCalculateEIrFailure(String totalPaymentValue) {
+        final PutWorkingCapitalLoansLoanIdRequest modifyRequest = workingCapitalLoanRequestFactory.defaultModifyWorkingCapitalLoansRequest() //
+                .totalPaymentVolume(new BigDecimal(totalPaymentValue)); //
+
+        String errorMessage = ErrorMessageHelper.workingCapitalInputValuesCauseUnableCalculateEIrErrorCodeFailure();
         verifyModifyWorkingCapitalLoanAccountFailure(modifyRequest, 400, errorMessage);
     }
 
@@ -1864,6 +1888,12 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         updatePeriodPaymentRateFailed(periodPaymentRate, errorMessage);
     }
 
+    @When("Admin update Working Capital period payment rate failed with {string} value cause unable to calculate EIR")
+    public void adminAddWorkingCapitalPeriodPaymentRateCauseUnableCalculateEIrFailure(final String periodPaymentRate) {
+        String errorMessage = ErrorMessageHelper.workingCapitalInputValuesCauseUnableCalculateEIrFailure();
+        updatePeriodPaymentRateFailed(periodPaymentRate, errorMessage, 403);
+    }
+
     @When("Working Capital Loan Period Payment Rate changes history contains the following data:")
     public void adminChecksWorkingCapitalPeriodPaymentRateChangesHistory(DataTable table) {
         PostWorkingCapitalLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -1918,6 +1948,25 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
             testContext().set(TestContextKey.WC_LOAN_IDS, new ArrayList<>());
         }
         ((List<Long>) testContext().get(TestContextKey.WC_LOAN_IDS)).add(loanId);
+    }
+
+    public void creatingAWorkingCapitalLoanWithInvalidDataResultAnError(final DataTable table, final String errorMessage) {
+        final List<List<String>> data = table.asLists();
+        final List<String> loanData = data.get(1);
+
+        final String loanProduct = loanData.getFirst();
+        final Long clientId = extractClientId();
+        final Long loanProductId = resolveLoanProductId(loanProduct);
+        final PostWorkingCapitalLoansRequest loansRequest = buildCreateLoanRequest(clientId, loanProductId, loanData);
+
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
+
+        assertHttpStatus(exception, 400);
+        assertValidationError(exception, errorMessage);
+
+        log.info("Verified working capital loan creation failed with error message '{}'", errorMessage);
     }
 
     private void modifyWorkingCapitalLoanAccount(final List<String> loanData) {
@@ -2133,7 +2182,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final String principal = loanData.get(3);
         final String totalPaymentVolume = loanData.get(4);
         final String periodPaymentRate = loanData.get(5);
-        // final String discount = loanData.get(6);
 
         return workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansRequest(clientId)//
                 .productId(productId)//
@@ -2142,7 +2190,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .principalAmount(new BigDecimal(principal))//
                 .totalPaymentVolume(new BigDecimal(totalPaymentVolume))//
                 .periodPaymentRate(new BigDecimal(periodPaymentRate));//
-        // .discount(discount != null && !discount.isEmpty() ? new BigDecimal(discount) : null);//
     }
 
     private PutWorkingCapitalLoansLoanIdRequest buildModifyLoanRequest(final List<String> loanData) {
@@ -3456,6 +3503,23 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     }
 
     public void updatePeriodPaymentRateFailed(String periodPaymentRate, String errorMessage) {
+        /*
+         * final PostWorkingCapitalLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+         * long loanId = loanResponse.getLoanId();
+         *
+         * PutWorkingCapitalLoansLoanIdRateRequest rateChangeRequest = workingCapitalLoanRequestFactory
+         * .defaultWorkingCapitalLoanUpdateRateRequest().periodPaymentRate(new BigDecimal(periodPaymentRate));
+         *
+         * CallFailedRuntimeException exception = fail( () ->
+         * fineractClient.workingCapitalLoans().updateWorkingCapitalLoanRateById(loanId, rateChangeRequest));
+         *
+         * assertThat(exception.getStatus()).as(errorMessage).isEqualTo(400);
+         * assertThat(exception.getDeveloperMessage()).contains(errorMessage);
+         */
+        updatePeriodPaymentRateFailed(periodPaymentRate, errorMessage, 400);
+    }
+
+    public void updatePeriodPaymentRateFailed(String periodPaymentRate, String errorMessage, int responseCode) {
         final PostWorkingCapitalLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
 
@@ -3465,7 +3529,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         CallFailedRuntimeException exception = fail(
                 () -> fineractClient.workingCapitalLoans().updateWorkingCapitalLoanRateById(loanId, rateChangeRequest));
 
-        assertThat(exception.getStatus()).as(errorMessage).isEqualTo(400);
+        assertThat(exception.getStatus()).as(errorMessage).isEqualTo(responseCode);
         assertThat(exception.getDeveloperMessage()).contains(errorMessage);
     }
 
