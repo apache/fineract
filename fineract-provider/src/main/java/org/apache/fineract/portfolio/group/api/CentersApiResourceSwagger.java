@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.group.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -138,6 +139,18 @@ final class CentersApiResourceSwagger {
         public Long officeId;
         @Schema(example = "false")
         public Boolean active;
+        @Schema(example = "externalId1")
+        public String externalId;
+        @Schema(example = "1")
+        public Long staffId;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "en")
+        public String locale;
+        @Schema(example = "04 March 2011")
+        public String activationDate;
+        @Schema(description = "List of group ids to associate at creation")
+        public List<Long> groupMembers;
     }
 
     @Schema(description = "PostCentersResponse")
