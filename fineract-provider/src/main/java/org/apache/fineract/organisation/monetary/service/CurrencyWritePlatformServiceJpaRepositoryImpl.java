@@ -75,9 +75,9 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
     private boolean isCurrencyUsedInExistingData(final String currencyCode) {
         return hasCurrencyUsage("m_product_loan", currencyCode) || hasCurrencyUsage("m_savings_product", currencyCode)
                 || hasCurrencyUsage("m_share_product", currencyCode) || hasCurrencyUsage("m_charge", currencyCode)
-                || hasCurrencyUsage("m_loan", currencyCode)
-                || hasCurrencyUsage("m_savings_account", currencyCode) || hasCurrencyUsage("m_share_account", currencyCode)
-                || hasCurrencyUsage("m_client_transaction", currencyCode) || hasCurrencyUsage("m_account_transfer_transaction", currencyCode)
+                || hasCurrencyUsage("m_loan", currencyCode) || hasCurrencyUsage("m_savings_account", currencyCode)
+                || hasCurrencyUsage("m_share_account", currencyCode) || hasCurrencyUsage("m_client_transaction", currencyCode)
+                || hasCurrencyUsage("m_account_transfer_transaction", currencyCode)
                 || hasCurrencyUsage("m_cashier_transactions", currencyCode) || hasCurrencyUsage("acc_gl_journal_entry", currencyCode);
     }
 

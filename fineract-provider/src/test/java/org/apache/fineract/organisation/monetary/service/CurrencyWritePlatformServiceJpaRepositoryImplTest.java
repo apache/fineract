@@ -92,8 +92,8 @@ public class CurrencyWritePlatformServiceJpaRepositoryImplTest {
         // simulates the removed currency still being referenced by one of the checked tables (e.g. m_loan)
         given(jdbcTemplate.queryForObject(anyString(), eq(Integer.class), any(Object[].class))).willReturn(1);
 
-        assertThrows(CurrencyInUseException.class, () -> underTest
-                .updateAllowedCurrencies(CurrencyUpdateRequest.builder().currencies(List.of(KEPT_CODE)).build()));
+        assertThrows(CurrencyInUseException.class,
+                () -> underTest.updateAllowedCurrencies(CurrencyUpdateRequest.builder().currencies(List.of(KEPT_CODE)).build()));
 
         verify(organisationCurrencyRepository, never()).deleteAll();
         verify(organisationCurrencyRepository, never()).saveAll(any());
