@@ -929,6 +929,6 @@ public final class ClientDataValidator {
             return null;
         }
         final LegalForm legalForm = LegalForm.fromInt(legalFormId);
-        return legalForm != null ? legalForm.getLabel() : null;
+        return legalForm != null ? legalForm.getLabel().toUpperCase() : null;
     }
 }
