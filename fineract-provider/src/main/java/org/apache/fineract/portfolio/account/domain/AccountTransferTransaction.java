@@ -138,6 +138,14 @@ public class AccountTransferTransaction extends AbstractPersistableCustom<Long> 
         this.toLoanTransaction = toLoanTransaction;
     }
 
+    public void updateFromSavingsTransaction(SavingsAccountTransaction fromSavingsTransaction) {
+        this.fromSavingsTransaction = fromSavingsTransaction;
+    }
+
+    public void updateToSavingsTransaction(SavingsAccountTransaction toSavingsTransaction) {
+        this.toSavingsTransaction = toSavingsTransaction;
+    }
+
     public AccountTransferDetails accountTransferDetails() {
         return this.accountTransferDetails;
     }

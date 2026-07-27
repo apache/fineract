@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import org.apache.fineract.accounting.journalentry.service.JournalEntryWritePlatformService;
+import java.util.Set;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -111,8 +111,6 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
     private SavingsAccountChargeDataValidator savingsAccountChargeDataValidator;
     @Mock
     private PaymentDetailWritePlatformService paymentDetailWritePlatformService;
-    @Mock
-    private JournalEntryWritePlatformService journalEntryWritePlatformService;
     @Mock
     private SavingsAccountDomainService savingsAccountDomainService;
     @Mock
@@ -397,6 +395,30 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         verify(savingsAccountTransactionDataValidator).validatePostInterest(command);
         verify(postingTransaction).updateExternalId(externalId);
         verify(savingsAccountTransactionRepository).save(postingTransaction);
+    }
+
+    @Test
+    void calculateInterest_shouldPersistBeforePostingReplacementAwareJournalEntries() {
+        final Long savingsId = 1L;
+        final LocalDate businessDate = LocalDate.of(2024, 4, 5);
+        final SavingsAccount account = mock(SavingsAccount.class);
+
+        setupTenantContext(businessDate);
+        when(savingAccountAssembler.getPivotConfigStatus()).thenReturn(false);
+        when(savingAccountAssembler.assembleFrom(savingsId, false)).thenReturn(account);
+        when(account.findExistingTransactionIds()).thenReturn(Set.of(10L));
+        when(account.findExistingReversedTransactionIds()).thenReturn(Set.of(11L));
+        when(account.officeId()).thenReturn(1L);
+        when(account.clientId()).thenReturn(2L);
+        when(account.groupId()).thenReturn(3L);
+        when(configurationDomainService.isSavingsInterestPostingAtCurrentPeriodEnd()).thenReturn(false);
+        when(configurationDomainService.retrieveFinancialYearBeginningMonth()).thenReturn(1);
+
+        service.calculateInterest(savingsId);
+
+        final var inOrder = Mockito.inOrder(savingAccountRepositoryWrapper, savingsAccountDomainService);
+        inOrder.verify(savingAccountRepositoryWrapper).saveAndFlush(account);
+        inOrder.verify(savingsAccountDomainService).postJournalEntries(account, Set.of(10L), Set.of(11L), false);
     }
 
     private void setupTenantContext(final LocalDate businessDate) {
