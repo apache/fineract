@@ -30,6 +30,7 @@ import org.apache.fineract.client.models.GetClientsClientIdAccountsResponse;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.PageClientSearchData;
 import org.apache.fineract.client.models.PagedRequestClientTextSearch;
+import org.apache.fineract.client.models.PostClientsClientIdChanges;
 import org.apache.fineract.client.models.PostClientsClientIdRequest;
 import org.apache.fineract.client.models.PostClientsClientIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
@@ -49,6 +50,7 @@ public class FeignClientHelper {
     private static final String WITHDRAW_COMMAND = "withdraw";
     private static final String UNDO_REJECTION_COMMAND = "undoRejection";
     private static final String UNDO_WITHDRAWAL_COMMAND = "undoWithdrawal";
+    private static final String ASSIGN_STAFF_COMMAND = "assignStaff";
 
     private final FineractFeignClient fineractClient;
 
@@ -147,5 +149,16 @@ public class FeignClientHelper {
 
     public DeleteClientsClientIdResponse deleteClient(Long clientId) {
         return ok(() -> fineractClient.clients().deleteClient(clientId));
+    }
+
+    /** Assigns a staff member to the client; returns the {@code changes} object. */
+    public PostClientsClientIdChanges assignStaffToClient(Long clientId, Long staffId) {
+        PostClientsClientIdRequest request = new PostClientsClientIdRequest().staffId(staffId);
+        return ok(() -> fineractClient.clients().handleCommandClient(clientId, request, ASSIGN_STAFF_COMMAND)).getChanges();
+    }
+
+    /** The staff id currently assigned to the client, or {@code null} if none. */
+    public Long getClientStaffId(Long clientId) {
+        return getClient(clientId).getStaffId();
     }
 }
