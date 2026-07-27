@@ -24,6 +24,7 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
+import java.util.HashMap;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.PageClientSearchData;
@@ -372,6 +373,59 @@ public class ClientSearchTest extends IntegrationTest {
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().size()).isEqualTo(1);
         assertThat(result.getContent().get(0).getExternalId().getValue()).isEqualTo(request.getExternalId());
+    }
+
+    @Test
+    public void testClientSearchExcludesClosedClients_WhenExcludeClosedIsTrue() {
+        // given
+        String lastname = Utils.randomStringGenerator("Client_LastName_", 5);
+        PostClientsRequest openClientRequest = ClientHelper.defaultClientCreationRequest();
+        openClientRequest.setLastname(lastname);
+        clientHelper.createClient(openClientRequest);
+
+        PostClientsRequest closedClientRequest = ClientHelper.defaultClientCreationRequest();
+        closedClientRequest.setLastname(lastname);
+        clientHelper.createClient(closedClientRequest);
+
+        HashMap<String, Object> code = CodeHelper.getCodeByName(requestSpec, responseSpec, "ClientClosureReason");
+        Integer codeId = (Integer) code.get("id");
+        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(codeId, requestSpec, responseSpec);
+        Integer closureReasonId = (Integer) codeValue.get("id");
+        ClientHelper.closeClient(closedClientRequest.getExternalId(), closureReasonId);
+
+        // when
+        PageClientSearchData resultIncludingClosed = clientHelper.searchClients(lastname);
+        PageClientSearchData resultExcludingClosed = clientHelper.searchClients(lastname, true);
+
+        // then
+        assertThat(resultIncludingClosed.getTotalElements()).isEqualTo(2);
+        assertThat(resultExcludingClosed.getTotalElements()).isEqualTo(1);
+        assertThat(resultExcludingClosed.getContent().get(0).getExternalId().getValue()).isEqualTo(openClientRequest.getExternalId());
+    }
+
+    @Test
+    public void testClientSearchIncludesClosedClients_WhenExcludeClosedIsFalse() {
+        // given
+        String lastname = Utils.randomStringGenerator("Client_LastName_", 5);
+        PostClientsRequest openClientRequest = ClientHelper.defaultClientCreationRequest();
+        openClientRequest.setLastname(lastname);
+        clientHelper.createClient(openClientRequest);
+
+        PostClientsRequest closedClientRequest = ClientHelper.defaultClientCreationRequest();
+        closedClientRequest.setLastname(lastname);
+        clientHelper.createClient(closedClientRequest);
+
+        HashMap<String, Object> code = CodeHelper.getCodeByName(requestSpec, responseSpec, "ClientClosureReason");
+        Integer codeId = (Integer) code.get("id");
+        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(codeId, requestSpec, responseSpec);
+        Integer closureReasonId = (Integer) codeValue.get("id");
+        ClientHelper.closeClient(closedClientRequest.getExternalId(), closureReasonId);
+
+        // when
+        PageClientSearchData result = clientHelper.searchClients(lastname, false);
+
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(2);
     }
 
     @Test

@@ -213,6 +213,15 @@ public class ClientHelper {
         return searchClients(request);
     }
 
+    public PageClientSearchData searchClients(String text, boolean excludeClosed) {
+        ClientTextSearch clientTextSearch = new ClientTextSearch();
+        clientTextSearch.setText(text);
+        clientTextSearch.setExcludeClosed(excludeClosed);
+        PagedRequestClientTextSearch request = new PagedRequestClientTextSearch();
+        request.setRequest(clientTextSearch);
+        return searchClients(request);
+    }
+
     public PageClientSearchData searchClients(PagedRequestClientTextSearch request) {
         return Calls.ok(FineractClientHelper.getFineractClient().clientSearchV2.searchClientsByText(request));
     }

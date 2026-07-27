@@ -23,5 +23,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface SearchingClientRepository {
 
-    Page<SearchedClient> searchByText(String searchText, Pageable pageable, String officeHierarchy);
+    Page<SearchedClient> searchByText(String searchText, Pageable pageable, String officeHierarchy, boolean excludeClosed);
 }
