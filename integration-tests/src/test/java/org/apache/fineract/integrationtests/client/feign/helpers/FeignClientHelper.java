@@ -21,7 +21,12 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.util.Collections;
+import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.ClientTextSearch;
@@ -49,6 +54,9 @@ public class FeignClientHelper {
     private static final String WITHDRAW_COMMAND = "withdraw";
     private static final String UNDO_REJECTION_COMMAND = "undoRejection";
     private static final String UNDO_WITHDRAWAL_COMMAND = "undoWithdrawal";
+    private static final String ASSIGN_STAFF_COMMAND = "assignStaff";
+
+    private static final Gson GSON = new Gson();
 
     private final FineractFeignClient fineractClient;
 
@@ -147,5 +155,30 @@ public class FeignClientHelper {
 
     public DeleteClientsClientIdResponse deleteClient(Long clientId) {
         return ok(() -> fineractClient.clients().deleteClient(clientId));
+    }
+
+    // ------------------------------------------------------------------ staff (raw HTTP — command/response model gaps)
+
+    /**
+     * Assigns a staff member to the client via {@code ?command=assignStaff}. Raw HTTP because the shared
+     * {@code PostClientsClientIdRequest} model has no {@code staffId} field — the sanctioned fallback for a
+     * command-specific field missing from a model shared across many commands (pr_review_lessons_learned #8 / #11), not
+     * REST-assured. Returns the {@code changes} object (contains the new {@code staffId}).
+     */
+    public JsonObject assignStaffToClient(Long clientId, Long staffId) {
+        String response = FeignRawHttpHelper.post("/clients/" + clientId + "?command=" + ASSIGN_STAFF_COMMAND,
+                GSON.toJson(Map.of("staffId", staffId)));
+        return JsonParser.parseString(response).getAsJsonObject().getAsJsonObject("changes");
+    }
+
+    /**
+     * The staff id currently assigned to the client, or {@code null} if none. Raw HTTP because
+     * {@code GetClientsClientIdResponse} does not expose {@code staffId} (#8 / #20 — never drop a read because the
+     * typed model lacks the field).
+     */
+    public Long getClientStaffId(Long clientId) {
+        String response = FeignRawHttpHelper.get("/clients/" + clientId);
+        JsonElement staffId = JsonParser.parseString(response).getAsJsonObject().get("staffId");
+        return staffId == null || staffId.isJsonNull() ? null : staffId.getAsLong();
     }
 }
