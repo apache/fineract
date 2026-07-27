@@ -385,22 +385,20 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                             continue;
                         }
                         if (dateShiftOnly || scheduleModelStartIndex >= scheduleModel.repaymentPeriods().size()) {
-                            if (isNotObligationsMet(installment)) {
-                                int offsetFrom = i - targetInstallmentIndex - 1;
-                                int offsetDue = i - targetInstallmentIndex;
-                                if (offsetDue != 0) {
-                                    installment.updateFromDate(newDueDate.plus(offsetFrom * repayEvery, repaymentFrequencyChronoUnit));
-                                }
-                                installment.updateDueDate(newDueDate.plus(offsetDue * repayEvery, repaymentFrequencyChronoUnit));
+                            int offsetFrom = i - targetInstallmentIndex - 1;
+                            int offsetDue = i - targetInstallmentIndex;
+                            if (offsetDue != 0) {
+                                installment.updateFromDate(newDueDate.plus(offsetFrom * repayEvery, repaymentFrequencyChronoUnit));
                             }
+                            installment.updateDueDate(newDueDate.plus(offsetDue * repayEvery, repaymentFrequencyChronoUnit));
                             continue;
                         }
 
                         final RepaymentPeriod repaymentPeriod = scheduleModel.repaymentPeriods().get((int) scheduleModelStartIndex);
 
+                        installment.updateFromDate(repaymentPeriod.getFromDate());
+                        installment.updateDueDate(repaymentPeriod.getDueDate());
                         if (isNotObligationsMet(installment)) {
-                            installment.updateFromDate(repaymentPeriod.getFromDate());
-                            installment.updateDueDate(repaymentPeriod.getDueDate());
                             installment.updatePrincipal(repaymentPeriod.getDuePrincipal().getAmount());
                             installment.updateInterestCharged(repaymentPeriod.getDueInterest().getAmount());
                         }
