@@ -37,7 +37,8 @@ import org.apache.fineract.integrationtests.common.Utils;
 
 /**
  * Typed Feign helper for center operations. Standalone by design: nothing here is added to {@code FeignLoanTestBase}
- * (see FEIGN_BASE_MODULARIZATION.md). Replaces the raw-HTTP {@code FeignGroupCenterHelper} stopgap for centers.
+ * (see FEIGN_BASE_MODULARIZATION.md). Replaced the raw-HTTP {@code FeignGroupCenterHelper} stopgap for centers
+ * (removed).
  * <p>
  * <b>create</b> / <b>delete</b> are fully typed against the generated {@code CentersApi} (using the
  * {@code PostCentersRequest} fields added at source in this PR). The <b>retrieve</b> / <b>list</b> / <b>update</b> /

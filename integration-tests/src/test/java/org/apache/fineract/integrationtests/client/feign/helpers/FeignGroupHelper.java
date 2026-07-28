@@ -41,7 +41,8 @@ import org.apache.fineract.integrationtests.common.Utils;
 
 /**
  * Typed Feign helper for group operations. Standalone by design: nothing here is added to {@code FeignLoanTestBase}
- * (see FEIGN_BASE_MODULARIZATION.md). Replaces the raw-HTTP {@code FeignGroupCenterHelper} stopgap for groups.
+ * (see FEIGN_BASE_MODULARIZATION.md). Replaced the raw-HTTP {@code FeignGroupCenterHelper} stopgap for groups
+ * (removed).
  * <p>
  * Create / retrieve / update / delete are fully typed against the generated {@code GroupsApi}. The command endpoints
  * ({@code ?command=activate|associateClients|disassociateClients|assignStaff}) still go through
