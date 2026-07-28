@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,12 +33,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.DelinquencyRangeRequest;
+import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActionRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActionResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
+import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -333,6 +336,69 @@ public class WorkingCapitalLoanDelinquencyActionIntegrationTest {
 
         // then
         assertNotNull(result, "Pause starting at disbursement date should be accepted");
+    }
+
+    /**
+     * A pause whose startDate falls inside a delinquency range period that has already been evaluated by COB
+     * (minPaymentCriteriaMet set) must be accepted, shift the period boundaries, and reprocess/re-evaluate the schedule
+     * so the period is no longer prematurely closed.
+     */
+    @Test
+    public void testBackdatedPauseIntoEvaluatedPeriodShiftsAndReevaluatesSchedule() {
+        final Long[] loanIdHolder = new Long[1];
+        final LocalDate[] originalPeriodToDateHolder = new LocalDate[1];
+
+        BusinessDateHelper.runAt("01 June 2026", () -> {
+            final Long bucketId = createWorkingCapitalLoanDelinquencyBucket(PERIOD_FREQUENCY_DAYS);
+            final Long productId = createProduct(bucketId);
+            final Long clientId = createClient();
+            loanIdHolder[0] = submitAndApproveLoan(clientId, productId);
+
+            WorkingCapitalLoanDelinquencyActionHelper.activateLoan(loanIdHolder[0], LocalDate.of(2026, 6, 1));
+
+            final List<WorkingCapitalLoanDelinquencyRangeScheduleData> initialPeriods = getRangeSchedule(loanIdHolder[0]);
+            assertEquals(1, initialPeriods.size());
+            originalPeriodToDateHolder[0] = initialPeriods.getFirst().getToDate();
+        });
+
+        // advance business date past the first period's toDate and run COB so the period gets evaluated
+        BusinessDateHelper.runAt("01 July 2026", () -> {
+            FeignCalls.ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
+                    new InlineJobRequest().addLoanIdsItem(loanIdHolder[0])));
+
+            final List<WorkingCapitalLoanDelinquencyRangeScheduleData> periodsAfterCob = getRangeSchedule(loanIdHolder[0]);
+            assertEquals(2, periodsAfterCob.size(), "COB should generate the next period once the first one has expired");
+            assertNotNull(periodsAfterCob.getFirst().getMinPaymentCriteriaMet(),
+                    "First period must have been evaluated by COB before the backdated pause is created");
+
+            final LocalDate secondPeriodOriginalFromDate = periodsAfterCob.get(1).getFromDate();
+            final LocalDate secondPeriodOriginalToDate = periodsAfterCob.get(1).getToDate();
+            assertNotNull(secondPeriodOriginalFromDate);
+            assertNotNull(secondPeriodOriginalToDate);
+
+            // when - a backdated pause is created starting inside the already-evaluated first period
+            final LocalDate pauseStart = LocalDate.of(2026, 6, 5);
+            final LocalDate pauseEnd = LocalDate.of(2026, 6, 15);
+            final PostWorkingCapitalLoansDelinquencyActionResponse result = WorkingCapitalLoanDelinquencyActionHelper
+                    .createDelinquencyAction(loanIdHolder[0], "pause", pauseStart, pauseEnd);
+            assertNotNull(result, "Backdated pause into an already-evaluated period should now be accepted");
+
+            // then - the evaluated period's boundaries shift by the pause length and it is no longer closed
+            final List<WorkingCapitalLoanDelinquencyRangeScheduleData> periodsAfterPause = getRangeSchedule(loanIdHolder[0]);
+            assertEquals(2, periodsAfterPause.size());
+
+            final WorkingCapitalLoanDelinquencyRangeScheduleData firstPeriod = periodsAfterPause.getFirst();
+            assertEquals(originalPeriodToDateHolder[0].plusDays(11), firstPeriod.getToDate(),
+                    "First period toDate should be extended by the 11-day inclusive pause duration");
+            assertNull(firstPeriod.getMinPaymentCriteriaMet(),
+                    "First period must be reopened (unevaluated) once its due date moves past the current business date");
+
+            final WorkingCapitalLoanDelinquencyRangeScheduleData secondPeriod = periodsAfterPause.get(1);
+            assertEquals(secondPeriodOriginalFromDate.plusDays(11), secondPeriod.getFromDate(),
+                    "Second period fromDate should also shift by the pause duration");
+            assertEquals(secondPeriodOriginalToDate.plusDays(11), secondPeriod.getToDate(),
+                    "Second period toDate should also shift by the pause duration");
+        });
     }
 
     /**

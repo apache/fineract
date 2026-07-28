@@ -77,6 +77,9 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
             rangeScheduleService.reprocessDelinquencySchedule(workingCapitalLoan);
         } else if (DelinquencyAction.PAUSE.equals(action.getAction())) {
             rangeScheduleService.extendPeriodsForPause(workingCapitalLoan, action.getStartDate(), action.getEndDate());
+            if (!action.getStartDate().isAfter(DateUtils.getBusinessLocalDate())) {
+                rangeScheduleService.reprocessDelinquencySchedule(workingCapitalLoan);
+            }
         } else if (DelinquencyAction.RESCHEDULE.equals(action.getAction())) {
             rangeScheduleService.rescheduleMinimumPayment(workingCapitalLoan);
             rangeScheduleService.reprocessDelinquencySchedule(workingCapitalLoan);
