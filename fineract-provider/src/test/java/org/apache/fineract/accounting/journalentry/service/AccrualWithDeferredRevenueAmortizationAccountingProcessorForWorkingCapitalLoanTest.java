@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -195,6 +196,7 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
         when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("5000"));
         when(allocation.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
         when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getOverpaymentPortion()).thenReturn(new BigDecimal("200"));
 
         processor.postJournalEntries(loan, txn, allocation, false);
 
@@ -212,6 +214,7 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
         when(allocation.getPrincipalPortion()).thenReturn(BigDecimal.ZERO);
         when(allocation.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
         when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getOverpaymentPortion()).thenReturn(new BigDecimal("750"));
 
         processor.postJournalEntries(loan, txn, allocation, false);
 
@@ -253,6 +256,7 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
         when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("5000"));
         when(allocation.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
         when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getOverpaymentPortion()).thenReturn(new BigDecimal("1000"));
 
         processor.postJournalEntries(loan, txn, allocation, true);
 
@@ -436,7 +440,6 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     @Test
     void testChargeAdjustmentWithoutChargeLinkFailsFast() {
         when(txn.getTypeOf()).thenReturn(LoanTransactionType.CHARGE_ADJUSTMENT);
-        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("40"));
         when(txn.getLoanTransactionRelations()).thenReturn(Set.of());
         when(allocation.getPrincipalPortion()).thenReturn(BigDecimal.ZERO);
         when(allocation.getFeeChargesPortion()).thenReturn(new BigDecimal("40"));
@@ -537,7 +540,6 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     void testRestateSkipsTransactionWhoseSplitDidNotChange() {
         stubGLAccountIds();
         when(txn.getTypeOf()).thenReturn(LoanTransactionType.CREDIT_BALANCE_REFUND);
-        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("300"));
         final JournalEntry overpaymentDebit = postedEntry(overpaymentGLAccount, JournalEntryType.DEBIT, "100");
         final JournalEntry loanPortfolioDebit = postedEntry(loanPortfolioGLAccount, JournalEntryType.DEBIT, "200");
         stubLiveEntries(overpaymentDebit, loanPortfolioDebit, postedEntry(fundSourceGLAccount, JournalEntryType.CREDIT, "300"));
@@ -561,6 +563,7 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
         when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("9000"));
         when(allocation.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
         when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getOverpaymentPortion()).thenReturn(new BigDecimal("100"));
         final JournalEntry loanPortfolioCredit = postedEntry(loanPortfolioGLAccount, JournalEntryType.CREDIT, "8800");
         stubLiveEntries(postedEntry(fundSourceGLAccount, JournalEntryType.DEBIT, "9100"), loanPortfolioCredit,
                 postedEntry(overpaymentGLAccount, JournalEntryType.CREDIT, "300"));
@@ -572,5 +575,44 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
                 eq(TXN_ID), any(), eq(new BigDecimal("9000")), isNull());
         verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(overpaymentGLAccount), eq(LOAN_ID),
                 eq(TXN_ID), any(), eq(new BigDecimal("100")), isNull());
+    }
+
+    /**
+     * A restatement's own offsetting mirrors must be flagged reversed, so they drop out of the live set. Left live, the
+     * next reversal (a second restatement, or an undo of this transaction) would mirror the mirrors and leave the
+     * original booking amounts standing on the ledger instead of cancelling to zero.
+     */
+    @Test
+    void testRestateSupersedesItsOwnMirrorsSoALaterReversalCannotCompound() {
+        stubGLAccountIds();
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("9100"));
+        when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("9000"));
+        when(allocation.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getOverpaymentPortion()).thenReturn(new BigDecimal("100"));
+        stubLiveEntries(postedEntry(fundSourceGLAccount, JournalEntryType.DEBIT, "9100"),
+                postedEntry(loanPortfolioGLAccount, JournalEntryType.CREDIT, "8800"),
+                postedEntry(overpaymentGLAccount, JournalEntryType.CREDIT, "300"));
+
+        processor.restateJournalEntries(loan, txn, allocation, false);
+
+        final ArgumentCaptor<JournalEntry> persisted = ArgumentCaptor.forClass(JournalEntry.class);
+        verify(helper, atLeastOnce()).persistJournalEntry(persisted.capture());
+        assertTrue(persisted.getAllValues().stream().allMatch(JournalEntry::isReversed),
+                "every entry the restatement persisted - the superseded originals and their mirrors alike - must be flagged reversed");
+    }
+
+    /** An undo keeps its mirrors live: they are the visible reversal, not bookkeeping noise. */
+    @Test
+    void testReversalKeepsItsMirrorsLive() {
+        when(txn.getReversedOnDate()).thenReturn(LocalDate.of(2026, 5, 2));
+        stubLiveEntries(postedEntry(fundSourceGLAccount, JournalEntryType.DEBIT, "5000"),
+                postedEntry(loanPortfolioGLAccount, JournalEntryType.CREDIT, "5000"));
+
+        processor.postReversalJournalEntries(loan, txn);
+
+        final ArgumentCaptor<JournalEntry> persisted = ArgumentCaptor.forClass(JournalEntry.class);
+        verify(helper, atLeastOnce()).persistJournalEntry(persisted.capture());
+        assertTrue(persisted.getAllValues().stream().anyMatch(entry -> !entry.isReversed()), "the reversal mirrors must stay live");
     }
 }

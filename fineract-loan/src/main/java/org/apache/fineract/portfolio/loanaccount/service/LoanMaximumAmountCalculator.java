@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanOverAppliedCalculationType;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
@@ -29,7 +30,7 @@ public final class LoanMaximumAmountCalculator {
 
     public BigDecimal getOverAppliedMax(Loan loan) {
         final LoanProduct loanProduct = loan.getLoanProduct();
-        if (LoanOverAppliedCalculationType.valueOf(loanProduct.getOverAppliedCalculationType().toUpperCase()).isPercentage()) {
+        if (LoanOverAppliedCalculationType.valueOf(loanProduct.getOverAppliedCalculationType().toUpperCase(Locale.ROOT)).isPercentage()) {
             BigDecimal overAppliedNumber = BigDecimal.valueOf(loanProduct.getOverAppliedNumber());
             BigDecimal totalPercentage = BigDecimal.valueOf(1).add(overAppliedNumber.divide(BigDecimal.valueOf(100)));
             return loan.getProposedPrincipal().multiply(totalPercentage);

@@ -22,6 +22,7 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
@@ -173,7 +174,7 @@ public final class ResultsetColumnHeaderData implements Serializable {
 
     // --- Calculation ---
     private String adjustColumnType(String type) {
-        type = type.toUpperCase();
+        type = type.toUpperCase(Locale.ROOT);
         return switch (type) {
             case "CLOB", "ENUM", "SET" -> "VARCHAR";
             case "NEWDECIMAL" -> "DECIMAL";

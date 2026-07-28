@@ -20,8 +20,10 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationPlan;
@@ -90,20 +92,14 @@ public class WorkingCapitalLoanTransactionProcessor {
         balanceRepository.saveAndFlush(balance);
         allocationRepository.saveAndFlush(allocation);
 
-        // A backdated transaction can change how the other transactions allocate across charges, so it triggers
-        // reprocessing. When the loan has charges, reprocessing rebuilds the amortization schedule from scratch, so
-        // the incremental apply below would be immediately overwritten and is skipped. For a charge-free loan
-        // reprocessing is a no-op (principal-only allocation is order-independent), so the incremental apply stands.
-        final List<WorkingCapitalLoanTransaction> allTransactions = transactionRepository
-                .findByWcLoan_IdOrderByTransactionDateAscIdAsc(loanId);
-        final boolean backdated = isBackdatedTransaction(allTransactions, transaction);
+        final boolean backdated = !isLastMonetaryAction(transaction);
         final boolean reprocessingWillRebuildSchedule = backdated && !charges.isEmpty();
         if (!reprocessingWillRebuildSchedule) {
             // The amortization model records the principal on its actual day and recalculates forward.
             amortizationScheduleWriteService.applyRepayment(loan, transactionDate, allocationPlan.principalPortion());
         }
         if (backdated) {
-            transactionReprocessingService.reprocessTransactions(loan, allTransactions);
+            transactionReprocessingService.reprocessTransactions(loan);
             // A changed chronological order can redistribute principal across days in ways the incremental
             // applyRepayment below can't express, so the delinquency schedule needs a full rebuild too.
             delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
@@ -113,7 +109,7 @@ public class WorkingCapitalLoanTransactionProcessor {
         // Breach schedule is maintained incrementally here; reprocessing does not rebuild it.
         breachScheduleService.applyRepayment(loanId, transactionDate, transactionAmount);
 
-        stateMachine.determineAndTransition(loan, transactionDate, charges);
+        stateMachine.determineAndTransition(loan, transactionDate);
         triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
         // On early closure the loan leaves the COB scope, so any charge whose due-date accrual has not been posted yet
         // is accrued as of the closing date to make sure the income is recognized before the loan is closed.
@@ -122,13 +118,17 @@ public class WorkingCapitalLoanTransactionProcessor {
         return allocation;
     }
 
-    private boolean isBackdatedTransaction(final List<WorkingCapitalLoanTransaction> allTransactions,
-            final WorkingCapitalLoanTransaction newTxn) {
-        // The same-date ID comparison is defensive only: the just-persisted transaction holds the highest
-        // ID, so in practice only a strictly later transaction date marks the new one as backdated.
-        return allTransactions.stream().filter(txn -> !txn.isReversed() && !txn.getId().equals(newTxn.getId()))
-                .anyMatch(txn -> txn.getTransactionDate().isAfter(newTxn.getTransactionDate())
-                        || (txn.getTransactionDate().equals(newTxn.getTransactionDate()) && txn.getId().compareTo(newTxn.getId()) > 0));
+    /**
+     * Whether nothing monetary sorts after this transaction: no later non-reversed transaction, and no active charge
+     * due on or after its date. When it holds, an incremental balance and schedule update is enough, because no other
+     * allocation can depend on this transaction. When it does not, the whole history has to be re-allocated.
+     */
+    public boolean isLastMonetaryAction(final WorkingCapitalLoanTransaction transaction) {
+        final Long loanId = transaction.getWcLoan().getId();
+        final OffsetDateTime createdDateTime = transaction.getCreatedDate().isPresent() ? transaction.getCreatedDate().get()
+                : DateUtils.getAuditOffsetDateTime();
+        return !transactionRepository.existsLaterTransaction(loanId, transaction.getTransactionDate(), createdDateTime)
+                && !chargeRepository.existsActiveChargeDueOnOrAfter(loanId, transaction.getTransactionDate(), createdDateTime);
     }
 
     public void triggerInlineAmortizationIfLoanClosed(final WorkingCapitalLoan loan, final LocalDate transactionDate) {

@@ -8,7 +8,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -26,7 +26,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -42,14 +42,14 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     When Admin sets the business date to "02 January 2026"
     And Initiating a credit balance refund on "02 January 2026" with 10.0 transaction amount on Working Capital loan results an error with the following data:
-      | HTTP response code | Error message                                                  |
-      | 400                | Credit balance refund is allowed only for overpaid loans       |
+      | HTTP response code | Error message                                            |
+      | 400                | Credit balance refund is allowed only for overpaid loans |
     And Customer makes repayment on "02 January 2026" with 9000.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
@@ -59,7 +59,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -80,7 +80,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -88,8 +88,8 @@ Feature: Working Capital Loan Credit Balance Refund
     Then Working Capital loan status will be "OVERPAID"
     When Admin sets the business date to "03 January 2026"
     And Initiating a credit balance refund on "03 January 2026" with 200.0 transaction amount on Working Capital loan results an error with the following data:
-      | HTTP response code | Error message                                                        |
-      | 400                | Credit balance refund amount cannot exceed overpayment amount        |
+      | HTTP response code | Error message                                                 |
+      | 400                | Credit balance refund amount cannot exceed overpayment amount |
     And Customer makes credit balance refund on "03 January 2026" with 100.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
@@ -99,7 +99,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -117,7 +117,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -133,7 +133,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -155,7 +155,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -177,7 +177,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -193,7 +193,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -201,8 +201,8 @@ Feature: Working Capital Loan Credit Balance Refund
     Then Working Capital loan status will be "OVERPAID"
     When Admin sets the business date to "03 January 2026"
     And Initiating a credit balance refund on "03 January 2026" with 50.0 transaction amount on Working Capital loan with classificationId 999999999 results an error with the following data:
-      | HTTP response code | Error message                                                                                                     |
-      | 400                | Code value does not exist in code working_capital_loan_credit_balance_refund_classification                       |
+      | HTTP response code | Error message                                                                               |
+      | 400                | Code value does not exist in code working_capital_loan_credit_balance_refund_classification |
 
   @TestRailId:C76671
   Scenario Outline: Verify that a credit balance refund cannot be initiated on a non-OVERPAID loan
@@ -210,18 +210,18 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin brings the working capital loan to "<status>"
     When Admin sets the business date to "03 January 2026"
     And Initiating a credit balance refund on "03 January 2026" with 50.0 transaction amount on Working Capital loan results an error with the following data:
       | HTTP response code | Error message                                            |
       | 400                | Credit balance refund is allowed only for overpaid loans |
     Examples:
-      | status                          |
-      | SUBMITTED_AND_PENDING_APPROVAL  |
-      | APPROVED                        |
-      | ACTIVE                          |
-      | CLOSED_OBLIGATIONS_MET          |
+      | status                         |
+      | SUBMITTED_AND_PENDING_APPROVAL |
+      | APPROVED                       |
+      | ACTIVE                         |
+      | CLOSED_OBLIGATIONS_MET         |
 
   @TestRailId:C76672
   Scenario: Verify that a credit balance refund with zero transaction amount is rejected
@@ -229,14 +229,14 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
     And Customer makes repayment on "02 January 2026" with 9100.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "OVERPAID"
     And Initiating a credit balance refund on "02 January 2026" with 0.0 transaction amount on Working Capital loan results an error with the following data:
-      | HTTP response code | Error message                                         |
+      | HTTP response code | Error message                                            |
       | 400                | The parameter `transactionAmount` must be greater than 0 |
 
   @TestRailId:C76673
@@ -245,14 +245,14 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
     And Customer makes repayment on "02 January 2026" with 9100.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "OVERPAID"
     And Initiating a credit balance refund on "02 January 2026" with -10.0 transaction amount on Working Capital loan results an error with the following data:
-      | HTTP response code | Error message                                         |
+      | HTTP response code | Error message                                            |
       | 400                | The parameter `transactionAmount` must be greater than 0 |
 
   @TestRailId:C76674
@@ -261,7 +261,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 10 January 2026 | 10 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 10 January 2026 | 10 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "10 January 2026" with "9000" amount and expected disbursement date on "10 January 2026"
     And Admin successfully disburse the Working Capital loan on "10 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "11 January 2026"
@@ -277,7 +277,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -285,8 +285,8 @@ Feature: Working Capital Loan Credit Balance Refund
     Then Working Capital loan status will be "OVERPAID"
     When Admin sets the business date to "05 January 2026"
     And Initiating a credit balance refund on "03 January 2026" with 50.0 transaction amount on Working Capital loan results an error with the following data:
-      | HTTP response code | Error message                                         |
-      | 400                | Backdated credit balance refund is not allowed        |
+      | HTTP response code | Error message                                  |
+      | 400                | Backdated credit balance refund is not allowed |
 
   @TestRailId:C76676
   Scenario: Verify that a credit balance refund cannot be repeated after the loan has been closed via full refund
@@ -294,7 +294,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -308,12 +308,12 @@ Feature: Working Capital Loan Credit Balance Refund
       | 400                | Credit balance refund is allowed only for overpaid loans |
 
   @TestRailId:C76677
-    Scenario: Verify that a credit balance refund note exceeding 1000 characters is rejected
+  Scenario: Verify that a credit balance refund note exceeding 1000 characters is rejected
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -329,7 +329,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -345,7 +345,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -361,7 +361,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -376,7 +376,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -395,7 +395,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -411,7 +411,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -423,7 +423,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -440,7 +440,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -456,7 +456,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -465,9 +465,9 @@ Feature: Working Capital Loan Credit Balance Refund
     When Admin sets the business date to "03 January 2026"
     And Customer makes credit balance refund on "03 January 2026" with 25.0 transaction amount on Working Capital loan
     Then Working Capital loan balance payload contains the following fields:
-      | field               | value  |
-      | principalOutstanding| 0.00   |
-      | overpaymentAmount   | 75.00  |
+      | field                | value |
+      | principalOutstanding | 0.00  |
+      | overpaymentAmount    | 75.00 |
 
   @TestRailId:C76686
   Scenario: Verify that a single overpaying repayment correctly attributes the full principal to totalPaidPrincipal
@@ -475,7 +475,7 @@ Feature: Working Capital Loan Credit Balance Refund
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin sets the business date to "02 January 2026"
@@ -504,9 +504,9 @@ Feature: Working Capital Loan Credit Balance Refund
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9000.0    | 9000.0             | 0.0            | 0.0              | 50.0              |
     And Working Capital Loan has transactions:
-      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment       | 9050.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 9050.0            | 9000.0           | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "10 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     When Customer makes credit balance refund on "10 January 2026" with 50.0 transaction amount on Working Capital loan
@@ -537,9 +537,9 @@ Feature: Working Capital Loan Credit Balance Refund
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9000.0    | 9000.0             | 0.0            | 0.0              | 50.0              |
     And Working Capital Loan has transactions:
-      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment       | 9050.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 9050.0            | 9000.0           | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "10 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     When Customer makes credit balance refund on "10 January 2026" with 30.0 transaction amount on Working Capital loan
@@ -570,9 +570,9 @@ Feature: Working Capital Loan Credit Balance Refund
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9000.0    | 200.0              | 0.0            | 0.0              | 0.0               |
     And Working Capital Loan has transactions:
-      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment       | 200.0             | 200.0            | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 200.0             | 200.0            | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "05 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     And Customer makes repayment on "05 January 2026" with 9100.0 transaction amount on Working Capital loan
@@ -581,10 +581,10 @@ Feature: Working Capital Loan Credit Balance Refund
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9000.0    | 9000.0             | 0.0            | 0.0              | 300.0             |
     And Working Capital Loan has transactions:
-      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment       | 200.0             | 200.0            | 0.0               | 0.0                   | false    |
-      | 05 January 2026 | Repayment       | 9100.0            | 8800.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 200.0             | 200.0            | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Repayment    | 9100.0            | 8800.0           | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "10 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     When Customer makes credit balance refund on "10 January 2026" with 300.0 transaction amount on Working Capital loan
@@ -614,17 +614,17 @@ Feature: Working Capital Loan Credit Balance Refund
     # the period's expected payment becomes 50 + 200 = 250. The 9000 repayment settles the projection from 06 January
     # on, so those periods would end the schedule early; 10 January still carries its due principal and keeps them.
     Then Working Capital loan amortization schedule has 10 periods, with the following data for periods:
-      | paymentNo | paymentDate      | expectedPaymentAmount | actualPaymentAmount | expectedBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance |
-      | 0         | 01 January 2026  | -9000.00              |                     | 9000.00         |                            |                          | 0.00                       |
-      | 1         | 02 January 2026  | 50.00                 | 0.00                | 8950.00         | 0.00                       | 0.00                     | 0.00                       |
-      | 2         | 03 January 2026  | 50.00                 | 0.00                | 8900.00         | 0.00                       | 0.00                     | 0.00                       |
-      | 3         | 04 January 2026  | 50.00                 | 0.00                | 8850.00         | 0.00                       | 0.00                     | 0.00                       |
-      | 4         | 05 January 2026  | 50.00                 | 9000.00             | 8800.00         | 0.00                       | 0.00                     | 0.00                       |
-      | 5         | 06 January 2026  | 50.00                 |                     | 8750.00         | 0.00                       |                          | 0.00                       |
-      | 6         | 07 January 2026  | 50.00                 |                     | 8700.00         | 0.00                       |                          | 0.00                       |
-      | 7         | 08 January 2026  | 50.00                 |                     | 8650.00         | 0.00                       |                          | 0.00                       |
-      | 8         | 09 January 2026  | 50.00                 |                     | 8600.00         | 0.00                       |                          | 0.00                       |
-      | 9         | 10 January 2026  | 250.00                |                     | 8550.00         | 0.00                       |                          | 0.00                       |
+      | paymentNo | paymentDate     | expectedPaymentAmount | actualPaymentAmount | expectedBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance |
+      | 0         | 01 January 2026 | -9000.00              |                     | 9000.00         |                            |                          | 0.00                       |
+      | 1         | 02 January 2026 | 50.00                 | 0.00                | 8950.00         | 0.00                       | 0.00                     | 0.00                       |
+      | 2         | 03 January 2026 | 50.00                 | 0.00                | 8900.00         | 0.00                       | 0.00                     | 0.00                       |
+      | 3         | 04 January 2026 | 50.00                 | 0.00                | 8850.00         | 0.00                       | 0.00                     | 0.00                       |
+      | 4         | 05 January 2026 | 50.00                 | 9000.00             | 8800.00         | 0.00                       | 0.00                     | 0.00                       |
+      | 5         | 06 January 2026 | 50.00                 |                     | 8750.00         | 0.00                       |                          | 0.00                       |
+      | 6         | 07 January 2026 | 50.00                 |                     | 8700.00         | 0.00                       |                          | 0.00                       |
+      | 7         | 08 January 2026 | 50.00                 |                     | 8650.00         | 0.00                       |                          | 0.00                       |
+      | 8         | 09 January 2026 | 50.00                 |                     | 8600.00         | 0.00                       |                          | 0.00                       |
+      | 9         | 10 January 2026 | 250.00                |                     | 8550.00         | 0.00                       |                          | 0.00                       |
 
   @TestRailId:C85507
   Scenario: Verify working capital loan credit balance refund with backdated repayment to make loan overpaid - UC4
@@ -643,9 +643,9 @@ Feature: Working Capital Loan Credit Balance Refund
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9000.0    | 9000.0             | 0.0            | 0.0              | 200.0             |
     And Working Capital Loan has transactions:
-      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment       | 9200.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 9200.0            | 9000.0           | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "10 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     When Customer makes credit balance refund on "10 January 2026" with 200.0 transaction amount on Working Capital loan
@@ -689,9 +689,9 @@ Feature: Working Capital Loan Credit Balance Refund
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9000.0    | 9000.0             | 0.0            | 0.0              | 200.0             |
     And Working Capital Loan has transactions:
-      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 05 January 2026 | Repayment       | 9200.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Repayment    | 9200.0            | 9000.0           | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "10 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     When Customer makes credit balance refund on "10 January 2026" with 200.0 transaction amount on Working Capital loan
@@ -749,9 +749,9 @@ Feature: Working Capital Loan Credit Balance Refund
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9000.0    | 9000.0             | 0.0            | 0.0              | 200.0             |
     And Working Capital Loan has transactions:
-      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment       | 9200.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 9200.0            | 9000.0           | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "10 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     Then Customer fails to make credit balance refund on "05 January 2026" with 200.0 EUR transaction amount backdated outcomes with error message
@@ -760,9 +760,9 @@ Feature: Working Capital Loan Credit Balance Refund
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9000.0    | 9000.0             | 0.0            | 0.0              | 200.0             |
     And Working Capital Loan has transactions:
-      | transactionDate | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment             | 9200.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 9200.0            | 9000.0           | 0.0               | 0.0                   | false    |
 
   @TestRailId:C85510
   Scenario: Verify working capital loan credit balance refund within breach schedule with undo backdated repayment- UC7
@@ -773,7 +773,7 @@ Feature: Working Capital Loan Credit Balance Refund
       | 1               | MONTHS              | FLAT                        | 3000         |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -790,9 +790,9 @@ Feature: Working Capital Loan Credit Balance Refund
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9000.0    | 2500.0             | 0.0            | 0.0              | 0.0               |
     And Working Capital Loan has transactions:
-      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 05 January 2026 | Repayment       | 2500.0            | 2500.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Repayment    | 2500.0            | 2500.0           | 0.0               | 0.0                   | false    |
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-31 | 31           | 3000.00          | 500.00            | null       | true   |
@@ -802,12 +802,12 @@ Feature: Working Capital Loan Credit Balance Refund
     Then Working Capital loan status will be "OVERPAID"
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
-      | 9000.0    | 9000.0             | 0.0            | 0.0              | 1500.0             |
+      | 9000.0    | 9000.0             | 0.0            | 0.0              | 1500.0            |
     And Working Capital Loan has transactions:
-      | transactionDate | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 05 January 2026 | Repayment             | 2500.0            | 2500.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Repayment             | 8000.0            | 6500.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Repayment    | 2500.0            | 2500.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 8000.0            | 6500.0           | 0.0               | 0.0                   | false    |
 #--- CBR on the same biz date ---#
     When Customer makes credit balance refund on "05 February 2026" with 1500.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
@@ -823,7 +823,7 @@ Feature: Working Capital Loan Credit Balance Refund
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-31 | 31           | 3000.00          | 0.00              | null       | false  |
-      | 2            | 2026-02-01 | 2026-02-28 | 28           | 3000.00          | 3000.00           | null       | null   |
+      | 2            | 2026-02-01 | 2026-02-28 | 28           | 0.00             | 0.00              | null       | false  |
     When Admin sets the business date to "10 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Customer undo "1"th "REPAYMENT" transaction made on "05 January 2026" on Working Capital loan
@@ -842,7 +842,7 @@ Feature: Working Capital Loan Credit Balance Refund
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-31 | 31           | 3000.00          | 0.00              | null       | false  |
-      | 2            | 2026-02-01 | 2026-02-28 | 28           | 3000.00          | 3000.00           | null       | null   |
+      | 2            | 2026-02-01 | 2026-02-28 | 28           | 2500.00          | 2500.00           | null       | null   |
 
   @TestRailId:C89753
   Scenario: Verify that undoing a repayment after a partial credit balance refund removes the full repayment amount from the breach schedule

@@ -35,4 +35,29 @@
             </column>
         </addColumn>
     </changeSet>
+
+    <!-- Backfill the portion for allocations written before the column existed. The journal entry posting now reads
+         overpayment_portion instead of deriving it, so leaving these rows at the 0 default would post a zero
+         overpayment leg against a full fund-source leg and unbalance any later restatement. Only the money-moving
+         types are touched; every other allocation genuinely has no overpayment portion. -->
+    <changeSet author="fineract" id="wcl-0060-backfill-overpayment-portion">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="m_wc_loan_transaction_allocation" columnName="overpayment_portion"/>
+        </preConditions>
+        <!-- Repayment-like: whatever the transaction paid beyond principal, fee and penalty was the overpayment. -->
+        <update tableName="m_wc_loan_transaction_allocation">
+            <column name="overpayment_portion"
+                    valueComputed="GREATEST((SELECT txn.transaction_amount FROM m_wc_loan_transaction txn WHERE txn.id = wc_loan_transaction_id)
+                                            - COALESCE(principal_portion, 0) - COALESCE(fee_charges_portion, 0) - COALESCE(penalty_charges_portion, 0), 0)"/>
+            <where>overpayment_portion = 0 AND (SELECT txn.transaction_type_id FROM m_wc_loan_transaction txn WHERE txn.id = wc_loan_transaction_id) IN (2, 22, 23, 26)</where>
+        </update>
+        <!-- Credit balance refund: booked before the split existed, the whole amount sat in principal_portion. A booked
+             refund never exceeds the overpayment, so all of it was the overpayment portion and none of it principal. -->
+        <update tableName="m_wc_loan_transaction_allocation">
+            <column name="overpayment_portion"
+                    valueComputed="(SELECT txn.transaction_amount FROM m_wc_loan_transaction txn WHERE txn.id = wc_loan_transaction_id)"/>
+            <column name="principal_portion" valueNumeric="0"/>
+            <where>overpayment_portion = 0 AND (SELECT txn.transaction_type_id FROM m_wc_loan_transaction txn WHERE txn.id = wc_loan_transaction_id) = 20</where>
+        </update>
+    </changeSet>
 </databaseChangeLog>

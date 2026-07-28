@@ -198,11 +198,19 @@ public final class ProjectedAmortizationScheduleModel {
      * balance or the payment analysis. It only raises {@code expectedPaymentAmount} of its own period, because the
      * re-injected principal is owned by the loan balance ({@code principalAdjustment} / {@code principalOutstanding}),
      * while this model stays the projection of the originally disbursed amount.
+     *
+     * <p>
+     * The date is clamped into the amortization term the same way {@link #applyPayment} clamps a payment date. A credit
+     * balance refund lands on an overpaid loan, so its date is often at or past maturity; without the clamp the
+     * adjustment would match no period at all and silently vanish from the projection while the balance still owed it.
+     * Unlike a payment it does not advance {@code calculatedTillDate}: that would move which periods count as passed
+     * and so change the NPV source, and the adjustment must leave the amortization alone.
      */
     public void applyPrincipalAdjustment(final LocalDate adjustmentDate, final BigDecimal amount) {
         Objects.requireNonNull(adjustmentDate, "adjustmentDate");
         Objects.requireNonNull(amount, "amount");
-        principalAdjustments.add(new PrincipalAdjustment(adjustmentDate, money(amount)));
+        principalAdjustments.add(new PrincipalAdjustment(calculateAllocationDate(adjustmentDate, currentFirstPeriodDayOffset()), //
+                money(amount)));
         rebuildPayments();
     }
 

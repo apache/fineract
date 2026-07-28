@@ -385,13 +385,13 @@ Feature: Working Capital Breach Schedule
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-01 | 2026-01-31 | 31           | 0.00             | 0.00              | null       | null   |
+      | 1            | 2026-01-01 | 2026-01-31 | 31           | 0.00             | 0.00              | null       | false  |
     When Admin sets the business date to "01 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-31 | 31           | 0.00             | 0.00              | null       | false  |
-      | 2            | 2026-02-01 | 2026-02-28 | 28           | 0.00             | 0.00              | null       | null   |
+      | 2            | 2026-02-01 | 2026-02-28 | 28           | 0.00             | 0.00              | null       | false  |
 
   @TestRailId:C77000
   Scenario: Verify working capital loan breach schedule - first period start shifted by breachGraceDays

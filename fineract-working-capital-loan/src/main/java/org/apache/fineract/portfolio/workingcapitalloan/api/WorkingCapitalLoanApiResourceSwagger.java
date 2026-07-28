@@ -320,6 +320,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
                     + "principalAdjustment — do not add the two together.")
             public BigDecimal principal;
             public BigDecimal principalPaid;
+            @Schema(description = "Principal re-injected by an over-refunding credit balance refund. Already included in principal.")
+            public BigDecimal principalAdjustment;
             public BigDecimal principalOutstanding;
             public BigDecimal fee;
             public BigDecimal feePaid;

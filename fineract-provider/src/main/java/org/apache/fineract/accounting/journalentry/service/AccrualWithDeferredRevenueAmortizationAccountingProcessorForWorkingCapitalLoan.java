@@ -65,8 +65,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         final BigDecimal principalPortion = MathUtil.nullToZero(allocation.getPrincipalPortion());
         final BigDecimal feesPortion = MathUtil.nullToZero(allocation.getFeeChargesPortion());
         final BigDecimal penaltiesPortion = MathUtil.nullToZero(allocation.getPenaltyChargesPortion());
-        final BigDecimal overpaymentPortion = txn.getTransactionAmount().subtract(principalPortion).subtract(feesPortion)
-                .subtract(penaltiesPortion).max(BigDecimal.ZERO);
+        final BigDecimal overpaymentPortion = MathUtil.nullToZero(allocation.getOverpaymentPortion());
 
         switch (txn.getTypeOf()) {
             case LoanTransactionType.REPAYMENT -> {
@@ -195,44 +194,18 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             // The ledger already reflects the recomputed split; re-posting would only add cancelling noise.
             return;
         }
-        helper.checkForBranchClosures(helper.getLatestClosureByBranch(loan.getClient().getOffice().getId()), txn.getTransactionDate());
-        supersedeJournalEntries(effectiveEntries, txn.getTransactionDate());
-        if (txn.getTypeOf() == LoanTransactionType.CREDIT_BALANCE_REFUND) {
-            postCreditBalanceRefundJournalEntries(loan, txn, allocation);
-        } else {
-            postJournalEntries(loan, txn, allocation, isChargedOff);
-        }
+        reverseExistingEntries(loan, txn, true);
+        postJournalEntries(loan, txn, allocation, isChargedOff);
     }
 
     /**
-     * The entries that currently make up a transaction's posting. Superseded entries and their offsetting mirrors are
-     * both flagged reversed (see {@link #supersedeJournalEntries}), so what remains is exactly the live split.
+     * The entries that currently make up a transaction's posting: {@code findJournalEntries} returns only the ones not
+     * flagged reversed. A restatement supersedes its predecessors (see {@link #reverseExistingEntries}), so what
+     * remains is exactly the live split.
      */
     private List<JournalEntry> effectiveJournalEntries(final WorkingCapitalLoanTransaction txn) {
         final String transactionId = AccountingProcessorHelper.WORKING_CAPITAL_LOAN_TRANSACTION_IDENTIFIER + txn.getId();
         return journalEntryRepository.findJournalEntries(transactionId, WORKING_CAPITAL_LOAN_ENTITY_TYPE);
-    }
-
-    /**
-     * Cancels a surviving transaction's current entries by posting an offsetting mirror for each, keeping the ledger
-     * append-only (nothing is deleted). Both the superseded entry and its mirror are flagged reversed: together they
-     * are a closed, cancelled pair, so only the freshly posted split stays live. That keeps a later restatement from
-     * mirroring these mirrors again, which would otherwise compound and corrupt the net balance.
-     *
-     * <p>
-     * This differs from {@link #postReversalJournalEntries}, which reverses the transaction being <em>undone</em> and
-     * leaves its mirrors live as the visible reversal.
-     */
-    private void supersedeJournalEntries(final List<JournalEntry> entries, final LocalDate reversalDate) {
-        for (final JournalEntry journalEntry : entries) {
-            final JournalEntry mirror = createMirrorEntry(journalEntry, journalEntry.getTransactionId(), reversalDate);
-            mirror.setReversed(true);
-            helper.persistJournalEntry(mirror);
-
-            journalEntry.setReversed(true);
-            journalEntry.setReversalJournalEntry(mirror);
-            helper.persistJournalEntry(journalEntry);
-        }
     }
 
     private JournalEntry createMirrorEntry(final JournalEntry journalEntry, final String transactionId, final LocalDate transactionDate) {
@@ -252,7 +225,6 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         }
         final Long productId = loan.getLoanProduct().getId();
         final Long paymentTypeId = extractPaymentTypeId(txn);
-        final BigDecimal amount = txn.getTransactionAmount();
 
         if (txn.getTypeOf() == LoanTransactionType.CREDIT_BALANCE_REFUND) {
             return postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.LOAN_PORTFOLIO, true,
@@ -264,8 +236,9 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         final BigDecimal principalPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getPrincipalPortion());
         final BigDecimal feesPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getFeeChargesPortion());
         final BigDecimal penaltiesPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getPenaltyChargesPortion());
-        final BigDecimal overpaymentPortion = amount.subtract(principalPortion).subtract(feesPortion).subtract(penaltiesPortion)
-                .max(BigDecimal.ZERO);
+        // Read the overpayment portion off the allocation, exactly as postJournalEntries does when it books the split.
+        // Re-deriving it here would let the guard and the poster disagree about what "unchanged" means.
+        final BigDecimal overpaymentPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getOverpaymentPortion());
         return postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.LOAN_PORTFOLIO, false, principalPortion)
                 || postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.FEES_RECEIVABLE, false, feesPortion)
                 || postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.PENALTIES_RECEIVABLE, false,
@@ -285,6 +258,20 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
 
     @Override
     public void postReversalJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn) {
+        reverseExistingEntries(loan, txn, false);
+    }
+
+    /**
+     * Cancels a transaction's live entries by posting an offsetting mirror for each, keeping the ledger append-only
+     * (nothing is deleted). The originals are always flagged reversed.
+     *
+     * @param supersede
+     *            whether the mirrors are flagged reversed as well. A restatement must pass {@code true}: the cancelled
+     *            pair then drops out of the live set, so the next reversal cannot mirror these mirrors again - which
+     *            would compound and leave the original booking amounts standing on the ledger. An undo passes
+     *            {@code false}, keeping its mirrors live as the visible reversal.
+     */
+    private void reverseExistingEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn, final boolean supersede) {
         final Office office = loan.getClient().getOffice();
         final LocalDate transactionDate = txn.getReversedOnDate() != null ? txn.getReversedOnDate() : DateUtils.getBusinessLocalDate();
 
@@ -296,6 +283,9 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
 
         for (final JournalEntry journalEntry : existingEntries) {
             final JournalEntry reversalEntry = createMirrorEntry(journalEntry, transactionId, transactionDate);
+            if (supersede) {
+                reversalEntry.setReversed(true);
+            }
             helper.persistJournalEntry(reversalEntry);
 
             journalEntry.setReversed(true);

@@ -127,18 +127,37 @@ class ProjectedAmortizationSchedulePrincipalAdjustmentTest {
     }
 
     /**
-     * An adjustment beyond the term has no period to carry it; the projection must stay unchanged rather than guess.
+     * An adjustment dated beyond the term is clamped onto the last period, the same way a late payment is. Dropping it
+     * would leave the projection disagreeing with the loan balance, which still owes the amount - and a credit balance
+     * refund lands on an overpaid loan, so a date at or past maturity is the normal case rather than the exotic one.
      */
     @Test
-    void ignoresAnAdjustmentDatedBeyondTheTerm() {
+    void clampsAnAdjustmentDatedBeyondTheTermOntoTheLastPeriod() {
         final ProjectedAmortizationScheduleModel model = model();
         final List<ProjectedPayment> before = model.projectedPayments();
 
         model.applyPrincipalAdjustment(DISBURSEMENT.plusYears(5), ADJUSTMENT);
 
-        assertEquals(before.size(), model.projectedPayments().size());
-        model.projectedPayments().stream().filter(payment -> payment.paymentNo() > 0)
-                .forEach(payment -> assertEquals(0, payment.expectedPaymentAmount().getAmount().compareTo(new BigDecimal("50"))));
+        assertEquals(before.size(), model.projectedPayments().size(), "clamping must not add a period");
+        final ProjectedPayment lastPeriod = model.projectedPayments().getLast();
+        assertEquals(0, lastPeriod.expectedPaymentAmount().getAmount().compareTo(new BigDecimal("50").add(ADJUSTMENT)),
+                "the last period must carry the clamped adjustment");
+        model.projectedPayments().stream().filter(payment -> payment.paymentNo() > 0).filter(payment -> payment != lastPeriod)
+                .forEach(payment -> assertEquals(0, payment.expectedPaymentAmount().getAmount().compareTo(new BigDecimal("50")),
+                        "period " + payment.paymentNo() + " must keep the projected payment"));
+    }
+
+    /** An adjustment dated before the first installment is clamped forward onto it, mirroring an early payment. */
+    @Test
+    void clampsAnAdjustmentDatedBeforeTheFirstInstallmentOntoTheFirstPeriod() {
+        final ProjectedAmortizationScheduleModel model = model();
+
+        model.applyPrincipalAdjustment(DISBURSEMENT.minusDays(10), ADJUSTMENT);
+
+        final ProjectedPayment firstPeriod = model.projectedPayments().stream().filter(payment -> payment.paymentNo() == 1).findFirst()
+                .orElseThrow();
+        assertEquals(0, firstPeriod.expectedPaymentAmount().getAmount().compareTo(new BigDecimal("50").add(ADJUSTMENT)),
+                "the first period must carry the clamped adjustment");
     }
 
     /**

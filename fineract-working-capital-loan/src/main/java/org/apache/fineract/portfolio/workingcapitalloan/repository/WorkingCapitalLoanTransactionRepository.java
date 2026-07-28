@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -88,4 +89,20 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
             """)
     List<TransactionDateAndAmountHolder> fetchTransactionDateAndAmount(@Param("wcLoanId") Long wcLoanId,
             @Param("transactionTypes") List<LoanTransactionType> transactionTypes);
+
+    /**
+     * Whether a non-reversed transaction sorts strictly after the given one, in the same (transaction date, id) order
+     * the replay uses. The given transaction is excluded by the strict comparison itself, and reversed transactions no
+     * longer move money so they cannot make an earlier allocation order-dependent.
+     */
+    @Query("""
+            SELECT CASE WHEN COUNT(transaction) > 0 THEN TRUE ELSE FALSE END
+            FROM WorkingCapitalLoanTransaction transaction
+            WHERE transaction.wcLoan.id = :loanId
+            AND transaction.reversed = FALSE
+            AND (transaction.transactionDate > :transactionDate
+                OR (transaction.transactionDate = :transactionDate AND transaction.createdDate > :createdDateTime))
+            """)
+    boolean existsLaterTransaction(@Param("loanId") Long loanId, @Param("transactionDate") LocalDate transactionDate,
+            @Param("createdDateTime") OffsetDateTime createdDateTime);
 }

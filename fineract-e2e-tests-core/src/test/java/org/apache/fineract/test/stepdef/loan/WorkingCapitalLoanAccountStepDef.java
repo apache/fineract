@@ -44,6 +44,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -1243,7 +1244,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         GetWorkingCapitalLoansLoanIdResponse loanDetailsResponse = ok(
                 () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
         String getLoanStatus = loanDetailsResponse.getStatus().getValue();
-        assertThat(getLoanStatus.toUpperCase()).isEqualTo(ACTIVE.name());
+        assertThat(getLoanStatus.toUpperCase(Locale.ROOT)).isEqualTo(ACTIVE.name());
 
         GetDisbursementDetail disbursementDetails = loanDetailsResponse.getDisbursementDetails().stream().findFirst()
                 .orElseThrow(() -> new RuntimeException(""));
@@ -1359,7 +1360,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         GetWorkingCapitalLoansLoanIdResponse loanDetailsResponse = ok(
                 () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
         String getLoanStatus = loanDetailsResponse.getStatus().getValue();
-        assertThat(getLoanStatus.toUpperCase()).isEqualTo(ACTIVE.name());
+        assertThat(getLoanStatus.toUpperCase(Locale.ROOT)).isEqualTo(ACTIVE.name());
 
         PostWorkingCapitalLoansLoanIdRequest disburseLoanRequest = testContext().get(TestContextKey.LOAN_DISBURSE_REQUEST);
 
@@ -3435,7 +3436,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     }
 
     private TransactionType resolveTransactionType(String transactionType) {
-        return TransactionType.valueOf(transactionType.toUpperCase().replace(' ', '_'));
+        return TransactionType.valueOf(transactionType.toUpperCase(Locale.ROOT).replace(' ', '_'));
     }
 
     private List<GetWorkingCapitalLoanTransactionIdResponse> findMatchingTransactions(Long loanId, TransactionType transactionType,

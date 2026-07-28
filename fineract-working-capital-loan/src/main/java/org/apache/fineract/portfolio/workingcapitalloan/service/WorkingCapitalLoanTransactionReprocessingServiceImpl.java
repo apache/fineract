@@ -77,53 +77,12 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         reprocessTransactions(loan, allTransactions);
     }
 
-    @Override
-    public void reprocessTransactions(final WorkingCapitalLoan loan, final List<WorkingCapitalLoanTransaction> allTransactions) {
-        reprocessTransactions(loan, allTransactions, false, false);
-    }
-
-    @Override
-    public void reprocessTransactionsAndCorrectAccounting(final WorkingCapitalLoan loan,
-            final List<WorkingCapitalLoanTransaction> allTransactions) {
-        reprocessTransactions(loan, allTransactions, false, true);
-    }
-
-    @Override
-    public void reprocessTransactionsForChargeFreeUndo(final WorkingCapitalLoan loan) {
-        final List<WorkingCapitalLoanTransaction> allTransactions = transactionRepository
-                .findByWcLoan_IdOrderByTransactionDateAscIdAsc(loan.getId());
-        reprocessTransactionsForChargeFreeUndo(loan, allTransactions);
-    }
-
-    @Override
-    public void reprocessTransactionsForChargeFreeUndo(final WorkingCapitalLoan loan,
-            final List<WorkingCapitalLoanTransaction> allTransactions) {
-        reprocessTransactions(loan, allTransactions, true, false);
-    }
-
-    private void reprocessTransactions(final WorkingCapitalLoan loan, final List<WorkingCapitalLoanTransaction> allTransactions,
-            final boolean forceEvenWithoutCharges, final boolean correctAccounting) {
+    private void reprocessTransactions(final WorkingCapitalLoan loan, final List<WorkingCapitalLoanTransaction> allTransactions) {
         final List<WorkingCapitalLoanCharge> charges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
-        // A Credit Balance Refund (CBR) is an inverse-money-movement whose outcome depends on the recomputed
-        // overpayment, so a charge-free loan carrying an active CBR must still be reprocessed even though ordinary
-        // repayment allocations (principal only, min(amount, outstanding)) would otherwise be order-independent.
-        final boolean hasCreditBalanceRefund = allTransactions.stream()
-                .anyMatch(txn -> !txn.isReversed() && txn.getTypeOf() == LoanTransactionType.CREDIT_BALANCE_REFUND);
 
         final WorkingCapitalLoanBalance balance = balanceRepository.findByWcLoan_Id(loan.getId()).orElse(null);
         if (balance == null) {
             log.debug("Skipping transaction reprocessing for WC loan {}: no balance to recompute", loan.getId());
-            return;
-        }
-
-        // Charge-free allocations are order-independent only while the loan is not overpaid: once outstanding hits zero
-        // the chronological split differs from booking-time order, so an overpaid (or undo-on-overpaid) loan must
-        // reprocess.
-        if (charges.isEmpty() && !forceEvenWithoutCharges && !hasCreditBalanceRefund
-                && !isOverpaidByReplayableTransactions(allTransactions, balance)) {
-            log.debug(
-                    "Skipping transaction reprocessing for WC loan {}: no active charges and not overpaid, allocations are order-independent",
-                    loan.getId());
             return;
         }
 
@@ -194,19 +153,11 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         // On an accounting-enabled loan the re-allocation changed the principal/overpayment split of the surviving
         // transactions, so their booking-time journal entries are stale (an overpayment leg shrinks, a refund turns
         // into extra-lending principal). Restate each surviving transaction's entries from its recomputed allocation.
-        if (correctAccounting && loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
             for (final WorkingCapitalLoanTransactionAllocation allocation : updatedAllocations) {
                 accountingProcessor.restateJournalEntries(loan, allocation.getWcLoanTransaction(), allocation, false);
             }
         }
-    }
-
-    private boolean isOverpaidByReplayableTransactions(final List<WorkingCapitalLoanTransaction> allTransactions,
-            final WorkingCapitalLoanBalance balance) {
-        final BigDecimal replayableTotal = allTransactions.stream()
-                .filter(txn -> !txn.isReversed() && txn.getTransactionType().isRepaymentType())
-                .map(WorkingCapitalLoanTransaction::getTransactionAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
-        return replayableTotal.compareTo(balance.getPrincipal()) > 0;
     }
 
     private boolean isCreditBalanceRefund(final LoanTransactionType type) {

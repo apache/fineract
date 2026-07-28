@@ -20,6 +20,7 @@ package org.apache.fineract.test.factory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import org.apache.fineract.client.models.PostSavingsCharges;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
@@ -43,7 +44,7 @@ public final class SavingsProductRequestFactory {
     private SavingsProductRequestFactory() {}
 
     public static PostSavingsProductsRequest defaultSavingsProductRequest() {
-        String uniqueId = UUID.randomUUID().toString().replace("-", "").substring(0, 4).toUpperCase();
+        String uniqueId = UUID.randomUUID().toString().replace("-", "").substring(0, 4).toUpperCase(Locale.ROOT);
         List<PostSavingsCharges> charges = new ArrayList<>();
 
         return new PostSavingsProductsRequest().name(DEFAULT_SAVINGS_PRODUCT_NAME + "-" + uniqueId)//

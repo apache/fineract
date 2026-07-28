@@ -18,9 +18,7 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
-import java.util.List;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 
 /**
  * Reprocesses transaction allocations for a Working Capital loan after a backdated transaction changes the
@@ -44,29 +42,4 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 public interface WorkingCapitalLoanTransactionReprocessingService {
 
     void reprocessTransactions(WorkingCapitalLoan loan);
-
-    /**
-     * Reprocesses using the provided pre-loaded transaction list (avoids a redundant DB query when the caller has
-     * already fetched them).
-     */
-    void reprocessTransactions(WorkingCapitalLoan loan, List<WorkingCapitalLoanTransaction> allTransactions);
-
-    /**
-     * Reprocesses and, on an accounting-enabled loan, restates the journal entries of the re-allocated surviving
-     * transactions to match their recomputed split. Used by the credit-balance-refund-aware undo, where re-allocation
-     * turns former overpayment into due principal (or vice versa) and the booking-time entries would otherwise drift.
-     */
-    void reprocessTransactionsAndCorrectAccounting(WorkingCapitalLoan loan, List<WorkingCapitalLoanTransaction> allTransactions);
-
-    /**
-     * Reprocesses even when the loan has no charges, for the repayment-undo path where undoing a payment on a
-     * previously overpaid loan must fold the former overpayment back into principal.
-     */
-    void reprocessTransactionsForChargeFreeUndo(WorkingCapitalLoan loan);
-
-    /**
-     * Charge-free undo variant that reuses a pre-loaded transaction list to avoid a redundant DB query when the caller
-     * has already fetched them.
-     */
-    void reprocessTransactionsForChargeFreeUndo(WorkingCapitalLoan loan, List<WorkingCapitalLoanTransaction> allTransactions);
 }
