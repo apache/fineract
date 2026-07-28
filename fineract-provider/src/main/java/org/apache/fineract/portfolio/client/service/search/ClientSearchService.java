@@ -58,9 +58,10 @@ public class ClientSearchService {
         Optional<ClientTextSearch> request = searchRequest.getRequest();
         String requestSearchText = request.map(ClientTextSearch::getText).orElse(null);
         String searchText = Objects.toString(requestSearchText, "");
+        boolean excludeClosed = Boolean.TRUE.equals(request.map(ClientTextSearch::getExcludeClosed).orElse(null));
 
         Pageable pageable = searchRequest.toPageable();
 
-        return clientRepository.searchByText(searchText, pageable, hierarchy).map(clientSearchDataMapper::map);
+        return clientRepository.searchByText(searchText, pageable, hierarchy, excludeClosed).map(clientSearchDataMapper::map);
     }
 }

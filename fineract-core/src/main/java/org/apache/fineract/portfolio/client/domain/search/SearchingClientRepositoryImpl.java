@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.jpa.CriteriaQueryFactory;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientIdentifier;
+import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -51,7 +52,7 @@ public class SearchingClientRepositoryImpl implements SearchingClientRepository 
     private final CriteriaQueryFactory criteriaQueryFactory;
 
     @Override
-    public Page<SearchedClient> searchByText(String searchText, Pageable pageable, String officeHierarchy) {
+    public Page<SearchedClient> searchByText(String searchText, Pageable pageable, String officeHierarchy, boolean excludeClosed) {
         /*
          * this whole thing can be replaced with Spring Data JPA 3+ with a findBy(Specification, Pageable) call but at
          * this point the upgrade is too costly
@@ -80,6 +81,11 @@ public class SearchingClientRepositoryImpl implements SearchingClientRepository 
                     cb.like(cb.function("LOWER", String.class, r.get("externalId")), searchLikeValue),
                     cb.like(cb.lower(r.get("mobileNo")), searchLikeValue),
                     cb.like(cb.lower(identity.get("documentKey")), searchLikeValue)));
+
+            // Add status filter to exclude closed clients only if excludeClosed is true
+            if (excludeClosed) {
+                predicates.add(cb.notEqual(r.get("status"), ClientStatus.CLOSED.getValue()));
+            }
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
