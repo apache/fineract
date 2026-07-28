@@ -1349,3 +1349,540 @@ Feature: Asset Externalization - Part2
       | 02 August 2026   | Capitalized Income Amortization Adjustment  | 20.0   | 0.0       | 20.0     | 0.0  | 0.0       | 0.0          | false    |
     When Loan Pay-off is made on "04 August 2026" with transfer external owner
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C89806
+  Scenario: Verify accelerated buy down fee amortization on intermediate-to-final sale is attributed to intermediate owner
+    When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DELAYED_SETTLEMENT" for loan product "LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES"
+    When Admin sets the business date to "01 July 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES | 01 July 2026     | 100            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 July 2026" with "100" amount and expected disbursement date on "01 July 2026"
+    And Admin successfully disburse the loan on "01 July 2026" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2026     |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2026   |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 31   | 01 September 2026 |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 30   | 01 October 2026  |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+    And Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 100.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 100.0  |
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | intermediarySale | 2026-07-02     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    When Admin sets the business date to "03 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2026-07-02     | 1                  | PENDING_INTERMEDIATE | 2026-07-01    | 2026-07-02  | INTERMEDIARYSALE |
+      | 2026-07-02     | 1                  | ACTIVE_INTERMEDIATE  | 2026-07-03    | 9999-12-31  | INTERMEDIARYSALE |
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2026      |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2026    |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 31   | 01 September 2026 |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 30   | 01 October 2026   |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "03 July 2026" with "50" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2026      |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2026    |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 31   | 01 September 2026 |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 30   | 01 October 2026   |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 03 July 2026     | Buy Down Fee     | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "03 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | EXPENSE   | 450280       | Buy Down Expense            | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 03 July 2026 | 50.0       | 0.0              | 50.0                     | 0.0             | 0.0                |
+    When Admin sets the business date to "04 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2026      |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2026    |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 31   | 01 September 2026 |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 30   | 01 October 2026   |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 03 July 2026     | Buy Down Fee              | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 July 2026     | Buy Down Fee Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE_AMORTIZATION" transaction with date "03 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 0.56   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 0.56  |        |
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 03 July 2026 | 50.0       | 0.56             | 49.44                    | 0.0             | 0.0                |
+    And The previous asset external owner has the following OWNER Journal entries:
+      | glAccountType | glAccountCode | glAccountName               | entryType | amount |
+      | EXPENSE       | 450280        | Buy Down Expense            | DEBIT     | 50.00  |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | CREDIT    | 50.00  |
+      | INCOME        | 450281        | Income From Buy Down        | CREDIT    | 0.56   |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 0.56   |
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-07-04     | 1                  |
+    When Admin sets the business date to "05 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 4 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2026-07-02     | 1                  | PENDING_INTERMEDIATE | 2026-07-01    | 2026-07-02  | INTERMEDIARYSALE |
+      | 2026-07-02     | 1                  | ACTIVE_INTERMEDIATE  | 2026-07-03    | 2026-07-04  | INTERMEDIARYSALE |
+      | 2026-07-04     | 1                  | PENDING              | 2026-07-04    | 2026-07-04  | SALE             |
+      | 2026-07-04     | 1                  | ACTIVE               | 2026-07-05    | 9999-12-31  | SALE             |
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2026      |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2026    |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 31   | 01 September 2026 |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 30   | 01 October 2026   |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 03 July 2026     | Buy Down Fee              | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 July 2026     | Buy Down Fee Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    |
+      | 04 July 2026     | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
+      | 04 July 2026     | Buy Down Fee Amortization | 48.89  | 0.0       | 48.89    | 0.0  | 0.0       | 0.0          | false    |
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 03 July 2026 | 50.0       | 50.0             | 0.0                      | 0.0             | 0.0                |
+    And Loan Transactions tab has 2 a "BUY_DOWN_FEE_AMORTIZATION" transactions with date "04 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 0.55   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
+      | INCOME    | 450281       | Income From Buy Down        |       | 48.89  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 48.89 |        |
+    And The previous asset external owner has the following OWNER Journal entries:
+      | glAccountType | glAccountCode | glAccountName               | entryType | amount |
+      | EXPENSE       | 450280        | Buy Down Expense            | DEBIT     | 50.00  |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | CREDIT    | 50.00  |
+      | INCOME        | 450281        | Income From Buy Down        | CREDIT    | 0.56   |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 0.56   |
+      | INCOME        | 450281        | Income From Buy Down        | CREDIT    | 0.55   |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 0.55   |
+      | INCOME        | 450281        | Income From Buy Down        | CREDIT    | 48.89  |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 48.89  |
+    When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DEFAULT_SETTLEMENT" for loan product "LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES"
+    When Loan Pay-off is made on "05 July 2026" with transfer external owner
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C89807
+  Scenario: Verify accelerated capitalized income amortization on intermediate-to-final sale is attributed to intermediate owner
+    When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DELAYED_SETTLEMENT" for loan product "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME"
+    When Admin sets the business date to "01 July 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 July 2026     | 200            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 July 2026" with "200" amount and expected disbursement date on "01 July 2026"
+    And Admin successfully disburse the loan on "01 July 2026" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2026      |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2026    |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 31   | 01 September 2026 |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 30   | 01 October 2026   |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+    And Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 100.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 100.0  |
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | intermediarySale | 2026-07-02     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    When Admin sets the business date to "03 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2026-07-02     | 1                  | PENDING_INTERMEDIATE | 2026-07-01    | 2026-07-02  | INTERMEDIARYSALE |
+      | 2026-07-02     | 1                  | ACTIVE_INTERMEDIATE  | 2026-07-03    | 9999-12-31  | INTERMEDIARYSALE |
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2026      |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2026    |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 31   | 01 September 2026 |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 30   | 01 October 2026   |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "03 July 2026" with "50" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2026      |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      |    |      | 03 July 2026      |           | 50.0            |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2026    |           | 100.28          | 49.72         | 0.86     | 0.0  | 0.0       | 50.58 | 0.0  | 0.0        | 0.0  | 50.58       |
+      | 2  | 31   | 01 September 2026 |           | 50.28           | 50.0          | 0.58     | 0.0  | 0.0       | 50.58 | 0.0  | 0.0        | 0.0  | 50.58       |
+      | 3  | 30   | 01 October 2026   |           | 0.0             | 50.28         | 0.29     | 0.0  | 0.0       | 50.57 | 0.0  | 0.0        | 0.0  | 50.57       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 150.0         | 1.73     | 0.0  | 0.0       | 151.73 | 0.0  | 0.0        | 0.0  | 151.73      |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement       | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 03 July 2026     | Capitalized Income | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+    And Loan Transactions tab has a "CAPITALIZED_INCOME" transaction with date "03 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable            | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 0.0              | 50.0                | 0.0             | 0.0                |
+    When Admin sets the business date to "04 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2026      |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      |    |      | 03 July 2026      |           | 50.0            |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2026    |           | 100.28          | 49.72         | 0.86     | 0.0  | 0.0       | 50.58 | 0.0  | 0.0        | 0.0  | 50.58       |
+      | 2  | 31   | 01 September 2026 |           | 50.28           | 50.0          | 0.58     | 0.0  | 0.0       | 50.58 | 0.0  | 0.0        | 0.0  | 50.58       |
+      | 3  | 30   | 01 October 2026   |           | 0.0             | 50.28         | 0.29     | 0.0  | 0.0       | 50.57 | 0.0  | 0.0        | 0.0  | 50.57       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 150.0         | 1.73     | 0.0  | 0.0       | 151.73 | 0.0  | 0.0        | 0.0  | 151.73      |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 03 July 2026     | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+      | 03 July 2026     | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 404000       | Interest Income             |       | 0.56   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 0.56  |        |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 0.56             | 49.44               | 0.0             | 0.0                |
+    And The previous asset external owner has the following OWNER Journal entries:
+      | glAccountType | glAccountCode | glAccountName               | entryType | amount |
+      | ASSET         | 112601        | Loans Receivable            | DEBIT     | 50.00  |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | CREDIT    | 50.00  |
+      | INCOME        | 404000        | Interest Income             | CREDIT    | 0.56   |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 0.56   |
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-07-04     | 1                  |
+    When Admin sets the business date to "05 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 4 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status               | effectiveFrom | effectiveTo | Transaction type |
+      | 2026-07-02     | 1                  | PENDING_INTERMEDIATE | 2026-07-01    | 2026-07-02  | INTERMEDIARYSALE |
+      | 2026-07-02     | 1                  | ACTIVE_INTERMEDIATE  | 2026-07-03    | 2026-07-04  | INTERMEDIARYSALE |
+      | 2026-07-04     | 1                  | PENDING              | 2026-07-04    | 2026-07-04  | SALE             |
+      | 2026-07-04     | 1                  | ACTIVE               | 2026-07-05    | 9999-12-31  | SALE             |
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2026      |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      |    |      | 03 July 2026      |           | 50.0            |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2026    |           | 100.28          | 49.72         | 0.86     | 0.0  | 0.0       | 50.58 | 0.0  | 0.0        | 0.0  | 50.58       |
+      | 2  | 31   | 01 September 2026 |           | 50.28           | 50.0          | 0.58     | 0.0  | 0.0       | 50.58 | 0.0  | 0.0        | 0.0  | 50.58       |
+      | 3  | 30   | 01 October 2026   |           | 0.0             | 50.28         | 0.29     | 0.0  | 0.0       | 50.57 | 0.0  | 0.0        | 0.0  | 50.57       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 150.0         | 1.73     | 0.0  | 0.0       | 151.73 | 0.0  | 0.0        | 0.0  | 151.73      |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 03 July 2026     | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+      | 03 July 2026     | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    |
+      | 04 July 2026     | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
+      | 04 July 2026     | Capitalized Income Amortization | 48.89  | 0.0       | 48.89    | 0.0  | 0.0       | 0.0          | false    |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 50.0             | 0.0                 | 0.0             | 0.0                |
+    And Loan Transactions tab has 2 a "CAPITALIZED_INCOME_AMORTIZATION" transactions with date "04 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 404000       | Interest Income             |       | 0.55   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
+      | INCOME    | 404000       | Interest Income             |       | 48.89  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 48.89 |        |
+    And The previous asset external owner has the following OWNER Journal entries:
+      | glAccountType | glAccountCode | glAccountName               | entryType | amount |
+      | ASSET         | 112601        | Loans Receivable            | DEBIT     | 50.00  |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | CREDIT    | 50.00  |
+      | INCOME        | 404000        | Interest Income             | CREDIT    | 0.56   |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 0.56   |
+      | INCOME        | 404000        | Interest Income             | CREDIT    | 0.55   |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 0.55   |
+      | INCOME        | 404000        | Interest Income             | CREDIT    | 48.89  |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 48.89  |
+    When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DEFAULT_SETTLEMENT" for loan product "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME"
+    When Loan Pay-off is made on "05 July 2026" with transfer external owner
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C89808
+  Scenario: Verify accelerated buy down fee amortization on owner-to-owner sale is attributed to previous owner
+    # DEFAULT_SETTLEMENT: Owner A buys loan → buy-down + daily amort under A → sale to Owner B
+    # Accelerated amort on sale must stay on Owner A (current at recognition), then ownership moves to B
+    When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DEFAULT_SETTLEMENT" for loan product "LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES"
+    When Admin sets the business date to "01 July 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES | 01 July 2026     | 100            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 July 2026" with "100" amount and expected disbursement date on "01 July 2026"
+    And Admin successfully disburse the loan on "01 July 2026" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2026      |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2026    |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 31   | 01 September 2026 |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 30   | 01 October 2026   |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+    And Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 100.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 100.0  |
+    # --- Sale to Owner A ---
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-07-02     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    When Admin sets the business date to "03 July 2026"
+    And Admin runs inline COB job for Loan
+    Then LoanOwnershipTransferBusinessEvent is created
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
+      | 2026-07-02     | 1                  | PENDING | 2026-07-01    | 2026-07-02  | SALE             |
+      | 2026-07-02     | 1                  | ACTIVE  | 2026-07-03    | 9999-12-31  | SALE             |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+    # --- Buy-down under Owner A + daily amort ---
+    And Admin adds buy down fee with "AUTOPAY" payment type to the loan on "03 July 2026" with "50" EUR transaction amount
+    Then Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 03 July 2026     | Buy Down Fee     | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE" transaction with date "03 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | EXPENSE   | 450280       | Buy Down Expense            | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 03 July 2026 | 50.0       | 0.0              | 50.0                     | 0.0             | 0.0                |
+    When Admin sets the business date to "04 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 03 July 2026     | Buy Down Fee              | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 July 2026     | Buy Down Fee Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "BUY_DOWN_FEE_AMORTIZATION" transaction with date "03 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 0.56   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 0.56  |        |
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 03 July 2026 | 50.0       | 0.56             | 49.44                    | 0.0             | 0.0                |
+    # Owner A (current) owns daily amort
+    And The asset external owner has the following OWNER Journal entries containing:
+      | glAccountType | glAccountCode | glAccountName               | entryType | amount |
+      | EXPENSE       | 450280        | Buy Down Expense            | DEBIT     | 50.00  |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | CREDIT    | 50.00  |
+      | INCOME        | 450281        | Income From Buy Down        | CREDIT    | 0.56   |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 0.56   |
+    # --- Sale Owner A → Owner B: accelerated amort must stay on Owner A ---
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-07-04     | 1                  |
+    When Admin sets the business date to "05 July 2026"
+    And Admin runs inline COB job for Loan
+    Then LoanOwnershipTransferBusinessEvent is created
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type          | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement              | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 03 July 2026     | Buy Down Fee              | 50.0   | 0.0       | 50.0     | 0.0  | 0.0       | 0.0          | false    |
+      | 03 July 2026     | Buy Down Fee Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    |
+      | 04 July 2026     | Buy Down Fee Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
+      | 04 July 2026     | Buy Down Fee Amortization | 48.89  | 0.0       | 48.89    | 0.0  | 0.0       | 0.0          | false    |
+    And Buy down fee contains the following data:
+      | Date         | Fee Amount | Amortized Amount | Not Yet Amortized Amount | Adjusted Amount | Charged Off Amount |
+      | 03 July 2026 | 50.0       | 50.0             | 0.0                      | 0.0             | 0.0                |
+    And Loan Transactions tab has 2 a "BUY_DOWN_FEE_AMORTIZATION" transactions with date "04 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 450281       | Income From Buy Down        |       | 0.55   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
+      | INCOME    | 450281       | Income From Buy Down        |       | 48.89  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 48.89 |        |
+    # Owner A is now previous; accelerated 48.89 must be on A, not B / self
+    And The previous asset external owner has the following OWNER Journal entries:
+      | glAccountType | glAccountCode | glAccountName               | entryType | amount |
+      | EXPENSE       | 450280        | Buy Down Expense            | DEBIT     | 50.00  |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | CREDIT    | 50.00  |
+      | INCOME        | 450281        | Income From Buy Down        | CREDIT    | 0.56   |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 0.56   |
+      | INCOME        | 450281        | Income From Buy Down        | CREDIT    | 0.55   |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 0.55   |
+      | INCOME        | 450281        | Income From Buy Down        | CREDIT    | 48.89  |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 48.89  |
+    When Loan Pay-off is made on "05 July 2026" with transfer external owner
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C89809
+  Scenario: Verify accelerated capitalized income amortization on owner-to-owner sale is attributed to previous owner
+    # DEFAULT_SETTLEMENT: Owner A buys loan → capitalized income + daily amort under A → sale to Owner B
+    # Accelerated amort on sale must stay on Owner A (current at recognition), then ownership moves to B
+    When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DEFAULT_SETTLEMENT" for loan product "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME"
+    When Admin sets the business date to "01 July 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                      | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME | 01 July 2026     | 200            | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "01 July 2026" with "200" amount and expected disbursement date on "01 July 2026"
+    And Admin successfully disburse the loan on "01 July 2026" with "100" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2026      |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2026    |           | 66.86           | 33.14         | 0.58     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 2  | 31   | 01 September 2026 |           | 33.53           | 33.33         | 0.39     | 0.0  | 0.0       | 33.72 | 0.0  | 0.0        | 0.0  | 33.72       |
+      | 3  | 30   | 01 October 2026   |           | 0.0             | 33.53         | 0.2      | 0.0  | 0.0       | 33.73 | 0.0  | 0.0        | 0.0  | 33.73       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 100.0         | 1.17     | 0.0  | 0.0       | 101.17 | 0.0  | 0.0        | 0.0  | 101.17      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+    And Loan Transactions tab has a "DISBURSEMENT" transaction with date "01 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 100.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |       | 100.0  |
+    # --- Sale to Owner A ---
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-07-02     | 1                  |
+    Then Asset externalization response has the correct Loan ID, transferExternalId
+    When Admin sets the business date to "03 July 2026"
+    And Admin runs inline COB job for Loan
+    Then LoanOwnershipTransferBusinessEvent is created
+    Then Fetching Asset externalization details by loan id gives numberOfElements: 2 with correct ownerExternalId and the following data:
+      | settlementDate | purchasePriceRatio | status  | effectiveFrom | effectiveTo | Transaction type |
+      | 2026-07-02     | 1                  | PENDING | 2026-07-01    | 2026-07-02  | SALE             |
+      | 2026-07-02     | 1                  | ACTIVE  | 2026-07-03    | 9999-12-31  | SALE             |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement     | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+    # --- Capitalized income under Owner A + daily amort ---
+    And Admin adds capitalized income with "AUTOPAY" payment type to the loan on "03 July 2026" with "50" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 01 July 2026      |           | 100.0           |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      |    |      | 03 July 2026      |           | 50.0            |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 01 August 2026    |           | 100.28          | 49.72         | 0.86     | 0.0  | 0.0       | 50.58 | 0.0  | 0.0        | 0.0  | 50.58       |
+      | 2  | 31   | 01 September 2026 |           | 50.28           | 50.0          | 0.58     | 0.0  | 0.0       | 50.58 | 0.0  | 0.0        | 0.0  | 50.58       |
+      | 3  | 30   | 01 October 2026   |           | 0.0             | 50.28         | 0.29     | 0.0  | 0.0       | 50.57 | 0.0  | 0.0        | 0.0  | 50.57       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid | In advance | Late | Outstanding |
+      | 150.0         | 1.73     | 0.0  | 0.0       | 151.73 | 0.0  | 0.0        | 0.0  | 151.73      |
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement       | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 03 July 2026     | Capitalized Income | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+    And Loan Transactions tab has a "CAPITALIZED_INCOME" transaction with date "03 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | ASSET     | 112601       | Loans Receivable            | 50.0  |        |
+      | LIABILITY | 145024       | Deferred Capitalized Income |       | 50.0   |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 0.0              | 50.0                | 0.0             | 0.0                |
+    When Admin sets the business date to "04 July 2026"
+    And Admin runs inline COB job for Loan
+    Then Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 03 July 2026     | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+      | 03 July 2026     | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    |
+    And Loan Transactions tab has a "CAPITALIZED_INCOME_AMORTIZATION" transaction with date "03 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 404000       | Interest Income             |       | 0.56   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 0.56  |        |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 0.56             | 49.44               | 0.0             | 0.0                |
+    # Owner A (current) owns daily amort
+    And The asset external owner has the following OWNER Journal entries containing:
+      | glAccountType | glAccountCode | glAccountName               | entryType | amount |
+      | ASSET         | 112601        | Loans Receivable            | DEBIT     | 50.00  |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | CREDIT    | 50.00  |
+      | INCOME        | 404000        | Interest Income             | CREDIT    | 0.56   |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 0.56   |
+    # --- Sale Owner A → Owner B: accelerated amort must stay on Owner A ---
+    When Admin makes asset externalization request by Loan ID with unique ownerExternalId, system-generated transferExternalId and the following data:
+      | Transaction type | settlementDate | purchasePriceRatio |
+      | sale             | 2026-07-04     | 1                  |
+    When Admin sets the business date to "05 July 2026"
+    And Admin runs inline COB job for Loan
+    Then LoanOwnershipTransferBusinessEvent is created
+    And Loan Transactions tab has the following data without accruals:
+      | Transaction date | Transaction Type                | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 01 July 2026     | Disbursement                    | 100.0  | 0.0       | 0.0      | 0.0  | 0.0       | 100.0        | false    |
+      | 03 July 2026     | Capitalized Income              | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 150.0        | false    |
+      | 03 July 2026     | Capitalized Income Amortization | 0.56   | 0.0       | 0.56     | 0.0  | 0.0       | 0.0          | false    |
+      | 04 July 2026     | Capitalized Income Amortization | 0.55   | 0.0       | 0.55     | 0.0  | 0.0       | 0.0          | false    |
+      | 04 July 2026     | Capitalized Income Amortization | 48.89  | 0.0       | 48.89    | 0.0  | 0.0       | 0.0          | false    |
+    And Deferred Capitalized Income contains the following data:
+      | Amount | Amortized Amount | Unrecognized Amount | Adjusted Amount | Charged Off Amount |
+      | 50.0   | 50.0             | 0.0                 | 0.0             | 0.0                |
+    And Loan Transactions tab has 2 a "CAPITALIZED_INCOME_AMORTIZATION" transactions with date "04 July 2026" which has the following Journal entries:
+      | Type      | Account code | Account name                | Debit | Credit |
+      | INCOME    | 404000       | Interest Income             |       | 0.55   |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 0.55  |        |
+      | INCOME    | 404000       | Interest Income             |       | 48.89  |
+      | LIABILITY | 145024       | Deferred Capitalized Income | 48.89 |        |
+    # Owner A is now previous; accelerated 48.89 must be on A, not B
+    And The previous asset external owner has the following OWNER Journal entries:
+      | glAccountType | glAccountCode | glAccountName               | entryType | amount |
+      | ASSET         | 112601        | Loans Receivable            | DEBIT     | 50.00  |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | CREDIT    | 50.00  |
+      | INCOME        | 404000        | Interest Income             | CREDIT    | 0.56   |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 0.56   |
+      | INCOME        | 404000        | Interest Income             | CREDIT    | 0.55   |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 0.55   |
+      | INCOME        | 404000        | Interest Income             | CREDIT    | 48.89  |
+      | LIABILITY     | 145024        | Deferred Capitalized Income | DEBIT     | 48.89  |
+    When Loan Pay-off is made on "05 July 2026" with transfer external owner
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
