@@ -28,6 +28,7 @@ import org.apache.fineract.infrastructure.configuration.data.GlobalConfiguration
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.PhoneNumberValidationService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,9 @@ class ClientDataValidatorTest {
     @Mock
     private ConfigurationReadPlatformService configurationReadPlatformService;
 
+    @Mock
+    private PhoneNumberValidationService phoneNumberValidationService;
+
     private ClientDataValidator validator;
 
     @BeforeEach
@@ -51,7 +55,8 @@ class ClientDataValidatorTest {
         FromJsonHelper fromApiJsonHelper = new FromJsonHelper();
         when(configurationReadPlatformService.retrieveGlobalConfiguration(anyString()))
                 .thenReturn(new GlobalConfigurationPropertyData().setEnabled(false));
-        validator = new ClientDataValidator(fromApiJsonHelper, configurationReadPlatformService);
+        when(phoneNumberValidationService.getRegex()).thenReturn("^\\+?[0-9]{7,15}$");
+        validator = new ClientDataValidator(fromApiJsonHelper, configurationReadPlatformService, phoneNumberValidationService);
     }
 
     private static String validMinimalCreateJson(String dateFormat) {

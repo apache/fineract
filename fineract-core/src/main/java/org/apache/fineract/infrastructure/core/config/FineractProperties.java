@@ -88,6 +88,7 @@ public class FineractProperties {
 
     private FineractSqlValidationProperties sqlValidation;
     private FineractInputValidationProperties inputValidation;
+    private FineractPhoneValidationProperties phoneValidation;
 
     private FineractCache cache;
 
@@ -731,6 +732,13 @@ public class FineractProperties {
 
         private String name;
         private String pattern;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractPhoneValidationProperties {
+
+        private String regex = "^\\+?[0-9]{7,15}$";
     }
 
     @Getter
