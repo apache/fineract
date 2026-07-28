@@ -24,6 +24,7 @@ import com.google.gson.JsonObject;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOriginatorLinkingService;
 import org.apache.fineract.portfolio.loanorigination.data.LoanApplicationOriginatorData;
@@ -72,7 +73,7 @@ public abstract class AbstractLoanOriginatorLinkingServiceImpl implements LoanOr
 
             final JsonObject jsonObject = element.getAsJsonObject();
             final LoanApplicationOriginatorData originatorData = validator.validateAndExtract(jsonObject);
-            final Long originatorId = resolveOrCreateOriginatorId(originatorData);
+            final Long originatorId = resolveOrCreateOriginatorId(originatorData, loanOriginatorHelper::findOrCreateOriginatorId);
 
             if (attachedOriginatorIds.contains(originatorId)) {
                 log.debug("Originator {} already attached to loan {}, skipping duplicate", originatorId, loanId);
@@ -85,9 +86,23 @@ public abstract class AbstractLoanOriginatorLinkingServiceImpl implements LoanOr
         }
     }
 
+    /**
+     * Default no-op for modules that do not reconcile originators on disbursement. Loan-specific linking overrides
+     * this.
+     */
+    @Override
+    public void processOriginatorsForLoanDisbursement(final Long loanId, final JsonArray originatorsArray) {
+        // no-op by default
+    }
+
     protected abstract void createAndSaveOriginatorMapping(Long loanId, Long originatorId);
 
-    private Long resolveOrCreateOriginatorId(final LoanApplicationOriginatorData originatorData) {
+    /**
+     * Resolves an originator by internal ID when provided, otherwise finds or creates it by external ID using the
+     * supplied strategy (application-time vs disbursement-time creation rules).
+     */
+    protected Long resolveOrCreateOriginatorId(final LoanApplicationOriginatorData originatorData,
+            final Function<LoanApplicationOriginatorData, Long> findOrCreateByExternalId) {
         if (originatorData.getId() != null) {
             final LoanOriginator originator = loanOriginatorRepository.findById(originatorData.getId())
                     .orElseThrow(() -> new LoanOriginatorNotFoundException(originatorData.getId()));
@@ -96,23 +111,24 @@ public abstract class AbstractLoanOriginatorLinkingServiceImpl implements LoanOr
             }
             return originator.getId();
         }
-        return findOrCreateOriginatorIdByExternalId(originatorData);
+        return findOrCreateOriginatorIdByExternalId(originatorData, findOrCreateByExternalId);
     }
 
-    private Long findOrCreateOriginatorIdByExternalId(final LoanApplicationOriginatorData originatorData) {
+    protected boolean isConstraintViolation(final DataAccessException e) {
+        return e.getMostSpecificCause() instanceof SQLException sqlEx && sqlEx.getSQLState() != null
+                && sqlEx.getSQLState().startsWith(SQL_STATE_INTEGRITY_CONSTRAINT_VIOLATION);
+    }
+
+    private Long findOrCreateOriginatorIdByExternalId(final LoanApplicationOriginatorData originatorData,
+            final Function<LoanApplicationOriginatorData, Long> findOrCreateByExternalId) {
         try {
-            return loanOriginatorHelper.findOrCreateOriginatorId(originatorData);
+            return findOrCreateByExternalId.apply(originatorData);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
             if (!isConstraintViolation(e)) {
                 throw e;
             }
             // Another thread created the originator concurrently - retry
-            return loanOriginatorHelper.findOrCreateOriginatorId(originatorData);
+            return findOrCreateByExternalId.apply(originatorData);
         }
-    }
-
-    private boolean isConstraintViolation(final DataAccessException e) {
-        return e.getMostSpecificCause() instanceof SQLException sqlEx && sqlEx.getSQLState() != null
-                && sqlEx.getSQLState().startsWith(SQL_STATE_INTEGRITY_CONSTRAINT_VIOLATION);
     }
 }

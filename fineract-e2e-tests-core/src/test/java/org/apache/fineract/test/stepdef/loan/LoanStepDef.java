@@ -107,6 +107,7 @@ import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostAddAndDeleteDisbursementDetailRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
+import org.apache.fineract.client.models.PostLoansLoanIdOriginatorData;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -1654,6 +1655,50 @@ public class LoanStepDef extends AbstractStepDef {
         eventCheckHelper.disburseLoanEventCheck(loanId);
         eventCheckHelper.loanDisbursalTransactionEventCheck(loanDisburseResponse);
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
+    }
+
+    /**
+     * Disburses the current loan with the originator external ID stored under
+     * {@link TestContextKey#ORIGINATOR_EXTERNAL_ID}.
+     */
+    @And("Admin successfully disburse the loan on {string} with {string} EUR transaction amount and the originator")
+    public void disburseLoanWithOriginator(final String actualDisbursementDate, final String transactionAmount) throws IOException {
+        final String originatorExternalId = testContext().get(TestContextKey.ORIGINATOR_EXTERNAL_ID);
+        disburseLoanWithOriginatorExternalIds(actualDisbursementDate, transactionAmount, List.of(originatorExternalId));
+    }
+
+    /**
+     * Disburses the current loan with the second originator external ID stored under
+     * {@link TestContextKey#ORIGINATOR_SECOND_EXTERNAL_ID}.
+     */
+    @And("Admin successfully disburse the loan on {string} with {string} EUR transaction amount and the second originator")
+    public void disburseLoanWithSecondOriginator(final String actualDisbursementDate, final String transactionAmount) throws IOException {
+        final String originatorExternalId = testContext().get(TestContextKey.ORIGINATOR_SECOND_EXTERNAL_ID);
+        disburseLoanWithOriginatorExternalIds(actualDisbursementDate, transactionAmount, List.of(originatorExternalId));
+    }
+
+    /**
+     * Disburses the current loan with an explicit empty originator list so existing originator mappings are detached.
+     */
+    @And("Admin successfully disburse the loan on {string} with {string} EUR transaction amount and empty originators")
+    public void disburseLoanWithEmptyOriginators(final String actualDisbursementDate, final String transactionAmount) throws IOException {
+        disburseLoanWithOriginatorExternalIds(actualDisbursementDate, transactionAmount, List.of());
+    }
+
+    /**
+     * Disburses the current loan without originators in the request body (field omitted / null), which must leave
+     * existing loan-originator mappings untouched.
+     */
+    @And("Admin successfully disburse the loan on {string} with {string} EUR transaction amount and null originators")
+    public void disburseLoanWithNullOriginators(final String actualDisbursementDate, final String transactionAmount) throws IOException {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assertNotNull(loanResponse);
+        final long loanId = loanResponse.getLoanId();
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount));
+        disburseRequest.originators(null);
+
+        performLoanDisbursementAndVerifyStatus(loanId, disburseRequest);
     }
 
     @And("Admin successfully add disbursement detail to the loan on {string} with {double} EUR transaction amount")
@@ -4357,6 +4402,22 @@ public class LoanStepDef extends AbstractStepDef {
                 .isEqualTo(statusExpected);
         eventCheckHelper.disburseLoanEventCheck(loanId);
         eventCheckHelper.loanDisbursalTransactionEventCheck(loanDisburseResponse);
+    }
+
+    /**
+     * Builds and submits a disbursement request for the current loan with the supplied originator external IDs.
+     */
+    private void disburseLoanWithOriginatorExternalIds(final String actualDisbursementDate, final String transactionAmount,
+            final List<String> originatorExternalIds) throws IOException {
+        final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        assertNotNull(loanResponse);
+        final long loanId = loanResponse.getLoanId();
+        final PostLoansLoanIdRequest disburseRequest = loanRequestFactory.defaultLoanDisburseRequest()
+                .actualDisbursementDate(actualDisbursementDate).transactionAmount(new BigDecimal(transactionAmount));
+        disburseRequest.originators(
+                originatorExternalIds.stream().map(externalId -> new PostLoansLoanIdOriginatorData().externalId(externalId)).toList());
+
+        performLoanDisbursementAndVerifyStatus(loanId, disburseRequest);
     }
 
     private LoanStatusEnumDataV1 getExpectedStatus(String loanStatus) {

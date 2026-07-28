@@ -290,6 +290,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanTransactionProcessingService loanTransactionProcessingService;
     private final LoanBalanceService loanBalanceService;
     private final LoanTransactionService loanTransactionService;
+    private final LoanOriginatorLinkingService loanOriginatorLinkingService;
 
     @Transactional
     @Override
@@ -465,6 +466,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                         loanAccrualsProcessingService.processIncomePostingAndAccruals(loan, true);
                     }
                 }
+            }
+
+            if (command.hasNonNullParameter(LoanApiConstants.ORIGINATORS_PARAM)) {
+                final JsonArray originatorsArray = command.arrayOfParameterNamed(LoanApiConstants.ORIGINATORS_PARAM);
+                loanOriginatorLinkingService.processOriginatorsForLoanDisbursement(loanId, originatorsArray);
             }
         }
         if (!changes.isEmpty()) {
