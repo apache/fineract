@@ -1350,6 +1350,7 @@ Feature: Asset Externalization - Part2
     When Loan Pay-off is made on "04 August 2026" with transfer external owner
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+  @TestRailId:C89806
   Scenario: Verify accelerated buy down fee amortization on intermediate-to-final sale is attributed to intermediate owner
     When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DELAYED_SETTLEMENT" for loan product "LP2_PROGRESSIVE_ADVANCED_PAYMENT_ALLOCATION_BUYDOWN_FEES"
     When Admin sets the business date to "01 July 2026"
@@ -1497,6 +1498,7 @@ Feature: Asset Externalization - Part2
     When Loan Pay-off is made on "05 July 2026" with transfer external owner
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+  @TestRailId:C89807
   Scenario: Verify accelerated capitalized income amortization on intermediate-to-final sale is attributed to intermediate owner
     When Admin set external asset owner loan product attribute "SETTLEMENT_MODEL" value "DELAYED_SETTLEMENT" for loan product "LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_CAPITALIZED_INCOME"
     When Admin sets the business date to "01 July 2026"
@@ -1647,6 +1649,7 @@ Feature: Asset Externalization - Part2
     When Loan Pay-off is made on "05 July 2026" with transfer external owner
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+  @TestRailId:C89808
   Scenario: Verify accelerated buy down fee amortization on owner-to-owner sale is attributed to previous owner
     # DEFAULT_SETTLEMENT: Owner A buys loan → buy-down + daily amort under A → sale to Owner B
     # Accelerated amort on sale must stay on Owner A (current at recognition), then ownership moves to B
@@ -1760,6 +1763,7 @@ Feature: Asset Externalization - Part2
     When Loan Pay-off is made on "05 July 2026" with transfer external owner
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+  @TestRailId:C89809
   Scenario: Verify accelerated capitalized income amortization on owner-to-owner sale is attributed to previous owner
     # DEFAULT_SETTLEMENT: Owner A buys loan → capitalized income + daily amort under A → sale to Owner B
     # Accelerated amort on sale must stay on Owner A (current at recognition), then ownership moves to B
