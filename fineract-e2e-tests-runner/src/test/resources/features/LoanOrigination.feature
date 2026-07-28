@@ -535,6 +535,7 @@ Feature: Loan Origination
     When Loan Pay-off is made on "07 January 2023"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+  @TestRailId:C89810
   Scenario: Verify loan originators can be reconciled during tranche disbursements
     When Admin sets the business date to "01 January 2026"
     When Admin creates a client with random data
@@ -557,6 +558,7 @@ Feature: Loan Origination
     When Loan Pay-off is made on "03 January 2026"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+  @TestRailId:C89811
   Scenario: Verify null originators on a later tranche disbursement leave existing originator mappings untouched
     When Admin sets the business date to "01 January 2026"
     When Admin creates a client with random data
