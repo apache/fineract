@@ -26,6 +26,11 @@ public final class WorkingCapitalLoanConstants {
 
     public static final String WCL_RESOURCE_NAME = "WORKINGCAPITALLOAN";
 
+    /**
+     * Shared by the create/modify validation error and the schedule-generation exception so both emit the same message.
+     */
+    public static final String EIR_NOT_CALCULABLE_USER_MESSAGE = "Please check the input values - unable to calculate a valid EIR.";
+
     // Common request parameters (locale, dateFormat, id)
     public static final String localeParameterName = "locale";
     public static final String dateFormatParameterName = "dateFormat";

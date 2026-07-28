@@ -451,6 +451,23 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         checkWorkingCapitalLoanProductWithExternalIdCreate();
     }
 
+    @When("Admin creates a new Working Capital Loan Product with discount value {string} that is forbidden to be overriden")
+    public void createWorkingCapitalLoanProductNonOverridenDiscount(String discount) {
+        final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
+        PostAllowAttributeOverrides allowAttributeOverrides = new PostAllowAttributeOverrides().delinquencyBucketClassification(true)
+                .breach(true).discountDefault(false).periodPaymentFrequencyType(true).periodPaymentFrequency(true);
+
+        final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest() //
+                .name(name) //
+                .allowAttributeOverrides(allowAttributeOverrides) //
+                .discount(new BigDecimal(discount));
+
+        final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+        checkWorkingCapitalLoanProductCreate();
+    }
+
     @Then("Admin failed to create a new Working Capital Loan Product field {string} with empty or null mandatory data {string}")
     public void createWorkingCapitalLoanProductWithEmptyDataFailed(String fieldName, String value) {
         String errorMessage = ErrorMessageHelper.fieldValueNullOrEmptyMandatoryFailure(fieldName);

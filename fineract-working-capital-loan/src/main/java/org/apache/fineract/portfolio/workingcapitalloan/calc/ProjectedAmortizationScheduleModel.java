@@ -60,6 +60,12 @@ public final class ProjectedAmortizationScheduleModel {
 
     private static final String MODEL_VERSION = "4";
 
+    /**
+     * Cap on Total Days: beyond this the schedule materialises an unreasonable number of rows and the EIR is
+     * meaningless.
+     */
+    public static final int MAX_CALCULABLE_TOTAL_DAYS = 100_000;
+
     @SerializedName(value = "discountFeeAmount", alternate = "originationFeeAmount")
     private final Money discountFeeAmount;
     private final Money netDisbursementAmount;
@@ -223,6 +229,34 @@ public final class ProjectedAmortizationScheduleModel {
             final int npvDayCount, final MathContext mc) {
         return totalPaymentValue.multiply(periodPaymentRate, mc).divide(BigDecimal.valueOf(npvDayCount), mc).divide(BigDecimal.valueOf(100),
                 mc);
+    }
+
+    /**
+     * Feasibility pre-check reusing {@link #generate}'s exact formulas, without building the schedule. Null mandatory
+     * inputs are treated as calculable so the caller's mandatory-field validation reports them instead.
+     */
+    public static boolean isEirCalculable(final BigDecimal discountFeeAmount, final BigDecimal netDisbursementAmount,
+            final BigDecimal totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount, final MathContext mc) {
+        if (discountFeeAmount == null || netDisbursementAmount == null || totalPaymentVolume == null || periodPaymentRate == null) {
+            return true;
+        }
+        if (netDisbursementAmount.signum() <= 0 || npvDayCount <= 0) {
+            return false;
+        }
+        final BigDecimal dailyPayment = computeDailyPayment(totalPaymentVolume, periodPaymentRate, npvDayCount, mc);
+        if (dailyPayment.signum() <= 0) {
+            return false;
+        }
+        final BigDecimal totalDays = netDisbursementAmount.add(discountFeeAmount, mc).divide(dailyPayment, mc).setScale(0, RoundingMode.UP);
+        if (totalDays.signum() <= 0 || totalDays.compareTo(BigDecimal.valueOf(MAX_CALCULABLE_TOTAL_DAYS)) > 0) {
+            return false;
+        }
+        try {
+            TvmFunctions.rate(totalDays.intValueExact(), dailyPayment.negate(), netDisbursementAmount, mc);
+        } catch (final ArithmeticException | IllegalArgumentException | IllegalStateException e) {
+            return false;
+        }
+        return true;
     }
 
     public static ProjectedAmortizationScheduleModel generate(final BigDecimal discountFeeAmount, final BigDecimal netDisbursementAmount,
@@ -448,6 +482,12 @@ public final class ProjectedAmortizationScheduleModel {
                 mc.getRoundingMode());
         final BigDecimal fractionalTotalDays = newNetDisb.add(newDiscount, mc).divide(newDailyPayment, mc).setScale(scale,
                 mc.getRoundingMode());
+        // Checked on the BigDecimal so int overflow cannot slip past the cap; the EIR solver may still succeed on an
+        // over-cap term (zero-rate shortcut), so relying on the rate() call to fail is not enough.
+        if (fractionalTotalDays.compareTo(BigDecimal.valueOf(MAX_CALCULABLE_TOTAL_DAYS)) > 0) {
+            throw new IllegalStateException("rate change produces a term of " + fractionalTotalDays + " days, above the calculable cap of "
+                    + MAX_CALCULABLE_TOTAL_DAYS);
+        }
         final int newTerm = fractionalTotalDays.intValue();
 
         // When daily payment exceeds remaining gross (e.g., very short-term loan with high TPV),

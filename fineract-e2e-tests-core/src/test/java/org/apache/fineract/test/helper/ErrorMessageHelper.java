@@ -1173,4 +1173,12 @@ public final class ErrorMessageHelper {
     public static String periodPaymentRateOnNonActiveLoanFailure() {
         return "rate.change.not.allowed.for.non.active.loan";
     }
+
+    public static String workingCapitalInputValuesCauseUnableCalculateEIrFailure() {
+        return "Please check the input values - unable to calculate a valid EIR.";
+    }
+
+    public static String workingCapitalInputValuesCauseUnableCalculateEIrErrorCodeFailure() {
+        return "validation.msg.WORKINGCAPITALLOAN.principalAmount.unable.to.calculate.valid.eir";
+    }
 }

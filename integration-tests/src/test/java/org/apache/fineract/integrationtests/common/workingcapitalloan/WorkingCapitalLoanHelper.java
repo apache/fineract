@@ -36,6 +36,7 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.ProjectedAmortizationScheduleData;
+import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRateRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 
@@ -243,6 +244,11 @@ public class WorkingCapitalLoanHelper {
      */
     public CallFailedRuntimeException runModifyExpectingFailure(final Long loanId, final PutWorkingCapitalLoansLoanIdRequest request) {
         return FeignCalls.fail(() -> api().modifyWorkingCapitalLoanApplicationById(loanId, request, Map.of()));
+    }
+
+    public CallFailedRuntimeException runUpdateRateExpectingFailure(final Long loanId,
+            final PutWorkingCapitalLoansLoanIdRateRequest request) {
+        return FeignCalls.fail(() -> api().updateWorkingCapitalLoanRateById(loanId, request));
     }
 
     public GetWorkingCapitalLoansLoanIdResponse retrieveLoan(final Long loanId) {

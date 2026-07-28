@@ -34,6 +34,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizati
 import org.apache.fineract.portfolio.workingcapitalloan.data.ProjectedAmortizationScheduleGenerateRequest;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
+import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanEirNotCalculableException;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.springframework.lang.NonNull;
@@ -100,6 +101,8 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         Validate.notNull(periodPaymentRate, "periodPaymentRate must not be null");
         Validate.notNull(npvDayCount, "npvDayCount must not be null");
 
+        assertEirCalculable(discount, disbursedAmount, totalPaymentVolume, periodPaymentRate, npvDayCount, mc);
+
         return ProjectedAmortizationScheduleModel.generate(discount, disbursedAmount, totalPaymentVolume, periodPaymentRate, npvDayCount,
                 disbursementDate, mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan), DateUtils.getBusinessLocalDate());
     }
@@ -160,10 +163,21 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         Validate.notNull(expectedDisbursementDate, "expectedDisbursementDate must not be null");
         Validate.isTrue(netDisbursementAmount.signum() > 0, "net disbursement amount for schedule must be positive");
 
+        assertEirCalculable(discount, netDisbursementAmount, totalPaymentVolume, periodPaymentRate, npvDayCount, mc);
+
         final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(discount, netDisbursementAmount,
                 totalPaymentVolume, periodPaymentRate, npvDayCount, expectedDisbursementDate, mc,
                 WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan), DateUtils.getBusinessLocalDate());
         scheduleRepositoryWrapper.writeModel(loan, model);
+    }
+
+    /** Guards paths that bypass request validation, before {@code generate()} materialises the full schedule. */
+    private void assertEirCalculable(final BigDecimal discount, final BigDecimal netDisbursementAmount, final BigDecimal totalPaymentVolume,
+            final BigDecimal periodPaymentRate, final int npvDayCount, final MathContext mc) {
+        if (!ProjectedAmortizationScheduleModel.isEirCalculable(discount, netDisbursementAmount, totalPaymentVolume, periodPaymentRate,
+                npvDayCount, mc)) {
+            throw new WorkingCapitalLoanEirNotCalculableException();
+        }
     }
 
     @Override
@@ -200,7 +214,13 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
 
         model.clearLastRateSegment();
 
-        calculator.applyRateChange(model, newRate, modelRateChangeDate);
+        // A pathological rate can make the re-solved split-term schedule non-computable (zero daily payment, over-cap
+        // term, non-convergent EIR); surface those as a domain-rule error.
+        try {
+            calculator.applyRateChange(model, newRate, modelRateChangeDate);
+        } catch (final IllegalStateException | IllegalArgumentException | ArithmeticException e) {
+            throw new WorkingCapitalLoanEirNotCalculableException(e);
+        }
 
         scheduleRepositoryWrapper.writeModel(loan, model);
     }

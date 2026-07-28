@@ -82,6 +82,11 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
         verifySummaryFields(dataTable);
     }
 
+    @Then("The retrieved amortization schedule has the following summary fields with positive effectiveInterestRate value:")
+    public void verifyRetrievedSummaryFieldsWithPositiveEffectiveInterestRate(final DataTable dataTable) {
+        verifySummaryFieldsWithPositiveEffectiveInterestRate(dataTable);
+    }
+
     @Then("The retrieved amortization schedule has payments with the following details:")
     public void verifyRetrievedPaymentDetails(final DataTable dataTable) {
         verifyPaymentDetails(dataTable, null);
@@ -92,13 +97,8 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
         verifyPaymentDetails(dataTable, Integer.valueOf(firstNLines));
     }
 
-    private void verifySummaryFields(final DataTable dataTable) {
-        final ProjectedAmortizationScheduleData response = TestContext.INSTANCE.get(WC_AMORT_SCHEDULE_KEY);
-        assertThat(response).as("Amortization schedule response").isNotNull();
-
-        final Map<String, String> expected = dataTable.asMaps().getFirst();
-        final SoftAssertions assertions = new SoftAssertions();
-
+    public void checkSummaryFields(final SoftAssertions assertions, ProjectedAmortizationScheduleData response,
+            Map<String, String> expected) {
         assertDecimal(assertions, "discountFeeAmount", response.getDiscountFeeAmount(), expected.get("discountFeeAmount"));
         assertDecimal(assertions, "netDisbursementAmount", response.getNetDisbursementAmount(), expected.get("netDisbursementAmount"));
         assertDecimal(assertions, "totalPaymentVolume", response.getTotalPaymentVolume(), expected.get("totalPaymentVolume"));
@@ -106,7 +106,26 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
         assertInt(assertions, "npvDayCount", response.getNpvDayCount(), expected.get("npvDayCount"));
         assertDecimal(assertions, "expectedPaymentAmount", response.getExpectedPaymentAmount(), expected.get("expectedPaymentAmount"));
         assertInt(assertions, "originalPaymentNumber", response.getOriginalPaymentNumber(), expected.get("originalPaymentNumber"));
+    }
 
+    private void verifySummaryFields(final DataTable dataTable) {
+        final ProjectedAmortizationScheduleData response = TestContext.INSTANCE.get(WC_AMORT_SCHEDULE_KEY);
+        assertThat(response).as("Amortization schedule response").isNotNull();
+        final Map<String, String> expected = dataTable.asMaps().getFirst();
+
+        final SoftAssertions assertions = new SoftAssertions();
+        checkSummaryFields(assertions, response, expected);
+        assertions.assertAll();
+    }
+
+    private void verifySummaryFieldsWithPositiveEffectiveInterestRate(final DataTable dataTable) {
+        final ProjectedAmortizationScheduleData response = TestContext.INSTANCE.get(WC_AMORT_SCHEDULE_KEY);
+        assertThat(response).as("Amortization schedule response").isNotNull();
+        final Map<String, String> expected = dataTable.asMaps().getFirst();
+
+        final SoftAssertions assertions = new SoftAssertions();
+        checkSummaryFields(assertions, response, expected);
+        assertDecimal(assertions, "effectiveInterestRate", response.getEffectiveInterestRate(), expected.get("effectiveInterestRate"));
         assertions.assertAll();
     }
 
