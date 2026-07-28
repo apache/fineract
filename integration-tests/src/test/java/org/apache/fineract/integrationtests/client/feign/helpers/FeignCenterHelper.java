@@ -18,53 +18,45 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.DeleteCentersCenterIdResponse;
+import org.apache.fineract.client.models.GetCentersCenterIdResponse;
+import org.apache.fineract.client.models.GetCentersPageItems;
+import org.apache.fineract.client.models.GetCentersResponse;
+import org.apache.fineract.client.models.PostCentersCenterIdChanges;
+import org.apache.fineract.client.models.PostCentersCenterIdRequest;
 import org.apache.fineract.client.models.PostCentersRequest;
 import org.apache.fineract.client.models.PostCentersResponse;
+import org.apache.fineract.client.models.PostGroupsGroupIdChanges;
+import org.apache.fineract.client.models.PostGroupsGroupIdRequest;
+import org.apache.fineract.client.models.PutCentersCenterIdRequest;
+import org.apache.fineract.client.models.PutCentersChanges;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
-import org.apache.fineract.integrationtests.common.CenterDomain;
 import org.apache.fineract.integrationtests.common.Utils;
 
-/**
- * Typed Feign helper for center operations. Standalone by design: nothing here is added to {@code FeignLoanTestBase}
- * (see FEIGN_BASE_MODULARIZATION.md). Replaces the raw-HTTP {@code FeignGroupCenterHelper} stopgap for centers.
- * <p>
- * <b>create</b> / <b>delete</b> are fully typed against the generated {@code CentersApi} (using the
- * {@code PostCentersRequest} fields added at source in this PR). The <b>retrieve</b> / <b>list</b> / <b>update</b> /
- * <b>associateGroups</b> and staff <b>command</b> endpoints go through {@link FeignRawHttpHelper}, because the
- * generated models can't express what the tests assert: {@code GetCentersCenterIdResponse} has no {@code externalId}/
- * {@code staffId}/{@code groupMembers}; {@code GetCentersResponse.pageItems} is an unordered {@code Set};
- * {@code PutCentersCenterIdRequest} exposes only {@code name}; and the shared command models lack the command-specific
- * fields. This is the sanctioned raw-HTTP fallback for broad response/command model gaps (pr_review_lessons_learned #8
- * / #11 / #20 — never drop an assertion because the model lacks the field), not REST-assured. Retrieval reuses the
- * pure-Gson {@link CenterDomain} POJO so every legacy assertion is preserved verbatim.
- */
+/** Typed Feign helper for center operations. */
 public class FeignCenterHelper {
 
-    private static final String CENTERS = "/centers/";
-    private static final String GROUPS = "/groups/";
-    /** Matches the legacy {@code CenterHelper.CREATED_DATE} used by the active-center convenience creators. */
     private static final String CREATED_DATE = "29 December 2014";
-
-    private static final Gson GSON = new Gson();
+    private static final String GROUP_MEMBERS_ASSOCIATION = "groupMembers";
+    private static final String ASSOCIATE_GROUPS_COMMAND = "associateGroups";
+    private static final String ASSIGN_STAFF_COMMAND = "assignStaff";
+    private static final String UNASSIGN_STAFF_COMMAND = "unassignStaff";
 
     private final FineractFeignClient fineractClient;
+    private final NonPagedListingApi nonPagedListingApi;
 
     public FeignCenterHelper(FineractFeignClient fineractClient) {
         this.fineractClient = fineractClient;
+        this.nonPagedListingApi = fineractClient.create(NonPagedListingApi.class);
     }
-
-    // ------------------------------------------------------------------ typed create / delete
 
     /** Creates a center in {@code pending} status (active=false). */
     public PostCentersResponse createCenter(String name, Long officeId) {
@@ -86,10 +78,7 @@ public class FeignCenterHelper {
         return createCenter(centerRequest(Utils.uniqueRandomStringGenerator("Center_Name_", 5), 1L, null, staffId, null, CREATED_DATE));
     }
 
-    /**
-     * Creates a center with external id, staff and group members. Mirrors the legacy semantics: the center is
-     * {@code active} iff an {@code activationDate} is supplied, otherwise {@code pending}.
-     */
+    /** Creates a center with external id, staff and group members; active iff an {@code activationDate} is supplied. */
     public PostCentersResponse createCenter(String name, Long officeId, String externalId, Long staffId, List<Long> groupMembers,
             String activationDate) {
         return createCenter(centerRequest(name, officeId, externalId, staffId, groupMembers, activationDate));
@@ -127,82 +116,52 @@ public class FeignCenterHelper {
         return request;
     }
 
-    // ------------------------------------------------------------------ raw retrieve / list (see class javadoc,
-    // #8/#20)
-
-    public CenterDomain retrieveCenter(Long centerId) {
-        return CenterDomain.fromJSON(FeignRawHttpHelper.get(CENTERS + centerId + "?associations=groupMembers"));
+    public GetCentersCenterIdResponse retrieveCenter(Long centerId) {
+        return ok(() -> fineractClient.centers().retrieveOneCenter(centerId, Map.of("associations", GROUP_MEMBERS_ASSOCIATION)));
     }
 
     /** Retrieves a center expecting failure (e.g. after deletion, or a non-existent id); returns the thrown error. */
-    public RuntimeException retrieveCenterExpectingError(Long centerId) {
-        try {
-            retrieveCenter(centerId);
-            return null;
-        } catch (RuntimeException e) {
-            return e;
-        }
+    public CallFailedRuntimeException retrieveCenterExpectingError(Long centerId) {
+        return fail(() -> fineractClient.centers().retrieveOneCenter(centerId, Map.of("associations", GROUP_MEMBERS_ASSOCIATION)));
     }
 
-    public List<CenterDomain> listCenters() {
-        return parseCenterList(FeignRawHttpHelper.get("/centers?limit=-1"));
+    public List<GetCentersPageItems> listCenters() {
+        return ok(nonPagedListingApi::listCenters);
     }
 
-    public List<CenterDomain> listCentersOrdered() {
-        return parseCenterList(FeignRawHttpHelper.get("/centers?limit=-1&orderBy=id&sortOrder=asc"));
+    public List<GetCentersPageItems> listCentersOrdered() {
+        return ok(nonPagedListingApi::listCentersOrdered);
     }
 
-    public List<CenterDomain> paginatedListCenters() {
-        String pageItems = JsonParser.parseString(FeignRawHttpHelper.get("/centers?paged=true&limit=-1")).getAsJsonObject().get("pageItems")
-                .toString();
-        return parseCenterList(pageItems);
+    public List<GetCentersPageItems> paginatedListCenters() {
+        GetCentersResponse response = ok(() -> fineractClient.centers().retrieveAllCenters(Map.of("paged", true, "limit", -1)));
+        return response.getPageItems() == null ? List.of() : new ArrayList<>(response.getPageItems());
     }
 
-    private static List<CenterDomain> parseCenterList(String json) {
-        List<CenterDomain> centers = GSON.fromJson(json, new TypeToken<ArrayList<CenterDomain>>() {}.getType());
-        return centers == null ? new ArrayList<>() : centers;
-    }
-
-    // ------------------------------------------------------------------ raw update / command endpoints (see class
-    // javadoc)
-
-    /**
-     * Updates a center with the given field map (e.g. {@code name}, {@code externalId}, {@code staffId}). Raw because
-     * {@code PutCentersCenterIdRequest} models only {@code name}. Returns the {@code changes} object.
-     */
-    public JsonObject updateCenter(Long centerId, Map<String, Object> request) {
-        String response = FeignRawHttpHelper.put(CENTERS + centerId, GSON.toJson(request));
-        return JsonParser.parseString(response).getAsJsonObject().getAsJsonObject("changes");
+    /** Updates a center with the given fields; returns the {@code changes} object. */
+    public PutCentersChanges updateCenter(Long centerId, PutCentersCenterIdRequest request) {
+        return ok(() -> fineractClient.centers().updateCenter(centerId, request)).getChanges();
     }
 
     /** Associates groups with the center; returns the associated group ids from the {@code changes} response. */
-    public int[] associateGroups(Long centerId, int[] groupMembers) {
-        Map<String, Object> body = Map.of("groupMembers", groupMembers);
-        String response = FeignRawHttpHelper.post(CENTERS + centerId + "?command=associateGroups", GSON.toJson(body));
-        JsonObject changes = JsonParser.parseString(response).getAsJsonObject().getAsJsonObject("changes");
-        List<String> ids = GSON.fromJson(changes.get("groupMembers"), new TypeToken<ArrayList<String>>() {}.getType());
-        int[] result = new int[ids.size()];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = Integer.parseInt(ids.get(i));
-        }
-        return result;
+    public List<Long> associateGroups(Long centerId, List<Long> groupMembers) {
+        PostCentersCenterIdChanges changes = ok(() -> fineractClient.centers().handleCommandsCenter(centerId,
+                new PostCentersCenterIdRequest().groupMembers(groupMembers), ASSOCIATE_GROUPS_COMMAND)).getChanges();
+        return changes.getGroupMembers().stream().map(Long::valueOf).toList();
     }
 
-    /**
-     * Assigns a staff member to the center. A center is a group-type entity, so this targets the {@code /groups}
-     * command endpoint (mirroring the legacy {@code CenterHelper.assignStaff}). Returns the {@code changes} object.
-     */
-    public JsonObject assignStaff(Long centerId, Long staffId) {
-        return postGroupCommand(centerId, "assignStaff", Map.of("staffId", staffId));
+    /** Assigns a staff member to the center; returns the {@code changes} object. */
+    public PostGroupsGroupIdChanges assignStaff(Long centerId, Long staffId) {
+        return postGroupCommand(centerId, ASSIGN_STAFF_COMMAND, new PostGroupsGroupIdRequest().staffId(staffId));
     }
 
     /** Unassigns the staff member from the center; returns the {@code changes} object (staffId becomes null). */
-    public JsonObject unassignStaff(Long centerId, Long staffId) {
-        return postGroupCommand(centerId, "unassignStaff", Map.of("staffId", staffId));
+    public PostGroupsGroupIdChanges unassignStaff(Long centerId, Long staffId) {
+        return postGroupCommand(centerId, UNASSIGN_STAFF_COMMAND, new PostGroupsGroupIdRequest().staffId(staffId));
     }
 
-    private JsonObject postGroupCommand(Long centerId, String command, Map<String, Object> body) {
-        String response = FeignRawHttpHelper.post(GROUPS + centerId + "?command=" + command, GSON.toJson(body));
-        return JsonParser.parseString(response).getAsJsonObject().getAsJsonObject("changes");
+    // A center is a group server-side: the /centers command endpoint rejects assignStaff/unassignStaff.
+    private PostGroupsGroupIdChanges postGroupCommand(Long centerId, String command, PostGroupsGroupIdRequest request) {
+        return ok(() -> fineractClient.groups().handleCommandsGroup(centerId, request, Map.of("command", command))).getChanges();
     }
 }

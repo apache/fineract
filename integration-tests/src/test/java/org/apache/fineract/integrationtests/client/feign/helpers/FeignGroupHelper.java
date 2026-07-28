@@ -20,18 +20,17 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.DeleteGroupsGroupIdResponse;
+import org.apache.fineract.client.models.GetGroupsGroupIdClientMembers;
 import org.apache.fineract.client.models.GetGroupsGroupIdResponse;
+import org.apache.fineract.client.models.GetGroupsPageItems;
+import org.apache.fineract.client.models.PostGroupsGroupIdChanges;
+import org.apache.fineract.client.models.PostGroupsGroupIdRequest;
 import org.apache.fineract.client.models.PostGroupsRequest;
 import org.apache.fineract.client.models.PostGroupsResponse;
 import org.apache.fineract.client.models.PutGroupsGroupIdRequest;
@@ -39,18 +38,7 @@ import org.apache.fineract.client.models.PutGroupsGroupIdResponse;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
 
-/**
- * Typed Feign helper for group operations. Standalone by design: nothing here is added to {@code FeignLoanTestBase}
- * (see FEIGN_BASE_MODULARIZATION.md). Replaces the raw-HTTP {@code FeignGroupCenterHelper} stopgap for groups.
- * <p>
- * Create / retrieve / update / delete are fully typed against the generated {@code GroupsApi}. The command endpoints
- * ({@code ?command=activate|associateClients|disassociateClients|assignStaff}) still go through
- * {@link FeignRawHttpHelper}: the shared {@code PostGroupsGroupIdRequest} model exposes only
- * {@code destinationGroupId}, so the command-specific fields ({@code clientMembers}, {@code staffId},
- * {@code activationDate}, {@code inheritStaffForClientAccounts}) cannot be set via the typed model. This is the
- * sanctioned raw-HTTP fallback for a request model shared across many commands (see pr_review_lessons_learned #8 /
- * #11), not REST-assured.
- */
+/** Typed Feign helper for group operations. */
 public class FeignGroupHelper {
 
     public static final Long DEFAULT_OFFICE_ID = 1L;
@@ -61,16 +49,15 @@ public class FeignGroupHelper {
     private static final String ASSOCIATE_CLIENTS_COMMAND = "associateClients";
     private static final String DISASSOCIATE_CLIENTS_COMMAND = "disassociateClients";
     private static final String ASSIGN_STAFF_COMMAND = "assignStaff";
-
-    private static final Gson GSON = new Gson();
+    private static final String CLIENT_MEMBERS_ASSOCIATION = "clientMembers";
 
     private final FineractFeignClient fineractClient;
+    private final NonPagedListingApi nonPagedListingApi;
 
     public FeignGroupHelper(FineractFeignClient fineractClient) {
         this.fineractClient = fineractClient;
+        this.nonPagedListingApi = fineractClient.create(NonPagedListingApi.class);
     }
-
-    // ------------------------------------------------------------------ typed create / retrieve / update / delete
 
     /** Creates a group in {@code pending} status (active=false) in the default office. */
     public PostGroupsResponse createGroup() {
@@ -131,86 +118,57 @@ public class FeignGroupHelper {
         return ok(() -> fineractClient.groups().deleteGroup(groupId));
     }
 
-    // ------------------------------------------------------------------ command endpoints (raw HTTP, see class
-    // javadoc)
-
     public void activateGroup(Long groupId) {
         activateGroup(groupId, DEFAULT_ACTIVATION_DATE);
     }
 
     public void activateGroup(Long groupId, String activationDate) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("activationDate", activationDate);
-        body.put("dateFormat", LoanTestData.DATETIME_PATTERN);
-        body.put("locale", LoanTestData.LOCALE);
-        FeignRawHttpHelper.post("/groups/" + groupId + "?command=" + ACTIVATE_COMMAND, GSON.toJson(body));
+        PostGroupsGroupIdRequest request = new PostGroupsGroupIdRequest()//
+                .activationDate(activationDate)//
+                .dateFormat(LoanTestData.DATETIME_PATTERN)//
+                .locale(LoanTestData.LOCALE);
+        postGroupCommand(groupId, ACTIVATE_COMMAND, request);
     }
 
     public void associateClient(Long groupId, Long clientId) {
-        Map<String, Object> body = Map.of("clientMembers", List.of(clientId));
-        FeignRawHttpHelper.post("/groups/" + groupId + "?command=" + ASSOCIATE_CLIENTS_COMMAND, GSON.toJson(body));
+        postGroupCommand(groupId, ASSOCIATE_CLIENTS_COMMAND, new PostGroupsGroupIdRequest().clientMembers(List.of(clientId)));
     }
 
     public void disAssociateClient(Long groupId, Long clientId) {
-        Map<String, Object> body = Map.of("clientMembers", List.of(clientId));
-        FeignRawHttpHelper.post("/groups/" + groupId + "?command=" + DISASSOCIATE_CLIENTS_COMMAND, GSON.toJson(body));
+        postGroupCommand(groupId, DISASSOCIATE_CLIENTS_COMMAND, new PostGroupsGroupIdRequest().clientMembers(List.of(clientId)));
     }
 
     /** Assigns a staff member to the group; returns the {@code changes} object (contains {@code staffId}). */
-    public JsonObject assignStaff(Long groupId, Long staffId) {
-        Map<String, Object> body = Map.of("staffId", staffId);
-        return postGroupCommand(groupId, ASSIGN_STAFF_COMMAND, body);
+    public PostGroupsGroupIdChanges assignStaff(Long groupId, Long staffId) {
+        return postGroupCommand(groupId, ASSIGN_STAFF_COMMAND, new PostGroupsGroupIdRequest().staffId(staffId));
+    }
+
+    /** Assigns staff to the group and cascades it to member client accounts; returns the {@code changes} object. */
+    public PostGroupsGroupIdChanges assignStaffInheritStaffForClientAccounts(Long groupId, Long staffId) {
+        PostGroupsGroupIdRequest request = new PostGroupsGroupIdRequest().staffId(staffId).inheritStaffForClientAccounts(true);
+        return postGroupCommand(groupId, ASSIGN_STAFF_COMMAND, request);
+    }
+
+    private PostGroupsGroupIdChanges postGroupCommand(Long groupId, String command, PostGroupsGroupIdRequest request) {
+        return ok(() -> fineractClient.groups().handleCommandsGroup(groupId, request, Map.of("command", command))).getChanges();
     }
 
     /**
-     * Assigns staff to the group and cascades it to member client accounts. Returns the {@code changes} object.
+     * The office's groups that have no center as parent. Must stay on the non-paged listing, see
+     * {@link NonPagedListingApi}.
      */
-    public JsonObject assignStaffInheritStaffForClientAccounts(Long groupId, Long staffId) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("staffId", staffId);
-        body.put("inheritStaffForClientAccounts", true);
-        return postGroupCommand(groupId, ASSIGN_STAFF_COMMAND, body);
+    public List<GetGroupsPageItems> retrieveOrphanGroups(Long officeId) {
+        return ok(() -> nonPagedListingApi.listOrphanGroups(officeId));
     }
 
-    private JsonObject postGroupCommand(Long groupId, String command, Map<String, Object> body) {
-        String response = FeignRawHttpHelper.post("/groups/" + groupId + "?command=" + command, GSON.toJson(body));
-        return JsonParser.parseString(response).getAsJsonObject().getAsJsonObject("changes");
-    }
-
-    /**
-     * Raw JSON-array text of the office's orphan groups (groups with no center parent). Raw because the endpoint
-     * returns a bare JSON array that the typed {@code GetGroupsResponse} does not model. Expected {@code "[]"} when
-     * none.
-     */
-    public String retrieveOrphanGroups(Long officeId) {
-        return FeignRawHttpHelper.get("/groups?officeId=" + officeId + "&orphansOnly=true").trim();
-    }
-
-    // ------------------------------------------------------------------ raw reads (retrieve model gaps, see #8/#20)
-
-    /**
-     * Whether the group is active. Raw HTTP because {@code GetGroupsGroupIdResponse} does not model the top-level
-     * {@code active} flag — the typed retrieve model cannot express this assertion (#8 / #20), so the read is preserved
-     * via raw JSON rather than dropped.
-     */
+    /** Whether the group is active. */
     public boolean isGroupActive(Long groupId) {
-        String response = FeignRawHttpHelper.get("/groups/" + groupId);
-        return JsonParser.parseString(response).getAsJsonObject().get("active").getAsBoolean();
+        return Boolean.TRUE.equals(retrieveGroup(groupId).getActive());
     }
 
-    /**
-     * The client-member ids currently associated with the group (empty list if none). Raw HTTP because
-     * {@code GetGroupsGroupIdResponse} does not model {@code clientMembers} (#8 / #20).
-     */
+    /** The client-member ids associated with the group (empty if none). */
     public List<Long> retrieveGroupMemberIds(Long groupId) {
-        String response = FeignRawHttpHelper.get("/groups/" + groupId + "?associations=clientMembers");
-        JsonElement members = JsonParser.parseString(response).getAsJsonObject().get("clientMembers");
-        List<Long> ids = new ArrayList<>();
-        if (members != null && members.isJsonArray()) {
-            for (JsonElement member : members.getAsJsonArray()) {
-                ids.add(member.getAsJsonObject().get("id").getAsLong());
-            }
-        }
-        return ids;
+        Set<GetGroupsGroupIdClientMembers> members = retrieveGroupWithAssociations(groupId, CLIENT_MEMBERS_ASSOCIATION).getClientMembers();
+        return members == null ? List.of() : members.stream().map(GetGroupsGroupIdClientMembers::getId).toList();
     }
 }
