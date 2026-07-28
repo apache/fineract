@@ -46,6 +46,7 @@ public interface JournalEntryMapper {
     @Mapping(target = "entityType", source = "entityType", qualifiedByName = "entityType")
     @Mapping(target = "entityId", source = "entityId")
     @Mapping(target = "submittedOnDate", source = "submittedOnDate")
+    @Mapping(target = "submittedOnDateTime", ignore = true)
     @Mapping(target = "transactionId", source = "transactionId")
     @Mapping(target = "currency", source = "currencyCode")
     @Mapping(target = "manualEntry", source = "manualEntry")
