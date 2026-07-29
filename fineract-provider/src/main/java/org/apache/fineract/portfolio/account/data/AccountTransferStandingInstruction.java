@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.account.data;
 
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.instructionTypeParamName;
+import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.recurrenceTypeParamName;
 
 import com.google.gson.JsonElement;
 import java.util.Locale;
