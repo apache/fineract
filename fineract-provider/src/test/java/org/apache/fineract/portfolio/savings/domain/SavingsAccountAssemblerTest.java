@@ -44,8 +44,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 class SavingsAccountAssemblerTest {
 
     @Mock
-    private SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
-    @Mock
     private SavingsAccountTransactionDataSummaryWrapper savingsAccountTransactionDataSummaryWrapper;
     @Mock
     private ClientRepositoryWrapper clientRepository;
@@ -81,10 +79,9 @@ class SavingsAccountAssemblerTest {
     // below for the transient-variable update.
     @Test
     void loadTransactionsToSavingsAccountWithNoTransactionsAfterPivotDateDoesNotThrow() {
-        SavingsAccountAssembler assembler = new SavingsAccountAssembler(savingsAccountTransactionSummaryWrapper,
-                savingsAccountTransactionDataSummaryWrapper, clientRepository, groupRepository, staffRepository, savingProductRepository,
-                savingsAccountRepository, savingsAccountChargeAssembler, fromApiJsonHelper, accountTransfersReadPlatformService,
-                jdbcTemplate, configurationDomainService, externalIdFactory);
+        SavingsAccountAssembler assembler = new SavingsAccountAssembler(savingsAccountTransactionDataSummaryWrapper, clientRepository,
+                groupRepository, staffRepository, savingProductRepository, savingsAccountRepository, savingsAccountChargeAssembler,
+                fromApiJsonHelper, accountTransfersReadPlatformService, jdbcTemplate, configurationDomainService, externalIdFactory);
 
         SavingsAccountSummary summary = new SavingsAccountSummary();
         summary.setInterestPostedTillDate(LocalDate.of(2026, 1, 1).minusDays(1));
