@@ -18,6 +18,12 @@
  */
 package org.apache.fineract.portfolio.account.data;
 
+import static org.apache.fineract.portfolio.account.AccountDetailConstants.fromAccountIdParamName;
+import static org.apache.fineract.portfolio.account.AccountDetailConstants.fromAccountTypeParamName;
+import static org.apache.fineract.portfolio.account.AccountDetailConstants.fromOfficeIdParamName;
+import static org.apache.fineract.portfolio.account.AccountDetailConstants.toAccountIdParamName;
+import static org.apache.fineract.portfolio.account.AccountDetailConstants.toAccountTypeParamName;
+import static org.apache.fineract.portfolio.account.AccountDetailConstants.toOfficeIdParamName;
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.transferTypeParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.instructionTypeParamName;
@@ -45,6 +51,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
+import org.apache.fineract.portfolio.account.domain.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
@@ -88,7 +95,55 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
         this.baseDataValidator.reset().parameter(validTillParamName).value(validTill).validateDateAfter(validFrom);
 
         final Integer recurrenceType = this.fromApiJsonHelper.extractIntegerNamed(recurrenceTypeParamName, this.element, Locale.getDefault());
-        this.baseDataValidator.reset().parameter(recurrenceTypeParamName).value(recurrenceType).notNull().inMinMaxRange(1, 2);       
+        this.baseDataValidator.reset().parameter(recurrenceTypeParamName).value(recurrenceType).notNull().inMinMaxRange(1, 2);
+
+        validateAccountTypesAndTransferEligibility(transferType);
+    }
+
+    private void validateAccountTypesAndTransferEligibility(final Integer transferType) {
+        final Integer fromAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(fromAccountTypeParamName, this.element);
+        final Integer toAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(toAccountTypeParamName, this.element);
+
+        if (fromAccountType == null || toAccountType == null) {
+            return;
+        }
+
+        validateTransferTypeEligibility(transferType, fromAccountType, toAccountType);
+        validateSelfAccountTransfer(transferType, fromAccountType, toAccountType);
+    }
+
+    private void validateTransferTypeEligibility(final Integer transferType, final Integer fromAccountType, final Integer toAccountType) {
+        if (isInvalidAccountTransfer(transferType, fromAccountType, toAccountType)) {
+            this.baseDataValidator.reset().parameter(transferTypeParamName)
+                    .failWithCode(StandingInstructionApiConstants.ACCOUNT_TRANSFER_NOT_ALLOWED_FOR_LOAN_ERROR_CODE);
+        } else if (isInvalidLoanRepayment(transferType, fromAccountType, toAccountType)) {
+            this.baseDataValidator.reset().parameter(transferTypeParamName)
+                    .failWithCode(StandingInstructionApiConstants.NOT_A_VALID_LOAN_REPAYMENT_ERROR_CODE);
+        }
+    }
+
+    private boolean isInvalidAccountTransfer(final Integer transferType, final Integer fromAccountType, final Integer toAccountType) {
+        return isAccountTransfer(transferType) && (isLoanAccount(fromAccountType) || isLoanAccount(toAccountType));
+    }
+
+    private boolean isInvalidLoanRepayment(final Integer transferType, final Integer fromAccountType, final Integer toAccountType) {
+        return isLoanRepayment(transferType) && (isLoanAccount(fromAccountType) || isSavingsAccount(toAccountType));
+    }
+
+    private void validateSelfAccountTransfer(final Integer transferType, final Integer fromAccountType, final Integer toAccountType) {
+        if (!isAccountTransfer(transferType) || !isSavingsAccount(fromAccountType) || !isSavingsAccount(toAccountType)) {
+            return;
+        }
+
+        final Long fromOfficeId = this.fromApiJsonHelper.extractLongNamed(fromOfficeIdParamName, this.element);
+        final Long toOfficeId = this.fromApiJsonHelper.extractLongNamed(toOfficeIdParamName, this.element);
+        final Long fromAccountId = this.fromApiJsonHelper.extractLongNamed(fromAccountIdParamName, this.element);
+        final Long toAccountId = this.fromApiJsonHelper.extractLongNamed(toAccountIdParamName, this.element);
+
+        if (areEqualOfficesAndEqualAccounts(fromOfficeId, toOfficeId, fromAccountId, toAccountId)) {
+            this.baseDataValidator.reset().parameter(toAccountIdParamName)
+                    .failWithCode(StandingInstructionApiConstants.CANNOT_TRANSFER_TO_SAME_ACCOUNT_ERROR_CODE);
+        }
     }
 
     protected abstract void validateSpecificFields();
@@ -277,6 +332,15 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
         return type != null && type.isDuesRecurrence();
     }
 
+    protected boolean isAccountTransfer(final Integer transferType) {
+        if (transferType == null) {
+            return false;
+        }
+
+        final AccountTransferType type = AccountTransferType.fromInt(transferType);
+        return type != null && type.isAccountTransfer();
+    }
+
     protected boolean isLoanRepayment(final Integer transferType) {
         if (transferType == null) {
             return false;
@@ -284,5 +348,27 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
 
         final AccountTransferType type = AccountTransferType.fromInt(transferType);
         return type != null && type.isLoanRepayment();
+    }
+
+    protected boolean isLoanAccount(final Integer accountType) {
+        if (accountType == null) {
+            return false;
+        }
+
+        final PortfolioAccountType type = PortfolioAccountType.fromInt(accountType);
+        return type != null && type.isLoanAccount();
+    }
+
+    protected boolean isSavingsAccount(final Integer accountType) {
+        if (accountType == null) {
+            return false;
+        }
+
+        final PortfolioAccountType type = PortfolioAccountType.fromInt(accountType);
+        return type != null && type.isSavingsAccount();
+    }
+
+    protected boolean areEqualOfficesAndEqualAccounts(final Long fromOfficeId, final Long toOfficeId, final Long fromAccountId, final Long toAccountId) {
+        return Objects.equals(fromOfficeId, toOfficeId) && Objects.equals(fromAccountId, toAccountId);
     }
 }
