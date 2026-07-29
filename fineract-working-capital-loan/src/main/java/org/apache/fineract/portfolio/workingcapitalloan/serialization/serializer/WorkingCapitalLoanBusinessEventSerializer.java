@@ -28,8 +28,11 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.generic.GenericContainer;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalBreachDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanAccountDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanCollectionDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencySchedulePeriodDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencyScheduleTagDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanSummaryDataV1;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
@@ -45,8 +48,12 @@ import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanD
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelationRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanBreachScheduleMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleMapper;
+import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryMapper;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.mapper.WorkingCapitalLoanAccountDataMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanApplicationReadPlatformService;
@@ -67,6 +74,10 @@ public class WorkingCapitalLoanBusinessEventSerializer
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleRepository rangeScheduleRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleMapper rangeScheduleMapper;
+    private final WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository tagHistoryRepository;
+    private final WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryMapper tagHistoryMapper;
+    private final WorkingCapitalLoanBreachScheduleRepository breachScheduleRepository;
+    private final WorkingCapitalLoanBreachScheduleMapper breachScheduleMapper;
     private final AvroDateTimeMapper avroDateTimeMapper;
     private final List<ExternalEventCustomDataSerializer<WorkingCapitalLoanBusinessEvent>> externalEventCustomDataSerializers;
     private final List<WorkingCapitalLoanChargeExternalEventCustomDataSerializer> chargeExternalEventCustomDataSerializers;
@@ -90,6 +101,7 @@ public class WorkingCapitalLoanBusinessEventSerializer
         populateSummaryTransactionTypeTotals(loan, result);
         populateLastTransactions(loan, result);
         populateDelinquencySchedule(loan, result);
+        populateBreachSchedule(loan, result);
         result.setCustomData(collectCustomData(event));
         return result;
     }
@@ -176,8 +188,23 @@ public class WorkingCapitalLoanBusinessEventSerializer
         if (delinquent == null) {
             return;
         }
-        delinquent.setDelinquencySchedule(mapper.mapDelinquencySchedule(
-                rangeScheduleMapper.toDataList(rangeScheduleRepository.findByLoanIdOrderByPeriodNumberAsc(loan.getId()))));
+        final List<WorkingCapitalLoanDelinquencySchedulePeriodDataV1> periods = mapper.mapDelinquencySchedule(
+                rangeScheduleMapper.toDataList(rangeScheduleRepository.findByLoanIdOrderByPeriodNumberAsc(loan.getId())));
+        final Map<Integer, List<WorkingCapitalLoanDelinquencyScheduleTagDataV1>> tagsByPeriod = tagHistoryRepository
+                .findByLoanIdAndLiftedOnDateIsNull(loan.getId()).stream()
+                .collect(Collectors.groupingBy(tag -> tag.getRangeSchedule().getPeriodNumber(),
+                        Collectors.mapping(tag -> mapper.map(tagHistoryMapper.mapForCollectionData(tag)), Collectors.toList())));
+        periods.forEach(period -> period.setTags(tagsByPeriod.get(period.getPeriodNumber())));
+        delinquent.setDelinquencySchedule(periods);
+    }
+
+    private void populateBreachSchedule(final WorkingCapitalLoan loan, final WorkingCapitalLoanAccountDataV1 result) {
+        final WorkingCapitalBreachDataV1 breach = result.getBreach();
+        if (breach == null) {
+            return;
+        }
+        breach.setBreachSchedule(mapper.mapBreachSchedule(
+                breachScheduleMapper.toDataList(breachScheduleRepository.findByLoanIdOrderByPeriodNumberAsc(loan.getId()))));
     }
 
     @Override

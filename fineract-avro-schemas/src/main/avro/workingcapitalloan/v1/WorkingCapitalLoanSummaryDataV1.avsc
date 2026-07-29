@@ -22,7 +22,6 @@
         {
             "default": null,
             "name": "principalAdjustments",
-            "doc": "Always null: working capital has no chargeback, the only source of principal adjustments.",
             "type": [
                 "null",
                 "bigdecimal"

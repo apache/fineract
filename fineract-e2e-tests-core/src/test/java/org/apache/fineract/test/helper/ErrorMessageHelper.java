@@ -1151,7 +1151,7 @@ public final class ErrorMessageHelper {
     }
 
     public static String discountAdjustmentUndoNotActiveLoanFailure() {
-        return "Failed data validation due to: undo.discount.adjustment.only.allowed.for.active.loan.";
+        return "Failed data validation due to: undo.transaction.not.allowed.for.loan.status.";
     }
 
     public static String nearBreachCannotEnableWithoutBreachFailure() {

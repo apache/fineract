@@ -1,27 +1,11 @@
 {
-    "name": "WorkingCapitalBreachDataV1",
+    "name": "WorkingCapitalLoanBreachSchedulePeriodDataV1",
     "namespace": "org.apache.fineract.avro.workingcapitalloan.v1",
     "type": "record",
     "fields": [
         {
             "default": null,
-            "name": "id",
-            "type": [
-                "null",
-                "long"
-            ]
-        },
-        {
-            "default": null,
-            "name": "name",
-            "type": [
-                "null",
-                "string"
-            ]
-        },
-        {
-            "default": null,
-            "name": "breachFrequency",
+            "name": "periodNumber",
             "type": [
                 "null",
                 "int"
@@ -29,23 +13,31 @@
         },
         {
             "default": null,
-            "name": "breachFrequencyType",
+            "name": "fromDate",
             "type": [
                 "null",
-                "org.apache.fineract.avro.generic.v1.StringEnumOptionDataV1"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "breachAmountCalculationType",
+            "name": "toDate",
             "type": [
                 "null",
-                "org.apache.fineract.avro.generic.v1.StringEnumOptionDataV1"
+                "string"
             ]
         },
         {
             "default": null,
-            "name": "breachAmount",
+            "name": "numberOfDays",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "default": null,
+            "name": "minPaymentAmount",
             "type": [
                 "null",
                 "bigdecimal"
@@ -53,18 +45,10 @@
         },
         {
             "default": null,
-            "name": "breachGraceDays",
+            "name": "outstandingAmount",
             "type": [
                 "null",
-                "int"
-            ]
-        },
-        {
-            "default": null,
-            "name": "breachStartDate",
-            "type": [
-                "null",
-                "string"
+                "bigdecimal"
             ]
         },
         {
@@ -72,19 +56,23 @@
             "name": "nearBreach",
             "type": [
                 "null",
-                "org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalNearBreachDataV1"
+                "boolean"
             ]
         },
         {
             "default": null,
-            "name": "breachSchedule",
-            "doc": "Current breach schedule periods.",
+            "name": "breach",
             "type": [
                 "null",
-                {
-                    "type": "array",
-                    "items": "org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanBreachSchedulePeriodDataV1"
-                }
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "reset",
+            "type": [
+                "null",
+                "boolean"
             ]
         }
     ]

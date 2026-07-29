@@ -31,6 +31,7 @@ import org.apache.fineract.avro.loan.v1.LoanApplicationTimelineDataV1;
 import org.apache.fineract.avro.loan.v1.LoanStatusEnumDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalBreachDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanAccountDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanBreachSchedulePeriodDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanChargeDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanCollectionDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencyDataV1;
@@ -49,6 +50,7 @@ import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanChargeData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCollectionData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
@@ -254,6 +256,9 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals(1, nearBreach.getFrequency());
         assertStringEnum(fullNearBreach().getFrequencyType(), nearBreach.getFrequencyType());
         assertEquals(new BigDecimal("450.00"), nearBreach.getThreshold());
+
+        // serializer-only field stays unmapped
+        assertNull(breach.getBreachSchedule());
     }
 
     @Test
@@ -382,6 +387,34 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals(2, result.getFirst().getPeriodNumber());
+    }
+
+    @Test
+    void map_breachSchedulePeriod_coversAllFields() {
+        final WorkingCapitalLoanBreachScheduleData source = fullBreachSchedulePeriod();
+
+        final WorkingCapitalLoanBreachSchedulePeriodDataV1 result = mapper.map(source);
+
+        assertNotNull(result);
+        assertEquals(4, result.getPeriodNumber());
+        assertEquals("2024-02-01", result.getFromDate());
+        assertEquals("2024-03-01", result.getToDate());
+        assertEquals(29, result.getNumberOfDays());
+        assertEquals(new BigDecimal("120.00"), result.getMinPaymentAmount());
+        assertEquals(new BigDecimal("70.00"), result.getOutstandingAmount());
+        assertEquals(Boolean.TRUE, result.getNearBreach());
+        assertEquals(Boolean.FALSE, result.getBreach());
+        assertEquals(Boolean.FALSE, result.getReset());
+    }
+
+    @Test
+    void mapBreachSchedule_mapsEveryPeriod() {
+        final List<WorkingCapitalLoanBreachSchedulePeriodDataV1> result = mapper
+                .mapBreachSchedule(List.of(fullBreachSchedulePeriod(), fullBreachSchedulePeriod()));
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(4, result.getFirst().getPeriodNumber());
     }
 
     @Test
@@ -536,6 +569,11 @@ class WorkingCapitalLoanAccountDataMapperTest {
     private static WorkingCapitalLoanDelinquencyRangeScheduleData fullSchedulePeriod() {
         return new WorkingCapitalLoanDelinquencyRangeScheduleData(9L, 101L, 2, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 30),
                 new BigDecimal("150.00"), new BigDecimal("50.00"), new BigDecimal("100.00"), Boolean.FALSE, 12L, new BigDecimal("100.00"));
+    }
+
+    private static WorkingCapitalLoanBreachScheduleData fullBreachSchedulePeriod() {
+        return new WorkingCapitalLoanBreachScheduleData(15L, 101L, 4, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1), 29,
+                new BigDecimal("120.00"), new BigDecimal("70.00"), Boolean.TRUE, Boolean.FALSE, Boolean.FALSE);
     }
 
     private static WorkingCapitalLoanChargeData fullCharge() {

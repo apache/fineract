@@ -121,7 +121,7 @@ Feature: Working Capital Loan Account Business Events
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Admin sets the business date to "15 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then a Working Capital Loan Delinquency Range Change business event is raised
+    Then a Working Capital Loan Delinquency Range Change business event is raised naming the delinquency range
     When Admin closes the Working Capital loan with a full repayment on "15 February 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
     And a Working Capital Loan Status Changed business event is raised
@@ -350,7 +350,7 @@ Feature: Working Capital Loan Account Business Events
     When Admin closes the Working Capital loan with a full repayment on "01 January 2026"
 
   @TestRailId:C89805
-  Scenario: Undoing a discount fee adjustment is rejected once the adjustment has closed the Working Capital loan and no loan events are raised
+  Scenario: Undoing a discount fee adjustment that closed the Working Capital loan reopens it and raises Status Changed and Balance Changed business events
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -373,6 +373,7 @@ Feature: Working Capital Loan Account Business Events
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
     And a Working Capital Loan Status Changed business event is raised
     And a Working Capital Loan Balance Changed business event is raised
-    Then Undo the last Discount fee adjustment on Working Capital loan account failed due to non active loan with status code 400
-    And no Working Capital Loan Status Changed business event is raised
-    And no Working Capital Loan Balance Changed business event is raised
+    When Admin undo the last Discount fee adjustment on Working Capital loan account
+    Then Working Capital loan status will be "ACTIVE"
+    And a Working Capital Loan Status Changed business event is raised
+    And a Working Capital Loan Balance Changed business event is raised

@@ -22,17 +22,21 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanAccountDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanBreachSchedulePeriodDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanChargeDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanCollectionDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencySchedulePeriodDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencyScheduleTagDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDisbursementDetailDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanSummaryDataV1;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanChargeData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCollectionData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDisbursementDetailData;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanRangeScheduleDelinquencyData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanSummaryData;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -59,6 +63,7 @@ public interface WorkingCapitalLoanAccountDataMapper {
     @Mapping(source = "breachGraceDays", target = "breach.breachGraceDays")
     @Mapping(source = "breachStartDate", target = "breach.breachStartDate")
     @Mapping(source = "nearBreach", target = "breach.nearBreach")
+    @Mapping(target = "breach.breachSchedule", ignore = true)
     @Mapping(target = "overpaidOnDate", ignore = true)
     @Mapping(target = "customData", ignore = true)
     WorkingCapitalLoanAccountDataV1 map(WorkingCapitalLoanData source);
@@ -71,7 +76,7 @@ public interface WorkingCapitalLoanAccountDataMapper {
     @Mapping(source = "penalty", target = "penaltyChargesCharged")
     @Mapping(source = "penaltyPaid", target = "penaltyChargesPaid")
     @Mapping(source = "penaltyOutstanding", target = "penaltyChargesOutstanding")
-    @Mapping(target = "principalAdjustments", ignore = true)
+    @Mapping(source = "principalAdjustment", target = "principalAdjustments")
     @Mapping(target = "principalWrittenOff", ignore = true)
     @Mapping(target = "feeChargesWrittenOff", ignore = true)
     @Mapping(target = "penaltyChargesWrittenOff", ignore = true)
@@ -110,10 +115,17 @@ public interface WorkingCapitalLoanAccountDataMapper {
     @Mapping(target = "netDisbursalAmount", ignore = true)
     WorkingCapitalLoanDisbursementDetailDataV1 map(WorkingCapitalLoanDisbursementDetailData source);
 
+    @Mapping(target = "tags", ignore = true)
     WorkingCapitalLoanDelinquencySchedulePeriodDataV1 map(WorkingCapitalLoanDelinquencyRangeScheduleData source);
 
     List<WorkingCapitalLoanDelinquencySchedulePeriodDataV1> mapDelinquencySchedule(
             List<WorkingCapitalLoanDelinquencyRangeScheduleData> source);
+
+    WorkingCapitalLoanDelinquencyScheduleTagDataV1 map(WorkingCapitalLoanRangeScheduleDelinquencyData source);
+
+    WorkingCapitalLoanBreachSchedulePeriodDataV1 map(WorkingCapitalLoanBreachScheduleData source);
+
+    List<WorkingCapitalLoanBreachSchedulePeriodDataV1> mapBreachSchedule(List<WorkingCapitalLoanBreachScheduleData> source);
 
     @Named("toAvroDecimalScale")
     default BigDecimal toAvroDecimalScale(final BigDecimal value) {

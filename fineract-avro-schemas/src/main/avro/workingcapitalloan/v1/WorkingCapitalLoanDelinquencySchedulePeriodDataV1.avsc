@@ -74,6 +74,18 @@
                 "null",
                 "bigdecimal"
             ]
+        },
+        {
+            "default": null,
+            "name": "tags",
+            "doc": "Active delinquency range tags currently applied to this schedule period.",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencyScheduleTagDataV1"
+                }
+            ]
         }
     ]
 }

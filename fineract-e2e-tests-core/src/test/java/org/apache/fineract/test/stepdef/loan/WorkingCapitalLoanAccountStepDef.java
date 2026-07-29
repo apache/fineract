@@ -1501,6 +1501,11 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         eventCheckHelper.workingCapitalLoanDelinquencyRangeChangeEventCheck(getCreatedLoanId());
     }
 
+    @Then("a Working Capital Loan Delinquency Range Change business event is raised naming the delinquency range")
+    public void aWorkingCapitalLoanDelinquencyRangeChangeBusinessEventIsRaisedNamingTheDelinquencyRange() {
+        eventCheckHelper.workingCapitalLoanDelinquencyRangeChangeEventNamesRangeCheck(getCreatedLoanId());
+    }
+
     @Then("a Working Capital Loan Balance Changed business event is raised with transaction type totals:")
     public void aWorkingCapitalLoanBalanceChangedBusinessEventIsRaisedWithTransactionTypeTotals(final DataTable table) {
         eventCheckHelper.workingCapitalLoanBalanceChangedEventSummaryTotalsCheck(getCreatedLoanId(), table.asMaps().get(0));

@@ -677,14 +677,23 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         updateBalanceForDiscountChange(loan, adjustmentTransaction.getTransactionAmount().negate(), true);
         // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived.
         delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+
+        // Restoring the outstanding can reopen a loan the adjustment had closed, so re-run the status transition.
+        final LocalDate reversedOnDate = adjustmentTransaction.getReversedOnDate();
+        final LoanStatus oldStatus = loan.getLoanStatus();
+
+        stateMachine.determineAndTransition(loan, reversedOnDate);
+
         loanRepository.saveAndFlush(loan);
 
         final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName);
         createNote(noteText, loan);
 
         notifyBalanceChanged(loan);
+        notifyStatusChanged(loan, oldStatus);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put("status", loan.getLoanStatus());
         if (StringUtils.isNotBlank(noteText)) {
             changes.put(WorkingCapitalLoanConstants.noteParamName, noteText);
         }

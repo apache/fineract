@@ -26,8 +26,10 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -48,6 +50,8 @@ import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanAccountD
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanChargeDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanCollectionDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencyDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencySchedulePeriodDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencyScheduleTagDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanSummaryDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanTransactionDataV1;
 import org.apache.fineract.client.feign.FineractFeignClient;
@@ -70,6 +74,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.WorkingCapitalCollection;
 import org.apache.fineract.client.models.WorkingCapitalCollectionDelinquencyPausePeriod;
+import org.apache.fineract.client.models.WorkingCapitalCollectionRangeScheduleDelinquency;
 import org.apache.fineract.test.data.AssetExternalizationTransferStatus;
 import org.apache.fineract.test.data.AssetExternalizationTransferStatusReason;
 import org.apache.fineract.test.data.TransactionType;
@@ -758,6 +763,57 @@ public class EventCheckHelper {
         });
     }
 
+    public void workingCapitalLoanDelinquencyRangeChangeEventNamesRangeCheck(final Long loanId) {
+        workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanDelinquencyRangeChangeEvent.class, loanId, (event, body) -> {
+            assertWorkingCapitalLoanAccountData(event, body);
+
+            final WorkingCapitalLoanCollectionDataV1 eventDelinquent = event.getDelinquent();
+            final WorkingCapitalCollection bodyDelinquent = body.getDelinquent();
+            assertThat(eventDelinquent).isNotNull();
+            assertThat(bodyDelinquent).isNotNull();
+            assertAmountEquals("delinquent.delinquentAmount", eventDelinquent.getDelinquentAmount(), bodyDelinquent.getDelinquentAmount());
+            assertAmountEquals("delinquent.totalDelinquentAmount", eventDelinquent.getTotalDelinquentAmount(),
+                    bodyDelinquent.getDelinquentPrincipal());
+
+            final List<WorkingCapitalLoanDelinquencySchedulePeriodDataV1> schedule = eventDelinquent.getDelinquencySchedule();
+            assertThat(schedule).as("delinquent.delinquencySchedule").isNotEmpty();
+            final List<WorkingCapitalLoanDelinquencyScheduleTagDataV1> eventTags = schedule.stream()
+                    .map(WorkingCapitalLoanDelinquencySchedulePeriodDataV1::getTags).filter(Objects::nonNull).flatMap(List::stream)
+                    .sorted(Comparator
+                            .comparing(WorkingCapitalLoanDelinquencyScheduleTagDataV1::getRangeId,
+                                    Comparator.nullsFirst(Comparator.naturalOrder()))
+                            .thenComparing(WorkingCapitalLoanDelinquencyScheduleTagDataV1::getDelinquentAmount,
+                                    Comparator.nullsFirst(Comparator.naturalOrder())))
+                    .toList();
+            assertThat(eventTags).as("delinquent.delinquencySchedule[].tags").isNotEmpty();
+
+            final List<WorkingCapitalCollectionRangeScheduleDelinquency> apiTags = Optional
+                    .ofNullable(bodyDelinquent.getInstallmentLevelDelinquency()).orElse(List.of()).stream()
+                    .sorted(Comparator
+                            .comparing(WorkingCapitalCollectionRangeScheduleDelinquency::getRangeId,
+                                    Comparator.nullsFirst(Comparator.naturalOrder()))
+                            .thenComparing(WorkingCapitalCollectionRangeScheduleDelinquency::getDelinquentAmount,
+                                    Comparator.nullsFirst(Comparator.naturalOrder())))
+                    .toList();
+            assertThat(eventTags).as("delinquent.delinquencySchedule[].tags vs API delinquent.installmentLevelDelinquency")
+                    .hasSize(apiTags.size());
+            IntStream.range(0, eventTags.size()).forEach(i -> {
+                final WorkingCapitalLoanDelinquencyScheduleTagDataV1 actual = eventTags.get(i);
+                final WorkingCapitalCollectionRangeScheduleDelinquency expected = apiTags.get(i);
+                assertThat(actual.getRangeId()).as("tags[%s].rangeId", i).isEqualTo(expected.getRangeId());
+                assertThat(actual.getClassification()).as("tags[%s].classification", i).isNotBlank()
+                        .isEqualTo(expected.getClassification());
+                assertThat(actual.getMinimumAgeDays()).as("tags[%s].minimumAgeDays", i).isEqualTo(expected.getMinimumAgeDays());
+                assertThat(actual.getMaximumAgeDays()).as("tags[%s].maximumAgeDays", i).isEqualTo(expected.getMaximumAgeDays());
+                if (expected.getDelinquentAmount() == null) {
+                    assertThat(actual.getDelinquentAmount()).as("tags[%s].delinquentAmount", i).isNull();
+                } else {
+                    assertAmountEquals("tags[" + i + "].delinquentAmount", actual.getDelinquentAmount(), expected.getDelinquentAmount());
+                }
+            });
+        });
+    }
+
     public void workingCapitalLoanBalanceChangedEventSummaryTotalsCheck(final Long loanId, final Map<String, String> expectedTotals) {
         workingCapitalLoanEventPayloadCheck(WorkingCapitalLoanBalanceChangedEvent.class, loanId, event -> {
             final WorkingCapitalLoanSummaryDataV1 eventSummary = event.getSummary();
@@ -916,6 +972,9 @@ public class EventCheckHelper {
 
         assertThat(event.getDelinquent()).isNotNull();
         assertThat(event.getDelinquent().getDelinquencySchedule()).isNotNull();
+
+        assertThat(event.getBreach()).isNotNull();
+        assertThat(event.getBreach().getBreachSchedule()).isNotNull();
 
         if (event.getDisbursementDetails() != null && !event.getDisbursementDetails().isEmpty() && body.getNetDisbursalAmount() != null) {
             event.getDisbursementDetails().forEach(tranche -> assertAmountEquals("disbursementDetails.netDisbursalAmount",
