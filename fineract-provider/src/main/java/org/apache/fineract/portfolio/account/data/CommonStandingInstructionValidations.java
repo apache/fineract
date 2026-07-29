@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.account.data;
 
+import static org.apache.fineract.portfolio.account.AccountDetailConstants.transferTypeParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.instructionTypeParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.monthDayFormatParamName;
@@ -28,7 +29,6 @@ import static org.apache.fineract.portfolio.account.api.StandingInstructionApiCo
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.recurrenceOnMonthDayParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.recurrenceTypeParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.statusParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.transferTypeParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.validFromParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.validTillParamName;
 
