@@ -29,7 +29,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
@@ -50,8 +49,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionRepository;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransactionSummaryWrapper;
-import org.apache.fineract.portfolio.savings.domain.SavingsHelper;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountDomainService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -82,13 +79,7 @@ class InteropServiceImplTest {
     @Mock
     private LoanRepositoryWrapper loanRepositoryWrapper;
     @Mock
-    private SavingsHelper savingsHelper;
-    @Mock
-    private SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
-    @Mock
     private SavingsAccountDomainService savingsAccountService;
-    @Mock
-    private ConfigurationDomainService configurationDomainService;
     @Mock
     private JdbcTemplate jdbcTemplate;
     @Mock

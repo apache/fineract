@@ -34,7 +34,6 @@ import org.apache.fineract.cob.savings.SavingsItemWriter;
 import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -67,7 +66,6 @@ class CobStepListenerRegistrationTest {
         ProgressiveLoanModelProcessingService modelProcessingService = mock(ProgressiveLoanModelProcessingService.class);
         LockingService lockingService = mock(LockingService.class);
         SavingsAccountRepository savingsAccountRepository = mock(SavingsAccountRepository.class);
-        SavingsAccountAssembler savingsAccountAssembler = mock(SavingsAccountAssembler.class);
         RetrieveSavingsIdService retrieveSavingsIdService = mock(RetrieveSavingsIdService.class);
 
         return Stream.of(//
@@ -79,10 +77,9 @@ class CobStepListenerRegistrationTest {
                         new InlineCOBLoanItemWriter(businessStepService, modelProcessingService, lockingService, loanRepository)), //
                 Arguments.of("SavingsItemReader", new SavingsItemReader(retrieveSavingsIdService, lockingService)), //
                 Arguments.of("InlineCOBSavingsItemReader", new InlineCOBSavingsItemReader()), //
-                Arguments.of("SavingsItemWriter",
-                        new SavingsItemWriter(businessStepService, lockingService, savingsAccountRepository, savingsAccountAssembler)), //
-                Arguments.of("InlineCOBSavingsItemWriter", new InlineCOBSavingsItemWriter(businessStepService, lockingService,
-                        savingsAccountRepository, savingsAccountAssembler)));
+                Arguments.of("SavingsItemWriter", new SavingsItemWriter(businessStepService, lockingService, savingsAccountRepository)), //
+                Arguments.of("InlineCOBSavingsItemWriter",
+                        new InlineCOBSavingsItemWriter(businessStepService, lockingService, savingsAccountRepository)));
     }
 
     @ParameterizedTest(name = "{0} registers exactly once as a step listener")

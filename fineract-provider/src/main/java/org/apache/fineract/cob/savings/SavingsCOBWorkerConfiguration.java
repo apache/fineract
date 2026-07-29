@@ -29,7 +29,6 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.infrastructure.springbatch.StepRetryPolicyFactory;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -66,8 +65,6 @@ public class SavingsCOBWorkerConfiguration {
     private PropertyService propertyService;
     @Autowired
     private SavingsAccountRepository savingsAccountRepository;
-    @Autowired
-    private SavingsAccountAssembler savingsAccountAssembler;
     @Autowired
     private QueueChannel inboundRequests;
     @Autowired
@@ -139,6 +136,6 @@ public class SavingsCOBWorkerConfiguration {
     @Bean
     @StepScope
     public SavingsItemWriter savingsCobWorkerItemWriter() {
-        return new SavingsItemWriter(cobBusinessStepService, savingsLockingService, savingsAccountRepository, savingsAccountAssembler);
+        return new SavingsItemWriter(cobBusinessStepService, savingsLockingService, savingsAccountRepository);
     }
 }
