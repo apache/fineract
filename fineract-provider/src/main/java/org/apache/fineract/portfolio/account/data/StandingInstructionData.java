@@ -51,17 +51,28 @@ public final class StandingInstructionData {
     private final OfficeData fromOffice;
     @Getter
     private final ClientData fromClient;
+    // Jackson serialization: Explicit getter exposes EnumOptionData object {id, code, value} instead of domain enum
+    // string
+    @Getter
     private final EnumOptionData fromAccountType;
     @Getter
     private final PortfolioAccountData fromAccount;
     private final OfficeData toOffice;
     @Getter
     private final ClientData toClient;
+    // Jackson serialization: Explicit getter exposes EnumOptionData object {id, code, value} instead of domain enum
+    // string
+    @Getter
     private final EnumOptionData toAccountType;
     @Getter
     private final PortfolioAccountData toAccount;
+    @Getter
     private final EnumOptionData transferType;
+    @Getter
     private final EnumOptionData priority;
+    // Jackson serialization: Explicit getter exposes EnumOptionData object {id, code, value} instead of domain enum
+    // string
+    @Getter
     private final EnumOptionData instructionType;
     @Getter
     private final EnumOptionData status;
@@ -69,8 +80,11 @@ public final class StandingInstructionData {
     private final BigDecimal amount;
     @Getter
     private final LocalDate validFrom;
+    @Getter
     private final LocalDate validTill;
+    @Getter
     private final EnumOptionData recurrenceType;
+    @Getter
     private final EnumOptionData recurrenceFrequency;
     @Getter
     private final Integer recurrenceInterval;
@@ -282,28 +296,34 @@ public final class StandingInstructionData {
                 instructionData.recurrenceTypeOptions, instructionData.recurrenceFrequencyOptions);
     }
 
-    public StandingInstructionType getInstructionType() {
+    // Domain enum helper for internal logic - renamed to avoid Jackson property conflict
+    public StandingInstructionType getInstructionTypeEnum() {
         return Optional.ofNullable(this.instructionType).map(e -> StandingInstructionType.fromInt(e.getId().intValue())).orElse(null);
 
     }
 
-    public AccountTransferRecurrenceType getRecurrenceType() {
+    // Domain enum helper for internal logic - renamed to avoid Jackson property conflict
+    public AccountTransferRecurrenceType getRecurrenceTypeEnum() {
         return Optional.ofNullable(this.recurrenceType).map(e -> AccountTransferRecurrenceType.fromInt(e.getId().intValue())).orElse(null);
     }
 
-    public PeriodFrequencyType getRecurrenceFrequency() {
+    // Domain enum helper for internal logic - renamed to avoid Jackson property conflict
+    public PeriodFrequencyType getRecurrenceFrequencyEnum() {
         return Optional.ofNullable(this.recurrenceFrequency).map(e -> PeriodFrequencyType.fromInt(e.getId().intValue())).orElse(null);
     }
 
-    public PortfolioAccountType getFromAccountType() {
+    // Domain enum helper for internal logic - renamed to avoid Jackson property conflict
+    public PortfolioAccountType getFromAccountTypeEnum() {
         return Optional.ofNullable(this.fromAccountType).map(e -> PortfolioAccountType.fromInt(e.getId().intValue())).orElse(null);
     }
 
-    public PortfolioAccountType getToAccountType() {
+    // Domain enum helper for internal logic - renamed to avoid Jackson property conflict
+    public PortfolioAccountType getToAccountTypeEnum() {
         return Optional.ofNullable(this.toAccountType).map(e -> PortfolioAccountType.fromInt(e.getId().intValue())).orElse(null);
     }
 
-    public AccountTransferType getTransferType() {
+    // Domain enum helper for internal logic - renamed to avoid Jackson property conflict
+    public AccountTransferType getTransferTypeEnum() {
         return Optional.ofNullable(this.transferType).map(e -> AccountTransferType.fromInt(e.getId().intValue())).orElse(null);
     }
 
@@ -317,10 +337,10 @@ public final class StandingInstructionData {
 
     public Integer toTransferType() {
         Integer transferType = null;
-        AccountTransferType accountTransferType = getTransferType();
-        if (accountTransferType.isChargePayment()) {
+        AccountTransferType accountTransferType = getTransferTypeEnum();
+        if (accountTransferType != null && accountTransferType.isChargePayment()) {
             transferType = LoanTransactionType.CHARGE_PAYMENT.getValue();
-        } else if (accountTransferType.isLoanRepayment()) {
+        } else if (accountTransferType != null && accountTransferType.isLoanRepayment()) {
             transferType = LoanTransactionType.REPAYMENT.getValue();
         }
         return transferType;
