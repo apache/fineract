@@ -29,8 +29,6 @@ import org.junit.jupiter.api.Test;
 
 class SavingsHelperNPExceptionTest {
 
-    private final SavingsHelper savingsHelper = new SavingsHelper(null);
-
     @Test
     void shouldNotThrowNullPointerExceptionWhenPostingPeriodTypeIsNull() {
         LocalDate start = LocalDate.of(2025, 1, 1);
@@ -39,7 +37,7 @@ class SavingsHelperNPExceptionTest {
 
         Integer financialYearBeginningMonth = 1;
         List<LocalDate> postInterestAsOn = new ArrayList<>();
-        List<LocalDateInterval> result = savingsHelper.determineInterestPostingPeriods(start, end, nullPostingPeriodType,
+        List<LocalDateInterval> result = SavingsInterestCalculationUtil.determineInterestPostingPeriods(start, end, nullPostingPeriodType,
                 financialYearBeginningMonth, postInterestAsOn);
         assertTrue(result.isEmpty(), "Result should be empty when postingPeriodType is null");
     }
