@@ -19,5 +19,5 @@
 package org.apache.fineract.portfolio.account.data;
 
 public interface StandingInstructionValidator {
-    boolean validate();
+    void validate();
 }
