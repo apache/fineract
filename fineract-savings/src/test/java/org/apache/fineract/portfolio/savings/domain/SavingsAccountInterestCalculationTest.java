@@ -45,6 +45,7 @@ import org.apache.fineract.portfolio.savings.SavingsInterestCalculationDaysInYea
 import org.apache.fineract.portfolio.savings.SavingsInterestCalculationType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.savings.domain.interest.PostingPeriod;
+import org.apache.fineract.portfolio.savings.service.SavingsAccountInterestCalculationServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -182,8 +183,8 @@ class SavingsAccountInterestCalculationTest {
         final LocalDate upTo = LocalDate.of(2024, 3, 31);
         account.recalculateDailyBalances(Money.zero(CURRENCY), upTo, false, false);
 
-        final List<PostingPeriod> periods = new SavingsAccountInterestCalculator().calculatePostingPeriods(account, MC, upTo, false, false,
-                1, null, false);
+        final List<PostingPeriod> periods = new SavingsAccountInterestCalculator(savingsHelper()).calculatePostingPeriods(account, MC, upTo,
+                false, false, 1, null, false);
 
         assertEquals("2024-01-01..2024-01-31 posted 2024-02-01 interest 5.42 closing 1500.00; "
                 + "2024-02-01..2024-02-29 posted 2024-03-01 interest 5.44 closing 1300.00; "
@@ -194,7 +195,8 @@ class SavingsAccountInterestCalculationTest {
 
     private List<PostingPeriod> calculate(final SavingsAccount account, final LocalDate upTo, final LocalDate postInterestOnDate,
             final boolean backdatedTxnsAllowedTill) {
-        return account.calculateInterestUsing(MC, upTo, false, false, 1, postInterestOnDate, backdatedTxnsAllowedTill, false);
+        return new SavingsAccountInterestCalculationServiceImpl(savingsHelper()).calculateInterestUsing(account, MC, upTo, false, false, 1,
+                postInterestOnDate, backdatedTxnsAllowedTill, false);
     }
 
     private void depositsAndWithdrawal(final SavingsAccount account) {
@@ -216,11 +218,13 @@ class SavingsAccountInterestCalculationTest {
         setField(account, "interestCalculationType", calculation.getValue());
         setField(account, "interestCalculationDaysInYearType", daysInYear.getValue());
         setField(account, "summary", new SavingsAccountSummary());
+        return account;
+    }
 
+    private static SavingsHelper savingsHelper() {
         final AccountTransfersReadPlatformService transfers = mock(AccountTransfersReadPlatformService.class);
         when(transfers.fetchPostInterestTransactionIds(anyLong())).thenReturn(List.of());
-        account.setHelpers(new SavingsAccountTransactionSummaryWrapper(), new SavingsHelper(transfers), null);
-        return account;
+        return new SavingsHelper(transfers);
     }
 
     private static Money money(final String amount) {

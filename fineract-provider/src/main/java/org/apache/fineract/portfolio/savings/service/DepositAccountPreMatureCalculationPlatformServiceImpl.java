@@ -47,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DepositAccountPreMatureCalculationPlatformServiceImpl implements DepositAccountPreMatureCalculationPlatformService {
 
     private final FromJsonHelper fromJsonHelper;
+    private final DepositAccountInterestCalculationService depositAccountInterestCalculationService;
     private final DepositAccountTransactionDataValidator depositAccountTransactionDataValidator;
     private final DepositAccountAssembler depositAccountAssembler;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
@@ -80,14 +81,14 @@ public class DepositAccountPreMatureCalculationPlatformServiceImpl implements De
 
         if (depositAccountType == DepositAccountType.FIXED_DEPOSIT) {
             final FixedDepositAccount fd = (FixedDepositAccount) account;
-            accountData = FixedDepositAccountData.preClosureDetails(
-                    account.getId(), fd.calculatePreMatureAmount(interestCalculatedToDate, isPreMatureClosure,
+            accountData = FixedDepositAccountData.preClosureDetails(account.getId(),
+                    this.depositAccountInterestCalculationService.calculatePreMatureAmount(fd, interestCalculatedToDate, isPreMatureClosure,
                             isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth),
                     onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas);
         } else if (depositAccountType == DepositAccountType.RECURRING_DEPOSIT) {
             final RecurringDepositAccount rd = (RecurringDepositAccount) account;
-            accountData = RecurringDepositAccountData.preClosureDetails(
-                    account.getId(), rd.calculatePreMatureAmount(interestCalculatedToDate, isPreMatureClosure,
+            accountData = RecurringDepositAccountData.preClosureDetails(account.getId(),
+                    this.depositAccountInterestCalculationService.calculatePreMatureAmount(rd, interestCalculatedToDate, isPreMatureClosure,
                             isSavingsInterestPostingAtCurrentPeriodEnd, financialYearBeginningMonth),
                     onAccountClosureOptions, paymentTypeOptions, savingsAccountDatas);
         }
