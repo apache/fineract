@@ -160,6 +160,8 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
     @Mock
     private SavingsAccountPostInterestService savingsAccountPostInterestService;
     @Mock
+    private SavingsAccountInterestCalculationService savingsAccountInterestCalculationService;
+    @Mock
     private SavingsAccountActivationService savingsAccountActivationService;
     @Mock
     private ExternalIdFactory externalIdFactory;
