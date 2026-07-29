@@ -356,7 +356,7 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
         }
 
         final PortfolioAccountType type = PortfolioAccountType.fromInt(accountType);
-        return type != null && type.isLoanAccount();
+        return type != null && PortfolioAccountType.LOAN.equals(type);
     }
 
     protected boolean isSavingsAccount(final Integer accountType) {
@@ -365,7 +365,7 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
         }
 
         final PortfolioAccountType type = PortfolioAccountType.fromInt(accountType);
-        return type != null && type.isSavingsAccount();
+        return type != null && PortfolioAccountType.SAVINGS.equals(type);
     }
 
     protected boolean areEqualOfficesAndEqualAccounts(final Long fromOfficeId, final Long toOfficeId, final Long fromAccountId, final Long toAccountId) {
