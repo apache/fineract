@@ -174,6 +174,31 @@ Feature: Working Capital Period Payment Rate
       | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP         | 2026-01-01      | 2026-01-01               | Active | 100.0     | 100.0             | 100.0              | 15.0              | null     |
 
+  @TestRailId:C89816
+  Scenario: Verify a rate change followed by backdated-repayment reprocessing preserves the pre-rate-change schedule segment
+    # A later repayment plus a backdated one trigger the full reset+replay reprocessing that rebuilds the projected
+    # amortization schedule from scratch. The periods before the rate change are a pure function of the untouched
+    # opening balance and the rate history, so reconstruction must reproduce them exactly rather than flattening the
+    # whole schedule to the current rate.
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin retrieves the projected amortization schedule
+    And Admin remembers the retrieved amortization schedule payments before "2026-01-10"
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin update Working Capital period payment rate with "11" value
+    When Admin sets the business date to "25 January 2026"
+    And Customer makes repayment on "25 January 2026" with 500 transaction amount on Working Capital loan
+    When Admin sets the business date to "30 January 2026"
+    And Customer makes repayment on "15 January 2026" with 200 transaction amount on Working Capital loan
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule payments before "2026-01-10" match the previously remembered ones
+
   @TestRailId:C78822
   Scenario Outline: Verify update Working Capital period payment rate failed with outranged rate change value within loan product level defined range - UC6
     When Admin sets the business date to "01 January 2026"

@@ -47,6 +47,7 @@ import org.assertj.core.api.SoftAssertions;
 public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
 
     private static final String WC_AMORT_SCHEDULE_KEY = "WC_AMORT_SCHEDULE_RESPONSE";
+    private static final String WC_AMORT_SCHEDULE_REMEMBERED_SEGMENT_KEY = "WC_AMORT_SCHEDULE_REMEMBERED_SEGMENT";
 
     private final FineractFeignClient fineractFeignClient;
 
@@ -76,6 +77,41 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
         final ProjectedAmortizationScheduleData response = api.retrieveAmortizationSchedule(loanId);
         log.info("Retrieved amortization schedule for loan {}: netDisbursementAmount={}", loanId, response.getNetDisbursementAmount());
         TestContext.INSTANCE.set(WC_AMORT_SCHEDULE_KEY, response);
+    }
+
+    @Then("Admin remembers the retrieved amortization schedule payments before {string}")
+    public void rememberAmortizationSchedulePaymentsBefore(final String cutoffDate) {
+        final ProjectedAmortizationScheduleData response = TestContext.INSTANCE.get(WC_AMORT_SCHEDULE_KEY);
+        assertThat(response).as("Amortization schedule response").isNotNull();
+        final List<ProjectedAmortizationSchedulePaymentData> segment = paymentsBefore(response, cutoffDate);
+        assertThat(segment).as("payments before %s", cutoffDate).isNotEmpty();
+        TestContext.INSTANCE.set(WC_AMORT_SCHEDULE_REMEMBERED_SEGMENT_KEY, segment);
+    }
+
+    @Then("The retrieved amortization schedule payments before {string} match the previously remembered ones")
+    public void verifyAmortizationSchedulePaymentsBeforeMatchRemembered(final String cutoffDate) {
+        final ProjectedAmortizationScheduleData response = TestContext.INSTANCE.get(WC_AMORT_SCHEDULE_KEY);
+        assertThat(response).as("Amortization schedule response").isNotNull();
+        final List<ProjectedAmortizationSchedulePaymentData> actualSegment = paymentsBefore(response, cutoffDate);
+
+        final List<ProjectedAmortizationSchedulePaymentData> rememberedSegment = TestContext.INSTANCE
+                .get(WC_AMORT_SCHEDULE_REMEMBERED_SEGMENT_KEY);
+        assertThat(rememberedSegment).as("previously remembered payments before %s", cutoffDate).isNotNull();
+
+        // Only the projected ("expected*") columns are driven by the rate history being reconstructed; the "actual*"
+        // columns reflect real transactions booked elsewhere on the loan and legitimately populate over time
+        // regardless of which period they belong to, so they are excluded from this comparison.
+        assertThat(actualSegment).as("projected payments before %s must be unchanged by reconstruction", cutoffDate)
+                .usingRecursiveComparison()
+                .ignoringFields("actualBalance", "actualPaymentAmount", "actualAmortizationAmount", "actualDiscountFeeBalance")
+                .isEqualTo(rememberedSegment);
+    }
+
+    private static List<ProjectedAmortizationSchedulePaymentData> paymentsBefore(final ProjectedAmortizationScheduleData response,
+            final String cutoffDate) {
+        final LocalDate cutoff = LocalDate.parse(cutoffDate);
+        return response.getPayments().stream()
+                .filter(payment -> payment.getPaymentDate() != null && payment.getPaymentDate().isBefore(cutoff)).toList();
     }
 
     @Then("The retrieved amortization schedule has the following summary fields:")

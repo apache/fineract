@@ -397,3 +397,28 @@ Feature: Working Capital Transaction Reprocessing
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Repayment    | 5000.0            | 5000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Repayment    | 7000.0            | 4000.0           | 0.0               | 0.0                   | false    |
+
+  @TestRailId:C89813
+  Scenario: Verify backdated repayment re-attributes the fee's charge paid-by row to the earlier transaction
+    # R1 (day 20) settles a 100 fee, so its paid-by row initially carries the fee.
+    # Backdated R2 (day 10) settles the fee first on chronological replay, so the paid-by row must move to R2.
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 January 2026" due date and 100.0 transaction amount
+    When Admin sets the business date to "20 January 2026"
+    And Customer makes repayment on "20 January 2026" with 100 transaction amount on Working Capital loan
+    Then Working Capital Loan "REPAYMENT" transaction on "20 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 100.0  |
+    When Admin sets the business date to "25 January 2026"
+    And Customer makes repayment on "10 January 2026" with 100 transaction amount on Working Capital loan
+    Then Working Capital Loan "REPAYMENT" transaction on "10 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 100.0  |
+    And Working Capital Loan "REPAYMENT" transaction on "20 January 2026" has the following charge paid-by data:
+      | Charge Name | Amount |

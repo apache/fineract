@@ -253,6 +253,37 @@ Feature: Working Capital Loan Charge After Maturity
     Then Customer makes credit balance refund on "20 August 2026" with 100.0 transaction amount on Working Capital loan
     And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
+  @TestRailId:C89815
+  Scenario: Verify overpayment consumed by a post-maturity charge is attributed to the repayment that funded it
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 1000             | 100000       | 18                | 0        |
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes repayment on "10 January 2026" with 1150.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "150.00"
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 1000.0             | 1000.0            | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 1150.0             | 1000.0            | 0.0               | 0.0                   | false    |
+    When Admin sets the business date to "15 January 2026"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 January 2026" due date and 100.0 transaction amount
+    Then Working Capital loan status will be "OVERPAID"
+    And Working Capital loan balance overpaymentAmount is "50.00"
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
+    # The fee is settled entirely out of the day-10 repayment's surplus, so that transaction's own allocation grows
+    # by the settled amount, and the charge's paid-by row points at it.
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 1000.0             | 1000.0            | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 1150.0             | 1000.0            | 100.0             | 0.0                   | false    |
+    And Working Capital Loan "REPAYMENT" transaction on "10 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 100.0  |
+
   @TestRailId:C85615
   Scenario: Verify charges added after Maturity date, closed, overpaid loan - UC9: charge due date before business date is rejected (Negative)
     When Admin creates working capital loan charge without payment mode
