@@ -217,7 +217,7 @@ Feature: Working Capital Transaction Allocation
       | 12 January 2026 | Repayment             | 9200.0            | 9000.0           | 15.0              | 25.0                  | false    |
       | 12 January 2026 | Accrual               | 15.0              | 0.0              | 15.0              | 0.0                   | false    |
       | 12 January 2026 | Accrual               | 25.0              | 0.0              | 0.0               | 25.0                  | false    |
-      | 12 January 2026 | Credit Balance Refund | 160.0             | 160.0            | 0.0               | 0.0                   | false    |
+      | 12 January 2026 | Credit Balance Refund | 160.0             | 0.0              | 0.0               | 0.0                   | false    |
 
   @TestRailId:C85419
   Scenario: Verify Working Capital Repayment transaction allocation with charges has been reprocessed successfully after additional backdated repayment - UC8

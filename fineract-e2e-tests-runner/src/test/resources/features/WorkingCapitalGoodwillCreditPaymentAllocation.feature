@@ -214,7 +214,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 9000.0    | 9000.0             | 100000.0           | 0.0            | 0.0              | 160.0             |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
-      | 15.0       | 0.0             | 15.0     | 25.0           | 0.0                 | 25.0          |
+      | 15.0       | 0.0             | 15.0     | 25.0           | 0.0                 | 25.0         |
     And Working Capital Loan has transactions:
       | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -232,7 +232,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 12 January 2026 | Goodwill Credit       | 9200.0            | 9000.0           | 15.0              | 25.0                  | false    |
       | 12 January 2026 | Accrual               | 15.0              | 0.0              | 15.0              | 0.0                   | false    |
       | 12 January 2026 | Accrual               | 25.0              | 0.0              | 0.0               | 25.0                  | false    |
-      | 12 January 2026 | Credit Balance Refund | 160.0             | 160.0            | 0.0               | 0.0                   | false    |
+      | 12 January 2026 | Credit Balance Refund | 160.0             | 0.0              | 0.0               | 0.0                   | false    |
 
   @TestRailId:C85518
   Scenario: Verify Working Capital Goodwill Credit transaction allocation with charges has been reprocessed successfully after additional backdated goodwill credit - UC8
@@ -314,7 +314,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
   Scenario: Verify Working Capital Goodwill Credit transaction with charge within amortization schedule with DUE_PENALTY_FEE_PRINCIPAL allocation - UC10
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
-      | LoanProduct               | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
       | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
     When Admin sets the business date to "10 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -323,8 +323,8 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | Charge Name                  | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
       | Working Capital Loan Penalty | 10 January 2026 | 35.0   | EUR      | true      | Specified due date | Flat                    | Regular             |
     Then Working Capital Loan has transactions:
-      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
     And Customer makes "GOODWILL_CREDIT" transaction on "10 January 2026" with 270.0 transaction amount on Working Capital loan
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
@@ -746,7 +746,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 185       | 05 July 2026     | 50.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
       | 186       | 06 July 2026     | 50.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
       | 187       | 07 July 2026     | 50.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
-      | 188       | 08 July 2026     |  8.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+      | 188       | 08 July 2026     | 8.00                  |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
     When Admin sets the business date to "15 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "15 March 2026"
@@ -878,7 +878,7 @@ Feature: Working Capital Goodwill Credit Payment Allocation
       | 12 January 2026 | Goodwill Credit       | 9200.0            | 9000.0           | 15.0              | 25.0                  | false    |
       | 12 January 2026 | Accrual               | 15.0              | 0.0              | 15.0              | 0.0                   | false    |
       | 12 January 2026 | Accrual               | 25.0              | 0.0              | 0.0               | 25.0                  | false    |
-      | 12 January 2026 | Credit Balance Refund | 160.0             | 160.0            | 0.0               | 0.0                   | false    |
+      | 12 January 2026 | Credit Balance Refund | 160.0             | 0.0              | 0.0               | 0.0                   | false    |
 
   @TestRailId:C85526
   Scenario: Verify Working Capital Goodwill Credit falls back to DEFAULT rule (DUE_PRINCIPAL first) and not to REPAYMENT rule (DUE_FEE first) when no GOODWILL_CREDIT rule is configured - UC16
@@ -1009,17 +1009,17 @@ Feature: Working Capital Goodwill Credit Payment Allocation
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "20 January 2026" due date and 25.0 transaction amount
     When Admin sets the business date to "15 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-# --- charges are due only on 20 Jan: principal is settled first (DUE_PRINCIPAL), then IN_ADVANCE_FEE fully, then IN_ADVANCE_PENALTY partially --- #
-    And Customer makes "GOODWILL_CREDIT" transaction on "15 January 2026" with 9020.0 transaction amount on Working Capital loan
+# --- charges are due only on 20 Jan: principal is settled first (DUE_PRINCIPAL), then IN_ADVANCE_FEE fully, then IN_ADVANCE_PENALTY fully --- #
+    And Customer makes "GOODWILL_CREDIT" transaction on "15 January 2026" with 9040.0 transaction amount on Working Capital loan
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9000.0    | 9000.0             | 100000.0           | 0.0            | 0.0              | 0.0               |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
-      | 15.0       | 0.0             | 15.0     | 25.0           | 20.0                | 5.0          |
+      | 15.0       | 0.0             | 15.0     | 25.0           | 0.0                 | 25.0         |
     And Working Capital Loan has transactions:
       | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 15 January 2026 | Goodwill Credit | 9020.0            | 9000.0           | 15.0              | 5.0                   | false    |
+      | 15 January 2026 | Goodwill Credit | 9040.0            | 9000.0           | 15.0              | 25.0                  | false    |
       | 15 January 2026 | Accrual         | 15.0              | 0.0              | 15.0              | 0.0                   | false    |
       | 15 January 2026 | Accrual         | 25.0              | 0.0              | 0.0               | 25.0                  | false    |

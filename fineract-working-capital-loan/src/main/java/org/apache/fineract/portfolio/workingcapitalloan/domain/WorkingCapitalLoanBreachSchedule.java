@@ -59,6 +59,9 @@ public class WorkingCapitalLoanBreachSchedule extends AbstractAuditableWithUTCDa
     @Column(name = "min_payment_amount", scale = 6, precision = 19)
     private BigDecimal minPaymentAmount;
 
+    @Column(name = "base_min_payment_amount", scale = 6, precision = 19)
+    private BigDecimal baseMinPaymentAmount;
+
     @Column(name = "paid_amount", scale = 6, precision = 19)
     private BigDecimal paidAmount;
 

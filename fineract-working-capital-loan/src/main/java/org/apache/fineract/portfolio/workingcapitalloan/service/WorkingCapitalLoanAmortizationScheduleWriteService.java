@@ -30,6 +30,10 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
     record PrincipalPayment(LocalDate date, BigDecimal amount) {
     }
 
+    /** Principal re-injected on a given date by an over-refunding credit balance refund. */
+    record PrincipalAdjustment(LocalDate date, BigDecimal amount) {
+    }
+
     void generateAndSaveAmortizationSchedule(Long loanId, ProjectedAmortizationScheduleGenerateRequest request);
 
     void generateAndSaveAmortizationScheduleOnDisbursement(WorkingCapitalLoan loan, BigDecimal disbursedAmount, LocalDate disbursementDate);
@@ -54,8 +58,9 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
 
     /**
      * Rebuilds the projected schedule from scratch (as on disbursement) and re-applies the given principal payments in
-     * chronological order. Used by transaction reprocessing, where re-allocation can change the principal portion
-     * recorded on each transaction date.
+     * chronological order, then the given principal adjustments. Used by transaction reprocessing, where re-allocation
+     * can change the principal portion recorded on each transaction date.
      */
-    void rebuildScheduleFromPrincipalPayments(WorkingCapitalLoan loan, List<PrincipalPayment> principalPayments);
+    void rebuildScheduleFromPrincipalPayments(WorkingCapitalLoan loan, List<PrincipalPayment> principalPayments,
+            List<PrincipalAdjustment> principalAdjustments);
 }

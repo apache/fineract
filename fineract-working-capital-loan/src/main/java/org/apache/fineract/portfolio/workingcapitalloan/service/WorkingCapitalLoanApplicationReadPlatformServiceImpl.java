@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -157,7 +158,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
                 predicates.add(cb.equal(root.get("externalId").get("value"), externalId));
             }
             if (StringUtils.isNotBlank(status)) {
-                predicates.add(cb.equal(root.get("loanStatus").as(String.class), status.toUpperCase()));
+                predicates.add(cb.equal(root.get("loanStatus").as(String.class), status.toUpperCase(Locale.ROOT)));
             }
             if (StringUtils.isNotBlank(accountNo)) {
                 predicates.add(cb.equal(root.get("accountNumber"), accountNo));

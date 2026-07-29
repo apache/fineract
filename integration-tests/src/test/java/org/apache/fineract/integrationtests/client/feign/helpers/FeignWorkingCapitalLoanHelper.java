@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -47,6 +48,7 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
+import org.apache.fineract.client.models.ProjectedAmortizationScheduleData;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdDiscountRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRateRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
@@ -138,6 +140,30 @@ public class FeignWorkingCapitalLoanHelper {
         PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionById(loanId, "goodwillCredit", request));
         return response.getResourceId();
+    }
+
+    public Long creditBalanceRefund(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "creditBalanceRefund", request));
+        return response.getResourceId();
+    }
+
+    public CallFailedRuntimeException creditBalanceRefundExpectingFailure(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId,
+                "creditBalanceRefund", request));
+    }
+
+    /**
+     * Reverses (undoes) a working capital loan transaction via the transaction-command {@code undo} endpoint. Used to
+     * back out a prior repayment so the CBR-aware reprocessing can re-derive balances.
+     */
+    public void reverseTransaction(Long loanId, Long transactionId, ExecuteWorkingCapitalLoanTransactionCommandRequest request) {
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId,
+                transactionId, "undo", request));
+    }
+
+    public ProjectedAmortizationScheduleData getAmortizationSchedule(Long loanId) {
+        return ok(() -> fineractClient.workingCapitalLoans().retrieveAmortizationSchedule(loanId));
     }
 
     public List<GetWorkingCapitalLoanTransactionIdResponse> getTransactions(Long loanId) {

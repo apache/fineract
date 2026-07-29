@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -58,7 +59,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 @Slf4j
 public final class ProjectedAmortizationScheduleModel {
 
-    private static final String MODEL_VERSION = "4";
+    private static final String MODEL_VERSION = "5";
 
     /**
      * Cap on Total Days: beyond this the schedule materialises an unreasonable number of rows and the EIR is
@@ -98,6 +99,9 @@ public final class ProjectedAmortizationScheduleModel {
     private final List<RateSegment> rateSegments;
 
     @Getter(AccessLevel.NONE)
+    private final List<PrincipalAdjustment> principalAdjustments;
+
+    @Getter(AccessLevel.NONE)
     @SerializedName(value = "projectedPayments", alternate = "payments")
     private List<ProjectedPayment> projectedPayments;
 
@@ -124,6 +128,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.currency = currency;
         this.actualPayments = new ArrayList<>();
         this.rateSegments = new ArrayList<>();
+        this.principalAdjustments = new ArrayList<>();
         this.calculatedTillDate = expectedDisbursementDate != null ? expectedDisbursementDate : currentBusinessDate;
         rebuildPayments();
     }
@@ -150,6 +155,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.currency = currency;
         this.actualPayments = new ArrayList<>();
         this.rateSegments = new ArrayList<>();
+        this.principalAdjustments = new ArrayList<>();
         this.projectedPayments = List.of();
         this.originalProjectedPayments = List.of();
         this.calculatedTillDate = null;
@@ -179,9 +185,46 @@ public final class ProjectedAmortizationScheduleModel {
         return rateSegments != null ? List.copyOf(rateSegments) : List.of();
     }
 
+    public List<PrincipalAdjustment> principalAdjustments() {
+        return principalAdjustments != null ? List.copyOf(principalAdjustments) : List.of();
+    }
+
+    /**
+     * Records principal re-injected into the loan on {@code adjustmentDate} by an over-refunding credit balance refund,
+     * and rebuilds the payment list.
+     *
+     * <p>
+     * The adjustment is deliberately kept out of the amortization: it does not enter the EIR, the NPV, the expected
+     * balance or the payment analysis. It only raises {@code expectedPaymentAmount} of its own period, because the
+     * re-injected principal is owned by the loan balance ({@code principalAdjustment} / {@code principalOutstanding}),
+     * while this model stays the projection of the originally disbursed amount.
+     *
+     * <p>
+     * The date is clamped into the amortization term the same way {@link #applyPayment} clamps a payment date. A credit
+     * balance refund lands on an overpaid loan, so its date is often at or past maturity; without the clamp the
+     * adjustment would match no period at all and silently vanish from the projection while the balance still owed it.
+     * Unlike a payment it does not advance {@code calculatedTillDate}: that would move which periods count as passed
+     * and so change the NPV source, and the adjustment must leave the amortization alone.
+     */
+    public void applyPrincipalAdjustment(final LocalDate adjustmentDate, final BigDecimal amount) {
+        Objects.requireNonNull(adjustmentDate, "adjustmentDate");
+        Objects.requireNonNull(amount, "amount");
+        principalAdjustments.add(new PrincipalAdjustment(calculateAllocationDate(adjustmentDate, currentFirstPeriodDayOffset()), //
+                money(amount)));
+        rebuildPayments();
+    }
+
     /** Snapshot of repayments already applied; used when restating the schedule after a discount fee adjustment. */
     public List<ActualPayment> snapshotActualPayments() {
         return List.copyOf(actualPayments);
+    }
+
+    /**
+     * Snapshot of the principal adjustments already applied; used alongside {@link #snapshotActualPayments()} when
+     * restating the schedule after a discount fee adjustment, so an over-refund CBR's adjustment survives the restate.
+     */
+    public List<PrincipalAdjustment> snapshotPrincipalAdjustments() {
+        return List.copyOf(principalAdjustments);
     }
 
     /** Sum of {@code actualAmortizationAmount} across all applied payment periods (paymentNo &gt; 0). */
@@ -204,6 +247,7 @@ public final class ProjectedAmortizationScheduleModel {
         final ProjectedAmortizationScheduleModel asOfModel = generate(asOfDiscount, netDisbursementAmount.getAmount(),
                 totalPaymentVolume.getAmount(), periodPaymentRate, npvDayCount, expectedDisbursementDate, mc, currency,
                 calculatedTillDate != null ? calculatedTillDate : expectedDisbursementDate);
+        asOfModel.copyPrincipalAdjustmentsFrom(this);
         for (final ActualPayment payment : actualPayments) {
             asOfModel.applyPayment(payment.date(), payment.amount().getAmount());
         }
@@ -368,8 +412,15 @@ public final class ProjectedAmortizationScheduleModel {
         final ProjectedAmortizationScheduleModel newModel = generate(newDiscountAmount, newNetAmount, totalPaymentVolume.getAmount(),
                 periodPaymentRate, npvDayCount, newStartDate, mc, currency, currentDate);
         newModel.actualPayments.addAll(actualPayments);
+        newModel.copyPrincipalAdjustmentsFrom(this);
         newModel.rebuildPayments();
         return newModel;
+    }
+
+    private void copyPrincipalAdjustmentsFrom(final ProjectedAmortizationScheduleModel source) {
+        if (source.principalAdjustments != null) {
+            this.principalAdjustments.addAll(source.principalAdjustments);
+        }
     }
 
     public void recalculateNetAmortizationAndDeferredBalanceFrom(final LocalDate repaymentDate) {
@@ -664,16 +715,63 @@ public final class ProjectedAmortizationScheduleModel {
 
         result.addAll(tailPayments);
 
-        while (result.size() > 1) {
-            final ProjectedPayment last = result.getLast();
-            if (last.npvValue() != null && last.npvValue().isZero()) {
-                result.removeLast();
+        final Map<LocalDate, BigDecimal> adjustmentsByDate = aggregatePrincipalAdjustmentsByDate();
+        addPrincipalAdjustments(result, adjustmentsByDate);
+        trimTrailingZeroNpvPayments(result, adjustmentsByDate.keySet());
+
+        return result;
+    }
+
+    private Map<LocalDate, BigDecimal> aggregatePrincipalAdjustmentsByDate() {
+        if (principalAdjustments == null || principalAdjustments.isEmpty()) {
+            return Map.of();
+        }
+        final Map<LocalDate, BigDecimal> result = new LinkedHashMap<>();
+        for (final PrincipalAdjustment adjustment : principalAdjustments) {
+            result.merge(adjustment.date(), adjustment.amount().getAmount(), (a, b) -> a.add(b, mc));
+        }
+        return result;
+    }
+
+    /**
+     * Adds each principal adjustment to the expected payment of the period falling on its own date. An adjustment dated
+     * outside the amortization term has no period to carry it and is left out of the projection rather than attached to
+     * an unrelated period; the loan balance still owns the amount.
+     */
+    private void addPrincipalAdjustments(final List<ProjectedPayment> payments, final Map<LocalDate, BigDecimal> adjustmentsByDate) {
+        if (adjustmentsByDate.isEmpty()) {
+            return;
+        }
+        for (int i = 0; i < payments.size(); i++) {
+            final ProjectedPayment payment = payments.get(i);
+            final BigDecimal adjustment = payment.paymentNo() > 0 ? adjustmentsByDate.get(payment.date()) : null;
+            if (adjustment == null) {
+                continue;
+            }
+            payments.set(i, withExpectedPaymentAmount(payment, payment.expectedPaymentAmount().getAmount().add(adjustment, mc)));
+        }
+    }
+
+    private ProjectedPayment withExpectedPaymentAmount(final ProjectedPayment payment, final BigDecimal expectedPaymentAmount) {
+        return new ProjectedPayment(payment.paymentNo(), payment.date(), payment.paymentsLeft(), money(expectedPaymentAmount),
+                payment.discountFactor(), payment.npvValue(), payment.expectedBalance(), payment.actualBalance(),
+                payment.expectedAmortizationAmount(), payment.actualPaymentAmount(), payment.actualAmortizationAmount(),
+                payment.incomeModification(), payment.expectedDiscountFeeBalance(), payment.actualDiscountFeeBalance());
+    }
+
+    /**
+     * Drops the trailing periods the loan will never see, keeping a period that carries a principal adjustment: it is
+     * due even though nothing of the projected disbursement is left to discount on it.
+     */
+    private static void trimTrailingZeroNpvPayments(final List<ProjectedPayment> payments, final Set<LocalDate> adjustedDates) {
+        while (payments.size() > 1) {
+            final ProjectedPayment last = payments.getLast();
+            if (last.npvValue() != null && last.npvValue().isZero() && !adjustedDates.contains(last.date())) {
+                payments.removeLast();
             } else {
                 break;
             }
         }
-
-        return result;
     }
 
     private BigDecimal resolveNpvSource(final boolean hasPositivePayment, final boolean passedPeriod, final BigDecimal periodPayment,
@@ -899,6 +997,10 @@ public final class ProjectedAmortizationScheduleModel {
 
     public record RateSegment(int startDayIndex, Money expectedPaymentAmount, int segmentTerm, BigDecimal effectiveInterestRate,
             Money netDisbursementAtSplit, Money discountAtSplit) {
+    }
+
+    /** Principal re-injected on a date by an over-refunding credit balance refund. */
+    public record PrincipalAdjustment(LocalDate date, Money amount) {
     }
 
     public static String getModelVersion() {

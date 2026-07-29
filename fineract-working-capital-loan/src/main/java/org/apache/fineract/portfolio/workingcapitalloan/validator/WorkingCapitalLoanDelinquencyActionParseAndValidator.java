@@ -29,6 +29,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -332,7 +333,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
             return null;
         }
         try {
-            return DelinquencyMinimumPaymentType.valueOf(value.toUpperCase());
+            return DelinquencyMinimumPaymentType.valueOf(value.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             failParameterValidation(dataValidator, MINIMUM_PAYMENT_TYPE, "invalid.minimum.payment.type",
                     "Invalid minimum payment type: " + value + ". Supported: PERCENTAGE, FLAT");
@@ -346,7 +347,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
             return null;
         }
         try {
-            return DelinquencyFrequencyType.valueOf(value.toUpperCase());
+            return DelinquencyFrequencyType.valueOf(value.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             failParameterValidation(dataValidator, FREQUENCY_TYPE, "invalid.frequency.type",
                     "Invalid frequency type: " + value + ". Supported: DAYS, WEEKS, MONTHS, YEARS");

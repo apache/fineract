@@ -31,6 +31,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
@@ -85,7 +86,7 @@ public class MeetingsApiResource {
 
         if (calendarId != null) {
             calendarData = calendarReadPlatformService.retrieveCalendar(calendarId, entityId,
-                    CalendarEntityType.valueOf(entityType.toUpperCase()).getValue());
+                    CalendarEntityType.valueOf(entityType.toUpperCase(Locale.ROOT)).getValue());
 
             var recurringDates = calendarReadPlatformService.generateRecurringDates(calendarData, true, DateUtils.getBusinessLocalDate());
             var nextTenRecurringDates = calendarReadPlatformService.generateNextTenRecurringDates(calendarData);
@@ -116,8 +117,8 @@ public class MeetingsApiResource {
     public Collection<MeetingData> retrieveMeetings(@PathParam("entityType") final String entityType,
             @PathParam("entityId") final Long entityId, @QueryParam("limit") final Integer limit) {
 
-        return meetingReadService.retrieveMeetingsByEntity(entityId, CalendarEntityType.valueOf(entityType.toUpperCase()).getValue(),
-                limit);
+        return meetingReadService.retrieveMeetingsByEntity(entityId,
+                CalendarEntityType.valueOf(entityType.toUpperCase(Locale.ROOT)).getValue(), limit);
     }
 
     @GET
@@ -128,7 +129,7 @@ public class MeetingsApiResource {
             @PathParam("entityId") final Long entityId) {
 
         var meetingData = meetingReadService.retrieveMeeting(meetingId, entityId,
-                CalendarEntityType.valueOf(entityType.toUpperCase()).getValue());
+                CalendarEntityType.valueOf(entityType.toUpperCase(Locale.ROOT)).getValue());
         var clientsAttendance = meetingAttendanceReadService.retrieveClientAttendanceByMeetingId(meetingId);
 
         return MeetingData.builder().id(meetingData.getId()).meetingDate(meetingData.getMeetingDate()).clients(meetingData.getClients())

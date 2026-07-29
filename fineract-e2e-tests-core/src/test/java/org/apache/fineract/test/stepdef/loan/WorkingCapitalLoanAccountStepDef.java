@@ -44,6 +44,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -1243,7 +1244,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         GetWorkingCapitalLoansLoanIdResponse loanDetailsResponse = ok(
                 () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
         String getLoanStatus = loanDetailsResponse.getStatus().getValue();
-        assertThat(getLoanStatus.toUpperCase()).isEqualTo(ACTIVE.name());
+        assertThat(getLoanStatus.toUpperCase(Locale.ROOT)).isEqualTo(ACTIVE.name());
 
         GetDisbursementDetail disbursementDetails = loanDetailsResponse.getDisbursementDetails().stream().findFirst()
                 .orElseThrow(() -> new RuntimeException(""));
@@ -1359,7 +1360,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         GetWorkingCapitalLoansLoanIdResponse loanDetailsResponse = ok(
                 () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
         String getLoanStatus = loanDetailsResponse.getStatus().getValue();
-        assertThat(getLoanStatus.toUpperCase()).isEqualTo(ACTIVE.name());
+        assertThat(getLoanStatus.toUpperCase(Locale.ROOT)).isEqualTo(ACTIVE.name());
 
         PostWorkingCapitalLoansLoanIdRequest disburseLoanRequest = testContext().get(TestContextKey.LOAN_DISBURSE_REQUEST);
 
@@ -2741,6 +2742,12 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         validateRepaymentResponse(response, transactionAmount, transactionDate, loanId);
     }
 
+    @Then("Customer fails to make credit balance refund on {string} with {double} EUR transaction amount backdated outcomes with error message")
+    public void creditBalanceRefundWCLoanFailureBackdated(final String transactionDate, final double transactionAmount) {
+        String errorMessage = ErrorMessageHelper.creditBalanceRefundBackdatedForbiddenFailure();
+        creditBalanceRefundWCLoanFailure(transactionDate, transactionAmount, 400, errorMessage);
+    }
+
     @Then("Customer makes {string} transaction on {string} with {double} transaction amount on Working Capital loan with the following payment details:")
     public void makeWorkingCapitalLoanTransactionLikeWithPaymentDetails(final String transactionTypeInput, final String transactionDate,
             final double transactionAmount, final DataTable table) {
@@ -2816,6 +2823,17 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         testContext().set(WC_CBR_JOURNAL_ENTRIES_BEFORE, before);
         testContext().set(WC_CBR_JOURNAL_ENTRIES_AFTER, after);
         return response;
+    }
+
+    public void creditBalanceRefundWCLoanFailure(final String transactionDate, final double transactionAmount, int errorCode,
+            String errorMessage) {
+        final Long loanId = getCreatedLoanId();
+        final PostWorkingCapitalLoanTransactionsRequest cbrRequest = buildCreditBalanceRefundRequest(transactionDate, transactionAmount,
+                null);
+        CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "creditBalanceRefund", cbrRequest));
+        assertThat(exception.getStatus()).as(errorMessage).isEqualTo(errorCode);
+        assertThat(exception.getDeveloperMessage()).contains(errorMessage);
     }
 
     private PostWorkingCapitalLoanTransactionsRequest buildRepaymentRequest(final String transactionDate, final double transactionAmount,
@@ -3418,7 +3436,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     }
 
     private TransactionType resolveTransactionType(String transactionType) {
-        return TransactionType.valueOf(transactionType.toUpperCase().replace(' ', '_'));
+        return TransactionType.valueOf(transactionType.toUpperCase(Locale.ROOT).replace(' ', '_'));
     }
 
     private List<GetWorkingCapitalLoanTransactionIdResponse> findMatchingTransactions(Long loanId, TransactionType transactionType,

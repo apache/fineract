@@ -65,8 +65,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         final BigDecimal principalPortion = MathUtil.nullToZero(allocation.getPrincipalPortion());
         final BigDecimal feesPortion = MathUtil.nullToZero(allocation.getFeeChargesPortion());
         final BigDecimal penaltiesPortion = MathUtil.nullToZero(allocation.getPenaltyChargesPortion());
-        final BigDecimal overpaymentPortion = txn.getTransactionAmount().subtract(principalPortion).subtract(feesPortion)
-                .subtract(penaltiesPortion).max(BigDecimal.ZERO);
+        final BigDecimal overpaymentPortion = MathUtil.nullToZero(allocation.getOverpaymentPortion());
 
         switch (txn.getTypeOf()) {
             case LoanTransactionType.REPAYMENT -> {
@@ -92,7 +91,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                     throw new NotImplementedException("Charge off is not implemented yet for Payout Refund on Working Capital Loan");
                 }
             }
-            case LoanTransactionType.CREDIT_BALANCE_REFUND -> postCreditBalanceRefundJournalEntries(loan, txn);
+            case LoanTransactionType.CREDIT_BALANCE_REFUND -> postCreditBalanceRefundJournalEntries(loan, txn, allocation);
             case LoanTransactionType.CHARGE_ADJUSTMENT -> postChargeAdjustmentJournalEntries(loan, txn, principalPortion, feesPortion,
                     penaltiesPortion, overpaymentPortion, isChargedOff);
             case LoanTransactionType.ACCRUAL -> postChargeAccrualJournalEntries(loan, txn, feesPortion, penaltiesPortion);
@@ -170,17 +169,109 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion);
     }
 
-    private void postCreditBalanceRefundJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn) {
-        final BigDecimal amount = txn.getTransactionAmount();
+    /**
+     * Books a credit balance refund from its allocation's split: the overpayment portion gave back overpayment, and any
+     * principal portion (the over-refund excess a reprocess derived) lent out fresh principal. At booking a refund is
+     * always fully funded by the overpayment, so this reduces to the plain overpayment-debit / fund-source-credit pair.
+     */
+    private void postCreditBalanceRefundJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final WorkingCapitalLoanTransactionAllocation allocation) {
         final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
         // debit
-        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.OVERPAYMENT, amount);
+        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.OVERPAYMENT,
+                MathUtil.nullToZero(allocation == null ? null : allocation.getOverpaymentPortion()));
+        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO,
+                MathUtil.nullToZero(allocation == null ? null : allocation.getPrincipalPortion()));
         // credit
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FUND_SOURCE, amount);
+        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount());
+    }
+
+    @Override
+    public void restateJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final WorkingCapitalLoanTransactionAllocation allocation, final boolean isChargedOff) {
+        final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
+        if (!splitDiffersFromLedger(loan, txn, allocation, effectiveEntries)) {
+            // The ledger already reflects the recomputed split; re-posting would only add cancelling noise.
+            return;
+        }
+        reverseExistingEntries(loan, txn, true);
+        postJournalEntries(loan, txn, allocation, isChargedOff);
+    }
+
+    /**
+     * The entries that currently make up a transaction's posting: {@code findJournalEntries} returns only the ones not
+     * flagged reversed. A restatement supersedes its predecessors (see {@link #reverseExistingEntries}), so what
+     * remains is exactly the live split.
+     */
+    private List<JournalEntry> effectiveJournalEntries(final WorkingCapitalLoanTransaction txn) {
+        final String transactionId = AccountingProcessorHelper.WORKING_CAPITAL_LOAN_TRANSACTION_IDENTIFIER + txn.getId();
+        return journalEntryRepository.findJournalEntries(transactionId, WORKING_CAPITAL_LOAN_ENTITY_TYPE);
+    }
+
+    private JournalEntry createMirrorEntry(final JournalEntry journalEntry, final String transactionId, final LocalDate transactionDate) {
+        final JournalEntryType reversalType = journalEntry.isDebitEntry() ? JournalEntryType.CREDIT : JournalEntryType.DEBIT;
+        return JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetail(), journalEntry.getGlAccount(),
+                journalEntry.getCurrencyCode(), transactionId, Boolean.FALSE, transactionDate, reversalType, journalEntry.getAmount(),
+                journalEntry.getDescription(), journalEntry.getEntityType(), journalEntry.getEntityId(), journalEntry.getReferenceNumber(),
+                journalEntry.getLoanTransactionId(), journalEntry.getSavingsTransactionId(), journalEntry.getClientTransactionId(),
+                journalEntry.getShareTransactionId());
+    }
+
+    /** Whether the recomputed split would post amounts different from the transaction's live entries. */
+    private boolean splitDiffersFromLedger(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final WorkingCapitalLoanTransactionAllocation allocation, final List<JournalEntry> effectiveEntries) {
+        if (effectiveEntries.isEmpty()) {
+            return true;
+        }
+        final Long productId = loan.getLoanProduct().getId();
+        final Long paymentTypeId = extractPaymentTypeId(txn);
+
+        if (txn.getTypeOf() == LoanTransactionType.CREDIT_BALANCE_REFUND) {
+            return postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.LOAN_PORTFOLIO, true,
+                    MathUtil.nullToZero(allocation == null ? null : allocation.getPrincipalPortion()))
+                    || postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.OVERPAYMENT, true,
+                            MathUtil.nullToZero(allocation == null ? null : allocation.getOverpaymentPortion()));
+        }
+
+        final BigDecimal principalPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getPrincipalPortion());
+        final BigDecimal feesPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getFeeChargesPortion());
+        final BigDecimal penaltiesPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getPenaltyChargesPortion());
+        // Read the overpayment portion off the allocation, exactly as postJournalEntries does when it books the split.
+        // Re-deriving it here would let the guard and the poster disagree about what "unchanged" means.
+        final BigDecimal overpaymentPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getOverpaymentPortion());
+        return postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.LOAN_PORTFOLIO, false, principalPortion)
+                || postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.FEES_RECEIVABLE, false, feesPortion)
+                || postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.PENALTIES_RECEIVABLE, false,
+                        penaltiesPortion)
+                || postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.OVERPAYMENT, false,
+                        overpaymentPortion);
+    }
+
+    private boolean postedAmountDiffers(final List<JournalEntry> entries, final Long productId, final Long paymentTypeId,
+            final CashAccountsForLoan accountType, final boolean debit, final BigDecimal expected) {
+        final GLAccount account = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, accountType.getValue(), paymentTypeId);
+        final BigDecimal posted = entries.stream()
+                .filter(entry -> entry.getGlAccount() != null && entry.getGlAccount().getId().equals(account.getId()))
+                .filter(entry -> entry.isDebitEntry() == debit).map(JournalEntry::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return posted.compareTo(expected) != 0;
     }
 
     @Override
     public void postReversalJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn) {
+        reverseExistingEntries(loan, txn, false);
+    }
+
+    /**
+     * Cancels a transaction's live entries by posting an offsetting mirror for each, keeping the ledger append-only
+     * (nothing is deleted). The originals are always flagged reversed.
+     *
+     * @param supersede
+     *            whether the mirrors are flagged reversed as well. A restatement must pass {@code true}: the cancelled
+     *            pair then drops out of the live set, so the next reversal cannot mirror these mirrors again - which
+     *            would compound and leave the original booking amounts standing on the ledger. An undo passes
+     *            {@code false}, keeping its mirrors live as the visible reversal.
+     */
+    private void reverseExistingEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn, final boolean supersede) {
         final Office office = loan.getClient().getOffice();
         final LocalDate transactionDate = txn.getReversedOnDate() != null ? txn.getReversedOnDate() : DateUtils.getBusinessLocalDate();
 
@@ -191,12 +282,10 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                 WORKING_CAPITAL_LOAN_ENTITY_TYPE);
 
         for (final JournalEntry journalEntry : existingEntries) {
-            final JournalEntryType reversalType = journalEntry.isDebitEntry() ? JournalEntryType.CREDIT : JournalEntryType.DEBIT;
-            final JournalEntry reversalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getPaymentDetail(),
-                    journalEntry.getGlAccount(), journalEntry.getCurrencyCode(), transactionId, Boolean.FALSE, transactionDate,
-                    reversalType, journalEntry.getAmount(), journalEntry.getDescription(), journalEntry.getEntityType(),
-                    journalEntry.getEntityId(), journalEntry.getReferenceNumber(), journalEntry.getLoanTransactionId(),
-                    journalEntry.getSavingsTransactionId(), journalEntry.getClientTransactionId(), journalEntry.getShareTransactionId());
+            final JournalEntry reversalEntry = createMirrorEntry(journalEntry, transactionId, transactionDate);
+            if (supersede) {
+                reversalEntry.setReversed(true);
+            }
             helper.persistJournalEntry(reversalEntry);
 
             journalEntry.setReversed(true);

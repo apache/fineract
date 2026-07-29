@@ -80,4 +80,7 @@
   <include relativeToChangelogFile="true" file="parts/0056_wc_loan_delinquency_disable.xml"/>
   <include relativeToChangelogFile="true" file="parts/0057_wc_loan_delinquency_reset_start_new_period.xml"/>
   <include relativeToChangelogFile="true" file="parts/0058_wc_breach_start_type.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0059_wc_loan_balance_principal_adjustment.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0060_wc_loan_transaction_allocation_overpayment_portion.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0061_wc_breach_range_schedule_base_min_paym_amount.xml"/>
 </databaseChangeLog>

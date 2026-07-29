@@ -352,7 +352,7 @@ Feature: Working Capital Loan Undo Transaction
       | 01 January 2026 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 06 January 2026 | Repayment             | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
       | 07 January 2026 | Repayment             | 9300.0            | 9000.0           | 100.0             | 0.0                   | false    |
-      | 08 January 2026 | Credit Balance Refund | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 08 January 2026 | Credit Balance Refund | 100.0             | 0.0              | 0.0               | 0.0                   | false    |
     And Working Capital loan balance payload contains the following fields:
       | field                | value  |
       | principalOutstanding | 0.0    |

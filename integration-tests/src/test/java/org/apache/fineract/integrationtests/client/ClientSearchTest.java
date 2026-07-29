@@ -24,6 +24,7 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
+import java.util.Locale;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.PageClientSearchData;
@@ -186,7 +187,7 @@ public class ClientSearchTest extends IntegrationTest {
         PostClientsRequest request3 = ClientHelper.defaultClientCreationRequest();
         clientHelper.createClient(request3);
         // when
-        PageClientSearchData result = clientHelper.searchClients(request2.getExternalId().toUpperCase());
+        PageClientSearchData result = clientHelper.searchClients(request2.getExternalId().toUpperCase(Locale.ROOT));
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getExternalId().getValue()).isEqualTo(request2.getExternalId());

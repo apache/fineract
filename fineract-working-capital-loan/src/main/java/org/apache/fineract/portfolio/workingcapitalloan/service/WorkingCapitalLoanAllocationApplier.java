@@ -76,11 +76,12 @@ public class WorkingCapitalLoanAllocationApplier {
             final WorkingCapitalLoanTransactionAllocation existing, final WorkingCapitalLoanAllocationPlan plan) {
         if (existing == null) {
             return WorkingCapitalLoanTransactionAllocation.forPortions(transaction, plan.principalPortion(), plan.feeChargesPortion(),
-                    plan.penaltyChargesPortion());
+                    plan.penaltyChargesPortion(), plan.overpaymentPortion());
         }
         existing.setPrincipalPortion(plan.principalPortion());
         existing.setFeeChargesPortion(plan.feeChargesPortion());
         existing.setPenaltyChargesPortion(plan.penaltyChargesPortion());
+        existing.setOverpaymentPortion(plan.overpaymentPortion());
         return existing;
     }
 }

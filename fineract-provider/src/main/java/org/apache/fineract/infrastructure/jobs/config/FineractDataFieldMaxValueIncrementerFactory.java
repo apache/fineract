@@ -23,6 +23,7 @@ import static org.springframework.batch.support.DatabaseType.MYSQL;
 import static org.springframework.batch.support.DatabaseType.POSTGRES;
 
 import java.util.List;
+import java.util.Locale;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
@@ -78,6 +79,6 @@ public class FineractDataFieldMaxValueIncrementerFactory implements DataFieldMax
     }
 
     private DatabaseType getDatabaseType(String incrementerType) {
-        return DatabaseType.valueOf(incrementerType.toUpperCase());
+        return DatabaseType.valueOf(incrementerType.toUpperCase(Locale.ROOT));
     }
 }

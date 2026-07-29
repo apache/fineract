@@ -62,7 +62,6 @@ import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConsta
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanEvent;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanLifecycleStateMachine;
@@ -587,8 +586,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived.
         delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
-        final List<WorkingCapitalLoanCharge> activeCharges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
-        stateMachine.determineAndTransition(loan, transactionDate, activeCharges);
+        stateMachine.determineAndTransition(loan, transactionDate);
         transactionProcessor.triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
         // A discount-fee adjustment can pay down principal and close the loan, so accrue any pending charge income.
         chargeAccrualService.accrueOnClosure(loan, transactionDate);
@@ -792,8 +790,11 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 transactionAmount, paymentDetail, transactionDate, classification, txnExternalId);
         this.transactionRepository.saveAndFlush(creditBalanceRefundTransaction);
 
+        // A booked refund can never exceed the overpayment (validated above), so it is fully funded by the overpayment
+        // balance and moves no principal: the whole amount is its overpayment portion. Principal appears on a CBR only
+        // when a later reprocess leaves part of the refund without overpayment behind it (the over-refund excess).
         final WorkingCapitalLoanTransactionAllocation allocation = WorkingCapitalLoanTransactionAllocation
-                .forPrincipalAllocation(creditBalanceRefundTransaction, transactionAmount);
+                .forCreditBalanceRefund(creditBalanceRefundTransaction, BigDecimal.ZERO, transactionAmount);
         this.allocationRepository.saveAndFlush(allocation);
 
         updateBalanceOnCreditBalanceRefund(loan, transactionAmount);
@@ -899,38 +900,51 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         transaction.setReversedOnDate(reversedOnDate);
         changes.put("reversedOnDate", reversedOnDate);
 
-        final List<WorkingCapitalLoanCharge> charges = this.chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
-        if (charges.isEmpty()) {
-            // The simple total adjustment below is only correct when there is no overpayment to redistribute. If the
-            // loan was overpaid, a full re-allocation is needed so a former overpayment portion folds back into
-            // principal instead of leaving the allocations and schedule disagreeing with the balance.
-            final WorkingCapitalLoanBalance balance = this.balanceRepository.findByWcLoan_Id(loan.getId()).orElse(null);
-            final boolean wasOverpaid = balance != null && MathUtil.isGreaterThanZero(balance.getOverpaymentAmount());
-            if (wasOverpaid) {
-                transactionReprocessingService.reprocessTransactionsForChargeFreeUndo(loan);
-            } else {
+        boolean lastMonetaryAction = transactionProcessor.isLastMonetaryAction(transaction);
+        boolean isAccountingOnly = isAccountingOnlyTransaction(transaction);
+        boolean isChargesInvolved = isChargesInvolved(loan);
+        if (lastMonetaryAction && !isChargesInvolved) {
+            if (!isAccountingOnly) {
                 amortizationScheduleWriteService.applyRepaymentUndo(loan, transaction.getTransactionDate(),
                         transaction.getAllocation().getPrincipalPortion());
-                updateBalanceOnUndoRepayment(loan, transaction.getAllocation().getPrincipalPortion());
             }
+            // TODO: undo charges balances
+            updateBalanceAfterUndo(loan, transaction);
         } else {
-            transactionReprocessingService.reprocessTransactions(loan);
+            if (!isAccountingOnly) {
+                transactionReprocessingService.reprocessTransactions(loan);
+            } else {
+                updateBalanceAfterUndo(loan, transaction);
+            }
         }
 
-        breachScheduleService.applyRepaymentUndo(loan.getId(), transaction.getTransactionDate(), transaction.getTransactionAmount());
-        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+        if (!isAccountingOnly) {
+            breachScheduleService.applyRepaymentUndo(loan.getId(), transaction.getTransactionDate(), transaction.getTransactionAmount());
+            delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+        }
 
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
             accountingProcessor.postReversalJournalEntries(loan, transaction);
         }
 
-        stateMachine.determineAndTransition(loan, transaction.getReversedOnDate(), charges);
+        stateMachine.determineAndTransition(loan, DateUtils.getBusinessLocalDate());
         changes.put("status", loan.getLoanStatus());
 
         handleNote(loan, command, changes);
 
         return new CommandProcessingResultBuilder().withLoanId(loan.getId()).withLoanExternalId(loan.getExternalId())
                 .withEntityId(transaction.getId()).withEntityExternalId(transaction.getExternalId()).with(changes).build();
+    }
+
+    private boolean isChargesInvolved(WorkingCapitalLoan loan) {
+        return !chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId()).isEmpty();
+    }
+
+    private boolean isAccountingOnlyTransaction(WorkingCapitalLoanTransaction transaction) {
+        return switch (transaction.getTransactionType()) {
+            case ACCRUAL, ACCRUAL_ACTIVITY, CHARGE_OFF, DISCOUNT_FEE_AMORTIZATION, DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT -> true;
+            default -> false;
+        };
     }
 
     @Override
@@ -971,9 +985,14 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             balance.setTotalDiscountFeeAdjustment(balance.getTotalDiscountFeeAdjustment().add(discountAmount));
             balance.setPrincipal(balance.getPrincipal().subtract(discountAmount));
 
-            final BigDecimal diff = balance.getPrincipal().subtract(balance.getPrincipalPaid());
+            // Clamp against the total principal due (principal + any over-refund principal adjustment), not the bare
+            // principal: an adjustment still owed must not be treated as overpaid just because the discount reduced the
+            // principal below what was paid. Identical to the previous principal-only clamp when there is no
+            // adjustment.
+            final BigDecimal totalPrincipalDue = balance.getTotalPrincipalDue();
+            final BigDecimal diff = totalPrincipalDue.subtract(balance.getPrincipalPaid());
             if (MathUtil.isLessThanOrEqualZero(diff)) {
-                balance.setPrincipalPaid(balance.getPrincipal());
+                balance.setPrincipalPaid(totalPrincipalDue);
                 if (MathUtil.isLessThanZero(diff)) {
                     balance.setOverpaymentAmount(balance.getOverpaymentAmount().add(diff.negate()));
                 } else {
@@ -987,18 +1006,37 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         this.balanceRepository.saveAndFlush(balance);
     }
 
-    private void updateBalanceOnUndoRepayment(final WorkingCapitalLoan loan, final BigDecimal transactionAmount) {
-        final WorkingCapitalLoanBalance balance = this.balanceRepository.findByWcLoan_Id(loan.getId())
-                .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
+    private void updateBalanceAfterUndo(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction) {
+        final WorkingCapitalLoanBalance balance = loan.getBalance();
 
-        final BigDecimal currentTotalPaidPrincipal = MathUtil.nullToZero(balance.getPrincipalPaid());
-        final BigDecimal currentOverpayment = MathUtil.nullToZero(balance.getOverpaymentAmount());
+        switch (transaction.getTransactionType()) {
+            case GOODWILL_CREDIT, PAYOUT_REFUND, REPAYMENT, CHARGE_ADJUSTMENT -> {
+                balance.setPrincipalPaid(balance.getPrincipalPaid().subtract(transaction.getAllocation().getPrincipalPortion()));
+                balance.setFeePaid(balance.getFeePaid().subtract(transaction.getAllocation().getFeeChargesPortion()));
+                balance.setPenaltyPaid(balance.getPenaltyPaid().subtract(transaction.getAllocation().getPenaltyChargesPortion()));
+                balance.setOverpaymentAmount(balance.getOverpaymentAmount().subtract(transaction.getAllocation().getOverpaymentPortion()));
+            }
+            case DISCOUNT_FEE -> {
+                balance.setPrincipal(balance.getPrincipal().subtract(transaction.getAllocation().getPrincipalPortion()));
+                balance.setTotalDiscountFee(balance.getTotalDiscountFee().subtract(transaction.getAllocation().getPrincipalPortion()));
+            }
+            case DISCOUNT_FEE_ADJUSTMENT -> {
+                balance.setPrincipal(balance.getPrincipal().add(transaction.getAllocation().getPrincipalPortion()));
+                balance.setTotalDiscountFee(balance.getTotalDiscountFee().add(transaction.getAllocation().getPrincipalPortion()));
+            }
+            case DISCOUNT_FEE_AMORTIZATION -> {
+                balance.setRealizedIncomeFromDiscountFee(
+                        balance.getRealizedIncomeFromDiscountFee().subtract(transaction.getTransactionAmount()));
+            }
+            case DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT -> {
+                balance.setRealizedIncomeFromDiscountFee(
+                        balance.getRealizedIncomeFromDiscountFee().add(transaction.getTransactionAmount()));
+            }
+            case CHARGE_OFF, ACCRUAL -> {
+            } // No-op
 
-        final BigDecimal amountSubtractFromOverpayment = currentOverpayment.min(transactionAmount);
-        final BigDecimal amountSubtractFromPrincipal = transactionAmount.subtract(amountSubtractFromOverpayment);
-
-        balance.setOverpaymentAmount(currentOverpayment.subtract(amountSubtractFromOverpayment));
-        balance.setPrincipalPaid(currentTotalPaidPrincipal.subtract(amountSubtractFromPrincipal));
+            default -> throw new IllegalStateException("Unsupported transaction type: " + transaction.getTransactionType());
+        }
 
         this.balanceRepository.saveAndFlush(balance);
     }

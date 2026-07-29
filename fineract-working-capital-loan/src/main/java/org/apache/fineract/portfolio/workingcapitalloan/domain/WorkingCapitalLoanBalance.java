@@ -56,6 +56,10 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
     @Setter
     private BigDecimal principalPaid = BigDecimal.ZERO;
 
+    @Column(name = "principal_adjustment", scale = 6, precision = 19, nullable = false)
+    @Setter
+    private BigDecimal principalAdjustment = BigDecimal.ZERO;
+
     @Column(name = "fee", scale = 6, precision = 19, nullable = false)
     @Setter
     private BigDecimal fee = BigDecimal.ZERO;
@@ -116,8 +120,12 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
         this.overpaymentAmount = BigDecimal.ZERO;
     }
 
+    public BigDecimal getTotalPrincipalDue() {
+        return MathUtil.add(getPrincipal(), getPrincipalAdjustment());
+    }
+
     public BigDecimal getPrincipalOutstanding() {
-        return MathUtil.subtract(getPrincipal(), getPrincipalPaid()).max(BigDecimal.ZERO);
+        return MathUtil.subtract(getTotalPrincipalDue(), getPrincipalPaid()).max(BigDecimal.ZERO);
     }
 
     public BigDecimal getFeeOutstanding() {
@@ -133,7 +141,7 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
     }
 
     public BigDecimal getTotalExpectedRepayment() {
-        return MathUtil.add(getPrincipal()).add(getPenalty()).add(getFee());
+        return MathUtil.add(getPrincipal()).add(getPrincipalAdjustment()).add(getPenalty()).add(getFee());
     }
 
     public BigDecimal getTotalRepayment() {

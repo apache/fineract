@@ -57,4 +57,5 @@ public class WorkingCapitalLoanTransactionData implements Serializable {
     private BigDecimal principalPortion;
     private BigDecimal feeChargesPortion;
     private BigDecimal penaltyChargesPortion;
+    private BigDecimal overpaymentPortion;
 }

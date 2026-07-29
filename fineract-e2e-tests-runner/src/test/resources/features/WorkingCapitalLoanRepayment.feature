@@ -1495,7 +1495,7 @@ Feature: Working Capital Loan Repayment
       | transactionDate | type                    | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement            | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment               | 9100.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Credit Balance Refund   | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Credit Balance Refund   | 100.0             | 0.0              | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "02 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     And Working capital loan account has the correct data:
@@ -1505,7 +1505,7 @@ Feature: Working Capital Loan Repayment
       | transactionDate | type                    | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement            | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment               | 9100.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Credit Balance Refund   | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Credit Balance Refund   | 100.0             | 0.0              | 0.0               | 0.0                   | false    |
 
   @TestRailId:C85170
   Scenario: Verify working capital loan repayment - multiple repayments on disbursement day - UC6.7

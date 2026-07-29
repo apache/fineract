@@ -1174,6 +1174,10 @@ public final class ErrorMessageHelper {
         return "rate.change.not.allowed.for.non.active.loan";
     }
 
+    public static String creditBalanceRefundBackdatedForbiddenFailure() {
+        return "Backdated credit balance refund is not allowed";
+    }
+
     public static String workingCapitalInputValuesCauseUnableCalculateEIrFailure() {
         return "Please check the input values - unable to calculate a valid EIR.";
     }

@@ -316,8 +316,12 @@ public final class WorkingCapitalLoanApiResourceSwagger {
             private GetWorkingCapitalLoanSummary() {}
 
             public CurrencyData currency;
+            @Schema(description = "Total principal due: original principal plus principalAdjustment. Already inclusive of "
+                    + "principalAdjustment — do not add the two together.")
             public BigDecimal principal;
             public BigDecimal principalPaid;
+            @Schema(description = "Principal re-injected by an over-refunding credit balance refund. Already included in principal.")
+            public BigDecimal principalAdjustment;
             public BigDecimal principalOutstanding;
             public BigDecimal fee;
             public BigDecimal feePaid;
@@ -379,6 +383,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal principal;
         @Schema(example = "10000.00")
         public BigDecimal principalPaid;
+        @Schema(example = "0.00")
+        public BigDecimal principalAdjustment;
         @Schema(example = "10000.00")
         public BigDecimal principalOutstanding;
         @Schema(example = "10000.00")

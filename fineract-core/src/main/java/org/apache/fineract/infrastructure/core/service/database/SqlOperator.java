@@ -22,6 +22,7 @@ import static java.lang.String.format;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -214,6 +215,6 @@ public enum SqlOperator {
 
     @NonNull
     public static SqlOperator forName(String name) {
-        return name == null ? getDefault() : SqlOperator.valueOf(name.toUpperCase());
+        return name == null ? getDefault() : SqlOperator.valueOf(name.toUpperCase(Locale.ROOT));
     }
 }

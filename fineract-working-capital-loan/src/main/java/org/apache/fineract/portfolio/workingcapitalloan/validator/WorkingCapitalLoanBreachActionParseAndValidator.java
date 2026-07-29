@@ -33,6 +33,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -301,7 +302,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
             return null;
         }
         try {
-            return WorkingCapitalBreachAmountCalculationType.valueOf(value.toUpperCase());
+            return WorkingCapitalBreachAmountCalculationType.valueOf(value.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             dataValidator.reset().parameter(MINIMUM_PAYMENT_TYPE).value(value).failWithCode("invalid.minimumPaymentType");
             return null;
@@ -314,7 +315,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
             return null;
         }
         try {
-            return WorkingCapitalLoanPeriodFrequencyType.valueOf(value.toUpperCase());
+            return WorkingCapitalLoanPeriodFrequencyType.valueOf(value.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             dataValidator.reset().parameter(FREQUENCY_TYPE).value(value).failWithCode("invalid.frequencyType");
             return null;
