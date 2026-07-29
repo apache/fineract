@@ -333,7 +333,6 @@ public class GuarantorDomainServiceImpl implements GuarantorDomainService {
                                     transactions.add(transaction);
                                 }
                             }
-                            this.savingsAccountAssembler.setHelpers(savingsAccount);
                             savingsAccount.updateSavingsAccountSummary(transactions);
                         }
                         savingsAccount.holdFunds(guarantorFundingDetails.getAmount());
