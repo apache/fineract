@@ -65,15 +65,40 @@ public class ExternalEventConfigurationHelper {
         clientActivateBusinessEvent.put("enabled", false);
         defaults.add(clientActivateBusinessEvent);
 
+        Map<String, Object> clientCloseBusinessEvent = new HashMap<>();
+        clientCloseBusinessEvent.put("type", "ClientCloseBusinessEvent");
+        clientCloseBusinessEvent.put("enabled", false);
+        defaults.add(clientCloseBusinessEvent);
+
         Map<String, Object> clientCreateBusinessEvent = new HashMap<>();
         clientCreateBusinessEvent.put("type", "ClientCreateBusinessEvent");
         clientCreateBusinessEvent.put("enabled", false);
         defaults.add(clientCreateBusinessEvent);
 
+        Map<String, Object> clientReactivateBusinessEvent = new HashMap<>();
+        clientReactivateBusinessEvent.put("type", "ClientReactivateBusinessEvent");
+        clientReactivateBusinessEvent.put("enabled", false);
+        defaults.add(clientReactivateBusinessEvent);
+
         Map<String, Object> clientRejectBusinessEvent = new HashMap<>();
         clientRejectBusinessEvent.put("type", "ClientRejectBusinessEvent");
         clientRejectBusinessEvent.put("enabled", false);
         defaults.add(clientRejectBusinessEvent);
+
+        Map<String, Object> clientUndoRejectionBusinessEvent = new HashMap<>();
+        clientUndoRejectionBusinessEvent.put("type", "ClientUndoRejectionBusinessEvent");
+        clientUndoRejectionBusinessEvent.put("enabled", false);
+        defaults.add(clientUndoRejectionBusinessEvent);
+
+        Map<String, Object> clientUndoWithdrawalBusinessEvent = new HashMap<>();
+        clientUndoWithdrawalBusinessEvent.put("type", "ClientUndoWithdrawalBusinessEvent");
+        clientUndoWithdrawalBusinessEvent.put("enabled", false);
+        defaults.add(clientUndoWithdrawalBusinessEvent);
+
+        Map<String, Object> clientWithdrawBusinessEvent = new HashMap<>();
+        clientWithdrawBusinessEvent.put("type", "ClientWithdrawBusinessEvent");
+        clientWithdrawBusinessEvent.put("enabled", false);
+        defaults.add(clientWithdrawBusinessEvent);
 
         Map<String, Object> documentCreatedBusinessEvent = new HashMap<>();
         documentCreatedBusinessEvent.put("type", "DocumentCreatedBusinessEvent");
