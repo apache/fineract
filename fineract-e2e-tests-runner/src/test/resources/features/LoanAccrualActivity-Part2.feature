@@ -4114,6 +4114,36 @@ Feature: LoanAccrualActivity - Part2
     # Net recognised interest income is unchanged
     Then Loan has 19.75 total Accruals
 
+  @TestRailId:C89817
+  Scenario: Verify that reversed Accrual Activity must not be stamped with future installment due date when loan re-opens after payoff reversal
+    When Admin sets the business date to "09 May 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_DOWNPAYMENT_ACCRUAL_ACTIVITY | 09 May 2026       | 279.99         | 24.99                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "09 May 2026" with "279.99" amount and expected disbursement date on "09 May 2026"
+    And Admin successfully disburse the loan on "09 May 2026" with "279.99" EUR transaction amount
+    When Admin sets the business date to "24 May 2026"
+    And Admin runs inline COB job for Loan
+    And Loan Pay-off is made on "24 May 2026"
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 09 May 2026      | Disbursement     | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 279.99       | false    | false    |
+      | 09 May 2026      | Down Payment     | 70.0   | 70.0      | 0.0      | 0.0  | 0.0       | 209.99       | false    | false    |
+      | 23 May 2026      | Accrual          | 1.97   | 0.0       | 1.97     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Repayment        | 212.11 | 209.99    | 2.12     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual          | 0.15   | 0.0       | 0.15     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual Activity | 2.12   | 0.0       | 2.12     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Admin sets the business date to "29 May 2026"
+    And Admin runs inline COB job for Loan
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "29 May 2026" with 100.0 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation true
+    Then Loan status will be "OVERPAID"
+    When Customer undo "1"th "Repayment" transaction made on "24 May 2026"
+    Then Loan status will be "ACTIVE"
+    And Loan has no "Accrual Activity" transaction with transaction date later than "29 May 2026", including reversed transactions
+
+  @TestRailId:C89818
   Scenario: Future dated Accrual Activity must not be created and final activity moves back after later MIR reversal
     When Admin sets the business date to "09 May 2026"
     And Admin creates a client with random data
@@ -4243,6 +4273,7 @@ Feature: LoanAccrualActivity - Part2
       | 29 May 2026      | Accrual                | 0.94   | 0.0       | 0.94     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 May 2026      | Accrual Adjustment     | 0.94   | 0.0       | 0.94     | 0.0  | 0.0       | 0.0          | false    | false    |
 
+  @TestRailId:C89819
   Scenario: Future dated Accrual Activity must not be created when loan reopens after full repayment reversal with MIR
     When Admin sets the business date to "09 May 2026"
     And Admin creates a client with random data

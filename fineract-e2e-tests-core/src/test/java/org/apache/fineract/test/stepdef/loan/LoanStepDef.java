@@ -63,6 +63,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.avro.loan.v1.LoanAccountDataV1;
 import org.apache.fineract.avro.loan.v1.LoanChargePaidByDataV1;
 import org.apache.fineract.avro.loan.v1.LoanStatusEnumDataV1;
@@ -2641,6 +2642,28 @@ public class LoanStepDef extends AbstractStepDef {
                 Map.of("staffInSelectedOfficeOnly", "false", "associations", "transactions")));
         List<GetLoansLoanIdTransactions> transactions = loanDetailsResponse.getTransactions();
         assertThat(transactions.size()).isZero();
+    }
+
+    @Then("Loan has no {string} transaction with transaction date later than {string}, including reversed transactions")
+    public void loanHasNoTransactionWithDateLaterThan(final String transactionTypeValue, final String dateLimit) {
+        final PostLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanCreateResponse.getLoanId();
+        final LocalDate latestAllowedDate = LocalDate.parse(dateLimit, FORMATTER);
+        final String transactionTypeCode = "loanTransactionType." + StringUtils.uncapitalize(transactionTypeValue.replace(" ", ""));
+
+        final GetLoansLoanIdTransactionsResponse transactionsResponse = ok(() -> fineractClient.loanTransactions()
+                .retrieveTransactionsByLoanId(loanId, Map.<String, Object>of("page", 0, "size", 200), Map.of()));
+        assert transactionsResponse != null && transactionsResponse.getContent() != null;
+
+        final List<String> offendingTransactions = transactionsResponse.getContent().stream()
+                .filter(t -> t.getType() != null && transactionTypeCode.equals(t.getType().getCode()))
+                .filter(t -> t.getDate() != null && t.getDate().isAfter(latestAllowedDate))
+                .map(t -> "id=%s, date=%s, submittedOnDate=%s, reversed=%s".formatted(t.getId(), t.getDate(), t.getSubmittedOnDate(),
+                        t.getReversedOnDate() != null || Boolean.TRUE.equals(t.getManuallyReversed())))
+                .toList();
+
+        assertThat(offendingTransactions).as("Loan %s has %s transaction(s) with transaction date later than %s: %s", loanId,
+                transactionTypeValue, dateLimit, offendingTransactions).isEmpty();
     }
 
     @Then("Loan Charges tab has a given charge with the following data:")
