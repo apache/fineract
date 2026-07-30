@@ -801,4 +801,10 @@ public class FineractProperties {
 
         private Long officeId;
     }
+
+    @Getter
+    @Setter
+    public static class FineractPhoneValidationProperties {
+        private String regex = "^\\+?[0-9]{7,15}$";
+    }
 }
