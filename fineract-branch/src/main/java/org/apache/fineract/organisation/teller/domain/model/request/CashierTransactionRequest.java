@@ -20,7 +20,6 @@ package org.apache.fineract.organisation.teller.domain.model.request;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -32,7 +31,7 @@ public class CashierTransactionRequest implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public String currencyCode;
-    public BigDecimal txnAmount;
+    public String txnAmount;
     public String txnNote;
     public String locale;
     public String dateFormat;
