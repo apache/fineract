@@ -54,8 +54,8 @@ Feature: Working Capital Breach Disable
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin initiate a Working Capital loan breach disable with startDate "15 January 2026"
     Then Initiating a Working Capital loan breach disable with startDate "15 January 2026" results an error with the following data:
-      | httpCode | message                                                |
-      | 400      | Failed data validation due to: breach.already.disabled |
+      | httpCode | message                                                                                                         |
+      | 400      | Breach evaluation is already disabled for this Working Capital loan. It must be enabled before disabling again. |
     When Admin closes the Working Capital loan with a full repayment on "15 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
@@ -73,8 +73,8 @@ Feature: Working Capital Breach Disable
     And Admin sets the business date to "15 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Initiating a Working Capital loan breach enable with startDate "15 January 2026" results an error with the following data:
-      | httpCode | message                                                           |
-      | 400      | Failed data validation due to: no.active.breach.disable.to.enable |
+      | httpCode | message                                                                    |
+      | 400      | There is no active breach disable to enable for this Working Capital loan. |
     When Admin closes the Working Capital loan with a full repayment on "15 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
@@ -92,14 +92,14 @@ Feature: Working Capital Breach Disable
     And Admin sets the business date to "15 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Initiating a Working Capital loan breach disable with startDate "10 January 2026" results an error with the following data:
-      | httpCode | message                                                      |
-      | 400      | Failed data validation due to: must.be.current.business.date |
+      | httpCode | message                                                                    |
+      | 400      | Start date of a disable or enable action must be the current business date |
     And Initiating a Working Capital loan breach enable with startDate "10 January 2026" results an error with the following data:
-      | httpCode | message                                                      |
-      | 400      | Failed data validation due to: must.be.current.business.date |
+      | httpCode | message                                                                    |
+      | 400      | Start date of a disable or enable action must be the current business date |
     And Initiating a Working Capital loan breach disable with startDate "15 January 2026" and endDate "20 January 2026" results an error with the following data:
-      | httpCode | message                                                                   |
-      | 400      | Failed data validation due to: must.not.be.provided.for.disable.or.enable |
+      | httpCode | message                                                      |
+      | 400      | End date must not be provided for a disable or enable action |
     When Admin closes the Working Capital loan with a full repayment on "15 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
@@ -118,11 +118,11 @@ Feature: Working Capital Breach Disable
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin initiate a Working Capital loan breach disable with startDate "15 January 2026"
     Then Initiating a Working Capital loan breach pause with startDate "16 January 2026" and endDate "20 January 2026" results an error with the following data:
-      | httpCode | message                                           |
-      | 400      | Failed data validation due to: breach.is.disabled |
+      | httpCode | message                                                                                                 |
+      | 400      | Breach pause, resume, reschedule and reset actions are not allowed while breach evaluation is disabled. |
     And Initiating a Working Capital loan breach reschedule with minimumPayment "50" "FLAT" results an error with the following data:
-      | httpCode | message                                           |
-      | 400      | Failed data validation due to: breach.is.disabled |
+      | httpCode | message                                                                                                 |
+      | 400      | Breach pause, resume, reschedule and reset actions are not allowed while breach evaluation is disabled. |
     When Admin closes the Working Capital loan with a full repayment on "15 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
@@ -163,8 +163,8 @@ Feature: Working Capital Breach Disable
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin initiate a Working Capital loan breach disable with startDate "15 January 2026"
     Then Admin fails to create WC breach reset action with the following data:
-      | httpCode | errorMessage                                      |
-      | 400      | Failed data validation due to: breach.is.disabled |
+      | httpCode | errorMessage                                                                                            |
+      | 400      | Breach pause, resume, reschedule and reset actions are not allowed while breach evaluation is disabled. |
     When Admin closes the Working Capital loan with a full repayment on "15 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
@@ -184,8 +184,8 @@ Feature: Working Capital Breach Disable
     And Admin initiate a Working Capital loan breach pause with startDate "15 January 2026" and endDate "20 January 2026"
     And Admin initiate a Working Capital loan breach disable with startDate "15 January 2026"
     Then Initiating a Working Capital loan breach resume with startDate "15 January 2026" results an error with the following data:
-      | httpCode | message                                           |
-      | 400      | Failed data validation due to: breach.is.disabled |
+      | httpCode | message                                                                                                 |
+      | 400      | Breach pause, resume, reschedule and reset actions are not allowed while breach evaluation is disabled. |
     When Admin closes the Working Capital loan with a full repayment on "15 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
@@ -208,8 +208,8 @@ Feature: Working Capital Breach Disable
       | action  | startDate  | endDate |
       | DISABLE | 2026-01-15 |         |
     Then Initiating a Working Capital loan breach undo reset results an error with the following data:
-      | httpCode | message                                           |
-      | 400      | Failed data validation due to: breach.is.disabled |
+      | httpCode | message                                                                                                 |
+      | 400      | Breach pause, resume, reschedule and reset actions are not allowed while breach evaluation is disabled. |
     When Admin closes the Working Capital loan with a full repayment on "15 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
@@ -359,8 +359,8 @@ Feature: Working Capital Breach Disable
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Initiating a Working Capital loan breach disable with startDate "01 January 2026" results an error with the following data:
-      | httpCode | message                                                |
-      | 400      | Failed data validation due to: no.breach.configuration |
+      | httpCode | message                                                                    |
+      | 400      | Breach actions require a breach configuration on the Working Capital loan. |
     When Admin closes the Working Capital loan with a full repayment on "01 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
@@ -374,8 +374,8 @@ Feature: Working Capital Breach Disable
       | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     Then Initiating a Working Capital loan breach disable with startDate "01 January 2026" results an error with the following data:
-      | httpCode | message                                           |
-      | 400      | Failed data validation due to: loan.is.not.active |
+      | httpCode | message                                                              |
+      | 400      | Breach actions can be created only for active Working Capital loans. |
 
   @TestRailId:C85479
   Scenario: Verify Working Capital breach enable/disable - UC17: Breach disable can be applied and retrieved by loan external id

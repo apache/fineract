@@ -178,7 +178,7 @@ public class WorkingCapitalLoanBreachActionTest {
             CallFailedRuntimeException ex = breachActionHelper.resumeExpectingFailure(loanIdHolder[0], "2026-07-20");
             assertEquals(400, ex.getStatus());
             assertNotNull(ex.getDeveloperMessage());
-            assertTrue(ex.getDeveloperMessage().contains("resume.not.during.active.pause"));
+            assertTrue(ex.getDeveloperMessage().contains("Resume breach action can only be created during an active pause"));
 
             final List<WorkingCapitalLoanBreachActionData> actions = breachActionHelper.retrieveBreachActions(loanIdHolder[0]);
             final WorkingCapitalLoanBreachActionData pause = actions.stream()

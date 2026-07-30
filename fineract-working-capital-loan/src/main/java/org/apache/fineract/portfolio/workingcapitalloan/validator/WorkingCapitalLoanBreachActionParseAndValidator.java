@@ -40,6 +40,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
@@ -48,6 +49,7 @@ import org.apache.fineract.infrastructure.core.validator.ParseAndValidator;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachPauseUtils;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachScheduleEvaluationUtils;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
@@ -55,6 +57,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanActiveBreachResetResolver;
+import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanBreachScheduleService;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalBreachAmountCalculationType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanBreachStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
@@ -64,6 +67,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndValidator {
 
+    private static final String VALIDATION_RESOURCE = "workingCapitalLoanBreachAction";
     private static final String PAUSE_ACTION = "pause";
     private static final String RESCHEDULE_ACTION = "reschedule";
     private static final String RESUME_ACTION = "resume";
@@ -76,10 +80,11 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     private final WorkingCapitalLoanBreachScheduleRepository breachScheduleRepository;
     private final WorkingCapitalLoanActiveBreachResetResolver activeBreachResetResolver;
     private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
+    private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
 
     public WorkingCapitalLoanBreachAction validateAndParse(final JsonCommand command, final WorkingCapitalLoan workingCapitalLoan,
             final List<WorkingCapitalLoanBreachAction> existing) {
-        final DataValidatorBuilder dataValidator = new DataValidatorBuilder(new ArrayList<>()).resource("workingCapitalLoanBreachAction");
+        final DataValidatorBuilder dataValidator = new DataValidatorBuilder(new ArrayList<>()).resource(VALIDATION_RESOURCE);
         final JsonElement json = command.parsedJson();
 
         final String actionString = jsonHelper.extractStringNamed(ACTION, json);
@@ -163,16 +168,19 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
 
         final LocalDate endDate = extractDate(json, END_DATE);
         if (endDate != null) {
-            dataValidator.reset().parameter(END_DATE).value(endDate).failWithCode("must.not.be.provided.for.resume");
+            failParameterValidation(dataValidator, END_DATE, "must.not.be.provided.for.resume",
+                    "End date must not be provided for a resume action");
         }
 
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
         if (resumeDate != null && !resumeDate.isEqual(businessDate)) {
-            dataValidator.reset().parameter(START_DATE).value(resumeDate).failWithCode("must.be.current.business.date");
+            failParameterValidation(dataValidator, START_DATE, "must.be.current.business.date",
+                    "Start date of a resume action must be the current business date");
         }
 
         if (resumeDate != null && findActivePause(resumeDate, existing).isEmpty()) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("resume.not.during.active.pause");
+            failGeneralValidation(dataValidator, "resume.not.during.active.pause",
+                    "Resume breach action can only be created during an active pause");
         }
 
         throwExceptionIfValidationWarningsExist(dataValidator);
@@ -191,10 +199,11 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         final List<WorkingCapitalLoanBreachSchedule> periods = breachScheduleRepository
                 .findByLoanIdOrderByPeriodNumberAsc(workingCapitalLoan.getId());
         if (periods.isEmpty()) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.breach.schedule");
+            failGeneralValidation(dataValidator, "no.breach.schedule", "Breach action requires an existing breach schedule.");
         }
         if (WorkingCapitalLoanBreachScheduleEvaluationUtils.resolveEvaluationPeriod(periods, resetDate).isEmpty()) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.breach.evaluation.period");
+            failGeneralValidation(dataValidator, "no.breach.evaluation.period",
+                    "There is no breach evaluation period covering the current business date.");
         }
         validateNoResetInCurrentPeriod(workingCapitalLoan, resetDate, periods, dataValidator);
 
@@ -214,7 +223,8 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         validateScheduleExists(workingCapitalLoan, dataValidator);
         final boolean hasActiveReset = activeBreachResetResolver.hasActiveReset(workingCapitalLoan.getId());
         if (!hasActiveReset) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.breach.reset.to.undo");
+            failGeneralValidation(dataValidator, "no.breach.reset.to.undo",
+                    "There is no active breach reset to undo for this Working Capital loan.");
         }
 
         throwExceptionIfValidationWarningsExist(dataValidator);
@@ -233,12 +243,14 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
 
         final LocalDate endDate = extractDate(json, END_DATE);
         if (endDate != null) {
-            dataValidator.reset().parameter(END_DATE).value(endDate).failWithCode("must.not.be.provided.for.disable.or.enable");
+            failParameterValidation(dataValidator, END_DATE, "must.not.be.provided.for.disable.or.enable",
+                    "End date must not be provided for a disable or enable action");
         }
 
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
         if (startDate != null && !startDate.isEqual(businessDate)) {
-            dataValidator.reset().parameter(START_DATE).value(startDate).failWithCode("must.be.current.business.date");
+            failParameterValidation(dataValidator, START_DATE, "must.be.current.business.date",
+                    "Start date of a disable or enable action must be the current business date");
         }
 
         final boolean isEnable = ENABLE_ACTION.equalsIgnoreCase(actionString);
@@ -256,9 +268,11 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     private void validateDisableState(final DataValidatorBuilder dataValidator, final Long loanId, final boolean isEnable) {
         final boolean alreadyDisabled = breachActionRepository.isBreachDisabledAsOf(loanId, DateUtils.getBusinessLocalDate());
         if (isEnable && !alreadyDisabled) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.active.breach.disable.to.enable");
+            failGeneralValidation(dataValidator, "no.active.breach.disable.to.enable",
+                    "There is no active breach disable to enable for this Working Capital loan.");
         } else if (!isEnable && alreadyDisabled) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("breach.already.disabled");
+            failGeneralValidation(dataValidator, "breach.already.disabled",
+                    "Breach evaluation is already disabled for this Working Capital loan. It must be enabled before disabling again.");
         }
     }
 
@@ -313,7 +327,8 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         try {
             return WorkingCapitalBreachAmountCalculationType.valueOf(value.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
-            dataValidator.reset().parameter(MINIMUM_PAYMENT_TYPE).value(value).failWithCode("invalid.minimumPaymentType");
+            failParameterValidation(dataValidator, MINIMUM_PAYMENT_TYPE, "invalid.minimumPaymentType",
+                    "Invalid minimum payment type: " + value + ". Supported: PERCENTAGE, FLAT");
             return null;
         }
     }
@@ -326,33 +341,38 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         try {
             return WorkingCapitalLoanPeriodFrequencyType.valueOf(value.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
-            dataValidator.reset().parameter(FREQUENCY_TYPE).value(value).failWithCode("invalid.frequencyType");
+            failParameterValidation(dataValidator, FREQUENCY_TYPE, "invalid.frequencyType",
+                    "Invalid frequency type: " + value + ". Supported: DAYS, WEEKS, MONTHS, YEARS");
             return null;
         }
     }
 
     private void validateLoanIsActive(final DataValidatorBuilder dataValidator, final WorkingCapitalLoan workingCapitalLoan) {
         if (!workingCapitalLoan.getLoanStatus().isActive()) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("loan.is.not.active");
+            failGeneralValidation(dataValidator, "loan.is.not.active",
+                    "Breach actions can be created only for active Working Capital loans.");
         }
     }
 
     private void validateBreachConfigurationExists(final DataValidatorBuilder dataValidator, final WorkingCapitalLoan workingCapitalLoan) {
         final WorkingCapitalLoanProductRelatedDetails details = workingCapitalLoan.getLoanProductRelatedDetails();
         if (details == null || details.getBreach() == null) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.breach.configuration");
+            failGeneralValidation(dataValidator, "no.breach.configuration",
+                    "Breach actions require a breach configuration on the Working Capital loan.");
         }
     }
 
     private void validateBreachNotDisabled(final DataValidatorBuilder dataValidator, final Long loanId) {
         if (breachActionRepository.isBreachDisabledAsOf(loanId, DateUtils.getBusinessLocalDate())) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("breach.is.disabled");
+            failGeneralValidation(dataValidator, "breach.is.disabled",
+                    "Breach pause, resume, reschedule and reset actions are not allowed while breach evaluation is disabled.");
         }
     }
 
     private void validateStartBeforeEnd(final DataValidatorBuilder dataValidator, final LocalDate startDate, final LocalDate endDate) {
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-            dataValidator.reset().parameter(END_DATE).value(endDate).failWithCode("must.be.on.or.after.startDate");
+            failParameterValidation(dataValidator, END_DATE, "must.be.on.or.after.startDate",
+                    "End date of pause period must be on or after the start date");
         }
     }
 
@@ -395,23 +415,12 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
             return;
         }
         final boolean overlaps = existing.stream().filter(action -> WorkingCapitalLoanBreachActionType.PAUSE.equals(action.getAction()))
-                .anyMatch(pause -> isOverlapping(startDate, endDate, pause.getStartDate(), effectivePauseEnd(pause, existing)));
+                .anyMatch(pause -> WorkingCapitalLoanBreachPauseUtils.inclusivePausePeriodsOverlap(startDate, endDate, pause.getStartDate(),
+                        WorkingCapitalLoanBreachPauseUtils.resolveEffectivePauseEnd(pause, existing)));
         if (overlaps) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("overlapping.pause.periods");
+            failGeneralValidation(dataValidator, "overlapping.pause.periods",
+                    "Breach pause period cannot overlap with another pause period");
         }
-    }
-
-    private LocalDate effectivePauseEnd(final WorkingCapitalLoanBreachAction pause, final List<WorkingCapitalLoanBreachAction> existing) {
-        // A resumed pause effectively ends on the (inclusive) resume date, so a later pause may start the next day
-        return existing.stream().filter(action -> WorkingCapitalLoanBreachActionType.RESUME.equals(action.getAction()))
-                .map(WorkingCapitalLoanBreachAction::getStartDate)
-                .filter(resumeDate -> !pause.getStartDate().isAfter(resumeDate) && !resumeDate.isAfter(pause.getEndDate()))
-                .min(LocalDate::compareTo).orElse(pause.getEndDate());
-    }
-
-    private boolean isOverlapping(final LocalDate startDate, final LocalDate endDate, final LocalDate otherStart,
-            final LocalDate otherEnd) {
-        return !startDate.isAfter(otherEnd) && !otherStart.isAfter(endDate);
     }
 
     private void validateReschedule(final WorkingCapitalLoanBreachAction action, final WorkingCapitalLoan workingCapitalLoan,
@@ -423,36 +432,66 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         final boolean hasFrequencyGroup = action.getFrequency() != null || action.getFrequencyType() != null;
 
         if (!hasPaymentGroup && !hasFrequencyGroup) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("reschedule.no.change.parameters");
+            failGeneralValidation(dataValidator, "reschedule.no.change.parameters",
+                    "At least one of payment (minimumPayment + minimumPaymentType) or frequency (frequency + frequencyType) group must be provided");
         }
         if (hasPaymentGroup) {
             validateMinimumPaymentGroupProvided(action, dataValidator);
         }
         if (hasFrequencyGroup) {
             validateFrequencyGroupProvided(action, dataValidator);
+            if (action.getFrequency() != null && action.getFrequency() > 0 && action.getFrequencyType() != null) {
+                validateFrequencyDoesNotEndBeforeBusinessDate(action, workingCapitalLoan, dataValidator);
+            }
         }
+    }
+
+    /**
+     * Rejects a frequency change whose resulting period end date falls before the current business date. The candidate
+     * end date comes from the breach schedule service, so it is the very date the re-date would persist.
+     */
+    private void validateFrequencyDoesNotEndBeforeBusinessDate(final WorkingCapitalLoanBreachAction action,
+            final WorkingCapitalLoan workingCapitalLoan, final DataValidatorBuilder dataValidator) {
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        final Optional<LocalDate> candidateToDate = breachScheduleService
+                .calculateRescheduledCurrentPeriodToDate(workingCapitalLoan.getId(), action.getFrequency(), action.getFrequencyType());
+        if (candidateToDate.filter(toDate -> toDate.isBefore(businessDate)).isPresent()) {
+            failGeneralValidation(dataValidator, "reschedule.frequency.results.endDate.before.businessDate",
+                    "Frequency change results a breach period endDate before current businessDate is not allowed");
+        }
+    }
+
+    private void failParameterValidation(final DataValidatorBuilder dataValidator, final String parameter, final String errorCodeSuffix,
+            final String defaultUserMessage) {
+        dataValidator.getDataValidationErrors().add(ApiParameterError.parameterError(
+                "validation.msg." + VALIDATION_RESOURCE + "." + parameter + "." + errorCodeSuffix, defaultUserMessage, parameter));
+    }
+
+    private void failGeneralValidation(final DataValidatorBuilder dataValidator, final String errorCodeSuffix,
+            final String defaultUserMessage) {
+        dataValidator.getDataValidationErrors()
+                .add(ApiParameterError.generalError("validation.msg." + VALIDATION_RESOURCE + "." + errorCodeSuffix, defaultUserMessage));
     }
 
     private void validateLoanIsDisbursed(final WorkingCapitalLoan workingCapitalLoan, final DataValidatorBuilder dataValidator) {
         final boolean isDisbursed = workingCapitalLoan.getDisbursementDetails().stream()
                 .map(WorkingCapitalLoanDisbursementDetails::getActualDisbursementDate).anyMatch(Objects::nonNull);
         if (!isDisbursed) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("loan.not.disbursed");
+            failGeneralValidation(dataValidator, "loan.not.disbursed", "Breach action requires the loan to be disbursed.");
         }
     }
 
     private void validateScheduleExists(final WorkingCapitalLoan workingCapitalLoan, final DataValidatorBuilder dataValidator) {
-        final List<WorkingCapitalLoanBreachSchedule> periods = breachScheduleRepository
-                .findByLoanIdOrderByPeriodNumberAsc(workingCapitalLoan.getId());
-        if (periods.isEmpty()) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.breach.schedule");
+        if (!breachScheduleRepository.existsByLoanId(workingCapitalLoan.getId())) {
+            failGeneralValidation(dataValidator, "no.breach.schedule", "Breach action requires an existing breach schedule.");
         }
     }
 
     private void validateMinimumPaymentGroupProvided(final WorkingCapitalLoanBreachAction action,
             final DataValidatorBuilder dataValidator) {
         if (action.getMinimumPayment() == null || action.getMinimumPayment().compareTo(BigDecimal.ZERO) <= 0) {
-            dataValidator.reset().parameter(MINIMUM_PAYMENT).value(action.getMinimumPayment()).failWithCode("must.be.greater.than.zero");
+            failParameterValidation(dataValidator, MINIMUM_PAYMENT, "must.be.greater.than.zero",
+                    "The parameter `minimumPayment` must be greater than zero");
         }
         if (action.getMinimumPaymentType() == null) {
             dataValidator.reset().parameter(MINIMUM_PAYMENT_TYPE).value(action.getMinimumPaymentType()).notNull();
@@ -484,7 +523,8 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         final boolean resetExistsInPeriod = activeBreachResetResolver.existsActiveResetInPeriod(workingCapitalLoan.getId(), fromDate,
                 toDate);
         if (resetExistsInPeriod) {
-            dataValidator.reset().failWithCodeNoParameterAddedToErrorCode("reset.already.exists.in.current.period");
+            failGeneralValidation(dataValidator, "reset.already.exists.in.current.period",
+                    "A breach reset already exists in the current breach period.");
         }
     }
 }

@@ -21,9 +21,12 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachSchedule;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 
 public interface WorkingCapitalLoanBreachScheduleService {
 
@@ -45,9 +48,19 @@ public interface WorkingCapitalLoanBreachScheduleService {
 
     /**
      * Recalculates the schedule from the effective reschedule parameters resolved from the persisted RESCHEDULE
-     * actions; a newly created reschedule action must therefore be saved before this is called.
+     * actions; a newly created reschedule action must therefore be saved before this is called. When {@code action}
+     * carries a frequency group, the current open period is also re-dated: its toDate is recalculated from its fromDate
+     * and the new frequency, extended by the recorded pauses that overlap the period.
      */
-    void rescheduleMinimumPayment(WorkingCapitalLoan loan);
+    void rescheduleMinimumPayment(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction action);
+
+    /**
+     * Returns the toDate {@link #rescheduleMinimumPayment} would set on the current open period for the given
+     * frequency, or empty when there is no current open period. Exposed so validation and the re-date itself share one
+     * implementation.
+     */
+    Optional<LocalDate> calculateRescheduledCurrentPeriodToDate(Long loanId, Integer frequency,
+            WorkingCapitalLoanPeriodFrequencyType frequencyType);
 
     void recalculatePeriodsForPauses(WorkingCapitalLoan loan);
 

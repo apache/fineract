@@ -23,15 +23,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 
-public final class WorkingCapitalLoanDelinquencyPauseUtils {
+public final class WorkingCapitalLoanBreachPauseUtils {
 
-    private WorkingCapitalLoanDelinquencyPauseUtils() {}
-
-    public static boolean isPauseActiveOnDate(final LocalDate pauseStart, final LocalDate pauseEnd, final LocalDate date) {
-        return pauseStart != null && pauseEnd != null && date != null && !date.isBefore(pauseStart) && !date.isAfter(pauseEnd);
-    }
+    private WorkingCapitalLoanBreachPauseUtils() {}
 
     /**
      * Returns whether a new inclusive pause period shares at least one day with an existing one. Touching periods
@@ -45,17 +40,20 @@ public final class WorkingCapitalLoanDelinquencyPauseUtils {
         return !parsedPauseStart.isAfter(existingPauseEnd) && !parsedPauseEnd.isBefore(existingPauseStart);
     }
 
-    public static LocalDate resolveEffectivePauseEnd(final WorkingCapitalLoanDelinquencyAction pause,
-            final List<WorkingCapitalLoanDelinquencyAction> actions) {
+    /**
+     * A resumed pause effectively ends on the (inclusive) resume date, so a later pause may start the next day.
+     */
+    public static LocalDate resolveEffectivePauseEnd(final WorkingCapitalLoanBreachAction pause,
+            final List<WorkingCapitalLoanBreachAction> actions) {
         final LocalDate pauseStart = pause.getStartDate();
         final LocalDate pauseEnd = pause.getEndDate();
         if (pauseStart == null || pauseEnd == null) {
             return pauseEnd;
         }
         return actions.stream().filter(Objects::nonNull)
-                .filter(action -> DelinquencyAction.RESUME.equals(action.getAction()) && action.getStartDate() != null
+                .filter(action -> WorkingCapitalLoanBreachActionType.RESUME.equals(action.getAction()) && action.getStartDate() != null
                         && !action.getStartDate().isBefore(pauseStart) && !action.getStartDate().isAfter(pauseEnd))
-                .map(WorkingCapitalLoanDelinquencyAction::getStartDate).min(Comparator.naturalOrder()).orElse(pauseEnd);
+                .map(WorkingCapitalLoanBreachAction::getStartDate).min(Comparator.naturalOrder()).orElse(pauseEnd);
     }
 
     /**
@@ -63,20 +61,23 @@ public final class WorkingCapitalLoanDelinquencyPauseUtils {
      * performed by the schedule rebuild.
      */
     public static LocalDate extendToDateByRecordedPauses(final LocalDate fromDate, final LocalDate baseToDate,
-            final List<WorkingCapitalLoanDelinquencyAction> actions) {
+            final List<WorkingCapitalLoanBreachAction> actions) {
         if (fromDate == null || baseToDate == null || actions == null) {
             return baseToDate;
         }
-        final long pauseDays = actions.stream().filter(Objects::nonNull)
-                .filter(action -> DelinquencyAction.PAUSE.equals(action.getAction()) && action.getStartDate() != null).mapToLong(pause -> {
-                    final LocalDate pauseStart = pause.getStartDate();
-                    final LocalDate pauseEnd = resolveEffectivePauseEnd(pause, actions);
-                    if (pauseEnd == null || pauseEnd.isBefore(fromDate) || pauseStart.isAfter(baseToDate)) {
-                        return 0L;
-                    }
-                    return calculatePauseExtensionDays(pauseStart, pauseEnd);
-                }).sum();
-        return baseToDate.plusDays(pauseDays);
+        final List<WorkingCapitalLoanBreachAction> pauses = actions.stream().filter(Objects::nonNull)
+                .filter(action -> WorkingCapitalLoanBreachActionType.PAUSE.equals(action.getAction()) && action.getStartDate() != null)
+                .sorted(Comparator.comparing(WorkingCapitalLoanBreachAction::getStartDate)).toList();
+        LocalDate toDate = baseToDate;
+        for (final WorkingCapitalLoanBreachAction pause : pauses) {
+            final LocalDate pauseStart = pause.getStartDate();
+            final LocalDate pauseEnd = resolveEffectivePauseEnd(pause, actions);
+            if (pauseEnd == null || pauseEnd.isBefore(fromDate) || pauseStart.isAfter(toDate)) {
+                continue;
+            }
+            toDate = toDate.plusDays(calculatePauseExtensionDays(pauseStart, pauseEnd));
+        }
+        return toDate;
     }
 
     /**
@@ -87,18 +88,6 @@ public final class WorkingCapitalLoanDelinquencyPauseUtils {
             return 0L;
         }
         return ChronoUnit.DAYS.between(pauseStart, pauseEnd) + 1;
-    }
-
-    /**
-     * Days to remove from the schedule when a pause is resumed early. Uses the difference between the full planned
-     * inclusive pause and the effective inclusive pause ending on the resume date.
-     */
-    public static long calculateDaysRemovedOnResume(final LocalDate pauseStart, final LocalDate resumeDate,
-            final LocalDate originalPauseEnd) {
-        if (pauseStart == null || resumeDate == null || originalPauseEnd == null || resumeDate.isAfter(originalPauseEnd)) {
-            return 0L;
-        }
-        return calculatePauseExtensionDays(pauseStart, originalPauseEnd) - calculatePauseExtensionDays(pauseStart, resumeDate);
     }
 
 }

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -47,10 +48,10 @@ import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymen
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyPauseUtils;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanDelinquencyRangeScheduleService;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -67,6 +68,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
     private final FromJsonHelper jsonHelper;
     private final WorkingCapitalLoanDelinquencyRangeScheduleRepository rangeScheduleRepository;
     private final WorkingCapitalLoanDelinquencyActionRepository actionRepository;
+    private final WorkingCapitalLoanDelinquencyRangeScheduleService rangeScheduleService;
 
     public WorkingCapitalLoanDelinquencyAction validateAndParse(final JsonCommand command, final WorkingCapitalLoan workingCapitalLoan,
             final List<WorkingCapitalLoanDelinquencyAction> existing) {
@@ -250,6 +252,24 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
         }
         if (hasFrequencyGroup) {
             validateFrequencyGroupProvided(action, dataValidator);
+            if (action.getFrequency() != null && action.getFrequency() > 0 && action.getFrequencyType() != null) {
+                validateFrequencyDoesNotEndBeforeBusinessDate(action, workingCapitalLoan, dataValidator);
+            }
+        }
+    }
+
+    /**
+     * Rejects a frequency change whose resulting period end date falls before the current business date. The candidate
+     * end date comes from the range schedule service, so it is the very date the re-date would persist.
+     */
+    private void validateFrequencyDoesNotEndBeforeBusinessDate(final WorkingCapitalLoanDelinquencyAction action,
+            final WorkingCapitalLoan workingCapitalLoan, final DataValidatorBuilder dataValidator) {
+        final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        final Optional<LocalDate> candidateToDate = rangeScheduleService.calculateRescheduledCurrentPeriodToDate(workingCapitalLoan.getId(),
+                action.getFrequency(), action.getFrequencyType());
+        if (candidateToDate.filter(toDate -> toDate.isBefore(businessDate)).isPresent()) {
+            failGeneralValidation(dataValidator, "reschedule.frequency.results.endDate.before.businessDate",
+                    "Frequency change results a delinquency period endDate before current businessDate is not allowed");
         }
     }
 
@@ -380,9 +400,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
     }
 
     private void validateScheduleExists(final WorkingCapitalLoan workingCapitalLoan, final DataValidatorBuilder dataValidator) {
-        final List<WorkingCapitalLoanDelinquencyRangeSchedule> periods = rangeScheduleRepository
-                .findByLoanIdOrderByPeriodNumberAsc(workingCapitalLoan.getId());
-        if (periods.isEmpty()) {
+        if (!rangeScheduleRepository.existsByLoanId(workingCapitalLoan.getId())) {
             failGeneralValidation(dataValidator, "no.schedule", "Reschedule action requires an existing delinquency range schedule.");
         }
     }

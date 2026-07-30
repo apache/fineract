@@ -62,7 +62,7 @@ public class WorkingCapitalLoanBreachActionWriteServiceImpl implements WorkingCa
                 || WorkingCapitalLoanBreachActionType.RESUME.equals(breachAction.getAction())) {
             breachScheduleService.recalculatePeriodsForPauses(workingCapitalLoan);
         } else if (WorkingCapitalLoanBreachActionType.RESCHEDULE.equals(breachAction.getAction())) {
-            breachScheduleService.rescheduleMinimumPayment(workingCapitalLoan);
+            breachScheduleService.rescheduleMinimumPayment(workingCapitalLoan, breachAction);
         } else if (WorkingCapitalLoanBreachActionType.RESET.equals(breachAction.getAction())) {
             breachResetService.resetBreach(workingCapitalLoan, saved);
         } else if (WorkingCapitalLoanBreachActionType.UNDO_RESET.equals(breachAction.getAction())) {
