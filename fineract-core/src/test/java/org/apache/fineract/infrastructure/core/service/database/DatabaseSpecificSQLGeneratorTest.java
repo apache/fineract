@@ -82,4 +82,18 @@ public class DatabaseSpecificSQLGeneratorTest {
         Mockito.verify(connection).createArrayOf("bigint", new Long[] { 1L, 2L, 3L });
         Mockito.verify(connection).close();
     }
+
+    @Test
+    public void testCountQueryResultOnSqlWithLowercaseLimit() {
+        String sql = "SELECT 1 FROM test_table WHERE asd=2 limit 25";
+        String countQuery = databaseSpecificSQLGenerator.countQueryResult(sql);
+        Assertions.assertEquals("SELECT COUNT(*) FROM (SELECT 1 FROM test_table WHERE asd=2) AS temp", countQuery);
+    }
+
+    @Test
+    public void testCountQueryResultOnSqlWithLowercaseLimitAndOffset() {
+        String sql = "SELECT 1 FROM test_table WHERE asd=2 limit 25 offset 180";
+        String countQuery = databaseSpecificSQLGenerator.countQueryResult(sql);
+        Assertions.assertEquals("SELECT COUNT(*) FROM (SELECT 1 FROM test_table WHERE asd=2) AS temp", countQuery);
+    }
 }
