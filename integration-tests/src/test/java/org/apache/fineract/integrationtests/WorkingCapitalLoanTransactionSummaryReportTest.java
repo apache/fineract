@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -508,9 +508,9 @@ public class WorkingCapitalLoanTransactionSummaryReportTest {
     public void transactionSummaryReportShowsAccrualPerChargeAndItsReversal() {
         final String productName = Utils.uniqueRandomStringGenerator("WCL TSR ", 8);
         final Long productId = createAccrualWithDeferredRevenueAmortizationProduct(productName);
-        final ChargeRequest fee = WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(false, 45.0)
+        final ChargeCreateRequest fee = WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(false, 45.0)
                 .name(Utils.uniqueRandomStringGenerator("WC TSR Fee ", 6));
-        final ChargeRequest penalty = WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(true, 25.0)
+        final ChargeCreateRequest penalty = WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(true, 25.0)
                 .name(Utils.uniqueRandomStringGenerator("WC TSR Penalty ", 6));
         final Long feeId = wcLoanHelper.createGlobalCharge(fee);
         final Long penaltyId = wcLoanHelper.createGlobalCharge(penalty);
@@ -559,9 +559,9 @@ public class WorkingCapitalLoanTransactionSummaryReportTest {
                 .createPaymentType(
                         new PaymentTypeCreateRequest().name(paymentTypeName).description(paymentTypeName).isCashPayment(false).position(1L))
                 .getResourceId());
-        final ChargeRequest fee = WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(false, 10.0);
+        final ChargeCreateRequest fee = WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(false, 10.0);
         final Long feeId = wcLoanHelper.createGlobalCharge(fee);
-        final ChargeRequest regularFee = ChargeRequestBuilders.loanSpecifiedDueDateFee(10.0);
+        final ChargeCreateRequest regularFee = ChargeRequestBuilders.loanSpecifiedDueDateFee(10.0);
         final Long regularFeeId = Objects.requireNonNull(chargesHelper.createCharge(regularFee).getResourceId());
         final LocalDate disbursementDate = LocalDate.of(2026, 10, 1);
         final LocalDate chargeDueDate = disbursementDate.plusDays(1);
@@ -711,7 +711,7 @@ public class WorkingCapitalLoanTransactionSummaryReportTest {
     }
 
     private String addPenaltyForLoan(final Long loanId) {
-        final ChargeRequest penalty = WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(true, PENALTY_AMOUNT);
+        final ChargeCreateRequest penalty = WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(true, PENALTY_AMOUNT);
         final Long chargeId = wcLoanHelper.createGlobalCharge(penalty);
         wcLoanHelper.addCharge(loanId, WorkingCapitalLoanRequestBuilders.addCharge(chargeId, PENALTY_AMOUNT, TRANSACTION_DATE));
         return penalty.getName();

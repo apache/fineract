@@ -28,12 +28,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.GetChargesResponse;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
+import org.apache.fineract.client.models.ChargeData;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetTaxesGroupResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
@@ -157,15 +157,15 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
      * Creates a FLAT, SPECIFIED_DUE_DATE charge definition linked to the given {@code taxGroupId}. Passing {@code null}
      * for {@code taxGroupId} creates a charge with no tax.
      */
-    private PostChargesResponse createFlatLoanCharge(double baseAmount, Long taxGroupId) {
-        ChargeRequest request = new ChargeRequest().penalty(false).amount(baseAmount)
+    private ChargeCreateResponse createFlatLoanCharge(double baseAmount, Long taxGroupId) {
+        ChargeCreateRequest request = new ChargeCreateRequest().penalty(false).amount(baseAmount)
                 .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
                 .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
                 .name(Utils.uniqueRandomStringGenerator("CHARGE_", 6)).chargeAppliesTo(1).locale(LoanTestData.LOCALE).active(true);
         if (taxGroupId != null) {
             request.taxGroupId(taxGroupId);
         }
-        PostChargesResponse response = chargesHelper.createCharge(request);
+        ChargeCreateResponse response = chargesHelper.createCharge(request);
         assertNotNull(response);
         assertNotNull(response.getResourceId());
         return response;
@@ -191,7 +191,7 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
             PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
 
             // Given – charge definition with 10 % tax group, base = 100
-            PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
+            ChargeCreateResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
             Long chargeDefinitionId = chargeResponse.getResourceId();
 
             Long clientId = createClient();
@@ -232,7 +232,7 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
             PostTaxesComponentsResponse comp2 = createTaxComponent(5.0f);
             PostTaxesGroupResponse taxGroup = createTaxGroup(comp1.getResourceId(), comp2.getResourceId());
 
-            PostChargesResponse chargeResponse = createFlatLoanCharge(200.0, taxGroup.getResourceId());
+            ChargeCreateResponse chargeResponse = createFlatLoanCharge(200.0, taxGroup.getResourceId());
 
             Long clientId = createClient();
             Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct());
@@ -263,7 +263,7 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
     public void testLoanChargeAmount_noTaxGroup_isNotModified() {
         runAt(LOAN_DATE, () -> {
             // Given – charge with NO tax group
-            PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, null);
+            ChargeCreateResponse chargeResponse = createFlatLoanCharge(100.0, null);
 
             Long clientId = createClient();
             Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct());
@@ -297,10 +297,10 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
         PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
 
         // When – create charge linked to the tax group
-        PostChargesResponse chargeResponse = createFlatLoanCharge(50.0, taxGroup.getResourceId());
+        ChargeCreateResponse chargeResponse = createFlatLoanCharge(50.0, taxGroup.getResourceId());
 
         // Then – retrieve and verify taxGroup is set
-        GetChargesResponse chargeData = chargesHelper.getCharge(chargeResponse.getResourceId());
+        ChargeData chargeData = chargesHelper.getCharge(chargeResponse.getResourceId());
         assertNotNull(chargeData);
         assertNotNull(chargeData.getTaxGroup(), "Charge must expose taxGroup in GET response");
         assertEquals(taxGroup.getResourceId(), chargeData.getTaxGroup().getId(),
@@ -369,7 +369,7 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
             // Given – shared charge definition with 10 % tax
             PostTaxesComponentsResponse taxComponent = createTaxComponent(10.0f);
             PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
-            PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
+            ChargeCreateResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
             Long chargeDefinitionId = chargeResponse.getResourceId();
 
             Long clientId = createClient();
@@ -425,7 +425,7 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
             PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
 
             // Given – flat charge of 100 with 10 % tax, due on the loan start date
-            PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
+            ChargeCreateResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
 
             Long clientId = createClient();
             // Given – a cash-based loan (principal = 1000, no interest)
@@ -485,7 +485,7 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
             PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
 
             // Given – flat charge of 100 with 10 % tax, due on the loan start date
-            PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
+            ChargeCreateResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
 
             Long clientId = createClient();
             // Given – a periodic-accrual loan (principal = 1000, no interest)
@@ -532,7 +532,7 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
             // Given
             PostTaxesComponentsResponse taxComponent = createTaxComponent(10.0f);
             PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
-            PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
+            ChargeCreateResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
 
             Long clientId = createClient();
             Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct());
@@ -642,7 +642,7 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
     public void testAccrualAccounting_accrualOfTaxedFee_taxLineIsRounded() {
         Account taxLiabilityAccount = accountHelper.createLiabilityAccount("taxLiability_accrual_round");
         runAt(LOAN_DATE, () -> {
-            PostChargesResponse charge = createTaxedFee(taxLiabilityAccount, 1000.0);
+            ChargeCreateResponse charge = createTaxedFee(taxLiabilityAccount, 1000.0);
             Long clientId = createClient();
             Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct());
             Long loanId = applyAndApproveLoan(clientId, loanProductId, LOAN_DATE, 1000.0);
@@ -658,7 +658,7 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
         });
     }
 
-    private PostChargesResponse createTaxedFee(Account taxLiabilityAccount, double amount) {
+    private ChargeCreateResponse createTaxedFee(Account taxLiabilityAccount, double amount) {
         PostTaxesComponentsResponse taxComponent = createTaxComponent(TAX_RATE_23_IN_123, taxLiabilityAccount.getAccountID().longValue());
         PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
         return createFlatLoanCharge(amount, taxGroup.getResourceId());
@@ -668,7 +668,7 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
     private Long createCashLoanWithTaxedFee(Account taxLiabilityAccount, double feeAmount) {
         Long[] loanId = new Long[1];
         runAt(LOAN_DATE, () -> {
-            PostChargesResponse charge = createTaxedFee(taxLiabilityAccount, feeAmount);
+            ChargeCreateResponse charge = createTaxedFee(taxLiabilityAccount, feeAmount);
             Long clientId = createClient();
             Long loanProductId = createLoanProduct(
                     createCashBasedLoanProduct().multiDisburseLoan(false).disallowExpectedDisbursements(null));
@@ -752,7 +752,7 @@ public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
         runAt(LOAN_DATE, () -> {
             PostTaxesComponentsResponse taxComponent = createTaxComponent(10.0f, taxLiabilityAccount.getAccountID().longValue());
             PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
-            PostChargesResponse charge = chargesHelper.createCharge(new ChargeRequest().penalty(false).amount(50.0)
+            ChargeCreateResponse charge = chargesHelper.createCharge(new ChargeCreateRequest().penalty(false).amount(50.0)
                     .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.INSTALMENT_FEE.getValue())
                     .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
                     .name(Utils.uniqueRandomStringGenerator("CHARGE_", 6)).chargeAppliesTo(1).locale(LoanTestData.LOCALE).active(true)

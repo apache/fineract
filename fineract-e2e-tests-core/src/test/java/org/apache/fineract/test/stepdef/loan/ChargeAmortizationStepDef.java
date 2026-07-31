@@ -30,9 +30,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.ChargeData;
-import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.GetChargesResponse;
+import org.apache.fineract.client.models.ChargeUpdateRequest;
 import org.apache.fineract.client.models.StringEnumOptionData;
 import org.apache.fineract.test.data.ChargeCalculationType;
 import org.apache.fineract.test.data.ChargePaymentMode;
@@ -61,21 +61,27 @@ public class ChargeAmortizationStepDef extends AbstractStepDef {
 
     @When("Admin creates a loan fee with {string} charge time type and the following amortization configuration:")
     public void createLoanFeeWithAmortization(final String chargeTimeType, final DataTable table) {
-        final ChargeRequest request = withAmortization(loanCharge(ChargeTimeType.valueOf(chargeTimeType), false), table.asMaps().get(0));
+        final ChargeCreateRequest request = withAmortization(loanCharge(ChargeTimeType.valueOf(chargeTimeType), false),
+                table.asMaps().get(0));
         final Long chargeId = ok(() -> fineractClient.charges().createCharge(request)).getResourceId();
         testContext().set(CHARGE_ID, chargeId);
     }
 
     @When("Admin updates the amortization configuration of the charge to:")
     public void updateAmortization(final DataTable table) {
-        final ChargeRequest request = withAmortization(new ChargeRequest().locale(LOCALE_EN), table.asMaps().get(0));
+        final Map<String, String> data = table.asMaps().get(0);
+        final String days = cell(data, DAYS);
+        final ChargeUpdateRequest request = new ChargeUpdateRequest().locale(LOCALE_EN).amortizationPeriodType(cell(data, PERIOD_TYPE)) //
+                .amortizationDays(days == null ? null : Integer.valueOf(days)) //
+                .amortizationCalculationType(cell(data, CALCULATION_TYPE)) //
+                .amortizationIncomeType(cell(data, INCOME_TYPE));
         ok(() -> fineractClient.charges().updateCharge(createdChargeId(), request));
     }
 
     @Then("The charge has the following amortization configuration:")
     public void verifyAmortization(final DataTable table) {
         final Map<String, String> expected = table.asMaps().get(0);
-        final GetChargesResponse charge = ok(() -> fineractClient.charges().retrieveOneCharge(createdChargeId()));
+        final ChargeData charge = ok(() -> fineractClient.charges().retrieveOneCharge(createdChargeId(), (Boolean) null));
 
         assertThat(idOf(charge.getAmortizationPeriodType())).as(PERIOD_TYPE).isEqualTo(cell(expected, PERIOD_TYPE));
         assertThat(charge.getAmortizationDays() == null ? null : String.valueOf(charge.getAmortizationDays())).as(DAYS)
@@ -87,14 +93,14 @@ public class ChargeAmortizationStepDef extends AbstractStepDef {
     @Then("Creating a loan charge with {string} charge time type, penalty {string} and the following amortization configuration results an error:")
     public void createLoanChargeWithAmortizationFails(final String chargeTimeType, final String penalty, final DataTable table) {
         final Map<String, String> data = table.asMaps().get(0);
-        final ChargeRequest request = withAmortization(loanCharge(ChargeTimeType.valueOf(chargeTimeType), Boolean.parseBoolean(penalty)),
-                data);
+        final ChargeCreateRequest request = withAmortization(
+                loanCharge(ChargeTimeType.valueOf(chargeTimeType), Boolean.parseBoolean(penalty)), data);
         assertFailure(fail(() -> fineractClient.charges().createCharge(request)), data);
     }
 
     @Then("Turning the charge into a penalty results an error:")
     public void turnChargeIntoPenaltyFails(final DataTable table) {
-        final ChargeRequest request = new ChargeRequest().penalty(true).locale(LOCALE_EN);
+        final ChargeUpdateRequest request = new ChargeUpdateRequest().penalty(true).locale(LOCALE_EN);
         assertFailure(fail(() -> fineractClient.charges().updateCharge(createdChargeId(), request)), table.asMaps().get(0));
     }
 
@@ -118,8 +124,8 @@ public class ChargeAmortizationStepDef extends AbstractStepDef {
         return chargeId;
     }
 
-    private static ChargeRequest loanCharge(final ChargeTimeType chargeTimeType, final boolean penalty) {
-        return new ChargeRequest() //
+    private static ChargeCreateRequest loanCharge(final ChargeTimeType chargeTimeType, final boolean penalty) {
+        return new ChargeCreateRequest() //
                 .chargeAppliesTo(ChargeProductAppliesTo.LOAN.value) //
                 .chargeTimeType(chargeTimeType.value) //
                 .chargeCalculationType(ChargeCalculationType.FLAT.value) //
@@ -132,7 +138,7 @@ public class ChargeAmortizationStepDef extends AbstractStepDef {
                 .penalty(penalty);
     }
 
-    private static ChargeRequest withAmortization(final ChargeRequest request, final Map<String, String> data) {
+    private static ChargeCreateRequest withAmortization(final ChargeCreateRequest request, final Map<String, String> data) {
         final String days = cell(data, DAYS);
         return request.amortizationPeriodType(cell(data, PERIOD_TYPE)) //
                 .amortizationDays(days == null ? null : Integer.valueOf(days)) //

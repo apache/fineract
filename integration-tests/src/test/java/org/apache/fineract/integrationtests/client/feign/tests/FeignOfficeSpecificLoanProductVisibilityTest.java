@@ -141,8 +141,8 @@ public class FeignOfficeSpecificLoanProductVisibilityTest extends FeignLoanTestB
             Assertions.assertThat(chargeOptions).contains(unmappedChargeId, branchChargeId);
             Assertions.assertThat(chargeOptions).doesNotContain(siblingChargeId);
 
-            ok(() -> branchUser.charges().retrieveOneCharge(branchChargeId));
-            CallFailedRuntimeException siblingLookup = fail(() -> branchUser.charges().retrieveOneCharge(siblingChargeId));
+            ok(() -> branchUser.charges().retrieveOneCharge(branchChargeId, (Boolean) null));
+            CallFailedRuntimeException siblingLookup = fail(() -> branchUser.charges().retrieveOneCharge(siblingChargeId, (Boolean) null));
             Assertions.assertThat(siblingLookup.getStatus()).isEqualTo(404);
         } finally {
             globalConfigurationHelper.updateConfigurationByName(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED, false);

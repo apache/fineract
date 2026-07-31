@@ -25,10 +25,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
@@ -296,7 +296,7 @@ public class LoanSpecificDueDateChargeAfterMaturityTest extends FeignLoanTestBas
                     new PutGlobalConfigurationsRequest().enabled(true));
             updateBusinessDate("01 September 2023");
 
-            PostChargesResponse penaltyCharge = chargesHelper.createLoanSpecifiedDueDatePenalty(10.0);
+            ChargeCreateResponse penaltyCharge = chargesHelper.createLoanSpecifiedDueDatePenalty(10.0);
 
             final PostLoansResponse loanResponse = applyForLoanApplication(clientId, commonLoanProductId, 1000L, 30, 30, 1, BigDecimal.ZERO,
                     "01 September 2023", "01 September 2023");

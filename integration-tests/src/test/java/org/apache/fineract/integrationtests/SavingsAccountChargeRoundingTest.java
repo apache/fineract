@@ -31,8 +31,8 @@ import java.math.RoundingMode;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.SavingsAccountData;
@@ -60,7 +60,7 @@ public class SavingsAccountChargeRoundingTest extends FeignSavingsTestBase {
             Long productId = createSavingsProduct(0, 1);
             Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
-            PostChargesResponse charge = createFlatCharge(19.8);
+            ChargeCreateResponse charge = createFlatCharge(19.8);
             assertNotNull(charge.getResourceId());
 
             Long savingsChargeId = addFlatCharge(savingsId, charge.getResourceId(), 19.8, DATE);
@@ -80,7 +80,7 @@ public class SavingsAccountChargeRoundingTest extends FeignSavingsTestBase {
             Long productId = createSavingsProduct(0, 1);
             Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
-            PostChargesResponse charge = createFlatCharge(0.6);
+            ChargeCreateResponse charge = createFlatCharge(0.6);
             assertNotNull(charge.getResourceId());
 
             Long savingsChargeId = addFlatCharge(savingsId, charge.getResourceId(), 0.6, DATE);
@@ -101,7 +101,7 @@ public class SavingsAccountChargeRoundingTest extends FeignSavingsTestBase {
             Long productId = createSavingsProduct(0, 1);
             Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
-            PostChargesResponse charge = createFlatCharge(0.4);
+            ChargeCreateResponse charge = createFlatCharge(0.4);
             assertNotNull(charge.getResourceId());
 
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
@@ -120,7 +120,7 @@ public class SavingsAccountChargeRoundingTest extends FeignSavingsTestBase {
             Long productId = createSavingsProduct(0, 1);
             Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
-            PostChargesResponse charge = createPercentageWithdrawalCharge(2.5);
+            ChargeCreateResponse charge = createPercentageWithdrawalCharge(2.5);
 
             addPercentageWithdrawalCharge(savingsId, charge.getResourceId(), 2.5);
 
@@ -152,7 +152,7 @@ public class SavingsAccountChargeRoundingTest extends FeignSavingsTestBase {
             Long productId = createSavingsProduct(0, 1);
             Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
-            PostChargesResponse charge = createPercentageWithdrawalCharge(2.5);
+            ChargeCreateResponse charge = createPercentageWithdrawalCharge(2.5);
 
             addPercentageWithdrawalCharge(savingsId, charge.getResourceId(), 2.5);
 
@@ -185,7 +185,7 @@ public class SavingsAccountChargeRoundingTest extends FeignSavingsTestBase {
             Long productId = createSavingsProduct(0, 1);
             Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
-            PostChargesResponse charge = createPercentageWithdrawalCharge(2.5);
+            ChargeCreateResponse charge = createPercentageWithdrawalCharge(2.5);
 
             addPercentageWithdrawalCharge(savingsId, charge.getResourceId(), 2.5);
 
@@ -222,17 +222,17 @@ public class SavingsAccountChargeRoundingTest extends FeignSavingsTestBase {
                 .withHoldTax(false).isDormancyTrackingActive(false);
     }
 
-    private PostChargesResponse createFlatCharge(double amount) {
+    private ChargeCreateResponse createFlatCharge(double amount) {
         String uniqueChargeName = "Savings Account Flat Charge " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(2) // SAVINGS
+        return chargesHelper.createCharge(new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(2) // SAVINGS
                 .chargeTimeType(2) // SPECIFIED DUE DATE
                 .chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
     }
 
-    private PostChargesResponse createPercentageWithdrawalCharge(double percentage) {
+    private ChargeCreateResponse createPercentageWithdrawalCharge(double percentage) {
         String uniqueChargeName = "Savings Account Withdrawal Charge " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(2) // SAVINGS
+        return chargesHelper.createCharge(new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(2) // SAVINGS
                 .chargeTimeType(5) // WITHDRAWAL
                 .chargeCalculationType(2) // % OF AMOUNT
                 .amount(percentage).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));

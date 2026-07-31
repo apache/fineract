@@ -36,7 +36,7 @@ import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 import org.apache.fineract.portfolio.savings.data.SavingsChargeTransactionData;
@@ -55,7 +55,7 @@ class SavingsAccountChargesApiResourceTest {
     @Mock
     private PlatformSecurityContext context;
     @Mock
-    private ChargeReadPlatformService chargeReadPlatformService;
+    private ChargeReadService chargeReadService;
     @Mock
     private SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
     @Mock

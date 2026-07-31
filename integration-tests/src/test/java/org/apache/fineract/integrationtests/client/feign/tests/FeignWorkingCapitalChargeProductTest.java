@@ -31,12 +31,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.ChargeData;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeUpdateResponse;
 import org.apache.fineract.client.models.EnumOptionData;
-import org.apache.fineract.client.models.GetChargesResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
-import org.apache.fineract.client.models.PutChargesChargeIdResponse;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
@@ -83,12 +82,16 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
 
     private static final String CURRENCY_CODE = "USD";
 
-    private static final String TIME_TYPE_ERROR_CODE = "validation.msg.charge.chargeTimeType.is.not.one.of.expected.enumerations";
-    private static final String CALCULATION_ERROR_CODE = "validation.msg.charge.chargeCalculationType.is.not.one.of.expected.enumerations";
-    private static final String CALCULATION_ERROR_CODE_ON_UPDATE = "validation.msg.charges.chargeCalculationType.is.not.one.of.expected.enumerations";
-    private static final String TIME_TYPE_ERROR_CODE_ON_UPDATE = "validation.msg.charges.chargeTimeType.is.not.one.of.expected.enumerations";
-    private static final String PAYMENT_MODE_ERROR_CODE = "validation.msg.charge.chargePaymentMode.is.not.one.of.expected.enumerations";
-    private static final String PAYMENT_MODE_ERROR_CODE_ON_UPDATE = "validation.msg.charges.chargePaymentMode.is.not.one.of.expected.enumerations";
+    // create and update share the bean validation rules, so they report the same codes
+    private static final String TIME_TYPE_ERROR_CODE = "org.apache.fineract.portfolio.charge.charge-time-type.invalid";
+    private static final String CALCULATION_ERROR_CODE = "org.apache.fineract.portfolio.charge.charge-calculation-type.invalid";
+    private static final String CALCULATION_ERROR_CODE_ON_UPDATE = CALCULATION_ERROR_CODE;
+    private static final String TIME_TYPE_ERROR_CODE_ON_UPDATE = TIME_TYPE_ERROR_CODE;
+    private static final String PAYMENT_MODE_ERROR_CODE = "org.apache.fineract.portfolio.charge.charge-payment-mode.invalid";
+    private static final String PAYMENT_MODE_ERROR_CODE_ON_UPDATE = PAYMENT_MODE_ERROR_CODE;
+    private static final String TIME_TYPE_ERROR_MESSAGE = "The parameter 'chargeTimeType' is not one of the values supported for this 'chargeAppliesTo'";
+    private static final String CALCULATION_ERROR_MESSAGE = "The parameter 'chargeCalculationType' is not one of the values supported for this 'chargeAppliesTo'";
+    private static final String PAYMENT_MODE_ERROR_MESSAGE = "The parameter 'chargePaymentMode' is not one of the supported values";
     private static final String WC_LOAN_CHARGE_TIME_TYPE_UNSUPPORTED = "error.msg.wc.loan.charge.time.type.not.supported";
 
     private static final String BUSINESS_DATE = "2026-01-01";
@@ -126,7 +129,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         final Long chargeId = createExpectingSuccess(WorkingCapitalLoanRequestBuilders.disbursementCharge(false, 20.0),
                 "chargeAppliesTo=WCP Loans must accept chargeTimeType=Disbursement");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(APPLIES_TO_WORKING_CAPITAL_LOAN, charge.getChargeAppliesTo().getId(), "chargeAppliesTo must remain WCP Loans (5)");
         assertId(TIME_TYPE_DISBURSEMENT, charge.getChargeTimeType().getId(), "chargeTimeType must be Disbursement (1)");
         assertEquals(TIME_TYPE_DISBURSEMENT_CODE, charge.getChargeTimeType().getCode(), "chargeTimeType code");
@@ -145,7 +148,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
                 WorkingCapitalLoanRequestBuilders.disbursementCharge(CALCULATION_PERCENT_OF_AMOUNT, false, 5.0),
                 "WCP Loans + Disbursement must accept chargeCalculationType='% amount'");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(TIME_TYPE_DISBURSEMENT, charge.getChargeTimeType().getId(), "chargeTimeType must be Disbursement (1)");
         assertId(CALCULATION_PERCENT_OF_AMOUNT, charge.getChargeCalculationType().getId(), "chargeCalculationType must be % Amount (2)");
         assertEquals(CALCULATION_PERCENT_OF_AMOUNT_CODE, charge.getChargeCalculationType().getCode(), "chargeCalculationType code");
@@ -158,7 +161,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         final Long chargeId = createExpectingSuccess(WorkingCapitalLoanRequestBuilders.disbursementCharge(true, 20.0),
                 "a working capital charge product supports the penalty flag");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertEquals(Boolean.TRUE, charge.getPenalty(), "the penalty flag must round-trip");
         assertId(TIME_TYPE_DISBURSEMENT, charge.getChargeTimeType().getId(), "chargeTimeType must be Disbursement (1)");
         assertId(CALCULATION_FLAT, charge.getChargeCalculationType().getId(), "chargeCalculationType must be Flat (1)");
@@ -167,12 +170,12 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
     @Test
     @Order(4)
     void workingCapitalDisbursementCharge_withoutPaymentMode_defaultsToRegular() {
-        final ChargeRequest request = WorkingCapitalLoanRequestBuilders.disbursementCharge(false, 20.0);
+        final ChargeCreateRequest request = WorkingCapitalLoanRequestBuilders.disbursementCharge(false, 20.0);
         assertNull(request.getChargePaymentMode(), "the request must genuinely omit chargePaymentMode");
 
         final Long chargeId = createExpectingSuccess(request, "chargePaymentMode may be omitted on a WC charge");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(PAYMENT_MODE_REGULAR, charge.getChargePaymentMode().getId(), "an omitted chargePaymentMode must default to Regular");
         assertEquals(PAYMENT_MODE_REGULAR_CODE, charge.getChargePaymentMode().getCode(), "chargePaymentMode code");
     }
@@ -184,7 +187,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
                 WorkingCapitalLoanRequestBuilders.disbursementChargeWithPaymentMode(PAYMENT_MODE_REGULAR, false, 20.0),
                 "'Regular' is the one allowed chargePaymentMode for a WC charge");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(PAYMENT_MODE_REGULAR, charge.getChargePaymentMode().getId(), "explicit Regular must be stored as Regular (0)");
     }
 
@@ -194,12 +197,12 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         final Long chargeId = createExpectingSuccess(WorkingCapitalLoanRequestBuilders.disbursementCharge(false, 20.0),
                 "amount is a maintainable parameter of a WC Disbursement charge");
 
-        final PutChargesChargeIdResponse updateResponse = chargesHelper.updateCharge(chargeId,
+        final ChargeUpdateResponse updateResponse = chargesHelper.updateCharge(chargeId,
                 WorkingCapitalLoanRequestBuilders.updateChargeAmount(30.0));
         assertNotNull(updateResponse.getChanges(), "PUT must report what it changed");
-        assertEquals(30.0, updateResponse.getChanges().getAmount().doubleValue(), "PUT must report the new amount");
+        assertEquals(30.0, ((Number) updateResponse.getChanges().get("amount")).doubleValue(), "PUT must report the new amount");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertEquals(30.0, charge.getAmount().doubleValue(), "the new amount must be persisted");
         assertId(TIME_TYPE_DISBURSEMENT, charge.getChargeTimeType().getId(), "chargeTimeType must be untouched by an amount-only update");
     }
@@ -265,7 +268,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         assertEquals(400, failure.getStatus(), "a validation rejection is reported as 400");
         assertEquals(List.of(CALCULATION_ERROR_CODE), errorCodesOf(failure),
                 "only the calculation type is invalid — Disbursement is a valid WC time type");
-        assertEquals("The parameter `chargeCalculationType` must be one of [ 1, 2 ] .", messageOf(failure, CALCULATION_ERROR_CODE),
+        assertEquals(CALCULATION_ERROR_MESSAGE, messageOf(failure, CALCULATION_ERROR_CODE),
                 "the advertised allow-list is [ FLAT, PERCENT_OF_AMOUNT ] in ordinal order");
     }
 
@@ -276,11 +279,11 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
                 WorkingCapitalLoanRequestBuilders.workingCapitalCharge(TIME_TYPE_INSTALMENT_FEE, CALCULATION_FLAT, false, 20.0));
 
         assertEquals(400, failure.getStatus(), "a validation rejection is reported as 400");
-        assertEquals(List.of(TIME_TYPE_ERROR_CODE, CALCULATION_ERROR_CODE), errorCodesOf(failure),
+        assertEquals(sorted(TIME_TYPE_ERROR_CODE, CALCULATION_ERROR_CODE), sorted(errorCodesOf(failure)),
                 "an unsupported WC time type leaves no legal calculation type, so both parameters are reported");
-        assertEquals("The parameter `chargeTimeType` must be one of [ 1, 2 ] .", messageOf(failure, TIME_TYPE_ERROR_CODE),
+        assertEquals(TIME_TYPE_ERROR_MESSAGE, messageOf(failure, TIME_TYPE_ERROR_CODE),
                 "the advertised allow-list is [ DISBURSEMENT, SPECIFIED_DUE_DATE ] in ordinal order");
-        assertEquals("The parameter `chargeCalculationType` must be one of [  ] .", messageOf(failure, CALCULATION_ERROR_CODE),
+        assertEquals(CALCULATION_ERROR_MESSAGE, messageOf(failure, CALCULATION_ERROR_CODE),
                 "an unsupported time type advertises an empty calculation allow-list -- the lookup fails closed");
     }
 
@@ -290,7 +293,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         final Long chargeId = createExpectingSuccess(WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(false, 20.0),
                 "WCP Loans + Specified due date + Flat stays valid");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(TIME_TYPE_SPECIFIED_DUE_DATE, charge.getChargeTimeType().getId(), "chargeTimeType must be Specified due date (2)");
         assertId(CALCULATION_FLAT, charge.getChargeCalculationType().getId(), "chargeCalculationType must be Flat (1)");
         assertId(PAYMENT_MODE_REGULAR, charge.getChargePaymentMode().getId(), "WC charges default to Regular");
@@ -304,7 +307,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
 
         assertEquals(400, failure.getStatus(), "a validation rejection is reported as 400");
         assertEquals(List.of(CALCULATION_ERROR_CODE), errorCodesOf(failure), "only the calculation type is invalid");
-        assertEquals("The parameter `chargeCalculationType` must be one of [ 1 ] .", messageOf(failure, CALCULATION_ERROR_CODE),
+        assertEquals(CALCULATION_ERROR_MESSAGE, messageOf(failure, CALCULATION_ERROR_CODE),
                 "Specified due date must keep advertising Flat only");
     }
 
@@ -337,7 +340,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         final Long chargeId = createExpectingSuccess(ChargeRequestBuilders.loanDisbursementPercentageFee(5.0),
                 "term-loan charges are unaffected by the working capital rules");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(APPLIES_TO_LOAN, charge.getChargeAppliesTo().getId(), "chargeAppliesTo must be Loan (1)");
         assertId(TIME_TYPE_DISBURSEMENT, charge.getChargeTimeType().getId(), "chargeTimeType must be Disbursement (1)");
         assertId(CALCULATION_PERCENT_OF_AMOUNT, charge.getChargeCalculationType().getId(), "chargeCalculationType must be % Amount (2)");
@@ -367,12 +370,12 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         final Long chargeId = createExpectingSuccess(WorkingCapitalLoanRequestBuilders.disbursementCharge(true, 20.0),
                 "a WC Disbursement penalty product must be maintainable after creation");
 
-        final PutChargesChargeIdResponse updateResponse = chargesHelper.updateCharge(chargeId,
+        final ChargeUpdateResponse updateResponse = chargesHelper.updateCharge(chargeId,
                 WorkingCapitalLoanRequestBuilders.updateChargeAmount(30.0));
         assertNotNull(updateResponse.getChanges(), "PUT must report what it changed");
-        assertEquals(30.0, updateResponse.getChanges().getAmount().doubleValue(), "PUT must report the new amount");
+        assertEquals(30.0, ((Number) updateResponse.getChanges().get("amount")).doubleValue(), "PUT must report the new amount");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertEquals(30.0, charge.getAmount().doubleValue(), "the new amount must be persisted");
         assertEquals(Boolean.TRUE, charge.getPenalty(), "the penalty flag must survive an amount-only update");
         assertId(TIME_TYPE_DISBURSEMENT, charge.getChargeTimeType().getId(), "chargeTimeType must be untouched by an amount-only update");
@@ -385,11 +388,11 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
                 WorkingCapitalLoanRequestBuilders.disbursementCharge(CALCULATION_PERCENT_OF_AMOUNT, false, 5.0),
                 "the {Disbursement, % Amount} product is the starting state of this update");
 
-        final PutChargesChargeIdResponse updateResponse = chargesHelper.updateCharge(chargeId,
+        final ChargeUpdateResponse updateResponse = chargesHelper.updateCharge(chargeId,
                 WorkingCapitalLoanRequestBuilders.updateChargeTimeAndCalculationType(TIME_TYPE_SPECIFIED_DUE_DATE, CALCULATION_FLAT));
         assertNotNull(updateResponse.getChanges(), "PUT must report what it changed");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(TIME_TYPE_SPECIFIED_DUE_DATE, charge.getChargeTimeType().getId(), "chargeTimeType must be Specified due date (2)");
         assertId(CALCULATION_FLAT, charge.getChargeCalculationType().getId(), "chargeCalculationType must be Flat (1)");
     }
@@ -405,10 +408,10 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
 
         assertEquals(400, failure.getStatus(), "a validation rejection is reported as 400");
         assertEquals(List.of(CALCULATION_ERROR_CODE_ON_UPDATE), errorCodesOf(failure), "only the calculation type is invalid");
-        assertEquals("The parameter `chargeCalculationType` must be one of [ 1 ] .", messageOf(failure, CALCULATION_ERROR_CODE_ON_UPDATE),
+        assertEquals(CALCULATION_ERROR_MESSAGE, messageOf(failure, CALCULATION_ERROR_CODE_ON_UPDATE),
                 "Specified due date must keep advertising Flat only on the update path too");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(CALCULATION_FLAT, charge.getChargeCalculationType().getId(), "the rejected update must not have been persisted");
     }
 
@@ -420,7 +423,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
 
         assertEquals(400, failure.getStatus(), "a validation rejection is reported as 400");
         assertEquals(List.of(PAYMENT_MODE_ERROR_CODE), errorCodesOf(failure), "only the payment mode is invalid");
-        assertEquals("The parameter `chargePaymentMode` must be one of [ 0 ] .", messageOf(failure, PAYMENT_MODE_ERROR_CODE),
+        assertEquals(PAYMENT_MODE_ERROR_MESSAGE, messageOf(failure, PAYMENT_MODE_ERROR_CODE),
                 "Regular (0) is the one payment mode a WC charge product may carry");
     }
 
@@ -435,10 +438,10 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
 
         assertEquals(400, failure.getStatus(), "a validation rejection is reported as 400");
         assertEquals(List.of(PAYMENT_MODE_ERROR_CODE_ON_UPDATE), errorCodesOf(failure), "only the payment mode is invalid");
-        assertEquals("The parameter `chargePaymentMode` must be one of [ 0 ] .", messageOf(failure, PAYMENT_MODE_ERROR_CODE_ON_UPDATE),
+        assertEquals(PAYMENT_MODE_ERROR_MESSAGE, messageOf(failure, PAYMENT_MODE_ERROR_CODE_ON_UPDATE),
                 "Regular (0) stays the one payment mode a WC charge product may carry on the update path too");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(PAYMENT_MODE_REGULAR, charge.getChargePaymentMode().getId(), "the rejected update must not have been persisted");
     }
 
@@ -455,7 +458,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         final Long chargeId = JsonParser.parseString(response).getAsJsonObject().get("resourceId").getAsLong();
         createdChargeIds.add(chargeId);
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(PAYMENT_MODE_REGULAR, charge.getChargePaymentMode().getId(),
                 "an explicit null payment mode must fall back to Regular (0), exactly like an omitted one");
         assertEquals(PAYMENT_MODE_REGULAR_CODE, charge.getChargePaymentMode().getCode(), "payment mode code");
@@ -471,12 +474,12 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
                 WorkingCapitalLoanRequestBuilders.updateChargeTimeType(TIME_TYPE_INSTALMENT_FEE));
 
         assertEquals(400, failure.getStatus(), "a validation rejection is reported as 400");
-        assertEquals(List.of(TIME_TYPE_ERROR_CODE_ON_UPDATE, CALCULATION_ERROR_CODE_ON_UPDATE), errorCodesOf(failure),
+        assertEquals(sorted(TIME_TYPE_ERROR_CODE_ON_UPDATE, CALCULATION_ERROR_CODE_ON_UPDATE), sorted(errorCodesOf(failure)),
                 "the time type is rejected, and no calculation type is valid for an unsupported time type");
-        assertEquals("The parameter `chargeTimeType` must be one of [ 1, 2 ] .", messageOf(failure, TIME_TYPE_ERROR_CODE_ON_UPDATE),
+        assertEquals(TIME_TYPE_ERROR_MESSAGE, messageOf(failure, TIME_TYPE_ERROR_CODE_ON_UPDATE),
                 "the update path must advertise the widened WC allow-list");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(TIME_TYPE_DISBURSEMENT, charge.getChargeTimeType().getId(), "the rejected update must not have been persisted");
     }
 
@@ -518,7 +521,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
 
         assertNull(JsonParser.parseString(response).getAsJsonObject().get("changes"),
                 "the API drops the null before the command is built, so PUT must report no change: " + response);
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(PAYMENT_MODE_REGULAR, charge.getChargePaymentMode().getId(),
                 "an explicit null payment mode must keep Regular (0) on the update path, exactly like on create");
     }
@@ -529,11 +532,11 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         final Long chargeId = createExpectingSuccess(WorkingCapitalLoanRequestBuilders.disbursementCharge(false, 20.0),
                 "the {Disbursement, Flat, Regular} product is the starting state of this update");
 
-        final PutChargesChargeIdResponse updateResponse = chargesHelper.updateCharge(chargeId,
+        final ChargeUpdateResponse updateResponse = chargesHelper.updateCharge(chargeId,
                 WorkingCapitalLoanRequestBuilders.updateChargePaymentMode(PAYMENT_MODE_REGULAR));
 
         assertNull(updateResponse.getChanges(), "Regular is already stored, so PUT must report no change");
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(PAYMENT_MODE_REGULAR, charge.getChargePaymentMode().getId(), "Regular (0) stays the stored payment mode");
     }
 
@@ -546,7 +549,7 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         final String response = FeignRawHttpHelper.put("/charges/" + chargeId, "{\"chargePaymentMode\": null, \"locale\": \"en\"}");
 
         assertNull(JsonParser.parseString(response).getAsJsonObject().get("changes"), "a dropped null is no change: " + response);
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(PAYMENT_MODE_REGULAR, charge.getChargePaymentMode().getId(), "the stored payment mode is untouched");
     }
 
@@ -563,16 +566,16 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         assertEquals(400, failure.getStatus(), "a validation rejection is reported as 400");
         assertEquals(List.of(CALCULATION_ERROR_CODE_ON_UPDATE), errorCodesOf(failure),
                 "the stored % Amount is no longer valid once the time type becomes Specified due date");
-        assertEquals("The parameter `chargeCalculationType` must be one of [ 1 ] .", messageOf(failure, CALCULATION_ERROR_CODE_ON_UPDATE),
+        assertEquals(CALCULATION_ERROR_MESSAGE, messageOf(failure, CALCULATION_ERROR_CODE_ON_UPDATE),
                 "the pair rule is re-validated against the new time type on a time-type-only update");
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertId(TIME_TYPE_DISBURSEMENT, charge.getChargeTimeType().getId(), "the rejected update must not have been persisted");
         assertId(CALCULATION_PERCENT_OF_AMOUNT, charge.getChargeCalculationType().getId(), "the calculation type is untouched");
     }
 
-    private Long createExpectingSuccess(final ChargeRequest request, final String expectation) {
-        final PostChargesResponse response;
+    private Long createExpectingSuccess(final ChargeCreateRequest request, final String expectation) {
+        final ChargeCreateResponse response;
         try {
             response = chargesHelper.createCharge(request);
         } catch (final CallFailedRuntimeException failure) {
@@ -605,6 +608,14 @@ public class FeignWorkingCapitalChargeProductTest extends FeignIntegrationTest {
         } catch (final CallFailedRuntimeException ignored) {
             // the charge may already be gone or still referenced; either way the test outcome does not depend on it
         }
+    }
+
+    private static List<String> sorted(final String... codes) {
+        return sorted(List.of(codes));
+    }
+
+    private static List<String> sorted(final List<String> codes) {
+        return codes.stream().sorted().toList();
     }
 
     private static void assertId(final long expected, final Long actual, final String message) {

@@ -34,8 +34,9 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.ChargeData;
-import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
 import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandResponse;
@@ -45,7 +46,6 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsRespon
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.MarkWorkingCapitalLoanAsFraudRequest;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
@@ -269,8 +269,8 @@ public class FeignWorkingCapitalLoanHelper {
         ok(() -> fineractClient.inlineJob().executeInlineJob("WC_LOAN_COB", new InlineJobRequest().addLoanIdsItem(loanId)));
     }
 
-    public Long createGlobalCharge(ChargeRequest request) {
-        PostChargesResponse response = ok(() -> fineractClient.charges().createCharge(request));
+    public Long createGlobalCharge(ChargeCreateRequest request) {
+        ChargeCreateResponse response = ok(() -> fineractClient.charges().createCharge(request));
         return response.getResourceId();
     }
 

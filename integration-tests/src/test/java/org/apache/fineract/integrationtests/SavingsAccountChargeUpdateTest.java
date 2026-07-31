@@ -25,9 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
 import java.util.UUID;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest;
@@ -72,7 +72,7 @@ public class SavingsAccountChargeUpdateTest extends FeignSavingsTestBase {
             Long productId = createSavingsProduct();
             Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
-            PostChargesResponse charge = createPercentageWithdrawalCharge(2.5);
+            ChargeCreateResponse charge = createPercentageWithdrawalCharge(2.5);
             Long savingsChargeId = addPercentageWithdrawalCharge(savingsId, charge.getResourceId(), 2.5);
 
             PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest request = new PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest()
@@ -96,7 +96,7 @@ public class SavingsAccountChargeUpdateTest extends FeignSavingsTestBase {
             Long productId = createSavingsProduct();
             Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
-            PostChargesResponse charge = createFlatCharge(19.8);
+            ChargeCreateResponse charge = createFlatCharge(19.8);
             Long savingsChargeId = addFlatCharge(savingsId, charge.getResourceId(), 19.8, DATE);
 
             PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest request = new PutSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdRequest()
@@ -126,17 +126,17 @@ public class SavingsAccountChargeUpdateTest extends FeignSavingsTestBase {
         return createSavingsProduct(request).getResourceId();
     }
 
-    private PostChargesResponse createFlatCharge(double amount) {
+    private ChargeCreateResponse createFlatCharge(double amount) {
         String uniqueChargeName = "Savings Account Flat Charge " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(2) // SAVINGS
+        return chargesHelper.createCharge(new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(2) // SAVINGS
                 .chargeTimeType(2) // SPECIFIED DUE DATE
                 .chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
     }
 
-    private PostChargesResponse createPercentageWithdrawalCharge(double percentage) {
+    private ChargeCreateResponse createPercentageWithdrawalCharge(double percentage) {
         String uniqueChargeName = "Savings Account Withdrawal Charge " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(2) // SAVINGS
+        return chargesHelper.createCharge(new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(2) // SAVINGS
                 .chargeTimeType(5) // WITHDRAWAL
                 .chargeCalculationType(2) // % OF AMOUNT
                 .amount(percentage).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));

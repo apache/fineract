@@ -27,7 +27,7 @@ import java.util.List;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AccountChargesRequest;
 import org.apache.fineract.client.models.AccountRequest;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.GetAccountsCharges;
 import org.apache.fineract.client.models.GetAccountsPurchasedShares;
 import org.apache.fineract.client.models.GetAccountsSummary;
@@ -1011,7 +1011,7 @@ public class ShareAccountIntegrationTests {
     }
 
     private Long createShareCharge(ChargeTimeType chargeTimeType) {
-        return chargesHelper.createCharge(new ChargeRequest()//
+        return chargesHelper.createCharge(new ChargeCreateRequest()//
                 .name(Utils.uniqueRandomStringGenerator("Charge_Share_", 8))//
                 .chargeAppliesTo(ChargeAppliesTo.SHARES.getValue())//
                 .chargeTimeType(chargeTimeType.getValue())//

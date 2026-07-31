@@ -21,7 +21,7 @@ package org.apache.fineract.integrationtests.loan.penalty;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -298,10 +298,10 @@ public class LoanPenaltyBackdatedTransactionTest extends FeignLoanTestBase {
     }
 
     private Long createOverduePenaltyPercentageCharge(double percentageAmount, String feeFrequency, int feeInterval) {
-        ChargeRequest chargeRequest = ChargeRequestBuilders.loanOverdueFee(percentageAmount)//
+        ChargeCreateRequest chargeRequest = ChargeRequestBuilders.loanOverdueFee(percentageAmount)//
                 .chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue())//
-                .feeFrequency(feeFrequency)//
-                .feeInterval(String.valueOf(feeInterval));
+                .feeFrequency(Integer.valueOf(feeFrequency))//
+                .feeInterval(feeInterval);
         return chargesHelper.createCharge(chargeRequest).getResourceId();
     }
 }

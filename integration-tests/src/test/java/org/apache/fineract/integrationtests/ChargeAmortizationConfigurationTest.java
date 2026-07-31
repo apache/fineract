@@ -25,11 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.ChargeData;
-import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.GetChargesResponse;
-import org.apache.fineract.client.models.PutChargesChargeIdRequest;
+import org.apache.fineract.client.models.ChargeUpdateRequest;
 import org.apache.fineract.client.models.StringEnumOptionData;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
@@ -62,7 +62,7 @@ public class ChargeAmortizationConfigurationTest extends FeignIntegrationTest {
 
     @Test
     public void chargeWithoutAmortizationFieldsIsNotAmortized() {
-        final GetChargesResponse charge = chargesHelper.getCharge(create(ChargeRequestBuilders.loanDisbursementFee(AMOUNT)));
+        final ChargeData charge = chargesHelper.getCharge(create(ChargeRequestBuilders.loanDisbursementFee(AMOUNT)));
 
         assertEquals("NONE", charge.getAmortizationPeriodType().getId());
         assertEquals("chargeAmortizationPeriodType.none", charge.getAmortizationPeriodType().getCode());
@@ -75,7 +75,7 @@ public class ChargeAmortizationConfigurationTest extends FeignIntegrationTest {
     public void fullLoanTermChargeDefaultsToFlatFee() {
         final Long chargeId = create(ChargeRequestBuilders.loanDisbursementFee(AMOUNT).amortizationPeriodType("FULL_LOAN_TERM"));
 
-        final GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        final ChargeData charge = chargesHelper.getCharge(chargeId);
         assertEquals("FULL_LOAN_TERM", charge.getAmortizationPeriodType().getId());
         assertNull(charge.getAmortizationDays());
         assertEquals("FLAT", charge.getAmortizationCalculationType().getId());
@@ -91,20 +91,20 @@ public class ChargeAmortizationConfigurationTest extends FeignIntegrationTest {
     public void numberOfDaysConfigurationCanBeChangedAndRemoved() {
         final Long chargeId = create(ChargeRequestBuilders.loanSpecifiedDueDateFee(AMOUNT));
 
-        final PutChargesChargeIdRequest amortized = chargesHelper.updateCharge(chargeId, new ChargeRequest().locale(LOCALE)
+        final Map<String, Object> amortized = chargesHelper.updateCharge(chargeId, new ChargeUpdateRequest().locale(LOCALE)
                 .amortizationPeriodType("NUMBER_OF_DAYS").amortizationDays(30).amortizationIncomeType("INTEREST")).getChanges();
-        assertEquals("NUMBER_OF_DAYS", amortized.getAmortizationPeriodType().getValue());
-        assertEquals(30, amortized.getAmortizationDays());
-        assertEquals("FLAT", amortized.getAmortizationCalculationType().getValue());
-        assertEquals("INTEREST", amortized.getAmortizationIncomeType().getValue());
+        assertEquals("NUMBER_OF_DAYS", amortized.get("amortizationPeriodType"));
+        assertEquals(30, ((Number) amortized.get("amortizationDays")).intValue());
+        assertEquals("FLAT", amortized.get("amortizationCalculationType"));
+        assertEquals("INTEREST", amortized.get("amortizationIncomeType"));
 
-        GetChargesResponse charge = chargesHelper.getCharge(chargeId);
+        ChargeData charge = chargesHelper.getCharge(chargeId);
         assertEquals("NUMBER_OF_DAYS", charge.getAmortizationPeriodType().getId());
         assertEquals(30, charge.getAmortizationDays());
         assertEquals("FLAT", charge.getAmortizationCalculationType().getId());
         assertEquals("INTEREST", charge.getAmortizationIncomeType().getId());
 
-        chargesHelper.updateCharge(chargeId, new ChargeRequest().locale(LOCALE).amortizationPeriodType("NONE"));
+        chargesHelper.updateCharge(chargeId, new ChargeUpdateRequest().locale(LOCALE).amortizationPeriodType("NONE"));
 
         charge = chargesHelper.getCharge(chargeId);
         assertEquals("NONE", charge.getAmortizationPeriodType().getId());
@@ -143,7 +143,7 @@ public class ChargeAmortizationConfigurationTest extends FeignIntegrationTest {
         final Long chargeId = create(ChargeRequestBuilders.loanSpecifiedDueDateFee(AMOUNT).amortizationPeriodType("FULL_LOAN_TERM"));
 
         assertRejected("validation.msg.charge.amortizationPeriodType.not.supported.for.penalty",
-                chargesHelper.updateChargeExpectingError(chargeId, new ChargeRequest().locale(LOCALE).penalty(true)));
+                chargesHelper.updateChargeExpectingError(chargeId, new ChargeUpdateRequest().locale(LOCALE).penalty(true)));
         assertEquals("FULL_LOAN_TERM", chargesHelper.getCharge(chargeId).getAmortizationPeriodType().getId());
     }
 
@@ -156,7 +156,7 @@ public class ChargeAmortizationConfigurationTest extends FeignIntegrationTest {
         assertEquals(List.of("FEE", "INTEREST"), ids(template.getAmortizationIncomeTypeOptions()));
     }
 
-    private Long create(final ChargeRequest request) {
+    private Long create(final ChargeCreateRequest request) {
         final Long chargeId = chargesHelper.createCharge(request).getResourceId();
         createdChargeIds.add(chargeId);
         return chargeId;

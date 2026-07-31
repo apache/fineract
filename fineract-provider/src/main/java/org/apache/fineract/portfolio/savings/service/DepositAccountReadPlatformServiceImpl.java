@@ -58,7 +58,7 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.charge.util.ConvertChargeDataToSpecificChargeData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
@@ -123,7 +123,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
     private final GroupReadPlatformService groupReadPlatformService;
     private final DepositProductReadPlatformService depositProductReadPlatformService;
     private final SavingsDropdownReadPlatformService savingsDropdownReadPlatformService;
-    private final ChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadService chargeReadService;
     private final StaffReadService staffReadPlatformService;
     private final DepositsDropdownReadPlatformService depositsDropdownReadPlatformService;
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
@@ -346,13 +346,13 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     .retrievewithdrawalFeeTypeOptions();
 
             final Collection<SavingsAccountTransactionData> transactions = null;
-            final Collection<ChargeData> productCharges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId, officeId);
+            final Collection<ChargeData> productCharges = this.chargeReadService.retrieveSavingsProductCharges(productId, officeId);
             // update charges from Product charges
             final Collection<SavingsAccountChargeData> charges = fromChargesToSavingsCharges(productCharges);
 
             final boolean feeChargesOnly = false;
-            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsProductApplicableCharges(feeChargesOnly, officeId);
+            final Collection<ChargeData> chargeOptions = this.chargeReadService.retrieveSavingsProductApplicableCharges(feeChargesOnly,
+                    officeId);
 
             final Collection<EnumOptionData> maturityInstructionOptions = this.depositsDropdownReadPlatformService
                     .maturityInstructionOptions();
@@ -432,8 +432,8 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
             final Collection<EnumOptionData> maturityInstructionOptions = null;
 
             final boolean feeChargesOnly = true;
-            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsProductApplicableCharges(feeChargesOnly, officeId);
+            final Collection<ChargeData> chargeOptions = this.chargeReadService.retrieveSavingsProductApplicableCharges(feeChargesOnly,
+                    officeId);
 
             if (depositAccountType == DepositAccountType.FIXED_DEPOSIT) {
 

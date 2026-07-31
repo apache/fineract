@@ -22,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
 import org.apache.fineract.client.models.AccountTransferRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PutSavingsAccountsAccountIdRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
@@ -45,7 +45,7 @@ public class AccountTransferWithdrawalFeeTest extends FeignSavingsTestBase {
 
     @Test
     public void testFromSavingsToSavingsAccountTransferWithWithdrawalFee() {
-        final PostChargesResponse withdrawalCharge = savingsChargeHelper.createWithdrawalFeeCharge();
+        final ChargeCreateResponse withdrawalCharge = savingsChargeHelper.createWithdrawalFeeCharge();
         assertNotNull(withdrawalCharge.getResourceId());
 
         final Long productId = createSavingsProduct(withdrawalFeeProduct()).getResourceId();
@@ -68,7 +68,7 @@ public class AccountTransferWithdrawalFeeTest extends FeignSavingsTestBase {
         final Long paymentTypeId = paymentTypeHelper.createPaymentType(bankTransferPaymentType()).getResourceId();
         assertNotNull(paymentTypeId);
 
-        final PostChargesResponse withdrawalCharge = savingsChargeHelper
+        final ChargeCreateResponse withdrawalCharge = savingsChargeHelper
                 .createCharge(SavingsRequestBuilders.savingsWithdrawalFeeCharge().enablePaymentType(true).paymentTypeId(paymentTypeId));
         assertNotNull(withdrawalCharge.getResourceId());
 

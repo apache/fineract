@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.LongStream;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.BatchResponse;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.DelinquencyBucketRequest;
 import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.DelinquencyRangeRequest;
@@ -249,7 +249,7 @@ public class InlineLoanCOBTest extends FeignLoanTestBase {
 
     private Long createOverdueLoan() {
         Long clientId = createClient();
-        ChargeRequest overdueFeeCharge = ChargeRequestBuilders.loanOverdueFee(1.0)
+        ChargeCreateRequest overdueFeeCharge = ChargeRequestBuilders.loanOverdueFee(1.0)
                 .chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue());
         Long overdueFeeChargeId = chargesHelper.createCharge(overdueFeeCharge).getResourceId();
         PostLoanProductsRequest product = create4Period1MonthLongWithoutInterestProduct(CUMULATIVE_STRATEGY).principal(15000.0)

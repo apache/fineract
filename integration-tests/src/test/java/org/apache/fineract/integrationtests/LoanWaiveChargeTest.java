@@ -30,9 +30,9 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanChargePaidByData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -101,7 +101,7 @@ public class LoanWaiveChargeTest extends FeignLoanTestBase {
 
             // create charge
             double chargeAmount = 100.0;
-            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            ChargeCreateResponse chargeResult = createCharge(chargeAmount);
             Long chargeId = chargeResult.getResourceId();
 
             // add charge after maturity
@@ -191,7 +191,7 @@ public class LoanWaiveChargeTest extends FeignLoanTestBase {
 
             // create charge
             double chargeAmount = 10.0;
-            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            ChargeCreateResponse chargeResult = createCharge(chargeAmount);
             Long chargeId = chargeResult.getResourceId();
 
             PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "09 January 2023", chargeAmount);
@@ -212,7 +212,7 @@ public class LoanWaiveChargeTest extends FeignLoanTestBase {
 
             // create charge
             double chargeAmount = 9.0;
-            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            ChargeCreateResponse chargeResult = createCharge(chargeAmount);
             Long chargeId = chargeResult.getResourceId();
 
             PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "10 January 2023", chargeAmount);
@@ -239,7 +239,7 @@ public class LoanWaiveChargeTest extends FeignLoanTestBase {
 
             // create charge
             double chargeAmount = 8.0;
-            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            ChargeCreateResponse chargeResult = createCharge(chargeAmount);
             Long chargeId = chargeResult.getResourceId();
 
             PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "11 January 2023", chargeAmount);
@@ -287,7 +287,7 @@ public class LoanWaiveChargeTest extends FeignLoanTestBase {
         runAt("23 January 2023", () -> {
             // create charge
             double chargeAmount = 5.0;
-            PostChargesResponse chargeResult = createCharge(chargeAmount, "EUR");
+            ChargeCreateResponse chargeResult = createCharge(chargeAmount, "EUR");
             Long chargeId = chargeResult.getResourceId();
 
             PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(appliedLoanId.get(), chargeId, "23 January 2023", chargeAmount);
