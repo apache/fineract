@@ -53,7 +53,7 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarRepository;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.charge.service.ChargeDropdownReadPlatformService;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralAssembler;
@@ -340,7 +340,7 @@ public class LoanAccountConfiguration {
             LoanRepositoryWrapper loanRepositoryWrapper, ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             LoanProductReadPlatformService loanProductReadPlatformService, ClientReadPlatformService clientReadPlatformService,
             GroupReadPlatformService groupReadPlatformService, LoanDropdownReadPlatformService loanDropdownReadPlatformService,
-            FundReadPlatformService fundReadPlatformService, ChargeReadPlatformService chargeReadPlatformService,
+            FundReadPlatformService fundReadPlatformService, ChargeReadService chargeReadService,
             CodeValueReadPlatformService codeValueReadPlatformService, CalendarReadPlatformService calendarReadPlatformService,
             StaffReadService staffReadPlatformService, PaginationHelper paginationHelper,
             PaymentTypeReadService paymentTypeReadPlatformService, FloatingRatesReadPlatformService floatingRatesReadPlatformService,
@@ -356,7 +356,7 @@ public class LoanAccountConfiguration {
             LoanRepaymentScheduleService loanRepaymentScheduleService) {
         return new LoanReadPlatformServiceImpl(jdbcTemplate, context, loanRepositoryWrapper, applicationCurrencyRepository,
                 loanProductReadPlatformService, clientReadPlatformService, groupReadPlatformService, loanDropdownReadPlatformService,
-                fundReadPlatformService, chargeReadPlatformService, codeValueReadPlatformService, calendarReadPlatformService,
+                fundReadPlatformService, chargeReadService, codeValueReadPlatformService, calendarReadPlatformService,
                 staffReadPlatformService, paginationHelper, paymentTypeReadPlatformService, floatingRatesReadPlatformService,
                 loanUtilService, configurationDomainService, accountDetailsReadPlatformService, columnValidator, sqlGenerator,
                 delinquencyReadPlatformService, loanTransactionRepository, loanChargePaidByReadService, loanTransactionRelationReadService,

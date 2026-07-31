@@ -37,7 +37,7 @@ import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.charge.util.ConvertChargeDataToSpecificChargeData;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
@@ -71,14 +71,14 @@ public class SavingsAccountTemplateReadPlatformServiceImpl implements SavingsAcc
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     private final StaffReadService staffReadPlatformService;
     private final SavingsDropdownReadPlatformService dropdownReadPlatformService;
-    private final ChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadService chargeReadService;
 
     private final EntityDatatableChecksReadService entityDatatableChecksReadService;
 
     public SavingsAccountTemplateReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final ClientReadPlatformService clientReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
             final SavingsProductReadPlatformService savingProductReadPlatformService, final StaffReadService staffReadPlatformService,
-            final SavingsDropdownReadPlatformService dropdownReadPlatformService, final ChargeReadPlatformService chargeReadPlatformService,
+            final SavingsDropdownReadPlatformService dropdownReadPlatformService, final ChargeReadService chargeReadService,
             final EntityDatatableChecksReadService entityDatatableChecksReadService, final ColumnValidator columnValidator) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
@@ -87,7 +87,7 @@ public class SavingsAccountTemplateReadPlatformServiceImpl implements SavingsAcc
         this.savingsProductReadPlatformService = savingProductReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
-        this.chargeReadPlatformService = chargeReadPlatformService;
+        this.chargeReadService = chargeReadService;
         this.entityDatatableChecksReadService = entityDatatableChecksReadService;
     }
 
@@ -137,13 +137,12 @@ public class SavingsAccountTemplateReadPlatformServiceImpl implements SavingsAcc
             final Collection<EnumOptionData> withdrawalFeeTypeOptions = this.dropdownReadPlatformService.retrievewithdrawalFeeTypeOptions();
 
             final Collection<SavingsAccountTransactionData> transactions = null;
-            final Collection<ChargeData> productCharges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId);
+            final Collection<ChargeData> productCharges = this.chargeReadService.retrieveSavingsProductCharges(productId);
             // update charges from Product charges
             final Collection<SavingsAccountChargeData> charges = fromChargesToSavingsCharges(productCharges);
 
             final boolean feeChargesOnly = false;
-            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsProductApplicableCharges(feeChargesOnly);
+            final Collection<ChargeData> chargeOptions = this.chargeReadService.retrieveSavingsProductApplicableCharges(feeChargesOnly);
 
             Collection<StaffData> fieldOfficerOptions = null;
 
@@ -201,8 +200,7 @@ public class SavingsAccountTemplateReadPlatformServiceImpl implements SavingsAcc
             final Collection<SavingsAccountChargeData> charges = null;
 
             final boolean feeChargesOnly = false;
-            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                    .retrieveSavingsProductApplicableCharges(feeChargesOnly);
+            final Collection<ChargeData> chargeOptions = this.chargeReadService.retrieveSavingsProductApplicableCharges(feeChargesOnly);
 
             template = SavingsAccountData.withTemplateOptions(template, productOptions, fieldOfficerOptions,
                     interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,

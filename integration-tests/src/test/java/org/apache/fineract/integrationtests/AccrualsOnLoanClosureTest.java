@@ -24,9 +24,9 @@ import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
@@ -48,7 +48,7 @@ public class AccrualsOnLoanClosureTest extends FeignLoanTestBase {
     private static final Double chargeAmount = 20.0;
 
     private static Long loanId;
-    private static PostChargesResponse penaltyResponse;
+    private static ChargeCreateResponse penaltyResponse;
     private static final String penaltyCharge1AddedDate = "24 April 2024";
 
     @Test
@@ -60,9 +60,9 @@ public class AccrualsOnLoanClosureTest extends FeignLoanTestBase {
         Assertions.assertNotNull(loanId);
         disburseLoan(loanId, BigDecimal.valueOf(disbursementAmount), disbursementDate);
 
-        penaltyResponse = chargesHelper.createCharge(
-                new ChargeRequest().active(true).chargeTimeType(2).chargeAppliesTo(1).chargeCalculationType(1).penalty(true).amount(20.0)
-                        .currencyCode("USD").locale("en").chargePaymentMode(0).name(Utils.randomStringGenerator("PENALTY_", 6)));
+        penaltyResponse = chargesHelper.createCharge(new ChargeCreateRequest().active(true).chargeTimeType(2).chargeAppliesTo(1)
+                .chargeCalculationType(1).penalty(true).amount(20.0).currencyCode("USD").locale("en").chargePaymentMode(0)
+                .name(Utils.randomStringGenerator("PENALTY_", 6)));
         runAt(startDate, () -> {
             globalConfigurationHelper.updateGlobalConfiguration(CHARGE_ACCRUAL_DATE,
                     new PutGlobalConfigurationsRequest().stringValue("submitted-date"));

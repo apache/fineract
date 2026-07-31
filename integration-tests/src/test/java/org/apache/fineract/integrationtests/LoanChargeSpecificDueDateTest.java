@@ -33,12 +33,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
@@ -112,7 +112,7 @@ public class LoanChargeSpecificDueDateTest extends BaseLoanIntegrationTest {
 
         final String feeAmount = "10.00";
         String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount, false);
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        final ChargeCreateResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long loanChargeId = postChargesResponse.getResourceId();
 
@@ -185,7 +185,7 @@ public class LoanChargeSpecificDueDateTest extends BaseLoanIntegrationTest {
 
         final String feeAmount = "10.00";
         String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount, true);
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        final ChargeCreateResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long loanChargeId = postChargesResponse.getResourceId();
         assertNotNull(loanChargeId);
@@ -260,7 +260,7 @@ public class LoanChargeSpecificDueDateTest extends BaseLoanIntegrationTest {
         // Apply Loan Charge with specific due date
         final String feeAmount = "1.500000";
         String payloadJSON = ChargesHelper.getLoanSpecificInstallmentFeeJSON();
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        final ChargeCreateResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long chargeId = postChargesResponse.getResourceId();
         assertNotNull(chargeId);
@@ -334,7 +334,7 @@ public class LoanChargeSpecificDueDateTest extends BaseLoanIntegrationTest {
         // Apply Loan Charge with specific due date
         final String feeAmount = "1.500000";
         String payloadJSON = ChargesHelper.getLoanSpecificInstallmentFeeJSON();
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        final ChargeCreateResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long chargeId = postChargesResponse.getResourceId();
         assertNotNull(chargeId);
@@ -408,7 +408,7 @@ public class LoanChargeSpecificDueDateTest extends BaseLoanIntegrationTest {
         // Apply Loan Charge with specific due date
         final String feeAmount = "10.00";
         String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount, true);
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        final ChargeCreateResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long chargeId = postChargesResponse.getResourceId();
         assertNotNull(chargeId);
@@ -475,7 +475,7 @@ public class LoanChargeSpecificDueDateTest extends BaseLoanIntegrationTest {
             // Apply Loan Charge with specific due date
             String feeAmount = "10.00";
             String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount, true);
-            final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+            final ChargeCreateResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
             assertNotNull(postChargesResponse);
             final Long chargeId = postChargesResponse.getResourceId();
             assertNotNull(chargeId);
@@ -610,7 +610,7 @@ public class LoanChargeSpecificDueDateTest extends BaseLoanIntegrationTest {
             // Apply Loan Charge with specific due date
             String feeAmount = "10.00";
             String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount, true);
-            final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+            final ChargeCreateResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
             assertNotNull(postChargesResponse);
             final Long chargeId = postChargesResponse.getResourceId();
             assertNotNull(chargeId);
@@ -688,7 +688,7 @@ public class LoanChargeSpecificDueDateTest extends BaseLoanIntegrationTest {
 
         final String feeAmount = "10.00";
         String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount, true);
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        final ChargeCreateResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long loanChargeId = postChargesResponse.getResourceId();
         assertNotNull(loanChargeId);
@@ -748,7 +748,7 @@ public class LoanChargeSpecificDueDateTest extends BaseLoanIntegrationTest {
 
         final String feeAmount = "10.00";
         String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount, true);
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        final ChargeCreateResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long loanChargeId = postChargesResponse.getResourceId();
         assertNotNull(loanChargeId);

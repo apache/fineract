@@ -28,16 +28,13 @@ import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
 import java.time.MonthDay;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.accounting.glaccount.data.GLAccountData;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
@@ -45,11 +42,9 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
-import org.apache.fineract.portfolio.charge.api.ChargesApiConstants;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.exception.ChargeDueAtDisbursementCannotBePenaltyException;
 import org.apache.fineract.portfolio.charge.exception.ChargeMustBePenaltyException;
-import org.apache.fineract.portfolio.charge.exception.ChargeParameterUpdateNotSupportedException;
 import org.apache.fineract.portfolio.charge.service.ChargeEnumerations;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
@@ -58,6 +53,8 @@ import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "m_charge", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name") })
 public class Charge extends AbstractPersistableCustom<Long> {
 
@@ -68,37 +65,32 @@ public class Charge extends AbstractPersistableCustom<Long> {
     public static final String LOCALE_PARAM_NAME = "locale";
     public static final String FEE_FREQUENCY_PARAM_NAME = "feeFrequency";
 
-    @Getter
     @Column(name = "name", length = 100)
     private String name;
 
-    @Getter
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
-    @Getter
     @Column(name = "currency_code", length = 3)
     private String currencyCode;
 
+    // AA: chargeAppliesTo is immutable, an update of it is rejected by the write service
+    @Setter(AccessLevel.NONE)
     @Column(name = "charge_applies_to_enum", nullable = false)
     private Integer chargeAppliesTo;
 
-    @Getter
     @Column(name = "charge_time_enum", nullable = false)
     private Integer chargeTimeType;
 
-    @Getter
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
 
-    @Getter
     @Column(name = "charge_payment_mode_enum")
     private Integer chargePaymentMode;
 
     @Column(name = "fee_on_day")
     private Integer feeOnDay;
 
-    @Getter
     @Column(name = "fee_interval")
     private Integer feeInterval;
 
@@ -111,14 +103,14 @@ public class Charge extends AbstractPersistableCustom<Long> {
     @Column(name = "is_active", nullable = false)
     private boolean active;
 
+    // soft delete, only ever set through delete()
+    @Setter(AccessLevel.NONE)
     @Column(name = "is_deleted", nullable = false)
     private boolean deleted = false;
 
-    @Getter
     @Column(name = "min_cap", scale = 6, precision = 19)
     private BigDecimal minCap;
 
-    @Getter
     @Column(name = "max_cap", scale = 6, precision = 19)
     private BigDecimal maxCap;
 
@@ -131,85 +123,30 @@ public class Charge extends AbstractPersistableCustom<Long> {
     @Column(name = "free_withdrawal_charge_frequency")
     private Integer freeWithdrawalFrequency;
 
-    @Getter
     @Column(name = "restart_frequency")
     private Integer restartFrequency;
 
-    @Getter
     @Column(name = "restart_frequency_enum")
     private Integer restartFrequencyEnum;
 
     @Column(name = "is_payment_type", nullable = false)
     private boolean enablePaymentType;
 
-    @Setter
-    @Getter
     @ManyToOne
     @JoinColumn(name = "payment_type_id", nullable = false)
     private PaymentType paymentType;
 
-    @Getter
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "income_or_liability_account_id")
     private GLAccount account;
 
-    @Getter
-    @Setter
     @ManyToOne
     @JoinColumn(name = "tax_group_id")
     private TaxGroup taxGroup;
 
-    public static Charge fromJson(final JsonCommand command, final GLAccount account, final TaxGroup taxGroup,
-            final PaymentType paymentType) {
-
-        final String name = command.stringValueOfParameterNamed("name");
-        final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
-        final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
-
-        final ChargeAppliesTo chargeAppliesTo = ChargeAppliesTo.fromInt(command.integerValueOfParameterNamed("chargeAppliesTo"));
-        final ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command.integerValueOfParameterNamed(CHARGE_TIME_PARAM_NAME));
-        final ChargeCalculationType chargeCalculationType = ChargeCalculationType
-                .fromInt(command.integerValueOfParameterNamed(CHARGE_CALCULATION_TYPE_PARAM_NAME));
-        final Integer chargePaymentMode = command.integerValueOfParameterNamed("chargePaymentMode");
-
-        final ChargePaymentMode paymentMode = chargePaymentMode == null
-                ? (chargeAppliesTo.isWorkingCapitalLoanCharge() ? ChargePaymentMode.REGULAR : null)
-                : ChargePaymentMode.fromInt(chargePaymentMode);
-
-        final boolean penalty = command.booleanPrimitiveValueOfParameterNamed("penalty");
-        final boolean active = command.booleanPrimitiveValueOfParameterNamed("active");
-        final MonthDay feeOnMonthDay = command.extractMonthDayNamed(FEE_ON_MONTH_DAY_PARAM_NAME);
-        final Integer feeInterval = command.integerValueOfParameterNamed(FEE_INTERVAL_PARAM_NAME);
-        final BigDecimal minCap = command.bigDecimalValueOfParameterNamed("minCap");
-        final BigDecimal maxCap = command.bigDecimalValueOfParameterNamed("maxCap");
-        final Integer feeFrequency = command.integerValueOfParameterNamed(FEE_FREQUENCY_PARAM_NAME);
-
-        boolean enableFreeWithdrawalCharge = false;
-        enableFreeWithdrawalCharge = command.booleanPrimitiveValueOfParameterNamed("enableFreeWithdrawalCharge");
-
-        boolean enablePaymentType = false;
-        enablePaymentType = command.booleanPrimitiveValueOfParameterNamed("enablePaymentType");
-
-        Integer freeWithdrawalFrequency = null;
-        Integer restartCountFrequency = null;
-        PeriodFrequencyType countFrequencyType = null;
-
-        if (enableFreeWithdrawalCharge) {
-            freeWithdrawalFrequency = command.integerValueOfParameterNamed("freeWithdrawalFrequency");
-            restartCountFrequency = command.integerValueOfParameterNamed("restartCountFrequency");
-
-            countFrequencyType = PeriodFrequencyType.fromInt(command.integerValueOfParameterNamed("countFrequencyType"));
-        }
-
-        return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active, paymentMode,
-                feeOnMonthDay, feeInterval, minCap, maxCap, feeFrequency, enableFreeWithdrawalCharge, freeWithdrawalFrequency,
-                restartCountFrequency, countFrequencyType, account, taxGroup, enablePaymentType, paymentType);
-    }
-
     protected Charge() {}
 
-    private Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
+    public Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
             final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty, final boolean active,
             final ChargePaymentMode paymentMode, final MonthDay feeOnMonthDay, final Integer feeInterval, final BigDecimal minCap,
             final BigDecimal maxCap, final Integer feeFrequency, final boolean enableFreeWithdrawalCharge,
@@ -297,18 +234,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
         }
     }
 
-    public boolean isActive() {
-        return this.active;
-    }
-
-    public boolean isPenalty() {
-        return this.penalty;
-    }
-
-    public boolean isDeleted() {
-        return this.deleted;
-    }
-
     public boolean isLoanCharge() {
         return ChargeAppliesTo.fromInt(this.chargeAppliesTo).isLoanCharge();
     }
@@ -349,284 +274,16 @@ public class Charge extends AbstractPersistableCustom<Long> {
         return ChargeCalculationType.fromInt(this.chargeCalculation).isPercentageOfDisbursementAmount();
     }
 
-    public boolean isEnableFreeWithdrawal() {
-        return this.enableFreeWithdrawal;
-    }
-
-    public boolean isEnablePaymentType() {
-        return this.enablePaymentType;
-    }
-
     public Integer getFrequencyFreeWithdrawalCharge() {
         return this.freeWithdrawalFrequency;
     }
 
-    private Long getPaymentTypeId() {
+    public Long getPaymentTypeId() {
         Long paymentTypeId = null;
         if (this.paymentType != null) {
             paymentTypeId = this.paymentType.getId();
         }
         return paymentTypeId;
-    }
-
-    public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
-
-        final Locale locale = command.extractLocale();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charges");
-
-        final String nameParamName = "name";
-        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
-            final String newValue = command.stringValueOfParameterNamed(nameParamName);
-            actualChanges.put(nameParamName, newValue);
-            this.name = newValue;
-        }
-
-        final String currencyCodeParamName = "currencyCode";
-        if (command.isChangeInStringParameterNamed(currencyCodeParamName, this.currencyCode)) {
-            final String newValue = command.stringValueOfParameterNamed(currencyCodeParamName);
-            actualChanges.put(currencyCodeParamName, newValue);
-            this.currencyCode = newValue;
-        }
-
-        final String amountParamName = "amount";
-        if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName, locale);
-            actualChanges.put(amountParamName, newValue);
-            actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
-            this.amount = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(CHARGE_TIME_PARAM_NAME, this.chargeTimeType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(CHARGE_TIME_PARAM_NAME);
-            actualChanges.put(CHARGE_TIME_PARAM_NAME, newValue);
-            actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
-            this.chargeTimeType = ChargeTimeType.fromInt(newValue).getValue();
-
-            if (isSavingsCharge()) {
-                if (!isAllowedSavingsChargeTime()) {
-                    baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
-                            .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.savings");
-                }
-                // if charge time is changed to monthly then validate for
-                // feeOnMonthDay and feeInterval
-                if (isMonthlyFee()) {
-                    final MonthDay monthDay = command.extractMonthDayNamed(FEE_ON_MONTH_DAY_PARAM_NAME);
-                    baseDataValidator.reset().parameter(FEE_ON_MONTH_DAY_PARAM_NAME).value(monthDay).notNull();
-
-                    final Integer feeInterval = command.integerValueOfParameterNamed(FEE_INTERVAL_PARAM_NAME);
-                    baseDataValidator.reset().parameter(FEE_INTERVAL_PARAM_NAME).value(feeInterval).notNull().inMinMaxRange(1, 12);
-                }
-            } else if (isLoanCharge()) {
-                if (!isAllowedLoanChargeTime()) {
-                    baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
-                            .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
-                }
-            } else if (ChargeAppliesTo.WORKING_CAPITAL_LOAN.getValue().equals(this.chargeAppliesTo)) {
-                baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(chargeTimeType).notNull()
-                        .isOneOfTheseValues(ChargeTimeType.validWorkingCapitalLoanValues());
-
-                Object[] validCalculationTypeValues = new Object[] {};
-                if (ChargeTimeType.SPECIFIED_DUE_DATE.getValue().equals(chargeTimeType)) {
-                    validCalculationTypeValues = ChargeCalculationType.validValuesForWorkingCapitalLoanSpecifiedDueDate();
-                }
-                baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(chargeCalculation).notNull()
-                        .isOneOfTheseValues(validCalculationTypeValues);
-
-            } else if (isClientCharge() && !isAllowedLoanChargeTime()) {
-                baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
-                        .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.client");
-            }
-        }
-
-        final String freeWithdrawalFrequencyParamName = "freeWithdrawalFrequency";
-        if (command.isChangeInIntegerParameterNamed(freeWithdrawalFrequencyParamName, this.freeWithdrawalFrequency)) {
-            final Integer enableFreeWithdrawalChargeNewValue = command.integerValueOfParameterNamed(freeWithdrawalFrequencyParamName);
-            actualChanges.put(freeWithdrawalFrequencyParamName, enableFreeWithdrawalChargeNewValue);
-            this.freeWithdrawalFrequency = enableFreeWithdrawalChargeNewValue;
-        }
-
-        final String restartCountFrequencyParamName = "restartCountFrequency";
-        if (command.isChangeInIntegerParameterNamed(restartCountFrequencyParamName, this.restartFrequency)) {
-            final Integer restartCountFrequencyNewValue = command.integerValueOfParameterNamed(restartCountFrequencyParamName);
-            actualChanges.put(restartCountFrequencyParamName, restartCountFrequencyNewValue);
-            this.restartFrequency = restartCountFrequencyNewValue;
-        }
-
-        final String countFrequencyTypeParamName = "countFrequencyType";
-        if (command.isChangeInIntegerParameterNamed(countFrequencyTypeParamName, this.restartFrequencyEnum)) {
-            final Integer countFrequencyTypeNewValue = command.integerValueOfParameterNamed(countFrequencyTypeParamName);
-            actualChanges.put(countFrequencyTypeParamName, countFrequencyTypeNewValue);
-            this.restartFrequencyEnum = ChargeTimeType.fromInt(countFrequencyTypeNewValue).getValue();
-        }
-
-        final String enableFreeWithdrawalChargeParamName = "enableFreeWithdrawalCharge";
-        if (command.isChangeInBooleanParameterNamed(enableFreeWithdrawalChargeParamName, this.enableFreeWithdrawal)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(enableFreeWithdrawalChargeParamName);
-            actualChanges.put(enableFreeWithdrawalChargeParamName, newValue);
-            this.enableFreeWithdrawal = newValue;
-
-        }
-
-        final String enablePaymentTypeParamName = "enablePaymentType";
-        if (command.isChangeInBooleanParameterNamed(enablePaymentTypeParamName, this.enablePaymentType)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(enablePaymentTypeParamName);
-            actualChanges.put(enablePaymentTypeParamName, newValue);
-            this.enablePaymentType = newValue;
-        }
-
-        final String paymentTypeParamName = "paymentTypeId";
-        if (command.isChangeInLongParameterNamed(paymentTypeParamName, getPaymentTypeId())) {
-            final Long newValue = command.longValueOfParameterNamed(paymentTypeParamName);
-            actualChanges.put(paymentTypeParamName, newValue);
-        }
-
-        final String chargeAppliesToParamName = "chargeAppliesTo";
-        if (command.isChangeInIntegerParameterNamed(chargeAppliesToParamName, this.chargeAppliesTo)) {
-            /*
-             * final Integer newValue = command.integerValueOfParameterNamed(chargeAppliesToParamName);
-             * actualChanges.put(chargeAppliesToParamName, newValue); actualChanges.put("locale", localeAsInput);
-             * this.chargeAppliesTo = ChargeAppliesTo.fromInt(newValue).getValue();
-             */
-
-            // AA: Do not allow to change chargeAppliesTo.
-            final String errorMessage = "Update of Charge applies to is not supported";
-            throw new ChargeParameterUpdateNotSupportedException("charge.applies.to", errorMessage);
-        }
-
-        if (command.isChangeInIntegerParameterNamed(CHARGE_CALCULATION_TYPE_PARAM_NAME, this.chargeCalculation)) {
-            final Integer newValue = command.integerValueOfParameterNamed(CHARGE_CALCULATION_TYPE_PARAM_NAME);
-            actualChanges.put(CHARGE_CALCULATION_TYPE_PARAM_NAME, newValue);
-            actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
-            this.chargeCalculation = ChargeCalculationType.fromInt(newValue).getValue();
-
-            if (isSavingsCharge()) {
-                if (!isAllowedSavingsChargeCalculationType()) {
-                    baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(this.chargeCalculation)
-                            .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
-                }
-
-                if (!(ChargeTimeType.fromInt(getChargeTimeType()).isWithdrawalFee()
-                        || ChargeTimeType.fromInt(getChargeTimeType()).isSavingsNoActivityFee())
-                        && ChargeCalculationType.fromInt(getChargeCalculation()).isPercentageOfAmount()) {
-                    baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(this.chargeCalculation)
-                            .failWithCodeNoParameterAddedToErrorCode(
-                                    "charge.calculation.type.percentage.allowed.only.for.withdrawal.or.noactivity");
-                }
-            } else if (isClientCharge()) {
-                if (!isAllowedClientChargeCalculationType()) {
-                    baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(this.chargeCalculation)
-                            .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.client");
-                }
-            }
-        }
-
-        // validate only for loan charge
-        if (isLoanCharge()) {
-            final String paymentModeParamName = "chargePaymentMode";
-            if (command.isChangeInIntegerParameterNamed(paymentModeParamName, this.chargePaymentMode)) {
-                final Integer newValue = command.integerValueOfParameterNamed(paymentModeParamName);
-                actualChanges.put(paymentModeParamName, newValue);
-                actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
-                this.chargePaymentMode = ChargePaymentMode.fromInt(newValue).getValue();
-            }
-        }
-
-        if (command.hasParameter(FEE_ON_MONTH_DAY_PARAM_NAME)) {
-            final MonthDay monthDay = command.extractMonthDayNamed(FEE_ON_MONTH_DAY_PARAM_NAME);
-            final String actualValueEntered = command.stringValueOfParameterNamed(FEE_ON_MONTH_DAY_PARAM_NAME);
-            final Integer dayOfMonthValue = monthDay.getDayOfMonth();
-            if (!this.feeOnDay.equals(dayOfMonthValue)) {
-                actualChanges.put(FEE_ON_MONTH_DAY_PARAM_NAME, actualValueEntered);
-                actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
-                this.feeOnDay = dayOfMonthValue;
-            }
-
-            final Integer monthOfYear = monthDay.getMonthValue();
-            if (!this.feeOnMonth.equals(monthOfYear)) {
-                actualChanges.put(FEE_ON_MONTH_DAY_PARAM_NAME, actualValueEntered);
-                actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
-                this.feeOnMonth = monthOfYear;
-            }
-        }
-
-        if (command.isChangeInIntegerParameterNamed(FEE_INTERVAL_PARAM_NAME, this.feeInterval)) {
-            final Integer newValue = command.integerValueOfParameterNamed(FEE_INTERVAL_PARAM_NAME);
-            actualChanges.put(FEE_INTERVAL_PARAM_NAME, newValue);
-            actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
-            this.feeInterval = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(FEE_FREQUENCY_PARAM_NAME, this.feeFrequency)) {
-            final Integer newValue = command.integerValueOfParameterNamed(FEE_FREQUENCY_PARAM_NAME);
-            actualChanges.put(FEE_FREQUENCY_PARAM_NAME, newValue);
-            actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
-            this.feeFrequency = newValue;
-        }
-
-        if (this.feeFrequency != null) {
-            baseDataValidator.reset().parameter(FEE_INTERVAL_PARAM_NAME).value(this.feeInterval).notNull();
-        }
-
-        final String penaltyParamName = "penalty";
-        if (command.isChangeInBooleanParameterNamed(penaltyParamName, this.penalty)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(penaltyParamName);
-            actualChanges.put(penaltyParamName, newValue);
-            this.penalty = newValue;
-        }
-
-        final String activeParamName = "active";
-        if (command.isChangeInBooleanParameterNamed(activeParamName, this.active)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(activeParamName);
-            actualChanges.put(activeParamName, newValue);
-            this.active = newValue;
-        }
-        // allow min and max cap to be only added to PERCENT_OF_AMOUNT for now
-        if (isPercentageOfApprovedAmount()) {
-            final String minCapParamName = "minCap";
-            if (command.isChangeInBigDecimalParameterNamed(minCapParamName, this.minCap)) {
-                final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minCapParamName);
-                actualChanges.put(minCapParamName, newValue);
-                actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
-                this.minCap = newValue;
-            }
-            final String maxCapParamName = "maxCap";
-            if (command.isChangeInBigDecimalParameterNamed(maxCapParamName, this.maxCap)) {
-                final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maxCapParamName);
-                actualChanges.put(maxCapParamName, newValue);
-                actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
-                this.maxCap = newValue;
-            }
-
-        }
-
-        if (this.penalty && ChargeTimeType.fromInt(this.chargeTimeType).isTimeOfDisbursement()) {
-            throw new ChargeDueAtDisbursementCannotBePenaltyException(this.name);
-        }
-        if (!penalty && ChargeTimeType.fromInt(this.chargeTimeType).isOverdueInstallment()) {
-            throw new ChargeMustBePenaltyException(name);
-        }
-
-        if (command.isChangeInLongParameterNamed(ChargesApiConstants.glAccountIdParamName, getIncomeAccountId())) {
-            final Long newValue = command.longValueOfParameterNamed(ChargesApiConstants.glAccountIdParamName);
-            actualChanges.put(ChargesApiConstants.glAccountIdParamName, newValue);
-        }
-
-        if (command.isChangeInLongParameterNamed(ChargesApiConstants.taxGroupIdParamName, getTaxGroupId())) {
-            final Long newValue = command.longValueOfParameterNamed(ChargesApiConstants.taxGroupIdParamName);
-            actualChanges.put(ChargesApiConstants.taxGroupIdParamName, newValue);
-            if (taxGroup != null) {
-                baseDataValidator.reset().parameter(ChargesApiConstants.taxGroupIdParamName).failWithCode("modification.not.supported");
-            }
-        }
-
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        return actualChanges;
     }
 
     /**
@@ -709,7 +366,7 @@ public class Charge extends AbstractPersistableCustom<Long> {
         return incomeAccountId;
     }
 
-    private Long getTaxGroupId() {
+    public Long getTaxGroupId() {
         Long taxGroupId = null;
         if (this.taxGroup != null) {
             taxGroupId = this.taxGroup.getId();

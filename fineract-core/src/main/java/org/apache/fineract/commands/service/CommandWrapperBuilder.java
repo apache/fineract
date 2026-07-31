@@ -160,7 +160,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_BATCH_BUSINESS_STEP;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CALENDAR;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CENTER;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CHARGE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CLIENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CLIENTIDENTIFIER;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_CLIENT_COLLATERAL_PRODUCT;
@@ -669,30 +668,6 @@ public class CommandWrapperBuilder {
         this.entityName = ENTITY_CODE;
         this.entityId = codeId;
         this.href = "/codes/" + codeId;
-        return this;
-    }
-
-    public CommandWrapperBuilder createCharge() {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_CHARGE;
-        this.entityId = null;
-        this.href = "/charges/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateCharge(final Long chargeId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_CHARGE;
-        this.entityId = chargeId;
-        this.href = "/charges/" + chargeId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteCharge(final Long chargeId) {
-        this.actionName = ACTION_DELETE;
-        this.entityName = ENTITY_CHARGE;
-        this.entityId = chargeId;
-        this.href = "/charges/" + chargeId;
         return this;
     }
 

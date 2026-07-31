@@ -109,7 +109,7 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.collateralmanagement.data.LoanCollateralResponseData;
@@ -279,7 +279,7 @@ public class LoansApiResource {
     private final LoanProductReadPlatformService loanProductReadPlatformService;
     private final LoanDropdownReadPlatformService dropdownReadPlatformService;
     private final FundReadPlatformService fundReadPlatformService;
-    private final ChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadService chargeReadService;
     private final LoanChargeReadPlatformService loanChargeReadPlatformService;
     private final LoanScheduleCalculationPlatformService calculationPlatformService;
     private final GuarantorReadPlatformService guarantorReadPlatformService;
@@ -1232,10 +1232,10 @@ public class LoansApiResource {
             fundOptions = this.fundReadPlatformService.retrieveAllFunds();
             repaymentStrategyOptions = this.dropdownReadPlatformService.retrieveTransactionProcessingStrategies();
             if (product.getMultiDisburseLoan()) {
-                chargeOptions = this.chargeReadPlatformService.retrieveLoanAccountApplicableCharges(resolvedLoanId,
+                chargeOptions = this.chargeReadService.retrieveLoanAccountApplicableCharges(resolvedLoanId,
                         new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT });
             } else {
-                chargeOptions = this.chargeReadPlatformService.retrieveLoanAccountApplicableCharges(resolvedLoanId,
+                chargeOptions = this.chargeReadService.retrieveLoanAccountApplicableCharges(resolvedLoanId,
                         new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT });
             }
             chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
@@ -1274,8 +1274,8 @@ public class LoansApiResource {
 
         }
 
-        Collection<ChargeData> overdueCharges = this.chargeReadPlatformService
-                .retrieveLoanProductCharges(loanBasicDetails.getLoanProductId(), ChargeTimeType.OVERDUE_INSTALLMENT);
+        Collection<ChargeData> overdueCharges = this.chargeReadService.retrieveLoanProductCharges(loanBasicDetails.getLoanProductId(),
+                ChargeTimeType.OVERDUE_INSTALLMENT);
 
         paidInAdvanceTemplate = this.loanReadPlatformService.retrieveTotalPaidInAdvance(resolvedLoanId);
 

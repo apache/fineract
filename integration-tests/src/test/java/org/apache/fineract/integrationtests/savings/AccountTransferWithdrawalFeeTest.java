@@ -22,9 +22,9 @@ import static io.restassured.RestAssured.given;
 
 import java.math.BigDecimal;
 import org.apache.fineract.client.models.AccountTransferRequest;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesResponse;
@@ -48,8 +48,8 @@ public class AccountTransferWithdrawalFeeTest extends BaseSavingsIntegrationTest
     public void testFromSavingsToSavingsAccountTransferWithWithdrawalFee() {
         // Create withdrawal fee charge (standard withdrawal fee without payment type binding)
         final ChargesHelper chargesHelper = new ChargesHelper();
-        final PostChargesResponse withdrawalCharge = chargesHelper
-                .createCharges(new ChargeRequest().active(true).name(Utils.uniqueRandomStringGenerator("Charge_Savings_", 6))
+        final ChargeCreateResponse withdrawalCharge = chargesHelper
+                .createCharges(new ChargeCreateRequest().active(true).name(Utils.uniqueRandomStringGenerator("Charge_Savings_", 6))
                         .currencyCode("USD").amount(100.0d).chargeAppliesTo(2).chargeTimeType(5).chargeCalculationType(1).locale("en"));
         Assertions.assertNotNull(withdrawalCharge.getResourceId());
 
@@ -117,7 +117,7 @@ public class AccountTransferWithdrawalFeeTest extends BaseSavingsIntegrationTest
 
         // Create withdrawal fee charge WITH payment type binding
         final ChargesHelper chargesHelper = new ChargesHelper();
-        final PostChargesResponse withdrawalCharge = chargesHelper.createCharges(new ChargeRequest().active(true)
+        final ChargeCreateResponse withdrawalCharge = chargesHelper.createCharges(new ChargeCreateRequest().active(true)
                 .name(Utils.uniqueRandomStringGenerator("Charge_Savings_", 6)).currencyCode("USD").amount(100.0d).chargeAppliesTo(2)
                 .chargeTimeType(5).chargeCalculationType(1).locale("en").enablePaymentType(true).paymentTypeId(paymentTypeId));
         Assertions.assertNotNull(withdrawalCharge.getResourceId());

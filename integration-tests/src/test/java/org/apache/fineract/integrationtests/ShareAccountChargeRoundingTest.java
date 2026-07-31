@@ -38,14 +38,14 @@ import org.apache.fineract.accounting.journalentry.service.AccountingProcessorHe
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.AccountChargesRequest;
 import org.apache.fineract.client.models.AccountRequest;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetAccountsCharges;
 import org.apache.fineract.client.models.GetAccountsPurchasedShares;
 import org.apache.fineract.client.models.GetAccountsTypeAccountIdResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostAccountsTypeAccountIdRequest;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostProductsTypeRequest;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
@@ -84,7 +84,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createActivationFeeFlatCharge(19.8);
+            ChargeCreateResponse chargeResponse = createActivationFeeFlatCharge(19.8);
 
             Long shareProductId = createShareProduct(0, 1);
             Long shareAccountId = applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 19.8, DATE);
@@ -105,7 +105,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createActivationFeeFlatCharge(0.55);
+            ChargeCreateResponse chargeResponse = createActivationFeeFlatCharge(0.55);
 
             Long shareProductId = createShareProduct(0, 1);
             Long shareAccountId = applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 0.55, DATE);
@@ -127,7 +127,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createActivationFeeFlatCharge(0.5);
+            ChargeCreateResponse chargeResponse = createActivationFeeFlatCharge(0.5);
 
             Long shareProductId = createShareProduct(0, 1);
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
@@ -144,7 +144,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createActivationFeeFlatCharge(19.8);
+            ChargeCreateResponse chargeResponse = createActivationFeeFlatCharge(19.8);
 
             Long shareProductId = createShareProductWithAccountingRule2(0, 1);
             Long shareAccountId = applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 19.8, DATE);
@@ -185,7 +185,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 3);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createPurchaseFeeFlatCharge(19.8);
+            ChargeCreateResponse chargeResponse = createPurchaseFeeFlatCharge(19.8);
 
             Long shareProductId = createShareProduct(0, 3);
             Long shareAccountId = applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 19.8, DATE);
@@ -204,7 +204,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createPurchaseFeeFlatCharge(0.51);
+            ChargeCreateResponse chargeResponse = createPurchaseFeeFlatCharge(0.51);
 
             Long shareProductId = createShareProduct(0, 1);
             Long shareAccountId = applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 0.51, DATE);
@@ -224,7 +224,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createPurchaseFeeFlatCharge(0.5);
+            ChargeCreateResponse chargeResponse = createPurchaseFeeFlatCharge(0.5);
 
             Long shareProductId = createShareProduct(0, 1);
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
@@ -242,7 +242,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createPurchaseFeePercentCharge(2.5);
+            ChargeCreateResponse chargeResponse = createPurchaseFeePercentCharge(2.5);
 
             Long shareProductId = createShareProduct(0, 1);
             Long shareAccountId = applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 2.5, DATE);
@@ -261,7 +261,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createPurchaseFeePercentCharge(0.51);
+            ChargeCreateResponse chargeResponse = createPurchaseFeePercentCharge(0.51);
 
             Long shareProductId = createShareProduct(0, 1);
             Long shareAccountId = applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 0.51, DATE);
@@ -281,7 +281,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createPurchaseFeePercentCharge(0.5);
+            ChargeCreateResponse chargeResponse = createPurchaseFeePercentCharge(0.5);
 
             Long shareProductId = createShareProduct(0, 1);
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
@@ -299,7 +299,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createRedeemFeeFlatCharge(10.7);
+            ChargeCreateResponse chargeResponse = createRedeemFeeFlatCharge(10.7);
 
             Long shareProductId = createShareProduct(0, 1);
             Long shareAccountId = applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 10.7, DATE);
@@ -321,7 +321,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createRedeemFeeFlatCharge(0.6);
+            ChargeCreateResponse chargeResponse = createRedeemFeeFlatCharge(0.6);
 
             Long shareProductId = createShareProduct(0, 1);
             Long shareAccountId = applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 0.6, DATE);
@@ -344,7 +344,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createRedeemFeeFlatCharge(0.5);
+            ChargeCreateResponse chargeResponse = createRedeemFeeFlatCharge(0.5);
 
             Long shareProductId = createShareProduct(0, 1);
             Long shareAccountId = applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 0.5, DATE);
@@ -368,7 +368,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createRedeemFeePercentCharge(5.5);
+            ChargeCreateResponse chargeResponse = createRedeemFeePercentCharge(5.5);
 
             Long shareProductId = createShareProduct(0, 1);
             Long shareAccountId = applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 5.5, DATE);
@@ -390,7 +390,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createRedeemFeePercentCharge(1.5);
+            ChargeCreateResponse chargeResponse = createRedeemFeePercentCharge(1.5);
 
             Long shareProductId = createShareProduct(0, 1);
             Long shareAccountId = applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 1.5, DATE);
@@ -413,7 +413,7 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
             Long savingsProductId = createSavingsProduct(0, 1);
             Long savingsAccountId = createAndActivateSavingsAccount(savingsProductId, DATE);
 
-            PostChargesResponse chargeResponse = createRedeemFeePercentCharge(1);
+            ChargeCreateResponse chargeResponse = createRedeemFeePercentCharge(1);
 
             Long shareProductId = createShareProduct(0, 1);
             Long shareAccountId = applyShareAccount(clientId, shareProductId, savingsAccountId, chargeResponse.getResourceId(), 1, DATE);
@@ -449,41 +449,41 @@ public class ShareAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
         return savingsId;
     }
 
-    private PostChargesResponse createActivationFeeFlatCharge(double amount) {
+    private ChargeCreateResponse createActivationFeeFlatCharge(double amount) {
         String uniqueChargeName = "Share Account Activation Fee Flat " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharges(new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(13) // ACTIVATION
                 .chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
     }
 
-    private PostChargesResponse createPurchaseFeeFlatCharge(double amount) {
+    private ChargeCreateResponse createPurchaseFeeFlatCharge(double amount) {
         String uniqueChargeName = "Share Account Purchase Fee Flat " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharges(new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(14) // PURCHASE
                 .chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
     }
 
-    private PostChargesResponse createPurchaseFeePercentCharge(double amount) {
+    private ChargeCreateResponse createPurchaseFeePercentCharge(double amount) {
         String uniqueChargeName = "Share Account Purchase Fee Percent " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharges(new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(14) // PURCHASE
                 .chargeCalculationType(2) // PERCENT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
     }
 
-    private PostChargesResponse createRedeemFeeFlatCharge(double amount) {
+    private ChargeCreateResponse createRedeemFeeFlatCharge(double amount) {
         String uniqueChargeName = "Share Account Redeem Fee Flat " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharges(new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(15) // REDEEM
                 .chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
     }
 
-    private PostChargesResponse createRedeemFeePercentCharge(double amount) {
+    private ChargeCreateResponse createRedeemFeePercentCharge(double amount) {
         String uniqueChargeName = "Share Account Redeem Fee Percent " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
+        return chargesHelper.createCharges(new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(4) // SHARE
                 .chargeTimeType(15) // REDEEM
                 .chargeCalculationType(2) // PERCENT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));

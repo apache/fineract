@@ -41,7 +41,7 @@ import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlat
 import org.apache.fineract.portfolio.account.service.PortfolioAccountReadPlatformService;
 import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.collateralmanagement.service.LoanCollateralManagementReadService;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
@@ -125,7 +125,7 @@ class LoansApiResourceRetrieveApprovalTemplateTest {
         ApiRequestParameterHelper helper = mock(ApiRequestParameterHelper.class);
 
         return new LoansApiResource(context, loanReadPlatformService, mock(LoanProductReadPlatformService.class),
-                mock(LoanDropdownReadPlatformService.class), mock(FundReadPlatformService.class), mock(ChargeReadPlatformService.class),
+                mock(LoanDropdownReadPlatformService.class), mock(FundReadPlatformService.class), mock(ChargeReadService.class),
                 mock(LoanChargeReadPlatformService.class), mock(LoanScheduleCalculationPlatformService.class),
                 mock(GuarantorReadPlatformService.class), mock(CodeValueReadPlatformService.class), mock(GroupReadPlatformService.class),
                 mock(DefaultToApiJsonSerializer.class), mock(DefaultToApiJsonSerializer.class), mock(DefaultToApiJsonSerializer.class),

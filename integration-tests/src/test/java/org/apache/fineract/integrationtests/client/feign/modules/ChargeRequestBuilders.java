@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.integrationtests.client.feign.modules;
 
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.integrationtests.common.Utils;
 
 public final class ChargeRequestBuilders {
@@ -43,67 +43,67 @@ public final class ChargeRequestBuilders {
 
     private ChargeRequestBuilders() {}
 
-    public static ChargeRequest loanDisbursementFee(double amount) {
+    public static ChargeCreateRequest loanDisbursementFee(double amount) {
         return loanDisbursementFee(amount, DEFAULT_CURRENCY);
     }
 
-    public static ChargeRequest loanDisbursementFee(double amount, String currencyCode) {
+    public static ChargeCreateRequest loanDisbursementFee(double amount, String currencyCode) {
         return baseLoanCharge(amount, currencyCode)//
                 .chargeTimeType(CHARGE_TIME_TYPE_DISBURSEMENT);
     }
 
-    public static ChargeRequest loanDisbursementPercentageFee(double percentage) {
+    public static ChargeCreateRequest loanDisbursementPercentageFee(double percentage) {
         return loanDisbursementPercentageFee(percentage, DEFAULT_CURRENCY);
     }
 
-    public static ChargeRequest loanDisbursementPercentageFee(double percentage, String currencyCode) {
+    public static ChargeCreateRequest loanDisbursementPercentageFee(double percentage, String currencyCode) {
         return baseLoanCharge(percentage, currencyCode)//
                 .chargeTimeType(CHARGE_TIME_TYPE_DISBURSEMENT)//
                 .chargeCalculationType(CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT);
     }
 
-    public static ChargeRequest loanSpecifiedDueDateFee(double amount) {
+    public static ChargeCreateRequest loanSpecifiedDueDateFee(double amount) {
         return loanSpecifiedDueDateFee(amount, DEFAULT_CURRENCY);
     }
 
-    public static ChargeRequest loanSpecifiedDueDateFee(double amount, String currencyCode) {
+    public static ChargeCreateRequest loanSpecifiedDueDateFee(double amount, String currencyCode) {
         return baseLoanCharge(amount, currencyCode)//
                 .chargeTimeType(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE);
     }
 
-    public static ChargeRequest loanSpecifiedDueDatePenalty(double amount) {
+    public static ChargeCreateRequest loanSpecifiedDueDatePenalty(double amount) {
         return loanSpecifiedDueDatePenalty(amount, DEFAULT_CURRENCY);
     }
 
-    public static ChargeRequest loanSpecifiedDueDatePenalty(double amount, String currencyCode) {
+    public static ChargeCreateRequest loanSpecifiedDueDatePenalty(double amount, String currencyCode) {
         return baseLoanCharge(amount, currencyCode)//
                 .chargeTimeType(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE)//
                 .penalty(true);
     }
 
-    public static ChargeRequest loanSpecifiedDueDatePercentageAmountAndInterestFee(double amount) {
+    public static ChargeCreateRequest loanSpecifiedDueDatePercentageAmountAndInterestFee(double amount) {
         return baseLoanCharge(amount, DEFAULT_CURRENCY)//
                 .chargeTimeType(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE)//
                 .chargeCalculationType(CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST);
     }
 
-    public static ChargeRequest loanSpecifiedDueDateAccountTransferFee(double amount, boolean penalty) {
+    public static ChargeCreateRequest loanSpecifiedDueDateAccountTransferFee(double amount, boolean penalty) {
         return loanSpecifiedDueDateFee(amount).chargePaymentMode(CHARGE_PAYMENT_MODE_ACCOUNT_TRANSFER).penalty(penalty);
     }
 
-    public static ChargeRequest loanInstallmentFee(double amount) {
+    public static ChargeCreateRequest loanInstallmentFee(double amount) {
         return baseLoanCharge(amount, DEFAULT_CURRENCY)//
                 .chargeTimeType(CHARGE_TIME_TYPE_INSTALLMENT_FEE);
     }
 
-    public static ChargeRequest loanOverdueFee(double amount) {
+    public static ChargeCreateRequest loanOverdueFee(double amount) {
         return baseLoanCharge(amount, DEFAULT_CURRENCY)//
                 .chargeTimeType(CHARGE_TIME_TYPE_OVERDUE_INSTALLMENT_FEE)//
                 .penalty(true);
     }
 
-    public static ChargeRequest clientSpecifiedDueDateFee(double amount) {
-        return new ChargeRequest()//
+    public static ChargeCreateRequest clientSpecifiedDueDateFee(double amount) {
+        return new ChargeCreateRequest()//
                 .name(Utils.uniqueRandomStringGenerator("Charge_Client_", 6))//
                 .chargeAppliesTo(CHARGE_APPLIES_TO_CLIENT)//
                 .chargeTimeType(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE)//
@@ -115,8 +115,8 @@ public final class ChargeRequestBuilders {
                 .locale(DEFAULT_LOCALE);
     }
 
-    private static ChargeRequest baseLoanCharge(double amount, String currencyCode) {
-        return new ChargeRequest()//
+    private static ChargeCreateRequest baseLoanCharge(double amount, String currencyCode) {
+        return new ChargeCreateRequest()//
                 .name(Utils.uniqueRandomStringGenerator("Charge_Loan_", 6))//
                 .chargeAppliesTo(CHARGE_APPLIES_TO_LOAN)//
                 .chargeCalculationType(CHARGE_CALCULATION_TYPE_FLAT)//

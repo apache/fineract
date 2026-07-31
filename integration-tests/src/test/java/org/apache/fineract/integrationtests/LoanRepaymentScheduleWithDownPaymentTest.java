@@ -28,13 +28,13 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
@@ -530,7 +530,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1", "0");
 
             final Double feeAmount = 10.00;
-            final PostChargesResponse postChargesResponse = createCharge(feeAmount);
+            final ChargeCreateResponse postChargesResponse = createCharge(feeAmount);
             assertNotNull(postChargesResponse);
             final Long loanChargeId = postChargesResponse.getResourceId();
             PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = addLoanCharge(loanId.longValue(), loanChargeId,
@@ -592,7 +592,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
                     "0");
 
             final Double feeAmount = 10.00;
-            final PostChargesResponse postChargesResponse = createCharge(feeAmount);
+            final ChargeCreateResponse postChargesResponse = createCharge(feeAmount);
             assertNotNull(postChargesResponse);
             final Long loanChargeId = postChargesResponse.getResourceId();
             PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = addLoanCharge(loanId.longValue(), loanChargeId,
@@ -693,7 +693,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
             final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1", "1");
 
             final Double feeAmount = 10.00;
-            final PostChargesResponse postChargesResponse = createCharge(feeAmount);
+            final ChargeCreateResponse postChargesResponse = createCharge(feeAmount);
             assertNotNull(postChargesResponse);
             final Long loanChargeId = postChargesResponse.getResourceId();
             PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = addLoanCharge(loanId.longValue(), loanChargeId,
@@ -757,7 +757,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
                     "1");
 
             final Double feeAmount = 10.00;
-            final PostChargesResponse postChargesResponse = createCharge(feeAmount);
+            final ChargeCreateResponse postChargesResponse = createCharge(feeAmount);
             assertNotNull(postChargesResponse);
             final Long loanChargeId = postChargesResponse.getResourceId();
             PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = addLoanCharge(loanId.longValue(), loanChargeId,

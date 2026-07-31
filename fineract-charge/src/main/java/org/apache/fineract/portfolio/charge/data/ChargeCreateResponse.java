@@ -16,41 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.charge.request;
+package org.apache.fineract.portfolio.charge.data;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
+@Builder
 @Data
 @NoArgsConstructor
-@Accessors(chain = true)
-public class ChargeRequest implements Serializable {
+@AllArgsConstructor
+public class ChargeCreateResponse implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Integer chargeAppliesTo;
-    private String name;
-    private String currencyCode;
-    private Integer chargeTimeType;
-    private Integer chargeCalculationType;
-    private Double amount;
-    private Boolean active;
-    private Boolean penalty;
-    private Integer chargePaymentMode;
-    private String monthDayFormat;
-    private String locale;
-    private String feeOnMonthDay;
-    private String feeInterval;
-    private String feeFrequency;
-    private Long paymentTypeId;
-    private Boolean enablePaymentType;
-    private BigDecimal minCap;
-    private BigDecimal maxCap;
-    private Long taxGroupId;
-
+    private Long resourceId;
 }

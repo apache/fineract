@@ -23,9 +23,9 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.GetChargesResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
+import org.apache.fineract.client.models.ChargeData;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -606,10 +606,10 @@ public final class ChargesHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static PostChargesResponse createLoanCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+    public static ChargeCreateResponse createLoanCharge(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String payload) {
         final String response = Utils.performServerPost(requestSpec, responseSpec, CREATE_CHARGES_URL, payload, null);
-        return GSON.fromJson(response, PostChargesResponse.class);
+        return GSON.fromJson(response, ChargeCreateResponse.class);
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -804,11 +804,11 @@ public final class ChargesHelper {
 
     }
 
-    public PostChargesResponse createCharges(ChargeRequest request) {
+    public ChargeCreateResponse createCharges(ChargeCreateRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().charges.createCharge(request));
     }
 
-    public GetChargesResponse retrieveCharge(final Long chargeId) {
-        return Calls.ok(FineractClientHelper.getFineractClient().charges.retrieveOneCharge(chargeId));
+    public ChargeData retrieveCharge(final Long chargeId) {
+        return Calls.ok(FineractClientHelper.getFineractClient().charges.retrieveOneCharge(chargeId, null));
     }
 }

@@ -49,7 +49,7 @@ import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanChargeData;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
@@ -65,7 +65,7 @@ import org.springframework.stereotype.Component;
 public class WorkingCapitalLoanChargesApiResource {
 
     private final WorkingCapitalLoanRepository workingCapitalLoanRepository;
-    private final ChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadService chargeReadService;
     private final PlatformSecurityContext securityContext;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final WorkingCapitalLoanChargeReadPlatformService loanChargeReadPlatformService;
@@ -274,7 +274,7 @@ public class WorkingCapitalLoanChargesApiResource {
         ExternalId loanExternalId = ExternalIdFactory.produce(loanExternalIdStr);
         Long resolvedLoanId = loanId == null ? workingCapitalLoanRepository.findIdByExternalId(loanExternalId) : loanId;
 
-        final List<ChargeData> chargeOptions = chargeReadPlatformService.retrieveWorkingCapitalLoanAccountApplicableCharges(resolvedLoanId);
+        final List<ChargeData> chargeOptions = chargeReadService.retrieveWorkingCapitalLoanAccountApplicableCharges(resolvedLoanId);
         return WorkingCapitalLoanChargeData.template(chargeOptions);
     }
 

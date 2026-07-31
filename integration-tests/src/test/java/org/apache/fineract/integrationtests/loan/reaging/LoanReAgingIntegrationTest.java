@@ -31,11 +31,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.LoanScheduleData;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -116,7 +116,7 @@ public class LoanReAgingIntegrationTest extends FeignLoanTestBase {
 
             // create charge
             double chargeAmount = 10.0;
-            PostChargesResponse chargeResult = createCharge(chargeAmount);
+            ChargeCreateResponse chargeResult = createCharge(chargeAmount);
             Long chargeId = chargeResult.getResourceId();
 
             // add charge after maturity

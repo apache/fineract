@@ -22,7 +22,7 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import io.cucumber.java.en.When;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeUpdateRequest;
 import org.apache.fineract.test.data.ChargeCalculationType;
 import org.apache.fineract.test.data.ChargeProductResolver;
 import org.apache.fineract.test.data.ChargeProductType;
@@ -39,7 +39,7 @@ public class ChargeStepDef extends AbstractStepDef {
 
     @When("Admin updates charge {string} with {string} calculation type and {double} % of transaction amount")
     public void updateCharge(String chargeType, String chargeCalculationType, double amount) {
-        ChargeRequest disbursementChargeUpdateRequest = new ChargeRequest();
+        ChargeUpdateRequest disbursementChargeUpdateRequest = new ChargeUpdateRequest();
         ChargeCalculationType chargeProductTypeValue = ChargeCalculationType.valueOf(chargeCalculationType);
         disbursementChargeUpdateRequest.chargeCalculationType(chargeProductTypeValue.value).amount(amount).locale("en");
 
@@ -51,7 +51,7 @@ public class ChargeStepDef extends AbstractStepDef {
 
     @When("Admin updates charge {string} with {string} calculation type and {double} EUR amount")
     public void updateChargeWithFlatAmount(String chargeType, String chargeCalculationType, double flatAmount) {
-        ChargeRequest disbursementChargeUpdateRequest = new ChargeRequest();
+        ChargeUpdateRequest disbursementChargeUpdateRequest = new ChargeUpdateRequest();
         ChargeCalculationType chargeProductTypeValue = ChargeCalculationType.valueOf(chargeCalculationType);
         disbursementChargeUpdateRequest.chargeCalculationType(chargeProductTypeValue.value).amount(flatAmount).locale("en");
 

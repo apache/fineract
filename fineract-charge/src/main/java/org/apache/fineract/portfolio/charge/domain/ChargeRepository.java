@@ -28,4 +28,16 @@ public interface ChargeRepository extends JpaRepository<Charge, Long>, JpaSpecif
 
     @Query("select lc.id from WorkingCapitalLoanCharge lc where lc.charge.id = :chargeId and lc.active = true")
     Optional<Long> isAnyWorkingCapitalLoansAssociateWithThisCharge(@Param("chargeId") Long chargeId);
+
+    @Query("select case when count(lc) > 0 then true else false end from LoanCharge lc where lc.charge.id = :chargeId and lc.active = true")
+    boolean isAnyActiveLoanChargeAssociatedWithCharge(@Param("chargeId") Long chargeId);
+
+    @Query("select case when count(sc) > 0 then true else false end from SavingsAccountCharge sc where sc.charge.id = :chargeId and sc.status = true")
+    boolean isAnyActiveSavingsAccountChargeAssociatedWithCharge(@Param("chargeId") Long chargeId);
+
+    @Query("select case when count(lp) > 0 then true else false end from LoanProduct lp join lp.charges c where c.id = :chargeId")
+    boolean isAnyLoanProductAssociatedWithCharge(@Param("chargeId") Long chargeId);
+
+    @Query("select case when count(sp) > 0 then true else false end from SavingsProduct sp join sp.charges c where c.id = :chargeId")
+    boolean isAnySavingsProductAssociatedWithCharge(@Param("chargeId") Long chargeId);
 }

@@ -22,7 +22,7 @@ import java.util.List;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 
-public interface ChargeReadPlatformService {
+public interface ChargeReadService {
 
     List<ChargeData> retrieveAllCharges();
 

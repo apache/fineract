@@ -78,7 +78,7 @@ import org.apache.fineract.organisation.office.service.OfficeReadPlatformService
 import org.apache.fineract.organisation.staff.data.StaffData;
 import org.apache.fineract.organisation.staff.service.StaffReadService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.fund.data.FundData;
@@ -134,7 +134,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     private final ShareProductReadPlatformService shareProductReadPlatformService;
-    private final ChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadService chargeReadService;
     private final DepositProductReadPlatformService depositProductReadPlatformService;
     private final RoleReadPlatformService roleReadPlatformService;
 
@@ -150,8 +150,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
             final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService,
             final SavingsProductReadPlatformService savingsProductReadPlatformService,
-            final ShareProductReadPlatformService shareProductReadPlatformService,
-            final ChargeReadPlatformService chargeReadPlatformService,
+            final ShareProductReadPlatformService shareProductReadPlatformService, final ChargeReadService chargeReadService,
             final DepositProductReadPlatformService depositProductReadPlatformService,
             final RoleReadPlatformService roleReadPlatformService) {
         this.officeReadPlatformService = officeReadPlatformService;
@@ -170,7 +169,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.savingsProductReadPlatformService = savingsProductReadPlatformService;
         this.shareProductReadPlatformService = shareProductReadPlatformService;
-        this.chargeReadPlatformService = chargeReadPlatformService;
+        this.chargeReadService = chargeReadService;
         this.depositProductReadPlatformService = depositProductReadPlatformService;
         this.roleReadPlatformService = roleReadPlatformService;
     }
@@ -282,7 +281,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     }
 
     private List<ChargeData> fetchCharges() {
-        return this.chargeReadPlatformService.retrieveAllCharges();
+        return this.chargeReadService.retrieveAllCharges();
     }
 
     private List<StaffData> fetchStaff(final Long staffId) {
@@ -529,7 +528,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     }
 
     private List<ChargeData> fetchChargesForShares() {
-        return chargeReadPlatformService.retrieveSharesApplicableCharges();
+        return chargeReadService.retrieveSharesApplicableCharges();
     }
 
     private List<ShareProductData> fetchSharedProducts() {

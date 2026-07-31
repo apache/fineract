@@ -62,7 +62,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.interestratechart.data.InterestRateChartData;
 import org.apache.fineract.portfolio.interestratechart.service.InterestRateChartReadService;
@@ -104,7 +104,7 @@ public class FixedDepositProductsApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
-    private final ChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadService chargeReadService;
     private final InterestRateChartReadService chartReadPlatformService;
     private final InterestRateChartReadService interestRateChartReadPlatformService;
     private final DepositsDropdownReadPlatformService depositsDropdownReadPlatformService;
@@ -208,7 +208,7 @@ public class FixedDepositProductsApiResource {
         FixedDepositProductData fixedDepositProductData = (FixedDepositProductData) this.depositProductReadPlatformService
                 .retrieveOne(DepositAccountType.FIXED_DEPOSIT, productId);
 
-        final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId);
+        final Collection<ChargeData> charges = this.chargeReadService.retrieveSavingsProductCharges(productId);
         fixedDepositProductData = FixedDepositProductData.withCharges(fixedDepositProductData, charges);
 
         final Collection<InterestRateChartData> charts = this.chartReadPlatformService.retrieveAllWithSlabsWithTemplate(productId);
@@ -308,10 +308,10 @@ public class FixedDepositProductsApiResource {
 
         // charges
         final boolean feeChargesOnly = true;
-        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSavingsProductApplicableCharges(feeChargesOnly);
+        Collection<ChargeData> chargeOptions = this.chargeReadService.retrieveSavingsProductApplicableCharges(feeChargesOnly);
         chargeOptions = CollectionUtils.isEmpty(chargeOptions) ? null : chargeOptions;
 
-        Collection<ChargeData> penaltyOptions = this.chargeReadPlatformService.retrieveSavingsApplicablePenalties();
+        Collection<ChargeData> penaltyOptions = this.chargeReadService.retrieveSavingsApplicablePenalties();
         penaltyOptions = CollectionUtils.isEmpty(penaltyOptions) ? null : penaltyOptions;
 
         final Collection<TaxGroupData> taxGroupOptions = this.taxReadPlatformService.retrieveTaxGroupsForLookUp();
