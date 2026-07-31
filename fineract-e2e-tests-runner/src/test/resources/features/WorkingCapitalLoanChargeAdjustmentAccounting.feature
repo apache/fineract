@@ -2,7 +2,7 @@
 @WorkingCapitalLoanChargeAdjustmentAccountingFeature
 Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
 
-  @TestRailId:TODO_1
+  @TestRailId:C89820
   Scenario: Verify Working Capital fee charge adjustment accounting entries - UC1: full fee charge adjustment has correct journal entries
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -35,9 +35,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
       | Type   | Account code | Account name            | Debit | Credit |
       | INCOME | 404007       | Fee Income              | 100.0 |        |
       | ASSET  | 112603       | Interest/Fee Receivable |       | 100.0  |
-
     When Customer undo "1"th "CHARGE_ADJUSTMENT" transaction made on "10 January 2026" on Working Capital loan
-
     Then Working Capital Loan Transactions tab has a reversed "CHARGE_ADJUSTMENT" transaction with date "10 January 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | INCOME | 404007       | Fee Income              | 100.0 |        |
@@ -54,10 +52,9 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 100.0           | 0.0      | 0.0            | 0.0                 | 0.0          |
-
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
-  @TestRailId:TODO_ADD_2
+  @TestRailId:C89821
   Scenario: Verify Working Capital penalty charge adjustment accounting entries - UC2: full penalty charge adjustment has correct journal entries
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -90,9 +87,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
       | Type   | Account code | Account name            | Debit | Credit |
       | INCOME | 404007       | Fee Income              | 50.0  |        |
       | ASSET  | 112603       | Interest/Fee Receivable |       | 50.0   |
-
     When Customer undo "1"th "CHARGE_ADJUSTMENT" transaction made on "10 January 2026" on Working Capital loan
-
     Then Working Capital Loan Transactions tab has a reversed "CHARGE_ADJUSTMENT" transaction with date "10 January 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | INCOME | 404007       | Fee Income              | 50.0  |        |
@@ -109,10 +104,9 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 0.0        | 0.0             | 0.0      | 50.0           | 50.0                | 0.0          |
-
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
-  @TestRailId:TODO_3
+  @TestRailId:C89822
   Scenario: Verify Working Capital fee charge adjustment accounting entries - UC3: partially paid fee - full fee charge adjustment has correct journal entries
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -161,9 +155,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital loan status will be "ACTIVE"
     And Working Capital loan balance principalOutstanding is "8950.0"
     And Working Capital loan balance overpaymentAmount is "0.0"
-
     When Customer undo "1"th "CHARGE_ADJUSTMENT" transaction made on "10 January 2026" on Working Capital loan
-
     Then Working Capital Loan Transactions tab has a reversed "CHARGE_ADJUSTMENT" transaction with date "10 January 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | INCOME | 404007       | Fee Income              | 100.0 |        |
@@ -186,10 +178,9 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 50.0            | 50.0     | 0.0            | 0.0                 | 0.0          |
-
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
-  @TestRailId:TODO_ADD_4
+  @TestRailId:C89823
   Scenario: Verify Working Capital penalty charge adjustment accounting entries - UC4: partially paid penalty - full penalty charge adjustment has correct journal entries
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -238,9 +229,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital loan status will be "ACTIVE"
     And Working Capital loan balance principalOutstanding is "8970.0"
     And Working Capital loan balance overpaymentAmount is "0.0"
-
     When Customer undo "1"th "CHARGE_ADJUSTMENT" transaction made on "10 January 2026" on Working Capital loan
-
     Then Working Capital Loan Transactions tab has a reversed "CHARGE_ADJUSTMENT" transaction with date "10 January 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | INCOME | 404007       | Fee Income              | 50.0  |        |
@@ -263,10 +252,9 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 0.0        | 0.0             | 0.0      | 50.0           | 20.0                | 30.0         |
-
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
-  @TestRailId:TODO_5
+  @TestRailId:C89824
   Scenario: Verify Working Capital fee charge adjustment accounting entries - UC5: partially paid fee - full fee charge adjustment has correct journal entries
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -298,7 +286,6 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 50.0            | 50.0     | 50.0           | 50.0                | 0.0          |
-
     When Admin sets the business date to "11 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital Loan has transactions:
@@ -313,7 +300,6 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 50.0            | 50.0     | 50.0           | 50.0                | 0.0          |
-
     When Admin makes a charge adjustment for the last added fee charge with 100.0 amount on working capital loan
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
@@ -334,9 +320,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
       | ASSET  | 112603       | Interest/Fee Receivable |       | 50.0   |
     And Working Capital loan status will be "ACTIVE"
     And Working Capital loan balance overpaymentAmount is "0.0"
-
     When Customer undo "1"th "CHARGE_ADJUSTMENT" transaction made on "11 January 2026" on Working Capital loan
-
     Then Working Capital Loan Transactions tab has a reversed "CHARGE_ADJUSTMENT" transaction with date "11 January 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | INCOME | 404007       | Fee Income              | 100.0 |        |
@@ -362,7 +346,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
       | 100.0      | 50.0            | 50.0     | 50.0           | 50.0                | 0.0          |
     Then Admin closes the Working Capital loan with a full repayment on "11 January 2026"
 
-  @TestRailId:TODO_ADD_6
+  @TestRailId:C89825
   Scenario: Verify Working Capital penalty charge adjustment accounting entries - UC6: partially paid penalty - full penalty charge adjustment has correct journal entries
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -394,7 +378,6 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 60.0       | 60.0            | 0.0      | 50.0           | 20.0                | 30.0         |
-
     When Admin sets the business date to "11 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital Loan has transactions:
@@ -409,7 +392,6 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 60.0       | 60.0            | 0.0      | 50.0           | 20.0                | 30.0         |
-
     When Admin makes a charge adjustment for the last added penalty charge with 50.0 amount on working capital loan
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
@@ -430,9 +412,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
       | ASSET  | 112603       | Interest/Fee Receivable |       | 20.0   |
     And Working Capital loan status will be "ACTIVE"
     And Working Capital loan balance overpaymentAmount is "0.0"
-
     When Customer undo "1"th "CHARGE_ADJUSTMENT" transaction made on "11 January 2026" on Working Capital loan
-
     Then Working Capital Loan Transactions tab has a reversed "CHARGE_ADJUSTMENT" transaction with date "11 January 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | INCOME | 404007       | Fee Income              | 50.0  |        |
@@ -456,11 +436,10 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 60.0       | 60.0            | 0.0      | 50.0           | 20.0                | 30.0         |
-
     Then Admin closes the Working Capital loan with a full repayment on "11 January 2026"
 
 
-  @TestRailId:TODO_7
+  @TestRailId:C89826
   Scenario: Verify Working Capital fee charge adjustment accounting entries - UC7: fully repaid loan - partial fee charge adjustment has overpayment journal entries
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -491,10 +470,8 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 45.0       | 0.0             | 45.0     | 0.0            | 0.0                 | 0.0          |
-
     When Admin sets the business date to "11 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-
     When Admin makes a charge adjustment for the last added fee charge with 25.0 amount on working capital loan
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
@@ -514,16 +491,13 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
       | LIABILITY | 245000       | Other Credit Liability |       | 25.0   |
     Then Working Capital loan status will be "OVERPAID"
     And Working Capital loan balance overpaymentAmount is "25.0"
-
     When Customer undo "1"th "CHARGE_ADJUSTMENT" transaction made on "11 January 2026" on Working Capital loan
-
     Then Working Capital Loan Transactions tab has a reversed "CHARGE_ADJUSTMENT" transaction with date "11 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name           | Debit | Credit |
       | INCOME    | 404007       | Fee Income             | 25.0  |        |
       | LIABILITY | 245000       | Other Credit Liability |       | 25.0   |
       | INCOME    | 404007       | Fee Income             |       | 25.0   |
       | LIABILITY | 245000       | Other Credit Liability | 25.0  |        |
-
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
     And Working Capital loan balance overpaymentAmount is "0.0"
     And Working Capital Loan has transactions:
@@ -556,7 +530,7 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
       | 45.0       | 45.0            | 0.0      | 0.0            | 0.0                 | 0.0          |
     Then Admin closes the Working Capital loan with a full repayment on "11 January 2026"
 
-  @TestRailId:TODO_ADD_8
+  @TestRailId:C89827
   Scenario: Verify Working Capital penalty charge adjustment accounting entries - UC8: fully repaid loan - partial penalty charge adjustment has overpayment journal entries
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -587,10 +561,8 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 0.0        | 0.0             | 0.0      | 77.7           | 0.0                 | 77.7         |
-
     When Admin sets the business date to "11 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-
     When Admin makes a charge adjustment for the last added penalty charge with 50.0 amount on working capital loan
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
@@ -608,19 +580,15 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
       | Type      | Account code | Account name           | Debit | Credit |
       | INCOME    | 404007       | Fee Income             | 50.0  |        |
       | LIABILITY | 245000       | Other Credit Liability |       | 50.0   |
-
     Then Working Capital loan status will be "OVERPAID"
     And Working Capital loan balance overpaymentAmount is "50.0"
-
     When Customer undo "1"th "CHARGE_ADJUSTMENT" transaction made on "11 January 2026" on Working Capital loan
-
     Then Working Capital Loan Transactions tab has a reversed "CHARGE_ADJUSTMENT" transaction with date "11 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name           | Debit | Credit |
       | INCOME    | 404007       | Fee Income             | 50.0  |        |
       | LIABILITY | 245000       | Other Credit Liability |       | 50.0   |
       | INCOME    | 404007       | Fee Income             |       | 50.0   |
       | LIABILITY | 245000       | Other Credit Liability | 50.0  |        |
-
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
     And Working Capital loan balance overpaymentAmount is "0.0"
     And Working Capital Loan has transactions:
