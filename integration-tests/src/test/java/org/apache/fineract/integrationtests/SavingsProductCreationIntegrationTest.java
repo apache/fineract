@@ -24,6 +24,8 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
+import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
@@ -137,6 +139,21 @@ public class SavingsProductCreationIntegrationTest {
         Assertions.assertNotEquals(interestReceivableAccount.getAccountID(),
                 savingsProductsResponseUpdate.getAccountingMappings().getInterestReceivableAccount().getId().intValue());
 
+    }
+
+    @Test
+    public void testRetrieveSavingsProductsWithOfficeSpecificRestrictionEnabledAndNoEntityAccessMapping() {
+        final GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
+        try {
+            globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED, true);
+            globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.RESTRICT_PRODUCTS_TO_USER_OFFICE, true);
+
+            final String savingsProducts = SavingsProductHelper.retrieveAllSavingsProducts(requestSpec, responseSpec);
+            Assertions.assertNotNull(savingsProducts);
+        } finally {
+            globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.RESTRICT_PRODUCTS_TO_USER_OFFICE, false);
+            globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED, false);
+        }
     }
 
     public static Integer createSavingsProductWithAccrualAccountingWithOverdraftAllowed(final String interestReceivableAccount,
