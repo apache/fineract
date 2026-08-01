@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.search.data;
 
+import java.util.Arrays;
 import org.apache.fineract.portfolio.search.SearchConstants.SearchSupportedResources;
 
 public class SearchConditions {
@@ -30,6 +31,8 @@ public class SearchConditions {
     private final Boolean savingSeach;
     private final Boolean shareSeach;
     private final Boolean clientIdentifierSearch;
+    private final Boolean loanTransactionSearch;
+    private final Boolean savingTransactionSearch;
     private Boolean exactMatch;
     private final String hierarchy;
 
@@ -38,23 +41,27 @@ public class SearchConditions {
         this.searchResource = searchResource;
         this.exactMatch = exactMatch;
         this.hierarchy = hierarchy;
-        this.clientSearch = null == searchResource
-                || searchResource.toLowerCase().contains(SearchSupportedResources.CLIENTS.name().toLowerCase());
-        this.groupSearch = null == searchResource
-                || searchResource.toLowerCase().contains(SearchSupportedResources.GROUPS.name().toLowerCase());
-        this.loanSeach = null == searchResource
-                || searchResource.toLowerCase().contains(SearchSupportedResources.LOANS.name().toLowerCase());
-        this.savingSeach = null == searchResource
-                || searchResource.toLowerCase().contains(SearchSupportedResources.SAVINGS.name().toLowerCase());
-        this.shareSeach = null == searchResource
-                || searchResource.toLowerCase().contains(SearchSupportedResources.SHARES.name().toLowerCase());
-        this.clientIdentifierSearch = null == searchResource
-                || searchResource.toLowerCase().contains(SearchSupportedResources.CLIENTIDENTIFIERS.name().toLowerCase());
+        this.clientSearch = isResourceSelected(searchResource, SearchSupportedResources.CLIENTS);
+        this.groupSearch = isResourceSelected(searchResource, SearchSupportedResources.GROUPS);
+        this.loanSeach = isResourceSelected(searchResource, SearchSupportedResources.LOANS);
+        this.savingSeach = isResourceSelected(searchResource, SearchSupportedResources.SAVINGS);
+        this.shareSeach = isResourceSelected(searchResource, SearchSupportedResources.SHARES);
+        this.clientIdentifierSearch = isResourceSelected(searchResource, SearchSupportedResources.CLIENTIDENTIFIERS);
+        this.loanTransactionSearch = isResourceSelected(searchResource, SearchSupportedResources.LOANTRANSACTIONS);
+        this.savingTransactionSearch = isResourceSelected(searchResource, SearchSupportedResources.SAVINGSTRANSACTIONS);
     }
 
     public SearchConditions(final String searchQueryParam, final String searchResource, final Boolean clientSearch,
             final Boolean groupSearch, final Boolean loanSeach, final Boolean savingSeach, final Boolean shareSeach,
             final Boolean clientIdentifierSearch, Boolean exactMatch, final String hierarchy) {
+        this(searchQueryParam, searchResource, clientSearch, groupSearch, loanSeach, savingSeach, shareSeach, clientIdentifierSearch, false,
+                false, exactMatch, hierarchy);
+    }
+
+    public SearchConditions(final String searchQueryParam, final String searchResource, final Boolean clientSearch,
+            final Boolean groupSearch, final Boolean loanSeach, final Boolean savingSeach, final Boolean shareSeach,
+            final Boolean clientIdentifierSearch, final Boolean loanTransactionSearch, final Boolean savingTransactionSearch,
+            Boolean exactMatch, final String hierarchy) {
         this.searchQuery = searchQueryParam;
         this.searchResource = searchResource;
         this.clientSearch = clientSearch;
@@ -63,6 +70,8 @@ public class SearchConditions {
         this.savingSeach = savingSeach;
         this.shareSeach = shareSeach;
         this.clientIdentifierSearch = clientIdentifierSearch;
+        this.loanTransactionSearch = loanTransactionSearch;
+        this.savingTransactionSearch = savingTransactionSearch;
         this.exactMatch = exactMatch;
         this.hierarchy = hierarchy;
     }
@@ -103,8 +112,21 @@ public class SearchConditions {
         return this.clientIdentifierSearch;
     }
 
+    public Boolean isLoanTransactionSearch() {
+        return this.loanTransactionSearch;
+    }
+
+    public Boolean isSavingTransactionSearch() {
+        return this.savingTransactionSearch;
+    }
+
     public String getHierarchy() {
         return this.hierarchy;
+    }
+
+    private boolean isResourceSelected(final String searchResource, final SearchSupportedResources supportedResource) {
+        return searchResource == null || Arrays.stream(searchResource.split(",")).map(String::trim)
+                .anyMatch(resource -> resource.equalsIgnoreCase(supportedResource.getValue()));
     }
 
 }
