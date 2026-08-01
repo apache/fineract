@@ -694,6 +694,14 @@ public class GlobalConfigurationHelper {
         retainedEarningUsedByReportName.put("string_value", "Trial Balance Summary Report with Asset Owner");
         defaults.add(retainedEarningUsedByReportName);
 
+        HashMap<String, Object> webAppPrimaryColor = new HashMap<>();
+        webAppPrimaryColor.put("name", GlobalConfigurationConstants.WEB_APP_PRIMARY_COLOR);
+        webAppPrimaryColor.put("value", 0L);
+        webAppPrimaryColor.put("enabled", true);
+        webAppPrimaryColor.put("trapDoor", false);
+        webAppPrimaryColor.put("string_value", "blue");
+        defaults.add(webAppPrimaryColor);
+
         return defaults;
     }
 
