@@ -45,6 +45,7 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelp
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDatatableHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignJournalEntryHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsChargeHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsLifecycleExtension;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
@@ -69,6 +70,7 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
     protected static FeignJournalEntryHelper journalEntryHelper;
     protected static FeignSchedulerHelper schedulerHelper;
     protected static FeignDatatableHelper datatableHelper;
+    protected static FeignSavingsChargeHelper savingsChargeHelper;
 
     @BeforeAll
     public static void setupSavingsHelpers() {
@@ -84,6 +86,7 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
         journalEntryHelper = new FeignJournalEntryHelper(client);
         schedulerHelper = new FeignSchedulerHelper(client);
         datatableHelper = new FeignDatatableHelper(client);
+        savingsChargeHelper = new FeignSavingsChargeHelper(client);
     }
 
     protected Long createClient() {
