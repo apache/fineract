@@ -42,6 +42,7 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHel
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDatatableHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignJournalEntryHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
@@ -67,6 +68,7 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
     protected static FeignAccountHelper accountHelper;
     protected static FeignJournalEntryHelper journalEntryHelper;
     protected static FeignSchedulerHelper schedulerHelper;
+    protected static FeignDatatableHelper datatableHelper;
 
     @BeforeAll
     public static void setupSavingsHelpers() {
@@ -81,6 +83,7 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
         accountHelper = new FeignAccountHelper(client);
         journalEntryHelper = new FeignJournalEntryHelper(client);
         schedulerHelper = new FeignSchedulerHelper(client);
+        datatableHelper = new FeignDatatableHelper(client);
     }
 
     protected Long createClient() {

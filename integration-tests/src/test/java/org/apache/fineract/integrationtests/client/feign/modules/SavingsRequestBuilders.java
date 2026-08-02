@@ -173,6 +173,14 @@ public final class SavingsRequestBuilders {
                 .paymentTypeId(1);
     }
 
+    public static PostSavingsAccountTransactionsRequest postInterestAsOn(String transactionDate) {
+        return new PostSavingsAccountTransactionsRequest()//
+                .transactionDate(transactionDate)//
+                .postInterestManualOrAutomatic(true)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .locale(SavingsTestData.LOCALE);
+    }
+
     /** The server rejects a hold without a reason, and accepts no payment type on one. */
     public static PostSavingsAccountTransactionsRequest holdAmount(String amount, String transactionDate, String reasonForBlock) {
         return new PostSavingsAccountTransactionsRequest()//

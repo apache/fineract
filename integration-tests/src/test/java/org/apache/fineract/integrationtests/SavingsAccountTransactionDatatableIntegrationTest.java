@@ -22,231 +22,145 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.client.models.GetDataTablesResponse;
 import org.apache.fineract.client.models.PostColumnHeaderData;
 import org.apache.fineract.client.models.PostDataTablesRequest;
 import org.apache.fineract.client.models.PostDataTablesResponse;
+import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.PutDataTablesAppTableIdDatatableIdResponse;
 import org.apache.fineract.client.models.PutDataTablesRequest;
 import org.apache.fineract.client.models.PutDataTablesRequestAddColumns;
 import org.apache.fineract.client.models.PutDataTablesResponse;
 import org.apache.fineract.client.models.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
-import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.system.DatatableHelper;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith({ SavingsTestLifecycleExtension.class })
-public class SavingsAccountTransactionDatatableIntegrationTest {
+public class SavingsAccountTransactionDatatableIntegrationTest extends FeignSavingsTestBase {
 
     private static final String SAVINGS_TRANSACTION_APP_TABLE_NAME = EntityTables.SAVINGS_TRANSACTION.getName();
-    public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    final String startDate = "01 Jun 2023";
-    final String firstDepositDate = "05 Jun 2023";
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
-    private DatatableHelper datatableHelper;
-    private SavingsProductHelper savingsProductHelper;
-    private SavingsAccountHelper savingsAccountHelper;
-    private GlobalConfigurationHelper globalConfigurationHelper;
+    private static final String DATATABLE_NAME_PREFIX = "dt_savings_transaction_";
+    private static final String NUMBER_COLUMN = "aNumber";
+    private static final String STRING_COLUMN = "aString";
+    private static final String BOOLEAN_COLUMN = "aBoolean";
+    private static final long COLUMN_LENGTH = 10L;
 
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.savingsProductHelper = new SavingsProductHelper();
-        this.globalConfigurationHelper = new GlobalConfigurationHelper();
-    }
+    /** three declared columns plus the primary key and the two audit columns the server adds */
+    private static final int EXPECTED_COLUMN_COUNT = 6;
+
+    private static final String START_DATE = "01 Jun 2023";
+    private static final String FIRST_DEPOSIT_DATE = "05 Jun 2023";
+    private static final String DEPOSIT_AMOUNT = "100";
+    private static final int UPDATED_NUMBER_VALUE = 100;
 
     @Test
     public void testDatatableCreateReadUpdateDeleteForSavingsAccountTransaction() {
-        // create dataTable
-        String datatableName = Utils.uniqueRandomStringGenerator("dt_savings_transaction_", 5).toLowerCase().toLowerCase();
-        String column1Name = "aNumber";
-        String column2Name = "aString";
-        String column3Name = "aBoolean";
+        final String datatableName = uniqueDatatableName();
 
-        PostDataTablesRequest request = new PostDataTablesRequest();
-        request.setDatatableName(datatableName);
-        request.setApptableName(SAVINGS_TRANSACTION_APP_TABLE_NAME);
-        request.setMultiRow(false);
+        final PostDataTablesRequest request = new PostDataTablesRequest().datatableName(datatableName)
+                .apptableName(SAVINGS_TRANSACTION_APP_TABLE_NAME).multiRow(false).addColumnsItem(numberColumn())
+                .addColumnsItem(stringColumn());
 
-        PostColumnHeaderData column1HeaderRequestData = new PostColumnHeaderData();
-        column1HeaderRequestData.setName(column1Name);
-        column1HeaderRequestData.setType("Number");
-        column1HeaderRequestData.setMandatory(false);
-        column1HeaderRequestData.setLength(10L);
-        column1HeaderRequestData.setCode("");
-        column1HeaderRequestData.setUnique(false);
-        column1HeaderRequestData.setIndexed(false);
-
-        request.addColumnsItem(column1HeaderRequestData);
-
-        PostColumnHeaderData column2HeaderRequestData = new PostColumnHeaderData();
-        column2HeaderRequestData.setName(column2Name);
-        column2HeaderRequestData.setType("String");
-        column2HeaderRequestData.setMandatory(false);
-        column2HeaderRequestData.setLength(10L);
-        column2HeaderRequestData.setCode("");
-        column2HeaderRequestData.setUnique(false);
-        column2HeaderRequestData.setIndexed(false);
-
-        request.addColumnsItem(column2HeaderRequestData);
-
-        PostDataTablesResponse response = datatableHelper.createDatatable(request);
+        final PostDataTablesResponse response = datatableHelper.createDatatable(request);
         assertNotNull(response.getResourceIdentifier());
 
-        // update datatable
-        PutDataTablesRequest putRequest = new PutDataTablesRequest();
-        putRequest.setApptableName(SAVINGS_TRANSACTION_APP_TABLE_NAME);
-        PutDataTablesRequestAddColumns column3HeaderPutRequestData = new PutDataTablesRequestAddColumns();
-        column3HeaderPutRequestData.setName(column3Name);
-        column3HeaderPutRequestData.setType("Boolean");
-        column3HeaderPutRequestData.setMandatory(false);
+        final PutDataTablesRequest putRequest = new PutDataTablesRequest().apptableName(SAVINGS_TRANSACTION_APP_TABLE_NAME)
+                .addAddColumnsItem(new PutDataTablesRequestAddColumns().name(BOOLEAN_COLUMN).type("Boolean").mandatory(false));
 
-        putRequest.addAddColumnsItem(column3HeaderPutRequestData);
-
-        PutDataTablesResponse updateResponse = datatableHelper.updateDatatable(datatableName, putRequest);
+        final PutDataTablesResponse updateResponse = datatableHelper.updateDatatable(datatableName, putRequest);
         assertNotNull(updateResponse.getResourceIdentifier());
 
-        // verify Datatable got created
-        GetDataTablesResponse dataTable = datatableHelper.getDataTableDetails(datatableName);
-
-        // verfify columns
-        List<ResultsetColumnHeaderData> columnHeaderData = dataTable.getColumnHeaderData();
+        final GetDataTablesResponse dataTable = datatableHelper.getDatatable(datatableName);
+        final List<ResultsetColumnHeaderData> columnHeaderData = dataTable.getColumnHeaderData();
         assertNotNull(columnHeaderData);
+        assertEquals(EXPECTED_COLUMN_COUNT, columnHeaderData.size());
 
-        // two columns with 1 primary key and 2 audit columns created
-        assertEquals(6, columnHeaderData.size());
-
-        // deleting the datatable
-        String deletedDataTableName = this.datatableHelper.deleteDatatable(datatableName);
-        assertEquals(datatableName, deletedDataTableName, "ERROR IN DELETING THE DATATABLE");
+        assertEquals(datatableName, datatableHelper.deleteDatatable(datatableName).getResourceIdentifier(),
+                "ERROR IN DELETING THE DATATABLE");
     }
 
     @Test
     public void testDatatableCreateReadUpdateDeleteEntryForSavingsAccountTransaction() {
-        // Create Client
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
-        Assertions.assertNotNull(clientID);
-        // Create savings product and account
-        final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+        final Long clientId = createClient(START_DATE);
+        assertNotNull(clientId);
 
-        final Integer transactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", firstDepositDate,
-                CommonConstants.RESPONSE_RESOURCE_ID);
-
+        final Long savingsId = createSavingsAccountDailyPosting(clientId);
+        final Long transactionId = deposit(savingsId, DEPOSIT_AMOUNT, FIRST_DEPOSIT_DATE).getResourceId();
         assertNotNull(transactionId);
 
-        // create dataTable
-        String datatableName = Utils.uniqueRandomStringGenerator("dt_savings_transaction_", 5).toLowerCase().toLowerCase();
-        String column1Name = "aNumber";
+        final String datatableName = uniqueDatatableName();
+        final PostDataTablesRequest request = new PostDataTablesRequest().datatableName(datatableName)
+                .apptableName(SAVINGS_TRANSACTION_APP_TABLE_NAME).multiRow(true).addColumnsItem(numberColumn());
 
-        PostDataTablesRequest request = new PostDataTablesRequest();
-        request.setDatatableName(datatableName);
-        request.setApptableName(SAVINGS_TRANSACTION_APP_TABLE_NAME);
-        request.setMultiRow(true);
-
-        PostColumnHeaderData column1HeaderRequestData = new PostColumnHeaderData();
-        column1HeaderRequestData.setName(column1Name);
-        column1HeaderRequestData.setType("Number");
-        column1HeaderRequestData.setMandatory(false);
-        column1HeaderRequestData.setLength(10L);
-        column1HeaderRequestData.setCode("");
-        column1HeaderRequestData.setUnique(false);
-        column1HeaderRequestData.setIndexed(false);
-
-        request.addColumnsItem(column1HeaderRequestData);
-
-        PostDataTablesResponse response = datatableHelper.createDatatable(request);
-
+        final PostDataTablesResponse response = datatableHelper.createDatatable(request);
         assertNotNull(response);
+        assertEquals(datatableName, response.getResourceIdentifier());
 
-        String createdName = response.getResourceIdentifier();
-        assertEquals(datatableName, createdName);
-
-        // add entries
-        final HashMap<String, Object> datatableEntryMap = new HashMap<>();
-        datatableEntryMap.put(column1Name, Utils.randomNumberGenerator(5));
-        datatableEntryMap.put("locale", "en");
-        datatableEntryMap.put("dateFormat", "yyyy-MM-dd");
-
-        String datatabelEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
-
-        final boolean genericResultSet = true;
-
-        HashMap<String, Object> datatableEntryResponseFirst = this.datatableHelper.createDatatableEntry(datatableName, transactionId,
-                genericResultSet, datatabelEntryRequestJsonString);
-
-        Integer datatableId = (Integer) datatableEntryResponseFirst.get("resourceId");
+        final Long datatableId = datatableHelper.createDatatableEntry(datatableName, transactionId, entry(Utils.randomNumberGenerator(5)))
+                .getResourceId();
         assertNotNull(datatableId);
 
-        // Read the Datatable entry generated with genericResultSet
-        HashMap<String, Object> items = this.datatableHelper.readDatatableEntry(datatableName, transactionId, genericResultSet, null, "");
-        assertNotNull(items);
-        assertEquals(1, ((List) items.get("data")).size());
+        assertEquals(1, datatableHelper.getDatatableEntries(datatableName, transactionId).path("data").size(),
+                "Expected exactly the one row that was just added");
 
-        // update datatable entry
-        datatableEntryMap.put(column1Name, 100);
-        datatableEntryMap.put("locale", "en");
-        datatableEntryMap.put("dateFormat", "yyyy-MM-dd");
-        datatabelEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
-        HashMap<String, Object> updatedDatatableEntryResponse = this.datatableHelper.updateDatatableEntry(datatableName, transactionId,
-                datatableId, false, datatabelEntryRequestJsonString);
+        final PutDataTablesAppTableIdDatatableIdResponse updateResponse = datatableHelper.updateDatatableEntry(datatableName, transactionId,
+                datatableId, entry(UPDATED_NUMBER_VALUE));
+        assertEquals(transactionId, Long.valueOf(updateResponse.getTransactionId()));
+        assertEquals(datatableId, updateResponse.getResourceId());
 
-        assertEquals(transactionId, Integer.valueOf((String) updatedDatatableEntryResponse.get("transactionId")));
-        assertEquals(datatableId, updatedDatatableEntryResponse.get("resourceId"));
+        final String deletedTransactionId = datatableHelper.deleteDatatableEntries(datatableName, transactionId).getTransactionId();
+        assertEquals(transactionId, Long.valueOf(deletedTransactionId), "ERROR IN DELETING THE DATATABLE ENTRIES");
 
-        // deleting datatable entries
-        String deletedTransactionId = (String) this.datatableHelper.deleteDatatableEntries(datatableName, transactionId, "transactionId");
-        assertEquals(transactionId, Integer.valueOf(deletedTransactionId), "ERROR IN DELETING THE DATATABLE ENTRIES");
-
-        // deleting the datatable
-        String deletedDataTableName = this.datatableHelper.deleteDatatable(datatableName);
-        assertEquals(datatableName, deletedDataTableName, "ERROR IN DELETING THE DATATABLE");
+        assertEquals(datatableName, datatableHelper.deleteDatatable(datatableName).getResourceIdentifier(),
+                "ERROR IN DELETING THE DATATABLE");
     }
 
-    private Integer createSavingsAccountDailyPosting(final Integer clientID, final String startDate) {
-        final Integer savingsProductID = createSavingsProductDailyPosting();
-        Assertions.assertNotNull(savingsProductID);
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL, startDate);
-        Assertions.assertNotNull(savingsId);
-        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+    private String uniqueDatatableName() {
+        return Utils.uniqueRandomStringGenerator(DATATABLE_NAME_PREFIX, 5).toLowerCase();
+    }
+
+    private PostColumnHeaderData numberColumn() {
+        return column(NUMBER_COLUMN, "Number");
+    }
+
+    private PostColumnHeaderData stringColumn() {
+        return column(STRING_COLUMN, "String");
+    }
+
+    private PostColumnHeaderData column(final String name, final String type) {
+        return new PostColumnHeaderData().name(name).type(type).mandatory(false).length(COLUMN_LENGTH).code("").unique(false)
+                .indexed(false);
+    }
+
+    private Map<String, Object> entry(final Integer numberValue) {
+        return Map.of(NUMBER_COLUMN, numberValue, "locale", SavingsTestData.LOCALE, "dateFormat", "yyyy-MM-dd");
+    }
+
+    private Long createSavingsAccountDailyPosting(final Long clientId) {
+        final PostSavingsProductsRequest product = SavingsRequestBuilders.savingsProduct(
+                SavingsTestData.InterestCompoundingPeriodType.DAILY, SavingsTestData.InterestPostingPeriodType.DAILY,
+                SavingsTestData.InterestCalculationType.DAILY_BALANCE);
+        final Long productId = createSavingsProduct(product).getResourceId();
+        assertNotNull(productId);
+
+        final Long savingsId = submitSavingsApplication(clientId, productId, START_DATE).getSavingsId();
+        assertNotNull(savingsId);
+
+        approveSavings(savingsId, START_DATE);
+        SavingsTestValidators.verifySavingsIsApproved(savingsHelper.getSavingsStatus(savingsId));
+
+        activateSavings(savingsId, START_DATE);
+        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
         return savingsId;
     }
 
-    private Integer createSavingsProductDailyPosting() {
-        final String savingsProductJSON = this.savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance().build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
-    }
-
-    // Reset configuration fields
     @AfterEach
     public void tearDown() {
         globalConfigurationHelper.resetAllDefaultGlobalConfigurations();

@@ -63,10 +63,7 @@ public class FeignSavingsTransactionHelper {
         return withdraw(savingsId, SavingsRequestBuilders.withdrawal(amount, transactionDate));
     }
 
-    /**
-     * Withdraws past the account balance using the {@code force-withdrawal} command, which the server only accepts
-     * while the force-withdrawal global configuration is enabled.
-     */
+    /** The server only accepts this command while the force-withdrawal global configuration is enabled. */
     public PostSavingsAccountTransactionsResponse forceWithdraw(Long savingsId, PostSavingsAccountTransactionsRequest request) {
         return ok(
                 () -> fineractClient.savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request, "force-withdrawal"));
@@ -76,18 +73,17 @@ public class FeignSavingsTransactionHelper {
         return forceWithdraw(savingsId, SavingsRequestBuilders.withdrawal(amount, transactionDate));
     }
 
-    /**
-     * Runs a withdrawal the server is expected to reject, returning the failure so the caller can assert the exact
-     * status and error code.
-     */
     public CallFailedRuntimeException withdrawExpectingError(Long savingsId, String amount, String transactionDate) {
         PostSavingsAccountTransactionsRequest request = SavingsRequestBuilders.withdrawal(amount, transactionDate);
         return fail(() -> fineractClient.savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request, "withdrawal"));
     }
 
-    /**
-     * Puts part of the balance on hold, making it unavailable to withdrawals until it is released again.
-     */
+    public PostSavingsAccountTransactionsResponse postInterestAsOn(Long savingsId, String transactionDate) {
+        PostSavingsAccountTransactionsRequest request = SavingsRequestBuilders.postInterestAsOn(transactionDate);
+        return ok(
+                () -> fineractClient.savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request, "postInterestAsOn"));
+    }
+
     public PostSavingsAccountTransactionsResponse holdAmount(Long savingsId, String amount, String transactionDate, String reasonForBlock) {
         PostSavingsAccountTransactionsRequest request = SavingsRequestBuilders.holdAmount(amount, transactionDate, reasonForBlock);
         return ok(() -> fineractClient.savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request, "holdAmount"));
@@ -101,9 +97,6 @@ public class FeignSavingsTransactionHelper {
         return adjustTransaction(savingsId, transactionId, "undo");
     }
 
-    /**
-     * Releases a hold placed by {@link #holdAmount}, taking the amount off hold and making it available again.
-     */
     public CommandProcessingResult releaseAmount(Long savingsId, Long holdTransactionId) {
         return adjustTransaction(savingsId, holdTransactionId, "releaseAmount");
     }
