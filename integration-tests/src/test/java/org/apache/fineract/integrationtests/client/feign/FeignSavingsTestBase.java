@@ -43,10 +43,12 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDa
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignJournalEntryHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsLifecycleExtension;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsTransactionHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSchedulerHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.BeforeAll;
@@ -63,6 +65,8 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
     protected static FeignGlobalConfigurationHelper globalConfigurationHelper;
     protected static FeignBusinessDateHelper businessDateHelper;
     protected static FeignAccountHelper accountHelper;
+    protected static FeignJournalEntryHelper journalEntryHelper;
+    protected static FeignSchedulerHelper schedulerHelper;
 
     @BeforeAll
     public static void setupSavingsHelpers() {
@@ -75,6 +79,8 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
         globalConfigurationHelper = new FeignGlobalConfigurationHelper(client);
         businessDateHelper = new FeignBusinessDateHelper(client);
         accountHelper = new FeignAccountHelper(client);
+        journalEntryHelper = new FeignJournalEntryHelper(client);
+        schedulerHelper = new FeignSchedulerHelper(client);
     }
 
     protected Long createClient() {

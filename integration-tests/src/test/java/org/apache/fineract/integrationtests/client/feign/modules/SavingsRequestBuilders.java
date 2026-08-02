@@ -62,70 +62,52 @@ public final class SavingsRequestBuilders {
                 .withHoldTax(false);
     }
 
-    public static PostSavingsProductsRequest withAccrualAccountingMappings(PostSavingsProductsRequest request, Account assetAccount,
-            Account liabilityAccount, Account incomeAccount, Account expenseAccount) {
-        return request//
-                .savingsReferenceAccountId(accountId(assetAccount))//
-                .overdraftPortfolioControlId(accountId(assetAccount))//
-                .feesReceivableAccountId(accountId(assetAccount))//
-                .penaltiesReceivableAccountId(accountId(assetAccount))//
-                .savingsControlAccountId(accountId(liabilityAccount))//
-                .transfersInSuspenseAccountId(accountId(liabilityAccount))//
-                .interestPayableAccountId(accountId(liabilityAccount))//
-                .interestOnSavingsAccountId(accountId(expenseAccount))//
-                .writeOffAccountId(accountId(expenseAccount))//
-                .incomeFromFeeAccountId(accountId(incomeAccount))//
-                .incomeFromPenaltyAccountId(accountId(incomeAccount))//
-                .incomeFromInterestId(accountId(incomeAccount));
+    /**
+     * Applies the GL account mappings an accrual-based savings product needs, in place, and returns the same request so
+     * it can be chained.
+     * <p>
+     * The interest receivable account is left unmapped here; use
+     * {@link #withAccrualAccountingMappings(PostSavingsProductsRequest, Account, Account, Account, Account, Account)}
+     * to point it at a specific account.
+     */
+    public static Map<String, Object> accrualAccountingMappings(Account assetAccount, Account liabilityAccount, Account incomeAccount,
+            Account expenseAccount) {
+        Map<String, Object> mappings = new HashMap<>();
+        String assetAccountId = accountId(assetAccount);
+        mappings.put(SavingsTestData.RawProductField.SAVINGS_REFERENCE_ACCOUNT_ID, assetAccountId);
+        mappings.put(SavingsTestData.RawProductField.OVERDRAFT_PORTFOLIO_CONTROL_ID, assetAccountId);
+        mappings.put(SavingsTestData.RawProductField.FEES_RECEIVABLE_ACCOUNT_ID, assetAccountId);
+        mappings.put(SavingsTestData.RawProductField.PENALTIES_RECEIVABLE_ACCOUNT_ID, assetAccountId);
+
+        String liabilityAccountId = accountId(liabilityAccount);
+        mappings.put(SavingsTestData.RawProductField.SAVINGS_CONTROL_ACCOUNT_ID, liabilityAccountId);
+        mappings.put(SavingsTestData.RawProductField.TRANSFERS_IN_SUSPENSE_ACCOUNT_ID, liabilityAccountId);
+        mappings.put(SavingsTestData.RawProductField.INTEREST_PAYABLE_ACCOUNT_ID, liabilityAccountId);
+
+        String expenseAccountId = accountId(expenseAccount);
+        mappings.put(SavingsTestData.RawProductField.INTEREST_ON_SAVINGS_ACCOUNT_ID, expenseAccountId);
+        mappings.put(SavingsTestData.RawProductField.WRITE_OFF_ACCOUNT_ID, expenseAccountId);
+
+        String incomeAccountId = accountId(incomeAccount);
+        mappings.put(SavingsTestData.RawProductField.INCOME_FROM_FEE_ACCOUNT_ID, incomeAccountId);
+        mappings.put(SavingsTestData.RawProductField.INCOME_FROM_PENALTY_ACCOUNT_ID, incomeAccountId);
+        mappings.put(SavingsTestData.RawProductField.INCOME_FROM_INTEREST_ID, incomeAccountId);
+        return mappings;
     }
 
-    public static PostSavingsProductsRequest withAccrualAccountingMappings(PostSavingsProductsRequest request, Account assetAccount,
-            Account liabilityAccount, Account incomeAccount, Account expenseAccount, Account interestReceivableAccount) {
-        return withAccrualAccountingMappings(request, assetAccount, liabilityAccount, incomeAccount, expenseAccount)
-                .interestReceivableAccountId(accountId(interestReceivableAccount));
+    public static Map<String, Object> accrualAccountingMappings(Account assetAccount, Account liabilityAccount, Account incomeAccount,
+            Account expenseAccount, Account interestReceivableAccount) {
+        Map<String, Object> mappings = accrualAccountingMappings(assetAccount, liabilityAccount, incomeAccount, expenseAccount);
+        mappings.put(SavingsTestData.RawProductField.INTEREST_RECEIVABLE_ACCOUNT_ID, accountId(interestReceivableAccount));
+        return mappings;
     }
 
-    /** An update is validated against the same parameter set as a create, so it carries the whole product body. */
-    public static PutSavingsProductsProductIdRequest withAccrualAccountingMappings(PutSavingsProductsProductIdRequest request,
-            Account assetAccount, Account liabilityAccount, Account incomeAccount, Account expenseAccount,
-            Account interestReceivableAccount) {
-        return request//
-                .savingsReferenceAccountId(accountId(assetAccount))//
-                .overdraftPortfolioControlId(accountId(assetAccount))//
-                .feesReceivableAccountId(accountId(assetAccount))//
-                .penaltiesReceivableAccountId(accountId(assetAccount))//
-                .savingsControlAccountId(accountId(liabilityAccount))//
-                .transfersInSuspenseAccountId(accountId(liabilityAccount))//
-                .interestPayableAccountId(accountId(liabilityAccount))//
-                .interestOnSavingsAccountId(accountId(expenseAccount))//
-                .writeOffAccountId(accountId(expenseAccount))//
-                .incomeFromFeeAccountId(accountId(incomeAccount))//
-                .incomeFromPenaltyAccountId(accountId(incomeAccount))//
-                .incomeFromInterestId(accountId(incomeAccount))//
-                .interestReceivableAccountId(accountId(interestReceivableAccount));
-    }
-
-    public static Long accountId(Account account) {
-        return account.getAccountID().longValue();
-    }
-
-    public static ChargeRequest savingsWithdrawalFeeCharge() {
-        return new ChargeRequest()//
-                .active(true)//
-                .name(Utils.uniqueRandomStringGenerator("Charge_Savings_", 6))//
-                .currencyCode(SavingsTestData.CURRENCY_CODE)//
-                .amount(SavingsTestData.DEFAULT_CHARGE_AMOUNT)//
-                .chargeAppliesTo(SavingsTestData.ChargeAppliesTo.SAVINGS)//
-                .chargeTimeType(SavingsTestData.ChargeTimeType.WITHDRAWAL_FEE)//
-                .chargeCalculationType(SavingsTestData.ChargeCalculationType.FLAT)//
-                .locale(SavingsTestData.LOCALE);
-    }
-
-    public static PostSavingsAccountsSavingsAccountIdChargesRequest savingsAccountCharge(Long chargeId, Float amount) {
-        return new PostSavingsAccountsSavingsAccountIdChargesRequest()//
-                .chargeId(chargeId)//
-                .amount(amount)//
-                .locale(SavingsTestData.LOCALE);
+    /**
+     * The raw product path sends the account ids as strings, which is the shape the server's locale-aware parsing
+     * expects and the shape the RestAssured product builder used.
+     */
+    public static String accountId(Account account) {
+        return String.valueOf(account.getAccountID());
     }
 
     public static PostSavingsAccountsRequest submitSavingsApplication(Long clientId, Long productId, String submittedOnDate) {

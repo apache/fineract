@@ -23,6 +23,8 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import feign.FeignException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
@@ -127,6 +129,20 @@ public class FeignSavingsTransactionHelper {
         SavingsAccountData savings = ok(
                 () -> fineractClient.savingsAccount().retrieveSavingsAccount(savingsId, Map.of("associations", "transactions")));
         return savings.getTransactions();
+    }
+
+    public List<SavingsAccountTransactionData> getAccrualTransactions(Long savingsId) {
+        return getTransactions(savingsId).stream().filter(FeignSavingsTransactionHelper::isAccrual).toList();
+    }
+
+    /** Reversed accruals are included, matching what the account's own accrual total reflects. */
+    public BigDecimal getTotalAccrualAmount(Long savingsId) {
+        return getAccrualTransactions(savingsId).stream().map(SavingsAccountTransactionData::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private static boolean isAccrual(SavingsAccountTransactionData transaction) {
+        return transaction.getTransactionType() != null && Boolean.TRUE.equals(transaction.getTransactionType().getAccrual());
     }
 
     public SavingsAccountTransactionsSearchResponse searchTransactions(Long savingsId, Map<String, Object> queryParams) {
