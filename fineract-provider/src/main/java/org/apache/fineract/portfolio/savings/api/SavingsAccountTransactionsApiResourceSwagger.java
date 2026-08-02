@@ -214,6 +214,12 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         public String externalId;
         @Schema(example = "true")
         public Boolean isPostInterestAsOn;
+        /**
+         * Read by {@code SavingsAccountTransactionDataValidator.validatePostInterest} for the
+         * {@code postInterestAsOn} command, but it was missing here, so no generated client could send it.
+         */
+        @Schema(example = "true")
+        public Boolean postInterestManualOrAutomatic;
         @Schema(example = "true")
         public String lienAllowed;
         @Schema(example = "String")
