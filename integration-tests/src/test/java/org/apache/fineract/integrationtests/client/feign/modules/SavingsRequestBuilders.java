@@ -46,6 +46,19 @@ public final class SavingsRequestBuilders {
                 .locale(SavingsTestData.LOCALE);
     }
 
+    /** Overdraft, enforced minimum balance and withholding tax are left off so they cannot skew interest figures. */
+    public static PostSavingsProductsRequest savingsProduct(int interestCompoundingPeriodType, int interestPostingPeriodType,
+            int interestCalculationType) {
+        return defaultSavingsProduct()//
+                .interestCompoundingPeriodType(interestCompoundingPeriodType)//
+                .interestPostingPeriodType(interestPostingPeriodType)//
+                .interestCalculationType(interestCalculationType)//
+                .withdrawalFeeForTransfers(true)//
+                .allowOverdraft(false)//
+                .enforceMinRequiredBalance(false)//
+                .withHoldTax(false);
+    }
+
     public static PostSavingsAccountsRequest submitSavingsApplication(Long clientId, Long productId, String submittedOnDate) {
         return new PostSavingsAccountsRequest()//
                 .clientId(clientId)//
@@ -80,6 +93,13 @@ public final class SavingsRequestBuilders {
     public static PostSavingsAccountsAccountIdRequest rejectSavings(String rejectedOnDate) {
         return new PostSavingsAccountsAccountIdRequest()//
                 .rejectedOnDate(rejectedOnDate)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .locale(SavingsTestData.LOCALE);
+    }
+
+    public static PostSavingsAccountsAccountIdRequest withdrawnByApplicant(String withdrawnOnDate) {
+        return new PostSavingsAccountsAccountIdRequest()//
+                .withdrawnOnDate(withdrawnOnDate)//
                 .dateFormat(SavingsTestData.DATETIME_PATTERN)//
                 .locale(SavingsTestData.LOCALE);
     }

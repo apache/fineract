@@ -150,7 +150,7 @@ public class GlobalConfigurationHelper {
      *      integration test state using Spring Framework's integration test infrastructure for transaction commits and
      *      rollbacks.
      */
-    private static ArrayList<HashMap> getAllDefaultGlobalConfigurations() {
+    public static ArrayList<HashMap> getAllDefaultGlobalConfigurations() {
 
         ArrayList<HashMap> defaults = new ArrayList<>();
 
