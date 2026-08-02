@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.bulkimport.importhandler.group;
 
 import com.google.gson.GsonBuilder;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -38,14 +39,15 @@ import org.apache.fineract.infrastructure.bulkimport.data.Count;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandler;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.ImportHandlerUtils;
 import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.DateSerializer;
-import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.EnumOptionDataValueSerializer;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
+import org.apache.fineract.portfolio.calendar.service.CalendarWritePlatformService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.group.command.GroupCreateCommand;
 import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
@@ -69,13 +71,16 @@ public class GroupImportHandler implements ImportHandler {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final IdempotencyKeyGenerator idempotencyKeyGenerator;
     private final CommandDispatcher dispatcher;
+    private final CalendarWritePlatformService calendarWritePlatformService;
 
     @Autowired
     public GroupImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final IdempotencyKeyGenerator idempotencyKeyGenerator, final CommandDispatcher dispatcher) {
+            final IdempotencyKeyGenerator idempotencyKeyGenerator, final CommandDispatcher dispatcher,
+            final CalendarWritePlatformService calendarWritePlatformService) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.idempotencyKeyGenerator = idempotencyKeyGenerator;
         this.dispatcher = dispatcher;
+        this.calendarWritePlatformService = calendarWritePlatformService;
     }
 
     @Override
@@ -249,33 +254,24 @@ public class GroupImportHandler implements ImportHandler {
     private Integer importGroupMeeting(final List<CalendarData> meetings, CommandProcessingResult result, int rowIndex, String dateFormat) {
         CalendarData calendarData = meetings.get(rowIndex);
         calendarData.setTitle("group_" + result.getGroupId().toString() + "_CollectionMeeting");
-        GsonBuilder gsonBuilder = GoogleGsonSerializerHelper.createGsonBuilder();
-        gsonBuilder.registerTypeAdapter(LocalDate.class, new DateSerializer(dateFormat, meetings.get(rowIndex).getLocale()));
-        gsonBuilder.registerTypeAdapter(EnumOptionData.class, new EnumOptionDataValueSerializer());
 
-        String payload;
-        CalendarData modifiedCalendarData;
-        if (calendarData.isRepeating() == false) {
-            modifiedCalendarData = new CalendarData(calendarData.getTitle(), calendarData.getDescription(), calendarData.getStartDate(),
-                    calendarData.isRepeating(), null, calendarData.getInterval(), calendarData.getRepeatsOnDay(),
-                    calendarData.getDateFormat(), calendarData.getLocale(), calendarData.getTypeId());
+        final String startDate = calendarData.getStartDate() != null
+                ? calendarData.getStartDate().format(DateTimeFormatter.ofPattern(dateFormat))
+                : null;
 
-        } else {
-            modifiedCalendarData = new CalendarData(calendarData.getTitle(), calendarData.getDescription(), calendarData.getStartDate(),
-                    calendarData.isRepeating(), calendarData.getFrequency(), calendarData.getInterval(), calendarData.getRepeatsOnDay(),
-                    calendarData.getDateFormat(), calendarData.getLocale(), calendarData.getTypeId());
+        CalendarCreateRequest.CalendarCreateRequestBuilder builder = CalendarCreateRequest.builder()
+                .entityType(TemplatePopulateImportConstants.CENTER_ENTITY_TYPE).entityId(result.getGroupId()).title(calendarData.getTitle())
+                .description(calendarData.getDescription()).startDate(startDate)
+                .typeId(calendarData.getTypeId() != null ? Integer.valueOf(calendarData.getTypeId()) : null)
+                .repeating(String.valueOf(calendarData.isRepeating())).interval(calendarData.getInterval())
+                .repeatsOnDay(calendarData.getRepeatsOnDay() != null ? String.valueOf(calendarData.getRepeatsOnDay().getId()) : null)
+                .dateFormat(dateFormat).locale(calendarData.getLocale());
 
+        if (calendarData.isRepeating() && calendarData.getFrequency() != null) {
+            builder.frequency(String.valueOf(calendarData.getFrequency().getId()));
         }
-        payload = gsonBuilder.create().toJson(modifiedCalendarData);
 
-        CommandWrapper commandWrapper = new CommandWrapper(result.getOfficeId(), result.getGroupId(), result.getClientId(),
-                result.getLoanId(), result.getSavingsId(), null, null, null, null, null, payload, result.getTransactionId(),
-                result.getProductId(), null, null, null, null, idempotencyKeyGenerator.create(), null, null);
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createCalendar(commandWrapper, TemplatePopulateImportConstants.CENTER_ENTITY_TYPE, result.getGroupId()) //
-                .withJson(payload) //
-                .build(); //
-        commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        calendarWritePlatformService.createCalendar(builder.build());
         return 2;
     }
 
