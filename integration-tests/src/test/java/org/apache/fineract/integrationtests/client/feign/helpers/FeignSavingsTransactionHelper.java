@@ -83,12 +83,27 @@ public class FeignSavingsTransactionHelper {
         return fail(() -> fineractClient.savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request, "withdrawal"));
     }
 
+    /**
+     * Puts part of the balance on hold, making it unavailable to withdrawals until it is released again.
+     */
+    public PostSavingsAccountTransactionsResponse holdAmount(Long savingsId, String amount, String transactionDate, String reasonForBlock) {
+        PostSavingsAccountTransactionsRequest request = SavingsRequestBuilders.holdAmount(amount, transactionDate, reasonForBlock);
+        return ok(() -> fineractClient.savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request, "holdAmount"));
+    }
+
     public CommandProcessingResult reverseTransaction(Long savingsId, Long transactionId) {
         return adjustTransaction(savingsId, transactionId, "reverse");
     }
 
     public CommandProcessingResult undoTransaction(Long savingsId, Long transactionId) {
         return adjustTransaction(savingsId, transactionId, "undo");
+    }
+
+    /**
+     * Releases a hold placed by {@link #holdAmount}, taking the amount off hold and making it available again.
+     */
+    public CommandProcessingResult releaseAmount(Long savingsId, Long holdTransactionId) {
+        return adjustTransaction(savingsId, holdTransactionId, "releaseAmount");
     }
 
     /** All three commands are driven by the query parameter alone and read no payload, hence the empty body. */

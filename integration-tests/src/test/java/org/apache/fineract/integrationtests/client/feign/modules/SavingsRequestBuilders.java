@@ -121,4 +121,14 @@ public final class SavingsRequestBuilders {
                 .locale(SavingsTestData.LOCALE)//
                 .paymentTypeId(1);
     }
+
+    /** The server rejects a hold without a reason, and accepts no payment type on one. */
+    public static PostSavingsAccountTransactionsRequest holdAmount(String amount, String transactionDate, String reasonForBlock) {
+        return new PostSavingsAccountTransactionsRequest()//
+                .transactionAmount(new BigDecimal(amount))//
+                .transactionDate(transactionDate)//
+                .reasonForBlock(reasonForBlock)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .locale(SavingsTestData.LOCALE);
+    }
 }
