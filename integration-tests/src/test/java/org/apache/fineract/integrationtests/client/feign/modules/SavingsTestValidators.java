@@ -22,7 +22,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
+import org.apache.fineract.client.feign.ObjectMapperFactory;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.SavingsAccountStatusEnumData;
 import org.apache.fineract.client.models.SavingsAccountTransactionData;
 
@@ -73,5 +77,18 @@ public final class SavingsTestValidators {
     public static void verifyAmount(final BigDecimal expected, final BigDecimal actual, final String message) {
         assertNotNull(actual, message + " - amount is missing");
         assertEquals(0, expected.compareTo(actual), message + " - expected " + expected + " but was " + actual);
+    }
+
+    /** The exception's own code is always the generic one; the specific code is on each {@code errors} entry. */
+    public static void verifyFirstErrorCode(final String expectedCode, final CallFailedRuntimeException exception) {
+        assertNotNull(exception.getResponseBody(), "Error response carried no body");
+        try {
+            JsonNode errors = ObjectMapperFactory.getShared().readTree(exception.getResponseBody()).get("errors");
+            assertNotNull(errors, "Error response carried no errors array");
+            assertTrue(errors.isArray() && !errors.isEmpty(), "Error response carried an empty errors array");
+            assertEquals(expectedCode, errors.get(0).path("userMessageGlobalisationCode").asText());
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to parse the error response: " + exception.getResponseBody(), e);
+        }
     }
 }

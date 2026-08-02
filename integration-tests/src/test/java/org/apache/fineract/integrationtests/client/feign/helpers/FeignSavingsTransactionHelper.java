@@ -21,10 +21,15 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import feign.FeignException;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.ObjectMapperFactory;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.PostSavingsAccountBulkReversalTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
@@ -67,6 +72,40 @@ public class FeignSavingsTransactionHelper {
 
     public PostSavingsAccountTransactionsResponse forceWithdraw(Long savingsId, String amount, String transactionDate) {
         return forceWithdraw(savingsId, SavingsRequestBuilders.withdrawal(amount, transactionDate));
+    }
+
+    /**
+     * Runs a withdrawal the server is expected to reject, returning the failure so the caller can assert the exact
+     * status and error code.
+     */
+    public CallFailedRuntimeException withdrawExpectingError(Long savingsId, String amount, String transactionDate) {
+        PostSavingsAccountTransactionsRequest request = SavingsRequestBuilders.withdrawal(amount, transactionDate);
+        return fail(() -> fineractClient.savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request, "withdrawal"));
+    }
+
+    public CommandProcessingResult reverseTransaction(Long savingsId, Long transactionId) {
+        return adjustTransaction(savingsId, transactionId, "reverse");
+    }
+
+    public CommandProcessingResult undoTransaction(Long savingsId, Long transactionId) {
+        return adjustTransaction(savingsId, transactionId, "undo");
+    }
+
+    /** All three commands are driven by the query parameter alone and read no payload, hence the empty body. */
+    private CommandProcessingResult adjustTransaction(Long savingsId, Long transactionId, String command) {
+        PostSavingsAccountBulkReversalTransactionsRequest request = new PostSavingsAccountBulkReversalTransactionsRequest();
+        return ok(() -> fineractClient.savingsAccountTransactions().adjustSavingsAccountTransaction(savingsId, transactionId, request,
+                command));
+    }
+
+    /** The generated client types this response as a bare {@code String}, so the JSON is mapped here. */
+    public SavingsAccountTransactionData getTransaction(Long savingsId, Long transactionId) {
+        String json = ok(() -> fineractClient.savingsAccountTransactions().retrieveOneSavingsAccountTransaction(savingsId, transactionId));
+        try {
+            return ObjectMapperFactory.getShared().readValue(json, SavingsAccountTransactionData.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to parse savings transaction " + transactionId, e);
+        }
     }
 
     public List<SavingsAccountTransactionData> getTransactions(Long savingsId) {

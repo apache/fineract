@@ -24,6 +24,8 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PostSavingsProductsResponse;
+import org.apache.fineract.client.models.PutSavingsProductsProductIdRequest;
+import org.apache.fineract.client.models.PutSavingsProductsProductIdResponse;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 
 public class FeignSavingsProductHelper {
@@ -44,5 +46,9 @@ public class FeignSavingsProductHelper {
 
     public GetSavingsProductsProductIdResponse getSavingsProduct(Long productId) {
         return ok(() -> fineractClient.savingsProduct().retrieveOneSavingsProduct(productId));
+    }
+
+    public PutSavingsProductsProductIdResponse updateSavingsProduct(Long productId, PutSavingsProductsProductIdRequest request) {
+        return ok(() -> fineractClient.savingsProduct().updateSavingsProduct(productId, request));
     }
 }
