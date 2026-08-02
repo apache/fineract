@@ -38,6 +38,7 @@ import org.apache.fineract.client.models.PostSavingsProductsResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
 import org.apache.fineract.client.models.SavingsAccountStatusEnumData;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
@@ -61,6 +62,7 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
     protected static FeignChargesHelper chargesHelper;
     protected static FeignGlobalConfigurationHelper globalConfigurationHelper;
     protected static FeignBusinessDateHelper businessDateHelper;
+    protected static FeignAccountHelper accountHelper;
 
     @BeforeAll
     public static void setupSavingsHelpers() {
@@ -72,6 +74,7 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
         chargesHelper = new FeignChargesHelper(client);
         globalConfigurationHelper = new FeignGlobalConfigurationHelper(client);
         businessDateHelper = new FeignBusinessDateHelper(client);
+        accountHelper = new FeignAccountHelper(client);
     }
 
     protected Long createClient() {

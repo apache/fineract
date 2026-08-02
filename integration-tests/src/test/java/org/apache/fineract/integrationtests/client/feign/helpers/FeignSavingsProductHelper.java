@@ -20,8 +20,10 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
+import org.apache.fineract.client.models.GetSavingsProductsResponse;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PostSavingsProductsResponse;
 import org.apache.fineract.client.models.PutSavingsProductsProductIdRequest;
@@ -50,5 +52,9 @@ public class FeignSavingsProductHelper {
 
     public PutSavingsProductsProductIdResponse updateSavingsProduct(Long productId, PutSavingsProductsProductIdRequest request) {
         return ok(() -> fineractClient.savingsProduct().updateSavingsProduct(productId, request));
+    }
+
+    public List<GetSavingsProductsResponse> getAllSavingsProducts() {
+        return ok(() -> fineractClient.savingsProduct().retrieveAllSavingsProducts());
     }
 }

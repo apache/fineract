@@ -19,11 +19,14 @@
 package org.apache.fineract.integrationtests.client.feign.modules;
 
 import java.math.BigDecimal;
+import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsRequest;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.PutSavingsProductsProductIdRequest;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
 
 public final class SavingsRequestBuilders {
 
@@ -57,6 +60,72 @@ public final class SavingsRequestBuilders {
                 .allowOverdraft(false)//
                 .enforceMinRequiredBalance(false)//
                 .withHoldTax(false);
+    }
+
+    public static PostSavingsProductsRequest withAccrualAccountingMappings(PostSavingsProductsRequest request, Account assetAccount,
+            Account liabilityAccount, Account incomeAccount, Account expenseAccount) {
+        return request//
+                .savingsReferenceAccountId(accountId(assetAccount))//
+                .overdraftPortfolioControlId(accountId(assetAccount))//
+                .feesReceivableAccountId(accountId(assetAccount))//
+                .penaltiesReceivableAccountId(accountId(assetAccount))//
+                .savingsControlAccountId(accountId(liabilityAccount))//
+                .transfersInSuspenseAccountId(accountId(liabilityAccount))//
+                .interestPayableAccountId(accountId(liabilityAccount))//
+                .interestOnSavingsAccountId(accountId(expenseAccount))//
+                .writeOffAccountId(accountId(expenseAccount))//
+                .incomeFromFeeAccountId(accountId(incomeAccount))//
+                .incomeFromPenaltyAccountId(accountId(incomeAccount))//
+                .incomeFromInterestId(accountId(incomeAccount));
+    }
+
+    public static PostSavingsProductsRequest withAccrualAccountingMappings(PostSavingsProductsRequest request, Account assetAccount,
+            Account liabilityAccount, Account incomeAccount, Account expenseAccount, Account interestReceivableAccount) {
+        return withAccrualAccountingMappings(request, assetAccount, liabilityAccount, incomeAccount, expenseAccount)
+                .interestReceivableAccountId(accountId(interestReceivableAccount));
+    }
+
+    /** An update is validated against the same parameter set as a create, so it carries the whole product body. */
+    public static PutSavingsProductsProductIdRequest withAccrualAccountingMappings(PutSavingsProductsProductIdRequest request,
+            Account assetAccount, Account liabilityAccount, Account incomeAccount, Account expenseAccount,
+            Account interestReceivableAccount) {
+        return request//
+                .savingsReferenceAccountId(accountId(assetAccount))//
+                .overdraftPortfolioControlId(accountId(assetAccount))//
+                .feesReceivableAccountId(accountId(assetAccount))//
+                .penaltiesReceivableAccountId(accountId(assetAccount))//
+                .savingsControlAccountId(accountId(liabilityAccount))//
+                .transfersInSuspenseAccountId(accountId(liabilityAccount))//
+                .interestPayableAccountId(accountId(liabilityAccount))//
+                .interestOnSavingsAccountId(accountId(expenseAccount))//
+                .writeOffAccountId(accountId(expenseAccount))//
+                .incomeFromFeeAccountId(accountId(incomeAccount))//
+                .incomeFromPenaltyAccountId(accountId(incomeAccount))//
+                .incomeFromInterestId(accountId(incomeAccount))//
+                .interestReceivableAccountId(accountId(interestReceivableAccount));
+    }
+
+    public static Long accountId(Account account) {
+        return account.getAccountID().longValue();
+    }
+
+    public static ChargeRequest savingsWithdrawalFeeCharge() {
+        return new ChargeRequest()//
+                .active(true)//
+                .name(Utils.uniqueRandomStringGenerator("Charge_Savings_", 6))//
+                .currencyCode(SavingsTestData.CURRENCY_CODE)//
+                .amount(SavingsTestData.DEFAULT_CHARGE_AMOUNT)//
+                .chargeAppliesTo(SavingsTestData.ChargeAppliesTo.SAVINGS)//
+                .chargeTimeType(SavingsTestData.ChargeTimeType.WITHDRAWAL_FEE)//
+                .chargeCalculationType(SavingsTestData.ChargeCalculationType.FLAT)//
+                .locale(SavingsTestData.LOCALE);
+    }
+
+    public static PostSavingsAccountsSavingsAccountIdChargesRequest savingsAccountCharge(Long chargeId, Float amount) {
+        return new PostSavingsAccountsSavingsAccountIdChargesRequest()//
+                .chargeId(chargeId)//
+                .amount(amount)//
+                .locale(SavingsTestData.LOCALE);
     }
 
     public static PostSavingsAccountsRequest submitSavingsApplication(Long clientId, Long productId, String submittedOnDate) {
