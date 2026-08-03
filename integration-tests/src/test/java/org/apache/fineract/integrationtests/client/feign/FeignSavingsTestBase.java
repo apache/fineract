@@ -39,12 +39,14 @@ import org.apache.fineract.client.models.SavingsAccountData;
 import org.apache.fineract.client.models.SavingsAccountStatusEnumData;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountTransferHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignDatatableHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignJournalEntryHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignPaymentTypeHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsChargeHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsLifecycleExtension;
@@ -71,6 +73,8 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
     protected static FeignSchedulerHelper schedulerHelper;
     protected static FeignDatatableHelper datatableHelper;
     protected static FeignSavingsChargeHelper savingsChargeHelper;
+    protected static FeignAccountTransferHelper accountTransferHelper;
+    protected static FeignPaymentTypeHelper paymentTypeHelper;
 
     @BeforeAll
     public static void setupSavingsHelpers() {
@@ -87,6 +91,8 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
         schedulerHelper = new FeignSchedulerHelper(client);
         datatableHelper = new FeignDatatableHelper(client);
         savingsChargeHelper = new FeignSavingsChargeHelper(client);
+        accountTransferHelper = new FeignAccountTransferHelper(client);
+        paymentTypeHelper = new FeignPaymentTypeHelper(client);
     }
 
     protected Long createClient() {
