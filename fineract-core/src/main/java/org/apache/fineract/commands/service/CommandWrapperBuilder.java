@@ -2234,15 +2234,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder updateCalendar(final String supportedEntityType, final Long supportedEntityId, final Long calendarId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_CALENDAR;
-        this.entityId = calendarId;
-        this.groupId = supportedEntityId;
-        this.href = "/" + supportedEntityType + "/" + supportedEntityId + "/calendars/" + calendarId;
-        return this;
-    }
-
     public CommandWrapperBuilder deleteCalendar(final String supportedEntityType, final Long supportedEntityId, final Long calendarId) {
         this.actionName = ACTION_DELETE;
         this.entityName = ENTITY_CALENDAR;

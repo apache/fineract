@@ -54,9 +54,12 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.calendar.command.CalendarCreateCommand;
+import org.apache.fineract.portfolio.calendar.command.CalendarUpdateCommand;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateResponse;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
+import org.apache.fineract.portfolio.calendar.data.CalendarUpdateRequest;
+import org.apache.fineract.portfolio.calendar.data.CalendarUpdateResponse;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.service.CalendarDropdownReadPlatformService;
 import org.apache.fineract.portfolio.calendar.service.CalendarReadPlatformService;
@@ -163,13 +166,15 @@ public class CalendarsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Calendar", operationId = "updateCalendar")
-    public CommandProcessingResult updateCalendar(@PathParam("entityType") final String entityType,
-            @PathParam("entityId") final Long entityId, @PathParam("calendarId") final Long calendarId, final String jsonRequestBody) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCalendar(entityType, entityId, calendarId)
-                .withJson(jsonRequestBody).build();
-
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    public CalendarUpdateResponse updateCalendar(@PathParam("entityType") final String entityType,
+            @PathParam("entityId") final Long entityId, @PathParam("calendarId") final Long calendarId,
+            @Valid final CalendarUpdateRequest request) {
+        request.setEntityType(entityType);
+        request.setEntityId(entityId);
+        request.setCalendarId(calendarId);
+        final CalendarUpdateCommand command = new CalendarUpdateCommand();
+        command.setPayload(request);
+        return dispatcher.<CalendarUpdateRequest, CalendarUpdateResponse>dispatch(command).get();
     }
 
     @DELETE
