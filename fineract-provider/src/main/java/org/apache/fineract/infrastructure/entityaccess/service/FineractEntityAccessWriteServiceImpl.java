@@ -22,7 +22,6 @@ import jakarta.persistence.PersistenceException;
 import java.time.LocalDate;
 import java.util.Map;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -31,8 +30,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.entityaccess.api.FineractEntityApiResourceConstants;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityDataValidator;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccess;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessRepository;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepositoryWrapper;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMapping;
@@ -51,38 +48,20 @@ import org.springframework.transaction.annotation.Transactional;
 public class FineractEntityAccessWriteServiceImpl implements FineractEntityAccessWriteService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FineractEntityAccessWriteServiceImpl.class);
-    private final FineractEntityAccessRepository entityAccessRepository;
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper;
     private final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository;
     private final FineractEntityToEntityMappingRepositoryWrapper fineractEntityToEntityMappingRepositoryWrapper;
     private final FineractEntityDataValidator fromApiJsonDeserializer;
 
     @Autowired
-    public FineractEntityAccessWriteServiceImpl(final FineractEntityAccessRepository entityAccessRepository,
-            final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper,
+    public FineractEntityAccessWriteServiceImpl(final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper,
             final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository,
             final FineractEntityToEntityMappingRepositoryWrapper fineractEntityToEntityMappingRepositoryWrapper,
             FineractEntityDataValidator fromApiJsonDeserializer) {
-        this.entityAccessRepository = entityAccessRepository;
         this.fineractEntityToEntityMappingRepository = fineractEntityToEntityMappingRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.fineractEntityRelationRepositoryWrapper = fineractEntityRelationRepositoryWrapper;
         this.fineractEntityToEntityMappingRepositoryWrapper = fineractEntityToEntityMappingRepositoryWrapper;
-    }
-
-    @Override
-    public CommandProcessingResult createEntityAccess(@SuppressWarnings("unused") JsonCommand command) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    @Transactional
-    public void addNewEntityAccess(final String entityType, final Long entityId, final CodeValue accessType, final String secondEntityType,
-            final Long secondEntityId) {
-        FineractEntityAccess entityAccess = FineractEntityAccess.createNew(entityType, entityId, accessType, secondEntityType,
-                secondEntityId);
-        entityAccessRepository.save(entityAccess);
     }
 
     @Override
@@ -182,11 +161,4 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
         throw ErrorHandler.getMappable(dve, "error.msg.entity.mapping", "Unknown data integrity issue with resource.");
     }
 
-    /*
-     * @Override public CommandProcessingResult updateEntityAccess(Long entityAccessId, JsonCommand command) { // TODO
-     * Auto-generated method stub return null; }
-     *
-     * @Override public CommandProcessingResult removeEntityAccess(String entityType, Long entityId, Long accessType,
-     * String secondEntityType, Long secondEntityId) { // TODO Auto-generated method stub return null; }
-     */
 }
