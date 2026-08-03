@@ -30,7 +30,6 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -40,6 +39,8 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.CalendarConstants.CalendarSupportedParameters;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateResponse;
+import org.apache.fineract.portfolio.calendar.data.CalendarUpdateRequest;
+import org.apache.fineract.portfolio.calendar.data.CalendarUpdateResponse;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarFrequencyType;
@@ -83,7 +84,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         try {
             entityType = CalendarEntityType.valueOf(request.getEntityType().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
-            throw new CalendarEntityTypeNotSupportedException(request.getEntityType());
+            throw new CalendarEntityTypeNotSupportedException(request.getEntityType(), e);
         }
         if (entityType == CalendarEntityType.INVALID) {
             throw new CalendarEntityTypeNotSupportedException(request.getEntityType());
@@ -215,29 +216,21 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
     }
 
+    @Transactional
     @Override
-    public CommandProcessingResult updateCalendar(final JsonCommand command) {
+    public CalendarUpdateResponse updateCalendar(final CalendarUpdateRequest request) {
+        this.validateIsEditMeetingAllowed(request.getEntityId() != null && request.getEntityType() != null
+                && (request.getEntityType().equalsIgnoreCase("groups") || request.getEntityType().equalsIgnoreCase("centers"))
+                        ? request.getEntityId()
+                        : null);
 
-        /** Validate to check if Edit is Allowed **/
-        this.validateIsEditMeetingAllowed(command.getGroupId());
-        /*
-         * Validate all the data for updating the calendar
-         */
-        this.fromApiJsonDeserializer.validateForUpdate(command.json());
-
+        final Long calendarId = request.getCalendarId();
         Boolean areActiveEntitiesSynced = false;
-        final Long calendarId = command.entityId();
 
         final Collection<LoanStatus> loanStatuses = new ArrayList<>(
                 Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, LoanStatus.APPROVED, LoanStatus.ACTIVE));
-
         final Integer numberOfActiveLoansSyncedWithThisCalendar = this.calendarInstanceRepository.countOfLoansSyncedWithCalendar(calendarId,
                 loanStatuses);
-
-        /*
-         * areActiveEntitiesSynced is set to true, if there are any active loans synced to this calendar.
-         */
-
         if (numberOfActiveLoansSyncedWithThisCalendar > 0) {
             areActiveEntitiesSynced = true;
         }
@@ -246,56 +239,27 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
                 .orElseThrow(() -> new CalendarNotFoundException(calendarId));
 
         final LocalDate oldStartDate = calendarForUpdate.getStartDate();
-        // create calendar history before updating calendar
         final CalendarHistory calendarHistory = new CalendarHistory(calendarForUpdate, oldStartDate);
 
-        Map<String, Object> changes = null;
-
-        final Boolean reschedulebasedOnMeetingDates = command
-                .booleanObjectValueOfParameterNamed(CalendarSupportedParameters.RESCHEDULE_BASED_ON_MEETING_DATES.getValue());
-
-        /*
-         * System allows to change the meeting date by two means,
-         *
-         * Option 1: reschedulebasedOnMeetingDates = false or reschedulebasedOnMeetingDates is not passed By directly
-         * editing the recurring day with effective from date and system decides the next meeting date based on some
-         * sensible logic (i.e., number of minimum days between two repayments)
-         *
-         *
-         * Option 2: reschedulebasedOnMeetingDates = true By providing alternative meeting date for one of future
-         * meeting date and derive the day of recurrence from the new meeting date. Ex: User proposes new meeting date
-         * say "14/Nov/2014" for present meeting date "12/Nov/2014", based on this input other values re derived and
-         * loans are rescheduled
-         *
-         */
-
+        Map<String, Object> changes;
         LocalDate newMeetingDate = null;
         LocalDate presentMeetingDate = null;
+        final Boolean reschedule = request.getRescheduleBasedOnMeetingDates();
 
-        if (reschedulebasedOnMeetingDates != null && reschedulebasedOnMeetingDates) {
-
-            newMeetingDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.NEW_MEETING_DATE.getValue());
-            presentMeetingDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.PRESENT_MEETING_DATE.getValue());
-
-            /*
-             * New meeting date proposed will become the new start date for the updated calendar
-             */
-
+        if (Boolean.TRUE.equals(reschedule)) {
+            newMeetingDate = parseDate(request.getNewMeetingDate(), request.getDateFormat(), request.getLocale());
+            presentMeetingDate = parseDate(request.getPresentMeetingDate(), request.getDateFormat(), request.getLocale());
             changes = calendarForUpdate.updateStartDateAndDerivedFeilds(newMeetingDate);
-
         } else {
-            changes = calendarForUpdate.update(command, areActiveEntitiesSynced);
+            changes = calendarForUpdate.update(request, areActiveEntitiesSynced, request.getDateFormat(), request.getLocale());
         }
 
         if (!changes.isEmpty()) {
-            // update calendar history table only if there is a change in
-            // calendar start date.
-            if (reschedulebasedOnMeetingDates == null) {
-                presentMeetingDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.START_DATE.getValue());
+            if (reschedule == null && request.getStartDate() != null) {
+                presentMeetingDate = parseDate(request.getStartDate(), request.getDateFormat(), request.getLocale());
             }
-            if (null != newMeetingDate) {
-                final LocalDate endDate = presentMeetingDate.minusDays(1);
-                calendarHistory.updateEndDate(endDate);
+            if (newMeetingDate != null && presentMeetingDate != null) {
+                calendarHistory.updateEndDate(presentMeetingDate.minusDays(1));
             }
             this.calendarHistoryRepository.save(calendarHistory);
             Set<CalendarHistory> history = calendarForUpdate.getCalendarHistory();
@@ -304,25 +268,16 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
             this.calendarRepository.saveAndFlush(calendarForUpdate);
 
             if (this.configurationDomainService.isRescheduleFutureRepaymentsEnabled() && calendarForUpdate.isRepeating()) {
-                // fetch all loan calendar instances associated with modifying
-                // calendar.
                 final Collection<CalendarInstance> loanCalendarInstances = this.calendarInstanceRepository
                         .findByCalendarIdAndEntityTypeId(calendarId, CalendarEntityType.LOANS.getValue());
-
                 if (!CollectionUtils.isEmpty(loanCalendarInstances)) {
-                    // update all loans associated with modifying calendar
-                    this.loanWritePlatformService.applyMeetingDateChanges(calendarForUpdate, loanCalendarInstances,
-                            reschedulebasedOnMeetingDates, presentMeetingDate, newMeetingDate);
-
+                    this.loanWritePlatformService.applyMeetingDateChanges(calendarForUpdate, loanCalendarInstances, reschedule,
+                            presentMeetingDate, newMeetingDate);
                 }
             }
         }
 
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(calendarForUpdate.getId()) //
-                .with(changes) //
-                .build();
+        return CalendarUpdateResponse.builder().resourceId(calendarForUpdate.getId()).changes(changes).build();
     }
 
     @Override
