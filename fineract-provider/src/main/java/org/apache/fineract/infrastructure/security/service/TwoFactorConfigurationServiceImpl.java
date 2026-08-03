@@ -21,7 +21,7 @@ package org.apache.fineract.infrastructure.security.service;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
-import java.io.StringReader;
+import java.io.Reader;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -279,7 +279,7 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
 
     private String compileTextTemplate(final String template, final String name, final Map<String, Object> params) {
         final MustacheFactory mf = new DefaultMustacheFactory();
-        final Mustache mustache = mf.compile(new StringReader(template), name);
+        final Mustache mustache = mf.compile(Reader.of(template), name);
 
         final StringWriter stringWriter = new StringWriter();
         mustache.execute(stringWriter, params);
