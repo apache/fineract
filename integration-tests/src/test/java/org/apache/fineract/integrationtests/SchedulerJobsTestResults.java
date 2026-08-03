@@ -65,6 +65,7 @@ import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.HolidayHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -760,6 +761,92 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
         Assertions.assertEquals((Float) standingInstructionData.get("amount"), (Float) loggedTransaction.get("amount"),
                 "Verifying transferred amount and logged transaction amounts");
+    }
+
+    // FINERACT-2672: one failing standing instruction (insufficient funds) must NOT revert its successful siblings or
+    // erase their history. Before the fix the whole batch ran in one transaction, so a single failure marked it
+    // rollback-only and reverted every successful transfer + all history rows.
+    @Test
+    public void testStandingInstructionsJobIsolatesFailureAndPersistsSuccesses() throws InterruptedException {
+        savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        final StandingInstructionsHelper standingInstructionsHelper = new StandingInstructionsHelper(requestSpec, responseSpec);
+
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
+        final DateTimeFormatter monthDayFormat = DateTimeFormatter.ofPattern("dd MMMM", Locale.US);
+        final LocalDate localDate = LocalDate.now(this.systemTimeZone.toZoneId());
+        ZonedDateTime currentDate = ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, this.systemTimeZone.toZoneId());
+        final String today = dateFormat.format(currentDate.toLocalDate());
+        final String monthDay = monthDayFormat.format(currentDate.toLocalDate());
+        currentDate = currentDate.minus(Duration.ofDays(7));
+        final String validFrom = dateFormat.format(currentDate);
+        currentDate = currentDate.plus(1, ChronoUnit.YEARS);
+        final String validTo = dateFormat.format(currentDate);
+
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        final Integer savingsProductId = createSavingsProduct(requestSpec, responseSpec,
+                ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
+
+        final Integer fundedSource = createActiveSavingsAccount(clientId, savingsProductId);
+        final Integer shortSource = createActiveSavingsAccount(clientId, savingsProductId);
+        final Integer destination = createActiveSavingsAccount(clientId, savingsProductId);
+
+        // The standing-instruction amount is 500 and the opening balance is 1000; drain the second source below 500 so
+        // its instruction fails on insufficient funds while the first still has enough to succeed.
+        savingsAccountHelper.withdrawalFromSavingsAccount(shortSource, "600", today, CommonConstants.RESPONSE_RESOURCE_ID);
+
+        final Float fundedSourceBefore = savingsBalance(fundedSource);
+        final Float shortSourceBefore = savingsBalance(shortSource);
+        final Float destinationBefore = savingsBalance(destination);
+
+        final Integer instructionFunded = standingInstructionsHelper.createStandingInstruction(clientId.toString(), fundedSource.toString(),
+                destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay);
+        final Integer instructionShort = standingInstructionsHelper.createStandingInstruction(clientId.toString(), shortSource.toString(),
+                destination.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, validFrom, validTo, monthDay);
+        Assertions.assertNotNull(instructionFunded);
+        Assertions.assertNotNull(instructionShort);
+
+        // The job must complete even though one instruction fails (pre-fix it threw JobExecutionException and rolled
+        // the
+        // whole run back).
+        this.schedulerJobHelper.executeAndAwaitJob("Execute Standing Instruction");
+
+        final Float amount = 500.0f;
+        // The funded instruction's transfer PERSISTED despite the sibling failing — the core regression.
+        Assertions.assertEquals(fundedSourceBefore - amount, savingsBalance(fundedSource),
+                "Funded source must be debited (its transfer must not be reverted by the failing sibling)");
+        Assertions.assertEquals(destinationBefore + amount, savingsBalance(destination),
+                "Destination must be credited exactly once, by the funded instruction only");
+        // The failing instruction's transfer rolled back in isolation — its source is unchanged.
+        Assertions.assertEquals(shortSourceBefore, savingsBalance(shortSource),
+                "Under-funded source must be unchanged (its transfer rolled back)");
+
+        final Integer fromAccountType = PortfolioAccountType.SAVINGS.getValue();
+        final Integer transferType = AccountTransferType.ACCOUNT_TRANSFER.getValue();
+
+        final List<HashMap> fundedHistory = standingInstructionsHelper.getStandingInstructionHistory(fundedSource, fromAccountType,
+                clientId, transferType);
+        Assertions.assertEquals(1, fundedHistory.size(), "Funded instruction must have one history row");
+        Assertions.assertEquals("success", fundedHistory.get(0).get("status"), "Funded instruction must be recorded as success");
+
+        // Pre-fix this row was rolled back with the run (0 rows); it must now survive as a durable failure record.
+        final List<HashMap> shortHistory = standingInstructionsHelper.getStandingInstructionHistory(shortSource, fromAccountType, clientId,
+                transferType);
+        Assertions.assertEquals(1, shortHistory.size(), "Failing instruction must leave one durable history row");
+        Assertions.assertEquals("failed", shortHistory.get(0).get("status"), "Failing instruction must be recorded as failed");
+    }
+
+    private Integer createActiveSavingsAccount(final Integer clientId, final Integer savingsProductId) {
+        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductId,
+                ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
+        Assertions.assertNotNull(savingsId);
+        SavingsStatusChecker.verifySavingsIsPending(SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId));
+        SavingsStatusChecker.verifySavingsIsApproved(this.savingsAccountHelper.approveSavings(savingsId));
+        SavingsStatusChecker.verifySavingsIsActive(this.savingsAccountHelper.activateSavings(savingsId));
+        return savingsId;
+    }
+
+    private Float savingsBalance(final Integer savingsId) {
+        return (Float) this.savingsAccountHelper.getSavingsSummary(savingsId).get("accountBalance");
     }
 
     @Test

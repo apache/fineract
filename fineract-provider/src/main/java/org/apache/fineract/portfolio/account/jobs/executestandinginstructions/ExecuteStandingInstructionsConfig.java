@@ -18,9 +18,8 @@
  */
 package org.apache.fineract.portfolio.account.jobs.executestandinginstructions;
 
-import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
-import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
+import org.apache.fineract.portfolio.account.service.StandingInstructionExecutionService;
 import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -31,7 +30,6 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -44,11 +42,7 @@ public class ExecuteStandingInstructionsConfig {
     @Autowired
     private StandingInstructionReadPlatformService standingInstructionReadPlatformService;
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private DatabaseSpecificSQLGenerator sqlGenerator;
-    @Autowired
-    private AccountTransfersWritePlatformService accountTransfersWritePlatformService;
+    private StandingInstructionExecutionService standingInstructionExecutionService;
 
     @Bean
     protected Step executeStandingInstructionsStep() {
@@ -64,7 +58,6 @@ public class ExecuteStandingInstructionsConfig {
 
     @Bean
     public ExecuteStandingInstructionsTasklet executeStandingInstructionsTasklet() {
-        return new ExecuteStandingInstructionsTasklet(standingInstructionReadPlatformService, jdbcTemplate, sqlGenerator,
-                accountTransfersWritePlatformService);
+        return new ExecuteStandingInstructionsTasklet(standingInstructionReadPlatformService, standingInstructionExecutionService);
     }
 }
