@@ -22,14 +22,13 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.GsonBuilder;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.IdempotencyKeyGenerator;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.bulkimport.constants.CenterConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
@@ -41,9 +40,11 @@ import org.apache.fineract.infrastructure.bulkimport.importhandler.helper.GroupI
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.apache.fineract.portfolio.calendar.command.CalendarCreateCommand;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
+import org.apache.fineract.portfolio.calendar.data.CalendarCreateResponse;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
-import org.apache.fineract.portfolio.calendar.service.CalendarWritePlatformService;
+import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
 import org.apache.fineract.portfolio.group.data.CenterData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.poi.ss.usermodel.Cell;
@@ -62,15 +63,13 @@ public class CenterImportHandler implements ImportHandler {
     public static final String EMPTY_STR = "";
     private static final Logger LOG = LoggerFactory.getLogger(CenterImportHandler.class);
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final IdempotencyKeyGenerator idempotencyKeyGenerator;
-    private final CalendarWritePlatformService calendarWritePlatformService;
+    private final CommandDispatcher dispatcher;
 
     @Autowired
     public CenterImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            IdempotencyKeyGenerator idempotencyKeyGenerator, CalendarWritePlatformService calendarWritePlatformService) {
+            final CommandDispatcher dispatcher) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.idempotencyKeyGenerator = idempotencyKeyGenerator;
-        this.calendarWritePlatformService = calendarWritePlatformService;
+        this.dispatcher = dispatcher;
     }
 
     @Override
@@ -266,23 +265,10 @@ public class CenterImportHandler implements ImportHandler {
         CalendarData calendarData = meetings.get(rowIndex);
         calendarData.setTitle("centers_" + result.getGroupId().toString() + "_CollectionMeeting");
 
-        final String startDate = calendarData.getStartDate() != null
-                ? calendarData.getStartDate().format(DateTimeFormatter.ofPattern(dateFormat))
-                : null;
-
-        CalendarCreateRequest.CalendarCreateRequestBuilder builder = CalendarCreateRequest.builder()
-                .entityType(TemplatePopulateImportConstants.CENTER_ENTITY_TYPE).entityId(result.getGroupId()).title(calendarData.getTitle())
-                .description(calendarData.getDescription()).startDate(startDate)
-                .typeId(calendarData.getTypeId() != null ? Integer.valueOf(calendarData.getTypeId()) : null)
-                .repeating(String.valueOf(calendarData.isRepeating())).interval(calendarData.getInterval())
-                .repeatsOnDay(calendarData.getRepeatsOnDay() != null ? String.valueOf(calendarData.getRepeatsOnDay().getId()) : null)
-                .dateFormat(dateFormat).locale(calendarData.getLocale());
-
-        if (calendarData.isRepeating() && calendarData.getFrequency() != null) {
-            builder.frequency(String.valueOf(calendarData.getFrequency().getId()));
-        }
-
-        calendarWritePlatformService.createCalendar(builder.build());
+        final CalendarCreateCommand command = new CalendarCreateCommand();
+        command.setPayload(
+                ImportHandlerUtils.toCalendarCreateRequest(calendarData, CalendarEntityType.CENTERS, result.getGroupId(), dateFormat));
+        dispatcher.<CalendarCreateRequest, CalendarCreateResponse>dispatch(command).get();
         return 2;
     }
 

@@ -736,11 +736,16 @@ public final class CalendarUtils {
 
     public static void validateNthDayOfMonthFrequency(DataValidatorBuilder baseDataValidator, final String repeatsOnNthDayOfMonthParamName,
             final String repeatsOnDayParamName, final JsonElement element, final FromJsonHelper fromApiJsonHelper) {
-        final Integer repeatsOnNthDayOfMonth = fromApiJsonHelper.extractIntegerSansLocaleNamed(repeatsOnNthDayOfMonthParamName, element);
+        validateNthDayOfMonthFrequency(baseDataValidator, repeatsOnNthDayOfMonthParamName, repeatsOnDayParamName,
+                fromApiJsonHelper.extractIntegerSansLocaleNamed(repeatsOnNthDayOfMonthParamName, element),
+                fromApiJsonHelper.extractIntegerSansLocaleNamed(repeatsOnDayParamName, element));
+    }
+
+    public static void validateNthDayOfMonthFrequency(DataValidatorBuilder baseDataValidator, final String repeatsOnNthDayOfMonthParamName,
+            final String repeatsOnDayParamName, final Integer repeatsOnNthDayOfMonth, final Integer repeatsOnDay) {
         baseDataValidator.reset().parameter(repeatsOnNthDayOfMonthParamName).value(repeatsOnNthDayOfMonth).ignoreIfNull()
                 .isOneOfTheseValues(NthDayType.ONE.getValue(), NthDayType.TWO.getValue(), NthDayType.THREE.getValue(),
                         NthDayType.FOUR.getValue(), NthDayType.LAST.getValue(), NthDayType.ONDAY.getValue());
-        final Integer repeatsOnDay = fromApiJsonHelper.extractIntegerSansLocaleNamed(repeatsOnDayParamName, element);
         baseDataValidator.reset().parameter(repeatsOnDayParamName).value(repeatsOnDay).ignoreIfNull()
                 .inMinMaxRange(CalendarWeekDaysType.getMinValue(), CalendarWeekDaysType.getMaxValue());
         NthDayType nthDayType = null;

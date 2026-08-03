@@ -27,6 +27,7 @@ import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateResponse;
 import org.apache.fineract.portfolio.calendar.service.CalendarWritePlatformService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -37,6 +38,7 @@ public class CalendarCreateCommandHandler implements CommandHandler<CalendarCrea
 
     @Retry(name = "commandCalendarCreate", fallbackMethod = "fallback")
     @Override
+    @Transactional
     public CalendarCreateResponse handle(Command<CalendarCreateRequest> command) {
         return writeService.createCalendar(command.getPayload());
     }

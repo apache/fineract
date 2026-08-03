@@ -36,13 +36,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.CalendarConstants.CalendarSupportedParameters;
+import org.apache.fineract.portfolio.calendar.data.CalendarUpdateRequest;
 import org.apache.fineract.portfolio.calendar.exception.CalendarDateException;
 import org.apache.fineract.portfolio.calendar.exception.CalendarParameterUpdateNotSupportedException;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
@@ -151,29 +151,6 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
                 firstReminder, secondReminder, meetingtime);
     }
 
-    public static Calendar fromJson(final JsonCommand command) {
-
-        LocalTime meetingtime;
-        final String title = command.stringValueOfParameterNamed(CalendarSupportedParameters.TITLE.getValue());
-        final String description = command.stringValueOfParameterNamed(CalendarSupportedParameters.DESCRIPTION.getValue());
-        final String location = command.stringValueOfParameterNamed(CalendarSupportedParameters.LOCATION.getValue());
-        final LocalDate startDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.START_DATE.getValue());
-        final LocalDate endDate = command.localDateValueOfParameterNamed(CalendarSupportedParameters.END_DATE.getValue());
-        final Integer duration = command.integerValueSansLocaleOfParameterNamed(CalendarSupportedParameters.DURATION.getValue());
-        final Integer typeId = command.integerValueSansLocaleOfParameterNamed(CalendarSupportedParameters.TYPE_ID.getValue());
-        final boolean repeating = command.booleanPrimitiveValueOfParameterNamed(CalendarSupportedParameters.REPEATING.getValue());
-        final Integer remindById = command.integerValueSansLocaleOfParameterNamed(CalendarSupportedParameters.REMIND_BY_ID.getValue());
-        final Integer firstReminder = command.integerValueSansLocaleOfParameterNamed(CalendarSupportedParameters.FIRST_REMINDER.getValue());
-        final Integer secondReminder = command
-                .integerValueSansLocaleOfParameterNamed(CalendarSupportedParameters.SECOND_REMINDER.getValue());
-        meetingtime = command.localTimeValueOfParameterNamed(CalendarSupportedParameters.MEETING_TIME.getValue());
-
-        final String recurrence = Calendar.constructRecurrence(command, null);
-
-        return new Calendar(title, description, location, startDate, endDate, duration, typeId, repeating, recurrence, remindById,
-                firstReminder, secondReminder, meetingtime);
-    }
-
     public Map<String, Object> updateStartDateAndDerivedFeilds(final LocalDate newMeetingStartDate) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
@@ -214,85 +191,79 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return actualChanges;
     }
 
-    public Map<String, Object> update(final JsonCommand command, final Boolean areActiveEntitiesSynced) {
+    /**
+     * Applies a partial update. A {@code null} field in the request leaves the stored value unchanged; an empty
+     * {@code description} or {@code location} clears it. The dates and the meeting time are parsed by the caller, which
+     * knows the request's {@code dateFormat}, {@code locale} and {@code timeFormat}.
+     */
+    public Map<String, Object> update(final CalendarUpdateRequest request, final LocalDate newStartDate, final LocalDate newEndDate,
+            final LocalTime newMeetingTime, final boolean areActiveEntitiesSynced) {
         final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
 
-        if (command.isChangeInStringParameterNamed(CalendarSupportedParameters.TITLE.getValue(), this.title)) {
-            final String newValue = command.stringValueOfParameterNamed(CalendarSupportedParameters.TITLE.getValue());
-            actualChanges.put(CalendarSupportedParameters.TITLE.getValue(), newValue);
-            this.title = StringUtils.defaultIfEmpty(newValue, null);
+        if (request.getTitle() != null && !request.getTitle().equals(this.title)) {
+            actualChanges.put(CalendarSupportedParameters.TITLE.getValue(), request.getTitle());
+            this.title = StringUtils.defaultIfEmpty(request.getTitle(), null);
         }
-        if (command.isChangeInStringParameterNamed(CalendarSupportedParameters.DESCRIPTION.getValue(), this.description)) {
-            final String newValue = command.stringValueOfParameterNamed(CalendarSupportedParameters.DESCRIPTION.getValue());
-            actualChanges.put(CalendarSupportedParameters.DESCRIPTION.getValue(), newValue);
-            this.description = StringUtils.defaultIfEmpty(newValue, null);
+        if (request.getDescription() != null && !request.getDescription().equals(StringUtils.defaultString(this.description))) {
+            actualChanges.put(CalendarSupportedParameters.DESCRIPTION.getValue(), request.getDescription());
+            this.description = StringUtils.defaultIfEmpty(request.getDescription(), null);
         }
-        if (command.isChangeInStringParameterNamed(CalendarSupportedParameters.LOCATION.getValue(), this.location)) {
-            final String newValue = command.stringValueOfParameterNamed(CalendarSupportedParameters.LOCATION.getValue());
-            actualChanges.put(CalendarSupportedParameters.LOCATION.getValue(), newValue);
-            this.location = StringUtils.defaultIfEmpty(newValue, null);
+        if (request.getLocation() != null && !request.getLocation().equals(StringUtils.defaultString(this.location))) {
+            actualChanges.put(CalendarSupportedParameters.LOCATION.getValue(), request.getLocation());
+            this.location = StringUtils.defaultIfEmpty(request.getLocation(), null);
         }
 
-        final String dateFormatAsInput = command.dateFormat();
-        final String localeAsInput = command.locale();
         final String startDateParamName = CalendarSupportedParameters.START_DATE.getValue();
-        if (command.isChangeInLocalDateParameterNamed(startDateParamName, getStartDateLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(startDateParamName);
-            final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
+        if (newStartDate != null && !newStartDate.equals(getStartDateLocalDate())) {
             final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
 
-            if (DateUtils.isBefore(newValue, currentDate)) {
+            if (DateUtils.isBefore(newStartDate, currentDate)) {
                 final String defaultUserMessage = "New meeting effective from date cannot be in past";
-                throw new CalendarDateException("new.start.date.cannot.be.in.past", defaultUserMessage, newValue, getStartDateLocalDate());
-            } else if (isStartDateAfter(newValue) && isStartDateBeforeOrEqual(currentDate)) {
+                throw new CalendarDateException("new.start.date.cannot.be.in.past", defaultUserMessage, newStartDate,
+                        getStartDateLocalDate());
+            } else if (isStartDateAfter(newStartDate) && isStartDateBeforeOrEqual(currentDate)) {
                 // new meeting date should be on or after start date or current
                 // date
                 final String defaultUserMessage = "New meeting effective from date cannot be a date before existing meeting start date";
-                throw new CalendarDateException("new.start.date.before.existing.date", defaultUserMessage, newValue,
+                throw new CalendarDateException("new.start.date.before.existing.date", defaultUserMessage, newStartDate,
                         getStartDateLocalDate());
             } else {
-                actualChanges.put(startDateParamName, valueAsInput);
-                actualChanges.put("dateFormat", dateFormatAsInput);
-                actualChanges.put("locale", localeAsInput);
-                this.startDate = newValue;
+                actualChanges.put(startDateParamName, request.getStartDate());
+                actualChanges.put(CalendarSupportedParameters.DATE_FORMAT.getValue(), request.getDateFormat());
+                actualChanges.put(CalendarSupportedParameters.LOCALE.getValue(), request.getLocale());
+                this.startDate = newStartDate;
             }
         }
 
         final String endDateParamName = CalendarSupportedParameters.END_DATE.getValue();
-        if (command.isChangeInLocalDateParameterNamed(endDateParamName, getEndDateLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(endDateParamName);
-            actualChanges.put(endDateParamName, valueAsInput);
-            actualChanges.put("dateFormat", dateFormatAsInput);
-            actualChanges.put("locale", localeAsInput);
-
-            this.endDate = command.localDateValueOfParameterNamed(endDateParamName);
+        if (newEndDate != null && !newEndDate.equals(getEndDateLocalDate())) {
+            actualChanges.put(endDateParamName, request.getEndDate());
+            actualChanges.put(CalendarSupportedParameters.DATE_FORMAT.getValue(), request.getDateFormat());
+            actualChanges.put(CalendarSupportedParameters.LOCALE.getValue(), request.getLocale());
+            this.endDate = newEndDate;
         }
 
         final String durationParamName = CalendarSupportedParameters.DURATION.getValue();
-        if (command.isChangeInIntegerSansLocaleParameterNamed(durationParamName, this.duration)) {
-            final Integer newValue = command.integerValueSansLocaleOfParameterNamed(durationParamName);
-            actualChanges.put(durationParamName, newValue);
-            this.duration = newValue;
+        if (request.getDuration() != null && !request.getDuration().equals(this.duration)) {
+            actualChanges.put(durationParamName, request.getDuration());
+            this.duration = request.getDuration();
         }
 
         // Do not allow to change calendar type
         // TODO: AA Instead of throwing an exception, do not allow meeting
         // calendar type to update.
-        final String typeParamName = CalendarSupportedParameters.TYPE_ID.getValue();
-        if (command.isChangeInIntegerSansLocaleParameterNamed(typeParamName, this.typeId)) {
-            final Integer newValue = command.integerValueSansLocaleOfParameterNamed(typeParamName);
+        if (request.getTypeId() != null && !request.getTypeId().equals(this.typeId)) {
             final String defaultUserMessage = "Meeting calendar type update is not supported";
             final String oldMeeingType = CalendarType.fromInt(this.typeId).name();
-            final String newMeetingType = CalendarType.fromInt(newValue).name();
+            final String newMeetingType = CalendarType.fromInt(request.getTypeId()).name();
 
             throw new CalendarParameterUpdateNotSupportedException("meeting.type", defaultUserMessage, newMeetingType, oldMeeingType);
         }
 
         final String repeatingParamName = CalendarSupportedParameters.REPEATING.getValue();
-        if (command.isChangeInBooleanParameterNamed(repeatingParamName, this.repeating)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(repeatingParamName);
-            actualChanges.put(repeatingParamName, newValue);
-            this.repeating = newValue;
+        if (request.getRepeating() != null && request.getRepeating() != this.repeating) {
+            actualChanges.put(repeatingParamName, request.getRepeating());
+            this.repeating = request.getRepeating();
         }
 
         // if repeating is false then update recurrence to NULL
@@ -312,66 +283,125 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
             }
         }
 
-        final String newRecurrence = Calendar.constructRecurrence(command, this);
-        if (!StringUtils.isBlank(this.recurrence) && !newRecurrence.equalsIgnoreCase(this.recurrence)) {
-            /*
-             * If active entities like JLG loan or RD accounts are synced to the calendar then do not allow to change
-             * meeting frequency
-             */
+        final String newRecurrence = this.repeating ? mergeRecurrence(request) : null;
+        if (newRecurrence != null && !newRecurrence.equalsIgnoreCase(this.recurrence)) {
+            if (!StringUtils.isBlank(this.recurrence)) {
+                /*
+                 * If active entities like JLG loan or RD accounts are synced to the calendar then do not allow to
+                 * change meeting frequency
+                 */
 
-            if (areActiveEntitiesSynced && !CalendarUtils.isFrequencySame(this.recurrence, newRecurrence)) {
-                final String defaultUserMessage = "Update of meeting frequency is not supported";
-                throw new CalendarParameterUpdateNotSupportedException("meeting.frequency", defaultUserMessage);
-            }
+                if (areActiveEntitiesSynced && !CalendarUtils.isFrequencySame(this.recurrence, newRecurrence)) {
+                    final String defaultUserMessage = "Update of meeting frequency is not supported";
+                    throw new CalendarParameterUpdateNotSupportedException("meeting.frequency", defaultUserMessage);
+                }
 
-            /*
-             * If active entities like JLG loan or RD accounts are synced to the calendar then do not allow to change
-             * meeting interval
-             */
+                /*
+                 * If active entities like JLG loan or RD accounts are synced to the calendar then do not allow to
+                 * change meeting interval
+                 */
 
-            if (areActiveEntitiesSynced && !CalendarUtils.isIntervalSame(this.recurrence, newRecurrence)) {
-                final String defaultUserMessage = "Update of meeting interval is not supported";
-                throw new CalendarParameterUpdateNotSupportedException("meeting.interval", defaultUserMessage);
+                if (areActiveEntitiesSynced && !CalendarUtils.isIntervalSame(this.recurrence, newRecurrence)) {
+                    final String defaultUserMessage = "Update of meeting interval is not supported";
+                    throw new CalendarParameterUpdateNotSupportedException("meeting.interval", defaultUserMessage);
+                }
             }
 
             actualChanges.put("recurrence", newRecurrence);
-            this.recurrence = StringUtils.defaultIfEmpty(newRecurrence, null);
+            this.recurrence = newRecurrence;
         }
 
         final String remindByParamName = CalendarSupportedParameters.REMIND_BY_ID.getValue();
-        if (command.isChangeInIntegerSansLocaleParameterNamed(remindByParamName, this.remindById)) {
-            final Integer newValue = command.integerValueSansLocaleOfParameterNamed(remindByParamName);
-            actualChanges.put(remindByParamName, newValue);
-            this.remindById = newValue;
+        if (request.getRemindById() != null && !request.getRemindById().equals(this.remindById)) {
+            actualChanges.put(remindByParamName, request.getRemindById());
+            this.remindById = request.getRemindById();
         }
 
         final String firstRemindarParamName = CalendarSupportedParameters.FIRST_REMINDER.getValue();
-        if (command.isChangeInIntegerSansLocaleParameterNamed(firstRemindarParamName, this.firstReminder)) {
-            final Integer newValue = command.integerValueSansLocaleOfParameterNamed(firstRemindarParamName);
-            actualChanges.put(firstRemindarParamName, newValue);
-            this.firstReminder = newValue;
+        if (request.getFirstReminder() != null && !request.getFirstReminder().equals(this.firstReminder)) {
+            actualChanges.put(firstRemindarParamName, request.getFirstReminder());
+            this.firstReminder = request.getFirstReminder();
         }
 
         final String secondRemindarParamName = CalendarSupportedParameters.SECOND_REMINDER.getValue();
-        if (command.isChangeInIntegerSansLocaleParameterNamed(secondRemindarParamName, this.secondReminder)) {
-            final Integer newValue = command.integerValueSansLocaleOfParameterNamed(secondRemindarParamName);
-            actualChanges.put(secondRemindarParamName, newValue);
-            this.secondReminder = newValue;
+        if (request.getSecondReminder() != null && !request.getSecondReminder().equals(this.secondReminder)) {
+            actualChanges.put(secondRemindarParamName, request.getSecondReminder());
+            this.secondReminder = request.getSecondReminder();
         }
 
-        final String timeFormat = command.stringValueOfParameterNamed(CalendarSupportedParameters.TIME_FORMAT.getValue());
-        final String time = CalendarSupportedParameters.MEETING_TIME.getValue();
-        if (command.isChangeInTimeParameterNamed(CalendarSupportedParameters.MEETING_TIME.getValue(), this.meetingtime, timeFormat)) {
-            final String newValue = command.stringValueOfParameterNamed(CalendarSupportedParameters.MEETING_TIME.getValue());
-            actualChanges.put(CalendarSupportedParameters.MEETING_TIME.getValue(), newValue);
-            LocalTime timeInLocalDateTimeFormat = command.localTimeValueOfParameterNamed(time);
-            if (timeInLocalDateTimeFormat != null) {
-                this.meetingtime = timeInLocalDateTimeFormat;
-            }
-
+        if (newMeetingTime != null && !newMeetingTime.equals(this.meetingtime)) {
+            actualChanges.put(CalendarSupportedParameters.MEETING_TIME.getValue(), request.getMeetingtime());
+            this.meetingtime = newMeetingTime;
         }
 
         return actualChanges;
+    }
+
+    /**
+     * Builds the recurrence of a repeating calendar from the update request. A recurrence field that is not sent keeps
+     * its stored value, so a request with only {@code interval}, only {@code repeatsOnDay} or only one of the monthly
+     * day fields changes just that part. Returns {@code null} when nothing about the recurrence was sent and the stored
+     * one stays as it is.
+     */
+    private String mergeRecurrence(final CalendarUpdateRequest request) {
+        final boolean recurrenceSent = request.getFrequency() != null || request.getInterval() != null || request.getRepeatsOnDay() != null
+                || request.getRepeatsOnNthDayOfMonth() != null || request.getRepeatsOnLastWeekdayOfMonth() != null
+                || request.getRepeatsOnDayOfMonth() != null;
+        final boolean hasStoredRecurrence = StringUtils.isNotBlank(this.recurrence);
+        if (!recurrenceSent && hasStoredRecurrence) {
+            return null;
+        }
+
+        final CalendarFrequencyType storedFrequency = hasStoredRecurrence ? CalendarUtils.getFrequency(this.recurrence)
+                : CalendarFrequencyType.INVALID;
+        final CalendarFrequencyType frequencyType = request.getFrequency() != null ? CalendarFrequencyType.fromInt(request.getFrequency())
+                : storedFrequency;
+        if (frequencyType == CalendarFrequencyType.INVALID) {
+            return null;
+        }
+        final Integer interval = request.getInterval() != null ? request.getInterval()
+                : hasStoredRecurrence ? Integer.valueOf(CalendarUtils.getInterval(this.recurrence)) : null;
+        // the stored days only carry over while the frequency stays the same
+        final boolean keepStoredDays = hasStoredRecurrence && frequencyType == storedFrequency;
+
+        if (frequencyType.isWeekly()) {
+            Integer repeatsOnDay = request.getRepeatsOnDay();
+            if (repeatsOnDay == null && keepStoredDays) {
+                final CalendarWeekDaysType storedDay = CalendarUtils.getRepeatsOnDay(this.recurrence);
+                repeatsOnDay = storedDay == CalendarWeekDaysType.INVALID ? null : storedDay.getValue();
+            }
+            return constructRecurrence(frequencyType, interval, repeatsOnDay, null);
+        }
+        if (frequencyType.isMonthly()) {
+            Integer nthDay = request.getRepeatsOnNthDayOfMonth();
+            Integer weekDay = request.getRepeatsOnLastWeekdayOfMonth();
+            Integer dayOfMonth = request.getRepeatsOnDayOfMonth();
+            if (keepStoredDays) {
+                // read the stored rule back as the three request fields and fill in the ones that were not sent
+                final NthDayType storedNthDay = CalendarUtils.getRepeatsOnNthDayOfMonth(this.recurrence);
+                final Integer storedMonthDay = CalendarUtils.getMonthOnDay(this.recurrence);
+                if (storedNthDay == NthDayType.ONDAY && NthDayType.LAST.getValue().equals(storedMonthDay)) {
+                    // BYMONTHDAY=-1 is how "last day of the month" (LAST without a weekday) is stored
+                    nthDay = nthDay == null ? NthDayType.LAST.getValue() : nthDay;
+                } else if (storedNthDay == NthDayType.ONDAY) {
+                    nthDay = nthDay == null ? NthDayType.ONDAY.getValue() : nthDay;
+                    dayOfMonth = dayOfMonth == null ? storedMonthDay : dayOfMonth;
+                } else if (storedNthDay != NthDayType.INVALID) {
+                    // a sent LAST without a weekday means the last day of the month, so the stored weekday only carries
+                    // over to a kept nth day or a sent first to fourth one
+                    final boolean weekDayCarriesOver = nthDay == null
+                            || (nthDay >= NthDayType.ONE.getValue() && nthDay <= NthDayType.FOUR.getValue());
+                    nthDay = nthDay == null ? storedNthDay.getValue() : nthDay;
+                    final CalendarWeekDaysType storedDay = CalendarUtils.getRepeatsOnDay(this.recurrence);
+                    if (weekDay == null && weekDayCarriesOver && storedDay != CalendarWeekDaysType.INVALID) {
+                        weekDay = storedDay.getValue();
+                    }
+                }
+            }
+            validateMonthlyDay(nthDay, weekDay, dayOfMonth);
+            return constructRecurrence(frequencyType, interval, null, nthDay, weekDay, dayOfMonth);
+        }
+        return constructRecurrence(frequencyType, interval, null, null);
     }
 
     @SuppressWarnings("null")
@@ -476,41 +506,45 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return isStartDateBeforeOrEqual(compareDate) && (getEndDateLocalDate() == null || isEndDateAfterOrEqual(compareDate));
     }
 
-    private static String constructRecurrence(final JsonCommand command, final Calendar calendar) {
-        final boolean repeating;
-        if (command.parameterExists(CalendarSupportedParameters.REPEATING.getValue())) {
-            repeating = command.booleanPrimitiveValueOfParameterNamed(CalendarSupportedParameters.REPEATING.getValue());
-        } else if (calendar != null) {
-            repeating = calendar.isRepeating();
-        } else {
-            repeating = false;
+    /**
+     * Checks the monthly day after the stored values have been merged in, so a partial update cannot leave a rule that
+     * names an nth weekday without the weekday, or "on day" without the day.
+     */
+    private static void validateMonthlyDay(final Integer nthDay, final Integer weekDay, final Integer dayOfMonth) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(CALENDAR_RESOURCE_NAME);
+        CalendarUtils.validateNthDayOfMonthFrequency(baseDataValidator, CalendarSupportedParameters.REPEATS_ON_NTH_DAY_OF_MONTH.getValue(),
+                CalendarSupportedParameters.REPEATS_ON_LAST_WEEKDAY_OF_MONTH.getValue(), nthDay, weekDay);
+        if (nthDay != null && NthDayType.fromInt(nthDay).isOnDay()) {
+            baseDataValidator.reset().parameter(CalendarSupportedParameters.REPEATS_ON_DAY_OF_MONTH.getValue()).value(dayOfMonth).notNull();
         }
-
-        if (repeating) {
-            final Integer frequency = command.integerValueOfParameterNamed(CalendarSupportedParameters.FREQUENCY.getValue());
-            final CalendarFrequencyType frequencyType = CalendarFrequencyType.fromInt(frequency);
-            final Integer interval = command.integerValueOfParameterNamed(CalendarSupportedParameters.INTERVAL.getValue());
-            Integer repeatsOnDay = null;
-            if (frequencyType.isWeekly()) {
-                repeatsOnDay = command.integerValueOfParameterNamed(CalendarSupportedParameters.REPEATS_ON_DAY.getValue());
-            }
-            Integer repeatsOnNthDayOfMonth = null;
-            if (frequencyType.isMonthly()) {
-                repeatsOnNthDayOfMonth = command
-                        .integerValueOfParameterNamed(CalendarSupportedParameters.REPEATS_ON_NTH_DAY_OF_MONTH.getValue());
-                final NthDayType nthDay = NthDayType.fromInt(repeatsOnNthDayOfMonth);
-                repeatsOnDay = command
-                        .integerValueOfParameterNamed(CalendarSupportedParameters.REPEATS_ON_LAST_WEEKDAY_OF_MONTH.getValue());
-                if (nthDay.isOnDay()) {
-                    repeatsOnNthDayOfMonth = command
-                            .integerValueOfParameterNamed(CalendarSupportedParameters.REPEATS_ON_DAY_OF_MONTH.getValue());
-                    repeatsOnDay = null;
-                }
-            }
-
-            return constructRecurrence(frequencyType, interval, repeatsOnDay, repeatsOnNthDayOfMonth);
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
         }
-        return "";
+    }
+
+    /**
+     * Builds a recurrence rule from the request parameters of a repeating calendar. For a monthly frequency
+     * {@code repeatsOnNthDayOfMonth} is the week of the month and {@code repeatsOnLastWeekdayOfMonth} the weekday, or,
+     * when {@code repeatsOnNthDayOfMonth} is {@link NthDayType#ONDAY}, {@code repeatsOnDayOfMonth} is the day of the
+     * month.
+     */
+    public static String constructRecurrence(final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay,
+            final Integer repeatsOnNthDayOfMonth, final Integer repeatsOnLastWeekdayOfMonth, final Integer repeatsOnDayOfMonth) {
+        Integer weekDay = null;
+        if (frequencyType.isWeekly()) {
+            weekDay = repeatsOnDay;
+        }
+        Integer nthDayOfMonth = null;
+        if (frequencyType.isMonthly()) {
+            nthDayOfMonth = repeatsOnNthDayOfMonth;
+            weekDay = repeatsOnLastWeekdayOfMonth;
+            if (NthDayType.fromInt(repeatsOnNthDayOfMonth).isOnDay()) {
+                nthDayOfMonth = repeatsOnDayOfMonth;
+                weekDay = null;
+            }
+        }
+        return constructRecurrence(frequencyType, interval, weekDay, nthDayOfMonth);
     }
 
     private static String constructRecurrence(final CalendarFrequencyType frequencyType, final Integer interval, final Integer repeatsOnDay,
@@ -519,7 +553,7 @@ public class Calendar extends AbstractAuditableWithUTCDateTimeCustom<Long> {
 
         recurrenceBuilder.append("FREQ=");
         recurrenceBuilder.append(frequencyType.toString().toUpperCase(java.util.Locale.ROOT));
-        if (interval > 1) {
+        if (interval != null && interval > 1) {
             recurrenceBuilder.append(";INTERVAL=");
             recurrenceBuilder.append(interval);
         }
