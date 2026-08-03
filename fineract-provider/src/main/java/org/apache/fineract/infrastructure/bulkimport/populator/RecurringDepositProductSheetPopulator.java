@@ -81,7 +81,11 @@ public class RecurringDepositProductSheetPopulator extends AbstractWorkbookPopul
             writeString(INTEREST_CALCULATION_COL, row, product.getInterestCalculationType().getValue());
             writeString(INTEREST_CALCULATION_DAYS_IN_YEAR_COL, row, product.getInterestCalculationDaysInYearType().getValue());
             writeBoolean(PRECLOSURE_PENAL_APPLICABLE_COL, row, product.isPreClosurePenalApplicable());
-            writeString(MIN_DEPOSIT_TERM_TYPE_COL, row, product.getMinDepositTermType().getValue());
+            // Null-guarded like the sibling optional fields below — a product without a min-deposit-term type would
+            // otherwise NPE here and 500 the whole recurring-deposit download template.
+            if (product.getMinDepositTermType() != null) {
+                writeString(MIN_DEPOSIT_TERM_TYPE_COL, row, product.getMinDepositTermType().getValue());
+            }
 
             if (product.getMinDepositAmount() != null) {
                 writeBigDecimal(MIN_DEPOSIT_COL, row, product.getMinDepositAmount());
