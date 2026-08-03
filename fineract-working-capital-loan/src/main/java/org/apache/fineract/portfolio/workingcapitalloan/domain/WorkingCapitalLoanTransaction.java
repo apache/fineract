@@ -39,6 +39,7 @@ import lombok.Setter;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionTypeConverter;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -168,7 +169,7 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         transaction.transactionType = LoanTransactionType.DISCOUNT_FEE;
         transaction.transactionAmount = amount;
         transaction.transactionDate = transactionDate;
-        transaction.submittedOnDate = transactionDate;
+        transaction.submittedOnDate = DateUtils.getBusinessLocalDate();
         transaction.externalId = externalId != null ? externalId : ExternalId.empty();
         transaction.paymentDetail = paymentDetail;
         transaction.classification = classification;
@@ -185,7 +186,7 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         transaction.transactionType = LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT;
         transaction.transactionAmount = amount;
         transaction.transactionDate = transactionDate;
-        transaction.submittedOnDate = transactionDate;
+        transaction.submittedOnDate = DateUtils.getBusinessLocalDate();
         transaction.externalId = externalId != null ? externalId : ExternalId.empty();
         transaction.paymentDetail = paymentDetail;
         transaction.classification = classification;
@@ -214,7 +215,7 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         this.wcLoan = loan;
         this.transactionType = transactionType;
         this.transactionDate = transactionDate;
-        this.submittedOnDate = transactionDate;
+        this.submittedOnDate = DateUtils.getBusinessLocalDate();
         this.transactionAmount = amount;
         this.paymentDetail = paymentDetail;
         this.classification = classification;
