@@ -21,10 +21,12 @@ package org.apache.fineract.accounting.journalentry.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.closure.domain.GLClosure;
@@ -214,7 +216,10 @@ public class AccountingProcessorHelper {
         final Long officeId = (Long) accountingBridgeData.get("officeId");
         final String currencyCode = (String) accountingBridgeData.get("currencyCode");
         final List<SavingsTransactionDTO> newSavingsTransactions = new ArrayList<>();
-        boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
+        final boolean isAccountTransfer = (Boolean) accountingBridgeData.get("isAccountTransfer");
+        @SuppressWarnings("unchecked")
+        final Set<Long> accountTransferTransactionIds = (Set<Long>) accountingBridgeData.getOrDefault("accountTransferTransactionIds",
+                Collections.emptySet());
 
         @SuppressWarnings("unchecked")
         final List<Map<String, Object>> newTransactionsMap = (List<Map<String, Object>>) accountingBridgeData.get("newSavingsTransactions");
@@ -261,13 +266,14 @@ public class AccountingProcessorHelper {
                 }
             }
 
-            if (!isAccountTransfer) {
-                isAccountTransfer = this.accountTransfersReadPlatformService.isAccountTransfer(Long.parseLong(transactionId),
+            boolean localIsAccountTransfer = isAccountTransfer || accountTransferTransactionIds.contains(Long.parseLong(transactionId));
+            if (!localIsAccountTransfer) {
+                localIsAccountTransfer = this.accountTransfersReadPlatformService.isAccountTransfer(Long.parseLong(transactionId),
                         PortfolioAccountType.SAVINGS);
             }
             final SavingsTransactionDTO transaction = new SavingsTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
-                    transactionDate, transactionType, amount, reversed, feePayments, penaltyPayments, overdraftAmount, isAccountTransfer,
-                    taxPayments);
+                    transactionDate, transactionType, amount, reversed, feePayments, penaltyPayments, overdraftAmount,
+                    localIsAccountTransfer, taxPayments);
 
             newSavingsTransactions.add(transaction);
 
