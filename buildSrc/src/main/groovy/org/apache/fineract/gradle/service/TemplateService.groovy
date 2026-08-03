@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.gradle.service
 
+import java.io.Reader;
 import freemarker.core.Environment
 import freemarker.template.Configuration
 import freemarker.template.Template
@@ -63,7 +64,7 @@ class TemplateService {
             template = new Template("template", new FileReader(new File(params.templateFile), Charset.forName("UTF-8")), this.config)
         }
         if(params.template) {
-            template = new Template("template", new StringReader(params.template), this.config)
+            template = new Template("template", Reader.of(params.template), this.config)
         }
 
         if(template) {

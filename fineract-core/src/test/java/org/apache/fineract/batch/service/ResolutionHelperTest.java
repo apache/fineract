@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import com.jayway.jsonpath.ReadContext;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.batch.exception.BatchReferenceInvalidException;
@@ -108,6 +109,7 @@ public class ResolutionHelperTest {
 
     @Test
     void testResolveRequestWithArrayDateParameter() {
+        Locale.setDefault(Locale.ENGLISH);
         // Test resolving a JSON primitive with array date format
         BatchRequest batchRequest = new BatchRequest();
         batchRequest
