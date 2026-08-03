@@ -117,6 +117,8 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     private GLAccount incomeFromFeesGLAccount;
     @Mock
     private GLAccount incomeFromPenaltiesGLAccount;
+    @Mock
+    private GLAccount incomeFromChargeOffFeesGLAccount;
 
     @BeforeEach
     void setUp() {
@@ -155,6 +157,10 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
                 eq(CashAccountsForLoan.INCOME_FROM_FEES.getValue()), any())).thenReturn(incomeFromFeesGLAccount);
         lenient().when(helper.getLinkedGLAccountForWorkingCapitalLoanProduct(eq(PRODUCT_ID),
                 eq(CashAccountsForLoan.INCOME_FROM_PENALTIES.getValue()), any())).thenReturn(incomeFromPenaltiesGLAccount);
+        lenient()
+                .when(helper.getLinkedGLAccountForWorkingCapitalLoanProduct(eq(PRODUCT_ID),
+                        eq(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue()), any()))
+                .thenReturn(incomeFromChargeOffFeesGLAccount);
     }
 
     private void mockChargeAdjustmentRelation(final boolean penaltyCharge) {
@@ -421,7 +427,7 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     }
 
     @Test
-    void testChargedOffChargeAdjustmentDebitsRecoveryInsteadOfFeeIncome() {
+    void testChargedOffFeeChargeAdjustmentDebitsFeeIncomeAndCreditsChargeOffFeeIncome() {
         when(txn.getTypeOf()).thenReturn(LoanTransactionType.CHARGE_ADJUSTMENT);
         when(txn.getTransactionAmount()).thenReturn(new BigDecimal("40"));
         mockChargeAdjustmentRelation(false);
@@ -431,10 +437,10 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
 
         processor.postJournalEntries(loan, txn, allocation, true);
 
-        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(incomeFromRecoveryGLAccount),
-                eq(LOAN_ID), eq(TXN_ID), any(), eq(new BigDecimal("40")), isNull());
-        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(feesReceivableGLAccount), eq(LOAN_ID),
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(incomeFromFeesGLAccount), eq(LOAN_ID),
                 eq(TXN_ID), any(), eq(new BigDecimal("40")), isNull());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(incomeFromChargeOffFeesGLAccount),
+                eq(LOAN_ID), eq(TXN_ID), any(), eq(new BigDecimal("40")), isNull());
     }
 
     @Test

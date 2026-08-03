@@ -77,20 +77,10 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                             feesPortion, penaltiesPortion, overpaymentPortion);
                 }
             }
-            case LoanTransactionType.GOODWILL_CREDIT -> {
-                if (!isChargedOff) {
-                    postGoodwillCreditJournalEntries(loan, txn, principalPortion, feesPortion, penaltiesPortion, overpaymentPortion);
-                } else {
-                    throw new NotImplementedException("Charge off is not implemented yet for Goodwill Credit for Working Capital Loan");
-                }
-            }
-            case LoanTransactionType.PAYOUT_REFUND -> {
-                if (!isChargedOff) {
-                    postPayoutRefundJournalEntries(loan, txn, principalPortion, feesPortion, penaltiesPortion, overpaymentPortion);
-                } else {
-                    throw new NotImplementedException("Charge off is not implemented yet for Payout Refund on Working Capital Loan");
-                }
-            }
+            case LoanTransactionType.GOODWILL_CREDIT -> postGoodwillCreditJournalEntries(loan, txn, principalPortion, feesPortion,
+                    penaltiesPortion, overpaymentPortion, isChargedOff);
+            case LoanTransactionType.PAYOUT_REFUND -> postPayoutRefundJournalEntries(loan, txn, principalPortion, feesPortion,
+                    penaltiesPortion, overpaymentPortion, isChargedOff);
             case LoanTransactionType.CREDIT_BALANCE_REFUND -> postCreditBalanceRefundJournalEntries(loan, txn, allocation);
             case LoanTransactionType.CHARGE_ADJUSTMENT -> postChargeAdjustmentJournalEntries(loan, txn, principalPortion, feesPortion,
                     penaltiesPortion, overpaymentPortion, isChargedOff);
@@ -107,32 +97,42 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             final BigDecimal principalPortion, final BigDecimal feesPortion, final BigDecimal penaltiesPortion,
             final BigDecimal overpaymentPortion, final boolean isChargedOff) {
         final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
+        final boolean penaltyCharge = isAdjustedChargeAPenalty(txn);
 
-        final CashAccountsForLoan incomeAccountType = isChargedOff ? CashAccountsForLoan.INCOME_FROM_RECOVERY
-                : isAdjustedChargeAPenalty(txn) ? CashAccountsForLoan.INCOME_FROM_PENALTIES : CashAccountsForLoan.INCOME_FROM_FEES;
+        // Debit always against the adjusted charge's own income account (fee or penalty), including after charge-off.
+        final CashAccountsForLoan debitAccountType = penaltyCharge ? CashAccountsForLoan.INCOME_FROM_PENALTIES
+                : CashAccountsForLoan.INCOME_FROM_FEES;
+        accountPostHelper.postDebitJournalEntry(debitAccountType, txn.getTransactionAmount());
 
-        // debit
-        accountPostHelper.postDebitJournalEntry(incomeAccountType, txn.getTransactionAmount());
-
-        // credit
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion);
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
+        if (isChargedOff) {
+            // Receivables were already written off at charge-off; credits go to charge-off fee/penalty income.
+            final CashAccountsForLoan creditAccountType = penaltyCharge ? CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY
+                    : CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES;
+            accountPostHelper.postCreditJournalEntry(creditAccountType, principalPortion);
+            accountPostHelper.postCreditJournalEntry(creditAccountType, feesPortion);
+            accountPostHelper.postCreditJournalEntry(creditAccountType, penaltiesPortion);
+        } else {
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion);
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
+        }
         accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion);
     }
 
     /**
      * Charge-off is a pure accounting tag with no portfolio impact. It writes off the outstanding receivables against
      * the charge-off expense (principal) and reverses the accrued fee/penalty income. There is no interest leg -- WC
-     * has no interest concept. Fraud-expense routing (CHARGE_OFF_FRAUD_EXPENSE) is out of scope until the fraud feature
-     * lands.
+     * has no interest concept. Principal expense is routed to the fraud expense account when the loan is marked fraud.
      */
     private void postChargeOffJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
             final BigDecimal principalPortion, final BigDecimal feesPortion, final BigDecimal penaltiesPortion) {
         final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
 
+        final CashAccountsForLoan chargeOffExpenseAccount = loan.isFraud() ? CashAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE
+                : CashAccountsForLoan.CHARGE_OFF_EXPENSE;
+
         // debit: recognize the loss on principal, reverse accrued fee/penalty income
-        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.CHARGE_OFF_EXPENSE, principalPortion);
+        accountPostHelper.postDebitJournalEntry(chargeOffExpenseAccount, principalPortion);
         accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES, feesPortion);
         accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY, penaltiesPortion);
 
@@ -150,16 +150,24 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                         "Charge adjustment transaction " + txn.getId() + " is missing its link to the adjusted charge"));
     }
 
-    private void postPayoutRefundJournalEntries(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn, BigDecimal principalPortion,
-            BigDecimal feesPortion, BigDecimal penaltiesPortion, BigDecimal overpaymentPortion) {
-        JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
+    private void postPayoutRefundJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final BigDecimal principalPortion, final BigDecimal feesPortion, final BigDecimal penaltiesPortion,
+            final BigDecimal overpaymentPortion, final boolean isChargedOff) {
+        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
         // debit
-        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.FUND_SOURCE,
-                MathUtil.add(principalPortion, penaltiesPortion, feesPortion, overpaymentPortion));
+        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount());
         // credit
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion);
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
+        if (isChargedOff) {
+            final CashAccountsForLoan principalCreditAccount = loan.isFraud() ? CashAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE
+                    : CashAccountsForLoan.CHARGE_OFF_EXPENSE;
+            accountPostHelper.postCreditJournalEntry(principalCreditAccount, principalPortion);
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES, feesPortion);
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY, penaltiesPortion);
+        } else {
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion);
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
+        }
         accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion);
     }
 
@@ -176,18 +184,25 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_PENALTIES, penaltiesPortion);
     }
 
-    private void postGoodwillCreditJournalEntries(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn, BigDecimal principalPortion,
-            BigDecimal feesPortion, BigDecimal penaltiesPortion, BigDecimal overpaymentPortion) {
-        BigDecimal overpaymentPlusPrincipal = principalPortion.add(overpaymentPortion);
-        JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
+    private void postGoodwillCreditJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final BigDecimal principalPortion, final BigDecimal feesPortion, final BigDecimal penaltiesPortion,
+            final BigDecimal overpaymentPortion, final boolean isChargedOff) {
+        final BigDecimal overpaymentPlusPrincipal = principalPortion.add(overpaymentPortion);
+        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
         // debit
         accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.GOODWILL_CREDIT, overpaymentPlusPrincipal);
         accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES, feesPortion);
         accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY, penaltiesPortion);
-        // credit
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion);
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
+        // credit — after charge-off, portfolio/receivable credits become recovery income
+        if (isChargedOff) {
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_RECOVERY, principalPortion);
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_RECOVERY, feesPortion);
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_RECOVERY, penaltiesPortion);
+        } else {
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion);
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
+            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
+        }
         accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion);
     }
 
@@ -401,8 +416,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             helper.createDebitJournalEntryForWorkingCapitalLoan(office, currencyCode, deferredIncomeAccount, loanId, txnId, transactionDate,
                     amount, null);
 
-            final CashAccountsForLoan creditAccountType = isChargedOff ? CashAccountsForLoan.CHARGE_OFF_EXPENSE
-                    : CashAccountsForLoan.INCOME_FROM_DISCOUNT_FEE;
+            final CashAccountsForLoan creditAccountType = resolveChargeOffExpenseAccount(loan, isChargedOff);
             final GLAccount creditAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, creditAccountType.getValue(),
                     null);
             helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, creditAccount, loanId, txnId, transactionDate,
@@ -429,8 +443,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, deferredIncomeAccount, loanId, txnId,
                     transactionDate, amount, null);
 
-            final CashAccountsForLoan debitAccountType = isChargedOff ? CashAccountsForLoan.CHARGE_OFF_EXPENSE
-                    : CashAccountsForLoan.INCOME_FROM_DISCOUNT_FEE;
+            final CashAccountsForLoan debitAccountType = resolveChargeOffExpenseAccount(loan, isChargedOff);
             final GLAccount debitAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, debitAccountType.getValue(),
                     null);
             helper.createDebitJournalEntryForWorkingCapitalLoan(office, currencyCode, debitAccount, loanId, txnId, transactionDate, amount,
@@ -478,6 +491,13 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             return txn.getPaymentDetail().getPaymentType().getId();
         }
         return null;
+    }
+
+    private CashAccountsForLoan resolveChargeOffExpenseAccount(final WorkingCapitalLoan loan, final boolean isChargedOff) {
+        if (!isChargedOff) {
+            return CashAccountsForLoan.INCOME_FROM_DISCOUNT_FEE;
+        }
+        return loan.isFraud() ? CashAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE : CashAccountsForLoan.CHARGE_OFF_EXPENSE;
     }
 
     private class JournalEntryPostingHelper {
