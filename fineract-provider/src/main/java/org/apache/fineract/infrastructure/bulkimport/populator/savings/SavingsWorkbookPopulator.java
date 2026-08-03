@@ -18,7 +18,10 @@
  */
 package org.apache.fineract.infrastructure.bulkimport.populator.savings;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import org.apache.fineract.infrastructure.bulkimport.constants.SavingsConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.infrastructure.bulkimport.populator.AbstractWorkbookPopulator;
@@ -365,7 +368,16 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
         // Withdrawal Fee Amount, Withdrawal Fee Type, Annual Fee, Annual Fee on
         // Date
         // Names for each product
+        Set<String> seenProductNames = new HashSet<>();
         for (Integer i = 0; i < products.size(); i++) {
+            SavingsProductData product = products.get(i);
+            String productName = product.getName();
+            // Guard against duplicate product-keyed defined names — POI rejects a duplicate and 500s the whole
+            // template. Excel defined names are case-insensitive, so key on the sanitised, upper-cased name. The name
+            // is resolved before any createName() call so a skipped product leaves no orphan Name in the workbook.
+            if (!seenProductNames.add(sanitizeName(productName).toUpperCase(Locale.ROOT))) {
+                continue;
+            }
             Name interestRateName = savingsWorkbook.createName();
             Name interestCompoundingPeriodName = savingsWorkbook.createName();
             Name interestPostingPeriodName = savingsWorkbook.createName();
@@ -380,8 +392,6 @@ public class SavingsWorkbookPopulator extends AbstractWorkbookPopulator {
             Name withdrawalFeeName = savingsWorkbook.createName();
             Name allowOverdraftName = savingsWorkbook.createName();
             Name overdraftLimitName = savingsWorkbook.createName();
-            SavingsProductData product = products.get(i);
-            String productName = product.getName();
             if (product.getNominalAnnualInterestRate() != null) {
                 setSanitized(interestRateName, "Interest_Rate_" + productName);
                 interestRateName.setRefersToFormula("Products!$C$" + (i + 2));
