@@ -22,7 +22,9 @@ import com.google.gson.Gson;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +63,15 @@ public class AccountTransferHelper {
     public String build(final String fromAccountId, final String fromClientId, final String toAccountId, final String toClientId,
             final String fromAccountType, final String toAccountType, final String transferAmount) {
 
-        final HashMap<String, String> map = new HashMap<>();
+        return build(fromAccountId, fromClientId, toAccountId, toClientId, fromAccountType, toAccountType, transferAmount, null);
+    }
+
+    @Deprecated(forRemoval = true)
+    public String build(final String fromAccountId, final String fromClientId, final String toAccountId, final String toClientId,
+            final String fromAccountType, final String toAccountType, final String transferAmount,
+            final Map<String, Object> paymentDetails) {
+
+        final HashMap<String, Object> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", LOCALE);
         map.put("fromClientId", fromClientId);
@@ -75,6 +85,9 @@ public class AccountTransferHelper {
         map.put("transferDate", this.transferDate);
         map.put("transferAmount", transferAmount);
         map.put("transferDescription", this.transferDescription);
+        if (paymentDetails != null) {
+            map.putAll(paymentDetails);
+        }
         String savingsApplicationJSON = new Gson().toJson(map);
         LOG.info("{}", savingsApplicationJSON);
         return savingsApplicationJSON;
@@ -98,6 +111,37 @@ public class AccountTransferHelper {
                         toAccountType, transferAmount);
         return Utils.performServerPost(this.requestSpec, this.responseSpec, ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER,
                 accountTransferJSON, "savingsId");
+    }
+
+    @Deprecated(forRemoval = true)
+    public Long accountTransferReturningResourceId(final Integer fromClientId, final Integer fromAccountId, final Integer toClientId,
+            final Integer toAccountId, final String fromAccountType, final String toAccountType, final String transferAmount,
+            final Map<String, Object> paymentDetails) {
+        LOG.debug("--------------------------------ACCOUNT TRANSFER--------------------------------");
+        final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
+                .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
+                .build(fromAccountId.toString(), fromClientId.toString(), toAccountId.toString(), toClientId.toString(), fromAccountType,
+                        toAccountType, transferAmount, paymentDetails);
+        final Integer resourceId = Utils.performServerPost(this.requestSpec, this.responseSpec,
+                ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER, accountTransferJSON, "resourceId");
+        return resourceId.longValue();
+    }
+
+    @Deprecated(forRemoval = true)
+    public Object invalidAccountTransferWithPaymentDetails(final Map<String, Object> paymentDetails) {
+        LOG.debug("--------------------------------ACCOUNT TRANSFER--------------------------------");
+        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
+        final String accountTransferJSON = new AccountTransferHelper(this.requestSpec, this.responseSpec) //
+                .withTransferOnDate(ACCOUNT_TRANSFER_DATE) //
+                .build("1", "1", "2", "1", "2", "2", "100.0", paymentDetails);
+        return Utils.performServerPost(this.requestSpec, this.responseSpec, ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER,
+                accountTransferJSON, "");
+    }
+
+    @Deprecated(forRemoval = true)
+    public ArrayList<HashMap> retrieveTransfersByAccountDetailId(final Long accountDetailId) {
+        return Utils.performServerGet(this.requestSpec, this.responseSpec,
+                ACCOUNT_TRANSFER_URL + "?" + Utils.TENANT_IDENTIFIER + "&accountDetailId=" + accountDetailId, "pageItems");
     }
 
     // TODO: Rewrite to use fineract-client instead!

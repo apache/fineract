@@ -31,6 +31,8 @@ import org.apache.fineract.portfolio.account.data.AccountTransferData;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.service.AccountTransferEnumerations;
 import org.apache.fineract.portfolio.client.data.ClientData;
+import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
+import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
@@ -56,9 +58,15 @@ public final class AccountTransfersMapper implements RowMapper<AccountTransferDa
             fromsavtran.id as fromSavingsAccountTransactionId,
             fromsavtran.transaction_type_enum as fromSavingsAccountTransactionType,
             tosavtran.id as toSavingsAccountTransactionId,
-            tosavtran.transaction_type_enum as toSavingsAccountTransactionType
+            tosavtran.transaction_type_enum as toSavingsAccountTransactionType,
+            pd.id as paymentDetailId, pd.payment_type_id as paymentTypeId,
+            pt.value as paymentTypeName, pd.account_number as accountNumber,
+            pd.check_number as checkNumber, pd.routing_code as routingCode,
+            pd.receipt_number as receiptNumber, pd.bank_number as bankNumber
              FROM m_account_transfer_transaction att
             left join m_account_transfer_details atd on atd.id = att.account_transfer_details_id
+            left join m_payment_detail pd on pd.id = att.payment_detail_id
+            left join m_payment_type pt on pt.id = pd.payment_type_id
             join m_currency curr on curr.code = att.currency_code
             join m_office fromoff on fromoff.id = atd.from_office_id
             join m_office tooff on tooff.id = atd.to_office_id
@@ -128,6 +136,21 @@ public final class AccountTransfersMapper implements RowMapper<AccountTransferDa
             fromAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
         }
 
+        PaymentDetailData paymentDetailData = null;
+        final Long paymentDetailId = JdbcSupport.getLong(rs, "paymentDetailId");
+        if (paymentDetailId != null) {
+            final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentTypeId");
+            final String paymentTypeName = rs.getString("paymentTypeName");
+            final PaymentTypeData paymentType = PaymentTypeData.builder().id(paymentTypeId).name(paymentTypeName).build();
+            final String accountNumber = rs.getString("accountNumber");
+            final String checkNumber = rs.getString("checkNumber");
+            final String routingCode = rs.getString("routingCode");
+            final String receiptNumber = rs.getString("receiptNumber");
+            final String bankNumber = rs.getString("bankNumber");
+            paymentDetailData = new PaymentDetailData(paymentDetailId, paymentType, accountNumber, checkNumber, routingCode, receiptNumber,
+                    bankNumber);
+        }
+
         PortfolioAccountData toAccount = null;
         EnumOptionData toAccountType = null;
         final Long toSavingsAccountId = JdbcSupport.getLong(rs, "toSavingsAccountId");
@@ -144,6 +167,6 @@ public final class AccountTransfersMapper implements RowMapper<AccountTransferDa
         }
 
         return AccountTransferData.instance(id, reversed, transferDate, currency, transferAmount, transferDescription, fromOffice, toOffice,
-                fromClient, toClient, fromAccountType, fromAccount, toAccountType, toAccount);
+                fromClient, toClient, fromAccountType, fromAccount, toAccountType, toAccount, paymentDetailData);
     }
 }

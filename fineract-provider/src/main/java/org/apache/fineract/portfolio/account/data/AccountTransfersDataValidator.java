@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.account.AccountDetailConstants;
 import org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants;
+import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +53,10 @@ public class AccountTransfersDataValidator {
             AccountDetailConstants.fromAccountIdParamName, AccountDetailConstants.toOfficeIdParamName,
             AccountDetailConstants.toClientIdParamName, AccountDetailConstants.toAccountTypeParamName,
             AccountDetailConstants.toAccountIdParamName, AccountTransfersApiConstants.transferDateParamName,
-            AccountTransfersApiConstants.transferAmountParamName, AccountTransfersApiConstants.transferDescriptionParamName));
+            AccountTransfersApiConstants.transferAmountParamName, AccountTransfersApiConstants.transferDescriptionParamName,
+            PaymentDetailConstants.paymentTypeParamName, PaymentDetailConstants.accountNumberParamName,
+            PaymentDetailConstants.checkNumberParamName, PaymentDetailConstants.routingCodeParamName,
+            PaymentDetailConstants.receiptNumberParamName, PaymentDetailConstants.bankNumberParamName));
 
     @Autowired
     public AccountTransfersDataValidator(final FromJsonHelper fromApiJsonHelper,
@@ -94,7 +98,32 @@ public class AccountTransfersDataValidator {
         baseDataValidator.reset().parameter(AccountTransfersApiConstants.transferDescriptionParamName).value(transactionDescription)
                 .notBlank().notExceedingLengthOf(200);
 
+        validatePaymentTypeDetails(baseDataValidator, element);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validatePaymentTypeDetails(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        boolean checkPaymentTypeDetails = false;
+        final Integer paymentTypeId = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(PaymentDetailConstants.paymentTypeParamName,
+                element);
+        baseDataValidator.reset().parameter(PaymentDetailConstants.paymentTypeParamName).value(paymentTypeId).ignoreIfNull()
+                .integerGreaterThanZero();
+        final Set<String> paymentDetailParameters = new HashSet<>(Arrays.asList(PaymentDetailConstants.accountNumberParamName,
+                PaymentDetailConstants.checkNumberParamName, PaymentDetailConstants.routingCodeParamName,
+                PaymentDetailConstants.receiptNumberParamName, PaymentDetailConstants.bankNumberParamName));
+        for (final String paymentDetailParameterName : paymentDetailParameters) {
+            final String paymentDetailParameterValue = this.fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
+            baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
+                    .notExceedingLengthOf(50);
+            if (paymentDetailParameterValue != null && !paymentDetailParameterValue.equals("")) {
+                checkPaymentTypeDetails = true;
+            }
+        }
+        if (checkPaymentTypeDetails) {
+            baseDataValidator.reset().parameter(PaymentDetailConstants.paymentTypeParamName).value(paymentTypeId).notBlank()
+                    .integerGreaterThanZero();
+        }
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {

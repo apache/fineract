@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -65,6 +66,7 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanReadPlatformService
 import org.apache.fineract.portfolio.loanaccount.service.adjustment.LoanAdjustmentParameter;
 import org.apache.fineract.portfolio.loanaccount.service.adjustment.LoanAdjustmentService;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
+import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.SavingsTransactionBooleanValues;
 import org.apache.fineract.portfolio.savings.domain.GSIMRepositoy;
 import org.apache.fineract.portfolio.savings.domain.GroupSavingsIndividualMonitoring;
@@ -93,6 +95,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final ExternalIdFactory externalIdFactory;
     private final FineractProperties fineractProperties;
     private final LoanAdjustmentService loanAdjustmentService;
+    private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
 
     @Transactional
     @Override
@@ -113,7 +116,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         final Integer toAccountTypeId = command.integerValueSansLocaleOfParameterNamed(toAccountTypeParamName);
         final PortfolioAccountType toAccountType = PortfolioAccountType.fromInt(toAccountTypeId);
 
-        final PaymentDetail paymentDetail = null;
+        final Map<String, Object> changes = new HashMap<>();
+        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         Long fromSavingsAccountId = null;
         Long transferDetailId = null;
         boolean isInterestTransfer = false;
@@ -211,7 +215,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             builder.withLoanId(fromLoanAccountId);
         }
 
-        return builder.build();
+        return builder.with(changes).build();
     }
 
     @Override
@@ -575,7 +579,8 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
 
-        final PaymentDetail paymentDetail = null;
+        final Map<String, Object> changes = new HashMap<>();
+        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         Long transferTransactionId = null;
 
         final Long fromLoanAccountId = command.longValueOfParameterNamed(fromAccountIdParamName);
@@ -615,6 +620,6 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         builder.withSavingsId(toSavingsAccountId);
         // }
 
-        return builder.build();
+        return builder.with(changes).build();
     }
 }

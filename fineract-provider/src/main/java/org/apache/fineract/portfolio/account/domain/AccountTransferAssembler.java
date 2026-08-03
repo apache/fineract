@@ -56,7 +56,7 @@ public class AccountTransferAssembler {
 
         final String description = command.stringValueOfParameterNamed(transferDescriptionParamName);
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToSavingsTransfer(accountTransferDetails,
-                withdrawal, deposit, transactionDate, transactionMonetaryAmount, description);
+                withdrawal, deposit, transactionDate, transactionMonetaryAmount, description, withdrawal.getPaymentDetail());
         accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
         return accountTransferDetails;
     }
@@ -73,7 +73,8 @@ public class AccountTransferAssembler {
         final String description = command.stringValueOfParameterNamed(transferDescriptionParamName);
 
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToLoanTransfer(accountTransferDetails,
-                withdrawal, loanRepaymentTransaction, transactionDate, transactionMonetaryAmount, description);
+                withdrawal, loanRepaymentTransaction, transactionDate, transactionMonetaryAmount, description,
+                withdrawal.getPaymentDetail());
         accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
         return accountTransferDetails;
     }
@@ -91,7 +92,7 @@ public class AccountTransferAssembler {
         final String description = command.stringValueOfParameterNamed(transferDescriptionParamName);
 
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.loanTosavingsTransfer(accountTransferDetails,
-                deposit, loanRefundTransaction, transactionDate, transactionMonetaryAmount, description);
+                deposit, loanRefundTransaction, transactionDate, transactionMonetaryAmount, description, deposit.getPaymentDetail());
         accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
         return accountTransferDetails;
     }
@@ -107,7 +108,7 @@ public class AccountTransferAssembler {
         }
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToLoanTransfer(accountTransferDetails,
                 savingsAccountTransaction, loanTransaction, accountTransferDTO.getTransactionDate(), transactionMonetaryAmount,
-                accountTransferDTO.getDescription());
+                accountTransferDTO.getDescription(), accountTransferDTO.getPaymentDetail());
         accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
         return accountTransferDetails;
     }
@@ -124,7 +125,7 @@ public class AccountTransferAssembler {
 
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.savingsToSavingsTransfer(accountTransferDetails,
                 withdrawal, deposit, accountTransferDTO.getTransactionDate(), transactionMonetaryAmount,
-                accountTransferDTO.getDescription());
+                accountTransferDTO.getDescription(), accountTransferDTO.getPaymentDetail());
         accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
         return accountTransferDetails;
     }
@@ -139,7 +140,7 @@ public class AccountTransferAssembler {
         }
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.loanTosavingsTransfer(accountTransferDetails,
                 deposit, loanRefundTransaction, accountTransferDTO.getTransactionDate(), transactionMonetaryAmount,
-                accountTransferDTO.getDescription());
+                accountTransferDTO.getDescription(), accountTransferDTO.getPaymentDetail());
         accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
         return accountTransferDetails;
     }
@@ -154,7 +155,7 @@ public class AccountTransferAssembler {
         }
         AccountTransferTransaction accountTransferTransaction = AccountTransferTransaction.loanToLoanTransfer(accountTransferDetails,
                 disburseTransaction, repaymentTransaction, accountTransferDTO.getTransactionDate(), transactionMonetaryAmount,
-                accountTransferDTO.getDescription());
+                accountTransferDTO.getDescription(), accountTransferDTO.getPaymentDetail());
         accountTransferDetails.addAccountTransferTransaction(accountTransferTransaction);
         return accountTransferDetails;
     }

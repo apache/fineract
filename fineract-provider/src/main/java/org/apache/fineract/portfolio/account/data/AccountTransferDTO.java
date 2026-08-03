@@ -96,6 +96,15 @@ public class AccountTransferDTO {
             final Long toAccountId, final String description, final Locale locale, final DateTimeFormatter fmt,
             final Integer fromTransferType, final Integer toTransferType, final ExternalId txnExternalId, final Loan fromLoan,
             final Loan toLoan) {
+        this(transactionDate, transactionAmount, fromAccountType, toAccountType, fromAccountId, toAccountId, description, locale, fmt, null,
+                fromTransferType, toTransferType, txnExternalId, fromLoan, toLoan);
+    }
+
+    public AccountTransferDTO(final LocalDate transactionDate, final BigDecimal transactionAmount,
+            final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType, final Long fromAccountId,
+            final Long toAccountId, final String description, final Locale locale, final DateTimeFormatter fmt,
+            final PaymentDetail paymentDetail, final Integer fromTransferType, final Integer toTransferType, final ExternalId txnExternalId,
+            final Loan fromLoan, final Loan toLoan) {
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
         this.fromAccountType = fromAccountType;
@@ -105,7 +114,7 @@ public class AccountTransferDTO {
         this.description = description;
         this.locale = locale;
         this.fmt = fmt;
-        this.paymentDetail = null;
+        this.paymentDetail = paymentDetail;
         this.fromTransferType = fromTransferType;
         this.toTransferType = toTransferType;
         this.chargeId = null;
