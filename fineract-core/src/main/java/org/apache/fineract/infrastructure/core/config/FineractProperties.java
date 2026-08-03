@@ -88,6 +88,7 @@ public class FineractProperties {
 
     private FineractSqlValidationProperties sqlValidation;
     private FineractInputValidationProperties inputValidation;
+    private FineractPhoneValidationProperties phoneValidation;
 
     private FineractCache cache;
 
@@ -735,6 +736,13 @@ public class FineractProperties {
 
     @Getter
     @Setter
+    public static class FineractPhoneValidationProperties {
+
+        private String regex = "^\\+?[0-9]{7,15}$";
+    }
+
+    @Getter
+    @Setter
     public static class FineractCache {
 
         private FineractCacheDetails defaultTemplate;
@@ -792,5 +800,11 @@ public class FineractProperties {
     public static class FineractDefaultValues {
 
         private Long officeId;
+    }
+
+    @Getter
+    @Setter
+    public static class FineractPhoneValidationProperties {
+        private String regex = "^\\+?[0-9]{7,15}$";
     }
 }
