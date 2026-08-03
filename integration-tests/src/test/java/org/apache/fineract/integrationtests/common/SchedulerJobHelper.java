@@ -18,175 +18,117 @@
  */
 package org.apache.fineract.integrationtests.common;
 
-import static org.apache.fineract.infrastructure.jobs.api.SchedulerJobApiConstants.SHORT_NAME_PARAM;
+import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.google.gson.Gson;
-import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.fineract.client.feign.services.SchedulerJobApi.RetrieveHistoryQueryParams;
+import org.apache.fineract.client.models.CommandProcessingResult;
+import org.apache.fineract.client.models.ExecuteJobRequest;
+import org.apache.fineract.client.models.GetJobsJobIDJobRunHistoryResponse;
 import org.apache.fineract.client.models.GetJobsResponse;
+import org.apache.fineract.client.models.GetSchedulerResponse;
+import org.apache.fineract.client.models.JobDetailHistoryDataSwagger;
 import org.apache.fineract.client.models.PutJobsJobIDRequest;
-import org.apache.fineract.client.util.Calls;
 import org.hamcrest.MatcherAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Feign-based. Still instance-shaped (see constructor) purely for source compatibility with existing call sites; a
+ * follow-up PR will static-ify this class and update all callers in one mechanical pass.
+ */
 public class SchedulerJobHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedulerJobHelper.class);
-    private final RequestSpecification requestSpec;
-    private final ResponseSpecification response200Spec;
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
+    /**
+     * @deprecated the {@code requestSpec} parameter is unused now that this Helper is Feign-based. Retained only so
+     *             existing {@code new SchedulerJobHelper(requestSpec)} call sites keep compiling; prefer relying on
+     *             static usage once callers are migrated in a follow-up PR.
+     */
+    @Deprecated
     public SchedulerJobHelper(final RequestSpecification requestSpec) {
-        this.requestSpec = requestSpec;
-        this.response200Spec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        // no-op: retained for source compatibility with existing callers
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private List<Map<String, Object>> getAllSchedulerJobs() {
-        final String GET_ALL_SCHEDULER_JOBS_URL = "/fineract-provider/api/v1/jobs?" + Utils.TENANT_IDENTIFIER;
+    private List<GetJobsResponse> getAllSchedulerJobs() {
         LOG.info("------------------------ RETRIEVING ALL SCHEDULER JOBS -------------------------");
-        List<Map<String, Object>> response = Utils.performServerGet(requestSpec, response200Spec, GET_ALL_SCHEDULER_JOBS_URL, "");
+        List<GetJobsResponse> response = ok(
+                () -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().retrieveAllSchedulerJobs());
         assertNotNull(response);
         return response;
     }
 
-    private <T> List<T> getAllSchedulerJobDetails(Function<Map<String, Object>, T> mapper) {
+    private <T> List<T> getAllSchedulerJobDetails(Function<GetJobsResponse, T> mapper) {
         return getAllSchedulerJobs().stream().map(mapper).collect(Collectors.toList());
     }
 
     public List<Integer> getAllSchedulerJobIds() {
-        return getAllSchedulerJobDetails(map -> (Integer) map.get("jobId"));
+        return getAllSchedulerJobDetails(job -> job.getJobId().intValue());
     }
 
     public List<String> getAllSchedulerJobNames() {
-        return getAllSchedulerJobDetails(map -> (String) map.get("displayName"));
+        return getAllSchedulerJobDetails(GetJobsResponse::getDisplayName);
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public Map<String, Object> getSchedulerJobById(int jobId) {
-        final String GET_SCHEDULER_JOB_BY_ID_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?" + Utils.TENANT_IDENTIFIER;
+    public GetJobsResponse getSchedulerJobById(int jobId) {
         LOG.info("------------------------ RETRIEVING SCHEDULER JOB BY ID -------------------------");
-        final Map<String, Object> response = Utils.performServerGet(requestSpec, response200Spec, GET_SCHEDULER_JOB_BY_ID_URL, "");
-        LOG.info("{}", response.toString());
+        GetJobsResponse response = ok(
+                () -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().retrieveOneSchedulerJob((long) jobId));
         assertNotNull(response);
+        LOG.info("{}", response);
         return response;
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public Boolean getSchedulerStatus() {
-        final String GET_SCHEDULER_STATUS_URL = "/fineract-provider/api/v1/scheduler?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING SCHEDULER STATUS -------------------------");
-        final Map<String, Object> response = Utils.performServerGet(requestSpec, response200Spec, GET_SCHEDULER_STATUS_URL, "");
-        return (Boolean) response.get("active");
+        GetSchedulerResponse response = ok(() -> FineractFeignClientHelper.getFineractFeignClient().scheduler().retrieveSchedulerStatus());
+        return response.getActive();
     }
 
     public void updateSchedulerStatus(final boolean on) {
         String command = on ? "start" : "stop";
-        Calls.ok(FineractClientHelper.getFineractClient().jobsScheduler.handleCommandsScheduler(command));
+        executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().scheduler().handleCommandsScheduler(command));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public Map<String, Object> updateSchedulerJob(int jobId, final boolean active) {
-        final String UPDATE_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ UPDATING SCHEDULER JOB -------------------------");
-        final Map<String, Object> response = Utils.performServerPut(requestSpec, response200Spec, UPDATE_SCHEDULER_JOB_URL,
-                updateSchedulerJobAsJSON(active), "changes");
-        return response;
+        CommandProcessingResult response = ok(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob()
+                .updateJobDetail((long) jobId, new PutJobsJobIDRequest().active(active)));
+        return response.getChanges();
     }
 
     public void updateSchedulerJob(long jobId, PutJobsJobIDRequest request) {
-        Calls.ok(FineractClientHelper.getFineractClient().jobs.updateJobDetail(jobId, request));
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private static String updateSchedulerJobAsJSON(final boolean active) {
-        final Map<String, String> map = new HashMap<>();
-        map.put("active", Boolean.toString(active));
-        LOG.info("map :  {}", map);
-        return new Gson().toJson(map);
+        ok(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().updateJobDetail(jobId, request));
     }
 
     public void runSchedulerJob(int jobId) {
-        Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob((long) jobId, "executeJob"));
+        executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().executeJob((long) jobId, "executeJob",
+                new ExecuteJobRequest()));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public void runSchedulerJob(int jobId, ResponseSpecification responseSpec) {
-        final String RUN_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + jobId + "?command=executeJob&" + Utils.TENANT_IDENTIFIER;
-        LOG.info("------------------------ RUN SCHEDULER JOB -------------------------");
-        Utils.performServerPost(requestSpec, responseSpec, RUN_SCHEDULER_JOB_URL, runSchedulerJobAsJSON(), null);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public void runSchedulerJobByShortName(String shortName) {
-        final ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build();
-        runSchedulerJobByShortName(shortName, responseSpec);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    public void runSchedulerJobByShortName(String shortName, ResponseSpecification responseSpec) {
-        final String RUN_SCHEDULER_JOB_URL = "/fineract-provider/api/v1/jobs/" + SHORT_NAME_PARAM + "/" + shortName + "?command=executeJob&"
-                + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RUN SCHEDULER JOB -------------------------");
-        Utils.performServerPost(requestSpec, responseSpec, RUN_SCHEDULER_JOB_URL, runSchedulerJobAsJSON(), null);
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
-    private static String runSchedulerJobAsJSON() {
-        final Map<String, String> map = new HashMap<>();
-        String runSchedulerJob = new Gson().toJson(map);
-        LOG.info(runSchedulerJob);
-        return runSchedulerJob;
+        executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().executeJobByShortName(shortName, "executeJob",
+                new ExecuteJobRequest()));
     }
 
     public int getSchedulerJobIdByName(String jobName) {
-        List<Map<String, Object>> allSchedulerJobsData = getAllSchedulerJobs();
-        for (Integer jobIndex = 0; jobIndex < allSchedulerJobsData.size(); jobIndex++) {
-            if (allSchedulerJobsData.get(jobIndex).get("displayName").equals(jobName)) {
-                return (Integer) allSchedulerJobsData.get(jobIndex).get("jobId");
+        List<GetJobsResponse> allSchedulerJobsData = getAllSchedulerJobs();
+        for (GetJobsResponse job : allSchedulerJobsData) {
+            if (jobName.equals(job.getDisplayName())) {
+                return job.getJobId().intValue();
             }
         }
         throw new IllegalArgumentException(
@@ -195,7 +137,7 @@ public class SchedulerJobHelper {
 
     public Long getSchedulerJobIdByShortName(String shortName) {
         LOG.info("------------------------ RETRIEVING SCHEDULER JOB ID BY SHORT NAME -------------------------");
-        GetJobsResponse job = Calls.ok(FineractClientHelper.getFineractClient().jobs.retrieveByShortName(shortName));
+        GetJobsResponse job = ok(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().retrieveByShortName(shortName));
         assertNotNull(job);
         return job.getJobId();
     }
@@ -243,12 +185,12 @@ public class SchedulerJobHelper {
         final Duration pause = Duration.ofSeconds(1);
         // Await a new completed run-history entry for this job. The history id is
         // monotonic and avoids false positives from timestamp precision.
-        Map<String, Object> finalRunHistory = await().atMost(timeout) //
+        JobDetailHistoryDataSwagger finalRunHistory = await().atMost(timeout) //
                 .pollInterval(pause) //
                 .pollDelay(pause) //
                 .until(() -> getLatestJobRunHistory(jobId), //
                         lastRunHistory -> {
-                            if (lastRunHistory == null || lastRunHistory.get("jobRunEndTime") == null) {
+                            if (lastRunHistory == null || lastRunHistory.getJobRunEndTime() == null) {
                                 return false;
                             }
                             Long jobRunHistoryId = getRunHistoryId(lastRunHistory);
@@ -259,37 +201,26 @@ public class SchedulerJobHelper {
                         });
 
         // Verify triggerType
-        MatcherAssert.assertThat(finalRunHistory.get("triggerType"), is("application"));
+        MatcherAssert.assertThat(finalRunHistory.getTriggerType(), is("application"));
 
         // Verify status & propagate jobRunErrorMessage and/or jobRunErrorLog
         // (if any)
-        String status = (String) finalRunHistory.get("status");
-        if (!status.equals("success")) {
-            fail("Job status is not success: " + finalRunHistory.toString());
+        String status = finalRunHistory.getStatus();
+        if (!"success".equals(status)) {
+            fail("Job status is not success for jobId=" + jobId + ": " + finalRunHistory);
         }
     }
 
-    private Long getRunHistoryId(Map<String, Object> runHistory) {
-        if (runHistory == null) {
-            return null;
-        }
-        Object id = runHistory.get("id");
-        if (id instanceof Number number) {
-            return number.longValue();
-        }
-        if (id instanceof String text) {
-            return Long.valueOf(text);
-        }
-        return null;
+    private Long getRunHistoryId(JobDetailHistoryDataSwagger runHistory) {
+        return runHistory == null ? null : runHistory.getId();
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> getLatestJobRunHistory(long jobId) {
-        final String GET_LATEST_SCHEDULER_JOB_RUN_HISTORY_URL = "/fineract-provider/api/v1/jobs/" + jobId
-                + "/runhistory?offset=0&limit=1&orderBy=id&sortOrder=DESC&" + Utils.TENANT_IDENTIFIER;
+    private JobDetailHistoryDataSwagger getLatestJobRunHistory(long jobId) {
         LOG.info("------------------------ RETRIEVING LATEST SCHEDULER JOB RUN HISTORY -------------------------");
-        Map<String, Object> response = Utils.performServerGet(requestSpec, response200Spec, GET_LATEST_SCHEDULER_JOB_RUN_HISTORY_URL, "");
-        List<Map<String, Object>> pageItems = (List<Map<String, Object>>) response.get("pageItems");
+        RetrieveHistoryQueryParams queryParams = new RetrieveHistoryQueryParams().offset(0).limit(1).orderBy("id").sortOrder("DESC");
+        GetJobsJobIDJobRunHistoryResponse response = ok(
+                () -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().retrieveHistory(jobId, queryParams));
+        List<JobDetailHistoryDataSwagger> pageItems = response.getPageItems();
         if (pageItems == null || pageItems.isEmpty()) {
             return null;
         }

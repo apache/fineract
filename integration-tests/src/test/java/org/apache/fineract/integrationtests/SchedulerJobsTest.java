@@ -24,11 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.fineract.client.models.GetJobsResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
@@ -59,9 +59,8 @@ public class SchedulerJobsTest {
         schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         originalSchedulerStatus = schedulerJobHelper.getSchedulerStatus();
         ParallelExecutionHelper.runInParallel(schedulerJobHelper.getAllSchedulerJobIds(), (jobId) -> {
-            Map<String, Object> schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
-            Boolean active = (Boolean) schedulerJob.get("active");
-            originalJobStatus.put(jobId, active);
+            GetJobsResponse schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
+            originalJobStatus.put(jobId, schedulerJob.getActive());
         });
         globalConfigurationHelper = new GlobalConfigurationHelper();
     }
@@ -81,9 +80,9 @@ public class SchedulerJobsTest {
         schedulerJobHelper.updateSchedulerStatus(true);
         int minJobId = schedulerJobHelper.getAllSchedulerJobIds().stream().mapToInt(number -> number).min().orElse(Integer.MAX_VALUE);
         schedulerJobHelper.updateSchedulerJob(minJobId, true);
-        String nextRunTimeText = await().until(() -> (String) schedulerJobHelper.getSchedulerJobById(minJobId).get("nextRunTime"),
-                Objects::nonNull);
-        DateTimeFormatter.ISO_INSTANT.parse(nextRunTimeText);
+        // Feign already deserializes nextRunTime into a typed OffsetDateTime, so a malformed date would fail here
+        // with a deserialization error rather than needing to be manually parsed.
+        await().until(() -> schedulerJobHelper.getSchedulerJobById(minJobId).getNextRunTime(), Objects::nonNull);
     }
 
     @Test
@@ -122,10 +121,9 @@ public class SchedulerJobsTest {
 
     private void updateJobStatus(Integer jobId) {
         // Retrieving Scheduler Job by ID
-        Map<String, Object> schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
+        GetJobsResponse schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
 
-        Boolean active = (Boolean) schedulerJob.get("active");
-        active = !active;
+        boolean active = !schedulerJob.getActive();
 
         // Updating Scheduler Job
         Map<String, Object> changes = schedulerJobHelper.updateSchedulerJob(jobId, active);
@@ -134,7 +132,7 @@ public class SchedulerJobsTest {
         assertEquals(active, changes.get("active"), "Verifying Scheduler Job Updates");
 
         schedulerJob = schedulerJobHelper.getSchedulerJobById(jobId);
-        assertEquals(active, schedulerJob.get("active"), "Verifying Get Scheduler Job");
+        assertEquals(active, schedulerJob.getActive(), "Verifying Get Scheduler Job");
     }
 
     @Test

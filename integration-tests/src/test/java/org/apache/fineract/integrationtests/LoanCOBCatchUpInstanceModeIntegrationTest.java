@@ -117,9 +117,10 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest extends BaseLoanIntegrati
     @ConfigureInstanceMode(readEnabled = true, writeEnabled = true, batchWorkerEnabled = true, batchManagerEnabled = false)
     @Test
     public void testSchedulerDoesNotWorksWhenNotInBatchManagerMode() {
-        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+        org.apache.fineract.client.feign.util.CallFailedRuntimeException exception = assertThrows(
+                org.apache.fineract.client.feign.util.CallFailedRuntimeException.class,
                 () -> schedulerJobHelper.updateSchedulerStatus(false));
-        assertEquals(405, exception.getResponse().code());
+        assertEquals(405, exception.getStatus());
     }
 
     @AfterEach
