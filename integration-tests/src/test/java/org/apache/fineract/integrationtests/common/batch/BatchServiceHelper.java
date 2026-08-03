@@ -40,6 +40,10 @@ public class BatchServiceHelper {
         return handleBatch(List.of(batchRequest), enclosingTransaction);
     }
 
+    /**
+     * The endpoint answers 200 even when a sub-request fails or the enclosing transaction rolls back, so a failing
+     * batch still comes back as a response list and each sub-request's own status code has to be asserted on.
+     */
     public List<BatchResponse> handleBatch(List<BatchRequest> batchRequests, boolean enclosingTransaction) {
         return FeignCalls.ok(() -> api().handleBatchRequests(batchRequests, enclosingTransaction));
     }
