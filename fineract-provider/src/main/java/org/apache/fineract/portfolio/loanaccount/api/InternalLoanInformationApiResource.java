@@ -72,7 +72,7 @@ public class InternalLoanInformationApiResource implements InitializingBean {
     @Path("{loanId}/audit")
     @Produces({ MediaType.APPLICATION_JSON })
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
-    public AuditData getLoanAuditFields(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId) {
+    public LoanAuditFieldsData getLoanAuditFields(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId) {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
         log.warn("Fetching loan with {}", loanId);
@@ -80,15 +80,15 @@ public class InternalLoanInformationApiResource implements InitializingBean {
         log.warn("------------------------------------------------------------");
 
         final Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
-        return new AuditData(loan.getCreatedBy().orElse(null), loan.getCreatedDate().orElse(null), loan.getLastModifiedBy().orElse(null),
-                loan.getLastModifiedDate().orElse(null));
+        return new LoanAuditFieldsData(loan.getCreatedBy().orElse(null), loan.getCreatedDate().orElse(null),
+                loan.getLastModifiedBy().orElse(null), loan.getLastModifiedDate().orElse(null));
     }
 
     @GET
     @Path("{loanId}/transaction/{transactionId}/audit")
     @Produces({ MediaType.APPLICATION_JSON })
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
-    public AuditData getLoanTransactionAuditFields(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId,
+    public LoanAuditFieldsData getLoanTransactionAuditFields(@Context final UriInfo uriInfo, @PathParam("loanId") Long loanId,
             @PathParam("transactionId") Long transactionId) {
         log.warn("------------------------------------------------------------");
         log.warn("                                                            ");
@@ -97,7 +97,7 @@ public class InternalLoanInformationApiResource implements InitializingBean {
         log.warn("------------------------------------------------------------");
 
         final LoanTransaction transaction = loanTransactionRepository.findById(transactionId).orElseThrow();
-        return new AuditData(transaction.getCreatedBy().orElse(null), transaction.getCreatedDate().orElse(null),
+        return new LoanAuditFieldsData(transaction.getCreatedBy().orElse(null), transaction.getCreatedDate().orElse(null),
                 transaction.getLastModifiedBy().orElse(null), transaction.getLastModifiedDate().orElse(null));
     }
 
@@ -145,6 +145,6 @@ public class InternalLoanInformationApiResource implements InitializingBean {
         return loanRepositoryWrapper.findMaxTransactionDateOfActiveLoans();
     }
 
-    private record AuditData(Long createdBy, OffsetDateTime createdDate, Long lastModifiedBy, OffsetDateTime lastModifiedDate) {
+    private record LoanAuditFieldsData(Long createdBy, OffsetDateTime createdDate, Long lastModifiedBy, OffsetDateTime lastModifiedDate) {
     }
 }
