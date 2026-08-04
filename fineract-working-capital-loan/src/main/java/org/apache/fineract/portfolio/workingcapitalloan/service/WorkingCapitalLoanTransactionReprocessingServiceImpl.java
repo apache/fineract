@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -87,7 +86,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
 
     @Override
     public void reprocessChargeFreeSuffix(final WorkingCapitalLoan loan, final LocalDate boundaryDate,
-                                          final WorkingCapitalLoanTransaction reversedTransaction) {
+            final WorkingCapitalLoanTransaction reversedTransaction) {
         final WorkingCapitalLoanBalance balance = balanceRepository.findByWcLoan_Id(loan.getId()).orElse(null);
         if (balance == null) {
             log.debug("Skipping suffix reprocessing for WC loan {}: no balance to recompute", loan.getId());
@@ -139,7 +138,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
             final WorkingCapitalLoanTransactionAllocation reversedAllocation = reversedTransaction.getAllocation();
             if (reversedAllocation != null) {
                 amortizationScheduleWriteService.applyRepaymentUndo(loan, reversedTransaction.getTransactionDate(),
-                                                                    MathUtil.nullToZero(reversedAllocation.getPrincipalPortion()));
+                        MathUtil.nullToZero(reversedAllocation.getPrincipalPortion()));
             }
         }
 
@@ -150,7 +149,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         final List<WorkingCapitalLoanTransactionAllocation> allocationsNeedingJournalRepost = new ArrayList<>();
         for (final WorkingCapitalLoanTransaction txn : replaySet) {
             final WorkingCapitalLoanTransactionAllocator.Result allocated = transactionAllocator.allocate(loan, balance, charges,
-                                                                                                          chargesById, txn);
+                    chargesById, txn);
             updatedAllocations.add(allocated.allocation());
 
             // The schedule only needs touching when the principal portion actually shifted: swap the stale principal
@@ -160,7 +159,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
             if (allocated.allocationChanged()) {
                 if (allocated.hadStoredAllocation()) {
                     amortizationScheduleWriteService.applyRepaymentUndo(loan, txn.getTransactionDate(),
-                                                                        allocated.previousPrincipalPortion());
+                            allocated.previousPrincipalPortion());
                 }
                 amortizationScheduleWriteService.applyRepayment(loan, txn.getTransactionDate(), allocated.plan().principalPortion());
             }
@@ -185,7 +184,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
      * transaction amount, so this exactly undoes what the forward apply added.
      */
     private void rewindChargeFreeBalance(final WorkingCapitalLoanBalance balance,
-                                         final WorkingCapitalLoanTransactionAllocation storedAllocation) {
+            final WorkingCapitalLoanTransactionAllocation storedAllocation) {
         if (storedAllocation == null) {
             // No stored allocation means the transaction never reached the balance - a freshly booked backdated
             // payment handed straight to this replay to be allocated for the first time. There is nothing to unwind,
@@ -250,7 +249,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
                 hadStoredAllocation = txn.getAllocation() != null;
                 final BigDecimal excessPrincipal = replayCreditBalanceRefund(balance, txn.getTransactionAmount());
                 updatedAllocations.add(applyCreditBalanceRefundAllocation(txn, excessPrincipal,
-                                                                          MathUtil.subtract(txn.getTransactionAmount(), excessPrincipal)));
+                        MathUtil.subtract(txn.getTransactionAmount(), excessPrincipal)));
                 principalAdjustments.add(new PrincipalAdjustment(txn.getTransactionDate(), excessPrincipal));
             } else {
                 // Allocate against the live (running) balance/charges so the decision is made against the remaining
@@ -258,12 +257,12 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
                 // only its separately stored allocation is recomputed and updated in place - the row is never reversed
                 // or replaced by reprocessing.
                 final WorkingCapitalLoanTransactionAllocator.Result allocated = transactionAllocator.allocate(loan, balance, charges,
-                                                                                                              chargesById, txn);
+                        chargesById, txn);
                 hadStoredAllocation = allocated.hadStoredAllocation();
                 updatedAllocations.add(allocated.allocation());
                 rebuiltChargesPaidBy.addAll(allocated.chargesPaidBy());
                 principalPayments.add(new PrincipalPayment(txn.getTransactionDate(), allocated.plan().principalPortion(),
-                                                           txn.getCreatedDate().orElse(null), txn.getId()));
+                        txn.getCreatedDate().orElse(null), txn.getId()));
             }
 
             // Journal entries are derived from the allocation, so a surviving transaction's entries may now be stale:
@@ -295,6 +294,8 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
     private void restateJournalEntries(final WorkingCapitalLoan loan, final List<WorkingCapitalLoanTransactionAllocation> allocations) {
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
             for (final WorkingCapitalLoanTransactionAllocation allocation : allocations) {
+                // The charged-off tag decides which accounts the restated split books to, exactly as it did at booking
+                // time, so a replay on a charged-off loan must not fall back to the regular treatment.
                 accountingProcessor.restateJournalEntries(loan, allocation.getWcLoanTransaction(), allocation, loan.isChargedOff());
             }
         }
@@ -310,7 +311,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
      * already exists but is not otherwise part of the save path.
      */
     private WorkingCapitalLoanTransactionAllocation applyCreditBalanceRefundAllocation(final WorkingCapitalLoanTransaction txn,
-                                                                                       final BigDecimal principalPortion, final BigDecimal overpaymentPortion) {
+            final BigDecimal principalPortion, final BigDecimal overpaymentPortion) {
         final WorkingCapitalLoanTransactionAllocation existing = txn.getAllocation();
         if (existing == null) {
             return WorkingCapitalLoanTransactionAllocation.forCreditBalanceRefund(txn, principalPortion, overpaymentPortion);

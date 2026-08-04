@@ -3793,7 +3793,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final Long loanId = getCreatedLoanId();
         final MarkWorkingCapitalLoanAsFraudRequest request = new MarkWorkingCapitalLoanAsFraudRequest()
                 .fraud(Boolean.parseBoolean(fraudFlag));
-        ok(() -> fineractClient.workingCapitalLoans().markWorkingCapitalLoanAsFraud(loanId, request));
+        ok(() -> fineractClient.workingCapitalLoans().markWorkingCapitalLoanAsFraudById(loanId, request));
         log.info("Set fraud flag={} on Working Capital loan {}", fraudFlag, loanId);
     }
 

@@ -35,7 +35,6 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
@@ -43,6 +42,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanNote;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanNoteRepository;
@@ -63,6 +63,7 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
     private final WorkingCapitalLoanRepository loanRepository;
     private final WorkingCapitalLoanDataValidator validator;
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
+    private final WorkingCapitalLoanTransactionFinder transactionFinder;
     private final WorkingCapitalLoanTransactionAllocationRepository allocationRepository;
     private final WorkingCapitalLoanBalanceRepository balanceRepository;
     private final WorkingCapitalLoanNoteRepository noteRepository;
@@ -89,11 +90,14 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
                         chargeOffReasonId)
                 : null;
 
-        // The charge-off amount is the outstanding balance as of the charge-off date. Because the charge-off date
-        // cannot
-        // be earlier than the last transaction, the current outstanding equals the as-of-date balance.
+        // The charge-off amount is the outstanding balance as of the charge-off date: the charge-off date cannot be
+        // earlier than the last user transaction, and system postings (accrual, discount-fee amortization) do not move
+        // the balance, so the current outstanding equals the as-of-date balance.
+        // A disbursed loan always has a balance row; a missing one means the account is inconsistent, and charging it
+        // off would silently record a zero amount.
         final WorkingCapitalLoanBalance balance = this.balanceRepository.findByWcLoan_Id(loan.getId())
-                .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
+                .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.wc.loan.balance.not.found",
+                        "No balance found for Working Capital Loan " + loanId, loanId));
         final BigDecimal chargeOffAmount = balance.getTotalOutstanding();
 
         // Non-monetary tag transaction: records the charged-off amount but does not move the running balance.
@@ -143,8 +147,7 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
         this.validator.validateUndoChargeOff(command, loan);
 
-        final WorkingCapitalLoanTransaction chargeOffTransaction = this.transactionRepository
-                .findActiveByTypeOrderByIdDesc(loanId, LoanTransactionType.CHARGE_OFF).stream().findFirst()
+        final WorkingCapitalLoanTransaction chargeOffTransaction = this.transactionFinder.findChargedOffTransaction(loan)
                 .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.wc.loan.charge.off.transaction.not.found",
                         "No active charge-off transaction found for loan " + loanId, loanId));
 

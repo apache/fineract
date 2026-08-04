@@ -20,7 +20,9 @@ package org.apache.fineract.accounting.journalentry.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
@@ -55,68 +57,118 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     public void postJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
             final WorkingCapitalLoanTransactionAllocation allocation, final boolean isChargedOff) {
         final Office office = loan.getClient().getOffice();
-        final Long productId = loan.getLoanProduct().getId();
-        final String currencyCode = loan.getLoanProductRelatedDetails().getCurrency().getCode();
-        final LocalDate transactionDate = txn.getTransactionDate();
-        final Long paymentTypeId = extractPaymentTypeId(txn);
+        helper.checkForBranchClosures(helper.getLatestClosureByBranch(office.getId()), txn.getTransactionDate());
 
-        helper.checkForBranchClosures(helper.getLatestClosureByBranch(office.getId()), transactionDate);
+        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
+        plannedPostings(loan, txn, allocation, isChargedOff).forEach(accountPostHelper::post);
+    }
 
-        final BigDecimal principalPortion = MathUtil.nullToZero(allocation.getPrincipalPortion());
-        final BigDecimal feesPortion = MathUtil.nullToZero(allocation.getFeeChargesPortion());
-        final BigDecimal penaltiesPortion = MathUtil.nullToZero(allocation.getPenaltyChargesPortion());
-        final BigDecimal overpaymentPortion = MathUtil.nullToZero(allocation.getOverpaymentPortion());
+    /**
+     * One entry a transaction's split books: which account, which side, how much.
+     *
+     * @param withPaymentDetail
+     *            whether the entry carries the transaction's payment detail. Repayment credit legs are booked without
+     *            it and every other leg with it, mirroring what the per-type posting methods did before they were
+     *            folded into {@link #plannedPostings}.
+     */
+    private record LedgerPosting(CashAccountsForLoan account, boolean debit, BigDecimal amount, boolean withPaymentDetail) {
 
-        switch (txn.getTypeOf()) {
-            case LoanTransactionType.REPAYMENT -> {
-                if (isChargedOff) {
-                    postChargedOffRepaymentEntries(office, productId, currencyCode, transactionDate, paymentTypeId, txn, principalPortion,
-                            feesPortion, penaltiesPortion, overpaymentPortion);
-                } else {
-                    postRegularRepaymentEntries(office, productId, currencyCode, transactionDate, paymentTypeId, txn, principalPortion,
-                            feesPortion, penaltiesPortion, overpaymentPortion);
-                }
-            }
-            case LoanTransactionType.GOODWILL_CREDIT -> postGoodwillCreditJournalEntries(loan, txn, principalPortion, feesPortion,
-                    penaltiesPortion, overpaymentPortion, isChargedOff);
-            case LoanTransactionType.PAYOUT_REFUND -> postPayoutRefundJournalEntries(loan, txn, principalPortion, feesPortion,
-                    penaltiesPortion, overpaymentPortion, isChargedOff);
-            case LoanTransactionType.CREDIT_BALANCE_REFUND -> postCreditBalanceRefundJournalEntries(loan, txn, allocation);
-            case LoanTransactionType.CHARGE_ADJUSTMENT -> postChargeAdjustmentJournalEntries(loan, txn, principalPortion, feesPortion,
-                    penaltiesPortion, overpaymentPortion, isChargedOff);
-            case LoanTransactionType.ACCRUAL -> postChargeAccrualJournalEntries(loan, txn, feesPortion, penaltiesPortion);
-            case LoanTransactionType.CHARGE_OFF -> postChargeOffJournalEntries(loan, txn, principalPortion, feesPortion, penaltiesPortion);
-            default -> {
-                throw new NotImplementedException(
-                        "Post Journal Entries is not implemented yet for " + txn.getTypeOf().getCode() + " for Working Capital Loan");
-            }
+        static LedgerPosting debit(final CashAccountsForLoan account, final BigDecimal amount) {
+            return new LedgerPosting(account, true, MathUtil.nullToZero(amount), true);
+        }
+
+        static LedgerPosting credit(final CashAccountsForLoan account, final BigDecimal amount) {
+            return new LedgerPosting(account, false, MathUtil.nullToZero(amount), true);
+        }
+
+        static LedgerPosting creditWithoutPaymentDetail(final CashAccountsForLoan account, final BigDecimal amount) {
+            return new LedgerPosting(account, false, MathUtil.nullToZero(amount), false);
         }
     }
 
-    private void postChargeAdjustmentJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
-            final BigDecimal principalPortion, final BigDecimal feesPortion, final BigDecimal penaltiesPortion,
-            final BigDecimal overpaymentPortion, final boolean isChargedOff) {
-        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
+    /** One ledger position: what a single GL account holds on a single side. */
+    private record PostingKey(Long glAccountId, boolean debit) {
+    }
+
+    /**
+     * Every entry a transaction's split books, for its type and charged-off state.
+     * <p>
+     * This is the single source of truth for that matrix: {@link #postJournalEntries} books the plan and
+     * {@link #splitDiffersFromLedger} compares it against the ledger. Deriving both from here is what keeps the
+     * restatement guard exact for every transaction type - a guard that restated the account mapping itself would stop
+     * describing the ledger, silently, the moment a posting rule changed.
+     * </p>
+     */
+    private List<LedgerPosting> plannedPostings(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final WorkingCapitalLoanTransactionAllocation allocation, final boolean isChargedOff) {
+        final BigDecimal principalPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getPrincipalPortion());
+        final BigDecimal feesPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getFeeChargesPortion());
+        final BigDecimal penaltiesPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getPenaltyChargesPortion());
+        final BigDecimal overpaymentPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getOverpaymentPortion());
+
+        return switch (txn.getTypeOf()) {
+            case LoanTransactionType.REPAYMENT ->
+                repaymentPostings(txn, principalPortion, feesPortion, penaltiesPortion, overpaymentPortion, isChargedOff);
+            case LoanTransactionType.GOODWILL_CREDIT ->
+                goodwillCreditPostings(principalPortion, feesPortion, penaltiesPortion, overpaymentPortion, isChargedOff);
+            case LoanTransactionType.PAYOUT_REFUND ->
+                payoutRefundPostings(loan, txn, principalPortion, feesPortion, penaltiesPortion, overpaymentPortion, isChargedOff);
+            case LoanTransactionType.CREDIT_BALANCE_REFUND -> creditBalanceRefundPostings(txn, principalPortion, overpaymentPortion);
+            case LoanTransactionType.CHARGE_ADJUSTMENT ->
+                chargeAdjustmentPostings(txn, principalPortion, feesPortion, penaltiesPortion, overpaymentPortion, isChargedOff);
+            case LoanTransactionType.ACCRUAL -> chargeAccrualPostings(feesPortion, penaltiesPortion);
+            case LoanTransactionType.CHARGE_OFF -> chargeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion);
+            default -> throw new NotImplementedException(
+                    "Post Journal Entries is not implemented yet for " + txn.getTypeOf().getCode() + " for Working Capital Loan");
+        };
+    }
+
+    /**
+     * The account a charged-off principal loss is expensed to: the dedicated fraud expense account when the loan is
+     * flagged as fraudulent, the regular charge-off expense otherwise.
+     */
+    private CashAccountsForLoan chargeOffExpenseAccount(final WorkingCapitalLoan loan) {
+        return loan.isFraud() ? CashAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE : CashAccountsForLoan.CHARGE_OFF_EXPENSE;
+    }
+
+    private List<LedgerPosting> repaymentPostings(final WorkingCapitalLoanTransaction txn, final BigDecimal principalPortion,
+            final BigDecimal feesPortion, final BigDecimal penaltiesPortion, final BigDecimal overpaymentPortion,
+            final boolean isChargedOff) {
+        // After charge-off the portfolio and receivables are already written off, so the credits recognize recovery
+        // income instead of reducing them.
+        final CashAccountsForLoan principalAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_RECOVERY
+                : CashAccountsForLoan.LOAN_PORTFOLIO;
+        final CashAccountsForLoan feesAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_RECOVERY
+                : CashAccountsForLoan.FEES_RECEIVABLE;
+        final CashAccountsForLoan penaltiesAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_RECOVERY
+                : CashAccountsForLoan.PENALTIES_RECEIVABLE;
+
+        return List.of(LedgerPosting.creditWithoutPaymentDetail(principalAccount, principalPortion),
+                LedgerPosting.creditWithoutPaymentDetail(feesAccount, feesPortion),
+                LedgerPosting.creditWithoutPaymentDetail(penaltiesAccount, penaltiesPortion),
+                LedgerPosting.creditWithoutPaymentDetail(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion),
+                LedgerPosting.debit(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount()));
+    }
+
+    private List<LedgerPosting> chargeAdjustmentPostings(final WorkingCapitalLoanTransaction txn, final BigDecimal principalPortion,
+            final BigDecimal feesPortion, final BigDecimal penaltiesPortion, final BigDecimal overpaymentPortion,
+            final boolean isChargedOff) {
         final boolean penaltyCharge = isAdjustedChargeAPenalty(txn);
 
         // Debit always against the adjusted charge's own income account (fee or penalty), including after charge-off.
-        final CashAccountsForLoan debitAccountType = penaltyCharge ? CashAccountsForLoan.INCOME_FROM_PENALTIES
+        final CashAccountsForLoan debitAccount = penaltyCharge ? CashAccountsForLoan.INCOME_FROM_PENALTIES
                 : CashAccountsForLoan.INCOME_FROM_FEES;
-        accountPostHelper.postDebitJournalEntry(debitAccountType, txn.getTransactionAmount());
+        // Receivables were already written off at charge-off; credits go to charge-off fee/penalty income.
+        final CashAccountsForLoan chargedOffCreditAccount = penaltyCharge ? CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY
+                : CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES;
+        final CashAccountsForLoan principalAccount = isChargedOff ? chargedOffCreditAccount : CashAccountsForLoan.LOAN_PORTFOLIO;
+        final CashAccountsForLoan feesAccount = isChargedOff ? chargedOffCreditAccount : CashAccountsForLoan.FEES_RECEIVABLE;
+        final CashAccountsForLoan penaltiesAccount = isChargedOff ? chargedOffCreditAccount : CashAccountsForLoan.PENALTIES_RECEIVABLE;
 
-        if (isChargedOff) {
-            // Receivables were already written off at charge-off; credits go to charge-off fee/penalty income.
-            final CashAccountsForLoan creditAccountType = penaltyCharge ? CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY
-                    : CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES;
-            accountPostHelper.postCreditJournalEntry(creditAccountType, principalPortion);
-            accountPostHelper.postCreditJournalEntry(creditAccountType, feesPortion);
-            accountPostHelper.postCreditJournalEntry(creditAccountType, penaltiesPortion);
-        } else {
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion);
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
-        }
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion);
+        return List.of(LedgerPosting.debit(debitAccount, txn.getTransactionAmount()),
+                LedgerPosting.credit(principalAccount, principalPortion), LedgerPosting.credit(feesAccount, feesPortion),
+                LedgerPosting.credit(penaltiesAccount, penaltiesPortion),
+                LedgerPosting.credit(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion));
     }
 
     /**
@@ -124,22 +176,17 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
      * the charge-off expense (principal) and reverses the accrued fee/penalty income. There is no interest leg -- WC
      * has no interest concept. Principal expense is routed to the fraud expense account when the loan is marked fraud.
      */
-    private void postChargeOffJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
-            final BigDecimal principalPortion, final BigDecimal feesPortion, final BigDecimal penaltiesPortion) {
-        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
-
-        final CashAccountsForLoan chargeOffExpenseAccount = loan.isFraud() ? CashAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE
-                : CashAccountsForLoan.CHARGE_OFF_EXPENSE;
-
-        // debit: recognize the loss on principal, reverse accrued fee/penalty income
-        accountPostHelper.postDebitJournalEntry(chargeOffExpenseAccount, principalPortion);
-        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES, feesPortion);
-        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY, penaltiesPortion);
-
-        // credit: write off the outstanding receivables
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion);
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
+    private List<LedgerPosting> chargeOffPostings(final WorkingCapitalLoan loan, final BigDecimal principalPortion,
+            final BigDecimal feesPortion, final BigDecimal penaltiesPortion) {
+        return List.of(
+                // debit: recognize the loss on principal, reverse accrued fee/penalty income
+                LedgerPosting.debit(chargeOffExpenseAccount(loan), principalPortion),
+                LedgerPosting.debit(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES, feesPortion),
+                LedgerPosting.debit(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY, penaltiesPortion),
+                // credit: write off the outstanding receivables
+                LedgerPosting.credit(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion),
+                LedgerPosting.credit(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion),
+                LedgerPosting.credit(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion));
     }
 
     private boolean isAdjustedChargeAPenalty(final WorkingCapitalLoanTransaction txn) {
@@ -150,60 +197,57 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                         "Charge adjustment transaction " + txn.getId() + " is missing its link to the adjusted charge"));
     }
 
-    private void postPayoutRefundJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+    /**
+     * On a charged-off loan a payout refund's credits reverse what the charge-off recognized - the charge-off expense
+     * for principal and the charged-off fee/penalty income - instead of reducing the portfolio and receivables, which
+     * are already written off.
+     */
+    private List<LedgerPosting> payoutRefundPostings(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
             final BigDecimal principalPortion, final BigDecimal feesPortion, final BigDecimal penaltiesPortion,
             final BigDecimal overpaymentPortion, final boolean isChargedOff) {
-        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
-        // debit
-        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount());
-        // credit
-        if (isChargedOff) {
-            final CashAccountsForLoan principalCreditAccount = loan.isFraud() ? CashAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE
-                    : CashAccountsForLoan.CHARGE_OFF_EXPENSE;
-            accountPostHelper.postCreditJournalEntry(principalCreditAccount, principalPortion);
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES, feesPortion);
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY, penaltiesPortion);
-        } else {
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion);
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
-        }
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion);
+        final CashAccountsForLoan principalAccount = isChargedOff ? chargeOffExpenseAccount(loan) : CashAccountsForLoan.LOAN_PORTFOLIO;
+        final CashAccountsForLoan feesAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES
+                : CashAccountsForLoan.FEES_RECEIVABLE;
+        final CashAccountsForLoan penaltiesAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY
+                : CashAccountsForLoan.PENALTIES_RECEIVABLE;
+
+        return List.of(LedgerPosting.debit(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount()),
+                LedgerPosting.credit(principalAccount, principalPortion), LedgerPosting.credit(feesAccount, feesPortion),
+                LedgerPosting.credit(penaltiesAccount, penaltiesPortion),
+                LedgerPosting.credit(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion));
     }
 
-    private void postChargeAccrualJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
-            final BigDecimal feesPortion, final BigDecimal penaltiesPortion) {
-        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
-
-        // Debit receivable when the charge becomes accrued.
-        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
-        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
-
-        // Credit the corresponding income account.
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_FEES, feesPortion);
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_PENALTIES, penaltiesPortion);
+    private List<LedgerPosting> chargeAccrualPostings(final BigDecimal feesPortion, final BigDecimal penaltiesPortion) {
+        return List.of(
+                // Debit receivable when the charge becomes accrued.
+                LedgerPosting.debit(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion),
+                LedgerPosting.debit(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion),
+                // Credit the corresponding income account.
+                LedgerPosting.credit(CashAccountsForLoan.INCOME_FROM_FEES, feesPortion),
+                LedgerPosting.credit(CashAccountsForLoan.INCOME_FROM_PENALTIES, penaltiesPortion));
     }
 
-    private void postGoodwillCreditJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
-            final BigDecimal principalPortion, final BigDecimal feesPortion, final BigDecimal penaltiesPortion,
-            final BigDecimal overpaymentPortion, final boolean isChargedOff) {
-        final BigDecimal overpaymentPlusPrincipal = principalPortion.add(overpaymentPortion);
-        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
-        // debit
-        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.GOODWILL_CREDIT, overpaymentPlusPrincipal);
-        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES, feesPortion);
-        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY, penaltiesPortion);
-        // credit — after charge-off, portfolio/receivable credits become recovery income
-        if (isChargedOff) {
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_RECOVERY, principalPortion);
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_RECOVERY, feesPortion);
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.INCOME_FROM_RECOVERY, penaltiesPortion);
-        } else {
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion);
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
-            accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
-        }
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion);
+    /**
+     * On a charged-off loan a goodwill credit's portfolio/receivable credits become recovery income; the debit side -
+     * the goodwill expense and income accounts - is the same either way.
+     */
+    private List<LedgerPosting> goodwillCreditPostings(final BigDecimal principalPortion, final BigDecimal feesPortion,
+            final BigDecimal penaltiesPortion, final BigDecimal overpaymentPortion, final boolean isChargedOff) {
+        final CashAccountsForLoan principalAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_RECOVERY
+                : CashAccountsForLoan.LOAN_PORTFOLIO;
+        final CashAccountsForLoan feesAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_RECOVERY
+                : CashAccountsForLoan.FEES_RECEIVABLE;
+        final CashAccountsForLoan penaltiesAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_RECOVERY
+                : CashAccountsForLoan.PENALTIES_RECEIVABLE;
+
+        // plain add, not MathUtil.add: the portions are already non-null here, and MathUtil consults the tenant's
+        // rounding mode, which this leg has no reason to depend on
+        return List.of(LedgerPosting.debit(CashAccountsForLoan.GOODWILL_CREDIT, principalPortion.add(overpaymentPortion)),
+                LedgerPosting.debit(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES, feesPortion),
+                LedgerPosting.debit(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY, penaltiesPortion),
+                LedgerPosting.credit(principalAccount, principalPortion), LedgerPosting.credit(feesAccount, feesPortion),
+                LedgerPosting.credit(penaltiesAccount, penaltiesPortion),
+                LedgerPosting.credit(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion));
     }
 
     /**
@@ -211,23 +255,18 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
      * principal portion (the over-refund excess a reprocess derived) lent out fresh principal. At booking a refund is
      * always fully funded by the overpayment, so this reduces to the plain overpayment-debit / fund-source-credit pair.
      */
-    private void postCreditBalanceRefundJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
-            final WorkingCapitalLoanTransactionAllocation allocation) {
-        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
-        // debit
-        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.OVERPAYMENT,
-                MathUtil.nullToZero(allocation == null ? null : allocation.getOverpaymentPortion()));
-        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO,
-                MathUtil.nullToZero(allocation == null ? null : allocation.getPrincipalPortion()));
-        // credit
-        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount());
+    private List<LedgerPosting> creditBalanceRefundPostings(final WorkingCapitalLoanTransaction txn, final BigDecimal principalPortion,
+            final BigDecimal overpaymentPortion) {
+        return List.of(LedgerPosting.debit(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion),
+                LedgerPosting.debit(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion),
+                LedgerPosting.credit(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount()));
     }
 
     @Override
     public void restateJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
             final WorkingCapitalLoanTransactionAllocation allocation, final boolean isChargedOff) {
         final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
-        if (!splitDiffersFromLedger(loan, txn, allocation, effectiveEntries)) {
+        if (!splitDiffersFromLedger(loan, txn, allocation, effectiveEntries, isChargedOff)) {
             // The ledger already reflects the recomputed split; re-posting would only add cancelling noise.
             return;
         }
@@ -254,43 +293,57 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                 journalEntry.getShareTransactionId());
     }
 
-    /** Whether the recomputed split would post amounts different from the transaction's live entries. */
+    /**
+     * Whether re-booking the transaction now would land differently on the ledger than what is currently live: the
+     * planned postings are aggregated per (GL account, side) and compared against the live entries aggregated the same
+     * way. Because both sides come from {@link #plannedPostings}, this holds for every transaction type and for both
+     * charged-off states - including a pure routing change, where the amounts are unchanged but move to different
+     * accounts, which shows up as a key mismatch.
+     */
     private boolean splitDiffersFromLedger(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
-            final WorkingCapitalLoanTransactionAllocation allocation, final List<JournalEntry> effectiveEntries) {
+            final WorkingCapitalLoanTransactionAllocation allocation, final List<JournalEntry> effectiveEntries,
+            final boolean isChargedOff) {
         if (effectiveEntries.isEmpty()) {
             return true;
         }
-        final Long productId = loan.getLoanProduct().getId();
-        final Long paymentTypeId = extractPaymentTypeId(txn);
+        final Map<PostingKey, BigDecimal> planned = plannedAmountsByPosition(loan, txn, allocation, isChargedOff);
+        final Map<PostingKey, BigDecimal> posted = postedAmountsByPosition(effectiveEntries);
 
-        if (txn.getTypeOf() == LoanTransactionType.CREDIT_BALANCE_REFUND) {
-            return postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.LOAN_PORTFOLIO, true,
-                    MathUtil.nullToZero(allocation == null ? null : allocation.getPrincipalPortion()))
-                    || postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.OVERPAYMENT, true,
-                            MathUtil.nullToZero(allocation == null ? null : allocation.getOverpaymentPortion()));
+        if (!planned.keySet().equals(posted.keySet())) {
+            return true;
         }
-
-        final BigDecimal principalPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getPrincipalPortion());
-        final BigDecimal feesPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getFeeChargesPortion());
-        final BigDecimal penaltiesPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getPenaltyChargesPortion());
-        // Read the overpayment portion off the allocation, exactly as postJournalEntries does when it books the split.
-        // Re-deriving it here would let the guard and the poster disagree about what "unchanged" means.
-        final BigDecimal overpaymentPortion = MathUtil.nullToZero(allocation == null ? null : allocation.getOverpaymentPortion());
-        return postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.LOAN_PORTFOLIO, false, principalPortion)
-                || postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.FEES_RECEIVABLE, false, feesPortion)
-                || postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.PENALTIES_RECEIVABLE, false,
-                        penaltiesPortion)
-                || postedAmountDiffers(effectiveEntries, productId, paymentTypeId, CashAccountsForLoan.OVERPAYMENT, false,
-                        overpaymentPortion);
+        // compareTo, not equals: BigDecimal equality is scale-sensitive, and 100 vs 100.00 is the same posting.
+        return planned.entrySet().stream().anyMatch(entry -> entry.getValue().compareTo(posted.get(entry.getKey())) != 0);
     }
 
-    private boolean postedAmountDiffers(final List<JournalEntry> entries, final Long productId, final Long paymentTypeId,
-            final CashAccountsForLoan accountType, final boolean debit, final BigDecimal expected) {
-        final GLAccount account = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, accountType.getValue(), paymentTypeId);
-        final BigDecimal posted = entries.stream()
-                .filter(entry -> entry.getGlAccount() != null && entry.getGlAccount().getId().equals(account.getId()))
-                .filter(entry -> entry.isDebitEntry() == debit).map(JournalEntry::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
-        return posted.compareTo(expected) != 0;
+    private Map<PostingKey, BigDecimal> plannedAmountsByPosition(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final WorkingCapitalLoanTransactionAllocation allocation, final boolean isChargedOff) {
+        final Long productId = loan.getLoanProduct().getId();
+        // Resolving every account with the payment type matches the poster: the mapping is payment-type specific only
+        // for FUND_SOURCE, and every FUND_SOURCE leg the poster books passes the payment type.
+        final Long paymentTypeId = extractPaymentTypeId(txn);
+
+        final Map<PostingKey, BigDecimal> amounts = new HashMap<>();
+        for (final LedgerPosting posting : plannedPostings(loan, txn, allocation, isChargedOff)) {
+            if (!MathUtil.isGreaterThanZero(posting.amount())) {
+                continue; // a zero leg is never booked, so it must not be expected either
+            }
+            final GLAccount account = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, posting.account().getValue(),
+                    paymentTypeId);
+            amounts.merge(new PostingKey(account.getId(), posting.debit()), posting.amount(), BigDecimal::add);
+        }
+        return amounts;
+    }
+
+    private Map<PostingKey, BigDecimal> postedAmountsByPosition(final List<JournalEntry> entries) {
+        final Map<PostingKey, BigDecimal> amounts = new HashMap<>();
+        for (final JournalEntry entry : entries) {
+            if (entry.getGlAccount() == null) {
+                continue;
+            }
+            amounts.merge(new PostingKey(entry.getGlAccount().getId(), entry.isDebitEntry()), entry.getAmount(), BigDecimal::add);
+        }
+        return amounts;
     }
 
     @Override
@@ -328,72 +381,6 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             journalEntry.setReversed(true);
             journalEntry.setReversalJournalEntry(reversalEntry);
             helper.persistJournalEntry(journalEntry);
-        }
-    }
-
-    private void postRegularRepaymentEntries(final Office office, final Long productId, final String currencyCode,
-            final LocalDate transactionDate, final Long paymentTypeId, final WorkingCapitalLoanTransaction txn,
-            final BigDecimal principalPortion, final BigDecimal feesPortion, final BigDecimal penaltiesPortion,
-            final BigDecimal overpaymentPortion) {
-        postRepaymentCreditEntries(office, productId, currencyCode, transactionDate, txn, principalPortion,
-                CashAccountsForLoan.LOAN_PORTFOLIO, feesPortion, CashAccountsForLoan.FEES_RECEIVABLE, penaltiesPortion,
-                CashAccountsForLoan.PENALTIES_RECEIVABLE, overpaymentPortion);
-        postFundSourceDebit(office, productId, currencyCode, transactionDate, paymentTypeId, txn);
-    }
-
-    private void postChargedOffRepaymentEntries(final Office office, final Long productId, final String currencyCode,
-            final LocalDate transactionDate, final Long paymentTypeId, final WorkingCapitalLoanTransaction txn,
-            final BigDecimal principalPortion, final BigDecimal feesPortion, final BigDecimal penaltiesPortion,
-            final BigDecimal overpaymentPortion) {
-        postRepaymentCreditEntries(office, productId, currencyCode, transactionDate, txn, principalPortion,
-                CashAccountsForLoan.INCOME_FROM_RECOVERY, feesPortion, CashAccountsForLoan.INCOME_FROM_RECOVERY, penaltiesPortion,
-                CashAccountsForLoan.INCOME_FROM_RECOVERY, overpaymentPortion);
-        postFundSourceDebit(office, productId, currencyCode, transactionDate, paymentTypeId, txn);
-    }
-
-    private void postRepaymentCreditEntries(final Office office, final Long productId, final String currencyCode,
-            final LocalDate transactionDate, final WorkingCapitalLoanTransaction txn, final BigDecimal principalPortion,
-            final CashAccountsForLoan principalAccountType, final BigDecimal feesPortion, final CashAccountsForLoan feesAccountType,
-            final BigDecimal penaltiesPortion, final CashAccountsForLoan penaltiesAccountType, final BigDecimal overpaymentPortion) {
-        final Long loanId = txn.getWcLoan().getId();
-        final Long txnId = txn.getId();
-
-        if (MathUtil.isGreaterThanZero(principalPortion)) {
-            final GLAccount account = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, principalAccountType.getValue(),
-                    null);
-            helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, account, loanId, txnId, transactionDate,
-                    principalPortion, null);
-        }
-
-        if (MathUtil.isGreaterThanZero(feesPortion)) {
-            final GLAccount account = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, feesAccountType.getValue(), null);
-            helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, account, loanId, txnId, transactionDate, feesPortion,
-                    null);
-        }
-
-        if (MathUtil.isGreaterThanZero(penaltiesPortion)) {
-            final GLAccount account = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, penaltiesAccountType.getValue(),
-                    null);
-            helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, account, loanId, txnId, transactionDate,
-                    penaltiesPortion, null);
-        }
-
-        if (MathUtil.isGreaterThanZero(overpaymentPortion)) {
-            final GLAccount account = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId,
-                    CashAccountsForLoan.OVERPAYMENT.getValue(), null);
-            helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, account, loanId, txnId, transactionDate,
-                    overpaymentPortion, null);
-        }
-    }
-
-    private void postFundSourceDebit(final Office office, final Long productId, final String currencyCode, final LocalDate transactionDate,
-            final Long paymentTypeId, final WorkingCapitalLoanTransaction txn) {
-        final BigDecimal totalAmount = txn.getTransactionAmount();
-        if (MathUtil.isGreaterThanZero(totalAmount)) {
-            final GLAccount account = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId,
-                    CashAccountsForLoan.FUND_SOURCE.getValue(), paymentTypeId);
-            helper.createDebitJournalEntryForWorkingCapitalLoan(office, currencyCode, account, txn.getWcLoan().getId(), txn.getId(),
-                    transactionDate, totalAmount, txn.getPaymentDetail());
         }
     }
 
@@ -497,7 +484,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         if (!isChargedOff) {
             return CashAccountsForLoan.INCOME_FROM_DISCOUNT_FEE;
         }
-        return loan.isFraud() ? CashAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE : CashAccountsForLoan.CHARGE_OFF_EXPENSE;
+        return chargeOffExpenseAccount(loan);
     }
 
     private class JournalEntryPostingHelper {
@@ -522,21 +509,20 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             paymentDetail = txn.getPaymentDetail();
         }
 
-        void postCreditJournalEntry(CashAccountsForLoan accountType, BigDecimal amount) {
-            if (MathUtil.isGreaterThanZero(amount)) {
-                final GLAccount account = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, accountType.getValue(),
-                        paymentTypeId);
-                helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, account, loanId, txnId, transactionDate, amount,
-                        paymentDetail);
+        /** Books one planned posting. A zero (or absent) amount books nothing. */
+        void post(final LedgerPosting posting) {
+            if (!MathUtil.isGreaterThanZero(posting.amount())) {
+                return;
             }
-        }
-
-        void postDebitJournalEntry(CashAccountsForLoan accountType, BigDecimal amount) {
-            if (MathUtil.isGreaterThanZero(amount)) {
-                final GLAccount account = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, accountType.getValue(),
-                        paymentTypeId);
-                helper.createDebitJournalEntryForWorkingCapitalLoan(office, currencyCode, account, loanId, txnId, transactionDate, amount,
-                        paymentDetail);
+            final GLAccount account = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, posting.account().getValue(),
+                    paymentTypeId);
+            final PaymentDetail entryPaymentDetail = posting.withPaymentDetail() ? paymentDetail : null;
+            if (posting.debit()) {
+                helper.createDebitJournalEntryForWorkingCapitalLoan(office, currencyCode, account, loanId, txnId, transactionDate,
+                        posting.amount(), entryPaymentDetail);
+            } else {
+                helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, account, loanId, txnId, transactionDate,
+                        posting.amount(), entryPaymentDetail);
             }
         }
     }

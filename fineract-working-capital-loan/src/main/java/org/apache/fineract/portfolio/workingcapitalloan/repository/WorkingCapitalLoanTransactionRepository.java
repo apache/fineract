@@ -129,4 +129,19 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
             """)
     List<WorkingCapitalLoanTransaction> findActiveByTypesOrderByDateDesc(@Param("wcLoanId") Long wcLoanId,
             @Param("transactionTypes") List<LoanTransactionType> transactionTypes);
+
+    /**
+     * Non-reversed transactions of the loan whose type is none of {@code excludedTypes}, latest first in the
+     * (transaction date, id) order the replay uses. Used to find the last user transaction without loading the loan's
+     * whole transaction history.
+     */
+    @Query("""
+            SELECT t FROM WorkingCapitalLoanTransaction t
+            WHERE t.wcLoan.id = :wcLoanId
+            AND t.reversed = FALSE
+            AND t.transactionType not in :excludedTypes
+            ORDER BY t.transactionDate DESC, t.id DESC
+            """)
+    List<WorkingCapitalLoanTransaction> findActiveExcludingTypesOrderByDateDesc(@Param("wcLoanId") Long wcLoanId,
+            @Param("excludedTypes") List<LoanTransactionType> excludedTypes, Pageable pageable);
 }

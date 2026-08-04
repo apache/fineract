@@ -86,6 +86,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest {
     private static Account chargeOffExpenseAccount;
     private static Account incomeFromChargeOffFeesAccount;
     private static Account incomeFromChargeOffPenaltyAccount;
+    private static Account goodwillCreditAccount;
 
     @BeforeAll
     public static void setupAccounts() {
@@ -106,6 +107,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest {
         chargeOffExpenseAccount = accountHelper.createExpenseAccount("wcCoChargeOffExpense");
         incomeFromChargeOffFeesAccount = accountHelper.createIncomeAccount("wcCoIncomeChargeOffFees");
         incomeFromChargeOffPenaltyAccount = accountHelper.createIncomeAccount("wcCoIncomeChargeOffPenalty");
+        goodwillCreditAccount = accountHelper.createExpenseAccount("wcCoGoodwillCredit");
     }
 
     @Test
@@ -235,6 +237,59 @@ public class WorkingCapitalLoanChargeOffAccountingTest {
     }
 
     @Test
+    public void testGoodwillCreditAfterChargeOffPostsToRecoveryIncome() {
+        final Long productId = createAccrualWithDeferredRevenueAmortizationProduct();
+        final LocalDate currentDate = LocalDate.now(ZoneId.systemDefault());
+        final AtomicLong loanId = new AtomicLong(0L);
+        BusinessDateHelper.runAt(currentDate.format(BUSINESS_DATE),
+                () -> loanId.set(createApprovedAndDisbursedLoan(productId, BigDecimal.valueOf(5000), currentDate)));
+
+        final LocalDate chargeOffDate = currentDate.plusDays(1);
+        BusinessDateHelper.runAt(chargeOffDate.format(BUSINESS_DATE), () -> loanHelper.chargeOffByLoanId(loanId.get(),
+                WorkingCapitalLoanDisbursementTestBuilder.buildChargeOffRequest(chargeOffDate, null)));
+
+        // Goodwill credit stays allowed after charge-off (parity with term and progressive loans). The debit side is
+        // the
+        // goodwill expense as usual; the credit side recognizes recovery income instead of the written-off portfolio.
+        final LocalDate goodwillDate = chargeOffDate.plusDays(1);
+        final AtomicLong goodwillTxnId = new AtomicLong(0L);
+        BusinessDateHelper.runAt(goodwillDate.format(BUSINESS_DATE),
+                () -> goodwillTxnId.set(loanHelper.makeGoodwillCreditByLoanId(loanId.get(), WorkingCapitalLoanDisbursementTestBuilder
+                        .buildRepaymentRequest(goodwillDate, BigDecimal.valueOf(1000), null, null, null, null))));
+
+        final List<JournalEntryTransactionItem> entries = getJournalEntriesForWCTransaction(goodwillTxnId.get());
+        assertEquals(2, entries.size(), "Expected 2 journal entries (1 debit + 1 credit)");
+        assertJournalEntry(entries, "DEBIT", goodwillCreditAccount, 1000.0);
+        assertJournalEntry(entries, "CREDIT", incomeFromRecoveryAccount, 1000.0);
+    }
+
+    @Test
+    public void testPayoutRefundAfterChargeOffReversesChargeOffExpense() {
+        final Long productId = createAccrualWithDeferredRevenueAmortizationProduct();
+        final LocalDate currentDate = LocalDate.now(ZoneId.systemDefault());
+        final AtomicLong loanId = new AtomicLong(0L);
+        BusinessDateHelper.runAt(currentDate.format(BUSINESS_DATE),
+                () -> loanId.set(createApprovedAndDisbursedLoan(productId, BigDecimal.valueOf(5000), currentDate)));
+
+        final LocalDate chargeOffDate = currentDate.plusDays(1);
+        BusinessDateHelper.runAt(chargeOffDate.format(BUSINESS_DATE), () -> loanHelper.chargeOffByLoanId(loanId.get(),
+                WorkingCapitalLoanDisbursementTestBuilder.buildChargeOffRequest(chargeOffDate, null)));
+
+        // Payout refund stays allowed after charge-off; its principal credit reverses the charge-off expense that the
+        // charge-off recognized, instead of reducing the already written-off portfolio.
+        final LocalDate refundDate = chargeOffDate.plusDays(1);
+        final AtomicLong refundTxnId = new AtomicLong(0L);
+        BusinessDateHelper.runAt(refundDate.format(BUSINESS_DATE),
+                () -> refundTxnId.set(loanHelper.makePayoutRefundByLoanId(loanId.get(), WorkingCapitalLoanDisbursementTestBuilder
+                        .buildRepaymentRequest(refundDate, BigDecimal.valueOf(1000), null, null, null, null))));
+
+        final List<JournalEntryTransactionItem> entries = getJournalEntriesForWCTransaction(refundTxnId.get());
+        assertEquals(2, entries.size(), "Expected 2 journal entries (1 debit + 1 credit)");
+        assertJournalEntry(entries, "DEBIT", fundSourceAccount, 1000.0);
+        assertJournalEntry(entries, "CREDIT", chargeOffExpenseAccount, 1000.0);
+    }
+
+    @Test
     public void testAddChargeAfterChargeOffIsRejected() {
         final Long productId = createAccrualWithDeferredRevenueAmortizationProduct();
         final LocalDate currentDate = LocalDate.now(ZoneId.systemDefault());
@@ -302,25 +357,24 @@ public class WorkingCapitalLoanChargeOffAccountingTest {
     private Long createAccrualWithDeferredRevenueAmortizationProduct() {
         final String uniqueName = "WCL CoAcct " + UUID.randomUUID().toString().substring(0, 8);
         final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
-        final Long productId = productHelper
-                .createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
-                        .withShortName(uniqueShortName).withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)
-                        .withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
-                        .withLoanPortfolioAccountId(loanPortfolioAccount.getAccountID().longValue())
-                        .withTransfersInSuspenseAccountId(transfersSuspenseAccount.getAccountID().longValue())
-                        .withIncomeFromDiscountFeeAccountId(incomeFromDiscountFeeAccount.getAccountID().longValue())
-                        .withReceivableFeeAccountId(feesReceivableAccount.getAccountID().longValue())
-                        .withReceivablePenaltyAccountId(penaltiesReceivableAccount.getAccountID().longValue())
-                        .withIncomeFromFeeAccountId(incomeFromFeeAccount.getAccountID().longValue())
-                        .withIncomeFromPenaltyAccountId(incomeFromPenaltyAccount.getAccountID().longValue())
-                        .withIncomeFromRecoveryAccountId(incomeFromRecoveryAccount.getAccountID().longValue())
-                        .withWriteOffAccountId(writeOffAccount.getAccountID().longValue())
-                        .withOverpaymentLiabilityAccountId(overpaymentAccount.getAccountID().longValue())
-                        .withDeferredIncomeLiabilityAccountId(deferredIncomeAccount.getAccountID().longValue())
-                        .withChargeOffExpenseAccountId(chargeOffExpenseAccount.getAccountID().longValue())
-                        .withIncomeFromChargeOffFeesAccountId(incomeFromChargeOffFeesAccount.getAccountID().longValue())
-                        .withIncomeFromChargeOffPenaltyAccountId(incomeFromChargeOffPenaltyAccount.getAccountID().longValue()).build())
-                .getResourceId();
+        final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
+                .withShortName(uniqueShortName).withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)
+                .withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
+                .withLoanPortfolioAccountId(loanPortfolioAccount.getAccountID().longValue())
+                .withTransfersInSuspenseAccountId(transfersSuspenseAccount.getAccountID().longValue())
+                .withIncomeFromDiscountFeeAccountId(incomeFromDiscountFeeAccount.getAccountID().longValue())
+                .withReceivableFeeAccountId(feesReceivableAccount.getAccountID().longValue())
+                .withReceivablePenaltyAccountId(penaltiesReceivableAccount.getAccountID().longValue())
+                .withIncomeFromFeeAccountId(incomeFromFeeAccount.getAccountID().longValue())
+                .withIncomeFromPenaltyAccountId(incomeFromPenaltyAccount.getAccountID().longValue())
+                .withIncomeFromRecoveryAccountId(incomeFromRecoveryAccount.getAccountID().longValue())
+                .withWriteOffAccountId(writeOffAccount.getAccountID().longValue())
+                .withOverpaymentLiabilityAccountId(overpaymentAccount.getAccountID().longValue())
+                .withDeferredIncomeLiabilityAccountId(deferredIncomeAccount.getAccountID().longValue())
+                .withChargeOffExpenseAccountId(chargeOffExpenseAccount.getAccountID().longValue())
+                .withIncomeFromChargeOffFeesAccountId(incomeFromChargeOffFeesAccount.getAccountID().longValue())
+                .withIncomeFromChargeOffPenaltyAccountId(incomeFromChargeOffPenaltyAccount.getAccountID().longValue())
+                .withGoodwillCreditAccountId(goodwillCreditAccount.getAccountID().longValue()).build()).getResourceId();
         createdProductIds.add(productId);
         return productId;
     }

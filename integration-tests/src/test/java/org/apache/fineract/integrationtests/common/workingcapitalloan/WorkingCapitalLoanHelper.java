@@ -183,6 +183,11 @@ public class WorkingCapitalLoanHelper {
                 .getResourceId();
     }
 
+    public Long makePayoutRefundByLoanId(final Long loanId, final PostWorkingCapitalLoanTransactionsRequest request) {
+        return FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "payoutRefund", request))
+                .getResourceId();
+    }
+
     public CallFailedRuntimeException runCreditBalanceRefundByLoanIdExpectingFailure(final Long loanId,
             final PostWorkingCapitalLoanTransactionsRequest request) {
         return FeignCalls.fail(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "creditBalanceRefund", request));
