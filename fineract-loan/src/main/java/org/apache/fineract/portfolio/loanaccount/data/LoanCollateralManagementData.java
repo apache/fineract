@@ -35,4 +35,11 @@ public class LoanCollateralManagementData {
     private BigDecimal totalCollateral;
 
     private Long id;
+
+    private String name;
+
+    private BigDecimal unitPrice;
+
+    private BigDecimal pctToBase;
+
 }
