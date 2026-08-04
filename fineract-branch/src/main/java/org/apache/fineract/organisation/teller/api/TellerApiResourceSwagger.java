@@ -373,7 +373,7 @@ final class TellerApiResourceSwagger {
         @Schema(example = "USD")
         public String currencyCode;
         @Schema(example = "5000")
-        public String txnAmount;
+        public BigDecimal txnAmount;
         @Schema(example = "allocating cash")
         public String txnNote;
         @Schema(example = "en")

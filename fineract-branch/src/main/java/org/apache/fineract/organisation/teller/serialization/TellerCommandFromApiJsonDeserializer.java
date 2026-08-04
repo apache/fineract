@@ -188,16 +188,7 @@ public final class TellerCommandFromApiJsonDeserializer {
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        BigDecimal txnAmount;
-        try {
-            txnAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(TXN_AMOUNT, element);
-        } catch (final PlatformApiDataValidationException e) {
-            final List<ApiParameterError> amountErrors = new ArrayList<>();
-            amountErrors
-                    .add(ApiParameterError.parameterError("validation.msg.invalid.decimal.format", "Amount must be a number", TXN_AMOUNT));
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    amountErrors, e);
-        }
+        final BigDecimal txnAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(TXN_AMOUNT, element);
         baseDataValidator.reset().parameter(TXN_AMOUNT).value(txnAmount).notNull();
 
         final LocalDate txnDate = this.fromApiJsonHelper.extractLocalDateNamed(TXN_DATE, element);
