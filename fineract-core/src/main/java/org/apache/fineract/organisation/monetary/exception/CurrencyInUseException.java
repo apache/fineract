@@ -27,7 +27,7 @@ public class CurrencyInUseException extends AbstractPlatformDomainRuleException 
 
     public CurrencyInUseException(final String currencyCode) {
         super("error.msg.currency.currencyCode.inUse",
-                "Currency cannot be removed because it is already used in existing transactions or accounts.", currencyCode);
+                "Cannot remove currency with identifier " + currencyCode + " while it is still in use", currencyCode);
     }
 
 }
