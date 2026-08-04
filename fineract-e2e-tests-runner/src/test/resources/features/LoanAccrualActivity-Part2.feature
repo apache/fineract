@@ -2554,6 +2554,7 @@ Feature: LoanAccrualActivity - Part2
 
     When Admin makes Credit Balance Refund transaction on "18 July 2025" with 22.2 EUR transaction amount
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    And Loan closedon_date is "18 July 2025"
 
   @TestRailId:C4054
   Scenario: Verify that no extra accrual activity will be created upon loan reprocessing with merchant issued refund and SNOOZE fee
@@ -2788,6 +2789,7 @@ Feature: LoanAccrualActivity - Part2
       | 18 July 2025     | Accrual                | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
     When Admin makes Credit Balance Refund transaction on "18 July 2025" with 22.2 EUR transaction amount
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    And Loan closedon_date is "18 July 2025"
 
   @TestRailId:C3955
   Scenario: Verify accrual activity trn just reversed but nt replayed with backdated repayment that overpays loan - UC1
@@ -4111,3 +4113,264 @@ Feature: LoanAccrualActivity - Part2
       | Accrual Adjustment | 19.75  | 19.75    | false    |
     # Net recognised interest income is unchanged
     Then Loan has 19.75 total Accruals
+
+  @TestRailId:C89817
+  Scenario: Verify that reversed Accrual Activity must not be stamped with future installment due date when loan re-opens after payoff reversal
+    When Admin sets the business date to "09 May 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_DOWNPAYMENT_ACCRUAL_ACTIVITY | 09 May 2026       | 279.99         | 24.99                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "09 May 2026" with "279.99" amount and expected disbursement date on "09 May 2026"
+    And Admin successfully disburse the loan on "09 May 2026" with "279.99" EUR transaction amount
+    When Admin sets the business date to "24 May 2026"
+    And Admin runs inline COB job for Loan
+    And Loan Pay-off is made on "24 May 2026"
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 09 May 2026      | Disbursement     | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 279.99       | false    | false    |
+      | 09 May 2026      | Down Payment     | 70.0   | 70.0      | 0.0      | 0.0  | 0.0       | 209.99       | false    | false    |
+      | 23 May 2026      | Accrual          | 1.97   | 0.0       | 1.97     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Repayment        | 212.11 | 209.99    | 2.12     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual          | 0.15   | 0.0       | 0.15     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual Activity | 2.12   | 0.0       | 2.12     | 0.0  | 0.0       | 0.0          | false    | false    |
+    When Admin sets the business date to "29 May 2026"
+    And Admin runs inline COB job for Loan
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "29 May 2026" with 100.0 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation true
+    Then Loan status will be "OVERPAID"
+    When Customer undo "1"th "Repayment" transaction made on "24 May 2026"
+    Then Loan status will be "ACTIVE"
+    And Loan has no "Accrual Activity" transaction with transaction date later than "29 May 2026", including reversed transactions
+
+  @TestRailId:C89818
+  Scenario: Future dated Accrual Activity must not be created and final activity moves back after later MIR reversal
+    When Admin sets the business date to "09 May 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_ACCRUAL_ACTIVITY | 09 May 2026       | 279.99         | 24.99                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "09 May 2026" with "279.99" amount and expected disbursement date on "09 May 2026"
+    And Admin successfully disburse the loan on "09 May 2026" with "279.99" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 09 May 2026      |           | 279.99          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 09 June 2026     |           | 188.58          | 91.41         | 5.83     | 0.0  | 0.0       | 97.24 | 0.0  | 0.0        | 0.0  | 97.24       |
+      | 2  | 30   | 09 July 2026     |           | 95.27           | 93.31         | 3.93     | 0.0  | 0.0       | 97.24 | 0.0  | 0.0        | 0.0  | 97.24       |
+      | 3  | 31   | 09 August 2026   |           | 0.0             | 95.27         | 1.98     | 0.0  | 0.0       | 97.25 | 0.0  | 0.0        | 0.0  | 97.25       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 279.99        | 11.74    | 0.0  | 0.0       | 291.73  | 0.0  | 0.0        | 0.0  | 291.73      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 09 May 2026      | Disbursement     | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 279.99       | false    | false    |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "09 May 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 279.99 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 279.99 |
+    When Admin sets the business date to "24 May 2026"
+    And Admin runs inline COB job for Loan
+    And Loan Pay-off is made on "24 May 2026"
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid   | In advance | Late | Outstanding |
+      |    |      | 09 May 2026      |               | 279.99          |               |          | 0.0  |           | 0.0   | 0.0    |            |      |             |
+      | 1  | 31   | 09 June 2026     | 24 May 2026   | 185.57          | 94.42         | 2.82     | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 2  | 30   | 09 July 2026     | 24 May 2026   | 88.33           | 97.24         | 0.0      | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 3  | 31   | 09 August 2026   | 24 May 2026   | 0.0             | 88.33         | 0.0      | 0.0  | 0.0       | 88.33 | 88.33  | 88.33      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
+      | 279.99        | 2.82     | 0.0  | 0.0       | 282.81  | 282.81 | 282.81     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 09 May 2026      | Disbursement     | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 279.99       | false    | false    |
+      | 23 May 2026      | Accrual          | 2.63   | 0.0       | 2.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Repayment        | 282.81 | 279.99    | 2.82     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual          | 0.19   | 0.0       | 0.19     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual Activity | 2.82   | 0.0       | 2.82     | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "24 May 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          |        | 279.99 |
+      | ASSET     | 112603       | Interest/Fee Receivable   |        | 2.82   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 282.81 |        |
+    When Admin sets the business date to "29 May 2026"
+    And Admin runs inline COB job for Loan
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "29 May 2026" with 279.99 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation true
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid   | In advance | Late | Outstanding |
+      |    |      | 09 May 2026      |               | 279.99          |               |          | 0.0  |           | 0.0   | 0.0    |            |      |             |
+      | 1  | 31   | 09 June 2026     | 24 May 2026   | 185.57          | 94.42         | 2.82     | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 2  | 30   | 09 July 2026     | 24 May 2026   | 88.33           | 97.24         | 0.0      | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 3  | 31   | 09 August 2026   | 24 May 2026   | 0.0             | 88.33         | 0.0      | 0.0  | 0.0       | 88.33 | 88.33  | 88.33      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
+      | 279.99        | 2.82     | 0.0  | 0.0       | 282.81  | 282.81 | 282.81     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 09 May 2026      | Disbursement           | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 279.99       | false    | false    |
+      | 23 May 2026      | Accrual                | 2.63   | 0.0       | 2.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Repayment              | 282.81 | 279.99    | 2.82     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual                | 0.19   | 0.0       | 0.19     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual Activity       | 2.82   | 0.0       | 2.82     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 May 2026      | Merchant Issued Refund | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 May 2026      | Interest Refund        | 2.82   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan Transactions tab has a "MERCHANT_ISSUED_REFUND" transaction with date "29 May 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | l1           | Overpayment account       |        | 279.99 |
+      | LIABILITY | 145023       | Suspense/Clearing account | 279.99 |        |
+    Then Loan Transactions tab has a "INTEREST_REFUND" transaction with date "29 May 2026" which has the following Journal entries:
+      | Type      | Account code | Account name        | Debit | Credit |
+      | LIABILITY | l1           | Overpayment account |       | 2.82   |
+      | INCOME    | 404000       | Interest Income     | 2.82  |        |
+    And Customer adjust "1"th repayment on "24 May 2026" with amount "0"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    And Loan closedon_date is "29 May 2026"
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid   | In advance | Late | Outstanding |
+      |    |      | 09 May 2026      |               | 279.99          |               |          | 0.0  |           | 0.0   | 0.0    |            |      |             |
+      | 1  | 31   | 09 June 2026     | 29 May 2026   | 186.51          | 93.48         | 3.76     | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 2  | 30   | 09 July 2026     | 29 May 2026   | 89.27           | 97.24         | 0.0      | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 3  | 31   | 09 August 2026   | 29 May 2026   | 0.0             | 89.27         | 0.0      | 0.0  | 0.0       | 89.27 | 89.27  | 89.27      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 279.99        | 3.76     | 0.0  | 0.0       | 283.75 | 283.75 | 283.75     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 09 May 2026      | Disbursement           | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 279.99       | false    | false    |
+      | 23 May 2026      | Accrual                | 2.63   | 0.0       | 2.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Repayment              | 282.81 | 279.99    | 2.82     | 0.0  | 0.0       | 0.0          | true     | false    |
+      | 24 May 2026      | Accrual                | 0.19   | 0.0       | 0.19     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 May 2026      | Merchant Issued Refund | 279.99 | 276.23    | 3.76     | 0.0  | 0.0       | 3.76         | false    | true     |
+      | 29 May 2026      | Interest Refund        | 3.76   | 3.76      | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 29 May 2026      | Accrual Activity       | 3.76   | 0.0       | 3.76     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 29 May 2026      | Accrual                | 0.94   | 0.0       | 0.94     | 0.0  | 0.0       | 0.0          | false    | false    |
+    And Admin makes "REPAYMENT" transaction with "AUTOPAY" payment type on "24 May 2026" with 282.81 EUR transaction amount
+    Then Loan status will be "OVERPAID"
+    And Loan has 282.81 overpaid amount
+    # Reversing the later transaction moves both the loan closure and the final Accrual Activity back to 24 May
+    When Customer undo "1"th "Merchant Issued Refund" transaction made on "29 May 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    And Loan closedon_date is "24 May 2026"
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid   | In advance | Late | Outstanding |
+      |    |      | 09 May 2026      |               | 279.99          |               |          | 0.0  |           | 0.0   | 0.0    |            |      |             |
+      | 1  | 31   | 09 June 2026     | 24 May 2026   | 185.57          | 94.42         | 2.82     | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 2  | 30   | 09 July 2026     | 24 May 2026   | 88.33           | 97.24         | 0.0      | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 3  | 31   | 09 August 2026   | 24 May 2026   | 0.0             | 88.33         | 0.0      | 0.0  | 0.0       | 88.33 | 88.33  | 88.33      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 279.99        | 2.82     | 0.0  | 0.0       | 282.81 | 282.81 | 282.81     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 09 May 2026      | Disbursement           | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 279.99       | false    | false    |
+      | 23 May 2026      | Accrual                | 2.63   | 0.0       | 2.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Repayment              | 282.81 | 279.99    | 2.82     | 0.0  | 0.0       | 0.0          | true     | false    |
+      | 24 May 2026      | Repayment              | 282.81 | 279.99    | 2.82     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual                | 0.19   | 0.0       | 0.19     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual Activity       | 2.82   | 0.0       | 2.82     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 May 2026      | Merchant Issued Refund | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     | true     |
+      | 29 May 2026      | Interest Refund        | 2.82   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | true     | true     |
+      | 29 May 2026      | Accrual                | 0.94   | 0.0       | 0.94     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 May 2026      | Accrual Adjustment     | 0.94   | 0.0       | 0.94     | 0.0  | 0.0       | 0.0          | false    | false    |
+
+  @TestRailId:C89819
+  Scenario: Future dated Accrual Activity must not be created when loan reopens after full repayment reversal with MIR
+    When Admin sets the business date to "09 May 2026"
+    And Admin creates a client with random data
+    And Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                              | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_REFUND_INTEREST_RECALC_ACCRUAL_ACTIVITY | 09 May 2026       | 279.99         | 24.99                  | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "09 May 2026" with "279.99" amount and expected disbursement date on "09 May 2026"
+    And Admin successfully disburse the loan on "09 May 2026" with "279.99" EUR transaction amount
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid | In advance | Late | Outstanding |
+      |    |      | 09 May 2026      |           | 279.99          |               |          | 0.0  |           | 0.0   | 0.0  |            |      |             |
+      | 1  | 31   | 09 June 2026     |           | 188.58          | 91.41         | 5.83     | 0.0  | 0.0       | 97.24 | 0.0  | 0.0        | 0.0  | 97.24       |
+      | 2  | 30   | 09 July 2026     |           | 95.27           | 93.31         | 3.93     | 0.0  | 0.0       | 97.24 | 0.0  | 0.0        | 0.0  | 97.24       |
+      | 3  | 31   | 09 August 2026   |           | 0.0             | 95.27         | 1.98     | 0.0  | 0.0       | 97.25 | 0.0  | 0.0        | 0.0  | 97.25       |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid | In advance | Late | Outstanding |
+      | 279.99        | 11.74    | 0.0  | 0.0       | 291.73  | 0.0  | 0.0        | 0.0  | 291.73      |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 09 May 2026      | Disbursement     | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 279.99       | false    | false    |
+    Then Loan Transactions tab has a "DISBURSEMENT" transaction with date "09 May 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 279.99 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 279.99 |
+    When Admin sets the business date to "24 May 2026"
+    And Admin runs inline COB job for Loan
+    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "24 May 2026" with 282.81 EUR transaction amount and system-generated Idempotency key
+    Then Loan status will be "CLOSED_OBLIGATIONS_MET"
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid   | In advance | Late | Outstanding |
+      |    |      | 09 May 2026      |               | 279.99          |               |          | 0.0  |           | 0.0   | 0.0    |            |      |             |
+      | 1  | 31   | 09 June 2026     | 24 May 2026   | 185.57          | 94.42         | 2.82     | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 2  | 30   | 09 July 2026     | 24 May 2026   | 88.33           | 97.24         | 0.0      | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 3  | 31   | 09 August 2026   | 24 May 2026   | 0.0             | 88.33         | 0.0      | 0.0  | 0.0       | 88.33 | 88.33  | 88.33      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
+      | 279.99        | 2.82     | 0.0  | 0.0       | 282.81  | 282.81 | 282.81     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 09 May 2026      | Disbursement     | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 279.99       | false    | false    |
+      | 23 May 2026      | Accrual          | 2.63   | 0.0       | 2.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Repayment        | 282.81 | 279.99    | 2.82     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual          | 0.19   | 0.0       | 0.19     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual Activity | 2.82   | 0.0       | 2.82     | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan Transactions tab has a "REPAYMENT" transaction with date "24 May 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          |        | 279.99 |
+      | ASSET     | 112603       | Interest/Fee Receivable   |        | 2.82   |
+      | LIABILITY | 145023       | Suspense/Clearing account | 282.81 |        |
+    When Admin sets the business date to "29 May 2026"
+    And Admin runs inline COB job for Loan
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "29 May 2026" with 279.99 EUR transaction amount and system-generated Idempotency key and interestRefundCalculation true
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid   | In advance | Late | Outstanding |
+      |    |      | 09 May 2026      |               | 279.99          |               |          | 0.0  |           | 0.0   | 0.0    |            |      |             |
+      | 1  | 31   | 09 June 2026     | 24 May 2026   | 185.57          | 94.42         | 2.82     | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 2  | 30   | 09 July 2026     | 24 May 2026   | 88.33           | 97.24         | 0.0      | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 3  | 31   | 09 August 2026   | 24 May 2026   | 0.0             | 88.33         | 0.0      | 0.0  | 0.0       | 88.33 | 88.33  | 88.33      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due     | Paid   | In advance | Late | Outstanding |
+      | 279.99        | 2.82     | 0.0  | 0.0       | 282.81  | 282.81 | 282.81     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 09 May 2026      | Disbursement           | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 279.99       | false    | false    |
+      | 23 May 2026      | Accrual                | 2.63   | 0.0       | 2.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Repayment              | 282.81 | 279.99    | 2.82     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual                | 0.19   | 0.0       | 0.19     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Accrual Activity       | 2.82   | 0.0       | 2.82     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 May 2026      | Merchant Issued Refund | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 May 2026      | Interest Refund        | 2.82   | 0.0       | 0.0      | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan Transactions tab has a "MERCHANT_ISSUED_REFUND" transaction with date "29 May 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | l1           | Overpayment account       |        | 279.99 |
+      | LIABILITY | 145023       | Suspense/Clearing account | 279.99 |        |
+    Then Loan Transactions tab has a "INTEREST_REFUND" transaction with date "29 May 2026" which has the following Journal entries:
+      | Type      | Account code | Account name        | Debit | Credit |
+      | LIABILITY | l1           | Overpayment account |       | 2.82   |
+      | INCOME    | 404000       | Interest Income     | 2.82  |        |
+    And Customer undo "1"th repayment on "24 May 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    And Loan closedon_date is "29 May 2026"
+    Then Loan Repayment schedule has 3 periods, with the following data for periods:
+      | Nr | Days | Date             | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid   | In advance | Late | Outstanding |
+      |    |      | 09 May 2026      |               | 279.99          |               |          | 0.0  |           | 0.0   | 0.0    |            |      |             |
+      | 1  | 31   | 09 June 2026     | 29 May 2026   | 186.51          | 93.48         | 3.76     | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 2  | 30   | 09 July 2026     | 29 May 2026   | 89.27           | 97.24         | 0.0      | 0.0  | 0.0       | 97.24 | 97.24  | 97.24      | 0.0  | 0.0         |
+      | 3  | 31   | 09 August 2026   | 29 May 2026   | 0.0             | 89.27         | 0.0      | 0.0  | 0.0       | 89.27 | 89.27  | 89.27      | 0.0  | 0.0         |
+    And Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid   | In advance | Late | Outstanding |
+      | 279.99        | 3.76     | 0.0  | 0.0       | 283.75 | 283.75 | 283.75     | 0.0  | 0.0         |
+    And Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+      | 09 May 2026      | Disbursement           | 279.99 | 0.0       | 0.0      | 0.0  | 0.0       | 279.99       | false    | false    |
+      | 23 May 2026      | Accrual                | 2.63   | 0.0       | 2.63     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 24 May 2026      | Repayment              | 282.81 | 279.99    | 2.82     | 0.0  | 0.0       | 0.0          | true     | false    |
+      | 24 May 2026      | Accrual                | 0.19   | 0.0       | 0.19     | 0.0  | 0.0       | 0.0          | false    | false    |
+      | 29 May 2026      | Merchant Issued Refund | 279.99 | 276.23    | 3.76     | 0.0  | 0.0       | 3.76         | false    | true     |
+      | 29 May 2026      | Interest Refund        | 3.76   | 3.76      | 0.0      | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 29 May 2026      | Accrual Activity       | 3.76   | 0.0       | 3.76     | 0.0  | 0.0       | 0.0          | false    | true     |
+      | 29 May 2026      | Accrual                | 0.94   | 0.0       | 0.94     | 0.0  | 0.0       | 0.0          | false    | false    |
