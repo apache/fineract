@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
@@ -139,7 +140,17 @@ public class SchedulerJobsTest {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
 
-            ParallelExecutionHelper.runInParallel(SchedulerJobHelper.getAllSchedulerJobNames(), SchedulerJobHelper::executeAndAwaitJob);
+            // Both date jobs write m_business_date: they race to insert the initial row while none exists yet, and
+            // the business date job also writes the COB date row when COB date adjustment is enabled. Running them
+            // next to each other makes one of them fail, so keep them out of the parallel batch.
+            List<String> dateJobs = List.of(JobName.INCREASE_BUSINESS_DATE_BY_1_DAY.toString(),
+                    JobName.INCREASE_COB_DATE_BY_1_DAY.toString());
+            List<String> allJobs = SchedulerJobHelper.getAllSchedulerJobNames();
+            assertTrue(allJobs.containsAll(dateJobs), "Date jobs are no longer named as expected, they would run in parallel: " + allJobs);
+
+            ParallelExecutionHelper.runInParallel(allJobs.stream().filter(jobName -> !dateJobs.contains(jobName)).toList(),
+                    SchedulerJobHelper::executeAndAwaitJob);
+            dateJobs.forEach(SchedulerJobHelper::executeAndAwaitJob);
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
