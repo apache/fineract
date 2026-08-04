@@ -101,6 +101,12 @@ public class ClientEntityImportHandlerTest {
 
         // insert dummy data into client entity sheet
         Sheet clientEntitySheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_ENTITY_SHEET_NAME);
+        // lookup values (client type, classification, constitution, main business line, ...) live on the hidden
+        // lookup sheet at fixed column positions; the visible sheet's lookup reference columns are dynamically
+        // positioned depending on the datatable columns configured for the Client entity, so they can't be
+        // addressed via the deprecated ClientEntityConstants.LOOKUP_* column indices anymore.
+        Sheet lookupSheet = workbook.getSheet(TemplatePopulateImportConstants.CLIENT_LOOKUPS_SHEET_NAME);
+        Row lookupRow = lookupSheet.getRow(1);
         Row firstClientRow = clientEntitySheet.getRow(1);
         firstClientRow.createCell(ClientEntityConstants.NAME_COL).setCellValue(Utils.randomStringGenerator("C_E_", 6));
         Sheet staffSheet = workbook.getSheet(TemplatePopulateImportConstants.STAFF_SHEET_NAME);
@@ -112,15 +118,11 @@ public class ClientEntityImportHandlerTest {
         Date validTill = simpleDateFormat.parse("14 May 2019");
         firstClientRow.createCell(ClientEntityConstants.INCOPORATION_VALID_TILL_COL).setCellValue(validTill);
         firstClientRow.createCell(ClientEntityConstants.MOBILE_NO_COL).setCellValue(Utils.uniqueRandomNumberGenerator(9));
-        firstClientRow.createCell(ClientEntityConstants.CLIENT_TYPE_COL)
-                .setCellValue(clientEntitySheet.getRow(1).getCell(ClientEntityConstants.LOOKUP_CLIENT_TYPES).getStringCellValue());
-        firstClientRow.createCell(ClientEntityConstants.CLIENT_CLASSIFICATION_COL)
-                .setCellValue(clientEntitySheet.getRow(1).getCell(ClientEntityConstants.LOOKUP_CLIENT_CLASSIFICATION).getStringCellValue());
+        firstClientRow.createCell(ClientEntityConstants.CLIENT_TYPE_COL).setCellValue(lookupRow.getCell(0).getStringCellValue());
+        firstClientRow.createCell(ClientEntityConstants.CLIENT_CLASSIFICATION_COL).setCellValue(lookupRow.getCell(1).getStringCellValue());
         firstClientRow.createCell(ClientEntityConstants.INCOPORATION_NUMBER_COL).setCellValue(Utils.randomNumberGenerator(6));
-        firstClientRow.createCell(ClientEntityConstants.MAIN_BUSINESS_LINE)
-                .setCellValue(clientEntitySheet.getRow(1).getCell(ClientEntityConstants.LOOKUP_MAIN_BUSINESS_LINE).getStringCellValue());
-        firstClientRow.createCell(ClientEntityConstants.CONSTITUTION_COL)
-                .setCellValue(clientEntitySheet.getRow(1).getCell(ClientEntityConstants.LOOKUP_CONSTITUTION_COL).getStringCellValue());
+        firstClientRow.createCell(ClientEntityConstants.MAIN_BUSINESS_LINE).setCellValue(lookupRow.getCell(3).getStringCellValue());
+        firstClientRow.createCell(ClientEntityConstants.CONSTITUTION_COL).setCellValue(lookupRow.getCell(2).getStringCellValue());
         firstClientRow.createCell(ClientEntityConstants.ACTIVE_COL).setCellValue("False");
         Date submittedDate = simpleDateFormat.parse("28 September 2017");
         firstClientRow.createCell(ClientEntityConstants.SUBMITTED_ON_COL).setCellValue(submittedDate);

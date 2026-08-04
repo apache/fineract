@@ -34,18 +34,21 @@ public final class DatatableData implements Serializable {
     private final String entitySubType;
     @SuppressWarnings("unused")
     private final List<ResultsetColumnHeaderData> columnHeaderData;
+    @SuppressWarnings("unused")
+    private final boolean multiRow;
 
     public static DatatableData create(final String applicationTableName, final String registeredTableName, final String entitySubType,
-            final List<ResultsetColumnHeaderData> columnHeaderData) {
-        return new DatatableData(applicationTableName, registeredTableName, entitySubType, columnHeaderData);
+            final List<ResultsetColumnHeaderData> columnHeaderData, final boolean multiRow) {
+        return new DatatableData(applicationTableName, registeredTableName, entitySubType, columnHeaderData, multiRow);
     }
 
     private DatatableData(final String applicationTableName, final String registeredTableName, final String entitySubType,
-            final List<ResultsetColumnHeaderData> columnHeaderData) {
+            final List<ResultsetColumnHeaderData> columnHeaderData, final boolean multiRow) {
         this.applicationTableName = applicationTableName;
         this.registeredTableName = registeredTableName;
         this.entitySubType = entitySubType;
         this.columnHeaderData = columnHeaderData;
+        this.multiRow = multiRow;
 
     }
 
@@ -63,6 +66,14 @@ public final class DatatableData implements Serializable {
 
     public String getRegisteredTableName() {
         return registeredTableName;
+    }
+
+    public List<ResultsetColumnHeaderData> getColumnHeaderData() {
+        return columnHeaderData;
+    }
+
+    public boolean isMultiRow() {
+        return multiRow;
     }
 
 }
