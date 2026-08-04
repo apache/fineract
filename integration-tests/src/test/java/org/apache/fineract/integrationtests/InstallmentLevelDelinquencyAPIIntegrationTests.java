@@ -45,8 +45,6 @@ import org.junit.jupiter.api.Test;
 @Slf4j
 public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanIntegrationTest {
 
-    private SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
-
     @Test
     public void testInstallmentLevelDelinquencyFourRangesInTheBucket() {
         runAt("31 May 2023", () -> {
@@ -596,7 +594,7 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
     private void updateBusinessDateAndExecuteCOBJob(String date) {
         businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                 .date(date).dateFormat(DATETIME_PATTERN).locale("en"));
-        schedulerJobHelper.executeAndAwaitJob("Loan COB");
+        SchedulerJobHelper.executeAndAwaitJob("Loan COB");
     }
 
     @AllArgsConstructor

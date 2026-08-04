@@ -51,7 +51,6 @@ import org.apache.fineract.integrationtests.client.IntegrationTest;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
@@ -78,7 +77,6 @@ public class BaseSavingsIntegrationTest extends IntegrationTest {
     protected final CodeHelper codeHelper = new CodeHelper();
     protected JournalEntryHelper journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
     protected ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-    protected SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
     protected void runFromToInclusive(String fromDate, String toDate, Consumer<String> runnable) {
         DateTimeFormatter format = DateTimeFormatter.ofPattern(DATETIME_PATTERN);

@@ -81,7 +81,6 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
     private static ChargesHelper chargesHelper;
     private static InlineLoanCOBHelper inlineLoanCOBHelper;
     private static BusinessStepHelper businessStepHelper;
-    private static SchedulerJobHelper schedulerJobHelper;
 
     @BeforeAll
     public static void setup() {
@@ -91,7 +90,6 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
         requestSpec.header("Fineract-Platform-TenantId", "default");
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
         chargesHelper = new ChargesHelper();
         client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
@@ -530,19 +528,19 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
 
         });
         runAt(repaymentPeriod1OneDayBeforeCloseDate, () -> {
-            schedulerJobHelper.executeAndAwaitJob("Accrual Activity Posting");
+            SchedulerJobHelper.executeAndAwaitJob("Accrual Activity Posting");
             verifyTransactions(loanId.get(), //
                     transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
         });
         runAt(repaymentPeriod1CloseDate, () -> {
-            schedulerJobHelper.executeAndAwaitJob("Accrual Activity Posting");
+            SchedulerJobHelper.executeAndAwaitJob("Accrual Activity Posting");
 
             verifyTransactions(loanId.get(), //
                     transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
                     transaction(90.0, "Accrual Activity", "01 February 2023", 0, 0, 20.0, 40.0, 30.0, 0.0, 0.0));
         });
         runAt(repaymentPeriod1OneDayAfterCloseDate, () -> {
-            schedulerJobHelper.executeAndAwaitJob("Accrual Activity Posting");
+            SchedulerJobHelper.executeAndAwaitJob("Accrual Activity Posting");
             verifyTransactions(loanId.get(), //
                     transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
                     transaction(90.0, "Accrual Activity", "01 February 2023", 0, 0, 20.0, 40.0, 30.0, 0.0, 0.0));
@@ -598,7 +596,7 @@ public class LoanTransactionAccrualActivityPostingTest extends BaseLoanIntegrati
 
         });
         runAt(repaymentPeriod1CloseDate, () -> {
-            schedulerJobHelper.executeAndAwaitJob("Accrual Activity Posting");
+            SchedulerJobHelper.executeAndAwaitJob("Accrual Activity Posting");
 
             verifyTransactions(loanId1.get(), //
                     transaction(1000.0, "Disbursement", disbursementDay, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),

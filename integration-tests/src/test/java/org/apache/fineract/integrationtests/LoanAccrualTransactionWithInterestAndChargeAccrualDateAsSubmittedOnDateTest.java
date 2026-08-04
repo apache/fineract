@@ -34,8 +34,6 @@ import org.junit.jupiter.api.Test;
 
 public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOnDateTest extends BaseLoanIntegrationTest {
 
-    private SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
-
     @Test
     public void accrualTransactionForInterestBearingLoan_WithoutCharges_SubmittedOnDateAsChargeAccrualDateWorksTest() {
         runAt("15 April 2024", () -> {
@@ -75,7 +73,7 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
                 updateBusinessDate("25 April 2024");
 
                 // run cob
-                schedulerJobHelper.executeAndAwaitJob("Loan COB");
+                SchedulerJobHelper.executeAndAwaitJob("Loan COB");
 
                 verifyTransactions(loanId, //
                         transaction(500.0, "Disbursement", "15 April 2024", 500.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
@@ -166,7 +164,7 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
                 updateBusinessDate("25 April 2024");
 
                 // run cob
-                schedulerJobHelper.executeAndAwaitJob("Loan COB");
+                SchedulerJobHelper.executeAndAwaitJob("Loan COB");
 
                 verifyTransactions(loanId, //
                         transaction(500.0, "Disbursement", "15 April 2024", 500.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
@@ -195,7 +193,7 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
                         transaction(500.0, "Disbursement", "26 April 2024", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
 
                 // run cob
-                schedulerJobHelper.executeAndAwaitJob("Loan COB");
+                SchedulerJobHelper.executeAndAwaitJob("Loan COB");
 
                 verifyTransactions(loanId, //
                         transaction(500.0, "Disbursement", "15 April 2024", 500.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //

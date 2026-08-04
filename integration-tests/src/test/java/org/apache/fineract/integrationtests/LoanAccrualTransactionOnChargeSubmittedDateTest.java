@@ -186,7 +186,6 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
     public void loanAccrualTransactionOnChargeSubmittedTest_Add_Periodic_Accrual_Transactions_Job() {
         try {
 
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
             // Accounts oof periodic accrual
             final Account assetAccount = this.accountHelper.createAssetAccount();
             final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -239,7 +238,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Run periodic accrual job for business date
             final String jobName = "Add Periodic Accrual Transactions";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             // verify accrual transaction created for charges create date
             checkAccrualTransaction(currentDate, 0.0f, 10.0f, 10.0f, loanId);
@@ -267,7 +266,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
             assertNotNull(feeLoanChargeId_1);
 
             // Run periodic accrual job for business date
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             // verify accrual transaction created for charges create date
             checkAccrualTransaction(futureDate, 0.0f, 10.0f, 0.0f, loanId);
@@ -284,7 +283,6 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
     public void loanAccrualTransactionOnChargeSubmittedTest_Loan_COB_AddPeriodicAccrualEntriesBusinessStep() {
         try {
 
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
             // Accounts oof periodic accrual
             final Account assetAccount = this.accountHelper.createAssetAccount();
             final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -339,7 +337,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, currentDate.plusDays(1));
 
             final String jobName = "Loan COB";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             // verify accrual transaction created for charges create date
             checkAccrualTransaction(currentDate, 0.0f, 10.0f, 10.0f, loanId);
@@ -368,7 +366,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Run cob job for business date + 1
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, futureDate.plusDays(1));
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             // verify accrual transaction created for charges create date
             checkAccrualTransaction(futureDate, 0.0f, 10.0f, 0.0f, loanId);
@@ -385,7 +383,6 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
     public void loanAccrualTransactionOnChargeSubmittedTest_Add_Accrual_Transactions_Job() {
         try {
 
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
             // Accounts oof periodic accrual
             final Account assetAccount = this.accountHelper.createAssetAccount();
             final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -438,7 +435,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Run accrual entries job for business date
             final String jobName = "Add Accrual Transactions";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             // verify accrual transaction created for charges create date
             checkAccrualTransaction(currentDate, 0.0f, 10.0f, 10.0f, loanId);
@@ -466,7 +463,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
             assertNotNull(feeLoanChargeId_1);
 
             // Run accrual entries job for business date
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             // verify accrual transaction created for charges create date
             checkAccrualTransaction(futureDate, 0.0f, 10.0f, 0.0f, loanId);
@@ -483,7 +480,6 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
     public void loanAccrualTransactionOnChargeSubmitted_With_Multiple_Repayments_Test_Add_Periodic_Accrual_Transactions_Job() {
         try {
 
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
             // Accounts oof periodic accrual
             final Account assetAccount = this.accountHelper.createAssetAccount();
             final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -538,7 +534,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
 
             // Run periodic accrual job for business date
             final String jobName = "Add Periodic Accrual Transactions";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             // verify multiple accrual transactions are created on charge created date according to repayment schedule
             // to which charge due date falls
@@ -556,7 +552,6 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
     public void loanAccrualTransactionOnChargeSubmitted_multiple_disbursement_reversal_test_Loan_COB() {
         try {
 
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
             // Accounts oof periodic accrual
             final Account assetAccount = this.accountHelper.createAssetAccount();
             final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -602,7 +597,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest extends BaseLoanInt
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, currentDate.plusDays(1));
 
             final String jobName = "Loan COB";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             // verify accrual transaction created for charges create date
             checkAccrualTransaction(currentDate, 0.0f, 0.0f, 10.0f, loanId);

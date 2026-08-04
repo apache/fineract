@@ -60,7 +60,6 @@ import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.ExternalAssetOwnerHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
@@ -90,7 +89,6 @@ public class ExternalAssetOwnerTransferCancelTest extends BaseLoanIntegrationTes
     private static FinancialActivityAccountHelper FINANCIAL_ACTIVITY_ACCOUNT_HELPER;
     private static ExternalAssetOwnerHelper EXTERNAL_ASSET_OWNER_HELPER;
     private static LoanTransactionHelper LOAN_TRANSACTION_HELPER;
-    private static SchedulerJobHelper SCHEDULER_JOB_HELPER;
     private static LocalDate TODAYS_DATE;
     private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
 
@@ -102,7 +100,6 @@ public class ExternalAssetOwnerTransferCancelTest extends BaseLoanIntegrationTes
         RESPONSE_SPEC = new ResponseSpecBuilder().expectStatusCode(200).build();
         AccountHelper accountHelper = new AccountHelper(REQUEST_SPEC, RESPONSE_SPEC);
         EXTERNAL_ASSET_OWNER_HELPER = new ExternalAssetOwnerHelper();
-        SCHEDULER_JOB_HELPER = new SchedulerJobHelper(REQUEST_SPEC);
         FINANCIAL_ACTIVITY_ACCOUNT_HELPER = new FinancialActivityAccountHelper(REQUEST_SPEC);
         LOAN_TRANSACTION_HELPER = new LoanTransactionHelper(REQUEST_SPEC, RESPONSE_SPEC);
 

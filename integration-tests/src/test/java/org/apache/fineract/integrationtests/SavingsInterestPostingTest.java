@@ -73,7 +73,6 @@ public class SavingsInterestPostingTest {
     private static RequestSpecification requestSpec;
     private AccountHelper accountHelper;
     private SavingsAccountHelper savingsAccountHelper;
-    private SchedulerJobHelper schedulerJobHelper;
     public static final String MINIMUM_OPENING_BALANCE = "1000.0";
     private SavingsProductHelper productHelper;
 
@@ -87,7 +86,6 @@ public class SavingsInterestPostingTest {
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
     }
@@ -125,8 +123,8 @@ public class SavingsInterestPostingTest {
 
             LocalDate marchDate = LocalDate.of(2025, 3, 2);
 
-            schedulerJobHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
-            schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            SchedulerJobHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
+            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
             long days = ChronoUnit.DAYS.between(startDate, marchDate.minusDays(1));
             BigDecimal expected = calcInterestPosting(productHelper, amount, days);
@@ -171,8 +169,8 @@ public class SavingsInterestPostingTest {
 
             LocalDate marchDate = LocalDate.of(2025, 3, 2);
 
-            schedulerJobHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
-            schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            SchedulerJobHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
+            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
             long days = ChronoUnit.DAYS.between(startDate, marchDate.minusDays(1));
             BigDecimal expected = calcOverdraftPosting(productHelper, amount, days);
@@ -226,8 +224,8 @@ public class SavingsInterestPostingTest {
 
             LocalDate marchDate = LocalDate.of(2025, 3, 2);
 
-            schedulerJobHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
-            schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            SchedulerJobHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
+            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
             List<HashMap> txs = getInterestTransactions(accountId);
             for (HashMap tx : txs) {
@@ -290,8 +288,8 @@ public class SavingsInterestPostingTest {
 
             LocalDate marchDate = LocalDate.of(2025, 3, 2);
 
-            schedulerJobHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
-            schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            SchedulerJobHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
+            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
             List<HashMap> txs = getInterestTransactions(accountId);
             for (HashMap tx : txs) {
@@ -350,7 +348,7 @@ public class SavingsInterestPostingTest {
 
             LocalDate februaryDate = LocalDate.of(2025, 2, 1);
 
-            schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
             List<HashMap> txsFebruary = getInterestTransactions(accountId);
 
@@ -371,7 +369,7 @@ public class SavingsInterestPostingTest {
 
             LocalDate marchDate = LocalDate.of(2025, 3, 1);
 
-            schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
             List<HashMap> txs = getInterestTransactions(accountId);
 
@@ -432,8 +430,8 @@ public class SavingsInterestPostingTest {
             Assertions.assertEquals(DUPLICATE_PREVENTION_ACCOUNT_COUNT, accountIdList.size(),
                     "ERROR: Expected " + DUPLICATE_PREVENTION_ACCOUNT_COUNT);
 
-            schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
-            schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
             await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
                 ParallelExecutionHelper.runInParallel(accountIdList, (accountId) -> {
@@ -488,7 +486,7 @@ public class SavingsInterestPostingTest {
         });
 
         runAt(schedulerPostingDate, () -> {
-            schedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
             List<HashMap> activeInterestTransactions = getActiveInterestTransactions(savingsAccountId[0]);
             Assertions.assertTrue(activeInterestTransactions.size() >= interestTxAfterManualAsOnPost[0],

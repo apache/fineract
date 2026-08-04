@@ -337,7 +337,6 @@ public class LoanCOBAccountLockCatchupInlineCOBTest extends BaseLoanIntegrationT
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.PENALTY_WAIT_PERIOD,
                     new PutGlobalConfigurationsRequest().value(0L));
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
             final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
             Assertions.assertNotNull(clientID);
@@ -367,7 +366,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest extends BaseLoanIntegrationT
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2020, 3, 2));
 
             final String jobName = "Loan COB";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
@@ -395,7 +394,6 @@ public class LoanCOBAccountLockCatchupInlineCOBTest extends BaseLoanIntegrationT
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.PENALTY_WAIT_PERIOD,
                     new PutGlobalConfigurationsRequest().value(0L));
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
             final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
             Assertions.assertNotNull(clientID);
@@ -426,7 +424,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest extends BaseLoanIntegrationT
             LoanAccountLockHelper.placeSoftLockOnLoanAccount(loanID.longValue(), "LOAN_INLINE_COB_PROCESSING");
 
             final String jobName = "Loan COB";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 

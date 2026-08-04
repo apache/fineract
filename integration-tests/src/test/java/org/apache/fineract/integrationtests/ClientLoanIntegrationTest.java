@@ -161,7 +161,6 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
     private static final Account CREDIT_LOSS_BAD_DEBT_FRAUD_ACCOUNT = ACCOUNT_HELPER.createExpenseAccount();
     private static final Account WRITTEN_OFF_ACCOUNT = ACCOUNT_HELPER.createExpenseAccount();
     private static final Account GOODWILL_EXPENSE_ACCOUNT = ACCOUNT_HELPER.createExpenseAccount();
-    private static final SchedulerJobHelper SCHEDULER_JOB_HELPER = new SchedulerJobHelper(REQUEST_SPEC);
     private static final SavingsAccountHelper SAVINGS_ACCOUNT_HELPER = new SavingsAccountHelper(REQUEST_SPEC, RESPONSE_SPEC);
     private static final AccountTransferHelper ACCOUNT_TRANSFER_HELPER = new AccountTransferHelper(REQUEST_SPEC, RESPONSE_SPEC);
     private static final LoanProductHelper LOAN_PRODUCT_HELPER = new LoanProductHelper();
@@ -2487,7 +2486,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
          */
         final String jobName = "Add Accrual Transactions";
 
-        SCHEDULER_JOB_HELPER.executeAndAwaitJob(jobName);
+        SchedulerJobHelper.executeAndAwaitJob(jobName);
 
         loanSchedule.clear();
         loanSchedule = LOAN_TRANSACTION_HELPER.getLoanRepaymentSchedule(REQUEST_SPEC, RESPONSE_SPEC, loanID);
@@ -2693,7 +2692,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
 
             final String jobName = "Add Accrual Transactions";
 
-            SCHEDULER_JOB_HELPER.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             loanSchedule.clear();
             loanSchedule = LOAN_TRANSACTION_HELPER.getLoanRepaymentSchedule(REQUEST_SPEC, RESPONSE_SPEC, loanID);
@@ -2900,7 +2899,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
 
         final String jobName = "Add Accrual Transactions";
 
-        SCHEDULER_JOB_HELPER.executeAndAwaitJob(jobName);
+        SchedulerJobHelper.executeAndAwaitJob(jobName);
 
         loanSchedule.clear();
         loanSchedule = LOAN_TRANSACTION_HELPER.getLoanRepaymentSchedule(REQUEST_SPEC, RESPONSE_SPEC, loanID);
@@ -3823,7 +3822,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
         verifyLoanRepaymentSchedule(loanSchedule, expectedvalues);
 
         String JobName = "Apply penalty to overdue loans";
-        SCHEDULER_JOB_HELPER.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
 
         loanSchedule = LOAN_TRANSACTION_HELPER.getLoanRepaymentSchedule(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         expectedvalues = new ArrayList<>();
