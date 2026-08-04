@@ -16,9 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.workingcapitalloan.repository;
+package org.apache.fineract.portfolio.workingcapitalloan.data;
 
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public interface WorkingCapitalLoanTransactionAllocationRepository extends JpaRepository<WorkingCapitalLoanTransactionAllocation, Long> {}
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class WorkingCapitalLoanChargePaidByData implements Serializable {
+
+    private Long id;
+    private BigDecimal amount;
+    private Long chargeId;
+    private Long transactionId;
+    private String name;
+}

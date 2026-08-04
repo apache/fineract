@@ -365,7 +365,7 @@ Feature: Loan - Part1
     Then Loan has 1 "REPAYMENT" transactions on Transactions tab
     Then Second loan has 0 "REPAYMENT" transactions on Transactions tab
 
-#  TODO unskip and check when PS-1106 is done
+#  TODO unskip and check, fix idempotency issue
   @Skip @TestRailId:C2483 @idempotency
   Scenario: As admin I would like to verify that idempotency applies correctly in case of a second client calls the same idempotency key on a second loan
     When Admin sets the business date to "1 November 2022"

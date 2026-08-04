@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.ChargeRequest;
@@ -122,12 +121,9 @@ public class FeignWorkingCapitalLoanHelper {
     }
 
     public Long makeRepayment(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
-        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId, "repayment", request));
-        return getTransactions(loanId).stream()
-                .filter(txn -> txn.getType() != null && "loanTransactionType.repayment".equals(txn.getType().getCode()))
-                .filter(txn -> !Boolean.TRUE.equals(txn.getReversed())).map(GetWorkingCapitalLoanTransactionIdResponse::getId)
-                .filter(Objects::nonNull).max(Long::compareTo)
-                .orElseThrow(() -> new IllegalStateException("No repayment transaction found after makeRepayment for loan " + loanId));
+        PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "repayment", request));
+        return response.getResourceId();
     }
 
     public Long undoTransaction(Long loanId, Long transactionId, ExecuteWorkingCapitalLoanTransactionCommandRequest request) {

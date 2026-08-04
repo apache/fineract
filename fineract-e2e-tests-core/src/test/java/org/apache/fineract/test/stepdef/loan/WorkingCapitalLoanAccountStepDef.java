@@ -61,6 +61,7 @@ import org.apache.fineract.client.models.GetBalance;
 import org.apache.fineract.client.models.GetCodeValuesDataResponse;
 import org.apache.fineract.client.models.GetDisbursementDetail;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
+import org.apache.fineract.client.models.GetWorkingCapitalLoanChargePaidByData;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsResponse;
@@ -1905,6 +1906,49 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final GetWorkingCapitalLoanTransactionsResponse getWorkingCapitalLoansLoanIdResponse = retrieveLoanTransactions(getCreatedLoanId());
         final List<GetWorkingCapitalLoanTransactionIdResponse> actualTransactions = getWorkingCapitalLoansLoanIdResponse.getContent();
         assertTable(GetWorkingCapitalLoanTransactionIdResponse.class, dataTable, actualTransactions);
+    }
+
+    @And("Working Capital Loan {string} transaction on {string} has the following charge paid-by data:")
+    public void workingCapitalLoanTransactionHasChargePaidByData(final String transactionType, final String transactionDate,
+            final DataTable table) {
+        final Long loanId = getCreatedLoanId();
+        final TransactionType resolvedType = resolveTransactionType(transactionType);
+        final List<GetWorkingCapitalLoanTransactionIdResponse> matches = findMatchingTransactions(loanId, resolvedType, transactionDate,
+                false);
+        Assertions.assertFalse(matches.isEmpty(),
+                String.format("No non-reversed %s transaction found on %s for loan %s", transactionType, transactionDate, loanId));
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = matches.get(0);
+
+        final List<GetWorkingCapitalLoanChargePaidByData> actualPaidBy = transaction.getChargePaidByList() == null ? List.of()
+                : transaction.getChargePaidByList();
+
+        final List<List<String>> data = table.asLists();
+        final List<String> headers = data.get(0);
+        final List<List<String>> actualRows = actualPaidBy.stream().map(paidBy -> fetchChargePaidByValues(headers, paidBy)).toList();
+
+        for (int i = 1; i < data.size(); i++) {
+            final List<String> expectedValues = data.get(i);
+            assertThat(actualRows.contains(expectedValues))
+                    .as("%nNo matching charge paid-by row for %s transaction on %s of loan %s line %s.%nActual rows: %s%nExpected row: %s",
+                            transactionType, transactionDate, loanId, i, actualRows, expectedValues)
+                    .isTrue();
+        }
+        Assertions.assertEquals(data.size() - 1, actualPaidBy.size(),
+                String.format("Charge paid-by row count mismatch for %s transaction on %s of loan %s. Actual: %s", transactionType,
+                        transactionDate, loanId, actualPaidBy));
+    }
+
+    private List<String> fetchChargePaidByValues(final List<String> headers, final GetWorkingCapitalLoanChargePaidByData paidBy) {
+        final List<String> values = new ArrayList<>();
+        for (final String headerName : headers) {
+            switch (headerName) {
+                case "Charge Name" -> values.add(paidBy.getName());
+                case "Amount" ->
+                    values.add(paidBy.getAmount() == null ? null : new Utils.DoubleFormatter(paidBy.getAmount().doubleValue()).format());
+                default -> throw new IllegalStateException(String.format("Header name %s cannot be found", headerName));
+            }
+        }
+        return values;
     }
 
     @Then("Admin successfully add discount with {string} amount on Working Capital loan account")

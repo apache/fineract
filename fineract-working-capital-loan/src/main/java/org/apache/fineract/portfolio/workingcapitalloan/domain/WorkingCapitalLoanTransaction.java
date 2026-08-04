@@ -108,6 +108,25 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         return transactionType;
     }
 
+    /**
+     * Points this transaction at its allocation, keeping the eager inverse side in step with the owning side.
+     *
+     * <p>
+     * Refuses to swap in a different allocation once one is set. The association is mapped
+     * {@code orphanRemoval = true}, so an unchecked reassignment would not fail - it would quietly delete the existing
+     * allocation row and replace it, losing its identity and audit trail. That mistake used to be caught by the
+     * {@code uq_m_wc_loan_transaction_allocation_transaction_id} unique constraint, back when a second allocation meant
+     * a second row; keeping both sides in sync means the constraint no longer gets the chance, so the check lives here
+     * instead. Callers that mean to re-allocate must mutate the existing allocation's portions, not build a new one.
+     */
+    void attachAllocation(final WorkingCapitalLoanTransactionAllocation allocation) {
+        if (this.allocation != null && this.allocation != allocation) {
+            throw new IllegalStateException("WC loan transaction " + getId() + " already has allocation " + this.allocation.getId()
+                    + "; a transaction has exactly one allocation, so re-allocation must update that one in place rather than attach another");
+        }
+        this.allocation = allocation;
+    }
+
     public static WorkingCapitalLoanTransaction disbursement(final WorkingCapitalLoan loan, final BigDecimal amount,
             final PaymentDetail paymentDetail, final LocalDate disbursementDate, final ExternalId externalId,
             final CodeValue classification) {

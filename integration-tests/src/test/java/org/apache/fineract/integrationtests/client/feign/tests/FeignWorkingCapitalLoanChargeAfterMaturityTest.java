@@ -27,11 +27,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.DelinquencyRangeRequest;
 import org.apache.fineract.client.models.GetBalance;
+import org.apache.fineract.client.models.GetWorkingCapitalLoanChargePaidByData;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
@@ -200,6 +202,107 @@ public class FeignWorkingCapitalLoanChargeAfterMaturityTest extends FeignIntegra
                     "no new delinquency period when nothing becomes outstanding");
             assertEquals(breachBefore, wcLoanHelper.getBreachSchedule(loanId).size(),
                     "no new breach period when nothing becomes outstanding");
+        });
+    }
+
+    @Test
+    @DisplayName("consuming an overpayment against a charge keeps the funding repayment's own portions summing to its amount")
+    void chargeOnOverpaidLoan_fundingRepaymentPortionsStayConsistent() {
+        businessDateHelper.runAt("2026-02-01", () -> {
+            final Long clientId = clientHelper.createClient("01 February 2026");
+            // Repay 1150 against a principal of 1000: the repayment is allocated 1000 principal + 150 overpayment.
+            final Long loanId = createDisburseAndOverpayLoan(clientId, "01 February 2026", BigDecimal.valueOf(1150));
+            assertStatus(loanId, STATUS_OVERPAID, "loan should be overpaid before adding the charge");
+
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-07-01");
+            // Settling this charge takes 100 out of that repayment's still-unallocated remainder and moves it onto the
+            // repayment's fee portion - the overpayment is only ever the unallocated part of a real repayment, never
+            // money of its own.
+            addChargeExpectingAllowed(loanId, false, CHARGE_AMOUNT, "01 July 2026", "overpaid > charge");
+
+            final GetWorkingCapitalLoanTransactionIdResponse repayment = findRepayment(loanId);
+            assertEqualBigDecimal(PRINCIPAL, repayment.getPrincipalPortion(), "the repayment still covers the whole principal");
+            assertEqualBigDecimal(BigDecimal.valueOf(CHARGE_AMOUNT), repayment.getFeeChargesPortion(),
+                    "the settled charge must be attributed to the repayment that funded it");
+            assertEqualBigDecimal(BigDecimal.valueOf(50), repayment.getOverpaymentPortion(),
+                    "the repayment's overpayment portion must shrink by what the charge consumed (150 - 100)");
+
+            // The portions are disjoint parts of one transaction, so they must still add up to it. Growing the fee
+            // portion without shrinking the overpayment portion would leave the row claiming more than was ever paid,
+            // and the undo unwind and the overpayment journal leg both read that portion back on its own.
+            assertEqualBigDecimal(repayment.getTransactionAmount(), portionSum(repayment),
+                    "the repayment's portions must sum to its transaction amount after the overpayment is consumed");
+
+            // The loan-level balance agrees with the transaction-level split.
+            final GetBalance balance = balanceOf(wcLoanHelper.getLoanDetails(loanId));
+            assertEqualBigDecimal(BigDecimal.valueOf(50), balance.getOverpaymentAmount(),
+                    "the balance overpayment must match the sum of the repayment overpayment portions");
+            assertEqualBigDecimal(BigDecimal.valueOf(CHARGE_AMOUNT), balance.getFeePaid(),
+                    "the balance fee-paid must match what the funding repayment actually settled");
+        });
+    }
+
+    @Test
+    @DisplayName("a charge larger than the first repayment's remainder is funded across two repayments, taking part of the second")
+    void chargeOnOverpaidLoan_spanningTwoFunders_splitsAcrossBothRepayments() {
+        businessDateHelper.runAt("2026-02-01", () -> {
+            final Long clientId = clientHelper.createClient("01 February 2026");
+            // First repayment overpays: 1000 clears the principal, the remaining 150 is its unallocated remainder.
+            final Long loanId = createDisburseAndOverpayLoan(clientId, "01 February 2026", BigDecimal.valueOf(1150));
+            assertStatus(loanId, STATUS_OVERPAID, "loan should be overpaid after the first repayment");
+
+            // Second repayment lands on an already-overpaid loan, so there is no principal left for it to touch and the
+            // whole 100 becomes a second unallocated remainder. Two remainders is what gives the funder loop something
+            // to roll between.
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-02-02");
+            wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(100), "02 February 2026"));
+            assertEqualBigDecimal(BigDecimal.valueOf(250), balanceOf(wcLoanHelper.getLoanDetails(loanId)).getOverpaymentAmount(),
+                    "the overpayment is the sum of both remainders (150 + 100)");
+
+            // The charge exceeds the first remainder, so settling it must exhaust repayment one and take part of
+            // repayment two - the partial-take / roll-to-next-funder path.
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-07-01");
+            final Long feeLoanChargeId = addChargeReturningId(loanId, 200, "01 July 2026", "charge spanning two funders");
+
+            final List<GetWorkingCapitalLoanTransactionIdResponse> repayments = repaymentsOldestFirst(loanId);
+            assertEquals(2, repayments.size(), "both repayments must survive as separate funding transactions");
+            final GetWorkingCapitalLoanTransactionIdResponse first = repayments.getFirst();
+            final GetWorkingCapitalLoanTransactionIdResponse second = repayments.get(1);
+
+            // Funder one is consumed to the last unit, funder two covers only the shortfall.
+            assertEqualBigDecimal(BigDecimal.valueOf(150), paidByAmountFor(first, feeLoanChargeId),
+                    "the first repayment must contribute its whole remaining 150 to the charge");
+            assertEqualBigDecimal(BigDecimal.valueOf(50), paidByAmountFor(second, feeLoanChargeId),
+                    "the second repayment must contribute only the 50 still unfunded, not its whole remainder");
+
+            // Each funder's own allocation moves the funded amount from its overpayment portion to its fee portion.
+            assertEqualBigDecimal(PRINCIPAL, first.getPrincipalPortion(), "the first repayment still covers the principal");
+            assertEqualBigDecimal(BigDecimal.valueOf(150), first.getFeeChargesPortion(),
+                    "the first repayment's fee portion is what it funded");
+            assertEqualBigDecimal(BigDecimal.ZERO, first.getOverpaymentPortion(), "the first repayment's remainder is fully consumed");
+
+            assertEqualBigDecimal(BigDecimal.ZERO, second.getPrincipalPortion(), "the second repayment met no outstanding principal");
+            assertEqualBigDecimal(BigDecimal.valueOf(50), second.getFeeChargesPortion(),
+                    "the second repayment's fee portion is its partial take");
+            assertEqualBigDecimal(BigDecimal.valueOf(50), second.getOverpaymentPortion(),
+                    "the second repayment keeps the half of its remainder the charge did not need");
+
+            // Portions stay disjoint parts of their own transaction on both sides of the split.
+            assertEqualBigDecimal(first.getTransactionAmount(), portionSum(first), "the first repayment's portions must sum to its amount");
+            assertEqualBigDecimal(second.getTransactionAmount(), portionSum(second),
+                    "the second repayment's portions must sum to its amount");
+
+            // The loan-level view agrees with the two-way split.
+            final GetBalance balance = balanceOf(wcLoanHelper.getLoanDetails(loanId));
+            assertEqualBigDecimal(BigDecimal.valueOf(200), balance.getFeePaid(), "the charge is fully paid across the two funders");
+            assertEqualBigDecimal(BigDecimal.ZERO, balance.getFeeOutstanding(), "no fee is left outstanding");
+            assertEqualBigDecimal(BigDecimal.valueOf(50), balance.getOverpaymentAmount(),
+                    "the overpayment keeps what the charge did not take");
+            assertStatus(loanId, STATUS_OVERPAID, "an overpayment survives the charge, so the loan stays overpaid");
+
+            final WorkingCapitalLoanChargeData feeCharge = findCharge(wcLoanHelper.getCharges(loanId), feeLoanChargeId);
+            assertEqualBigDecimal(BigDecimal.valueOf(200), feeCharge.getAmountPaid(), "the charge records the full amount as paid");
+            assertTrue(feeCharge.getPaid(), "the charge must be flagged paid");
         });
     }
 
@@ -426,6 +529,37 @@ public class FeignWorkingCapitalLoanChargeAfterMaturityTest extends FeignIntegra
             throw new AssertionError(scenarioContext + " — adding a charge on a closed/overpaid/past-maturity WC loan must be allowed, "
                     + "but the server rejected it: " + e.getMessage(), e);
         }
+    }
+
+    /** The loan's single non-reversed repayment - the transaction that funds the overpayment. */
+    private GetWorkingCapitalLoanTransactionIdResponse findRepayment(final Long loanId) {
+        final List<GetWorkingCapitalLoanTransactionIdResponse> repayments = repaymentsOldestFirst(loanId);
+        assertEquals(1, repayments.size(), "the scenario expects exactly one repayment to fund the overpayment");
+        return repayments.getFirst();
+    }
+
+    /** Every non-reversed repayment, in the order the funder loop consumes them (transaction date, then id). */
+    private List<GetWorkingCapitalLoanTransactionIdResponse> repaymentsOldestFirst(final Long loanId) {
+        return wcLoanHelper.getTransactions(loanId).stream().filter(txn -> !Boolean.TRUE.equals(txn.getReversed()))
+                .filter(txn -> txn.getType() != null && Boolean.TRUE.equals(txn.getType().getRepayment()))
+                .sorted(Comparator.comparing(GetWorkingCapitalLoanTransactionIdResponse::getTransactionDate)
+                        .thenComparing(GetWorkingCapitalLoanTransactionIdResponse::getId))
+                .toList();
+    }
+
+    /** The transaction's four allocation portions, which are disjoint and must add back up to its amount. */
+    private BigDecimal portionSum(final GetWorkingCapitalLoanTransactionIdResponse txn) {
+        return txn.getPrincipalPortion().add(txn.getFeeChargesPortion()).add(txn.getPenaltyChargesPortion())
+                .add(txn.getOverpaymentPortion());
+    }
+
+    /** What a single transaction contributed towards one charge, or zero if it funded none of it. */
+    private BigDecimal paidByAmountFor(final GetWorkingCapitalLoanTransactionIdResponse txn, final Long loanChargeId) {
+        if (txn.getChargePaidByList() == null) {
+            return BigDecimal.ZERO;
+        }
+        return txn.getChargePaidByList().stream().filter(paidBy -> loanChargeId.equals(paidBy.getChargeId()))
+                .map(GetWorkingCapitalLoanChargePaidByData::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private Long createDisburseAndCloseLoan(Long clientId, String date) {
