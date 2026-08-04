@@ -31,6 +31,7 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsRespon
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansPagedResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansTemplateResponse;
+import org.apache.fineract.client.models.MarkWorkingCapitalLoanAsFraudRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
@@ -78,6 +79,24 @@ public class WorkingCapitalLoanHelper {
 
     public GetWorkingCapitalLoansLoanIdResponse retrieveById(final Long loanId) {
         return FeignCalls.ok(() -> api().retrieveWorkingCapitalLoanById(loanId));
+    }
+
+    public void markAsFraudById(final Long loanId, final MarkWorkingCapitalLoanAsFraudRequest request) {
+        FeignCalls.ok(() -> api().markWorkingCapitalLoanAsFraudById(loanId, request));
+    }
+
+    public CallFailedRuntimeException markAsFraudByIdExpectingFailure(final Long loanId,
+            final MarkWorkingCapitalLoanAsFraudRequest request) {
+        return FeignCalls.fail(() -> api().markWorkingCapitalLoanAsFraudById(loanId, request));
+    }
+
+    public void markAsFraudByExternalId(final String externalId, final MarkWorkingCapitalLoanAsFraudRequest request) {
+        FeignCalls.ok(() -> api().markWorkingCapitalLoanAsFraudByExternalId(externalId, request));
+    }
+
+    public CallFailedRuntimeException markAsFraudByExternalIdExpectingFailure(final String externalId,
+            final MarkWorkingCapitalLoanAsFraudRequest request) {
+        return FeignCalls.fail(() -> api().markWorkingCapitalLoanAsFraudByExternalId(externalId, request));
     }
 
     public GetWorkingCapitalLoansLoanIdResponse retrieveByExternalId(final String externalId) {

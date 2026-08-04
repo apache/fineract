@@ -934,6 +934,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder markAsFraudWorkingCapitalLoan(final Long loanId) {
+        this.actionName = "SETFRAUD";
+        this.entityName = "WORKINGCAPITALLOAN";
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/working-capital-loans/" + loanId + "/mark-as-fraud";
+        return this;
+    }
+
     public CommandWrapperBuilder createNearBreachActionWorkingCapitalLoan(final Long loanId) {
         this.actionName = "CREATE";
         this.entityName = "WC_NEAR_BREACH_ACTION";

@@ -347,7 +347,7 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public Boolean enableInstallmentLevelDelinquency;
         @Schema(description = "List of originators associated with this loan")
         public List<GetWorkingCapitalLoansLoanIdOriginatorData> originators;
-        @Schema(description = "Fraud flag. Placeholder: null until the WCP fraud feature is implemented")
+        @Schema(description = "Fraud flag. True when the loan has been marked as fraudulent", example = "false")
         public Boolean fraud;
         @Schema(description = "Whether the loan is charged off (pure accounting tag; the loan stays active)")
         public Boolean chargedOff;

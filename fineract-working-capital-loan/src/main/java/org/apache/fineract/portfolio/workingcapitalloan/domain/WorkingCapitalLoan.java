@@ -189,6 +189,14 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     @JoinColumn(name = "charged_off_by_userid")
     private AppUser chargedOffBy;
 
+    /**
+     * Flags the loan as fraudulent. When charged off, a fraudulent loan is routed to the charge-off fraud expense
+     * account instead of the regular charge-off expense account. Independent of the charge-off state itself.
+     */
+    @Setter
+    @Column(name = "is_fraud", nullable = false)
+    private boolean fraud = false;
+
     public Long getOfficeId() {
         return client != null && client.getOffice() != null ? client.getOffice().getId() : null;
     }
