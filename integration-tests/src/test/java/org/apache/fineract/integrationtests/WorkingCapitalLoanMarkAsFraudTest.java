@@ -59,15 +59,15 @@ public class WorkingCapitalLoanMarkAsFraudTest {
         assertFalse(Boolean.TRUE.equals(retrieveLoan(loanId).getFraud()));
 
         // Mark the loan as fraudulent.
-        applicationHelper.markAsFraud(loanId, new MarkWorkingCapitalLoanAsFraudRequest().fraud(true));
+        applicationHelper.markAsFraudById(loanId, new MarkWorkingCapitalLoanAsFraudRequest().fraud(true));
         assertTrue(retrieveLoan(loanId).getFraud());
 
         // Marking again with the same value is idempotent.
-        applicationHelper.markAsFraud(loanId, new MarkWorkingCapitalLoanAsFraudRequest().fraud(true));
+        applicationHelper.markAsFraudById(loanId, new MarkWorkingCapitalLoanAsFraudRequest().fraud(true));
         assertTrue(retrieveLoan(loanId).getFraud());
 
         // Unmark the loan.
-        applicationHelper.markAsFraud(loanId, new MarkWorkingCapitalLoanAsFraudRequest().fraud(false));
+        applicationHelper.markAsFraudById(loanId, new MarkWorkingCapitalLoanAsFraudRequest().fraud(false));
         assertFalse(Boolean.TRUE.equals(retrieveLoan(loanId).getFraud()));
     }
 
@@ -78,7 +78,7 @@ public class WorkingCapitalLoanMarkAsFraudTest {
         final Long loanId = submitLoan(clientId, productId);
 
         // fraud is a required field; omitting it must be rejected by the request validation.
-        final CallFailedRuntimeException ex = applicationHelper.markAsFraudExpectingFailure(loanId,
+        final CallFailedRuntimeException ex = applicationHelper.markAsFraudByIdExpectingFailure(loanId,
                 new MarkWorkingCapitalLoanAsFraudRequest());
         assertEquals(400, ex.getStatus());
     }
@@ -91,15 +91,44 @@ public class WorkingCapitalLoanMarkAsFraudTest {
         final Long loanId = submitLoan(clientId, productId);
 
         // Marking a non-active loan as fraud must be rejected with a 400 carrying the specific validation message.
-        final CallFailedRuntimeException ex = applicationHelper.markAsFraudExpectingFailure(loanId,
+        final CallFailedRuntimeException ex = applicationHelper.markAsFraudByIdExpectingFailure(loanId,
                 new MarkWorkingCapitalLoanAsFraudRequest().fraud(true));
         assertEquals(400, ex.getStatus());
         assertNotNull(ex.getDeveloperMessage());
         assertTrue(ex.getDeveloperMessage().contains("Marking a loan as fraud is allowed only for active loans"));
     }
 
+    @Test
+    public void testMarkAndUnmarkWorkingCapitalLoanAsFraudByExternalId() {
+        final Long productId = createProduct();
+        final Long clientId = createClient();
+        final String externalId = UUID.randomUUID().toString();
+        final Long loanId = activeLoan(clientId, productId, externalId);
+
+        assertFalse(Boolean.TRUE.equals(retrieveLoanByExternalId(externalId).getFraud()));
+
+        applicationHelper.markAsFraudByExternalId(externalId, new MarkWorkingCapitalLoanAsFraudRequest().fraud(true));
+        assertTrue(retrieveLoanByExternalId(externalId).getFraud());
+        // The by-id and by-external-id endpoints address the same loan.
+        assertTrue(retrieveLoan(loanId).getFraud());
+
+        applicationHelper.markAsFraudByExternalId(externalId, new MarkWorkingCapitalLoanAsFraudRequest().fraud(false));
+        assertFalse(Boolean.TRUE.equals(retrieveLoanByExternalId(externalId).getFraud()));
+    }
+
+    @Test
+    public void testMarkAsFraudFailsWhenExternalIdIsUnknown() {
+        final CallFailedRuntimeException ex = applicationHelper.markAsFraudByExternalIdExpectingFailure(UUID.randomUUID().toString(),
+                new MarkWorkingCapitalLoanAsFraudRequest().fraud(true));
+        assertEquals(404, ex.getStatus());
+    }
+
     private Long activeLoan(final Long clientId, final Long productId) {
-        final Long loanId = submitLoan(clientId, productId);
+        return activeLoan(clientId, productId, null);
+    }
+
+    private Long activeLoan(final Long clientId, final Long productId, final String externalId) {
+        final Long loanId = submitLoan(clientId, productId, externalId);
         final LocalDate currentDate = LocalDate.now(ZoneId.systemDefault());
         applicationHelper.approveById(loanId,
                 WorkingCapitalLoanApplicationTestBuilder.buildApproveRequest(currentDate, BigDecimal.valueOf(5000), null));
@@ -109,17 +138,28 @@ public class WorkingCapitalLoanMarkAsFraudTest {
     }
 
     private Long submitLoan(final Long clientId, final Long productId) {
+        return submitLoan(clientId, productId, null);
+    }
+
+    private Long submitLoan(final Long clientId, final Long productId, final String externalId) {
         return applicationHelper.submit(new WorkingCapitalLoanApplicationTestBuilder() //
                 .withClientId(clientId) //
                 .withProductId(productId) //
                 .withPrincipal(BigDecimal.valueOf(5000)) //
                 .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT) //
                 .withTotalPaymentVolume(BigDecimal.valueOf(100000)) //
+                .withExternalId(externalId) //
                 .buildSubmitRequest());
     }
 
     private GetWorkingCapitalLoansLoanIdResponse retrieveLoan(final Long loanId) {
         final GetWorkingCapitalLoansLoanIdResponse response = applicationHelper.retrieveById(loanId);
+        assertNotNull(response);
+        return response;
+    }
+
+    private GetWorkingCapitalLoansLoanIdResponse retrieveLoanByExternalId(final String externalId) {
+        final GetWorkingCapitalLoansLoanIdResponse response = applicationHelper.retrieveByExternalId(externalId);
         assertNotNull(response);
         return response;
     }

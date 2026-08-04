@@ -23,7 +23,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
-    <changeSet author="fineract" id="wcl-0063-1">
+    <changeSet author="fineract" id="wcl-0065-1">
         <preConditions onFail="MARK_RAN">
             <not>
                 <columnExists tableName="m_wc_loan" columnName="is_fraud"/>
@@ -36,7 +36,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="fineract" id="wcl-0063-2">
+    <changeSet author="fineract" id="wcl-0065-2">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_permission WHERE code = 'SETFRAUD_WORKINGCAPITALLOAN'</sqlCheck>
         </preConditions>

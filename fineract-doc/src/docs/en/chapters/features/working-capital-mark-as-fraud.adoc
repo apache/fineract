@@ -30,10 +30,15 @@ default.
 
 == API
 
+The loan can be addressed by id or by external id:
+
 [source]
 ----
 PUT /v1/working-capital-loans/{loanId}/mark-as-fraud
+PUT /v1/working-capital-loans/external-id/{loanExternalId}/mark-as-fraud
 ----
+
+Both take the same body and produce the same result. An unknown external id returns a 404.
 
 [source,json]
 ----

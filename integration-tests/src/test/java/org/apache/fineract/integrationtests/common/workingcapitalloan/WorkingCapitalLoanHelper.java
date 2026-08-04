@@ -81,12 +81,22 @@ public class WorkingCapitalLoanHelper {
         return FeignCalls.ok(() -> api().retrieveWorkingCapitalLoanById(loanId));
     }
 
-    public void markAsFraud(final Long loanId, final MarkWorkingCapitalLoanAsFraudRequest request) {
-        FeignCalls.ok(() -> api().markWorkingCapitalLoanAsFraud(loanId, request));
+    public void markAsFraudById(final Long loanId, final MarkWorkingCapitalLoanAsFraudRequest request) {
+        FeignCalls.ok(() -> api().markWorkingCapitalLoanAsFraudById(loanId, request));
     }
 
-    public CallFailedRuntimeException markAsFraudExpectingFailure(final Long loanId, final MarkWorkingCapitalLoanAsFraudRequest request) {
-        return FeignCalls.fail(() -> api().markWorkingCapitalLoanAsFraud(loanId, request));
+    public CallFailedRuntimeException markAsFraudByIdExpectingFailure(final Long loanId,
+            final MarkWorkingCapitalLoanAsFraudRequest request) {
+        return FeignCalls.fail(() -> api().markWorkingCapitalLoanAsFraudById(loanId, request));
+    }
+
+    public void markAsFraudByExternalId(final String externalId, final MarkWorkingCapitalLoanAsFraudRequest request) {
+        FeignCalls.ok(() -> api().markWorkingCapitalLoanAsFraudByExternalId(externalId, request));
+    }
+
+    public CallFailedRuntimeException markAsFraudByExternalIdExpectingFailure(final String externalId,
+            final MarkWorkingCapitalLoanAsFraudRequest request) {
+        return FeignCalls.fail(() -> api().markWorkingCapitalLoanAsFraudByExternalId(externalId, request));
     }
 
     public GetWorkingCapitalLoansLoanIdResponse retrieveByExternalId(final String externalId) {
