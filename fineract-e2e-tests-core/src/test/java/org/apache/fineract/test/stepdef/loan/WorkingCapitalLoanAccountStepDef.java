@@ -3776,6 +3776,18 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         chargeOffWCLoan(transactionDate, null, null, null);
     }
 
+    @Then("Charging off the Working Capital loan on {string} results an error with the following data:")
+    public void chargeOffWCLoanResultsAnError(final String transactionDate, final DataTable table) {
+        final Long loanId = getCreatedLoanId();
+        final PostWorkingCapitalLoanTransactionsRequest request = buildChargeOffRequest(transactionDate, null, null, null);
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "chargeOff", request));
+        if (table != null) {
+            verifyErrorResponse(exception, table);
+        }
+        log.debug("Verified charge-off on {} fails with expected error for loan {}", transactionDate, loanId);
+    }
+
     @When("Admin sets the fraud flag of the Working Capital loan to {word}")
     public void setWorkingCapitalLoanFraudFlag(final String fraudFlag) {
         final Long loanId = getCreatedLoanId();
