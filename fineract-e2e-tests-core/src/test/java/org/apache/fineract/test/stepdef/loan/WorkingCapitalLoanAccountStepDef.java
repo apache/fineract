@@ -1195,6 +1195,22 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .isEqualTo(loanStatusExpectedValue);
     }
 
+    @When("Admin writes off the Working Capital loan on {string}")
+    public void writeOffWorkingCapitalLoan(final String transactionDate) {
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate);
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "writeOff",
+                request));
+    }
+
+    @When("Admin undoes the write-off on the Working Capital loan")
+    public void undoWriteOffWorkingCapitalLoan() {
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest();
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(getCreatedLoanId(),
+                "undoWriteOff", request));
+    }
+
     @And("Admin successfully disburse the Working Capital loan on {string} with {string} EUR transaction amount")
     public void disburseWCLoan(String actualDisbursementDate, String transactionAmount) {
         PostWorkingCapitalLoansLoanIdRequest disburseRequest = workingCapitalLoanRequestFactory.defaultWorkingCapitalLoanDisburseRequest()

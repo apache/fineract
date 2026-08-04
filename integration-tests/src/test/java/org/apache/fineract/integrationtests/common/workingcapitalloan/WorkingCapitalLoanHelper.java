@@ -158,6 +158,15 @@ public class WorkingCapitalLoanHelper {
                 .getResourceId();
     }
 
+    public Long writeOffByLoanId(final Long loanId, final PostWorkingCapitalLoanTransactionsRequest request) {
+        return FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "writeOff", request)).getResourceId();
+    }
+
+    public Long undoWriteOffByLoanId(final Long loanId, final PostWorkingCapitalLoanTransactionsRequest request) {
+        return FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionById(loanId, "undoWriteOff", request))
+                .getResourceId();
+    }
+
     public void undoTransactionByLoanId(final Long loanId, final Long transactionId) {
         FeignCalls.ok(() -> transactionsApi().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId, transactionId,
                 "undo", new ExecuteWorkingCapitalLoanTransactionCommandRequest()));

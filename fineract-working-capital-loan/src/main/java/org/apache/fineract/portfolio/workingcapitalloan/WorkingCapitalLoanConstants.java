@@ -59,6 +59,8 @@ public final class WorkingCapitalLoanConstants {
     public static final String DISCOUNT_FEE_ADJUSTMENT_LOAN_COMMAND = "discountFeeAdjustment";
     public static final String CHARGE_OFF_LOAN_COMMAND = "chargeOff";
     public static final String UNDO_CHARGE_OFF_LOAN_COMMAND = "undoChargeOff";
+    public static final String WRITE_OFF_LOAN_COMMAND = "writeOff";
+    public static final String UNDO_WRITE_OFF_LOAN_COMMAND = "undoWriteOff";
 
     // Approval / Rejection / Undo-approval parameters
     public static final String RESOURCE_NAME = WCL_RESOURCE_NAME;
@@ -99,6 +101,9 @@ public final class WorkingCapitalLoanConstants {
 
     public static final String WRITE_OFF_REASONS = "WriteOffReasons";
     public static final String CHARGE_OFF_REASONS = "ChargeOffReasons";
+    // Lower-case "writeoff" on purpose: the incoming write-off parameters follow the term/progressive loan shape,
+    // where the reason is sent as "writeoffReasonId" (see LoanTransactionValidatorImpl).
+    public static final String writeoffReasonIdParamName = "writeoffReasonId";
 
     // transaction undo parameters
     public static final String reversalExternalIdParamName = "reversalExternalId";

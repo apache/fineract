@@ -355,6 +355,10 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public LocalDate chargedOffOnDate;
         @Schema(description = "Charge-off reason code value, when one was provided")
         public CodeValueData chargeOffReason;
+        @Schema(description = "Date the loan was written off. Cleared by an undo write-off", example = "2026-07-16")
+        public LocalDate writtenOffOnDate;
+        @Schema(description = "Write-off reason code value, when one was provided")
+        public CodeValueData writeOffReason;
 
         @Schema(description = "Originator data associated with the loan")
         public static final class GetWorkingCapitalLoansLoanIdOriginatorData {

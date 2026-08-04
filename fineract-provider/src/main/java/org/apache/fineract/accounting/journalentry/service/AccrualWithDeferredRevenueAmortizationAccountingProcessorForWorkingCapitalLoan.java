@@ -118,6 +118,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                 chargeAdjustmentPostings(txn, principalPortion, feesPortion, penaltiesPortion, overpaymentPortion, isChargedOff);
             case LoanTransactionType.ACCRUAL -> chargeAccrualPostings(feesPortion, penaltiesPortion);
             case LoanTransactionType.CHARGE_OFF -> chargeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion);
+            case LoanTransactionType.WRITEOFF -> writeOffPostings(loan, txn, principalPortion, feesPortion, penaltiesPortion, isChargedOff);
             default -> throw new NotImplementedException(
                     "Post Journal Entries is not implemented yet for " + txn.getTypeOf().getCode() + " for Working Capital Loan");
         };
@@ -184,6 +185,36 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                 LedgerPosting.debit(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES, feesPortion),
                 LedgerPosting.debit(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY, penaltiesPortion),
                 // credit: write off the outstanding receivables
+                LedgerPosting.credit(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion),
+                LedgerPosting.credit(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion),
+                LedgerPosting.credit(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion));
+    }
+
+    /**
+     * Terminal write-off: debit Losses Written-off for the whole outstanding, credit the portfolio and receivable
+     * accounts per portion (mirrors the accrual term-loan treatment, without the interest leg WC does not have).
+     * <p>
+     * A loan that was already charged off reclassifies instead: the receivables are already off the books, so the
+     * credits go against the accounts {@link #chargeOffPostings} debited -- the charge-off expense (or fraud expense)
+     * for principal and the charged-off fee/penalty income accounts -- moving the loss to Losses Written-off. The net
+     * P&amp;L effect is zero; only its presentation changes. Crediting the asset accounts again here would drive them
+     * negative and recognize the loss twice.
+     * </p>
+     */
+    private List<LedgerPosting> writeOffPostings(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final BigDecimal principalPortion, final BigDecimal feesPortion, final BigDecimal penaltiesPortion,
+            final boolean isChargedOff) {
+        if (isChargedOff) {
+            return List.of(
+                    LedgerPosting.debit(CashAccountsForLoan.LOSSES_WRITTEN_OFF,
+                            MathUtil.add(principalPortion, feesPortion, penaltiesPortion)),
+                    LedgerPosting.credit(chargeOffExpenseAccount(loan), principalPortion),
+                    LedgerPosting.credit(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES, feesPortion),
+                    LedgerPosting.credit(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY, penaltiesPortion));
+        }
+
+        return List.of(
+                LedgerPosting.debit(CashAccountsForLoan.LOSSES_WRITTEN_OFF, MathUtil.add(principalPortion, feesPortion, penaltiesPortion)),
                 LedgerPosting.credit(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion),
                 LedgerPosting.credit(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion),
                 LedgerPosting.credit(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion));

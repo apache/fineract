@@ -76,6 +76,22 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
     @Setter
     private BigDecimal penaltyPaid = BigDecimal.ZERO;
 
+    /**
+     * Portions moved out of the outstanding balance by a write-off. They lower the computed outstanding to zero without
+     * touching the paid columns, so an undo simply resets them back to zero and the original outstanding reappears.
+     */
+    @Column(name = "principal_written_off", scale = 6, precision = 19, nullable = false)
+    @Setter
+    private BigDecimal principalWrittenOff = BigDecimal.ZERO;
+
+    @Column(name = "fee_written_off", scale = 6, precision = 19, nullable = false)
+    @Setter
+    private BigDecimal feeWrittenOff = BigDecimal.ZERO;
+
+    @Column(name = "penalty_written_off", scale = 6, precision = 19, nullable = false)
+    @Setter
+    private BigDecimal penaltyWrittenOff = BigDecimal.ZERO;
+
     @Column(name = "realized_income_from_discount_fee", scale = 6, precision = 19, nullable = false)
     @Setter
     private BigDecimal realizedIncomeFromDiscountFee = BigDecimal.ZERO;
@@ -125,15 +141,15 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
     }
 
     public BigDecimal getPrincipalOutstanding() {
-        return MathUtil.subtract(getTotalPrincipalDue(), getPrincipalPaid()).max(BigDecimal.ZERO);
+        return MathUtil.subtract(getTotalPrincipalDue(), getPrincipalPaid(), getPrincipalWrittenOff()).max(BigDecimal.ZERO);
     }
 
     public BigDecimal getFeeOutstanding() {
-        return MathUtil.subtract(getFee(), getFeePaid()).max(BigDecimal.ZERO);
+        return MathUtil.subtract(getFee(), getFeePaid(), getFeeWrittenOff()).max(BigDecimal.ZERO);
     }
 
     public BigDecimal getPenaltyOutstanding() {
-        return MathUtil.subtract(getPenalty(), getPenaltyPaid()).max(BigDecimal.ZERO);
+        return MathUtil.subtract(getPenalty(), getPenaltyPaid(), getPenaltyWrittenOff()).max(BigDecimal.ZERO);
     }
 
     public BigDecimal getTotalOutstanding() {

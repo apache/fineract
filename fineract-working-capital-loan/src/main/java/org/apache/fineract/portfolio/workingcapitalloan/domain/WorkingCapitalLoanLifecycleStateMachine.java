@@ -90,6 +90,10 @@ public class WorkingCapitalLoanLifecycleStateMachine {
             case LOAN_OVERPAID -> (from.isActive() || from.isClosedObligationsMet() || from.isOverpaid()) ? LoanStatus.OVERPAID : null;
             case LOAN_REOPENED -> (from.isOverpaid() || from.isClosedObligationsMet()) ? LoanStatus.ACTIVE : null;
             case LOAN_CREDIT_BALANCE_REFUND_IN_FULL -> from.isOverpaid() ? LoanStatus.CLOSED_OBLIGATIONS_MET : null;
+            // Write-off is terminal: only an ACTIVE loan can be written off, and undo is the sole transition out of
+            // CLOSED_WRITTEN_OFF (the loan is otherwise locked).
+            case LOAN_WRITTEN_OFF -> from.isActive() ? LoanStatus.CLOSED_WRITTEN_OFF : null;
+            case LOAN_WRITTEN_OFF_UNDO -> from.isClosedWrittenOff() ? LoanStatus.ACTIVE : null;
         };
     }
 }

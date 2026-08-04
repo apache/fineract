@@ -1,4 +1,3 @@
-@temp3
 @WorkingCapital
 @WorkingCapitalLoanChargeOffFeature
 Feature: Working Capital Loan Charge-off
