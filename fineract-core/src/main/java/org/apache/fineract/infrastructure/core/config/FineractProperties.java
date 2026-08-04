@@ -43,6 +43,8 @@ public class FineractProperties {
 
     private String idempotencyKeyHeaderName;
 
+    private boolean idempotencyKeyValidationEnabled;
+
     private Boolean insecureHttpClient;
     private long clientConnectTimeout;
     private long clientReadTimeout;
