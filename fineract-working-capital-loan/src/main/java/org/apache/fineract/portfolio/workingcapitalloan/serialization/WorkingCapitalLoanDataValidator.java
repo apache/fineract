@@ -85,8 +85,8 @@ public class WorkingCapitalLoanDataValidator {
             WorkingCapitalLoanConstants.paymentDetailsParamName, WorkingCapitalLoanConstants.externalIdParameterName,
             WorkingCapitalLoanConstants.discountExternalIdParameterName, WorkingCapitalLoanConstants.classificationIdParamName));
 
-    private static final Set<String> UNDO_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(
-            Arrays.asList("locale", WorkingCapitalLoanConstants.reversalExternalIdParamName, WorkingCapitalLoanConstants.noteParamName));
+    private static final Set<String> UNDO_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
+            WorkingCapitalLoanConstants.reversalExternalIdParamName, WorkingCapitalLoanConstants.noteParamName));
 
     private static final Set<String> PAYMENT_DETAILS_SUPPORTED_PARAMETERS = new HashSet<>(
             Arrays.asList(WorkingCapitalLoanConstants.paymentTypeIdParamName, WorkingCapitalLoanConstants.accountNumberParamName,

@@ -25,6 +25,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -95,6 +96,56 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
     @Then("The retrieved amortization schedule has payments with the following details in first {string} lines:")
     public void verifyRetrievedPaymentDetailsFirstNLines(final String firstNLines, final DataTable dataTable) {
         verifyPaymentDetails(dataTable, Integer.valueOf(firstNLines));
+    }
+
+    /**
+     * Verifies only the payment rows whose {@code paymentNo} is listed in the table, and only the columns present in
+     * the table header. Lets a scenario pin a curated subset of rows (e.g. the first few plus the final remainder row)
+     * without restating the whole schedule.
+     */
+    @Then("The retrieved amortization schedule has payments with the following details for the listed payment numbers:")
+    public void verifyRetrievedPaymentDetailsByPaymentNo(final DataTable dataTable) {
+        final ProjectedAmortizationScheduleData response = TestContext.INSTANCE.get(WC_AMORT_SCHEDULE_KEY);
+        assertThat(response).as("Amortization schedule response").isNotNull();
+
+        final List<ProjectedAmortizationSchedulePaymentData> actualPayments = response.getPayments();
+        assertThat(actualPayments).as("payments list").isNotNull();
+
+        final Map<Integer, ProjectedAmortizationSchedulePaymentData> byPaymentNo = new HashMap<>();
+        for (final ProjectedAmortizationSchedulePaymentData payment : actualPayments) {
+            byPaymentNo.put(payment.getPaymentNo(), payment);
+        }
+
+        final SoftAssertions assertions = new SoftAssertions();
+        for (final Map<String, String> expected : dataTable.asMaps()) {
+            final int paymentNo = Integer.parseInt(expected.get("paymentNo"));
+            final ProjectedAmortizationSchedulePaymentData actual = byPaymentNo.get(paymentNo);
+            assertions.assertThat(actual).as("payment %s present", paymentNo).isNotNull();
+            if (actual == null) {
+                continue;
+            }
+            final String p = "payment[" + paymentNo + "].";
+            if (expected.containsKey("date")) {
+                assertDate(assertions, p + "date", actual.getPaymentDate(), expected.get("date"));
+            }
+            if (expected.containsKey("expectedPaymentAmount")) {
+                assertNullableDecimal(assertions, p + "expectedPaymentAmount", actual.getExpectedPaymentAmount(),
+                        expected.get("expectedPaymentAmount"));
+            }
+            if (expected.containsKey("expectedBalance")) {
+                assertNullableDecimal(assertions, p + "expectedBalance", actual.getExpectedBalance(), expected.get("expectedBalance"));
+            }
+            if (expected.containsKey("expectedAmortizationAmount")) {
+                assertNullableDecimal(assertions, p + "expectedAmortizationAmount", actual.getExpectedAmortizationAmount(),
+                        expected.get("expectedAmortizationAmount"));
+            }
+            if (expected.containsKey("expectedDiscountFeeBalance")) {
+                assertNullableDecimal(assertions, p + "expectedDiscountFeeBalance", actual.getExpectedDiscountFeeBalance(),
+                        expected.get("expectedDiscountFeeBalance"));
+            }
+        }
+
+        assertions.assertAll();
     }
 
     public void checkSummaryFields(final SoftAssertions assertions, ProjectedAmortizationScheduleData response,

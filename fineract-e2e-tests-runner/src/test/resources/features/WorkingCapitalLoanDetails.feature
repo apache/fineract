@@ -43,8 +43,8 @@ Feature: Working Capital Loan Details
       | netDisbursalAmount                             | 100.0                        |
       | totalPaymentVolume                             | 100.0                        |
       | paymentRate                                    | 1.0                          |
-      | periodPaymentAmount                            | 0.0                          |
-      | numberOfRepayments                             | 36000                        |
+      | periodPaymentAmount                            | 0.01                         |
+      | numberOfRepayments                             | 10000                        |
       | dailyEir                                       | 0.0                          |
       | calculatedAnnualEir                            | 0.0                          |
       | proposedDiscountFee                            | 0.0                          |

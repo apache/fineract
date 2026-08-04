@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.Validate;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleCalculator;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
@@ -101,7 +102,8 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         Validate.notNull(periodPaymentRate, "periodPaymentRate must not be null");
         Validate.notNull(npvDayCount, "npvDayCount must not be null");
 
-        assertEirCalculable(discount, disbursedAmount, totalPaymentVolume, periodPaymentRate, npvDayCount, mc);
+        assertEirCalculable(discount, disbursedAmount, totalPaymentVolume, periodPaymentRate, npvDayCount,
+                loan.getLoanProduct().getCurrency(), mc);
 
         return ProjectedAmortizationScheduleModel.generate(discount, disbursedAmount, totalPaymentVolume, periodPaymentRate, npvDayCount,
                 disbursementDate, mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan), DateUtils.getBusinessLocalDate());
@@ -163,7 +165,8 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         Validate.notNull(expectedDisbursementDate, "expectedDisbursementDate must not be null");
         Validate.isTrue(netDisbursementAmount.signum() > 0, "net disbursement amount for schedule must be positive");
 
-        assertEirCalculable(discount, netDisbursementAmount, totalPaymentVolume, periodPaymentRate, npvDayCount, mc);
+        assertEirCalculable(discount, netDisbursementAmount, totalPaymentVolume, periodPaymentRate, npvDayCount,
+                loan.getLoanProduct().getCurrency(), mc);
 
         final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(discount, netDisbursementAmount,
                 totalPaymentVolume, periodPaymentRate, npvDayCount, expectedDisbursementDate, mc,
@@ -173,9 +176,9 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
 
     /** Guards paths that bypass request validation, before {@code generate()} materialises the full schedule. */
     private void assertEirCalculable(final BigDecimal discount, final BigDecimal netDisbursementAmount, final BigDecimal totalPaymentVolume,
-            final BigDecimal periodPaymentRate, final int npvDayCount, final MathContext mc) {
+            final BigDecimal periodPaymentRate, final int npvDayCount, final MonetaryCurrency currency, final MathContext mc) {
         if (!ProjectedAmortizationScheduleModel.isEirCalculable(discount, netDisbursementAmount, totalPaymentVolume, periodPaymentRate,
-                npvDayCount, mc)) {
+                npvDayCount, currency, mc)) {
             throw new WorkingCapitalLoanEirNotCalculableException();
         }
     }
@@ -211,8 +214,6 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         final LocalDate loanDisbursementDate = resolveLoanDisbursementDate(loan);
         final int splitDayIndex = (int) ChronoUnit.DAYS.between(loanDisbursementDate, businessDate);
         final LocalDate modelRateChangeDate = model.expectedDisbursementDate().plusDays(splitDayIndex);
-
-        model.clearLastRateSegment();
 
         // A pathological rate can make the re-solved split-term schedule non-computable (zero daily payment, over-cap
         // term, non-convergent EIR); surface those as a domain-rule error.

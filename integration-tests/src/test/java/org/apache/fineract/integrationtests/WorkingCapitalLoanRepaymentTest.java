@@ -621,7 +621,7 @@ public class WorkingCapitalLoanRepaymentTest {
                 expectedRow("7/17/2019", "50", null, "149.68", "0.21", null, "0.33", null, null),
                 expectedRow("7/18/2019", "50", null, "99.84", "0.16", null, "0.17", null, null),
                 expectedRow("7/19/2019", "50", null, "49.95", "0.11", null, "0.06", null, null),
-                expectedRow("7/20/2019", "50", null, "0.00", "0.05", null, "0.01", null, null));
+                expectedRow("7/20/2019", "50", null, "0.00", "0.06", null, "0.00", null, null));
     }
 
     private static ExpectedScheduleRow expectedRow(final String paymentDate, final String expectedPaymentAmount,
