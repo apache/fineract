@@ -292,8 +292,12 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
      * self-guarding: a transaction whose recomputed split already matches its live entries is left untouched.
      */
     private void restateJournalEntries(final WorkingCapitalLoan loan, final List<WorkingCapitalLoanTransactionAllocation> allocations) {
-        for (final WorkingCapitalLoanTransactionAllocation allocation : allocations) {
-            accountingProcessor.restateJournalEntries(loan, allocation.getWcLoanTransaction(), allocation, false);
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            for (final WorkingCapitalLoanTransactionAllocation allocation : allocations) {
+                // The charged-off tag decides which accounts the restated split books to, exactly as it did at booking
+                // time, so a replay on a charged-off loan must not fall back to the regular treatment.
+                accountingProcessor.restateJournalEntries(loan, allocation.getWcLoanTransaction(), allocation, loan.isChargedOff());
+            }
         }
     }
 

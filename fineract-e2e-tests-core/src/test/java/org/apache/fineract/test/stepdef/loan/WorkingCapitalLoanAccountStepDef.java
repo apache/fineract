@@ -68,6 +68,7 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsRespon
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.LoanTransactionEnumData;
+import org.apache.fineract.client.models.MarkWorkingCapitalLoanAsFraudRequest;
 import org.apache.fineract.client.models.PostAllowAttributeOverrides;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
@@ -3773,6 +3774,27 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @When("Admin charges off the Working Capital loan on {string}")
     public void chargeOffWCLoan(final String transactionDate) {
         chargeOffWCLoan(transactionDate, null, null, null);
+    }
+
+    @Then("Charging off the Working Capital loan on {string} results an error with the following data:")
+    public void chargeOffWCLoanResultsAnError(final String transactionDate, final DataTable table) {
+        final Long loanId = getCreatedLoanId();
+        final PostWorkingCapitalLoanTransactionsRequest request = buildChargeOffRequest(transactionDate, null, null, null);
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "chargeOff", request));
+        if (table != null) {
+            verifyErrorResponse(exception, table);
+        }
+        log.debug("Verified charge-off on {} fails with expected error for loan {}", transactionDate, loanId);
+    }
+
+    @When("Admin sets the fraud flag of the Working Capital loan to {word}")
+    public void setWorkingCapitalLoanFraudFlag(final String fraudFlag) {
+        final Long loanId = getCreatedLoanId();
+        final MarkWorkingCapitalLoanAsFraudRequest request = new MarkWorkingCapitalLoanAsFraudRequest()
+                .fraud(Boolean.parseBoolean(fraudFlag));
+        ok(() -> fineractClient.workingCapitalLoans().markWorkingCapitalLoanAsFraudById(loanId, request));
+        log.info("Set fraud flag={} on Working Capital loan {}", fraudFlag, loanId);
     }
 
     @When("Admin charges off the Working Capital loan on {string} with charge-off reason {string}")

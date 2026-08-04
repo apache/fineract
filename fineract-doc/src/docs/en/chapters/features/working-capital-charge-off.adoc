@@ -70,15 +70,15 @@ the last user transaction date (system transactions such as accrual or discount-
 === Behaviour
 
 * A non-monetary `CHARGE_OFF` transaction is created for the charge-off amount, which is the outstanding
-balance as of the charge-off date. Because the charge-off date cannot precede the last user transaction, the
-current outstanding balance equals the as-of-date balance.
+balance as of the charge-off date. The charge-off date cannot precede the last user transaction, and system
+transactions do not move the balance, so the current outstanding balance equals the as-of-date balance.
 * The transaction does *not* move the loan balance and is excluded from transaction replay.
 * The loan is flagged as charged off (`chargedOff = true`) and remains `ACTIVE`.
-* Repayments and payment, waiver or adjustment of *existing* charges remain allowed afterwards, so the
-balance can still be cured. While the loan is charged off, those credits are recognized as recovery
-income and discount-fee amortization is routed to the charge-off expense (see <<wc-charge-off-accounting>>).
-* Goodwill credit and payout refund are not supported while the loan is charged off; posting either one
-is rejected.
+* All credit transactions — repayment, goodwill credit, payout refund, credit balance refund — and payment,
+waiver or adjustment of *existing* charges remain allowed afterwards, so the balance can still be cured.
+Only their accounting treatment changes (see <<wc-charge-off-accounting>>); the loan otherwise behaves like
+a loan that is not charged off.
+* Adding a *new* charge is the single action blocked while the loan is charged off.
 
 .Charge-off request/response flow
 [plantuml,format=svg]
@@ -195,10 +195,10 @@ through the Working Capital Loan product accounting mapping.
 
 === While the Loan Is Charged Off
 
-Transactions posted while the loan carries the charged-off tag receive a different accounting
-treatment: credits that would normally reduce the portfolio or receivables are recognized as recovery
-income, and discount-fee amortization is recognized against the charge-off expense instead of
-discount-fee income.
+Transactions posted while the loan carries the charged-off tag are accepted as usual, but their accounting
+treatment changes: credits that would normally reduce the portfolio or receivables — already written off by
+the charge-off — instead recognize recovery income or reverse what the charge-off recognized, and
+discount-fee amortization is recognized against the charge-off expense instead of discount-fee income.
 
 [cols="2,2,3"]
 |===
@@ -208,6 +208,18 @@ discount-fee income.
 |`FUND_SOURCE`
 |`INCOME_FROM_RECOVERY` for the principal, fee and penalty portions; `OVERPAYMENT` for any overpaid
 excess
+
+|Goodwill credit
+|`GOODWILL_CREDIT` for the principal and overpayment portions,
+`INCOME_FROM_GOODWILL_CREDIT_FEES` / `INCOME_FROM_GOODWILL_CREDIT_PENALTY` per portion (unchanged)
+|`INCOME_FROM_RECOVERY` for the principal, fee and penalty portions; `OVERPAYMENT` for any overpaid
+excess
+
+|Payout refund
+|`FUND_SOURCE`
+|`CHARGE_OFF_EXPENSE` for the principal portion, `INCOME_FROM_CHARGE_OFF_FEES` /
+`INCOME_FROM_CHARGE_OFF_PENALTY` per portion — reversing what the charge-off recognized; `OVERPAYMENT` for
+any overpaid excess
 
 |Charge adjustment
 |`INCOME_FROM_RECOVERY`

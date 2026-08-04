@@ -25,17 +25,22 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 import org.apache.fineract.accounting.common.AccountingConstants.CashAccountsForLoan;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
@@ -62,6 +67,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -117,6 +125,20 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     private GLAccount incomeFromFeesGLAccount;
     @Mock
     private GLAccount incomeFromPenaltiesGLAccount;
+    @Mock
+    private GLAccount incomeFromChargeOffFeesGLAccount;
+    @Mock
+    private GLAccount incomeFromChargeOffPenaltyGLAccount;
+    @Mock
+    private GLAccount goodwillCreditGLAccount;
+    @Mock
+    private GLAccount incomeFromGoodwillCreditFeesGLAccount;
+    @Mock
+    private GLAccount incomeFromGoodwillCreditPenaltyGLAccount;
+    @Mock
+    private GLAccount chargeOffExpenseGLAccount;
+    @Mock
+    private GLAccount chargeOffFraudExpenseGLAccount;
 
     @BeforeEach
     void setUp() {
@@ -155,6 +177,10 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
                 eq(CashAccountsForLoan.INCOME_FROM_FEES.getValue()), any())).thenReturn(incomeFromFeesGLAccount);
         lenient().when(helper.getLinkedGLAccountForWorkingCapitalLoanProduct(eq(PRODUCT_ID),
                 eq(CashAccountsForLoan.INCOME_FROM_PENALTIES.getValue()), any())).thenReturn(incomeFromPenaltiesGLAccount);
+        lenient()
+                .when(helper.getLinkedGLAccountForWorkingCapitalLoanProduct(eq(PRODUCT_ID),
+                        eq(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue()), any()))
+                .thenReturn(incomeFromChargeOffFeesGLAccount);
     }
 
     private void mockChargeAdjustmentRelation(final boolean penaltyCharge) {
@@ -421,7 +447,7 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     }
 
     @Test
-    void testChargedOffChargeAdjustmentDebitsRecoveryInsteadOfFeeIncome() {
+    void testChargedOffFeeChargeAdjustmentDebitsFeeIncomeAndCreditsChargeOffFeeIncome() {
         when(txn.getTypeOf()).thenReturn(LoanTransactionType.CHARGE_ADJUSTMENT);
         when(txn.getTransactionAmount()).thenReturn(new BigDecimal("40"));
         mockChargeAdjustmentRelation(false);
@@ -431,10 +457,10 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
 
         processor.postJournalEntries(loan, txn, allocation, true);
 
-        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(incomeFromRecoveryGLAccount),
-                eq(LOAN_ID), eq(TXN_ID), any(), eq(new BigDecimal("40")), isNull());
-        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(feesReceivableGLAccount), eq(LOAN_ID),
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(incomeFromFeesGLAccount), eq(LOAN_ID),
                 eq(TXN_ID), any(), eq(new BigDecimal("40")), isNull());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(incomeFromChargeOffFeesGLAccount),
+                eq(LOAN_ID), eq(TXN_ID), any(), eq(new BigDecimal("40")), isNull());
     }
 
     @Test
@@ -540,6 +566,8 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     void testRestateSkipsTransactionWhoseSplitDidNotChange() {
         stubGLAccountIds();
         when(txn.getTypeOf()).thenReturn(LoanTransactionType.CREDIT_BALANCE_REFUND);
+        // the guard compares every leg of the split, the fund source credit included
+        when(txn.getTransactionAmount()).thenReturn(new BigDecimal("300"));
         final JournalEntry overpaymentDebit = postedEntry(overpaymentGLAccount, JournalEntryType.DEBIT, "100");
         final JournalEntry loanPortfolioDebit = postedEntry(loanPortfolioGLAccount, JournalEntryType.DEBIT, "200");
         stubLiveEntries(overpaymentDebit, loanPortfolioDebit, postedEntry(fundSourceGLAccount, JournalEntryType.CREDIT, "300"));
@@ -600,6 +628,150 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
         verify(helper, atLeastOnce()).persistJournalEntry(persisted.capture());
         assertTrue(persisted.getAllValues().stream().allMatch(JournalEntry::isReversed),
                 "every entry the restatement persisted - the superseded originals and their mirrors alike - must be flagged reversed");
+    }
+
+    // -----------------------------------------------------------------------
+    // Restatement guard: the plan the poster books must be exactly what the guard compares against, for every
+    // transaction type and both charged-off states. Otherwise a restatement either re-posts an unchanged split
+    // (cancelling noise) or, worse, skips a changed one.
+    // -----------------------------------------------------------------------
+
+    private static Stream<Arguments> restatableTransactions() {
+        return Stream.of(Arguments.of(LoanTransactionType.REPAYMENT, false, false),
+                Arguments.of(LoanTransactionType.REPAYMENT, true, false), Arguments.of(LoanTransactionType.GOODWILL_CREDIT, false, false),
+                Arguments.of(LoanTransactionType.GOODWILL_CREDIT, true, false),
+                Arguments.of(LoanTransactionType.PAYOUT_REFUND, false, false), Arguments.of(LoanTransactionType.PAYOUT_REFUND, true, false),
+                Arguments.of(LoanTransactionType.PAYOUT_REFUND, true, true),
+                Arguments.of(LoanTransactionType.CHARGE_ADJUSTMENT, false, false),
+                Arguments.of(LoanTransactionType.CHARGE_ADJUSTMENT, true, false),
+                Arguments.of(LoanTransactionType.CREDIT_BALANCE_REFUND, false, false),
+                Arguments.of(LoanTransactionType.CREDIT_BALANCE_REFUND, true, false),
+                Arguments.of(LoanTransactionType.ACCRUAL, false, false), Arguments.of(LoanTransactionType.ACCRUAL, true, false),
+                Arguments.of(LoanTransactionType.CHARGE_OFF, true, false), Arguments.of(LoanTransactionType.CHARGE_OFF, true, true));
+    }
+
+    /**
+     * Booking a transaction and then restating it from the same allocation must leave the ledger alone. This is the
+     * invariant that keeps the guard honest: it holds only while the accounts the guard expects are the accounts the
+     * poster books, for every type and both charged-off states.
+     */
+    @ParameterizedTest(name = "{0}, chargedOff={1}, fraud={2}")
+    @MethodSource("restatableTransactions")
+    void testPostThenRestateIsANoOp(final LoanTransactionType type, final boolean isChargedOff, final boolean isFraud) {
+        stubAllGLAccounts();
+        setUpTransaction(type, isFraud);
+
+        final List<JournalEntry> booked = captureBookedEntries(() -> processor.postJournalEntries(loan, txn, allocation, isChargedOff));
+        assertTrue(!booked.isEmpty(), "the poster must book something, otherwise the test proves nothing");
+
+        clearInvocations(helper);
+        stubLiveEntries(booked.toArray(new JournalEntry[0]));
+
+        processor.restateJournalEntries(loan, txn, allocation, isChargedOff);
+
+        assertTrue(booked.stream().noneMatch(JournalEntry::isReversed), "an unchanged split must not be reversed");
+        verify(helper, never()).persistJournalEntry(any());
+        verify(helper, never()).createDebitJournalEntryForWorkingCapitalLoan(any(), any(), any(), anyLong(), anyLong(), any(), any(),
+                any());
+        verify(helper, never()).createCreditJournalEntryForWorkingCapitalLoan(any(), any(), any(), anyLong(), anyLong(), any(), any(),
+                any());
+    }
+
+    /**
+     * A charge-off routes the same amounts to different accounts. Comparing amounts per portfolio/receivable account
+     * alone cannot see that, so the guard has to compare positions - which account holds what, on which side.
+     */
+    @Test
+    void testRestateDetectsRoutingChangeWithUnchangedAmounts() {
+        stubAllGLAccounts();
+        setUpTransaction(LoanTransactionType.REPAYMENT, false);
+
+        // The ledger holds the regular routing; the loan is charged off now, so the credits belong to recovery income.
+        stubLiveEntries(postedEntry(fundSourceGLAccount, JournalEntryType.DEBIT, "560"),
+                postedEntry(loanPortfolioGLAccount, JournalEntryType.CREDIT, "500"),
+                postedEntry(feesReceivableGLAccount, JournalEntryType.CREDIT, "30"),
+                postedEntry(penaltiesReceivableGLAccount, JournalEntryType.CREDIT, "20"),
+                postedEntry(overpaymentGLAccount, JournalEntryType.CREDIT, "10"));
+
+        processor.restateJournalEntries(loan, txn, allocation, true);
+
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(incomeFromRecoveryGLAccount),
+                eq(LOAN_ID), eq(TXN_ID), any(), eq(new BigDecimal("500")), isNull());
+        verify(helper, never()).createCreditJournalEntryForWorkingCapitalLoan(any(), any(), eq(loanPortfolioGLAccount), anyLong(),
+                anyLong(), any(), any(), any());
+    }
+
+    /** Sets the portions and amount up so every leg of the type under test is non-zero and the entry balances. */
+    private void setUpTransaction(final LoanTransactionType type, final boolean isFraud) {
+        lenient().when(txn.getTypeOf()).thenReturn(type);
+        lenient().when(loan.isFraud()).thenReturn(isFraud);
+        if (type == LoanTransactionType.CHARGE_ADJUSTMENT) {
+            mockChargeAdjustmentRelation(false);
+        }
+        if (type == LoanTransactionType.CREDIT_BALANCE_REFUND) {
+            // A refund debits only the overpayment and principal legs, and credits the fund source with their total.
+            lenient().when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("500"));
+            lenient().when(allocation.getOverpaymentPortion()).thenReturn(new BigDecimal("60"));
+            lenient().when(txn.getTransactionAmount()).thenReturn(new BigDecimal("560"));
+            return;
+        }
+        lenient().when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("500"));
+        lenient().when(allocation.getFeeChargesPortion()).thenReturn(new BigDecimal("30"));
+        lenient().when(allocation.getPenaltyChargesPortion()).thenReturn(new BigDecimal("20"));
+        lenient().when(allocation.getOverpaymentPortion()).thenReturn(new BigDecimal("10"));
+        lenient().when(txn.getTransactionAmount()).thenReturn(new BigDecimal("560"));
+    }
+
+    /** Runs a posting action and returns the entries it booked, rebuilt as the ledger would hold them. */
+    private List<JournalEntry> captureBookedEntries(final Runnable postingAction) {
+        postingAction.run();
+
+        final List<JournalEntry> booked = new ArrayList<>();
+        final ArgumentCaptor<GLAccount> debitAccounts = ArgumentCaptor.forClass(GLAccount.class);
+        final ArgumentCaptor<BigDecimal> debitAmounts = ArgumentCaptor.forClass(BigDecimal.class);
+        verify(helper, atLeast(0)).createDebitJournalEntryForWorkingCapitalLoan(any(), any(), debitAccounts.capture(), anyLong(), anyLong(),
+                any(), debitAmounts.capture(), any());
+        for (int i = 0; i < debitAccounts.getAllValues().size(); i++) {
+            booked.add(postedEntry(debitAccounts.getAllValues().get(i), JournalEntryType.DEBIT,
+                    debitAmounts.getAllValues().get(i).toPlainString()));
+        }
+
+        final ArgumentCaptor<GLAccount> creditAccounts = ArgumentCaptor.forClass(GLAccount.class);
+        final ArgumentCaptor<BigDecimal> creditAmounts = ArgumentCaptor.forClass(BigDecimal.class);
+        verify(helper, atLeast(0)).createCreditJournalEntryForWorkingCapitalLoan(any(), any(), creditAccounts.capture(), anyLong(),
+                anyLong(), any(), creditAmounts.capture(), any());
+        for (int i = 0; i < creditAccounts.getAllValues().size(); i++) {
+            booked.add(postedEntry(creditAccounts.getAllValues().get(i), JournalEntryType.CREDIT,
+                    creditAmounts.getAllValues().get(i).toPlainString()));
+        }
+        return booked;
+    }
+
+    /** Every account the type matrix can reach, each with a distinct id so positions are comparable. */
+    private void stubAllGLAccounts() {
+        stubGLAccountIds();
+        lenient().when(incomeFromRecoveryGLAccount.getId()).thenReturn(6L);
+        lenient().when(incomeFromFeesGLAccount.getId()).thenReturn(7L);
+        lenient().when(incomeFromPenaltiesGLAccount.getId()).thenReturn(8L);
+        lenient().when(incomeFromChargeOffFeesGLAccount.getId()).thenReturn(9L);
+        lenient().when(incomeFromChargeOffPenaltyGLAccount.getId()).thenReturn(10L);
+        lenient().when(goodwillCreditGLAccount.getId()).thenReturn(11L);
+        lenient().when(incomeFromGoodwillCreditFeesGLAccount.getId()).thenReturn(12L);
+        lenient().when(incomeFromGoodwillCreditPenaltyGLAccount.getId()).thenReturn(13L);
+        lenient().when(chargeOffExpenseGLAccount.getId()).thenReturn(14L);
+        lenient().when(chargeOffFraudExpenseGLAccount.getId()).thenReturn(15L);
+
+        stubGLAccountMapping(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY, incomeFromChargeOffPenaltyGLAccount);
+        stubGLAccountMapping(CashAccountsForLoan.GOODWILL_CREDIT, goodwillCreditGLAccount);
+        stubGLAccountMapping(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_FEES, incomeFromGoodwillCreditFeesGLAccount);
+        stubGLAccountMapping(CashAccountsForLoan.INCOME_FROM_GOODWILL_CREDIT_PENALTY, incomeFromGoodwillCreditPenaltyGLAccount);
+        stubGLAccountMapping(CashAccountsForLoan.CHARGE_OFF_EXPENSE, chargeOffExpenseGLAccount);
+        stubGLAccountMapping(CashAccountsForLoan.CHARGE_OFF_FRAUD_EXPENSE, chargeOffFraudExpenseGLAccount);
+    }
+
+    private void stubGLAccountMapping(final CashAccountsForLoan accountType, final GLAccount account) {
+        lenient().when(helper.getLinkedGLAccountForWorkingCapitalLoanProduct(eq(PRODUCT_ID), eq(accountType.getValue()), any()))
+                .thenReturn(account);
     }
 
     /** An undo keeps its mirrors live: they are the visible reversal, not bookkeeping noise. */

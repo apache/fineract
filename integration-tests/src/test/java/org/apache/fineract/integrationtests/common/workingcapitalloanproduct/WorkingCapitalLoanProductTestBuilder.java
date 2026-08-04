@@ -100,6 +100,7 @@ public class WorkingCapitalLoanProductTestBuilder {
     private Long chargeOffExpenseAccountId;
     private Long incomeFromChargeOffFeesAccountId;
     private Long incomeFromChargeOffPenaltyAccountId;
+    private Long goodwillCreditAccountId;
 
     public WorkingCapitalLoanProductTestBuilder withName(final String name) {
         this.name = name;
@@ -332,6 +333,11 @@ public class WorkingCapitalLoanProductTestBuilder {
         return this;
     }
 
+    public WorkingCapitalLoanProductTestBuilder withGoodwillCreditAccountId(final Long goodwillCreditAccountId) {
+        this.goodwillCreditAccountId = goodwillCreditAccountId;
+        return this;
+    }
+
     public PostWorkingCapitalLoanProductsRequest build() {
         final PostWorkingCapitalLoanProductsRequest request = new PostWorkingCapitalLoanProductsRequest();
         populateCommonFields(request);
@@ -396,6 +402,7 @@ public class WorkingCapitalLoanProductTestBuilder {
         request.setChargeOffExpenseAccountId(this.chargeOffExpenseAccountId);
         request.setIncomeFromChargeOffFeesAccountId(this.incomeFromChargeOffFeesAccountId);
         request.setIncomeFromChargeOffPenaltyAccountId(this.incomeFromChargeOffPenaltyAccountId);
+        request.setGoodwillCreditAccountId(this.goodwillCreditAccountId);
         request.setLocale("en_US");
         request.setDateFormat("yyyy-MM-dd");
     }
