@@ -26,6 +26,7 @@ import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionDateAndAmountHolder;
+import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionTypeTotalHolder;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -105,4 +106,24 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
             """)
     boolean existsLaterTransaction(@Param("loanId") Long loanId, @Param("transactionDate") LocalDate transactionDate,
             @Param("createdDateTime") OffsetDateTime createdDateTime);
+
+    @Query("""
+            SELECT t.transactionType, t.reversed, SUM(t.transactionAmount)
+            FROM WorkingCapitalLoanTransaction t
+            WHERE t.wcLoan.id = :wcLoanId
+            AND t.transactionType in :transactionTypes
+            GROUP BY t.transactionType, t.reversed
+            """)
+    List<TransactionTypeTotalHolder> fetchTotalsPerTypeAndReversed(@Param("wcLoanId") Long wcLoanId,
+            @Param("transactionTypes") List<LoanTransactionType> transactionTypes);
+
+    @Query("""
+            SELECT t FROM WorkingCapitalLoanTransaction t
+            WHERE t.wcLoan.id = :wcLoanId
+            AND t.reversed = FALSE
+            AND t.transactionType in :transactionTypes
+            ORDER BY t.transactionDate DESC, t.id DESC
+            """)
+    List<WorkingCapitalLoanTransaction> findActiveByTypesOrderByDateDesc(@Param("wcLoanId") Long wcLoanId,
+            @Param("transactionTypes") List<LoanTransactionType> transactionTypes);
 }

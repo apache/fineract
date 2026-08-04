@@ -37,6 +37,8 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanBalanceChangedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanStatusChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -142,6 +144,9 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         }
 
         chargeAccrualService.processOnChargeAdded(loan, loanCharge);
+
+        notifyBalanceChanged(loan);
+        notifyStatusChanged(loan, statusBeforeCharge);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -274,6 +279,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         adjustmentTx.getLoanTransactionRelations().add(relation);
         transactionRepository.saveAndFlush(adjustmentTx);
 
+        final LoanStatus oldStatus = loan.getLoanStatus();
         final WorkingCapitalLoanTransactionAllocation allocation = transactionProcessor.processRepaymentLikeTransaction(loan, adjustmentTx,
                 LoanTransactionType.CHARGE_ADJUSTMENT, transactionDate, amount);
 
@@ -289,6 +295,10 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
 
         businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanChargeAdjustmentPostBusinessEvent(adjustmentTx, loan.getId()));
+
+        workingCapitalLoanRepository.saveAndFlush(loan);
+        notifyBalanceChanged(loan);
+        notifyStatusChanged(loan, oldStatus);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -375,5 +385,15 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         } else {
             balance.setFee(balance.getFee().add(loanCharge.getAmount()));
         }
+    }
+
+    private void notifyStatusChanged(final WorkingCapitalLoan loan, final LoanStatus oldStatus) {
+        if (oldStatus != loan.getLoanStatus()) {
+            businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanStatusChangedBusinessEvent(loan));
+        }
+    }
+
+    private void notifyBalanceChanged(final WorkingCapitalLoan loan) {
+        businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanBalanceChangedBusinessEvent(loan));
     }
 }

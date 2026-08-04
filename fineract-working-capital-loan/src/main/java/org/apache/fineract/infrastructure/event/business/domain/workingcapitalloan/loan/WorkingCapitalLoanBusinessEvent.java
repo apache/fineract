@@ -16,25 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan;
 
-package org.apache.fineract.portfolio.workingcapitalloan.service;
-
-import java.time.LocalDate;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyRange;
+import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 
-public interface WorkingCapitalLoanDelinquencyClassificationService {
+public abstract class WorkingCapitalLoanBusinessEvent extends AbstractBusinessEvent<WorkingCapitalLoan> {
 
-    void instantClassifyDelinquency(WorkingCapitalLoan loan, LocalDate businessDate);
+    private static final String CATEGORY = "WorkingCapitalLoan";
 
-    void classifyDelinquency(WorkingCapitalLoan loan, LocalDate businessDate);
+    public WorkingCapitalLoanBusinessEvent(final WorkingCapitalLoan value) {
+        super(value);
+    }
 
-    boolean applyDelinquencyTagForRange(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyRangeSchedule range,
-            DelinquencyRange currentRange, LocalDate businessDate);
+    @Override
+    public String getCategory() {
+        return CATEGORY;
+    }
 
-    boolean isDelinquencyDisabled(WorkingCapitalLoan loan, LocalDate date);
-
-    void liftDelinquencyClassification(WorkingCapitalLoan loan, LocalDate businessDate);
-
+    @Override
+    public Long getAggregateRootId() {
+        return get().getId();
+    }
 }

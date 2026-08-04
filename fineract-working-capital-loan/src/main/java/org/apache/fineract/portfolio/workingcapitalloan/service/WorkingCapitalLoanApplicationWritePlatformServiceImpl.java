@@ -28,6 +28,9 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanApplicationModifiedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOriginatorLinkingService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
@@ -54,17 +57,20 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
     private final WorkingCapitalLoanNoteRepository noteRepository;
     private final ProjectedAmortizationLoanModelRepository projectedAmortizationLoanModelRepository;
     private final Optional<LoanOriginatorLinkingService> loanOriginatorLinkingService;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     public WorkingCapitalLoanApplicationWritePlatformServiceImpl(WorkingCapitalLoanApplicationDataValidator validator,
             WorkingCapitalLoanRepository repository, WorkingCapitalLoanAssembler assembler, WorkingCapitalLoanNoteRepository noteRepository,
             ProjectedAmortizationLoanModelRepository projectedAmortizationLoanModelRepository,
-            @Qualifier("workingCapitalLoanOriginatorLinkingServiceImpl") Optional<LoanOriginatorLinkingService> loanOriginatorLinkingService) {
+            @Qualifier("workingCapitalLoanOriginatorLinkingServiceImpl") Optional<LoanOriginatorLinkingService> loanOriginatorLinkingService,
+            BusinessEventNotifierService businessEventNotifierService) {
         this.validator = validator;
         this.repository = repository;
         this.assembler = assembler;
         this.noteRepository = noteRepository;
         this.projectedAmortizationLoanModelRepository = projectedAmortizationLoanModelRepository;
         this.loanOriginatorLinkingService = loanOriginatorLinkingService;
+        this.businessEventNotifierService = businessEventNotifierService;
     }
 
     @Transactional
@@ -79,6 +85,8 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
             final String submittedOnNote = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.submittedOnNoteParameterName);
             createNote(submittedOnNote, saved);
             attachOriginatorsIfProvided(command, saved);
+
+            this.businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanCreatedBusinessEvent(saved));
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -112,6 +120,8 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
             final WorkingCapitalLoan saved = this.repository.saveAndFlush(loan);
             final String submittedOnNote = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.submittedOnNoteParameterName);
             createNote(submittedOnNote, saved);
+
+            this.businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanApplicationModifiedBusinessEvent(saved));
 
             return new CommandProcessingResultBuilder() //
                     .withEntityId(loanId) //

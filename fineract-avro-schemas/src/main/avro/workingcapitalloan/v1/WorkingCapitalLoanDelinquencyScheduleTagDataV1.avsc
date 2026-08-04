@@ -1,0 +1,48 @@
+{
+    "name": "WorkingCapitalLoanDelinquencyScheduleTagDataV1",
+    "namespace": "org.apache.fineract.avro.workingcapitalloan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "rangeId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "classification",
+            "doc": "Name of the delinquency range this schedule period is currently classified into.",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "minimumAgeDays",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "default": null,
+            "name": "maximumAgeDays",
+            "type": [
+                "null",
+                "int"
+            ]
+        },
+        {
+            "default": null,
+            "name": "delinquentAmount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        }
+    ]
+}

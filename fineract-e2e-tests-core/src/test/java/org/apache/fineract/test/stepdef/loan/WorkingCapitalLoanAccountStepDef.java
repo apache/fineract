@@ -1446,6 +1446,101 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 new BigDecimal(amount), transactionDate);
     }
 
+    @Then("a Working Capital Loan Created business event is raised")
+    public void aWorkingCapitalLoanCreatedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanCreatedEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Application Modified business event is raised")
+    public void aWorkingCapitalLoanApplicationModifiedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanApplicationModifiedEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Approved business event is raised")
+    public void aWorkingCapitalLoanApprovedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanApprovedEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Undo Approval business event is raised")
+    public void aWorkingCapitalLoanUndoApprovalBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanUndoApprovalEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Rejected business event is raised")
+    public void aWorkingCapitalLoanRejectedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanRejectedEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Disbursal business event is raised")
+    public void aWorkingCapitalLoanDisbursalBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanDisbursalEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Undo Disbursal business event is raised")
+    public void aWorkingCapitalLoanUndoDisbursalBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanUndoDisbursalEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Status Changed business event is raised")
+    public void aWorkingCapitalLoanStatusChangedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanStatusChangedEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Balance Changed business event is raised")
+    public void aWorkingCapitalLoanBalanceChangedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanBalanceChangedEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Balance Changed business event is raised with charges:")
+    public void aWorkingCapitalLoanBalanceChangedBusinessEventIsRaisedWithCharges(final DataTable table) {
+        eventCheckHelper.workingCapitalLoanBalanceChangedEventChargesCheck(getCreatedLoanId(), table.asMaps());
+    }
+
+    @Then("a Working Capital Loan Delinquency Range Change business event is raised")
+    public void aWorkingCapitalLoanDelinquencyRangeChangeBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanDelinquencyRangeChangeEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Delinquency Range Change business event is raised naming the delinquency range")
+    public void aWorkingCapitalLoanDelinquencyRangeChangeBusinessEventIsRaisedNamingTheDelinquencyRange() {
+        eventCheckHelper.workingCapitalLoanDelinquencyRangeChangeEventNamesRangeCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Balance Changed business event is raised with transaction type totals:")
+    public void aWorkingCapitalLoanBalanceChangedBusinessEventIsRaisedWithTransactionTypeTotals(final DataTable table) {
+        eventCheckHelper.workingCapitalLoanBalanceChangedEventSummaryTotalsCheck(getCreatedLoanId(), table.asMaps().get(0));
+    }
+
+    @Then("a Working Capital Loan Balance Changed business event is raised where charge accrual fields are not populated")
+    public void aWorkingCapitalLoanBalanceChangedBusinessEventIsRaisedWithoutChargeAccrualFields() {
+        eventCheckHelper.workingCapitalLoanBalanceChangedEventChargesWithoutAccrualCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Disbursal business event is raised with loan details matching the API")
+    public void aWorkingCapitalLoanDisbursalBusinessEventIsRaisedWithLoanDetailsMatchingTheApi() {
+        eventCheckHelper.workingCapitalLoanDisbursalEventDeepPayloadCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Status Changed business event is raised with timeline matching the API")
+    public void aWorkingCapitalLoanStatusChangedBusinessEventIsRaisedWithTimelineMatchingTheApi() {
+        eventCheckHelper.workingCapitalLoanStatusChangedEventTimelineCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Balance Changed business event is raised with the delinquency pause periods")
+    public void aWorkingCapitalLoanBalanceChangedBusinessEventIsRaisedWithDelinquencyPausePeriods() {
+        eventCheckHelper.workingCapitalLoanBalanceChangedEventPausePeriodsCheck(getCreatedLoanId());
+    }
+
+    @Then("no Working Capital Loan Status Changed business event is raised")
+    public void noWorkingCapitalLoanStatusChangedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanStatusChangedEventNotRaisedCheck(getCreatedLoanId());
+    }
+
+    @Then("no Working Capital Loan Balance Changed business event is raised")
+    public void noWorkingCapitalLoanBalanceChangedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanBalanceChangedEventNotRaisedCheck(getCreatedLoanId());
+    }
+
     @Then("Admin fails to disburse the Working Capital loan on {string} with {string} EUR transaction amount because of not approved")
     public void disburseWCLoanFailureWithNotApproved(String actualDisbursementDate, String transactionAmount) {
         final PostWorkingCapitalLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
