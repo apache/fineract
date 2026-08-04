@@ -95,6 +95,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             case LoanTransactionType.CHARGE_ADJUSTMENT -> postChargeAdjustmentJournalEntries(loan, txn, principalPortion, feesPortion,
                     penaltiesPortion, overpaymentPortion, isChargedOff);
             case LoanTransactionType.ACCRUAL -> postChargeAccrualJournalEntries(loan, txn, feesPortion, penaltiesPortion);
+            case LoanTransactionType.CHARGE_OFF -> postChargeOffJournalEntries(loan, txn, principalPortion, feesPortion, penaltiesPortion);
             default -> {
                 throw new NotImplementedException(
                         "Post Journal Entries is not implemented yet for " + txn.getTypeOf().getCode() + " for Working Capital Loan");
@@ -118,6 +119,27 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
         accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
         accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.OVERPAYMENT, overpaymentPortion);
+    }
+
+    /**
+     * Charge-off is a pure accounting tag with no portfolio impact. It writes off the outstanding receivables against
+     * the charge-off expense (principal) and reverses the accrued fee/penalty income. There is no interest leg -- WC
+     * has no interest concept. Fraud-expense routing (CHARGE_OFF_FRAUD_EXPENSE) is out of scope until the fraud feature
+     * lands.
+     */
+    private void postChargeOffJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final BigDecimal principalPortion, final BigDecimal feesPortion, final BigDecimal penaltiesPortion) {
+        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
+
+        // debit: recognize the loss on principal, reverse accrued fee/penalty income
+        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.CHARGE_OFF_EXPENSE, principalPortion);
+        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES, feesPortion);
+        accountPostHelper.postDebitJournalEntry(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY, penaltiesPortion);
+
+        // credit: write off the outstanding receivables
+        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion);
+        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion);
+        accountPostHelper.postCreditJournalEntry(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion);
     }
 
     private boolean isAdjustedChargeAPenalty(final WorkingCapitalLoanTransaction txn) {

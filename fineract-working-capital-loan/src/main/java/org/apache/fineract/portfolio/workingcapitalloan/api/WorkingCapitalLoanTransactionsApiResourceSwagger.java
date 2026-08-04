@@ -186,6 +186,8 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public BigDecimal transactionAmount;
         @Schema(example = "12", description = "Optional code value id for transaction classification")
         public Long classificationId;
+        @Schema(example = "7", description = "Optional charge-off reason code value id (command=chargeOff)")
+        public Long chargeOffReasonId;
         @Schema(example = "Repayment note")
         public String note;
         @Schema(example = "repayment-ext-001")

@@ -24,6 +24,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCommandTemplateData;
@@ -99,6 +100,14 @@ public class WorkingCapitalLoanTransactionReadPlatformServiceImpl implements Wor
             return WorkingCapitalLoanCommandTemplateData.builder().currency(wcLoan.getLoanProduct().getCurrency().toData())
                     .classificationOptions(codeValueReadPlatformService
                             .retrieveCodeValuesByCode(WorkingCapitalLoanConstants.DISCOUNT_FEE_CLASSIFICATION_CODE_NAME))
+                    .build();
+        } else if (WorkingCapitalLoanConstants.CHARGE_OFF_LOAN_COMMAND.equals(command)) {
+            // Charge-off amount is the auto-calculated outstanding balance; the date defaults to the business date.
+            return WorkingCapitalLoanCommandTemplateData.builder()
+                    .chargeOffAmount(wcLoan.getBalance() != null ? wcLoan.getBalance().getTotalOutstanding() : BigDecimal.ZERO)
+                    .chargeOffDate(DateUtils.getBusinessLocalDate()).currency(wcLoan.getLoanProduct().getCurrency().toData())
+                    .chargeOffReasonOptions(
+                            codeValueReadPlatformService.retrieveCodeValuesByCode(WorkingCapitalLoanConstants.CHARGE_OFF_REASONS))
                     .build();
         }
         return null;

@@ -196,6 +196,18 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         return transaction;
     }
 
+    /**
+     * Charge-off is a terminal, non-monetary transaction: it records the charged-off amount (the outstanding balance as
+     * of the charge-off date) but does not move the running balance, and it is excluded from replay (not a repayment
+     * type). The loan stays ACTIVE.
+     */
+    public static WorkingCapitalLoanTransaction chargeOff(final WorkingCapitalLoan loan, final BigDecimal amount,
+            final LocalDate transactionDate, final ExternalId externalId) {
+        final WorkingCapitalLoanTransaction txn = new WorkingCapitalLoanTransaction();
+        txn.initialize(loan, LoanTransactionType.CHARGE_OFF, transactionDate, amount, null, null, externalId);
+        return txn;
+    }
+
     public static WorkingCapitalLoanTransaction chargeAdjustment(final WorkingCapitalLoan loan, final ExternalId externalId,
             final BigDecimal amount, final LocalDate transactionDate, final PaymentDetail paymentDetail) {
         final WorkingCapitalLoanTransaction transaction = new WorkingCapitalLoanTransaction();

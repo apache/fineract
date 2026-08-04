@@ -1287,6 +1287,24 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder chargeOffWorkingCapitalLoanTransaction(final Long loanId) {
+        this.actionName = ACTION_CHARGEOFF;
+        this.entityName = ENTITY_WORKINGCAPITALLOAN;
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/working-capital-loans/" + loanId + "/transactions?command=chargeOff";
+        return this;
+    }
+
+    public CommandWrapperBuilder undoChargeOffWorkingCapitalLoanTransaction(final Long loanId) {
+        this.actionName = ACTION_UNDOCHARGEOFF;
+        this.entityName = ENTITY_WORKINGCAPITALLOAN;
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/working-capital-loans/" + loanId + "/transactions?command=undoChargeOff";
+        return this;
+    }
+
     public CommandWrapperBuilder loanInterestPaymentWaiverTransaction(final Long loanId) {
         this.actionName = ACTION_INTERESTPAYMENTWAIVER;
         this.entityName = ENTITY_LOAN;
