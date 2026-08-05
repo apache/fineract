@@ -45,6 +45,8 @@ import java.time.MonthDay;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -297,75 +299,42 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
     }
 
     private boolean isValidInstructionType(final Integer instructionType) {
-        if (instructionType == null) {
-            return false;
-        }
-
-        final StandingInstructionType type = StandingInstructionType.fromInt(instructionType);
-        return type != null && (type.isFixedAmoutTransfer() || type.isDuesAmoutTransfer());
+        return isFixedInstruction(instructionType) || isDuesInstruction(instructionType);
     }
     
     protected boolean isDuesInstruction(final Integer instructionType) {
-        if (instructionType == null) {
-            return false;
-        }
-
-        final StandingInstructionType type = StandingInstructionType.fromInt(instructionType);
-        return type != null && type.isDuesAmoutTransfer();
+        return isMatchingType(instructionType, StandingInstructionType::fromInt, StandingInstructionType::isDuesAmoutTransfer);
     }
 
     protected boolean isFixedInstruction(final Integer instructionType) {
-        if (instructionType == null) {
-            return false;
-        }
-
-        final StandingInstructionType type = StandingInstructionType.fromInt(instructionType);
-        return type != null && type.isFixedAmoutTransfer();
+        return isMatchingType(instructionType, StandingInstructionType::fromInt, StandingInstructionType::isFixedAmoutTransfer);
     }
 
     protected boolean isAsPerDuesRecurrence(final Integer recurrenceType) {
-        if (recurrenceType == null) {
-            return false;
-        }
-
-        final AccountTransferRecurrenceType type = AccountTransferRecurrenceType.fromInt(recurrenceType);
-        return type != null && type.isDuesRecurrence();
+        return isMatchingType(recurrenceType, AccountTransferRecurrenceType::fromInt, AccountTransferRecurrenceType::isDuesRecurrence);
     }
 
     protected boolean isAccountTransfer(final Integer transferType) {
-        if (transferType == null) {
-            return false;
-        }
-
-        final AccountTransferType type = AccountTransferType.fromInt(transferType);
-        return type != null && type.isAccountTransfer();
+        return isMatchingType(transferType, AccountTransferType::fromInt, AccountTransferType::isAccountTransfer);
     }
 
     protected boolean isLoanRepayment(final Integer transferType) {
-        if (transferType == null) {
-            return false;
-        }
-
-        final AccountTransferType type = AccountTransferType.fromInt(transferType);
-        return type != null && type.isLoanRepayment();
+        return isMatchingType(transferType, AccountTransferType::fromInt, AccountTransferType::isLoanRepayment);
     }
 
     protected boolean isLoanAccount(final Integer accountType) {
-        if (accountType == null) {
-            return false;
-        }
-
-        final PortfolioAccountType type = PortfolioAccountType.fromInt(accountType);
-        return type != null && PortfolioAccountType.LOAN.equals(type);
+        return isMatchingType(accountType, PortfolioAccountType::fromInt, PortfolioAccountType.LOAN::equals);
     }
 
     protected boolean isSavingsAccount(final Integer accountType) {
-        if (accountType == null) {
-            return false;
-        }
+        return isMatchingType(accountType, PortfolioAccountType::fromInt, PortfolioAccountType.SAVINGS::equals);
+    }
 
-        final PortfolioAccountType type = PortfolioAccountType.fromInt(accountType);
-        return type != null && PortfolioAccountType.SAVINGS.equals(type);
+    private <T> boolean isMatchingType(final Integer codeType, final Function<Integer, T> resolver, final Function<T, Boolean> predicate) {
+        return Optional.ofNullable(codeType)
+                       .map(resolver)
+                       .map(predicate)
+                       .orElse(false);
     }
 
     protected boolean areEqualOfficesAndEqualAccounts(final Long fromOfficeId, final Long toOfficeId, final Long fromAccountId, final Long toAccountId) {
