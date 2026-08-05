@@ -16,26 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.floatingrates.data;
+package org.apache.fineract.portfolio.floatingrates.command;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRateCreateRequest;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class FloatingRateRequest implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    private String name;
-    private Boolean isBaseLendingRate;
-    private Boolean isActive;
-    private List<FloatingRatePeriodRequest> ratePeriods;
-
-}
+@EqualsAndHashCode(callSuper = true)
+public class FloatingRateCreateCommand extends Command<FloatingRateCreateRequest> {}
