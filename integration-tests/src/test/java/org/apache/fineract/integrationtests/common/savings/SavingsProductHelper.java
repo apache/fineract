@@ -503,4 +503,10 @@ public class SavingsProductHelper {
         return GSON.fromJson(response, GetSavingsProductsProductIdResponse.class);
     }
 
+    @Deprecated(forRemoval = true)
+    public static String retrieveAllSavingsProducts(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
+        LOG.info("-------------------- RETRIEVING ALL SAVINGS PRODUCTS --------------------------");
+        return Utils.performServerGet(requestSpec, responseSpec, CREATE_SAVINGS_PRODUCT_URL);
+    }
+
 }
