@@ -28,6 +28,7 @@ import com.google.gson.JsonElement;
 import java.util.Locale;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -63,7 +64,7 @@ public class StandingInstructionValidatorFactoryTest {
         assertTrue(result instanceof AccountTransferStandingInstruction);
     }
 
-    private actForTransferTypeWithParam(final Integer transferType) {
+    private void actForTransferTypeWithParam(final Integer transferType) {
         when(fromApiJsonHelper.extractIntegerNamed(eq(transferTypeParamName), eq(element), any(Locale.class))).thenReturn(transferType);
     }
 }
