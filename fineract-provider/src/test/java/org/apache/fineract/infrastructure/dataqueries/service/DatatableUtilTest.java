@@ -20,21 +20,23 @@ package org.apache.fineract.infrastructure.dataqueries.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
-import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
 import org.apache.fineract.useradministration.domain.AppUser;
@@ -69,14 +71,12 @@ class DatatableUtilTest {
     private GenericDataService genericDataService;
     @Mock
     private DatabaseSpecificSQLGenerator sqlGenerator;
-    @Mock
-    private ColumnValidator columnValidator;
 
     private DatatableUtil underTest;
 
     @BeforeEach
     void setUp() {
-        underTest = new DatatableUtil(searchUtil, jdbcTemplate, sqlValidator, context, genericDataService, sqlGenerator, columnValidator);
+        underTest = new DatatableUtil(searchUtil, jdbcTemplate, sqlValidator, context, genericDataService, sqlGenerator);
         setupSecurityContext();
     }
 
@@ -231,5 +231,114 @@ class DatatableUtilTest {
         headers.add(ResultsetColumnHeaderData.basic("id", "bigint", DatabaseType.MYSQL));
         headers.add(ResultsetColumnHeaderData.basic("loan_id", "bigint", DatabaseType.MYSQL));
         return headers;
+    }
+
+    // ---- order-by allowlist validation (fixes SQL injection via ORDER BY) ----
+
+    private List<ResultsetColumnHeaderData> createOrderByTestHeaders() {
+        List<ResultsetColumnHeaderData> headers = new ArrayList<>();
+        headers.add(ResultsetColumnHeaderData.basic("client_id", "bigint", DatabaseType.MYSQL));
+        headers.add(ResultsetColumnHeaderData.basic("Gender_cd_Question", "int", DatabaseType.MYSQL));
+        headers.add(ResultsetColumnHeaderData.basic("Some Decimal", "decimal", DatabaseType.MYSQL));
+        headers.add(ResultsetColumnHeaderData.basic("Birth Date", "date", DatabaseType.MYSQL));
+        return headers;
+    }
+
+    private void setupOrderByTestMocks() {
+        // identity escape so assertions can check for the raw column name in the captured SQL
+        when(sqlGenerator.escape(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(genericDataService.fillResultsetColumnHeaders(anyString())).thenReturn(createOrderByTestHeaders());
+        when(searchUtil.findFiltered(any(), any())).thenReturn(null); // single-row datatable, keeps SQL simple
+        when(genericDataService.fillResultsetRowData(anyString(), any(), any(Object[].class))).thenReturn(new ArrayList<>());
+    }
+
+    @Test
+    void testRetrieveDataTableGenericResultSetAppendsValidColumnOrderBy() {
+        setupOrderByTestMocks();
+
+        underTest.retrieveDataTableGenericResultSet(EntityTables.LOAN, "test_datatable", APP_TABLE_ID, "client_id DESC", null);
+
+        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(genericDataService).fillResultsetRowData(sqlCaptor.capture(), any(), any(Object[].class));
+        assertTrue(sqlCaptor.getValue().contains("order by client_id DESC"), "SQL should contain the validated order by clause");
+    }
+
+    @Test
+    void testRetrieveDataTableGenericResultSetRejectsUnquotedColumnNameContainingSpace() {
+        setupOrderByTestMocks();
+
+        // unquoted "Birth Date" is no longer valid -- it parses as column="Birth", direction="Date",
+        // and "Date" isn't ASC/DESC, so this must be rejected. Quoting is now required for space-containing names.
+        assertThrows(PlatformDataIntegrityException.class,
+                () -> underTest.retrieveDataTableGenericResultSet(EntityTables.LOAN, "test_datatable", APP_TABLE_ID, "Birth Date", null));
+        verify(genericDataService, never()).fillResultsetRowData(anyString(), any(), any(Object[].class));
+    }
+
+    @Test
+    void testRetrieveDataTableGenericResultSetOrderByIsCaseInsensitiveForDirection() {
+        setupOrderByTestMocks();
+
+        underTest.retrieveDataTableGenericResultSet(EntityTables.LOAN, "test_datatable", APP_TABLE_ID, "client_id desc", null);
+
+        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(genericDataService).fillResultsetRowData(sqlCaptor.capture(), any(), any(Object[].class));
+        assertTrue(sqlCaptor.getValue().contains("order by client_id DESC"), "Direction token should be normalized to uppercase");
+    }
+
+    @Test
+    void testRetrieveDataTableGenericResultSetRejectsUnknownColumnInOrderBy() {
+        setupOrderByTestMocks();
+
+        assertThrows(PlatformDataIntegrityException.class, () -> underTest.retrieveDataTableGenericResultSet(EntityTables.LOAN,
+                "test_datatable", APP_TABLE_ID, "not_a_real_column", null));
+        verify(genericDataService, never()).fillResultsetRowData(anyString(), any(), any(Object[].class));
+    }
+
+    @Test
+    void testRetrieveDataTableGenericResultSetRejectsClassicSqlInjectionInOrderBy() {
+        setupOrderByTestMocks();
+
+        assertThrows(PlatformDataIntegrityException.class, () -> underTest.retrieveDataTableGenericResultSet(EntityTables.LOAN,
+                "test_datatable", APP_TABLE_ID, "client_id; DROP TABLE m_client;--", null));
+        verify(genericDataService, never()).fillResultsetRowData(anyString(), any(), any(Object[].class));
+    }
+
+    @Test
+    void testRetrieveDataTableGenericResultSetRejectsInjectionDisguisedWithTrailingDirectionToken() {
+        setupOrderByTestMocks();
+
+        // guards against a naive "strip trailing ASC/DESC" implementation trusting everything before it
+        assertThrows(PlatformDataIntegrityException.class, () -> underTest.retrieveDataTableGenericResultSet(EntityTables.LOAN,
+                "test_datatable", APP_TABLE_ID, "client_id; DROP TABLE m_client;-- ASC", null));
+        verify(genericDataService, never()).fillResultsetRowData(anyString(), any(), any(Object[].class));
+    }
+
+    @Test
+    void testRetrieveDataTableGenericResultSetRejectsWhenAnyColumnInMultiListIsInvalid() {
+        setupOrderByTestMocks();
+
+        assertThrows(PlatformDataIntegrityException.class, () -> underTest.retrieveDataTableGenericResultSet(EntityTables.LOAN,
+                "test_datatable", APP_TABLE_ID, "client_id,not_a_real_column", null));
+        verify(genericDataService, never()).fillResultsetRowData(anyString(), any(), any(Object[].class));
+    }
+
+    @Test
+    void testRetrieveDataTableGenericResultSetOmitsOrderByWhenOrderIsBlank() {
+        setupOrderByTestMocks();
+
+        underTest.retrieveDataTableGenericResultSet(EntityTables.LOAN, "test_datatable", APP_TABLE_ID, "   ", null);
+
+        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(genericDataService).fillResultsetRowData(sqlCaptor.capture(), any(), any(Object[].class));
+        assertFalse(sqlCaptor.getValue().contains("order by"), "Blank order param should not produce an order by clause");
+    }
+
+    @Test
+    void testRetrieveDataTableGenericResultSetTreatsLiteralPlusAsPlusNotSpace() {
+        setupOrderByTestMocks(); // uses createOrderByTestHeaders(), which doesn't include a "+"-containing column
+
+        assertThrows(PlatformDataIntegrityException.class,
+                () -> underTest.retrieveDataTableGenericResultSet(EntityTables.LOAN, "test_datatable", APP_TABLE_ID, "Birth+Date", null));
+        verify(genericDataService, never()).fillResultsetRowData(anyString(), any(), any(Object[].class));
     }
 }

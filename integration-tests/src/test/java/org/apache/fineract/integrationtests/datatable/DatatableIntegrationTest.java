@@ -1051,4 +1051,128 @@ public class DatatableIntegrationTest extends IntegrationTest {
         this.datatableHelper.deleteDatatable(datatableName);
     }
 
+    @Test
+    public void validateOrderParameterOnDatatableEntryRead() {
+        // given: a single-row client datatable with a column name that requires quoting
+        final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
+        String plainColumn = "plaincolumn";
+        String spacedColumn = "Spaced Column";
+        addDatatableColumn(datatableColumnsList, plainColumn, "Number", false, null, null);
+        addDatatableColumn(datatableColumnsList, spacedColumn, "String", false, 20, null);
+
+        final HashMap<String, Object> columnMap = new HashMap<>();
+        String datatableName = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase();
+        columnMap.put("datatableName", datatableName);
+        columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
+        columnMap.put("entitySubType", CLIENT_PERSON_SUBTYPE_NAME);
+        columnMap.put("multiRow", false);
+        columnMap.put("columns", datatableColumnsList);
+
+        String dtJson = new Gson().toJson(columnMap);
+        HashMap<String, Object> datatableResponse = this.datatableHelper.createDatatable(dtJson, "");
+        String assignedDatatableName = (String) datatableResponse.get("resourceIdentifier");
+        assertEquals(datatableName, assignedDatatableName);
+
+        final Integer clientID = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
+
+        final HashMap<String, Object> entryMap = new HashMap<>();
+        entryMap.put(plainColumn, Utils.randomNumberGenerator(3));
+        entryMap.put(spacedColumn, Utils.randomStringGenerator("", 8));
+        entryMap.put("locale", "en");
+        this.datatableHelper.createDatatableEntry(datatableName, clientID, true, new Gson().toJson(entryMap));
+
+        // valid: bare column, no direction
+        HashMap<String, Object> result = this.datatableHelper.readDatatableEntryWithOrder(datatableName, clientID, true, plainColumn, "");
+        assertNotNull(result);
+
+        // valid: bare column with direction
+        result = this.datatableHelper.readDatatableEntryWithOrder(datatableName, clientID, true, plainColumn + " DESC", "");
+        assertNotNull(result);
+
+        // valid: double-quoted column with a space
+        result = this.datatableHelper.readDatatableEntryWithOrder(datatableName, clientID, true, "\"" + spacedColumn + "\"", "");
+        assertNotNull(result);
+
+        // valid: backtick-quoted column with a space, plus direction
+        result = this.datatableHelper.readDatatableEntryWithOrder(datatableName, clientID, true, "`" + spacedColumn + "` ASC", "");
+        assertNotNull(result);
+
+        // invalid: unknown column -- expect 403
+        ResponseSpecification responseSpecError403 = new ResponseSpecBuilder().expectStatusCode(403).build();
+        DatatableHelper error403Helper = new DatatableHelper(this.requestSpec, responseSpecError403);
+        error403Helper.readDatatableEntryWithOrder(datatableName, clientID, true, "not_a_real_column", "");
+
+        // invalid: classic SQL injection payload -- expect 403
+        error403Helper.readDatatableEntryWithOrder(datatableName, clientID, true, plainColumn + "; DROP TABLE m_client;--", "");
+
+        // invalid: unquoted column name containing a space -- expect 403 (quoting is required)
+        error403Helper.readDatatableEntryWithOrder(datatableName, clientID, true, spacedColumn, "");
+
+        // cleanup
+        this.datatableHelper.deleteDatatableEntries(datatableName, clientID, "clientId");
+        this.datatableHelper.deleteDatatable(datatableName);
+    }
+
+    @Test
+    public void validateOrderParameterOnDatatableManyEntryRead() {
+        // given: a multi-row client datatable so we can obtain a datatableId to query against
+        final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
+        String plainColumn = "plaincolumn";
+        String spacedColumn = "Spaced Column";
+        addDatatableColumn(datatableColumnsList, plainColumn, "Number", false, null, null);
+        addDatatableColumn(datatableColumnsList, spacedColumn, "String", false, 20, null);
+
+        final HashMap<String, Object> columnMap = new HashMap<>();
+        String datatableName = Utils.uniqueRandomStringGenerator(CLIENT_APP_TABLE_NAME + "_", 5).toLowerCase();
+        columnMap.put("datatableName", datatableName);
+        columnMap.put("apptableName", CLIENT_APP_TABLE_NAME);
+        columnMap.put("entitySubType", CLIENT_PERSON_SUBTYPE_NAME);
+        columnMap.put("multiRow", true);
+        columnMap.put("columns", datatableColumnsList);
+
+        HashMap<String, Object> datatableResponse = this.datatableHelper.createDatatable(new Gson().toJson(columnMap), "");
+        assertEquals(datatableName, datatableResponse.get("resourceIdentifier"));
+
+        final Integer clientID = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
+
+        final HashMap<String, Object> entryMap = new HashMap<>();
+        entryMap.put(plainColumn, Utils.randomNumberGenerator(3));
+        entryMap.put(spacedColumn, Utils.randomStringGenerator("", 8));
+        entryMap.put("locale", "en");
+        PostDataTablesAppTableIdResponse entryResponse = this.datatableHelper.addDatatableEntry(datatableName, clientID, true,
+                new Gson().toJson(entryMap));
+        Long datatableId = entryResponse.getResourceId();
+        assertNotNull(datatableId);
+
+        // valid: bare column, no direction
+        HashMap<String, Object> result = this.datatableHelper.readDatatableManyEntryWithOrder(datatableName, clientID, datatableId, true,
+                plainColumn, "");
+        assertNotNull(result);
+
+        // valid: bare column with direction
+        result = this.datatableHelper.readDatatableManyEntryWithOrder(datatableName, clientID, datatableId, true, plainColumn + " DESC",
+                "");
+        assertNotNull(result);
+
+        // valid: double-quoted column with a space
+        result = this.datatableHelper.readDatatableManyEntryWithOrder(datatableName, clientID, datatableId, true,
+                "\"" + spacedColumn + "\"", "");
+        assertNotNull(result);
+
+        // invalid: unknown column -- expect 403
+        ResponseSpecification responseSpecError403 = new ResponseSpecBuilder().expectStatusCode(403).build();
+        DatatableHelper error403Helper = new DatatableHelper(this.requestSpec, responseSpecError403);
+        error403Helper.readDatatableManyEntryWithOrder(datatableName, clientID, datatableId, true, "not_a_real_column", "");
+
+        // invalid: classic SQL injection payload -- expect 403
+        error403Helper.readDatatableManyEntryWithOrder(datatableName, clientID, datatableId, true, plainColumn + "; DROP TABLE m_client;--",
+                "");
+
+        // invalid: subquery-based injection (the exact class of payload from the security report) -- expect 403
+        error403Helper.readDatatableManyEntryWithOrder(datatableName, clientID, datatableId, true, "(SELECT 1 FROM pg_sleep(3))", "");
+
+        // cleanup
+        this.datatableHelper.deleteDatatableEntries(datatableName, clientID, "clientId");
+        this.datatableHelper.deleteDatatable(datatableName);
+    }
 }
