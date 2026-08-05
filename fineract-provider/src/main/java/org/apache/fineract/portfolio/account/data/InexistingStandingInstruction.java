@@ -36,9 +36,9 @@ public class InexistingStandingInstruction extends CommonStandingInstructionVali
 
     @Override
     protected void validateSpecificFields() {
-        final Integer transferType = fromApiJsonHelper.extractIntegerNamed(transferTypeParamName, this.element, Locale.getDefault());
-        final Integer instructionType = fromApiJsonHelper.extractIntegerNamed(instructionTypeParamName, this.element, Locale.getDefault());
-        final Integer recurrenceType = fromApiJsonHelper.extractIntegerNamed(recurrenceTypeParamName, this.element, Locale.getDefault());
+        final Integer transferType = fromApiJsonHelper.extractIntegerNamed(transferTypeParamName, this.element, this.locale);
+        final Integer instructionType = fromApiJsonHelper.extractIntegerNamed(instructionTypeParamName, this.element, this.locale);
+        final Integer recurrenceType = fromApiJsonHelper.extractIntegerNamed(recurrenceTypeParamName, this.element, this.locale);
 
         if (isLoanRepayment(transferType) && isFixedInstruction(instructionType) && isAsPerDuesRecurrence(recurrenceType)) {
             this.baseDataValidator.reset().parameter(recurrenceTypeParamName)

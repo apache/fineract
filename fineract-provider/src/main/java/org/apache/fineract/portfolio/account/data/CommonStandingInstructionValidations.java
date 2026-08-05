@@ -58,6 +58,7 @@ import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 public abstract class CommonStandingInstructionValidations implements StandingInstructionValidator {
+    protected final Locale locale = Locale.getDefault();
     protected final FromJsonHelper fromApiJsonHelper;
     protected final JsonElement element;
     protected final DataValidatorBuilder baseDataValidator;
@@ -75,19 +76,19 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
     }
 
     private void validateCommonFields() {
-        final Integer transferType = this.fromApiJsonHelper.extractIntegerNamed(transferTypeParamName, this.element, Locale.getDefault());
+        final Integer transferType = this.fromApiJsonHelper.extractIntegerNamed(transferTypeParamName, this.element, this.locale);
         this.baseDataValidator.reset().parameter(transferTypeParamName).value(transferType).notNull().inMinMaxRange(1, 3);
 
         final String name = this.fromApiJsonHelper.extractStringNamed(nameParamName, this.element);
         this.baseDataValidator.reset().parameter(nameParamName).value(name).notBlank();
 
-        final Integer priority = this.fromApiJsonHelper.extractIntegerNamed(priorityParamName, this.element, Locale.getDefault());
+        final Integer priority = this.fromApiJsonHelper.extractIntegerNamed(priorityParamName, this.element, this.locale);
         this.baseDataValidator.reset().parameter(priorityParamName).value(priority).notNull().inMinMaxRange(1, 4);
 
-        final Integer instructionType = this.fromApiJsonHelper.extractIntegerNamed(instructionTypeParamName, this.element, Locale.getDefault());
+        final Integer instructionType = this.fromApiJsonHelper.extractIntegerNamed(instructionTypeParamName, this.element, this.locale);
         this.baseDataValidator.reset().parameter(instructionTypeParamName).value(instructionType).notNull().inMinMaxRange(1, 2);
 
-        final Integer status = this.fromApiJsonHelper.extractIntegerNamed(statusParamName, this.element, Locale.getDefault());
+        final Integer status = this.fromApiJsonHelper.extractIntegerNamed(statusParamName, this.element, this.locale);
         this.baseDataValidator.reset().parameter(statusParamName).value(status).notNull().inMinMaxRange(1, 2);
 
         final LocalDate validFrom = this.fromApiJsonHelper.extractLocalDateNamed(validFromParamName, this.element);
@@ -96,7 +97,7 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
         final LocalDate validTill = this.fromApiJsonHelper.extractLocalDateNamed(validTillParamName, this.element);
         this.baseDataValidator.reset().parameter(validTillParamName).value(validTill).validateDateAfter(validFrom);
 
-        final Integer recurrenceType = this.fromApiJsonHelper.extractIntegerNamed(recurrenceTypeParamName, this.element, Locale.getDefault());
+        final Integer recurrenceType = this.fromApiJsonHelper.extractIntegerNamed(recurrenceTypeParamName, this.element, this.locale);
         this.baseDataValidator.reset().parameter(recurrenceTypeParamName).value(recurrenceType).notNull().inMinMaxRange(1, 2);
 
         validateAccountTypesAndTransferEligibility(transferType);
@@ -151,10 +152,10 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
     protected abstract void validateSpecificFields();
 
     protected void validatePeriodicFields() {
-        final Integer recurrenceFrequency = this.fromApiJsonHelper.extractIntegerNamed(recurrenceFrequencyParamName, this.element, Locale.getDefault());
+        final Integer recurrenceFrequency = this.fromApiJsonHelper.extractIntegerNamed(recurrenceFrequencyParamName, this.element, this.locale);
         this.baseDataValidator.reset().parameter(recurrenceFrequencyParamName).value(recurrenceFrequency).notNull().inMinMaxRange(0, 3);
 
-        final Integer recurrenceInterval = this.fromApiJsonHelper.extractIntegerNamed(recurrenceIntervalParamName, this.element, Locale.getDefault());
+        final Integer recurrenceInterval = this.fromApiJsonHelper.extractIntegerNamed(recurrenceIntervalParamName, this.element, this.locale);
         this.baseDataValidator.reset().parameter(recurrenceIntervalParamName).value(recurrenceInterval).notNull().integerGreaterThanZero();
 
         if (!isValidFrequencyData(recurrenceFrequency, recurrenceInterval)) {

@@ -38,13 +38,13 @@ public class AccountTransferStandingInstruction extends CommonStandingInstructio
         validatePeriodicFields();
         validateAmountForFixedInstructionType();
         
-        final Integer instructionType = this.fromApiJsonHelper.extractIntegerNamed(instructionTypeParamName, this.element, Locale.getDefault());
+        final Integer instructionType = this.fromApiJsonHelper.extractIntegerNamed(instructionTypeParamName, this.element, this.locale);
         if (isDuesInstruction(instructionType)) {
             this.baseDataValidator.reset().parameter(instructionTypeParamName)
                     .failWithCode(StandingInstructionApiConstants.INSTRUCTION_TYPE_DUES_NOT_ALLOWED_FOR_ACCOUNT_TRANSFER_ERROR_CODE);
         }
 
-        final Integer recurrenceType = this.fromApiJsonHelper.extractIntegerNamed(recurrenceTypeParamName, this.element, Locale.getDefault());
+        final Integer recurrenceType = this.fromApiJsonHelper.extractIntegerNamed(recurrenceTypeParamName, this.element, this.locale);
         if (isAsPerDuesRecurrence(recurrenceType)) {
             this.baseDataValidator.reset().parameter(recurrenceTypeParamName)
                     .failWithCode(StandingInstructionApiConstants.RECURRENCE_AS_PER_DUES_NOT_ALLOWED_FOR_SAVINGS_ERROR_CODE);

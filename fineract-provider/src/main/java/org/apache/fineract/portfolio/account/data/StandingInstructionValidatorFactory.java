@@ -36,8 +36,8 @@ public final class StandingInstructionValidatorFactory {
     private StandingInstructionValidatorFactory() {}
 
     public static StandingInstructionValidator getStrategy(final FromJsonHelper fromApiJsonHelper, final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-
-        final Integer transferType = fromApiJsonHelper.extractIntegerNamed(transferTypeParamName, element, Locale.getDefault());
+        final Locale locale = Locale.getDefault();
+        final Integer transferType = fromApiJsonHelper.extractIntegerNamed(transferTypeParamName, element, locale);
 
         if (transferType == null) {
             return new InexistingStandingInstruction(fromApiJsonHelper, element, baseDataValidator);
@@ -47,8 +47,8 @@ public final class StandingInstructionValidatorFactory {
             return new AccountTransferStandingInstruction(fromApiJsonHelper, element, baseDataValidator);
         }
 
-        final Integer instructionType = fromApiJsonHelper.extractIntegerNamed(instructionTypeParamName, element, Locale.getDefault());
-        final Integer recurrenceType = fromApiJsonHelper.extractIntegerNamed(recurrenceTypeParamName, element, Locale.getDefault());
+        final Integer instructionType = fromApiJsonHelper.extractIntegerNamed(instructionTypeParamName, element, locale);
+        final Integer recurrenceType = fromApiJsonHelper.extractIntegerNamed(recurrenceTypeParamName, element, locale);
 
         if (instructionType == null || recurrenceType == null) {
             return new InexistingStandingInstruction(fromApiJsonHelper, element, baseDataValidator);
