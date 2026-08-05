@@ -65,7 +65,7 @@ public class EmailMessage extends AbstractPersistableCustom<Long> {
     @Column(name = "status_enum", nullable = false)
     private Integer statusType;
 
-    @Column(name = "email_address", nullable = false, length = 50)
+    @Column(name = "email_address", nullable = false, length = 254)
     private String emailAddress;
 
     @Column(name = "email_subject", nullable = false, length = 50)

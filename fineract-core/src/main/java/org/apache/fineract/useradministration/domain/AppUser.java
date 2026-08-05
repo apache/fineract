@@ -63,7 +63,7 @@ import org.springframework.security.core.userdetails.User;
 public class AppUser extends AbstractPersistableCustom<Long> implements PlatformUser {
 
     @Getter
-    @Column(name = "email", nullable = false, length = 100)
+    @Column(name = "email", nullable = false, length = 254)
     private String email;
 
     @Column(name = "username", nullable = false, length = 100)

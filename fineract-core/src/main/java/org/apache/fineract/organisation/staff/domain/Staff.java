@@ -53,7 +53,7 @@ public class Staff extends AbstractPersistableCustom<Long> {
     @Column(name = "external_id", length = 100, unique = true)
     private String externalId;
 
-    @Column(name = "email_address", length = 50, unique = true)
+    @Column(name = "email_address", length = 254, unique = true)
     private String emailAddress;
 
     @ManyToOne
