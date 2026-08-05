@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.account.data;
 
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.transferTypeParamName;
+import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.instructionTypeParamName;
+import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.recurrenceTypeParamName;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,7 +30,9 @@ import com.google.gson.JsonElement;
 import java.util.Locale;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
+import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -48,7 +52,7 @@ public class StandingInstructionValidatorFactoryTest {
 
     @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenTransferTypeIsNull() {
-        actForTransferTypeWithParam(null);
+        actForParamWithValue(transferTypeParamName, null);
         
         StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
         
@@ -57,14 +61,36 @@ public class StandingInstructionValidatorFactoryTest {
 
     @Test
     public void shouldReturnAnAccountTransferStandingInstructionInstance() {
-        actForTransferTypeWithParam(AccountTransferType.ACCOUNT_TRANSFER.getValue());
+        actForParamWithValue(transferTypeParamName, AccountTransferType.ACCOUNT_TRANSFER.getValue());
 
         StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
         
         assertTrue(result instanceof AccountTransferStandingInstruction);
     }
 
-    private void actForTransferTypeWithParam(final Integer transferType) {
-        when(fromApiJsonHelper.extractIntegerNamed(eq(transferTypeParamName), eq(element), any(Locale.class))).thenReturn(transferType);
+    @Test
+    public void shouldReturnAnInexistingStandingInstructionInstanceWhenInstructionTypeIsNull() {
+        actForParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
+        actForParamWithValue(instructionTypeParamName, null);
+        actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
+
+        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
+        
+        assertTrue(result instanceof InexistingStandingInstruction);
+    }
+
+    @Test
+    public void shouldReturnAnInexistingStandingInstructionInstanceWhenRecurrenceTypeIsNull() {
+        actForParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
+        actForParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
+        actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
+
+        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
+        
+        assertTrue(result instanceof InexistingStandingInstruction);
+    }
+
+    private void actForParamWithValue(final String paramName, final Integer value) {
+        when(fromApiJsonHelper.extractIntegerNamed(eq(paramName), eq(element), any(Locale.class))).thenReturn(value);
     }
 }
