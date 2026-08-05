@@ -245,8 +245,10 @@ public class LoanCapitalizedIncomeAmortizationProcessingServiceImpl implements L
                 }
                 final BigDecimal grossAmortizedAmount = loanAmortizationAllocationService
                         .calculateGrossAmortizedAmount(balance.getLoanTransaction().getId(), loan.getId());
+                final BigDecimal netCapitalizedIncomeAmount = MathUtil.subtract(balance.getAmount(),
+                        MathUtil.nullToZero(balance.getAmountAdjustment()));
                 final boolean fullyAmortizedOnSaleOrClosure = MathUtil.isZero(balance.getUnrecognizedAmount())
-                        && grossAmortizedAmount.compareTo(balance.getAmount()) >= 0;
+                        && grossAmortizedAmount.compareTo(netCapitalizedIncomeAmount) >= 0;
                 final LocalDate effectiveTillDate = fullyAmortizedOnSaleOrClosure ? maturityDate : tillDatePlusOne;
                 final Money amortizationTillDate = CapitalizedIncomeAmortizationUtil.calculateTotalAmortizationTillDate(balance,
                         adjustments, maturityDate, loan.getLoanProductRelatedDetail().getCapitalizedIncomeStrategy(), effectiveTillDate,

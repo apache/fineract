@@ -88,8 +88,10 @@ public class LoanBuyDownFeeAmortizationProcessingServiceImpl implements LoanBuyD
                 }
                 final BigDecimal grossAmortizedAmount = loanAmortizationAllocationService
                         .calculateGrossAmortizedAmount(balance.getLoanTransaction().getId(), loan.getId());
+                final BigDecimal netBuyDownFeeAmount = MathUtil.subtract(balance.getAmount(),
+                        MathUtil.nullToZero(balance.getAmountAdjustment()));
                 final boolean fullyAmortizedOnSaleOrClosure = MathUtil.isZero(balance.getUnrecognizedAmount())
-                        && grossAmortizedAmount.compareTo(balance.getAmount()) >= 0;
+                        && grossAmortizedAmount.compareTo(netBuyDownFeeAmount) >= 0;
                 final LocalDate effectiveTillDate = fullyAmortizedOnSaleOrClosure ? maturityDate : tillDatePlusOne;
                 final Money amortizationTillDate = BuyDownFeeAmortizationUtil.calculateTotalAmortizationTillDate(balance, adjustments,
                         maturityDate, loan.getLoanProductRelatedDetail().getBuyDownFeeStrategy(), effectiveTillDate, loan.getCurrency());
