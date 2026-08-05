@@ -24,4 +24,6 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <include relativeToChangelogFile="true" file="parts/0001_command_init.xml"/>
     <include relativeToChangelogFile="true" file="parts/0002_command_fix_structure.xml"/>
+    <include relativeToChangelogFile="true" file="parts/0003_idempotency_key_unique.xml"/>
+
 </databaseChangeLog>

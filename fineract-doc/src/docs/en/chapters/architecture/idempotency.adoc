@@ -1,5 +1,7 @@
 = Idempotency
 
+IMPORTANT: The idempotency mechanics of the new command processing infrastructure still need to be documented. The implementation is done as a command hook. Detailed documentation will be provided soon. The only thing that new and legacy idempotency capabilities have in common is the name and configuration of the HTTP header name that contains  the idempotency key.
+
 Idempotency is the way to make sure your specific action is only executed once.
 For example, if you have a button that is supposed to send a repayment, you don’t want to repayment twice if the user clicks the button twice. Idempotency is a way to make sure that the action is only executed once.
 

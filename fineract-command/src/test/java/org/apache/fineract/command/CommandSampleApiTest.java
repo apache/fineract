@@ -36,13 +36,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.command.core.CommandProperties;
 import org.apache.fineract.command.test.sample.data.DummyRequest;
 import org.apache.fineract.command.test.sample.data.DummyResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
@@ -68,9 +66,6 @@ class CommandSampleApiTest {
     private List<ClientHttpRequestInterceptor> interceptors;
 
     private RestTemplate restTemplate;
-
-    @Autowired
-    private CommandProperties properties;
 
     @BeforeEach
     public void setUp() {
@@ -106,14 +101,14 @@ class CommandSampleApiTest {
     @Test
     void dummyApiSync() {
         final var content = "test-sync";
-        final var idempotencyKey = UUID.randomUUID().toString();
+        // final var idempotencyKey = UUID.randomUUID().toString();
 
         restTemplate.setInterceptors(interceptors);
 
-        final var headers = new HttpHeaders();
-        headers.add(properties.getIdemPotencyKeyHeaderName(), idempotencyKey);
+        // final var headers = new HttpHeaders();
+        // headers.add(properties.getIdemPotencyKeyHeaderName(), idempotencyKey);
 
-        final var request = new HttpEntity<>(DummyRequest.builder().content(content).build(), headers);
+        final var request = new HttpEntity<>(DummyRequest.builder().content(content).build(), new HttpHeaders());
 
         final var result = restTemplate.postForObject(baseUrl + "/sync", request, DummyResponse.class);
 
