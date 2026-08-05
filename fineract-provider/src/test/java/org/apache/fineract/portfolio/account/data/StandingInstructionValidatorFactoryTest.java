@@ -47,10 +47,23 @@ public class StandingInstructionValidatorFactoryTest {
 
     @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenTransferTypeIsNull() {
-        when(fromApiJsonHelper.extractIntegerNamed(eq(transferTypeParamName), eq(element), any(Locale.class))).thenReturn(null);
+        actForTransferTypeWithParam(null);
         
         StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
         
         assertTrue(result instanceof InexistingStandingInstruction);
+    }
+
+    @Test
+    public void shouldReturnAnAccountTransferStandingInstructionInstance() {
+        actForTransferTypeWithParam(AccountTransferType.ACCOUNT_TRANSFER.getValue());
+
+        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
+        
+        assertTrue(result instanceof AccountTransferStandingInstruction);
+    }
+
+    private actForTransferTypeWithParam(final Integer transferType) {
+        when(fromApiJsonHelper.extractIntegerNamed(eq(transferTypeParamName), eq(element), any(Locale.class))).thenReturn(transferType);
     }
 }
