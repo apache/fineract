@@ -53,19 +53,16 @@ public class StandingInstructionValidatorFactoryTest {
     @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenTransferTypeIsNull() {
         actForParamWithValue(transferTypeParamName, null);
+
+        assertInstanceStrategy(InexistingStandingInstruction.class);
         
-        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
-        
-        assertTrue(result instanceof InexistingStandingInstruction);
     }
 
     @Test
     public void shouldReturnAnAccountTransferStandingInstructionInstance() {
         actForParamWithValue(transferTypeParamName, AccountTransferType.ACCOUNT_TRANSFER.getValue());
 
-        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
-        
-        assertTrue(result instanceof AccountTransferStandingInstruction);
+        assertInstanceStrategy(AccountTransferStandingInstruction.class);
     }
 
     @Test
@@ -74,9 +71,7 @@ public class StandingInstructionValidatorFactoryTest {
         actForParamWithValue(instructionTypeParamName, null);
         actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
 
-        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
-        
-        assertTrue(result instanceof InexistingStandingInstruction);
+        assertInstanceStrategy(InexistingStandingInstruction.class);
     }
 
     @Test
@@ -85,9 +80,7 @@ public class StandingInstructionValidatorFactoryTest {
         actForParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
         actForParamWithValue(recurrenceTypeParamName, null);
 
-        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
-        
-        assertTrue(result instanceof InexistingStandingInstruction);
+        assertInstanceStrategy(InexistingStandingInstruction.class);
     }
 
     @Test
@@ -96,9 +89,7 @@ public class StandingInstructionValidatorFactoryTest {
         actForParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
         actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
 
-        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
-        
-        assertTrue(result instanceof PeriodicFixedAmountLoanRepaymentStandingInstruction);
+        assertInstanceStrategy(PeriodicFixedAmountLoanRepaymentStandingInstruction.class);
     }
 
     @Test
@@ -107,9 +98,7 @@ public class StandingInstructionValidatorFactoryTest {
         actForParamWithValue(instructionTypeParamName, StandingInstructionType.DUES.getValue());
         actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
 
-        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
-        
-        assertTrue(result instanceof PeriodicDuesLoanRepaymentStandingInstruction);
+        assertInstanceStrategy(PeriodicDuesLoanRepaymentStandingInstruction.class);
     }
 
     @Test
@@ -118,9 +107,7 @@ public class StandingInstructionValidatorFactoryTest {
         actForParamWithValue(instructionTypeParamName, StandingInstructionType.DUES.getValue());
         actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
 
-        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
-        
-        assertTrue(result instanceof LoanRepaymentStandingInstruction);
+        assertInstanceStrategy(LoanRepaymentStandingInstruction.class);
     }
 
     @Test
@@ -129,12 +116,15 @@ public class StandingInstructionValidatorFactoryTest {
         actForParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
         actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
 
-        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
-        
-        assertTrue(result instanceof InexistingStandingInstruction);
+        assertInstanceStrategy(InexistingStandingInstruction.class);
     }
 
     private void actForParamWithValue(final String paramName, final Integer value) {
         when(fromApiJsonHelper.extractIntegerNamed(eq(paramName), eq(element), any(Locale.class))).thenReturn(value);
+    }
+
+    private <T extends StandingInstructionValidator> void assertInstanceStrategy(Class<T> expectedClass) {
+        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
+        assertTrue(expectedClass.isInstance(result));
     }
 }
