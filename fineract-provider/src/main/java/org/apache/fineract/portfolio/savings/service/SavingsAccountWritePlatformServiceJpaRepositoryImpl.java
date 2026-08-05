@@ -180,6 +180,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         CommandProcessingResult result = null;
         int count = 0;
         for (SavingsAccount account : childSavings) {
+            this.context.validateAccessRights(account.office().getHierarchy());
             result = activate(account.getId(), command);
             if (result != null) {
                 count++;
@@ -201,6 +202,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingsAccountTransactionDataValidator.validateActivation(command);
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        this.context.validateAccessRights(account.office().getHierarchy());
 
         checkClientOrGroupActive(account);
         final Set<Long> existingTransactionIds = new HashSet<>();
@@ -287,6 +289,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
+        this.context.validateAccessRights(account.office().getHierarchy());
 
         if (account.getGsim() != null) {
             isGsim = true;
@@ -370,6 +373,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
+        this.context.validateAccessRights(account.office().getHierarchy());
 
         if (account.getGsim() != null) {
             isGsim = true;
@@ -435,6 +439,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
+        this.context.validateAccessRights(account.office().getHierarchy());
 
         if (account.getGsim() != null) {
             isGsim = true;
@@ -513,6 +518,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
+        this.context.validateAccessRights(account.office().getHierarchy());
         checkClientOrGroupActive(account);
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
@@ -558,6 +564,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
+        this.context.validateAccessRights(account.office().getHierarchy());
         checkClientOrGroupActive(account);
 
         this.savingsAccountTransactionDataValidator.validateTransactionWithPivotDate(transactionDate, account);
@@ -742,7 +749,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
         final boolean isBulk = command.booleanPrimitiveValueOfParameterNamed("isBulk");
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
-
+        this.context.validateAccessRights(account.office().getHierarchy());
         final SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository
                 .findOneByIdAndSavingsAccountId(transactionId, savingsId);
         if (savingsAccountTransaction == null) {
@@ -793,6 +800,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .isSavingsInterestPostingAtCurrentPeriodEnd();
         final Integer financialYearBeginningMonth = this.configurationDomainService.retrieveFinancialYearBeginningMonth();
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        this.context.validateAccessRights(account.office().getHierarchy());
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
@@ -895,7 +903,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final LocalDate today = DateUtils.getBusinessLocalDate();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
-
+        this.context.validateAccessRights(account.office().getHierarchy());
         if (account.isNotActive()) {
             throwValidationForActiveStatus(SavingsApiConstants.adjustTransactionAction);
         }
@@ -982,6 +990,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     private void checkClientOrGroupActive(final SavingsAccount account) {
+        this.context.validateAccessRights(account.office().getHierarchy());
         final Client client = account.getClient();
         if (client != null) {
             if (client.isNotActive()) {
@@ -1006,6 +1015,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         CommandProcessingResult result = null;
         int count = 0;
         for (SavingsAccount account : childSavings) {
+            this.context.validateAccessRights(account.office().getHierarchy());
             result = close(account.getId(), command);
 
             if (result != null) {
@@ -1024,6 +1034,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final AppUser user = this.context.authenticatedUser();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        this.context.validateAccessRights(account.office().getHierarchy());
         this.savingsAccountTransactionDataValidator.validateClosing(command, account);
 
         final boolean isLinkedWithAnyActiveLoan = this.accountAssociationsReadPlatformService.isLinkedWithAnyActiveAccount(savingsId);
@@ -1352,7 +1363,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         // Get Savings account from savings charge
         final SavingsAccount account = savingsAccountCharge.savingsAccount();
-
+        this.context.validateAccessRights(account.office().getHierarchy());
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
 
         this.savingAccountAssembler.loadTransactionsToSavingsAccount(account, backdatedTxnsAllowedTill);
@@ -1512,6 +1523,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         // Get Savings account from savings charge
         final SavingsAccount account = savingsAccountCharge.savingsAccount();
+        this.context.validateAccessRights(account.office().getHierarchy());
         this.savingAccountAssembler.assignSavingAccountHelpers(account);
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
@@ -1592,6 +1604,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .findOneWithNotFoundDetection(savingsAccountChargeId, savingsAccountId);
 
         final SavingsAccount account = savingsAccountCharge.savingsAccount();
+        this.context.validateAccessRights(account.office().getHierarchy());
         this.savingAccountAssembler.assignSavingAccountHelpers(account);
 
         final LocalDate inactivationOnDate = DateUtils.getBusinessLocalDate();
@@ -1752,6 +1765,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public void setSubStatusInactive(Long savingsId) {
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        this.context.validateAccessRights(account.office().getHierarchy());
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
@@ -1763,6 +1777,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public void setSubStatusDormant(Long savingsId) {
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        this.context.validateAccessRights(account.office().getHierarchy());
         account.setSubStatusDormant();
         this.savingAccountRepositoryWrapper.saveAndFlush(account);
     }
@@ -1770,6 +1785,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public void escheat(Long savingsId) {
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        this.context.validateAccessRights(account.office().getHierarchy());
         final Set<Long> existingTransactionIds = new HashSet<>();
         final Set<Long> existingReversedTransactionIds = new HashSet<>();
         updateExistingTransactionsDetails(account, existingTransactionIds, existingReversedTransactionIds);
@@ -1815,6 +1831,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.context.authenticatedUser();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        this.context.validateAccessRights(account.office().getHierarchy());
         checkClientOrGroupActive(account);
 
         final Map<String, Object> changes = account.block();
@@ -1842,6 +1859,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.context.authenticatedUser();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        this.context.validateAccessRights(account.office().getHierarchy());
         checkClientOrGroupActive(account);
 
         final Map<String, Object> changes = account.unblock();
@@ -1869,6 +1887,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final AppUser submittedBy = this.context.authenticatedUser();
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
+        this.context.validateAccessRights(account.office().getHierarchy());
         final LocalDate transactionDate = command.localDateValueOfParameterNamed(transactionDateParamName);
         final ExternalId externalId = this.externalIdFactory.createFromCommand(command, SavingsApiConstants.externalIdParamName);
         final boolean lienAllowed = command.booleanPrimitiveValueOfParameterNamed(lienAllowedParamName);
@@ -1935,6 +1954,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final boolean backdatedTxnsAllowedTill = this.savingAccountAssembler.getPivotConfigStatus();
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, backdatedTxnsAllowedTill);
+        this.context.validateAccessRights(account.office().getHierarchy());
         checkClientOrGroupActive(account);
 
         Money runningBalance = Money.of(account.getCurrency(), account.getAccountBalance());
@@ -1975,6 +1995,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.context.authenticatedUser();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        this.context.validateAccessRights(account.office().getHierarchy());
         checkClientOrGroupActive(account);
 
         final String reasonForBlock = command.stringValueOfParameterNamed(SavingsApiConstants.reasonForBlockParamName);
@@ -2002,6 +2023,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.context.authenticatedUser();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        this.context.validateAccessRights(account.office().getHierarchy());
         checkClientOrGroupActive(account);
         account.updateReason(null);
         final Map<String, Object> changes = account.unblockCredits();
@@ -2025,6 +2047,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.context.authenticatedUser();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        this.context.validateAccessRights(account.office().getHierarchy());
         checkClientOrGroupActive(account);
 
         final String reasonForBlock = command.stringValueOfParameterNamed(SavingsApiConstants.reasonForBlockParamName);
@@ -2052,6 +2075,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.context.authenticatedUser();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId, false);
+        this.context.validateAccessRights(account.office().getHierarchy());
         checkClientOrGroupActive(account);
 
         account.updateReason(null);

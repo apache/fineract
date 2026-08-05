@@ -218,10 +218,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     @Override
     public SavingsAccountData retrieveOne(final Long accountId) {
 
-        try {
-            final String sql = "select " + this.savingAccountMapper.schema() + " where sa.id = ?";
+        final AppUser currentUser = this.context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
 
-            return this.jdbcTemplate.queryForObject(sql, this.savingAccountMapper, new Object[] { accountId }); // NOSONAR
+        try {
+            final String sql = "select " + this.savingAccountMapper.schema() + " join m_office o on o.id = c.office_id"
+                    + " where sa.id = ? and o.hierarchy like ?";
+
+            return this.jdbcTemplate.queryForObject(sql, this.savingAccountMapper, new Object[] { accountId, hierarchy + "%" });
         } catch (final EmptyResultDataAccessException e) {
             throw new SavingsAccountNotFoundException(accountId, e);
         }
