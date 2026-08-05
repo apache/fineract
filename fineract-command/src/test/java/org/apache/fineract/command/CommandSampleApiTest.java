@@ -36,7 +36,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.command.core.CommandProperties;
 import org.apache.fineract.command.test.sample.data.DummyRequest;
 import org.apache.fineract.command.test.sample.data.DummyResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,11 +67,8 @@ class CommandSampleApiTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    @Autowired
-    private CommandProperties properties;
-
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         this.baseUrl = "http://localhost:" + port + "/test/dummy";
         this.interceptors = List.of((request, body, execution) -> {
             var headers = request.getHeaders();
@@ -97,14 +93,14 @@ class CommandSampleApiTest {
     @Test
     void dummyApiSync() {
         final var content = "test-sync";
-        final var idempotencyKey = UUID.randomUUID().toString();
+        // final var idempotencyKey = UUID.randomUUID().toString();
 
         restTemplate.getRestTemplate().setInterceptors(interceptors);
 
-        final var headers = new HttpHeaders();
-        headers.add(properties.getIdemPotencyKeyHeaderName(), idempotencyKey);
+        // final var headers = new HttpHeaders();
+        // headers.add(properties.getIdemPotencyKeyHeaderName(), idempotencyKey);
 
-        final var request = new HttpEntity<>(DummyRequest.builder().content(content).build(), headers);
+        final var request = new HttpEntity<>(DummyRequest.builder().content(content).build(), new HttpHeaders());
 
         final var result = restTemplate.postForObject(baseUrl + "/sync", request, DummyResponse.class);
 

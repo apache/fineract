@@ -18,11 +18,12 @@
  */
 package org.apache.fineract.command.core;
 
+@SuppressWarnings("rawtypes")
 public interface CommandHookManager {
 
-    void before(Command command);
+    void before(CommandContext ctx);
 
-    void after(Command command, Object response);
+    void after(CommandContext ctx);
 
-    void error(Command command, Throwable error);
+    void error(CommandContext ctx);
 }
