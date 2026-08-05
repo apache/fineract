@@ -43,4 +43,10 @@ public class AccountTransferRequest implements Serializable {
     private String toClientId;
     private String fromAccountId;
     private String fromOfficeId;
+    private Long paymentTypeId;
+    private String accountNumber;
+    private String checkNumber;
+    private String routingCode;
+    private String receiptNumber;
+    private String bankNumber;
 }
