@@ -83,7 +83,51 @@ public class StandingInstructionValidatorFactoryTest {
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenRecurrenceTypeIsNull() {
         actForParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
         actForParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
+        actForParamWithValue(recurrenceTypeParamName, null);
+
+        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
+        
+        assertTrue(result instanceof InexistingStandingInstruction);
+    }
+
+    @Test
+    public void shouldReturnAPeriodicFixedAmountLoanRepaymentStandingInstructionInstance() {
+        actForParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
+        actForParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
         actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
+
+        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
+        
+        assertTrue(result instanceof PeriodicFixedAmountLoanRepaymentStandingInstruction);
+    }
+
+    @Test
+    public void shouldReturnAPeriodicDuesLoanRepaymentStandingInstructionInstance() {
+        actForParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
+        actForParamWithValue(instructionTypeParamName, StandingInstructionType.DUES.getValue());
+        actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
+
+        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
+        
+        assertTrue(result instanceof PeriodicDuesLoanRepaymentStandingInstruction);
+    }
+
+    @Test
+    public void shouldReturnALoanRepaymentStandingInstructionInstance() {
+        actForParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
+        actForParamWithValue(instructionTypeParamName, StandingInstructionType.DUES.getValue());
+        actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
+
+        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
+        
+        assertTrue(result instanceof LoanRepaymentStandingInstruction);
+    }
+
+    @Test
+    public void shouldReturnAnInexistingStandingInstructionInstanceWithFixedInstructionAndAsPerDuesRecurrence() {
+        actForParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
+        actForParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
+        actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
 
         StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
         
