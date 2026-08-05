@@ -548,12 +548,19 @@ public final class ProjectedAmortizationScheduleModel {
      * @param newPeriodPaymentRate
      *            the new period payment rate as a <strong>percentage</strong>
      * @param rateChangeDate
-     *            the date of the rate change (must be within model's date range)
+     *            the date the new rate takes effect (must be within model's date range); may be in the future
+     * @param currentDate
+     *            today's business date, capping how far {@code calculatedTillDate} may advance; {@code null} lets the
+     *            effective date advance it unchecked
      */
-    public void applyRateChange(final BigDecimal newPeriodPaymentRate, final LocalDate rateChangeDate) {
+    public void applyRateChange(final BigDecimal newPeriodPaymentRate, final LocalDate rateChangeDate, final LocalDate currentDate) {
         Objects.requireNonNull(newPeriodPaymentRate, "newPeriodPaymentRate");
         Objects.requireNonNull(rateChangeDate, "rateChangeDate");
-        updateCalculatedTillDate(rateChangeDate);
+        // A rate change proves time has advanced only as far as the day it was booked on. Letting a future effective
+        // date carry calculatedTillDate with it would mark the periods between today and that date as elapsed, so the
+        // catch-up machinery would bill them as missed and the NPV would be taken from the wrong periods.
+        final LocalDate reachedDate = currentDate != null && rateChangeDate.isAfter(currentDate) ? currentDate : rateChangeDate;
+        updateCalculatedTillDate(reachedDate);
         final int rawSplitDayIndex = (int) ChronoUnit.DAYS.between(expectedDisbursementDate, rateChangeDate);
         if (rawSplitDayIndex < 0) {
             throw new IllegalArgumentException("rateChangeDate must not be before expectedDisbursementDate");
@@ -607,18 +614,31 @@ public final class ProjectedAmortizationScheduleModel {
         if (rawSplitDayIndex >= effectiveTotalTerm()) {
             newDiscount = origDiscount.add(origNet, mc).subtract(balanceAtSplit, mc).subtract(paymentsReceived, mc);
         } else {
-            // Periods billed before the split are 1..(splitDayIndex-1); sum their expected payments segment-aware so a
-            // prior rate change's payment amount is counted (not the base payment). The loop is empty for a day-0/day-1
-            // change (segment covers the whole schedule), so nothing is spuriously added back to the discount.
+            // The gross still to be billed is measured from the start of the sub-schedule the split falls in, not from
+            // disbursement. A past-term rate change re-injects the unpaid principal as a fresh net + discount, so from
+            // that segment onwards the original pair no longer describes what is left to consume - and summing payments
+            // across the rebase counts the base schedule's periods and the segment's own against the same total, which
+            // drives it negative and yields a negative term.
+            //
+            // Segments at or after the split were dropped above, so the active one is whichever covers the last period
+            // before it; with none (a plain base schedule, or a day-0/day-1 change) this reduces to disbursement and
+            // the
+            // original pair, leaving single-change results untouched.
+            final RateSegment segmentAtSplit = splitDayIndex > 1 ? segmentForDay(splitDayIndex - 1) : null;
+            final int consumedFromDay = segmentAtSplit != null ? segmentAtSplit.startDayIndex() : 1;
+            final BigDecimal grossAtSegmentStart = segmentAtSplit != null
+                    ? segmentAtSplit.netDisbursementAtSplit().getAmount().add(segmentAtSplit.discountAtSplit().getAmount(), mc)
+                    : origNet.add(origDiscount, mc);
+
             BigDecimal consumedBeforeSplit = BigDecimal.ZERO;
-            for (int day = 1; day < splitDayIndex; day++) {
+            for (int day = consumedFromDay; day < splitDayIndex; day++) {
                 consumedBeforeSplit = consumedBeforeSplit.add(expectedPaymentForDay(day), mc);
             }
             // Stay entirely on the expected track: balanceAtSplit and consumedBeforeSplit both come from the projected
             // schedule, which already assumes each period before the split was paid. Deducting the actual payments
             // received here as well would remove them a second time and understate the fee the segment still has to
             // earn. (The past-term branch above rebases on an actual-payment balance, so it deducts them there.)
-            final BigDecimal remainingTotal = origNet.add(origDiscount, mc).subtract(consumedBeforeSplit, mc);
+            final BigDecimal remainingTotal = grossAtSegmentStart.subtract(consumedBeforeSplit, mc);
             newDiscount = remainingTotal.subtract(balanceAtSplit, mc);
         }
         final int scale = currency.getDecimalPlaces();

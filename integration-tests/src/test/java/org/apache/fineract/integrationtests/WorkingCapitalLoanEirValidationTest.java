@@ -308,8 +308,8 @@ public class WorkingCapitalLoanEirValidationTest {
     public void testRateChangeIntoNonCalculableEirFailsCleanlyNot500() {
         final Long loanId = createActiveLoan();
 
-        final CallFailedRuntimeException ex = applicationHelper.runUpdateRateExpectingFailure(loanId,
-                WorkingCapitalLoanRequestBuilders.updateRate(new BigDecimal("0.01")));
+        final CallFailedRuntimeException ex = applicationHelper.runUpdateRateExpectingFailure(loanId, WorkingCapitalLoanRequestBuilders
+                .updateRate(new BigDecimal("0.01"), Utils.dateFormatter.format(Utils.getLocalDateOfTenant())));
 
         assertRateChangeRejectedAndLoanStaysActive(loanId, ex);
     }
@@ -384,8 +384,8 @@ public class WorkingCapitalLoanEirValidationTest {
     public void testRateChangeIntoOverCapTermIsRejectedWith403() {
         final Long loanId = createActiveLoan();
 
-        final CallFailedRuntimeException ex = applicationHelper.runUpdateRateExpectingFailure(loanId,
-                WorkingCapitalLoanRequestBuilders.updateRate(new BigDecimal("0.1")));
+        final CallFailedRuntimeException ex = applicationHelper.runUpdateRateExpectingFailure(loanId, WorkingCapitalLoanRequestBuilders
+                .updateRate(new BigDecimal("0.1"), Utils.dateFormatter.format(Utils.getLocalDateOfTenant())));
 
         assertRateChangeRejectedAndLoanStaysActive(loanId, ex);
     }
