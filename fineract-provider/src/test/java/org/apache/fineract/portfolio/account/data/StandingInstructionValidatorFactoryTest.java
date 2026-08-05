@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.google.gson.JsonElement;
+import java.util.Locale;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,7 @@ public class StandingInstructionValidatorFactoryTest {
 
     @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenTransferTypeIsNull() {
-        when(fromApiJsonHelper.extractIntegerNamed(eq(transferTypeParamName), eq(element), any())).thenReturn(null);
+        when(fromApiJsonHelper.extractIntegerNamed(eq(transferTypeParamName), eq(element), any(Locale.class))).thenReturn(null);
         
         StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
         
