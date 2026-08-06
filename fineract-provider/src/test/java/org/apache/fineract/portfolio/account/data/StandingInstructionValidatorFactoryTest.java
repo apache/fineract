@@ -52,7 +52,7 @@ public class StandingInstructionValidatorFactoryTest {
 
     @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenTransferTypeIsNull() {
-        actForParamWithValue(transferTypeParamName, null);
+        setUpParamWithValue(transferTypeParamName, null);
 
         assertInstanceStrategy(InexistingStandingInstruction.class);
         
@@ -60,66 +60,66 @@ public class StandingInstructionValidatorFactoryTest {
 
     @Test
     public void shouldReturnAnAccountTransferStandingInstructionInstance() {
-        actForParamWithValue(transferTypeParamName, AccountTransferType.ACCOUNT_TRANSFER.getValue());
+        setUpParamWithValue(transferTypeParamName, AccountTransferType.ACCOUNT_TRANSFER.getValue());
 
         assertInstanceStrategy(AccountTransferStandingInstruction.class);
     }
 
     @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenInstructionTypeIsNull() {
-        actForParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
-        actForParamWithValue(instructionTypeParamName, null);
-        actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
+        setUpParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
+        setUpParamWithValue(instructionTypeParamName, null);
+        setUpParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
 
         assertInstanceStrategy(InexistingStandingInstruction.class);
     }
 
     @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenRecurrenceTypeIsNull() {
-        actForParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
-        actForParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
-        actForParamWithValue(recurrenceTypeParamName, null);
+        setUpParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
+        setUpParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
+        setUpParamWithValue(recurrenceTypeParamName, null);
 
         assertInstanceStrategy(InexistingStandingInstruction.class);
     }
 
     @Test
     public void shouldReturnAPeriodicFixedAmountLoanRepaymentStandingInstructionInstance() {
-        actForParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
-        actForParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
-        actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
+        setUpParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
+        setUpParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
+        setUpParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
 
         assertInstanceStrategy(PeriodicFixedAmountLoanRepaymentStandingInstruction.class);
     }
 
     @Test
     public void shouldReturnAPeriodicDuesLoanRepaymentStandingInstructionInstance() {
-        actForParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
-        actForParamWithValue(instructionTypeParamName, StandingInstructionType.DUES.getValue());
-        actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
+        setUpParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
+        setUpParamWithValue(instructionTypeParamName, StandingInstructionType.DUES.getValue());
+        setUpParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
 
         assertInstanceStrategy(PeriodicDuesLoanRepaymentStandingInstruction.class);
     }
 
     @Test
     public void shouldReturnALoanRepaymentStandingInstructionInstance() {
-        actForParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
-        actForParamWithValue(instructionTypeParamName, StandingInstructionType.DUES.getValue());
-        actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
+        setUpParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
+        setUpParamWithValue(instructionTypeParamName, StandingInstructionType.DUES.getValue());
+        setUpParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
 
         assertInstanceStrategy(LoanRepaymentStandingInstruction.class);
     }
 
     @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWithFixedInstructionAndAsPerDuesRecurrence() {
-        actForParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
-        actForParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
-        actForParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
+        setUpParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
+        setUpParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
+        setUpParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
 
         assertInstanceStrategy(InexistingStandingInstruction.class);
     }
 
-    private void actForParamWithValue(final String paramName, final Integer value) {
+    private void setUpParamWithValue(final String paramName, final Integer value) {
         when(fromApiJsonHelper.extractIntegerNamed(eq(paramName), eq(element), any(Locale.class))).thenReturn(value);
     }
 
