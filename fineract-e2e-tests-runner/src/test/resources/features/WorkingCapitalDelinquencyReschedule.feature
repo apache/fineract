@@ -1875,6 +1875,7 @@ Feature: Working Capital Delinquency Reschedule Action
       | 4            | 01 April 2026 | 30 April 2026 | 150            | 0          | 150               |                       |
     Then Admin closes the Working Capital loan with a full repayment on "17 April 2026"
 
+  @TestRailId:C93975
   Scenario: Verify delinquency reschedule frequency change is rejected when resulting period end date is in the past
     When Admin sets the business date to "01 January 2026"
     When Admin creates a client with random data
@@ -1897,6 +1898,7 @@ Feature: Working Capital Delinquency Reschedule Action
     Then Admin fails to create WC delinquency reschedule action with error containing "Frequency change results a delinquency period endDate before current businessDate is not allowed" and the following parameters:
       | frequency | frequencyType |
       | 19        | DAYS          |
+    # --- Delinquency reschedule ---
     When Admin creates WC delinquency reschedule action with the following parameters:
       | frequency | frequencyType |
       | 20        | DAYS          |
@@ -1904,8 +1906,10 @@ Feature: Working Capital Delinquency Reschedule Action
       | periodNumber | fromDate        | toDate           | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
       | 1            | 01 January 2026 | 20 January 2026  | 300            | 0          | 300               | false                 |
       | 2            | 21 January 2026 | 09 February 2026 | 300            | 0          | 300               |                       |
+    # --- Close loan ---
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
+  @TestRailId:C93975
   Scenario: Verify delinquency reschedule validates the recalculated period end date against the resumed pause length
     When Admin sets the business date to "01 January 2026"
     When Admin creates a client with random data
@@ -1919,12 +1923,14 @@ Feature: Working Capital Delinquency Reschedule Action
     When Admin runs inline COB job for Working Capital Loan
     When Admin sets the business date to "10 January 2026"
     When Admin runs inline COB job for Working Capital Loan
+    # --- Delinquency pause ---
     And Admin initiate a Working Capital loan delinquency pause with startDate "10 January 2026" and endDate "19 January 2026"
     Then WC loan delinquency range schedule has the following periods:
       | periodNumber | fromDate        | toDate           | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
       | 1            | 01 January 2026 | 09 February 2026 | 300            | 0          | 300               |                       |
     When Admin sets the business date to "15 January 2026"
     When Admin runs inline COB job for Working Capital Loan
+    # --- Delinquency resume ---
     And Admin initiate a Working Capital loan delinquency resume with startDate "15 January 2026"
     Then WC loan delinquency range schedule has the following periods:
       | periodNumber | fromDate        | toDate           | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
@@ -1933,6 +1939,7 @@ Feature: Working Capital Delinquency Reschedule Action
     Then Admin fails to create WC delinquency reschedule action with error containing "Frequency change results a delinquency period endDate before current businessDate is not allowed" and the following parameters:
       | frequency | frequencyType |
       | 25        | DAYS          |
+    # --- Delinquency reschedule ---
     When Admin creates WC delinquency reschedule action with the following parameters:
       | frequency | frequencyType |
       | 26        | DAYS          |
@@ -1940,4 +1947,5 @@ Feature: Working Capital Delinquency Reschedule Action
       | periodNumber | fromDate         | toDate           | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet |
       | 1            | 01 January 2026  | 01 February 2026 | 300            | 0          | 300               | false                 |
       | 2            | 02 February 2026 | 27 February 2026 | 300            | 0          | 300               |                       |
+    # --- Close loan ---
     Then Admin closes the Working Capital loan with a full repayment on "01 February 2026"

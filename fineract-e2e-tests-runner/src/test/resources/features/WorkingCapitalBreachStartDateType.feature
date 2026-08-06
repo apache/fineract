@@ -116,6 +116,38 @@ Feature: Working Capital Breach Start Date Type
       | breachStartDate |
       | 2026-01-06      |
 
+  @TestRailId:C93977
+  Scenario: Verify breach start date type - UC3.1: breachGraceDays shifts properly when breachStartType is DISBURSEMENT
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays | breachStartType |
+      | 3               | DAYS                | FLAT                        | 100          | 5               | DISBURSEMENT   |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 10 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "10 January 2026"
+    When Admin sets the business date to "10 January 2026"
+    And Admin successfully disburse the Working Capital loan on "10 January 2026" with "9000" EUR transaction amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # Schedule fromDate will be set at disbursement date 10 Jan + 5 grace days = 15 Jan but no breach will occur yet
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-15 | 2026-01-17 | 3            | 100              | 100               | null       | null   |
+    And Working capital loan account has the correct data:
+      | breachStartDate |
+      | null            |
+    # Schedule starts at disbursement date 10 Jan + 5 grace days = 15 Jan
+    When Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-15 | 2026-01-17 | 3            | 100              | 100               | null       | true   |
+      | 2            | 2026-01-18 | 2026-01-20 | 3            | 100              | 100               | null       | null   |
+    And Working capital loan account has the correct data:
+      | breachStartDate |
+      | 2026-01-15      |
+
   @TestRailId:C89776
   Scenario: Verify breach start date type - UC4: loan-level DISBURSEMENT override wins over LOAN_CREATION product default
     When Admin sets the business date to "01 January 2026"
