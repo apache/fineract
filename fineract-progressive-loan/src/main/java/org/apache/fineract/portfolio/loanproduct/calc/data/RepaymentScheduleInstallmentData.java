@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanproduct.calc.data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,9 +31,12 @@ public final class RepaymentScheduleInstallmentData {
     private final LocalDate dueDate;
     private final boolean downPayment;
     private final boolean additional;
+    private final BigDecimal paidPrincipal;
+    private final BigDecimal paidInterest;
 
-    public static RepaymentScheduleInstallmentData of(LocalDate fromDate, LocalDate dueDate, boolean downPayment, boolean additional) {
+    public static RepaymentScheduleInstallmentData of(LocalDate fromDate, LocalDate dueDate, boolean downPayment, boolean additional,
+            BigDecimal paidPrincipal, BigDecimal paidInterest) {
         return RepaymentScheduleInstallmentData.builder().fromDate(fromDate).dueDate(dueDate).downPayment(downPayment)
-                .additional(additional).build();
+                .additional(additional).paidPrincipal(paidPrincipal).paidInterest(paidInterest).build();
     }
 }

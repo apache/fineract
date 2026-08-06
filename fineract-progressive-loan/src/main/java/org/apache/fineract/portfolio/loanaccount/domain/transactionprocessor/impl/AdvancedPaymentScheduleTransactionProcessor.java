@@ -1674,6 +1674,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         Money amortizableAmount = disbursementTransaction.getAmount(currency).minus(downPaymentAmount);
         emiCalculator.addDisbursement(model, transactionDate, amortizableAmount);
+        alignModelWithPaidAmounts(transactionCtx, loan, model, installments, transactionDate);
 
         boolean needsNPlusOneInstallment = installments.stream()
                 .filter(i -> i.getDueDate().isAfter(transactionDate) || i.getDueDate().isEqual(transactionDate))
@@ -1765,6 +1766,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         Money amortizableAmount = capitalizedIncomeTransaction.getAmount(currency);
         emiCalculator.addCapitalizedIncome(model, transactionDate, amortizableAmount);
+        alignModelWithPaidAmounts(transactionCtx, capitalizedIncomeTransaction.getLoan(), model, installments, transactionDate);
 
         recalculateRepaymentPeriodsWithEMICalculation(amortizableAmount, model, installments, capitalizedIncomeTransaction, currency,
                 ((ProgressiveTransactionCtx) transactionCtx).getProcessedLoanCharges());
@@ -3777,6 +3779,24 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             firstNormalInstallmentNumber = LoanRepaymentScheduleProcessingWrapper
                     .fetchFirstNormalInstallmentNumber(getCtx().getInstallments());
         }
+    }
+
+    /**
+     * Keeps an EMI recalculation from leaving an installment with less amount than what has already been paid on it,
+     * which would show up as a negative outstanding amount on the loan. To be called after an operation which
+     * recalculates the EMI amounts on the interest model, and before the installments are updated from the model.
+     * <p>
+     * Only loans which do not report their payments to the interest model need this, therefore this is guarded by the
+     * very same condition which decides whether the payments are reported to the model. The interest model of the other
+     * loans knows the paid amounts on its own and corrects itself while the payments are processed.
+     */
+    private void alignModelWithPaidAmounts(final TransactionCtx ctx, final Loan loan, final ProgressiveLoanInterestScheduleModel model,
+            final List<LoanRepaymentScheduleInstallment> installments, final LocalDate tillDate) {
+        if (isInterestRecalculationSupported(ctx, loan)) {
+            return;
+        }
+        emiCalculator.alignPeriodsWithPaidAmounts(model, EMICalculatorDataMapper.toRepaymentScheduleInstallmentDataList(installments),
+                tillDate);
     }
 
     private boolean isInterestRecalculationSupported(TransactionCtx ctx, Loan loan) {
