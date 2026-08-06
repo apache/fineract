@@ -299,8 +299,21 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
                 sqlBuilder.append(" fromsavacc.id=? ");
                 paramObj.add(standingInstructionDTO.fromAccount());
             } else if (PortfolioAccountType.LOAN.equals(accountType)) {
-                sqlBuilder.append(" fromloanacc.id=? ");
-                paramObj.add(standingInstructionDTO.fromAccount());
+                // For LOAN_REPAYMENT transfers, loan is stored in to_loan_account_id (FROM=SAVINGS, TO=LOAN)
+                // For other transfer types, loan is stored in from_loan_account_id
+                // Defensive fallback: if transferType is null, check both columns to handle UI inconsistencies
+                Integer transferTypeValue = standingInstructionDTO.transferType();
+                if (transferTypeValue != null && transferTypeValue.equals(AccountTransferType.LOAN_REPAYMENT.getValue())) {
+                    sqlBuilder.append(" toloanacc.id=? ");
+                    paramObj.add(standingInstructionDTO.fromAccount());
+                } else if (transferTypeValue == null) {
+                    sqlBuilder.append(" (toloanacc.id=? OR fromloanacc.id=?) ");
+                    paramObj.add(standingInstructionDTO.fromAccount());
+                    paramObj.add(standingInstructionDTO.fromAccount());
+                } else {
+                    sqlBuilder.append(" fromloanacc.id=? ");
+                    paramObj.add(standingInstructionDTO.fromAccount());
+                }
             }
             addAndCaluse = true;
         }
@@ -358,7 +371,7 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     public StandingInstructionDuesData retriveLoanDuesData(final Long loanId) {
         final StandingInstructionLoanDuesMapper rm = new StandingInstructionLoanDuesMapper();
         final String sql = "select " + rm.schema() + " where ml.id= ? and ls.duedate <= " + sqlGenerator.currentBusinessDate()
-                + " and ls.completed_derived <> 1";
+                + " and ls.completed_derived IS FALSE";
         return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId }); // NOSONAR
     }
 
