@@ -111,7 +111,8 @@ public class StandingInstructionHistoryReadServiceImpl implements StandingInstru
                 sqlBuilder.append(" fromsavacc.id=? ");
                 paramObj.add(standingInstructionDTO.fromAccount());
             } else if (PortfolioAccountType.LOAN.equals(accountType)) {
-                sqlBuilder.append(" fromloanacc.id=? ");
+                sqlBuilder.append(" (toloanacc.id=? or fromloanacc.id=?) ");
+                paramObj.add(standingInstructionDTO.fromAccount());
                 paramObj.add(standingInstructionDTO.fromAccount());
             }
             addAndCaluse = true;
