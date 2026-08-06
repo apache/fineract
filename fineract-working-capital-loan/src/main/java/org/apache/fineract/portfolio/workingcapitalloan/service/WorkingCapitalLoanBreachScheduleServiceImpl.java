@@ -239,6 +239,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
 
             if (isCurrent) {
                 currentPeriod = period;
+                period.setBaseMinPaymentAmount(newMinPaymentAmount);
                 period.setMinPaymentAmount(newMinPaymentAmount);
                 period.setOutstandingAmount(newMinPaymentAmount.subtract(period.getPaidAmount()).max(BigDecimal.ZERO));
                 period.setNearBreach(null);
@@ -391,6 +392,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
         period.setFromDate(fromDate);
         period.setToDate(toDate);
         period.setNumberOfDays(numberOfDays);
+        period.setBaseMinPaymentAmount(minPaymentAmount);
         period.setMinPaymentAmount(minPaymentAmount);
         period.setPaidAmount(BigDecimal.ZERO);
         period.setOutstandingAmount(minPaymentAmount);
@@ -499,6 +501,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
             period.setFromDate(fromDate);
             period.setToDate(toDate);
             period.setNumberOfDays((int) ChronoUnit.DAYS.between(fromDate, toDate) + 1);
+            period.setBaseMinPaymentAmount(minPaymentAmount);
             period.setMinPaymentAmount(minPaymentAmount);
             period.setPaidAmount(BigDecimal.ZERO);
             period.setOutstandingAmount(minPaymentAmount);
@@ -526,6 +529,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
             return;
         }
         final List<WorkingCapitalLoanBreachSchedule> periods = repository.findByLoanIdOrderByPeriodNumberAsc(loanId);
+        capLastPeriodToRemainingBalance(loanId, periods, balanceOpt.get(), businessDate);
         Optional<WorkingCapitalLoanBreachSchedule> lastResetPeriod = periods.stream().filter(WorkingCapitalLoanBreachSchedule::isReset)
                 .reduce((a, b) -> b);
         final BigDecimal pastDueAmount;
@@ -543,5 +547,52 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
         balance.setBreachPastDueAmount(pastDueAmount);
 
         log.debug("Recalculated breach past due amount for WC loan {}: {}", loanId, pastDueAmount);
+    }
+
+    /**
+     * Caps the open period's minimum payment at what the customer can still owe against it - what they have already
+     * paid into it plus the loan's remaining principal. In the last period of a loan the calculated minimum payment can
+     * exceed what is still owed, and a period must never demand more than the balance.
+     *
+     * <p>
+     * The cap is always derived from {@code baseMinPaymentAmount}, never from the possibly already-capped
+     * {@code minPaymentAmount}, so it is idempotent and lifts again on its own - up to the calculated minimum payment -
+     * when the balance grows. The base is left untouched here; it is written only where the minimum payment is
+     * calculated or rescheduled.
+     *
+     * <p>
+     * The remaining principal includes any principal adjustment re-injected by an over-refunding credit balance refund,
+     * which is how such an adjustment reaches the breach schedule. It is deliberately global: the adjustment is not
+     * attributed to a period of its own.
+     *
+     * <p>
+     * Only the still-open last period is capped. Once a period has expired its demand was settled by the balance of its
+     * own time, so the cap it carried at expiry stands - re-capping it against today's balance would erase historical
+     * breaches as soon as the loan is repaid.
+     */
+    private void capLastPeriodToRemainingBalance(final Long loanId, final List<WorkingCapitalLoanBreachSchedule> periods,
+            final WorkingCapitalLoanBalance balance, final LocalDate businessDate) {
+        if (periods.isEmpty()) {
+            return;
+        }
+        final WorkingCapitalLoanBreachSchedule lastPeriod = periods.getLast();
+        if (DateUtils.isBefore(lastPeriod.getToDate(), businessDate)) {
+            return;
+        }
+        // A period predating the base column carries no base to restore from; its current minimum payment is the best
+        // available stand-in. The Liquibase backfill means this only applies to rows written before the upgrade.
+        final BigDecimal baseMinPaymentAmount = lastPeriod.getBaseMinPaymentAmount() != null ? lastPeriod.getBaseMinPaymentAmount()
+                : MathUtil.nullToZero(lastPeriod.getMinPaymentAmount());
+        final BigDecimal paidAmount = MathUtil.nullToZero(lastPeriod.getPaidAmount());
+        final BigDecimal cap = MathUtil.add(paidAmount, MathUtil.nullToZero(balance.getPrincipalOutstanding()));
+        final BigDecimal cappedMinPaymentAmount = baseMinPaymentAmount.min(cap);
+
+        lastPeriod.setMinPaymentAmount(cappedMinPaymentAmount);
+        lastPeriod.setOutstandingAmount(MathUtil.subtract(cappedMinPaymentAmount, paidAmount).max(BigDecimal.ZERO));
+        recomputeBreach(lastPeriod, businessDate);
+        if (cappedMinPaymentAmount.compareTo(baseMinPaymentAmount) < 0) {
+            log.debug("Capped Breach Schedule period {} minimum payment from {} to {} for WC loan {} - remaining principal {}",
+                    lastPeriod.getPeriodNumber(), baseMinPaymentAmount, cappedMinPaymentAmount, loanId, balance.getPrincipalOutstanding());
+        }
     }
 }

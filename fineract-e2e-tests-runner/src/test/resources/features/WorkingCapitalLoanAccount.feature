@@ -133,10 +133,10 @@ Feature: WorkingCapitalLoanAccount
       | WCLP         | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 100.0             | 0.0               | 100.0              | 1.0               | 0.0              |
     When Admin modifies the working capital loan with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      |                 |                          | 500.0           |                    |                   |          |
+      |                 |                          | 200.0           |                    |                   |          |
     Then Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | status                         | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 500.0             | 0.0               | 100.0              | 1.0               | 0.0              |
+      | WCLP         | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 200.0             | 0.0               | 100.0              | 1.0               | 0.0              |
 
   @TestRailId:C70260
   Scenario: Modify Working Capital Loan account in Submitted and pending approval state - UC3: Change submittedOnDate
@@ -425,11 +425,11 @@ Feature: WorkingCapitalLoanAccount
     Then Working capital loan creation was successful
     When Admin modifies the working capital loan with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      |                 |                          | 500.0           |                    |                   |          |
+      |                 |                          | 200.0           |                    |                   |          |
     Then Working capital loan modification response contains changes for "principalAmount"
     And Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | status                         | proposedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed |
-      | WCLP         | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 500.0             | 100.0              | 1.0               | 0.0              |
+      | WCLP         | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 200.0             | 100.0              | 1.0               | 0.0              |
 
   @TestRailId:C72337
   Scenario: Approve Working Capital Loan account - UC1: Approve loan in SUBMITTED AND PENDING APPROVAL state with default values
@@ -1299,3 +1299,82 @@ Feature: WorkingCapitalLoanAccount
     Examples:
       | rate_change_value | rate_change_error_message                                             |
       | -1                | The parameter `periodPaymentRate` must be greater than or equal to 0. |
+
+  @TestRailId:C89784
+  Scenario: Verify loan creation with input values with discount that cause unable to calculate a valid EIR leads to error - UC1
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    Then Creating a working capital loan with input values that cause unable to calculate a valid EIR will result into an error:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 17           | 18                | 1000     |
+
+  @TestRailId:C89785
+  Scenario: Verify loan creation with input values without discount that cause unable to calculate a valid EIR leads to error - UC2
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    Then Creating a working capital loan with input values that cause unable to calculate a valid EIR will result into an error:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 17           | 18                | 0        |
+
+  @TestRailId:C89786
+  Scenario: Verify loan creation with input values that allows to calculate a valid EIR leads to creating Working capital loan account - UC3
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 5000            | 5500         | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "5000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "5000" EUR transaction amount
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has the following summary fields with positive effectiveInterestRate value:
+      | discountFeeAmount | netDisbursementAmount | totalPaymentVolume | periodPaymentRate | npvDayCount | expectedPaymentAmount | originalPaymentNumber |
+      | 0.00              | 5000.00               | 5500.00            | 18                | 360         | 2.75                  | 1819                  |
+
+  @TestRailId:C89787
+  Scenario: Verify loan modification without input values with discount that cause unable to calculate a valid EIR leads to error - UC4
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 5000            | 5500         | 18                | 0        |
+    Then Admin failed to modify working capital loan with total payment value "17" that cause unable to calculate EIR
+    Then Working capital loan account has the correct data:
+      | product.name             | submittedOnDate | expectedDisbursementDate | status                         | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed |
+      | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 5000.0            | 0.0               | 5500.0             | 18.0              | 0.0              |
+
+  @TestRailId:C89788
+  Scenario: Verify loan update with input value as change period payment rate cause unable to calculate a valid EIR and leads to error - UC5
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 1000     |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    And Working capital loan account has the correct data:
+      | product.name             | submittedOnDate | expectedDisbursementDate | status | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Active | 9000.0            | 9000.0            | 100000.0           | 18.0              | 1000.0    |
+    Then Admin update Working Capital period payment rate failed with "0.01" value cause unable to calculate EIR
+    And Working capital loan account has the correct data:
+      | product.name             | submittedOnDate | expectedDisbursementDate | status | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Active | 9000.0            | 9000.0            | 100000.0           | 18.0              | 1000.0   |
+
+  @TestRailId:C89789
+  Scenario: Verify loan creation with input values with non-overridable pre-defined discount that unable to calculate a valid EIR leads to error - UC6
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a new Working Capital Loan Product with discount value "300000" that is forbidden to be overriden
+    Then Creating a working capital loan using created product with input values that cause unable to calculate a valid EIR will result into an error:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 5000            | 5500         | 18                |          |
+
+  @TestRailId:C89790
+  Scenario: Verify loan creation with input values with overriden discount to none value that allows to calculate a valid EIR leads creating Working Capital loan account- UC7
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct   | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_DISCOUNT | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    Then Working capital loan account has the correct data:
+      | product.name  | submittedOnDate | expectedDisbursementDate | status                         | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed |
+      | WCLP_DISCOUNT | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 9000.0            | 0.0               | 100000.0           | 18.0              | 0.0              |

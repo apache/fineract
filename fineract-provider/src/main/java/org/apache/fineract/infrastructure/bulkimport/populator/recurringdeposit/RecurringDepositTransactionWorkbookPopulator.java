@@ -194,8 +194,12 @@ public class RecurringDepositTransactionWorkbookPopulator extends AbstractWorkbo
                 startIndex = i + 2;
                 clientName = savingsAccounts.get(i).getClientName();
                 clientId = savingsAccounts.get(i).getClientId();
-                clientsWithActiveSavings.add(clientName);
-                clientIdsWithActiveSavings.add(clientId);
+                // Guard against a duplicate Account_<client>_<id>_ defined name when a client name recurs (e.g. a
+                // client with more than one account) — mirrors LoanRepaymentWorkbookPopulator.setNames.
+                if (!clientsWithActiveSavings.contains(clientName)) {
+                    clientsWithActiveSavings.add(clientName);
+                    clientIdsWithActiveSavings.add(clientId);
+                }
             }
             if (i == savingsAccounts.size() - 1) {
                 endIndex = i + 2;

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.ChargeRequest;
@@ -47,6 +47,7 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
+import org.apache.fineract.client.models.ProjectedAmortizationScheduleData;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdDiscountRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRateRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
@@ -120,12 +121,9 @@ public class FeignWorkingCapitalLoanHelper {
     }
 
     public Long makeRepayment(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
-        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId, "repayment", request));
-        return getTransactions(loanId).stream()
-                .filter(txn -> txn.getType() != null && "loanTransactionType.repayment".equals(txn.getType().getCode()))
-                .filter(txn -> !Boolean.TRUE.equals(txn.getReversed())).map(GetWorkingCapitalLoanTransactionIdResponse::getId)
-                .filter(Objects::nonNull).max(Long::compareTo)
-                .orElseThrow(() -> new IllegalStateException("No repayment transaction found after makeRepayment for loan " + loanId));
+        PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "repayment", request));
+        return response.getResourceId();
     }
 
     public Long undoTransaction(Long loanId, Long transactionId, ExecuteWorkingCapitalLoanTransactionCommandRequest request) {
@@ -138,6 +136,30 @@ public class FeignWorkingCapitalLoanHelper {
         PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionById(loanId, "goodwillCredit", request));
         return response.getResourceId();
+    }
+
+    public Long creditBalanceRefund(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "creditBalanceRefund", request));
+        return response.getResourceId();
+    }
+
+    public CallFailedRuntimeException creditBalanceRefundExpectingFailure(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId,
+                "creditBalanceRefund", request));
+    }
+
+    /**
+     * Reverses (undoes) a working capital loan transaction via the transaction-command {@code undo} endpoint. Used to
+     * back out a prior repayment so the CBR-aware reprocessing can re-derive balances.
+     */
+    public void reverseTransaction(Long loanId, Long transactionId, ExecuteWorkingCapitalLoanTransactionCommandRequest request) {
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId,
+                transactionId, "undo", request));
+    }
+
+    public ProjectedAmortizationScheduleData getAmortizationSchedule(Long loanId) {
+        return ok(() -> fineractClient.workingCapitalLoans().retrieveAmortizationSchedule(loanId));
     }
 
     public List<GetWorkingCapitalLoanTransactionIdResponse> getTransactions(Long loanId) {

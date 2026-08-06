@@ -39,6 +39,7 @@ import lombok.Setter;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionTypeConverter;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
@@ -107,6 +108,25 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         return transactionType;
     }
 
+    /**
+     * Points this transaction at its allocation, keeping the eager inverse side in step with the owning side.
+     *
+     * <p>
+     * Refuses to swap in a different allocation once one is set. The association is mapped
+     * {@code orphanRemoval = true}, so an unchecked reassignment would not fail - it would quietly delete the existing
+     * allocation row and replace it, losing its identity and audit trail. That mistake used to be caught by the
+     * {@code uq_m_wc_loan_transaction_allocation_transaction_id} unique constraint, back when a second allocation meant
+     * a second row; keeping both sides in sync means the constraint no longer gets the chance, so the check lives here
+     * instead. Callers that mean to re-allocate must mutate the existing allocation's portions, not build a new one.
+     */
+    void attachAllocation(final WorkingCapitalLoanTransactionAllocation allocation) {
+        if (this.allocation != null && this.allocation != allocation) {
+            throw new IllegalStateException("WC loan transaction " + getId() + " already has allocation " + this.allocation.getId()
+                    + "; a transaction has exactly one allocation, so re-allocation must update that one in place rather than attach another");
+        }
+        this.allocation = allocation;
+    }
+
     public static WorkingCapitalLoanTransaction disbursement(final WorkingCapitalLoan loan, final BigDecimal amount,
             final PaymentDetail paymentDetail, final LocalDate disbursementDate, final ExternalId externalId,
             final CodeValue classification) {
@@ -168,7 +188,7 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         transaction.transactionType = LoanTransactionType.DISCOUNT_FEE;
         transaction.transactionAmount = amount;
         transaction.transactionDate = transactionDate;
-        transaction.submittedOnDate = transactionDate;
+        transaction.submittedOnDate = DateUtils.getBusinessLocalDate();
         transaction.externalId = externalId != null ? externalId : ExternalId.empty();
         transaction.paymentDetail = paymentDetail;
         transaction.classification = classification;
@@ -185,7 +205,7 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         transaction.transactionType = LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT;
         transaction.transactionAmount = amount;
         transaction.transactionDate = transactionDate;
-        transaction.submittedOnDate = transactionDate;
+        transaction.submittedOnDate = DateUtils.getBusinessLocalDate();
         transaction.externalId = externalId != null ? externalId : ExternalId.empty();
         transaction.paymentDetail = paymentDetail;
         transaction.classification = classification;
@@ -193,6 +213,18 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         transaction.reversalExternalId = null;
         transaction.reversedOnDate = null;
         return transaction;
+    }
+
+    /**
+     * Charge-off is a terminal, non-monetary transaction: it records the charged-off amount (the outstanding balance as
+     * of the charge-off date) but does not move the running balance, and it is excluded from replay (not a repayment
+     * type). The loan stays ACTIVE.
+     */
+    public static WorkingCapitalLoanTransaction chargeOff(final WorkingCapitalLoan loan, final BigDecimal amount,
+            final LocalDate transactionDate, final ExternalId externalId) {
+        final WorkingCapitalLoanTransaction txn = new WorkingCapitalLoanTransaction();
+        txn.initialize(loan, LoanTransactionType.CHARGE_OFF, transactionDate, amount, null, null, externalId);
+        return txn;
     }
 
     public static WorkingCapitalLoanTransaction chargeAdjustment(final WorkingCapitalLoan loan, final ExternalId externalId,
@@ -214,7 +246,7 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         this.wcLoan = loan;
         this.transactionType = transactionType;
         this.transactionDate = transactionDate;
-        this.submittedOnDate = transactionDate;
+        this.submittedOnDate = DateUtils.getBusinessLocalDate();
         this.transactionAmount = amount;
         this.paymentDetail = paymentDetail;
         this.classification = classification;

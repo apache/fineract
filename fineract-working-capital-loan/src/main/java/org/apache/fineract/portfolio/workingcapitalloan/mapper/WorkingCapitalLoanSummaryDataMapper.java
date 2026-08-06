@@ -34,8 +34,9 @@ public interface WorkingCapitalLoanSummaryDataMapper {
     @Named("toSummaryData")
     @Mapping(target = "currency", source = ".", qualifiedByName = "toCurrency")
     // Principal
-    @Mapping(target = "principal", source = "balance.principal", qualifiedByName = "nullToZero")
+    @Mapping(target = "principal", source = "balance.totalPrincipalDue", qualifiedByName = "nullToZero")
     @Mapping(target = "principalPaid", source = "balance.principalPaid", qualifiedByName = "nullToZero")
+    @Mapping(target = "principalAdjustment", source = "balance.principalAdjustment", qualifiedByName = "nullToZero")
     @Mapping(target = "principalOutstanding", source = "balance.principalOutstanding", qualifiedByName = "nullToZero")
     // Fee
     @Mapping(target = "fee", source = "balance.fee", qualifiedByName = "nullToZero")

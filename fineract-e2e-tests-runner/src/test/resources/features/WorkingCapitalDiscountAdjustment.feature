@@ -540,7 +540,7 @@ Feature: Working Capital Discount Adjustment
       | 197       | 17 July 2019     | 50.00                 |                     | 149.68          | 0.21                       |                          | 0.33                       |
       | 198       | 18 July 2019     | 50.00                 |                     | 99.84           | 0.16                       |                          | 0.17                       |
       | 199       | 19 July 2019     | 50.00                 |                     | 49.95           | 0.11                       |                          | 0.06                       |
-      | 200       | 20 July 2019     | 50.00                 |                     | 0.00            | 0.05                       |                          | 0.01                       |
+      | 200       | 20 July 2019     | 50.00                 |                     | 0.00            | 0.06                       |                          | 0.00                       |
     When Admin sets the business date to "02 January 2019"
     And Customer makes repayment on "02 January 2019" with 50 transaction amount on Working Capital loan
     When Admin sets the business date to "03 January 2019"
@@ -955,7 +955,7 @@ Feature: Working Capital Discount Adjustment
       | 197       | 17 July 2019     | 50.00                 |                     | 149.68          | 0.21                       |                          | 0.33                       |
       | 198       | 18 July 2019     | 50.00                 |                     | 99.84           | 0.16                       |                          | 0.17                       |
       | 199       | 19 July 2019     | 50.00                 |                     | 49.95           | 0.11                       |                          | 0.06                       |
-      | 200       | 20 July 2019     | 50.00                 |                     | 0.00            | 0.05                       |                          | 0.01                       |
+      | 200       | 20 July 2019     | 50.00                 |                     | 0.00            | 0.06                       |                          | 0.00                       |
     When Admin sets the business date to "05 January 2019"
     And Customer makes repayment on "05 January 2019" with 50 transaction amount on Working Capital loan
     When Admin sets the business date to "08 January 2019"

@@ -276,6 +276,7 @@ Feature: Working Capital COB Job
     When Admin runs WC COB job
     Then Admin verifies all inserted WC loans have no account locks
 
+
   Scenario: WC COB keeps a lock that carries an error message
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -347,6 +348,7 @@ Feature: Working Capital COB Job
     When Admin places a chunk-processing lock without an error message and cob business date "31 December 2023" on the last inserted WC loan
     When Admin runs WC COB job
     Then Admin verifies all inserted WC loans have at least one account lock
+
 
   Scenario: WC COB removes only orphaned locks among multiple loans in the same run
     # Two loans share the same COB run: one carries an orphaned lock (no error) and must be unlocked;

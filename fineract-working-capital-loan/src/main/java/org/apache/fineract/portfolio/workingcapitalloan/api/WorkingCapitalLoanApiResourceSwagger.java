@@ -316,8 +316,12 @@ public final class WorkingCapitalLoanApiResourceSwagger {
             private GetWorkingCapitalLoanSummary() {}
 
             public CurrencyData currency;
+            @Schema(description = "Total principal due: original principal plus principalAdjustment. Already inclusive of "
+                    + "principalAdjustment — do not add the two together.")
             public BigDecimal principal;
             public BigDecimal principalPaid;
+            @Schema(description = "Principal re-injected by an over-refunding credit balance refund. Already included in principal.")
+            public BigDecimal principalAdjustment;
             public BigDecimal principalOutstanding;
             public BigDecimal fee;
             public BigDecimal feePaid;
@@ -343,10 +347,14 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public Boolean enableInstallmentLevelDelinquency;
         @Schema(description = "List of originators associated with this loan")
         public List<GetWorkingCapitalLoansLoanIdOriginatorData> originators;
-        @Schema(description = "Fraud flag. Placeholder: null until the WCP fraud feature is implemented")
+        @Schema(description = "Fraud flag. True when the loan has been marked as fraudulent", example = "false")
         public Boolean fraud;
-        @Schema(description = "Charge-off flag. Placeholder: null until the WCP charge-off feature is implemented")
+        @Schema(description = "Whether the loan is charged off (pure accounting tag; the loan stays active)")
         public Boolean chargedOff;
+        @Schema(description = "Date the loan was charged off", example = "2026-07-16")
+        public LocalDate chargedOffOnDate;
+        @Schema(description = "Charge-off reason code value, when one was provided")
+        public CodeValueData chargeOffReason;
 
         @Schema(description = "Originator data associated with the loan")
         public static final class GetWorkingCapitalLoansLoanIdOriginatorData {
@@ -379,6 +387,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal principal;
         @Schema(example = "10000.00")
         public BigDecimal principalPaid;
+        @Schema(example = "0.00")
+        public BigDecimal principalAdjustment;
         @Schema(example = "10000.00")
         public BigDecimal principalOutstanding;
         @Schema(example = "10000.00")

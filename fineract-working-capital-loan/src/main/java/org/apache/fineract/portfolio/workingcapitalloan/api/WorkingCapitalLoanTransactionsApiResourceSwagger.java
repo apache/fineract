@@ -81,6 +81,26 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public BigDecimal feeChargesPortion;
         @Schema(example = "0.00", description = "Penalty charges portion from allocation")
         public BigDecimal penaltyChargesPortion;
+        public BigDecimal overpaymentPortion;
+        @Schema(description = "Which charges this transaction settled, and for how much")
+        public List<GetWorkingCapitalLoanChargePaidByData> chargePaidByList;
+    }
+
+    @Schema(description = "How much of a transaction settled one specific charge")
+    public static final class GetWorkingCapitalLoanChargePaidByData {
+
+        private GetWorkingCapitalLoanChargePaidByData() {}
+
+        @Schema(example = "1")
+        public Long id;
+        @Schema(example = "100.00")
+        public BigDecimal amount;
+        @Schema(example = "12")
+        public Long chargeId;
+        @Schema(example = "34")
+        public Long transactionId;
+        @Schema(example = "Processing fee")
+        public String name;
     }
 
     @Schema(description = "Loan transaction type enum data (same as basic loan)")
@@ -185,6 +205,8 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public BigDecimal transactionAmount;
         @Schema(example = "12", description = "Optional code value id for transaction classification")
         public Long classificationId;
+        @Schema(example = "7", description = "Optional charge-off reason code value id (command=chargeOff)")
+        public Long chargeOffReasonId;
         @Schema(example = "Repayment note")
         public String note;
         @Schema(example = "repayment-ext-001")

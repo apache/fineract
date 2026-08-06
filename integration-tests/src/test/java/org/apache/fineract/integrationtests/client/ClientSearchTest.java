@@ -24,6 +24,7 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
+import java.util.Locale;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.PageClientSearchData;
@@ -175,6 +176,24 @@ public class ClientSearchTest extends IntegrationTest {
     }
 
     @Test
+    public void testClientSearchWorks_ByExternalId_CaseInsensitive() {
+        // given
+        PostClientsRequest request1 = ClientHelper.defaultClientCreationRequest();
+        clientHelper.createClient(request1);
+
+        PostClientsRequest request2 = ClientHelper.defaultClientCreationRequest();
+        clientHelper.createClient(request2);
+
+        PostClientsRequest request3 = ClientHelper.defaultClientCreationRequest();
+        clientHelper.createClient(request3);
+        // when
+        PageClientSearchData result = clientHelper.searchClients(request2.getExternalId().toUpperCase(Locale.ROOT));
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getExternalId().getValue()).isEqualTo(request2.getExternalId());
+    }
+
+    @Test
     public void testClientSearchWorks_ByAccountNumber() {
         // given
         PostClientsRequest request1 = ClientHelper.defaultClientCreationRequest();
@@ -212,6 +231,29 @@ public class ClientSearchTest extends IntegrationTest {
         clientHelper.createClient(request3);
         // when
         PageClientSearchData result = clientHelper.searchClients(client2DisplayName);
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getDisplayName()).isEqualTo(client2DisplayName);
+    }
+
+    @Test
+    public void testClientSearchWorks_ByDisplayName_CaseInsensitive() {
+        // given
+        PostClientsRequest request1 = ClientHelper.defaultClientCreationRequest();
+        clientHelper.createClient(request1);
+
+        PostClientsRequest request2 = ClientHelper.defaultClientCreationRequest();
+        String uniqueFirstName = Utils.randomStringGenerator("FN_", 10);
+        String uniqueLastName = Utils.randomStringGenerator("LN_", 10);
+        request2.setFirstname(uniqueFirstName);
+        request2.setLastname(uniqueLastName);
+        clientHelper.createClient(request2);
+        String client2DisplayName = "%s %s".formatted(uniqueFirstName, uniqueLastName);
+
+        PostClientsRequest request3 = ClientHelper.defaultClientCreationRequest();
+        clientHelper.createClient(request3);
+        // when
+        PageClientSearchData result = clientHelper.searchClients(client2DisplayName.toLowerCase());
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getDisplayName()).isEqualTo(client2DisplayName);
@@ -275,6 +317,29 @@ public class ClientSearchTest extends IntegrationTest {
         clientHelper.createClient(request3);
         // when
         PageClientSearchData result = clientHelper.searchClients(documentKey);
+        // then
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getMobileNo()).isEqualTo(request1.getMobileNo());
+    }
+
+    @Test
+    public void testClientSearchWorks_ByClientIdentifier_CaseInsensitive() {
+        // given
+        PostClientsRequest request1 = ClientHelper.defaultClientCreationRequest();
+        request1.setMobileNo(Utils.randomStringGenerator("", 8, Utils.SOURCE_SET_NUMBERS));
+        PostClientsResponse clientResponse = clientHelper.createClient(request1);
+        final Long documentType = 1L;
+        PostClientsClientIdIdentifiersRequest identifierRequest = ClientHelper.createClientIdentifer(documentType);
+        final String documentKey = identifierRequest.getDocumentKey();
+        clientHelper.createClientIdentifer(clientResponse.getClientId(), identifierRequest);
+
+        PostClientsRequest request2 = ClientHelper.defaultClientCreationRequest();
+        clientHelper.createClient(request2);
+
+        PostClientsRequest request3 = ClientHelper.defaultClientCreationRequest();
+        clientHelper.createClient(request3);
+        // when
+        PageClientSearchData result = clientHelper.searchClients(documentKey.toLowerCase());
         // then
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getMobileNo()).isEqualTo(request1.getMobileNo());

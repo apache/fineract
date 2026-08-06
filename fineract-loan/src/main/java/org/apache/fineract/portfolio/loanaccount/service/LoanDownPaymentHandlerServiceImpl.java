@@ -166,7 +166,8 @@ public class LoanDownPaymentHandlerServiceImpl implements LoanDownPaymentHandler
          * FIXME: Vishwas, skipping post loan transaction checks for Loan recoveries
          **/
         if (loanTransaction.isNotRecoveryRepayment()) {
-            loanLifecycleStateMachine.determineAndTransition(loan, loanTransaction.getTransactionDate());
+            loanLifecycleStateMachine.determineAndTransition(loan,
+                    adjustedTransaction != null ? loan.getLastUserTransactionDate() : loanTransaction.getTransactionDate());
         } else {
             loanBalanceService.updateLoanSummaryDerivedFields(loan);
         }

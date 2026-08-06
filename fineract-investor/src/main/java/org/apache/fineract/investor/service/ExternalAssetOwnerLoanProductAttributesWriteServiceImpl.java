@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -154,7 +155,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImpl implements 
                 for (Object obj : implementingClass.getEnumConstants()) {
                     ExternalAssetOwnerLoanProductAttribute objEnum = (ExternalAssetOwnerLoanProductAttribute) obj;
                     if (objEnum.getAttributeKey().equals(attributeKey)
-                            && objEnum.getAttributeValue().equals(attributeValue.toUpperCase())) {
+                            && objEnum.getAttributeValue().equals(attributeValue.toUpperCase(Locale.ROOT))) {
                         return;
                     }
                 }

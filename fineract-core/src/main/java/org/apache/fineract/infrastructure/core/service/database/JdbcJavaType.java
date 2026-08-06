@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.service.database;
 import com.google.common.collect.ImmutableList;
 import java.io.Serializable;
 import java.sql.JDBCType;
+import java.util.Locale;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.springframework.lang.NonNull;
 
@@ -131,7 +132,7 @@ public enum JdbcJavaType {
         if (name == null) {
             return null;
         }
-        name = name.toUpperCase();
+        name = name.toUpperCase(Locale.ROOT);
 
         for (JdbcJavaType type : values()) {
             DialectType dialectType = type.getDialectType(dialect);

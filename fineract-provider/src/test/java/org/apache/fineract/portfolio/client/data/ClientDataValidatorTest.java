@@ -21,13 +21,19 @@ package org.apache.fineract.portfolio.client.data;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.List;
 import org.apache.fineract.infrastructure.configuration.data.GlobalConfigurationPropertyData;
 import org.apache.fineract.infrastructure.configuration.service.ConfigurationReadPlatformService;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecks;
+import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecksRepository;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +50,9 @@ class ClientDataValidatorTest {
     @Mock
     private ConfigurationReadPlatformService configurationReadPlatformService;
 
+    @Mock
+    private EntityDatatableChecksRepository entityDatatableChecksRepository;
+
     private ClientDataValidator validator;
 
     @BeforeEach
@@ -51,7 +60,7 @@ class ClientDataValidatorTest {
         FromJsonHelper fromApiJsonHelper = new FromJsonHelper();
         when(configurationReadPlatformService.retrieveGlobalConfiguration(anyString()))
                 .thenReturn(new GlobalConfigurationPropertyData().setEnabled(false));
-        validator = new ClientDataValidator(fromApiJsonHelper, configurationReadPlatformService);
+        validator = new ClientDataValidator(fromApiJsonHelper, configurationReadPlatformService, entityDatatableChecksRepository);
     }
 
     private static String validMinimalCreateJson(String dateFormat) {
@@ -200,5 +209,49 @@ class ClientDataValidatorTest {
                 """;
 
         assertDoesNotThrow(() -> validator.validateForUpdate(json));
+    }
+
+    @Test
+    void validateForCreate_withEmptyDatatables_whenNoneRequiredForLegalForm_doesNotThrow() {
+        when(entityDatatableChecksRepository.findByEntityAndStatusAndSubtype(anyString(), any(), anyString()))
+                .thenReturn(Collections.emptyList());
+        String json = """
+                {
+                  "officeId": 1,
+                  "firstname": "John",
+                  "lastname": "Doe",
+                  "active": false,
+                  "legalFormId": 2,
+                  "locale": "en",
+                  "dateFormat": "dd MMMM yyyy",
+                  "datatables": []
+                }
+                """;
+
+        assertDoesNotThrow(() -> validator.validateForCreate(json));
+    }
+
+    @Test
+    void validateForCreate_withEmptyDatatables_whenRequiredForLegalForm_throwsPlatformApiDataValidationException() {
+        EntityDatatableChecks requiredCheck = mock(EntityDatatableChecks.class);
+        when(entityDatatableChecksRepository.findByEntityAndStatusAndSubtype(anyString(), any(), anyString()))
+                .thenReturn(List.of(requiredCheck));
+        String json = """
+                {
+                  "officeId": 1,
+                  "firstname": "John",
+                  "lastname": "Doe",
+                  "active": false,
+                  "legalFormId": 1,
+                  "locale": "en",
+                  "dateFormat": "dd MMMM yyyy",
+                  "datatables": []
+                }
+                """;
+
+        PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateForCreate(json));
+
+        assertTrue(ex.getErrors().stream().anyMatch(e -> ClientApiConstants.datatables.equals(e.getParameterName())));
     }
 }

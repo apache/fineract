@@ -43,8 +43,8 @@ Feature: Working Capital Loan Details
       | netDisbursalAmount                             | 100.0                        |
       | totalPaymentVolume                             | 100.0                        |
       | paymentRate                                    | 1.0                          |
-      | periodPaymentAmount                            | 0.0                          |
-      | numberOfRepayments                             | 36000                        |
+      | periodPaymentAmount                            | 0.01                         |
+      | numberOfRepayments                             | 10000                        |
       | dailyEir                                       | 0.0                          |
       | calculatedAnnualEir                            | 0.0                          |
       | proposedDiscountFee                            | 0.0                          |
@@ -158,8 +158,8 @@ Feature: Working Capital Loan Details
       | paymentAllocation.0.paymentAllocationOrder     | present                      |
       | originators.size                               | 0                            |
       | enableInstallmentLevelDelinquency              | true                         |
-      | fraud                                          | null                         |
-      | chargedOff                                     | null                         |
+      | fraud                                          | false                        |
+      | chargedOff                                     | false                        |
     And Working capital loan details has the auto-generated fields present
 
   @TestRailId:C85424
@@ -210,11 +210,11 @@ Feature: Working Capital Loan Details
     Then Working capital loan creation was successful
     Then Working capital loan details has the originator attached
     Then Working capital loan details has the following field values:
-      | originators.size                      | 1                        |
-      | originators.0.id                      | present                  |
-      | originators.0.externalId              | present                  |
-      | originators.0.name                    | WC Inline Originator     |
-      | originators.0.status                  | ACTIVE                   |
+      | originators.size         | 1                    |
+      | originators.0.id         | present              |
+      | originators.0.externalId | present              |
+      | originators.0.name       | WC Inline Originator |
+      | originators.0.status     | ACTIVE               |
 
   @TestRailId:C85445
   Scenario: Loan details GET returns the breach and near breach values
@@ -233,17 +233,17 @@ Feature: Working Capital Loan Details
       | product.name | submittedOnDate | expectedDisbursementDate | status                         | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed |
       | WCLP         | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 100.0             | 0.0               | 100.0              | 1.0               | 0.0              |
     Then Working capital loan details has the following field values:
-      | breach.id                                | present                  |
-      | breach.name                              | present                  |
-      | breach.breachFrequency                   | 70                       |
-      | breach.breachFrequencyType.code          | DAYS                     |
-      | breach.breachFrequencyType.value         | DAYS                     |
-      | breach.breachAmountCalculationType.code  | PERCENTAGE               |
-      | breach.breachAmountCalculationType.value | Percentage               |
-      | breach.breachAmount                      | present                  |
-      | nearBreach.id                            | present                  |
-      | nearBreach.name                          | present                  |
-      | nearBreach.frequency                     | 4                        |
-      | nearBreach.frequencyType.code            | WEEKS                    |
-      | nearBreach.frequencyType.value           | WEEKS                    |
-      | nearBreach.threshold                     | present                  |
+      | breach.id                                | present    |
+      | breach.name                              | present    |
+      | breach.breachFrequency                   | 70         |
+      | breach.breachFrequencyType.code          | DAYS       |
+      | breach.breachFrequencyType.value         | DAYS       |
+      | breach.breachAmountCalculationType.code  | PERCENTAGE |
+      | breach.breachAmountCalculationType.value | Percentage |
+      | breach.breachAmount                      | present    |
+      | nearBreach.id                            | present    |
+      | nearBreach.name                          | present    |
+      | nearBreach.frequency                     | 4          |
+      | nearBreach.frequencyType.code            | WEEKS      |
+      | nearBreach.frequencyType.value           | WEEKS      |
+      | nearBreach.threshold                     | present    |

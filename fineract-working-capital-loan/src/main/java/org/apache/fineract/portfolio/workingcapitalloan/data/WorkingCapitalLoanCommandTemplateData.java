@@ -55,4 +55,9 @@ public class WorkingCapitalLoanCommandTemplateData implements Serializable {
 
     private Collection<PaymentTypeData> paymentTypeOptions;
     private Collection<CodeValueData> classificationOptions;
+
+    // Charge-off template: amount is the auto-calculated outstanding balance as of the charge-off date (read-only).
+    private BigDecimal chargeOffAmount;
+    private LocalDate chargeOffDate;
+    private Collection<CodeValueData> chargeOffReasonOptions;
 }

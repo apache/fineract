@@ -16,26 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.teller.service;
+package org.apache.fineract.portfolio.workingcapitalloan.data;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-public class CashierWritePlatformService {
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class WorkingCapitalLoanChargePaidByData implements Serializable {
 
-    public CommandProcessingResult allocateCashierToTeller(JsonCommand command) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public CommandProcessingResult deleteCashier(Long entityId) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public CommandProcessingResult modifyCashier(Long entityId, JsonCommand command) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
+    private Long id;
+    private BigDecimal amount;
+    private Long chargeId;
+    private Long transactionId;
+    private String name;
 }

@@ -342,3 +342,30 @@ Feature: Working Capital Loan Repayment Accounting Entries
       | Type      | Account code | Account name              | Debit | Credit |
       | ASSET     | 987654       | Fund Receivables           | 199.0 |        |
       | LIABILITY | 245000       | Other Credit Liability    |       | 199.0  |
+
+  @TestRailId:C89814
+  Scenario: Verify a backdated repayment that takes over a fee settlement books its own Journal entries exactly once
+    # R1 (day 20) settles the 100 fee. Backdated R2 (day 10) settles it first on chronological replay, triggering
+    # reprocessing. R2 is the newly created transaction, so its entries must be booked exactly once by the write
+    # flow - not a second time by the reprocessing replay (which only reverses/reposts entries of *pre-existing*
+    # transactions whose allocation changed).
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 January 2026" due date and 100.0 transaction amount
+    When Admin sets the business date to "20 January 2026"
+    And Customer makes repayment on "20 January 2026" with 100 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "20 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 100.0 |        |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 100.0  |
+    When Admin sets the business date to "25 January 2026"
+    And Customer makes repayment on "10 January 2026" with 100 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 100.0 |        |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 100.0  |

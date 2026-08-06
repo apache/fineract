@@ -46,8 +46,8 @@ import org.apache.fineract.infrastructure.documentmanagement.data.DocumentCreate
 import org.apache.fineract.infrastructure.documentmanagement.data.DocumentCreateResponse;
 import org.apache.fineract.infrastructure.documentmanagement.service.DocumentWritePlatformService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.tika.Tika;
 import org.apache.tika.io.TikaInputStream;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -81,7 +81,8 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                 final Tika tika = new Tika();
                 final TikaInputStream tikaInputStream = TikaInputStream.get(bis);
                 final String fileType = tika.detect(tikaInputStream);
-                if (!fileType.contains("msoffice") && !fileType.contains("application/vnd.ms-excel")) {
+                if (!fileType.contains("msoffice") && !fileType.contains("application/vnd.ms-excel")
+                        && !fileType.contains("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
                     // We had a problem where we tried to upload the downloaded
                     // file from the import options, it was somehow changed the
                     // extension we use this fix.
@@ -89,7 +90,7 @@ public class BulkImportWorkbookServiceImpl implements BulkImportWorkbookService 
                             "Uploaded file extension is not recognized.");
 
                 }
-                Workbook workbook = new HSSFWorkbook(clonedInputStream);
+                Workbook workbook = WorkbookFactory.create(clonedInputStream);
                 GlobalEntityType entityType = null;
                 int primaryColumn = 0;
                 if (entity.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_PERSON.toString())) {

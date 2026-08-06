@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Charge-off is a pure accounting tag on the WC loan account: it does not affect the -->
+    <!-- portfolio (balance, schedule) and the loan stays ACTIVE. The ChargeOffReasons code -->
+    <!-- (m_code) is already seeded by the core tenant changelog (0079); it is reused here. -->
+    <changeSet author="fineract" id="wcl-0063-1">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan"/>
+            <not>
+                <columnExists tableName="m_wc_loan" columnName="is_charged_off"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan">
+            <column defaultValueBoolean="false" name="is_charged_off" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValueComputed="NULL" name="charged_off_on_date" type="date"/>
+            <!-- INT (not BIGINT) to match m_code_value.id: MySQL requires identical types on FK columns. -->
+            <column defaultValueComputed="NULL" name="charge_off_reason_cv_id" type="INT"/>
+            <column defaultValueComputed="NULL" name="charged_off_by_userid" type="BIGINT"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Foreign keys for the charge-off columns -->
+    <changeSet author="fineract" id="wcl-0063-2">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan"/>
+            <columnExists tableName="m_wc_loan" columnName="charge_off_reason_cv_id"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK_m_wc_loan_charge_off_reason"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="charge_off_reason_cv_id" baseTableName="m_wc_loan"
+                                 constraintName="FK_m_wc_loan_charge_off_reason" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_code_value" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="charged_off_by_userid" baseTableName="m_wc_loan"
+                                 constraintName="FK_m_wc_loan_charged_off_by" deferrable="false" initiallyDeferred="false"
+                                 onDelete="RESTRICT" onUpdate="RESTRICT" referencedColumnNames="id"
+                                 referencedTableName="m_appuser" validate="true"/>
+    </changeSet>
+
+    <!-- Permissions: create BOTH charge-off and undo charge-off (Term Loan only seeded -->
+    <!-- CHARGEOFF_LOAN and left UNDOCHARGEOFF without a permission; we do not replicate that gap). -->
+    <changeSet author="fineract" id="wcl-0063-3">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_permission WHERE code = 'CHARGEOFF_WORKINGCAPITALLOAN'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="transaction_loan"/>
+            <column name="code" value="CHARGEOFF_WORKINGCAPITALLOAN"/>
+            <column name="entity_name" value="WORKINGCAPITALLOAN"/>
+            <column name="action_name" value="CHARGEOFF"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0063-4">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_permission WHERE code = 'UNDOCHARGEOFF_WORKINGCAPITALLOAN'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="transaction_loan"/>
+            <column name="code" value="UNDOCHARGEOFF_WORKINGCAPITALLOAN"/>
+            <column name="entity_name" value="WORKINGCAPITALLOAN"/>
+            <column name="action_name" value="UNDOCHARGEOFF"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

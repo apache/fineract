@@ -96,8 +96,6 @@ public class JournalEntriesWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(JournalEntryConstants.BANK_NO_COL, rowHeader, "Bank#");
         writeString(JournalEntryConstants.COMMENTS_COL, rowHeader, "Comments");
 
-        // TODO Auto-generated method stub
-
     }
 
     private void setRules(Sheet worksheet) {

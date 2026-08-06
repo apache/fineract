@@ -67,12 +67,12 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
         List<Throwable> errors = new ArrayList<>();
         for (StandingInstructionData data : instructionData) {
             boolean isDueForTransfer = false;
-            AccountTransferRecurrenceType recurrenceType = data.getRecurrenceType();
-            StandingInstructionType instructionType = data.getInstructionType();
+            AccountTransferRecurrenceType recurrenceType = data.getRecurrenceTypeEnum();
+            StandingInstructionType instructionType = data.getInstructionTypeEnum();
             LocalDate transactionDate = DateUtils.getBusinessLocalDate();
             if (recurrenceType.isPeriodicRecurrence()) {
                 final ScheduledDateGenerator scheduledDateGenerator = new DefaultScheduledDateGenerator();
-                PeriodFrequencyType frequencyType = data.getRecurrenceFrequency();
+                PeriodFrequencyType frequencyType = data.getRecurrenceFrequencyEnum();
                 LocalDate startDate = data.getValidFrom();
                 if (frequencyType.isMonthly()) {
                     startDate = startDate.withDayOfMonth(data.getRecurrenceOnDay());
@@ -90,11 +90,11 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
 
             }
             BigDecimal transactionAmount = data.getAmount();
-            if (PortfolioAccountType.LOAN.equals(data.getToAccountType())
+            if (PortfolioAccountType.LOAN.equals(data.getToAccountTypeEnum())
                     && (recurrenceType.isDuesRecurrence() || (isDueForTransfer && instructionType.isDuesAmoutTransfer()))) {
                 StandingInstructionDuesData standingInstructionDuesData = standingInstructionReadPlatformService
                         .retriveLoanDuesData(data.getToAccount().getId());
-                if (data.getInstructionType().isDuesAmoutTransfer()) {
+                if (data.getInstructionTypeEnum().isDuesAmoutTransfer()) {
                     transactionAmount = standingInstructionDuesData.totalDueAmount();
                 }
                 if (recurrenceType.isDuesRecurrence()) {
@@ -107,10 +107,10 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
                 final boolean isRegularTransaction = true;
                 final boolean isExceptionForBalanceCheck = false;
                 AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount,
-                        data.getFromAccountType(), data.getToAccountType(), data.getFromAccount().getId(), data.getToAccount().getId(),
-                        data.getName() + " Standing instruction trasfer ", null, null, null, null, data.toTransferType(), null, null,
-                        data.getTransferType().getValue(), null, null, ExternalId.empty(), null, null, fromSavingsAccount,
-                        isRegularTransaction, isExceptionForBalanceCheck);
+                        data.getFromAccountTypeEnum(), data.getToAccountTypeEnum(), data.getFromAccount().getId(),
+                        data.getToAccount().getId(), data.getName() + " Standing instruction trasfer ", null, null, null, null,
+                        data.toTransferType(), null, null, data.getTransferTypeEnum().getValue(), null, null, ExternalId.empty(), null,
+                        null, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
                 final boolean transferCompleted = transferAmount(errors, accountTransferDTO, data.getId());
 
                 if (transferCompleted) {

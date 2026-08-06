@@ -32,6 +32,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.TenantOidcConfig;
 import org.apache.fineract.infrastructure.core.exception.ResourceNotFoundException;
@@ -142,7 +143,7 @@ public class TenantOidcConfigApiResource {
         boolean enabled = obj.has("enabled") ? obj.get("enabled").getAsBoolean() : (existing == null || existing.isEnabled());
 
         return TenantOidcConfig.builder().id(existing != null ? existing.getId() : null).tenantId(tenantId)
-                .providerType(OidcFederationType.valueOf(providerTypeStr.toUpperCase())).issuerUri(issuerUri).clientId(clientId)
+                .providerType(OidcFederationType.valueOf(providerTypeStr.toUpperCase(Locale.ROOT))).issuerUri(issuerUri).clientId(clientId)
                 .clientSecret(clientSecret).jwksUri(jwksUri).usernameClaim(usernameClaim).scopes(scopes)
                 .postLogoutRedirectUri(postLogoutRedirectUri).enabled(enabled).build();
     }

@@ -44,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -170,6 +171,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         final List<Object> paramValues = new ArrayList<>();
         final Matcher matcher = PLACEHOLDER_PATTERN.matcher(sql);
         final StringBuilder preparedSql = new StringBuilder();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
         while (matcher.find()) {
             final String paramName = matcher.group(1);
@@ -181,8 +183,15 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             } else {
                 matcher.appendReplacement(preparedSql, Matcher.quoteReplacement(matcher.group(0)));
                 log.warn("Report '{}' contains placeholder '{}' with no matching parameter", name, paramName);
+                dataValidationErrors.add(ApiParameterError.parameterError("error.msg.report.missing.parameter",
+                        "The parameter '" + paramName + "' is required.", paramName));
             }
         }
+
+        if (!dataValidationErrors.isEmpty()) {
+            throw new org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException(dataValidationErrors);
+        }
+
         matcher.appendTail(preparedSql);
         return new PreparedQuery(this.genericDataService.wrapSQL(preparedSql.toString()), paramValues);
     }

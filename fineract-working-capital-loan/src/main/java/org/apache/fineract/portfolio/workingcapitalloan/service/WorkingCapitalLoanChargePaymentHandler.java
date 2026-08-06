@@ -21,6 +21,8 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import java.math.BigDecimal;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanChargePaidBy;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.springframework.stereotype.Component;
 
 /**
@@ -29,21 +31,25 @@ import org.springframework.stereotype.Component;
  * adjustments so the two paths share one implementation.
  *
  * <p>
- * The handler mutates only the charge in place and <strong>accumulates</strong> (never overwrites). The matching
+ * The handler mutates only the charge in place and <strong>accumulates</strong> (never overwrites), and builds the
+ * {@link WorkingCapitalLoanChargePaidBy} row recording which transaction paid which charge for how much. The matching
  * fee/penalty bucket on the {@link org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance}
- * is refreshed separately by {@link WorkingCapitalLoanBalanceUpdater}; persistence is the caller's responsibility.
+ * is refreshed separately by {@link WorkingCapitalLoanBalanceUpdater}; persistence of both the charge and the returned
+ * paid-by row is the caller's responsibility.
  */
 @Component
 public class WorkingCapitalLoanChargePaymentHandler {
 
-    public void applyChargePayment(final WorkingCapitalLoanCharge charge, final BigDecimal amount) {
+    public WorkingCapitalLoanChargePaidBy applyChargePayment(final WorkingCapitalLoanTransaction transaction,
+            final WorkingCapitalLoanCharge charge, final BigDecimal amount) {
         if (!MathUtil.isGreaterThanZero(amount)) {
-            return;
+            return null;
         }
         final BigDecimal newPaid = MathUtil.nullToZero(charge.getAmountPaid()).add(amount);
         charge.setAmountPaid(newPaid);
         if (newPaid.compareTo(MathUtil.nullToZero(charge.getAmount())) >= 0) {
             charge.setPaid(true);
         }
+        return new WorkingCapitalLoanChargePaidBy(transaction, charge, amount);
     }
 }

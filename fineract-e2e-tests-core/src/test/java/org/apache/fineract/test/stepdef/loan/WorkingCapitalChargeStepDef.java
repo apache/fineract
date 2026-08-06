@@ -611,6 +611,37 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         assertThat(exception.getMessage()).as("Error message should contain: " + expectedMessage).contains(expectedMessage);
     }
 
+    @Then("Initiating adding {string} specified due date charge to working capital loan with {string} due date and {double} transaction amount results an error with the following data:")
+    public void addWorkingCapitalChargeResultsAnError(final String chargeType, final String dueDate, final Double amount,
+            final DataTable table) {
+        final Long loanId = getLoanId();
+        final ChargeProductType chargeProductType = ChargeProductType.valueOf(chargeType);
+        final Long chargeTypeId = chargeProductResolver.resolve(chargeProductType);
+
+        final LocalDate dueDateParsed = LocalDate.parse(dueDate, FORMATTER);
+        final String dueDateFormatted = dueDateParsed.format(FORMATTER_API);
+
+        final PostLoansLoanIdChargesRequest request = new PostLoansLoanIdChargesRequest() //
+                .chargeId(chargeTypeId) //
+                .amount(amount) //
+                .dueDate(dueDateFormatted) //
+                .dateFormat(DATE_FORMAT_API) //
+                .locale("en");
+
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoanCharges().createLoanCharge(loanId, request));
+
+        final List<List<String>> data = table.asLists();
+        final String expectedHttpCode = data.get(1).getFirst();
+        final String expectedErrorMessage = data.get(1).get(1);
+
+        assertThat(exception.getStatus()).as("HTTP status code should be " + expectedHttpCode)
+                .isEqualTo(Integer.parseInt(expectedHttpCode));
+        assertThat(exception.getMessage()).as("Should contain error message").contains(expectedErrorMessage);
+
+        log.info("Verified adding charge {} after charge-off failed for loan {}", chargeType, loanId);
+    }
+
     private void assertSingleOption(final List<EnumOptionData> options, final String optionName, final Long expectedId) {
         assertThat(options).as(optionName + " should not be null or empty").isNotNull().isNotEmpty();
         assertThat(options).hasSize(1);

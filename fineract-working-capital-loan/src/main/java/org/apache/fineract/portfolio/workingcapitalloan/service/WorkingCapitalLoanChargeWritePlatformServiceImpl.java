@@ -23,6 +23,7 @@ import com.google.gson.JsonElement;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +35,12 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanBalanceChangedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanStatusChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentPostBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentPreBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
@@ -51,13 +55,13 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
-import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationPlan;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationRequest;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanChargePaidBy;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanEvent;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanNote;
@@ -69,9 +73,11 @@ import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapital
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanChargeNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargePaidByRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanNoteRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionAllocationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanChargeConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanChargeDataValidator;
@@ -93,9 +99,10 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
     private final PaymentDetailWritePlatformService paymentDetailService;
     private final WorkingCapitalLoanNoteRepository noteRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
-    private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
     private final WorkingCapitalLoanTransactionProcessor transactionProcessor;
     private final WorkingCapitalLoanChargePaymentHandler chargePaymentHandler;
+    private final WorkingCapitalLoanTransactionAllocationRepository allocationRepository;
+    private final WorkingCapitalLoanChargePaidByRepository chargePaidByRepository;
     private final WorkingCapitalLoanBalanceUpdater balanceUpdater;
     private final WorkingCapitalLoanLifecycleStateMachine stateMachine;
     private final WorkingCapitalLoanAllocationRequestFactory allocationRequestFactory;
@@ -113,6 +120,11 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
                 .orElseThrow(() -> new WorkingCapitalLoanNotFoundException(loanId));
 
         final LoanStatus statusBeforeCharge = loan.getLoanStatus();
+        // New charges cannot be added once the loan is charged off (modify/waive/pay of existing charges stay allowed).
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.wc.loan.is.charged.off",
+                    "Adding a charge to Working Capital Loan " + loanId + " is not allowed. The loan is charged off.", loanId);
+        }
 
         WorkingCapitalLoanCharge loanCharge = assemblyChargeFromCommand(loan, command);
 
@@ -142,6 +154,9 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         }
 
         chargeAccrualService.processOnChargeAdded(loan, loanCharge);
+
+        notifyBalanceChanged(loan);
+        notifyStatusChanged(loan, statusBeforeCharge);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -175,6 +190,16 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
                 .map(ProjectedAmortizationScheduleModel::scheduledMaturityDate).orElse(null);
     }
 
+    /**
+     * Settles newly-outstanding charges on an overpaid loan out of its overpayment.
+     *
+     * <p>
+     * Relies on the invariant that the overpayment balance equals the sum of the unallocated remainders of the loan's
+     * non-reversed repayments - the overpayment is not money of its own, only the part of those repayments that has not
+     * been attributed yet. The plan is capped at the overpayment, so the funders always cover it; the guard below
+     * enforces that rather than trusting it, because a shortfall would settle the charges only partially while the
+     * balance booked the whole plan.
+     */
     private void consumeOverpaymentAgainstCharges(final WorkingCapitalLoan loan, final WorkingCapitalLoanBalance balance) {
         final BigDecimal availableOverpayment = MathUtil.nullToZero(balance.getOverpaymentAmount());
         if (!MathUtil.isGreaterThanZero(availableOverpayment)) {
@@ -188,16 +213,79 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
 
         final Map<Long, WorkingCapitalLoanCharge> chargesById = charges.stream()
                 .collect(Collectors.toMap(WorkingCapitalLoanCharge::getId, Function.identity()));
+
+        // An overpayment is not money in its own right - it is the still-unallocated remainder of earlier repayments.
+        // So the charge is settled out of those repayments, taken in chronological order, which gives every settlement
+        // a real transaction to attribute it to: the paid-by row points at the repayment that funded it, and that
+        // repayment's allocation grows by the same amount, keeping the two consistent with each other.
+        final List<OverpaymentFunder> funders = loadOverpaymentFunders(loan);
+        final BigDecimal fundableTotal = funders.stream().map(OverpaymentFunder::getAvailable).reduce(BigDecimal.ZERO, BigDecimal::add);
+        final List<WorkingCapitalLoanChargePaidBy> paidByRows = new ArrayList<>();
+        final List<WorkingCapitalLoanTransactionAllocation> touchedAllocations = new ArrayList<>();
+        int funderIndex = 0;
+
+        BigDecimal totalUnfunded = BigDecimal.ZERO;
         for (final WorkingCapitalLoanAllocationPlan.ChargeAllocation chargeAllocation : plan.chargeAllocations()) {
             final WorkingCapitalLoanCharge charge = chargesById.get(chargeAllocation.chargeId());
-            if (charge != null) {
-                chargePaymentHandler.applyChargePayment(charge, chargeAllocation.amount());
+            BigDecimal unfunded = chargeAllocation.amount();
+            while (MathUtil.isGreaterThanZero(unfunded) && funderIndex < funders.size()) {
+                final OverpaymentFunder funder = funders.get(funderIndex);
+                final BigDecimal take = unfunded.min(funder.getAvailable());
+                if (MathUtil.isGreaterThanZero(take)) {
+                    final WorkingCapitalLoanChargePaidBy paidBy = chargePaymentHandler.applyChargePayment(funder.getTransaction(), charge,
+                            take);
+                    if (paidBy != null) {
+                        paidByRows.add(paidBy);
+                    }
+                    funder.fund(take, chargeAllocation.penalty());
+                    touchedAllocations.add(funder.getAllocation());
+                    unfunded = unfunded.subtract(take);
+                }
+                if (!MathUtil.isGreaterThanZero(funder.getAvailable())) {
+                    funderIndex++;
+                }
             }
+            totalUnfunded = totalUnfunded.add(unfunded);
         }
+
+        // The plan is capped at the overpayment, and the overpayment is by construction the sum of the funders'
+        // unallocated remainders, so the funders always cover it. Should that ever stop holding, the charges and
+        // paid-by rows would record only what was funded while the balance below booked the whole plan - a silent
+        // split between the two. Fail the transaction instead of committing that inconsistency.
+        if (MathUtil.isGreaterThanZero(totalUnfunded)) {
+            throw new IllegalStateException("Overpayment settlement for WC loan " + loan.getId() + " is short by " + totalUnfunded
+                    + ": the overpayment balance of " + availableOverpayment
+                    + " exceeds the unallocated repayment remainders funding it, which total " + fundableTotal);
+        }
+
         loanChargeRepository.saveAll(charges);
+        allocationRepository.saveAll(touchedAllocations);
+        chargePaidByRepository.saveAll(paidByRows);
 
         balance.setOverpaymentAmount(BigDecimal.ZERO);
         balanceUpdater.apply(balance, plan);
+    }
+
+    private List<OverpaymentFunder> loadOverpaymentFunders(final WorkingCapitalLoan loan) {
+        final List<WorkingCapitalLoanTransaction> transactions = transactionRepository
+                .findByWcLoan_IdOrderByTransactionDateAscIdAsc(loan.getId()).stream()
+                .filter(txn -> !txn.isReversed() && txn.getTypeOf().isRepaymentType()).toList();
+        if (transactions.isEmpty()) {
+            return List.of();
+        }
+        final List<OverpaymentFunder> funders = new ArrayList<>();
+        for (final WorkingCapitalLoanTransaction txn : transactions) {
+            final WorkingCapitalLoanTransactionAllocation allocation = txn.getAllocation();
+            if (allocation == null) {
+                // A repayment with no allocation row never reached the balance, so it contributed nothing to the
+                // overpayment and cannot fund anything back out of it.
+                continue;
+            }
+            if (MathUtil.isGreaterThanZero(allocation.getOverpaymentPortion())) {
+                funders.add(new OverpaymentFunder(txn, allocation));
+            }
+        }
+        return funders;
     }
 
     private void applyChargeDrivenLifecycle(final WorkingCapitalLoan loan, final WorkingCapitalLoanBalance balance,
@@ -274,12 +362,10 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         adjustmentTx.getLoanTransactionRelations().add(relation);
         transactionRepository.saveAndFlush(adjustmentTx);
 
-        final WorkingCapitalLoanTransactionAllocation allocation = transactionProcessor.processRepaymentLikeTransaction(loan, adjustmentTx,
-                LoanTransactionType.CHARGE_ADJUSTMENT, transactionDate, amount);
-
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntries(loan, adjustmentTx, allocation, false);
-        }
+        final LoanStatus oldStatus = loan.getLoanStatus();
+        // The processor owns the whole tail of a repayment-like transaction, journal entries included, so there is no
+        // posting to do here.
+        transactionProcessor.processRepaymentLikeTransaction(loan, adjustmentTx, transactionDate, amount);
 
         final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanChargeConstants.noteParamName);
         if (StringUtils.isNotBlank(noteText)) {
@@ -289,6 +375,10 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
 
         businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanChargeAdjustmentPostBusinessEvent(adjustmentTx, loan.getId()));
+
+        workingCapitalLoanRepository.saveAndFlush(loan);
+        notifyBalanceChanged(loan);
+        notifyStatusChanged(loan, oldStatus);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -375,5 +465,15 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         } else {
             balance.setFee(balance.getFee().add(loanCharge.getAmount()));
         }
+    }
+
+    private void notifyStatusChanged(final WorkingCapitalLoan loan, final LoanStatus oldStatus) {
+        if (oldStatus != loan.getLoanStatus()) {
+            businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanStatusChangedBusinessEvent(loan));
+        }
+    }
+
+    private void notifyBalanceChanged(final WorkingCapitalLoan loan) {
+        businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanBalanceChangedBusinessEvent(loan));
     }
 }

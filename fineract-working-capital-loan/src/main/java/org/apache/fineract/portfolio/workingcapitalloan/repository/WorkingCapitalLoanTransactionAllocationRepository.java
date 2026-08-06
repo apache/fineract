@@ -18,12 +18,7 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
-import java.util.Collection;
-import java.util.List;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface WorkingCapitalLoanTransactionAllocationRepository extends JpaRepository<WorkingCapitalLoanTransactionAllocation, Long> {
-
-    List<WorkingCapitalLoanTransactionAllocation> findByWcLoanTransactionIdIn(Collection<Long> transactionIds);
-}
+public interface WorkingCapitalLoanTransactionAllocationRepository extends JpaRepository<WorkingCapitalLoanTransactionAllocation, Long> {}

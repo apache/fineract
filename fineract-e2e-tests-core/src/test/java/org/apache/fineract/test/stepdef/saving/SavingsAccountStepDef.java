@@ -23,8 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.After;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.GetSavingsProductsResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
@@ -47,6 +50,7 @@ import org.apache.fineract.test.factory.SavingsAccountRequestFactory;
 import org.apache.fineract.test.factory.SavingsProductRequestFactory;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.ErrorResponse;
+import org.apache.fineract.test.helper.GlobalConfigurationHelper;
 import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
@@ -56,6 +60,9 @@ public class SavingsAccountStepDef extends AbstractStepDef {
 
     @Autowired
     private FineractFeignClient fineractClient;
+
+    @Autowired
+    private GlobalConfigurationHelper globalConfigurationHelper;
 
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
@@ -67,6 +74,18 @@ public class SavingsAccountStepDef extends AbstractStepDef {
         PostSavingsProductsResponse savingsProductResponse = ok(
                 () -> fineractClient.savingsProduct().createSavingsProduct(savingsProductRequest));
         testContext().set(TestContextKey.DEFAULT_SAVINGS_PRODUCT_CREATE_RESPONSE_EUR, savingsProductResponse);
+    }
+
+    @After("@SavingsProductOfficeRestrictionFeature")
+    public void restoreOfficeSpecificProductRestrictionConfig() {
+        globalConfigurationHelper.disableGlobalConfiguration("restrict-products-to-user-office", 0L);
+        globalConfigurationHelper.disableGlobalConfiguration("office-specific-products-enabled", 0L);
+    }
+
+    @When("Savings products are retrieved successfully")
+    public void retrieveSavingsProductsSuccessfully() {
+        List<GetSavingsProductsResponse> savingsProducts = ok(() -> fineractClient.savingsProduct().retrieveAllSavingsProducts());
+        assertThat(savingsProducts).isNotNull();
     }
 
     @And("Client creates a new EUR savings account with {string} submitted on date")

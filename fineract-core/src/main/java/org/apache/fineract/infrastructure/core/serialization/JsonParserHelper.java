@@ -804,7 +804,7 @@ public class JsonParserHelper {
             dataValidationErrors.add(error);
         }
 
-        if (StringUtils.isNotBlank(courntryCode.toUpperCase())) {
+        if (StringUtils.isNotBlank(courntryCode.toUpperCase(Locale.ROOT))) {
             final List<String> allowedCountries = Arrays.asList(Locale.getISOCountries());
             if (!allowedCountries.contains(courntryCode)) {
                 final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.locale.format",
@@ -818,7 +818,7 @@ public class JsonParserHelper {
                     dataValidationErrors);
         }
 
-        return Locale.of(languageCode.toLowerCase(), courntryCode.toUpperCase(), variantCode);
+        return Locale.of(languageCode.toLowerCase(), courntryCode.toUpperCase(Locale.ROOT), variantCode);
     }
 
     private Locale extractLocaleValue(final JsonObject object) {

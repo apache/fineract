@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.api;
 
 import jakarta.validation.constraints.NotNull;
+import java.util.Locale;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -64,7 +65,7 @@ public abstract class IdTypeResolver {
     }
 
     public static String formatIdType(String idType) {
-        return idType == null ? null : idType.replace("-", "_").toUpperCase();
+        return idType == null ? null : idType.replace("-", "_").toUpperCase(Locale.ROOT);
     }
 
     public static RuntimeException resolveFailed(String idType, Exception e) {

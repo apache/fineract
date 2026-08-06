@@ -133,11 +133,11 @@ public class SharedAccountWorkBookPopulator extends AbstractWorkbookPopulator {
 
         Name clientsGroup = sharedAccountWorkbook.createName();
         clientsGroup.setNameName("Clients");
-        clientsGroup.setRefersToFormula(TemplatePopulateImportConstants.CLIENT_SHEET_NAME + "!$B$2:$B$" + clients.size() + 1);
+        clientsGroup.setRefersToFormula(TemplatePopulateImportConstants.CLIENT_SHEET_NAME + "!$B$2:$B$" + (clients.size() + 1));
 
         Name productGroup = sharedAccountWorkbook.createName();
         productGroup.setNameName("Products");
-        productGroup.setRefersToFormula(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME + "!$B$2:$B$" + products.size() + 1);
+        productGroup.setRefersToFormula(TemplatePopulateImportConstants.SHARED_PRODUCTS_SHEET_NAME + "!$B$2:$B$" + (products.size() + 1));
 
         for (Integer i = 0; i < products.size(); i++) {
             Name currecyName = sharedAccountWorkbook.createName();

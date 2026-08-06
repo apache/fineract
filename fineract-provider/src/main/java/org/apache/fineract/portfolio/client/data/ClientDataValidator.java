@@ -40,7 +40,12 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecks;
+import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecksRepository;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.validation.constraints.DateFormatValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,13 +55,16 @@ public final class ClientDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final ConfigurationReadPlatformService configurationReadPlatformService;
+    private final EntityDatatableChecksRepository entityDatatableChecksRepository;
     private static final String MOBILE_NUMBER_REGEX = "^\\+?[0-9]{7,15}$";
 
     @Autowired
     public ClientDataValidator(final FromJsonHelper fromApiJsonHelper,
-            final ConfigurationReadPlatformService configurationReadPlatformService) {
+            final ConfigurationReadPlatformService configurationReadPlatformService,
+            final EntityDatatableChecksRepository entityDatatableChecksRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.configurationReadPlatformService = configurationReadPlatformService;
+        this.entityDatatableChecksRepository = entityDatatableChecksRepository;
     }
 
     public void validateForCreate(final String json) {
@@ -225,7 +233,9 @@ public final class ClientDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.datatables, element)) {
             final JsonArray datatables = this.fromApiJsonHelper.extractJsonArrayNamed(ClientApiConstants.datatables, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
+            if (areDatatablesRequiredForLegalForm(legalFormId)) {
+                baseDataValidator.reset().parameter(ClientApiConstants.datatables).value(datatables).notNull().jsonArrayNotEmpty();
+            }
         }
 
         if (this.fromApiJsonHelper.parameterExists("isStaff", element)) {
@@ -891,4 +901,34 @@ public final class ClientDataValidator {
 
     }
 
+    /**
+     * Determines whether datatables are required for client creation based on configured entity datatable checks and
+     * legal form.
+     *
+     * @param legalFormId
+     *            the legal form ID (e.g. PERSON, ENTITY)
+     * @return true if at least one required datatable is configured, false otherwise
+     */
+    private boolean areDatatablesRequiredForLegalForm(final Integer legalFormId) {
+        final String entityName = EntityTables.CLIENT.getName();
+        final Integer createStatus = StatusEnum.CREATE.getValue();
+        final String entitySubtype = resolveEntitySubtype(legalFormId);
+
+        final List<EntityDatatableChecks> requiredDatatables = entitySubtype == null
+                ? entityDatatableChecksRepository.findByEntityAndStatus(entityName, createStatus)
+                : entityDatatableChecksRepository.findByEntityAndStatusAndSubtype(entityName, createStatus, entitySubtype);
+
+        return requiredDatatables != null && !requiredDatatables.isEmpty();
+    }
+
+    /**
+     * Resolves the entity subtype label from the legal form ID. Returns null if the legal form is missing or invalid.
+     */
+    private String resolveEntitySubtype(final Integer legalFormId) {
+        if (legalFormId == null) {
+            return null;
+        }
+        final LegalForm legalForm = LegalForm.fromInt(legalFormId);
+        return legalForm != null ? legalForm.getLabel().toUpperCase() : null;
+    }
 }

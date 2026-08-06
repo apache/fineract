@@ -228,7 +228,7 @@ public class ClientEntityWorkbookPopulator extends AbstractWorkbookPopulator {
         writeString(ClientEntityConstants.EXTERNAL_ID_COL, rowHeader, "External ID ");
         writeString(ClientEntityConstants.SUBMITTED_ON_COL, rowHeader, "Submitted On Date");
         writeString(ClientEntityConstants.ACTIVE_COL, rowHeader, "Active*");
-        writeString(ClientEntityConstants.ACTIVATION_DATE_COL, rowHeader, "Activation Date ");
+        writeString(ClientEntityConstants.ACTIVATION_DATE_COL, rowHeader, "Activation Date* ");
         writeString(ClientEntityConstants.ADDRESS_ENABLED, rowHeader, "Address Enabled ");
         writeString(ClientEntityConstants.ADDRESS_TYPE_COL, rowHeader, "Address Type ");
         writeString(ClientEntityConstants.STREET_COL, rowHeader, "Street  ");

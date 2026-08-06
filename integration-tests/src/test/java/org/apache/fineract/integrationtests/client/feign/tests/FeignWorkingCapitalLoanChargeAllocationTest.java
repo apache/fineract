@@ -264,7 +264,7 @@ public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegratio
         });
         businessDateHelper.runAt("2026-01-02", () -> {
             wcLoanHelper.makeRepayment(loanIdHolder[0],
-                    WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(9000), "02 January 2026"));
+                    WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(9100), "02 January 2026"));
             GetWorkingCapitalLoansLoanIdResponse loanDetails = wcLoanHelper.getLoanDetails(loanIdHolder[0]);
             assertNotNull(loanDetails.getStatus());
             assertEquals("loanStatusType.closed.obligations.met", loanDetails.getStatus().getCode(),
@@ -284,8 +284,8 @@ public class FeignWorkingCapitalLoanChargeAllocationTest extends FeignIntegratio
             assertEquals(Boolean.TRUE, reversedAdjustment.getReversed(), "Charge adjustment transaction should be flagged reversed");
 
             WorkingCapitalLoanChargeData feeCharge = findCharge(wcLoanHelper.getCharges(loanIdHolder[0]), feeLoanChargeIdHolder[0]);
-            assertEqualBigDecimal(BigDecimal.ZERO, feeCharge.getAmountPaid(), "Fee charge amount paid restored to 0");
-            assertEqualBigDecimal(BigDecimal.valueOf(100), feeCharge.getAmountOutstanding(), "Fee charge outstanding restored to 100");
+            assertEqualBigDecimal(BigDecimal.valueOf(100), feeCharge.getAmountPaid(), "Fee charge amount paid restored to 100");
+            assertEqualBigDecimal(BigDecimal.ZERO, feeCharge.getAmountOutstanding(), "Fee charge outstanding restored to 0");
 
             assertEquals("loanStatusType.closed.obligations.met", wcLoanHelper.getLoanDetails(loanIdHolder[0]).getStatus().getCode(),
                     "Loan remains closed — the adjustment only ever touched the fee bucket, never principal");

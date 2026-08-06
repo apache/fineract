@@ -1,0 +1,83 @@
+= Working Capital Loan — Mark as Fraud
+
+== Purpose
+
+Marking a Working Capital Loan as fraudulent flags an account that has been identified as fraud, so that a
+later charge-off routes the write-off to a dedicated *fraud expense* account instead of the regular
+charge-off expense account.
+
+The fraud flag is *independent of the charge-off action itself*: it only records that the loan is
+fraudulent. It has no accounting effect until the loan is charged off.
+
+== Functionality
+
+* `fraud` is a boolean flag on the loan account (column `is_fraud` on `m_wc_loan`), defaulting to `false`.
+* A loan can be marked as fraud *only while it is active*. Clearing the flag is allowed regardless of status.
+* Marking a loan as fraud *does not change the loan status* — the loan keeps its `ACTIVE` status.
+* The operation is idempotent: re-sending the same value is a no-op and reports no changes.
+
+== Validation Rules
+
+* `fraud` is *required* and must be a boolean (`true` or `false`).
+* The loan must be *active* to be marked as fraud (`fraud = true`). Clearing the flag (`fraud = false`) is
+  allowed in any status.
+
+== Authorization
+
+The command requires the `SETFRAUD_WORKINGCAPITALLOAN` permission. Users with `ALL_FUNCTIONS` (super user)
+are allowed implicitly. Maker-checker is supported and can be enabled for this permission; it is disabled by
+default.
+
+== API
+
+The loan can be addressed by id or by external id:
+
+[source]
+----
+PUT /v1/working-capital-loans/{loanId}/mark-as-fraud
+PUT /v1/working-capital-loans/external-id/{loanExternalId}/mark-as-fraud
+----
+
+Both take the same body and produce the same result. An unknown external id returns a 404.
+
+[source,json]
+----
+{
+  "fraud": true
+}
+----
+
+Response (`CommandProcessingResult`):
+
+[source,json]
+----
+{
+  "officeId": 1,
+  "clientId": 5,
+  "loanId": 12,
+  "resourceId": 12,
+  "changes": {
+    "fraud": true
+  }
+}
+----
+
+`changes` is empty when the flag already had the requested value.
+
+== Retrieval
+
+The current value is exposed as the `fraud` field of the loan retrieval response:
+
+[source]
+----
+GET /v1/working-capital-loans/{loanId}
+----
+
+== Accounting Impact
+
+Marking a loan as fraud produces *no journal entries* on its own. The flag is consumed at charge-off time:
+a charged-off fraudulent loan debits the *Charge-Off Fraud Expense* account instead of the regular
+*Charge-Off Expense* account. All other charge-off processing is identical.
+
+NOTE: This command is served through the legacy command-source pipeline, like every other Working Capital
+Loan command, so it is recorded in the command audit trail and can participate in maker-checker.

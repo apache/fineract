@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.workingcapitalloanproduct.mapper;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -154,10 +153,10 @@ public interface WorkingCapitalLoanProductMapper {
         }
         return rules.stream().map(rule -> {
             final List<WorkingCapitalPaymentAllocationData.PaymentAllocationOrder> paymentAllocationOrder = new ArrayList<>();
-            final AtomicInteger counter = new AtomicInteger(1);
+            int counter = 1;
             for (final WorkingCapitalPaymentAllocationType allocationType : rule.getAllocationTypes()) {
-                paymentAllocationOrder.add(
-                        new WorkingCapitalPaymentAllocationData.PaymentAllocationOrder(allocationType.name(), counter.getAndIncrement()));
+                paymentAllocationOrder.add(new WorkingCapitalPaymentAllocationData.PaymentAllocationOrder(allocationType.name(), counter));
+                counter++;
             }
             return new WorkingCapitalPaymentAllocationData(rule.getTransactionType() != null ? rule.getTransactionType() : null,
                     paymentAllocationOrder);

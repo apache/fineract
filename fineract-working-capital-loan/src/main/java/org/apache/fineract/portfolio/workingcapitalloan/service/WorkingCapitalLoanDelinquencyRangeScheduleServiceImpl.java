@@ -649,9 +649,6 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
         List<WorkingCapitalLoanDelinquencyRangeSchedule> periods = loanDelinquencyRangeScheduleRepository
                 .findByLoanIdOrderByPeriodNumberAsc(loan.getId());
         for (WorkingCapitalLoanDelinquencyRangeSchedule period : periods) {
-            if (period.getMinPaymentCriteriaMet() != null) {
-                continue;
-            }
             if (!period.getToDate().isBefore(pauseStart)) {
                 period.setToDate(period.getToDate().plusDays(pauseDays));
             }

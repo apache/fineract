@@ -62,8 +62,25 @@ public class LoanOriginatorHelper {
             if (!isOriginatorCreationDuringLoanApplicationEnabled()) {
                 throw new LoanOriginatorCreationNotAllowedException(data.getExternalId());
             }
-            return createNewOriginator(data, externalId).getId();
+            return createNewOriginator(data, externalId, "during loan application").getId();
         });
+    }
+
+    /**
+     * Finds an active originator by external ID, or creates it for a loan disbursement without checking the
+     * application-time originator creation feature flag.
+     *
+     * @param data
+     *            originator request data containing the external ID and optional metadata for creation
+     * @return the existing or newly created originator ID
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Long findOrCreateOriginatorIdForLoanDisbursement(final LoanApplicationOriginatorData data) {
+        final ExternalId externalId = new ExternalId(data.getExternalId());
+        return loanOriginatorRepository.findByExternalId(externalId).map(existing -> {
+            validateActive(existing);
+            return existing.getId();
+        }).orElseGet(() -> createNewOriginator(data, externalId, "during loan disbursement").getId());
     }
 
     private void validateActive(final LoanOriginator originator) {
@@ -83,8 +100,9 @@ public class LoanOriginatorHelper {
         }
     }
 
-    private LoanOriginator createNewOriginator(final LoanApplicationOriginatorData data, final ExternalId externalId) {
-        log.info("Creating new originator with externalId: {} during loan application", data.getExternalId());
+    private LoanOriginator createNewOriginator(final LoanApplicationOriginatorData data, final ExternalId externalId,
+            final String context) {
+        log.info("Creating new originator with externalId: {} {}", data.getExternalId(), context);
 
         final CodeValue originatorType = resolveCodeValue(data.getTypeId(), ORIGINATOR_TYPE_CODE_NAME);
         final CodeValue channelType = resolveCodeValue(data.getChannelTypeId(), CHANNEL_TYPE_CODE_NAME);

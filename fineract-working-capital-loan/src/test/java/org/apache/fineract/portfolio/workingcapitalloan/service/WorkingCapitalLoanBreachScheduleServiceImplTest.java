@@ -271,8 +271,6 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
 
     @Test
     void applyRepaymentUndo_reflipsBreachForAlreadyEndedPeriod() {
-        // PS-3176 tester feedback: undoing a repayment that had fully settled an already-ended period must
-        // re-flag it as breached instead of leaving the stale breach=false from when it was still paid off.
         final LocalDate transactionDate = LocalDate.of(2026, 5, 15);
         final WorkingCapitalLoanBreachSchedule endedPeriod = period(2, LocalDate.of(2026, 5, 11), LocalDate.of(2026, 5, 20),
                 BigDecimal.valueOf(100), BigDecimal.valueOf(100), BigDecimal.ZERO);

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.cob.service;
 
+import java.util.Locale;
 import java.util.Map;
 import org.apache.fineract.cob.COBBusinessStep;
 import org.apache.fineract.cob.loan.LoanCOBBusinessStep;
@@ -32,7 +33,7 @@ public class LoanBusinessStepCategoryServiceImpl implements BusinessStepCategory
     @Override
     public Class<? extends COBBusinessStep> getBusinessStepByCategory(String category) {
         Map.Entry<BusinessStepCategory, Class<? extends COBBusinessStep>> businessStepCategoryClassEntry = businessSteps.entrySet().stream()
-                .filter(businessStep -> businessStep.getKey().name().equals(category.toUpperCase())).findFirst().orElse(null);
+                .filter(businessStep -> businessStep.getKey().name().equals(category.toUpperCase(Locale.ROOT))).findFirst().orElse(null);
         return businessStepCategoryClassEntry != null ? businessStepCategoryClassEntry.getValue() : null;
     }
 }

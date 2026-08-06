@@ -535,4 +535,48 @@ Feature: Loan Origination
     When Loan Pay-off is made on "07 January 2023"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+  @TestRailId:C89810
+  Scenario: Verify loan originators can be reconciled during tranche disbursements
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin creates a new loan originator with external ID and name "First Disbursement Originator"
+    When Admin creates a second loan originator with external ID and name "Later Disbursement Originator"
+    When Admin creates a fully customized loan with three expected disbursements details and following data:
+      | LoanProduct                                                                                | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | 1st_tranche_disb_expected_date | 1st_tranche_disb_principal | 2nd_tranche_disb_expected_date | 2nd_tranche_disb_principal | 3rd_tranche_disb_expected_date | 3rd_tranche_disb_principal |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_EXPECT_TRANCHE | 01 January 2026   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | 01 January 2026                | 300.0                      | 02 January 2026                | 200.0                      | 03 January 2026                | 500.0                      |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "300" EUR transaction amount and the originator
+    Then Loan details with association "originators" has 1 originator attached
+    And Loan details with association "originators" has the originator attached
+    When Admin sets the business date to "02 January 2026"
+    And Admin successfully disburse the loan on "02 January 2026" with "200" EUR transaction amount and the second originator
+    Then Loan details with association "originators" has 1 originator attached
+    And Loan details with association "originators" has the second originator attached
+    When Admin sets the business date to "03 January 2026"
+    And Admin successfully disburse the loan on "03 January 2026" with "500" EUR transaction amount and empty originators
+    Then Loan details with association "originators" has no originator attached
+    When Loan Pay-off is made on "03 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
+  @TestRailId:C89811
+  Scenario: Verify null originators on a later tranche disbursement leave existing originator mappings untouched
+    When Admin sets the business date to "01 January 2026"
+    When Admin creates a client with random data
+    When Admin creates a new loan originator with external ID and name "Preserved Disbursement Originator"
+    When Admin creates a fully customized loan with three expected disbursements details and following data:
+      | LoanProduct                                                                                | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            | 1st_tranche_disb_expected_date | 1st_tranche_disb_principal | 2nd_tranche_disb_expected_date | 2nd_tranche_disb_principal | 3rd_tranche_disb_expected_date | 3rd_tranche_disb_principal |
+      | LP2_ADV_PYMNT_INTEREST_DAILY_EMI_360_30_INTEREST_RECALC_DAILY_MULTIDISBURSE_EXPECT_TRANCHE | 01 January 2026   | 1000           | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 6                 | MONTHS                | 1              | MONTHS                 | 6                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION | 01 January 2026                | 300.0                      | 02 January 2026                | 200.0                      | 03 January 2026                | 500.0                      |
+    And Admin successfully approves the loan on "01 January 2026" with "1000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the loan on "01 January 2026" with "300" EUR transaction amount and the originator
+    Then Loan details with association "originators" has 1 originator attached
+    And Loan details with association "originators" has the originator attached
+    When Admin sets the business date to "02 January 2026"
+    And Admin successfully disburse the loan on "02 January 2026" with "200" EUR transaction amount and null originators
+    Then Loan details with association "originators" has 1 originator attached
+    And Loan details with association "originators" has the originator attached
+    When Admin sets the business date to "03 January 2026"
+    And Admin successfully disburse the loan on "03 January 2026" with "500" EUR transaction amount
+    Then Loan details with association "originators" has 1 originator attached
+    And Loan details with association "originators" has the originator attached
+    When Loan Pay-off is made on "03 January 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met

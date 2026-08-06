@@ -96,8 +96,8 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
         } else {
 
             accessListCSVStrBuf = new StringBuilder();
-            accessListCSVStrBuf.append("false"); // Append false so that no rows
-                                                 // will be returned
+            accessListCSVStrBuf.append("-1"); // Append -1 so that no rows
+                                              // will be returned
         }
         if (accessListCSVStrBuf != null) {
             returnIdListStr = accessListCSVStrBuf.toString();

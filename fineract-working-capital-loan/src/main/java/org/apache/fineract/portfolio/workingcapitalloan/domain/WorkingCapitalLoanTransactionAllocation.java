@@ -54,6 +54,15 @@ public class WorkingCapitalLoanTransactionAllocation extends AbstractAuditableWi
     @Setter
     private BigDecimal penaltyChargesPortion;
 
+    /**
+     * The part of the transaction that moved the overpayment balance: for a repayment the amount paid beyond the
+     * outstanding, for a credit balance refund the amount taken back out of the overpayment. Disjoint from
+     * {@code principalPortion}, so the portions always sum to the transaction amount for money-moving transactions.
+     */
+    @Column(name = "overpayment_portion", scale = 6, precision = 19)
+    @Setter
+    private BigDecimal overpaymentPortion;
+
     @Version
     @Column(name = "version")
     private Integer version;
@@ -63,50 +72,77 @@ public class WorkingCapitalLoanTransactionAllocation extends AbstractAuditableWi
     public static WorkingCapitalLoanTransactionAllocation forPrincipalAllocation(final WorkingCapitalLoanTransaction transaction,
             final BigDecimal principalAmount) {
         final WorkingCapitalLoanTransactionAllocation allocation = new WorkingCapitalLoanTransactionAllocation();
-        allocation.wcLoanTransaction = transaction;
         allocation.principalPortion = principalAmount != null ? principalAmount : BigDecimal.ZERO;
         allocation.feeChargesPortion = BigDecimal.ZERO;
         allocation.penaltyChargesPortion = BigDecimal.ZERO;
+        allocation.overpaymentPortion = BigDecimal.ZERO;
+        allocation.link(transaction);
         return allocation;
     }
 
     public static WorkingCapitalLoanTransactionAllocation forPortions(final WorkingCapitalLoanTransaction transaction,
-            final BigDecimal principalAmount, final BigDecimal feeAmount, final BigDecimal penaltyAmount) {
+            final BigDecimal principalAmount, final BigDecimal feeAmount, final BigDecimal penaltyAmount,
+            final BigDecimal overpaymentAmount) {
         final WorkingCapitalLoanTransactionAllocation allocation = new WorkingCapitalLoanTransactionAllocation();
-        allocation.wcLoanTransaction = transaction;
         allocation.principalPortion = MathUtil.nullToZero(principalAmount);
         allocation.feeChargesPortion = MathUtil.nullToZero(feeAmount);
         allocation.penaltyChargesPortion = MathUtil.nullToZero(penaltyAmount);
+        allocation.overpaymentPortion = MathUtil.nullToZero(overpaymentAmount);
+        allocation.link(transaction);
         return allocation;
     }
 
     public static WorkingCapitalLoanTransactionAllocation forDisbursementDiscount(final WorkingCapitalLoanTransaction transaction,
             final BigDecimal principalAmount) {
         final WorkingCapitalLoanTransactionAllocation allocation = new WorkingCapitalLoanTransactionAllocation();
-        allocation.wcLoanTransaction = transaction;
         allocation.principalPortion = MathUtil.nullToZero(principalAmount);
         allocation.feeChargesPortion = BigDecimal.ZERO;
         allocation.penaltyChargesPortion = BigDecimal.ZERO;
+        allocation.overpaymentPortion = BigDecimal.ZERO;
+        allocation.link(transaction);
         return allocation;
     }
 
     public static WorkingCapitalLoanTransactionAllocation forDiscountFeeAdjustment(final WorkingCapitalLoanTransaction transaction,
             final BigDecimal principalAmount) {
         final WorkingCapitalLoanTransactionAllocation allocation = new WorkingCapitalLoanTransactionAllocation();
-        allocation.wcLoanTransaction = transaction;
         allocation.principalPortion = MathUtil.nullToZero(principalAmount);
         allocation.feeChargesPortion = BigDecimal.ZERO;
         allocation.penaltyChargesPortion = BigDecimal.ZERO;
+        allocation.overpaymentPortion = BigDecimal.ZERO;
+        allocation.link(transaction);
         return allocation;
     }
 
     public static WorkingCapitalLoanTransactionAllocation forChargeAccrual(final WorkingCapitalLoanTransaction transaction,
             final BigDecimal amount, final boolean isPenalty) {
         final WorkingCapitalLoanTransactionAllocation allocation = new WorkingCapitalLoanTransactionAllocation();
-        allocation.wcLoanTransaction = transaction;
         allocation.principalPortion = BigDecimal.ZERO;
         allocation.feeChargesPortion = isPenalty ? BigDecimal.ZERO : MathUtil.nullToZero(amount);
         allocation.penaltyChargesPortion = isPenalty ? MathUtil.nullToZero(amount) : BigDecimal.ZERO;
+        allocation.overpaymentPortion = BigDecimal.ZERO;
+        allocation.link(transaction);
         return allocation;
+    }
+
+    /**
+     * A credit balance refund's split: the part taken back out of the overpayment balance and the over-refund excess
+     * that became newly-lent principal (zero while the refund is fully funded by the overpayment).
+     */
+    public static WorkingCapitalLoanTransactionAllocation forCreditBalanceRefund(final WorkingCapitalLoanTransaction transaction,
+            final BigDecimal excessPrincipal, final BigDecimal overpaymentConsumed) {
+        final WorkingCapitalLoanTransactionAllocation allocation = new WorkingCapitalLoanTransactionAllocation();
+        allocation.principalPortion = MathUtil.nullToZero(excessPrincipal);
+        allocation.feeChargesPortion = BigDecimal.ZERO;
+        allocation.penaltyChargesPortion = BigDecimal.ZERO;
+        allocation.overpaymentPortion = MathUtil.nullToZero(overpaymentConsumed);
+        allocation.link(transaction);
+        return allocation;
+    }
+
+    /** Wires both sides of the one-to-one so the transaction's eager inverse reflects this allocation immediately. */
+    private void link(final WorkingCapitalLoanTransaction transaction) {
+        this.wcLoanTransaction = transaction;
+        transaction.attachAllocation(this);
     }
 }

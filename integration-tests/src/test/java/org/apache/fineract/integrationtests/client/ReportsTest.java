@@ -27,8 +27,10 @@ import java.util.Map;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
+import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostReportsResponse;
 import org.apache.fineract.client.models.PostRepostRequest;
+import org.apache.fineract.client.models.ResultsetRowData;
 import org.apache.fineract.client.models.RunReportsResponse;
 import org.apache.fineract.client.services.RunReportsApi;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
@@ -100,6 +102,32 @@ public class ReportsTest extends IntegrationTest {
                 fineractClient().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "1", "exportCSV", "true")));
         assertThat(result.body().contentType()).isEqualTo(MediaType.parse("text/csv"));
         assertThat(result.body().string()).contains("Office/Branch");
+    }
+
+    @Test
+    void runClientListingReportIncludesCreatedClientInTableAndCSV() throws IOException {
+        String clientName = Utils.randomStringGenerator("ReportTestClient", 8);
+        createClient(clientName);
+
+        RunReportsResponse tableResult = ok(fineractClient().reportsRun.runReportGetData("Client Listing", Map.of("R_officeId", "1")));
+        List<ResultsetRowData> tableRows = tableResult.getData();
+        assertThat(tableRows).isNotNull();
+        boolean tableContainsClient = tableRows.stream().map(ResultsetRowData::getRow)
+                .anyMatch(row -> row != null && row.contains(clientName));
+        assertThat(tableContainsClient).as("Client Listing table output should contain client %s in rows %s", clientName, tableRows)
+                .isTrue();
+
+        Response<ResponseBody> csvResult = okR(
+                fineractClient().reportsRun.runReportGetFile("Client Listing", Map.of("R_officeId", "1", "exportCSV", "true")));
+        ResponseBody csvBody = csvResult.body();
+        assertThat(csvBody).isNotNull();
+        assertThat(csvBody.contentType()).isEqualTo(MediaType.parse("text/csv"));
+        assertThat(csvBody.string()).as("Client Listing CSV output should contain client %s", clientName).contains(clientName);
+    }
+
+    private Long createClient(String fullName) {
+        return ok(fineractClient().clients.createClient(new PostClientsRequest().legalFormId(1L).officeId(1L).fullname(fullName)
+                .dateFormat(Utils.DATE_FORMAT).locale("en_US").active(true).activationDate("01 January 2023"))).getClientId();
     }
 
     @Test // see FINERACT-1306

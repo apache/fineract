@@ -32,6 +32,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
@@ -77,7 +78,7 @@ public class CreditBureauTest {
         List<Map<String, Object>> configurations = new Gson().fromJson(configJson, new TypeToken<List<Map<String, Object>>>() {}.getType());
         Assertions.assertNotNull(configurations);
         Map<String, Long> currentConfiguration = configurations.stream()
-                .collect(Collectors.toMap(k -> String.valueOf(k.get("configurationKey")).toUpperCase(),
+                .collect(Collectors.toMap(k -> String.valueOf(k.get("configurationKey")).toUpperCase(Locale.ROOT),
                         v -> ((Number) v.get("creditBureauConfigurationId")).longValue()));
         final String usernameResponse = CreditBureauConfigurationHelper
                 .updateCreditBureauConfiguration(currentConfiguration.get("USERNAME"), "USERNAME", "testUser");

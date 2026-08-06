@@ -34,4 +34,9 @@ public class LoanOriginatorLinkingServiceNoOp implements LoanOriginatorLinkingSe
     public void processOriginatorsForLoanApplication(Long loanId, JsonArray originatorsArray) {
         // No-op when loan-origination module is not enabled
     }
+
+    @Override
+    public void processOriginatorsForLoanDisbursement(Long loanId, JsonArray originatorsArray) {
+        // No-op when loan-origination module is not enabled
+    }
 }

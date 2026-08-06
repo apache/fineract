@@ -26,6 +26,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.util.Locale;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.organisation.CampaignsHelper;
@@ -96,7 +97,7 @@ public class SmsApiResourceIntegrationTest {
             Object smsClientId = sms.get("clientId");
             Object smsCampaignName = sms.get("campaignName");
             if (smsClientId != null && smsCampaignName != null && smsClientId.equals(clientId)
-                    && smsCampaignName.equals("Campaign_Name_" + Integer.toHexString(campaignId).toUpperCase())) {
+                    && smsCampaignName.equals("Campaign_Name_" + Integer.toHexString(campaignId).toUpperCase(Locale.ROOT))) {
                 java.util.Map<String, Object> statusObj = (java.util.Map<String, Object>) sms.get("status");
                 if (statusObj != null) {
                     status = ((Number) statusObj.get("id")).intValue();

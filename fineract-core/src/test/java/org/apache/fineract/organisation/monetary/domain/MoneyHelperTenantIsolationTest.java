@@ -36,8 +36,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test to verify that the MoneyHelper tenant isolation fix works correctly with pure utility class approach. This
- * validates that PS-2617 has been properly resolved using the new architecture.
+ * Test to verify that the MoneyHelper tenant isolation fix works correctly with pure utility class approach.
  */
 class MoneyHelperTenantIsolationTest {
 

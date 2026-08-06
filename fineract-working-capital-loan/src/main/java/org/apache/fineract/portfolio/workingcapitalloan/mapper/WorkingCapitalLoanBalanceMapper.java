@@ -22,9 +22,11 @@ import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanBalanceData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(config = MapstructMapperConfig.class)
 public interface WorkingCapitalLoanBalanceMapper {
 
+    @Mapping(target = "principal", source = "totalPrincipalDue")
     WorkingCapitalLoanBalanceData toData(WorkingCapitalLoanBalance balance);
 }

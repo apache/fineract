@@ -19,6 +19,8 @@
 
 package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanChargeData;
@@ -46,5 +48,20 @@ public interface WorkingCapitalLoanChargeRepository
             + "lc.id, c.id, c.name, lc.chargeTimeType, lc.submittedOnDate, lc.dueDate, lc.chargeCalculationType, oc.code, oc.name, oc.decimalPlaces, oc.inMultiplesOf, oc.displaySymbol,"
             + " oc.nameCode, lc.amount, lc.amountPaid, lc.penaltyCharge, lc.chargePaymentMode, lc.paid, l.id, lc.externalId, l.externalId) from WorkingCapitalLoanCharge lc join fetch lc.charge c join OrganisationCurrency oc on c.currencyCode = oc.code join fetch lc.loan l where l.id = :loanId and lc.active = true order by lc.chargeTimeType asc, lc.dueDate asc, lc.penaltyCharge asc")
     List<WorkingCapitalLoanChargeData> retrieveLoanCharges(@Param("loanId") Long loanId);
+
+    /**
+     * Whether an active charge is due on or after the given date. Only active charges count: reprocessing itself
+     * re-allocates against active charges only, so an inactive one cannot change any allocation.
+     */
+    @Query("""
+            SELECT CASE WHEN COUNT(charge) > 0 THEN TRUE ELSE FALSE END
+            FROM WorkingCapitalLoanCharge charge
+            WHERE charge.loan.id = :loanId
+            AND charge.active = true
+            AND charge.dueDate >= :transactionDate
+            AND charge.createdDate >= :createdDateTime
+            """)
+    boolean existsActiveChargeDueOnOrAfter(@Param("loanId") Long loanId, @Param("transactionDate") LocalDate transactionDate,
+            @Param("createdDateTime") OffsetDateTime createdDateTime);
 
 }

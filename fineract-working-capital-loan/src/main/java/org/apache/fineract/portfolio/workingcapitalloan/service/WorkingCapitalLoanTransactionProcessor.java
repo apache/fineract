@@ -20,20 +20,20 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationPlan;
-import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanAllocationRequest;
+import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelation;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargePaidByRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionAllocationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
@@ -47,10 +47,8 @@ public class WorkingCapitalLoanTransactionProcessor {
     private final WorkingCapitalLoanBalanceRepository balanceRepository;
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
     private final WorkingCapitalLoanTransactionAllocationRepository allocationRepository;
-    private final WorkingCapitalLoanAllocationRequestFactory allocationRequestFactory;
-    private final WorkingCapitalLoanPaymentAllocationProcessor allocationProcessor;
-    private final WorkingCapitalLoanAllocationApplier allocationApplier;
-    private final WorkingCapitalLoanBalanceUpdater balanceUpdater;
+    private final WorkingCapitalLoanChargePaidByRepository chargePaidByRepository;
+    private final WorkingCapitalLoanTransactionAllocator transactionAllocator;
     private final WorkingCapitalLoanTransactionReprocessingService transactionReprocessingService;
     private final WorkingCapitalLoanAmortizationScheduleWriteService amortizationScheduleWriteService;
     private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
@@ -58,77 +56,99 @@ public class WorkingCapitalLoanTransactionProcessor {
     private final WorkingCapitalLoanLifecycleStateMachine stateMachine;
     private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     private final WorkingCapitalLoanChargeAccrualService chargeAccrualService;
+    private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
 
-    public WorkingCapitalLoanTransactionAllocation processRepaymentLikeTransaction(final WorkingCapitalLoan loan,
-            final WorkingCapitalLoanTransaction transaction, final LoanTransactionType transactionType, final LocalDate transactionDate,
-            final BigDecimal transactionAmount) {
+    public void processRepaymentLikeTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
+            final LocalDate transactionDate, final BigDecimal transactionAmount) {
         final Long loanId = loan.getId();
+        final List<WorkingCapitalLoanCharge> charges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loanId);
+        final boolean backdated = !isLastMonetaryAction(transaction);
+
         final WorkingCapitalLoanBalance balance = balanceRepository.findByWcLoan_Id(loanId)
                 .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
-        final List<WorkingCapitalLoanCharge> charges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loanId);
 
-        WorkingCapitalLoanAllocationRequest allocationRequest;
-        if (transactionType == LoanTransactionType.CHARGE_ADJUSTMENT) {
-            final WorkingCapitalLoanTransactionRelation loanTransactionRelation = transaction.getLoanTransactionRelations().stream()
-                    .filter(e -> e.getToCharge() != null).findFirst().orElseThrow();
-            final WorkingCapitalLoanCharge adjustedCharge = loanTransactionRelation.getToCharge();
-            // The factory honors a configured CHARGE_ADJUSTMENT allocation order when the product defines one;
-            // otherwise it scopes the adjustment to its own charge (no principal) so a not-yet-due charge is not
-            // diverted onto principal.
-            allocationRequest = allocationRequestFactory.buildForChargeAdjustment(loan, balance, charges, adjustedCharge, transactionDate,
-                    transactionAmount);
-        } else {
-            // Decide the allocation across penalty/fee/principal following the loan's configured payment allocation
-            // order (principal-only when no order is configured), then materialize it onto the charges and refresh the
-            // balance.
-            allocationRequest = allocationRequestFactory.build(loan, balance, charges, transactionDate, transactionAmount, transactionType);
-        }
-        final WorkingCapitalLoanAllocationPlan allocationPlan = allocationProcessor.plan(allocationRequest);
-        final WorkingCapitalLoanTransactionAllocation allocation = allocationApplier.apply(transaction, null, allocationPlan, charges);
-        balanceUpdater.apply(balance, allocationPlan);
-        chargeRepository.saveAll(charges);
-        balanceRepository.saveAndFlush(balance);
-        allocationRepository.saveAndFlush(allocation);
+        final boolean isLoanOverpaidWithCurrentTransaction = MathUtil.isGreaterThanZero(balance.getOverpaymentAmount())
+                || transactionAmount.compareTo(balance.getPrincipalOutstanding()) > 0;
 
-        // A backdated transaction can change how the other transactions allocate across charges, so it triggers
-        // reprocessing. When the loan has charges, reprocessing rebuilds the amortization schedule from scratch, so
-        // the incremental apply below would be immediately overwritten and is skipped. For a charge-free loan
-        // reprocessing is a no-op (principal-only allocation is order-independent), so the incremental apply stands.
-        final List<WorkingCapitalLoanTransaction> allTransactions = transactionRepository
-                .findByWcLoan_IdOrderByTransactionDateAscIdAsc(loanId);
-        final boolean backdated = isBackdatedTransaction(allTransactions, transaction);
-        final boolean reprocessingWillRebuildSchedule = backdated && !charges.isEmpty();
-        if (!reprocessingWillRebuildSchedule) {
-            // The amortization model records the principal on its actual day and recalculates forward.
-            amortizationScheduleWriteService.applyRepayment(loan, transactionDate, allocationPlan.principalPortion());
-        }
-        if (backdated) {
-            transactionReprocessingService.reprocessTransactions(loan, allTransactions);
-            // A changed chronological order can redistribute principal across days in ways the incremental
-            // applyRepayment below can't express, so the delinquency schedule needs a full rebuild too.
+        // A backdated transaction that can reshuffle later allocations is handed straight to reprocessing, which
+        // allocates this transaction as part of the replay. Charges reshuffle across the whole history (full rebuild);
+        // charge-free overpayment reshuffles only from the insertion point on (suffix rebuild). Either way, computing
+        // an incremental allocation first would only be rewound and redone.
+        final boolean reprocessRebuildsEverything = backdated && (!charges.isEmpty() || isLoanOverpaidWithCurrentTransaction);
+
+        final WorkingCapitalLoanTransactionAllocation allocation;
+        if (reprocessRebuildsEverything) {
+            if (charges.isEmpty()) {
+                transactionReprocessingService.reprocessChargeFreeSuffix(loan, transactionDate, null);
+            } else {
+                transactionReprocessingService.reprocessTransactions(loan);
+            }
+            // A changed chronological order can redistribute principal across days in ways an incremental apply can't
+            // express, so the delinquency schedule needs a full rebuild too.
             delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+            // Reprocessing rebuilt this transaction's allocation from scratch and linked it back onto the transaction,
+            // so it is readable directly for the accounting posting - no separate lookup needed.
+            allocation = transaction.getAllocation();
+            if (allocation == null) {
+                // The replay allocates every transaction it is handed, so a missing allocation means it never ran -
+                // in practice because the loan has no balance row to recompute, which both entry points skip on. The
+                // transaction would otherwise be left with no allocation, no balance movement and no schedule entry,
+                // and would either fail further downstream in the accounting posting or, with accounting off, be
+                // committed in that broken state unnoticed.
+                throw new IllegalStateException("Reprocessing did not allocate WC loan transaction " + transaction.getId() + " on loan "
+                        + loanId + "; the loan most likely has no balance row, which reprocessing skips on");
+            }
         } else {
-            delinquencyRangeScheduleService.applyRepayment(loan, transactionDate, transactionAmount);
+            // Decide and materialize the allocation for this single transaction against the current balance (the
+            // charge-adjustment routing lives in the allocator), then persist the mutated aggregate.
+            final WorkingCapitalLoanTransactionAllocator.Result allocated = transactionAllocator.allocate(loan, balance, charges,
+                    transaction);
+            allocation = allocated.allocation();
+
+            chargeRepository.saveAll(charges);
+            balanceRepository.saveAndFlush(balance);
+            allocationRepository.saveAndFlush(allocation);
+            chargePaidByRepository.saveAll(allocated.chargesPaidBy());
+
+            // The amortization model records the principal on its actual day and recalculates forward.
+            amortizationScheduleWriteService.applyRepayment(loan, transactionDate, allocated.plan().principalPortion());
+
+            if (backdated) {
+                // Reaching here backdated means the loan is charge-free and stays within principal, so the allocation
+                // is principal-only regardless of sequence and the incremental apply above is already the final answer
+                // - no allocation replay is needed. Delinquency is date-driven rather than allocation-driven, though,
+                // so inserting a payment into an earlier period still requires rebuilding that schedule.
+                delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+            } else {
+                delinquencyRangeScheduleService.applyRepayment(loan, transactionDate, transactionAmount);
+            }
         }
+
         // Breach schedule is maintained incrementally here; reprocessing does not rebuild it.
         breachScheduleService.applyRepayment(loanId, transactionDate, transactionAmount);
 
-        stateMachine.determineAndTransition(loan, transactionDate, charges);
+        stateMachine.determineAndTransition(loan, transactionDate);
         triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
         // On early closure the loan leaves the COB scope, so any charge whose due-date accrual has not been posted yet
         // is accrued as of the closing date to make sure the income is recognized before the loan is closed.
         chargeAccrualService.accrueOnClosure(loan, transactionDate);
 
-        return allocation;
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            accountingProcessor.postJournalEntries(loan, transaction, allocation, loan.isChargedOff());
+        }
     }
 
-    private boolean isBackdatedTransaction(final List<WorkingCapitalLoanTransaction> allTransactions,
-            final WorkingCapitalLoanTransaction newTxn) {
-        // The same-date ID comparison is defensive only: the just-persisted transaction holds the highest
-        // ID, so in practice only a strictly later transaction date marks the new one as backdated.
-        return allTransactions.stream().filter(txn -> !txn.isReversed() && !txn.getId().equals(newTxn.getId()))
-                .anyMatch(txn -> txn.getTransactionDate().isAfter(newTxn.getTransactionDate())
-                        || (txn.getTransactionDate().equals(newTxn.getTransactionDate()) && txn.getId().compareTo(newTxn.getId()) > 0));
+    /**
+     * Whether nothing monetary sorts after this transaction: no later non-reversed transaction, and no active charge
+     * due on or after its date. When it holds, an incremental balance and schedule update is enough, because no other
+     * allocation can depend on this transaction. When it does not, the whole history has to be re-allocated.
+     */
+    public boolean isLastMonetaryAction(final WorkingCapitalLoanTransaction transaction) {
+        final Long loanId = transaction.getWcLoan().getId();
+        final OffsetDateTime createdDateTime = transaction.getCreatedDate().isPresent() ? transaction.getCreatedDate().get()
+                : DateUtils.getAuditOffsetDateTime();
+        return !transactionRepository.existsLaterTransaction(loanId, transaction.getTransactionDate(), createdDateTime)
+                && !chargeRepository.existsActiveChargeDueOnOrAfter(loanId, transaction.getTransactionDate(), createdDateTime);
     }
 
     public void triggerInlineAmortizationIfLoanClosed(final WorkingCapitalLoan loan, final LocalDate transactionDate) {

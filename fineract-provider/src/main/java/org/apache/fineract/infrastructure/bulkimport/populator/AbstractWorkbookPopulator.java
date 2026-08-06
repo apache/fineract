@@ -163,7 +163,15 @@ public abstract class AbstractWorkbookPopulator implements WorkbookPopulator {
      * See {@link Name#setNameName(String)} and https://issues.apache.org/jira/browse/FINERACT-1256.
      */
     protected void setSanitized(Name poiName, String roughName) {
-        String sanitized = NAME_REGEX.matcher(roughName.trim()).replaceAll("_");
-        poiName.setNameName(sanitized);
+        poiName.setNameName(sanitizeName(roughName));
+    }
+
+    /**
+     * The exact string {@link #setSanitized} would use as the Excel defined name. Use it as the de-duplication key when
+     * guarding name-keyed defined-name loops, so two source values that sanitise to the same name are treated as a
+     * collision (e.g. "TARGET SAVINGS" and "TARGET-SAVINGS" both sanitise to "TARGET_SAVINGS").
+     */
+    protected String sanitizeName(String roughName) {
+        return NAME_REGEX.matcher(roughName.trim()).replaceAll("_");
     }
 }

@@ -52,6 +52,7 @@ import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
+import org.apache.fineract.portfolio.workingcapitalloan.data.MarkWorkingCapitalLoanAsFraudRequest;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDelinquencyTagHistoryData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanPeriodPaymentRateChangeData;
@@ -157,6 +158,43 @@ public class WorkingCapitalLoanApiResource {
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         return modifyLoanApplication(loanId, null, apiRequestBodyAsJson);
+    }
+
+    @PUT
+    @Path("{loanId}/mark-as-fraud")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "markWorkingCapitalLoanAsFraudById", summary = "Mark or unmark a Working Capital Loan as fraudulent", description = "Flags the loan as fraudulent. When the loan is later charged off, a fraudulent loan is routed to the charge-off fraud expense account instead of the regular charge-off expense account. Does not change the loan status.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = MarkWorkingCapitalLoanAsFraudRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
+    public CommandProcessingResult markAsFraudById(
+            @PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+        return markAsFraud(loanId, null, apiRequestBodyAsJson);
+    }
+
+    @PUT
+    @Path("external-id/{loanExternalId}/mark-as-fraud")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "markWorkingCapitalLoanAsFraudByExternalId", summary = "Mark or unmark a Working Capital Loan as fraudulent by external id", description = "Flags the loan as fraudulent. When the loan is later charged off, a fraudulent loan is routed to the charge-off fraud expense account instead of the regular charge-off expense account. Does not change the loan status.")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = MarkWorkingCapitalLoanAsFraudRequest.class)))
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
+    public CommandProcessingResult markAsFraudByExternalId(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId", required = true) final String loanExternalId,
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+        return markAsFraud(null, loanExternalId, apiRequestBodyAsJson);
+    }
+
+    private CommandProcessingResult markAsFraud(final Long loanId, final String loanExternalIdStr, final String apiRequestBodyAsJson) {
+        final Long resolvedLoanId = loanId != null ? loanId
+                : readPlatformService.getResolvedLoanId(ExternalIdFactory.produce(loanExternalIdStr));
+        if (resolvedLoanId == null) {
+            throw new WorkingCapitalLoanNotFoundException(ExternalIdFactory.produce(loanExternalIdStr));
+        }
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson)
+                .markAsFraudWorkingCapitalLoan(resolvedLoanId).build();
+        return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
     }
 
     @DELETE

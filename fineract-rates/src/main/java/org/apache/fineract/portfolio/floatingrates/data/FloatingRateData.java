@@ -100,7 +100,6 @@ public class FloatingRateData implements Comparable<FloatingRateData>, Serializa
     }
 
     public static FloatingRateData toTemplate(List<EnumOptionData> interestRateFrequencyTypeOptions) {
-        // TODO Auto-generated method stub
         return new FloatingRateData(null, null, false, true, null, null, null, null, null, interestRateFrequencyTypeOptions);
     }
 }

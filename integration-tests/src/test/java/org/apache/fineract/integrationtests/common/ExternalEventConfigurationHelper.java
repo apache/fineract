@@ -65,15 +65,40 @@ public class ExternalEventConfigurationHelper {
         clientActivateBusinessEvent.put("enabled", false);
         defaults.add(clientActivateBusinessEvent);
 
+        Map<String, Object> clientCloseBusinessEvent = new HashMap<>();
+        clientCloseBusinessEvent.put("type", "ClientCloseBusinessEvent");
+        clientCloseBusinessEvent.put("enabled", false);
+        defaults.add(clientCloseBusinessEvent);
+
         Map<String, Object> clientCreateBusinessEvent = new HashMap<>();
         clientCreateBusinessEvent.put("type", "ClientCreateBusinessEvent");
         clientCreateBusinessEvent.put("enabled", false);
         defaults.add(clientCreateBusinessEvent);
 
+        Map<String, Object> clientReactivateBusinessEvent = new HashMap<>();
+        clientReactivateBusinessEvent.put("type", "ClientReactivateBusinessEvent");
+        clientReactivateBusinessEvent.put("enabled", false);
+        defaults.add(clientReactivateBusinessEvent);
+
         Map<String, Object> clientRejectBusinessEvent = new HashMap<>();
         clientRejectBusinessEvent.put("type", "ClientRejectBusinessEvent");
         clientRejectBusinessEvent.put("enabled", false);
         defaults.add(clientRejectBusinessEvent);
+
+        Map<String, Object> clientUndoRejectionBusinessEvent = new HashMap<>();
+        clientUndoRejectionBusinessEvent.put("type", "ClientUndoRejectionBusinessEvent");
+        clientUndoRejectionBusinessEvent.put("enabled", false);
+        defaults.add(clientUndoRejectionBusinessEvent);
+
+        Map<String, Object> clientUndoWithdrawalBusinessEvent = new HashMap<>();
+        clientUndoWithdrawalBusinessEvent.put("type", "ClientUndoWithdrawalBusinessEvent");
+        clientUndoWithdrawalBusinessEvent.put("enabled", false);
+        defaults.add(clientUndoWithdrawalBusinessEvent);
+
+        Map<String, Object> clientWithdrawBusinessEvent = new HashMap<>();
+        clientWithdrawBusinessEvent.put("type", "ClientWithdrawBusinessEvent");
+        clientWithdrawBusinessEvent.put("enabled", false);
+        defaults.add(clientWithdrawBusinessEvent);
 
         Map<String, Object> documentCreatedBusinessEvent = new HashMap<>();
         documentCreatedBusinessEvent.put("type", "DocumentCreatedBusinessEvent");
@@ -714,6 +739,56 @@ public class ExternalEventConfigurationHelper {
         workingCapitalLoanChargeAdjustmentPostBusinessEvent.put("type", "WorkingCapitalLoanChargeAdjustmentPostBusinessEvent");
         workingCapitalLoanChargeAdjustmentPostBusinessEvent.put("enabled", false);
         defaults.add(workingCapitalLoanChargeAdjustmentPostBusinessEvent);
+
+        Map<String, Object> workingCapitalLoanCreatedBusinessEvent = new HashMap<>();
+        workingCapitalLoanCreatedBusinessEvent.put("type", "WorkingCapitalLoanCreatedBusinessEvent");
+        workingCapitalLoanCreatedBusinessEvent.put("enabled", false);
+        defaults.add(workingCapitalLoanCreatedBusinessEvent);
+
+        Map<String, Object> workingCapitalLoanApplicationModifiedBusinessEvent = new HashMap<>();
+        workingCapitalLoanApplicationModifiedBusinessEvent.put("type", "WorkingCapitalLoanApplicationModifiedBusinessEvent");
+        workingCapitalLoanApplicationModifiedBusinessEvent.put("enabled", false);
+        defaults.add(workingCapitalLoanApplicationModifiedBusinessEvent);
+
+        Map<String, Object> workingCapitalLoanApprovedBusinessEvent = new HashMap<>();
+        workingCapitalLoanApprovedBusinessEvent.put("type", "WorkingCapitalLoanApprovedBusinessEvent");
+        workingCapitalLoanApprovedBusinessEvent.put("enabled", false);
+        defaults.add(workingCapitalLoanApprovedBusinessEvent);
+
+        Map<String, Object> workingCapitalLoanUndoApprovalBusinessEvent = new HashMap<>();
+        workingCapitalLoanUndoApprovalBusinessEvent.put("type", "WorkingCapitalLoanUndoApprovalBusinessEvent");
+        workingCapitalLoanUndoApprovalBusinessEvent.put("enabled", false);
+        defaults.add(workingCapitalLoanUndoApprovalBusinessEvent);
+
+        Map<String, Object> workingCapitalLoanRejectedBusinessEvent = new HashMap<>();
+        workingCapitalLoanRejectedBusinessEvent.put("type", "WorkingCapitalLoanRejectedBusinessEvent");
+        workingCapitalLoanRejectedBusinessEvent.put("enabled", false);
+        defaults.add(workingCapitalLoanRejectedBusinessEvent);
+
+        Map<String, Object> workingCapitalLoanDisbursalBusinessEvent = new HashMap<>();
+        workingCapitalLoanDisbursalBusinessEvent.put("type", "WorkingCapitalLoanDisbursalBusinessEvent");
+        workingCapitalLoanDisbursalBusinessEvent.put("enabled", false);
+        defaults.add(workingCapitalLoanDisbursalBusinessEvent);
+
+        Map<String, Object> workingCapitalLoanUndoDisbursalBusinessEvent = new HashMap<>();
+        workingCapitalLoanUndoDisbursalBusinessEvent.put("type", "WorkingCapitalLoanUndoDisbursalBusinessEvent");
+        workingCapitalLoanUndoDisbursalBusinessEvent.put("enabled", false);
+        defaults.add(workingCapitalLoanUndoDisbursalBusinessEvent);
+
+        Map<String, Object> workingCapitalLoanStatusChangedBusinessEvent = new HashMap<>();
+        workingCapitalLoanStatusChangedBusinessEvent.put("type", "WorkingCapitalLoanStatusChangedBusinessEvent");
+        workingCapitalLoanStatusChangedBusinessEvent.put("enabled", false);
+        defaults.add(workingCapitalLoanStatusChangedBusinessEvent);
+
+        Map<String, Object> workingCapitalLoanBalanceChangedBusinessEvent = new HashMap<>();
+        workingCapitalLoanBalanceChangedBusinessEvent.put("type", "WorkingCapitalLoanBalanceChangedBusinessEvent");
+        workingCapitalLoanBalanceChangedBusinessEvent.put("enabled", false);
+        defaults.add(workingCapitalLoanBalanceChangedBusinessEvent);
+
+        Map<String, Object> workingCapitalLoanDelinquencyRangeChangeBusinessEvent = new HashMap<>();
+        workingCapitalLoanDelinquencyRangeChangeBusinessEvent.put("type", "WorkingCapitalLoanDelinquencyRangeChangeBusinessEvent");
+        workingCapitalLoanDelinquencyRangeChangeBusinessEvent.put("enabled", false);
+        defaults.add(workingCapitalLoanDelinquencyRangeChangeBusinessEvent);
 
         return defaults;
     }

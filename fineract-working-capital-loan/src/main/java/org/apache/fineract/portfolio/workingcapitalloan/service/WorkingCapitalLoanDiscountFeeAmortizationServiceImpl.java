@@ -81,14 +81,14 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
             return;
         }
 
-        // Charge-off accounting is out of scope here (see the full-discount note above), so amortization is always
-        // posted as not-charged-off.
+        // On a charged-off loan the recognized amortization is routed to the charge-off expense account instead of
+        // discount-fee income (handled by the accounting processor via the isChargedOff flag).
         if (MathUtil.isGreaterThanZero(amortizationAmount)) {
             final WorkingCapitalLoanTransaction amortizationTxn = WorkingCapitalLoanTransaction.discountFeeAmortization(loan,
                     amortizationAmount, transactionDate, externalIdFactory.create());
             transactionRepository.saveAndFlush(amortizationTxn);
             if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-                accountingProcessor.postJournalEntriesForDiscountFeeAmortization(loan, amortizationTxn, false);
+                accountingProcessor.postJournalEntriesForDiscountFeeAmortization(loan, amortizationTxn, loan.isChargedOff());
             }
         } else {
             final BigDecimal adjustmentAmount = amortizationAmount.negate();
@@ -97,7 +97,7 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
             linkToTriggeringDiscountAdjustment(loan, adjustmentTxn);
             transactionRepository.saveAndFlush(adjustmentTxn);
             if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-                accountingProcessor.postJournalEntriesForDiscountFeeAmortizationAdjustment(loan, adjustmentTxn, false);
+                accountingProcessor.postJournalEntriesForDiscountFeeAmortizationAdjustment(loan, adjustmentTxn, loan.isChargedOff());
             }
         }
 

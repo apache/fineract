@@ -214,7 +214,8 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                 }
             }
         } catch (final IOException e) {
-            // TODO throw something here
+            log.error("Failed to parse campaign params while inserting direct campaign into email outbound table for campaign {} ({})",
+                    emailCampaign.getId(), emailCampaign.getCampaignName(), e);
         }
 
     }
@@ -247,7 +248,8 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                 }
             }
         } catch (final IOException e) {
-            // TODO throw something here
+            log.error("Failed to parse campaign params while inserting direct campaign into email outbound table for campaign {} ({})",
+                    campaignId, campaignName, e);
         }
 
     }
@@ -410,7 +412,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                 }
             }
         } catch (final IOException e) {
-            // TODO throw something here
+            log.error("Failed to parse campaign params while generating email campaign preview message", e);
         }
 
         return campaignMessage;

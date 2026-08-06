@@ -29,10 +29,11 @@ Feature: Working Capital Transaction Reprocessing
       | overpaymentAmount    | 0.0    |
     # The backdated repayment allocates fully to principal; the earlier repayment stays untouched
     And Working Capital Loan has transactions:
-      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 05 January 2026 | Repayment    | 2000.0            | 2000.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | submittedOnDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | 15 January 2026 | Repayment    | 2000.0            | 2000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
   @TestRailId:C85209
   Scenario: Verify backdated repayment that overpays - excess becomes overpayment
@@ -88,11 +89,12 @@ Feature: Working Capital Transaction Reprocessing
       | totalPaidPrincipal   | 6000.0 |
       | overpaymentAmount    | 0.0    |
     And Working Capital Loan has transactions:
-      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 05 January 2026 | Repayment    | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Repayment    | 2000.0            | 2000.0           | 0.0               | 0.0                   | false    |
-      | 15 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | submittedOnDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | 20 January 2026 | Repayment    | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | 20 January 2026 | Repayment    | 2000.0            | 2000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | 15 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
   @TestRailId:C85211
   Scenario: Verify sequential (non-backdated) repayments do not trigger reprocessing side effects
@@ -113,10 +115,11 @@ Feature: Working Capital Transaction Reprocessing
       | totalPaidPrincipal   | 5000.0 |
       | overpaymentAmount    | 0.0    |
     And Working Capital Loan has transactions:
-      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 05 January 2026 | Repayment    | 2000.0            | 2000.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | submittedOnDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | 05 January 2026 | Repayment    | 2000.0            | 2000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
   @TestRailId:C85212
   Scenario: Verify backdated repayment only settles a charge that is already due on the backdated date
@@ -141,13 +144,14 @@ Feature: Working Capital Transaction Reprocessing
       | totalPaidPrincipal   | 4965.0 |
     # The day-5 repayment predates the fee due date, so it is principal-only; the day-10 repayment covers the fee
     And Working Capital Loan has transactions:
-      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 05 January 2026 | Repayment    | 2000.0            | 2000.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Repayment    | 3000.0            | 2965.0           | 35.0              | 0.0                   | false    |
+      | transactionDate | submittedOnDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | 15 January 2026 | Repayment    | 2000.0            | 2000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | 10 January 2026 | Repayment    | 3000.0            | 2965.0           | 35.0              | 0.0                   | false    |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Paid | Fee Outstanding |
       | 35.0       | 35.0     | 0.0             |
+    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
   @TestRailId:C85213
   Scenario: Verify a repayment clearing more than one lapsed delinquency period distributes by remaining balance
@@ -171,6 +175,7 @@ Feature: Working Capital Transaction Reprocessing
       | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
       | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 130.0      | 140.0             | false                 | 140.0            | 1              |
       | 3            | 2026-03-02 | 2026-03-31 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with a full repayment on "02 March 2026"
 
   @TestRailId:C85214
   Scenario: Verify backdated repayment is recorded on its actual day and the amortization balance is recalculated
@@ -195,6 +200,7 @@ Feature: Working Capital Transaction Reprocessing
     Then The retrieved amortization schedule has the following summary fields:
       | discountFeeAmount | netDisbursementAmount | totalPaymentVolume | periodPaymentRate | npvDayCount | expectedPaymentAmount |
       | 0.00              | 9000.00               | 100000.00          | 18                | 360         | 50.00                 |
+    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
   @TestRailId:C85215
   Scenario: Verify backdated repayment reduces the outstanding tracked by the breach schedule
@@ -213,6 +219,7 @@ Feature: Working Capital Transaction Reprocessing
     And Customer makes repayment on "05 January 2026" with 2000 transaction amount on Working Capital loan
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has 1 period
+    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
   @TestRailId:C85216
   Scenario: Verify backdated repayment re-allocates the later transaction's fee portion to principal
@@ -251,6 +258,7 @@ Feature: Working Capital Transaction Reprocessing
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Repayment    | 25.0              | 20.0             | 5.0               | 0.0                   | false    |
       | 10 January 2026 | Repayment    | 30.0              | 30.0             | 0.0               | 0.0                   | false    |
+    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
   @TestRailId:C85217
   Scenario: Verify reversal of a transaction re-allocates the remaining transaction's fee portion
@@ -289,6 +297,7 @@ Feature: Working Capital Transaction Reprocessing
       | field                | value  |
       | principalOutstanding | 8980.0 |
       | totalPaidPrincipal   | 20.0   |
+    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
   @TestRailId:C85218
   Scenario: Verify a repayment splits across fee and principal per the product's allocation order
@@ -317,6 +326,7 @@ Feature: Working Capital Transaction Reprocessing
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Paid | Fee Outstanding |
       | 5.0        | 5.0      | 0.0             |
+    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
   @TestRailId:C85460
   Scenario: Verify backdated repayment reprocessing preserves an earlier charge adjustment's settlement
@@ -358,6 +368,7 @@ Feature: Working Capital Transaction Reprocessing
       | field                | value  |
       | principalOutstanding | 8950.0 |
       | totalPaidPrincipal   | 50.0   |
+    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
   @TestRailId:C85461
   Scenario: Verify backdated repayment that overpays redistributes allocations chronologically
@@ -386,3 +397,28 @@ Feature: Working Capital Transaction Reprocessing
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Repayment    | 5000.0            | 5000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Repayment    | 7000.0            | 4000.0           | 0.0               | 0.0                   | false    |
+
+  @TestRailId:C89813
+  Scenario: Verify backdated repayment re-attributes the fee's charge paid-by row to the earlier transaction
+    # R1 (day 20) settles a 100 fee, so its paid-by row initially carries the fee.
+    # Backdated R2 (day 10) settles the fee first on chronological replay, so the paid-by row must move to R2.
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 January 2026" due date and 100.0 transaction amount
+    When Admin sets the business date to "20 January 2026"
+    And Customer makes repayment on "20 January 2026" with 100 transaction amount on Working Capital loan
+    Then Working Capital Loan "REPAYMENT" transaction on "20 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 100.0  |
+    When Admin sets the business date to "25 January 2026"
+    And Customer makes repayment on "10 January 2026" with 100 transaction amount on Working Capital loan
+    Then Working Capital Loan "REPAYMENT" transaction on "10 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 100.0  |
+    And Working Capital Loan "REPAYMENT" transaction on "20 January 2026" has the following charge paid-by data:
+      | Charge Name | Amount |

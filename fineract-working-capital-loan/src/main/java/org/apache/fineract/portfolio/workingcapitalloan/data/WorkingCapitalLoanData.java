@@ -27,6 +27,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
@@ -107,4 +108,6 @@ public class WorkingCapitalLoanData implements Serializable {
     private List<LoanOriginatorData> originators;
     private Boolean fraud;
     private Boolean chargedOff;
+    private LocalDate chargedOffOnDate;
+    private CodeValueData chargeOffReason;
 }

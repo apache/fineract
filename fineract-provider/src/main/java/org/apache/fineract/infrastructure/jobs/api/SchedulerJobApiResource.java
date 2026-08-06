@@ -180,8 +180,9 @@ public class SchedulerJobApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Job", description = "Updates the details of a job.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.PutJobsJobIDRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK")
-    public String updateJobDetail(@PathParam(SchedulerJobApiConstants.JOB_ID) @Parameter(description = "jobId") final Long jobId,
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
+    public CommandProcessingResult updateJobDetail(
+            @PathParam(SchedulerJobApiConstants.JOB_ID) @Parameter(description = "jobId") final Long jobId,
             @Parameter(hidden = true) final String jsonRequestBody) {
         return updateJobDetail(IdTypeResolver.resolveDefault(), Objects.toString(jobId, null), jsonRequestBody);
     }
@@ -191,8 +192,8 @@ public class SchedulerJobApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Update a Job", description = "Updates the details of a job.")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.PutJobsJobIDRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK")
-    public String updateJobDetailByShortName(
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = CommandProcessingResult.class)))
+    public CommandProcessingResult updateJobDetailByShortName(
             @PathParam("shortName") @Parameter(required = true, description = SchedulerJobApiConstants.SHORT_NAME_PARAM) final String shortName,
             @Parameter(hidden = true) final String jsonRequestBody) {
         return updateJobDetail(IdTypeResolver.resolve(SHORT_NAME_PARAM), shortName, jsonRequestBody);
@@ -250,7 +251,7 @@ public class SchedulerJobApiResource {
         return response;
     }
 
-    private String updateJobDetail(@NotNull IdTypeResolver.IdType idType, String identifier, String jsonRequestBody) {
+    private CommandProcessingResult updateJobDetail(@NotNull IdTypeResolver.IdType idType, String identifier, String jsonRequestBody) {
         Long jobId = schedulerJobRunnerReadService.retrieveId(idType, identifier);
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateJobDetail(jobId) //
@@ -261,6 +262,6 @@ public class SchedulerJobApiResource {
                 || result.getChanges().containsKey(SchedulerJobApiConstants.cronExpressionParamName))) {
             this.jobRegisterService.rescheduleJob(jobId);
         }
-        return this.toApiJsonSerializer.serialize(result);
+        return result;
     }
 }

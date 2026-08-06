@@ -155,6 +155,26 @@ public final class WorkingCapitalLoanDisbursementTestBuilder {
         return buildTransactionRequest(transactionDate, transactionAmount, classificationId, note, paymentTypeId, accountNumber, null);
     }
 
+    public static PostWorkingCapitalLoanTransactionsRequest buildChargeOffRequest(final LocalDate transactionDate, final String note) {
+        final PostWorkingCapitalLoanTransactionsRequest request = new PostWorkingCapitalLoanTransactionsRequest().locale(DEFAULT_LOCALE)
+                .dateFormat(DEFAULT_DATE_FORMAT);
+        if (transactionDate != null) {
+            request.transactionDate(format(transactionDate));
+        }
+        if (note != null) {
+            request.note(note);
+        }
+        return request;
+    }
+
+    public static PostWorkingCapitalLoanTransactionsRequest buildUndoChargeOffRequest(final String note) {
+        final PostWorkingCapitalLoanTransactionsRequest request = new PostWorkingCapitalLoanTransactionsRequest().locale(DEFAULT_LOCALE);
+        if (note != null) {
+            request.note(note);
+        }
+        return request;
+    }
+
     private static PostWorkingCapitalLoansLoanIdRequest baseLoanIdRequest() {
         return new PostWorkingCapitalLoansLoanIdRequest().locale(DEFAULT_LOCALE).dateFormat(DEFAULT_DATE_FORMAT);
     }

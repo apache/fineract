@@ -16,28 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.organisation.teller.handler;
+package org.apache.fineract.portfolio.workingcapitalloan.handler;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.commands.annotation.CommandType;
 import org.apache.fineract.commands.handler.NewCommandSourceHandler;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.organisation.teller.service.CashierWritePlatformService;
+import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanFraudWriteService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Handles a modify cashier command.
- *
- * @author Markus Geiss
- * @see org.apache.fineract.organisation.teller.service.CashierWritePlatformService
- * @since 2.0.0
- */
+@Service
 @RequiredArgsConstructor
-public class ModifyCashierCommandHandler implements NewCommandSourceHandler {
+@CommandType(entity = "WORKINGCAPITALLOAN", action = "SETFRAUD")
+public class MarkWorkingCapitalLoanAsFraudCommandHandler implements NewCommandSourceHandler {
 
-    private final CashierWritePlatformService writePlatformService;
+    private final WorkingCapitalLoanFraudWriteService writeService;
 
+    @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.modifyCashier(command.entityId(), command);
+        return this.writeService.markAsFraud(command.entityId(), command);
     }
 }

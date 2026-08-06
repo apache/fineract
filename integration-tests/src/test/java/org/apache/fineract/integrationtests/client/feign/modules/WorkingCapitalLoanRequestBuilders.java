@@ -122,4 +122,12 @@ public final class WorkingCapitalLoanRequestBuilders {
     public static PostWorkingCapitalLoansLoanIdChargesChargeIdRequest chargeAdjustment(BigDecimal amount) {
         return new PostWorkingCapitalLoansLoanIdChargesChargeIdRequest().amount(amount).locale(LOCALE).dateFormat(DATE_FORMAT);
     }
+
+    public static PostWorkingCapitalLoanTransactionsRequest creditBalanceRefund(BigDecimal amount, String transactionDate) {
+        return repayment(amount, transactionDate);
+    }
+
+    public static ExecuteWorkingCapitalLoanTransactionCommandRequest reversal() {
+        return new ExecuteWorkingCapitalLoanTransactionCommandRequest();
+    }
 }

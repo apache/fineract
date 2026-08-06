@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -52,6 +53,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.NearBreachActionT
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
@@ -64,6 +66,7 @@ public class WorkingCapitalLoanDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
     private final ExpectedDisbursementDateValidator expectedDisbursementDateValidator;
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
+    private final WorkingCapitalLoanTransactionFinder transactionFinder;
     private final CodeValueRepository codeValueRepository;
     private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
 
@@ -85,8 +88,8 @@ public class WorkingCapitalLoanDataValidator {
             WorkingCapitalLoanConstants.paymentDetailsParamName, WorkingCapitalLoanConstants.externalIdParameterName,
             WorkingCapitalLoanConstants.discountExternalIdParameterName, WorkingCapitalLoanConstants.classificationIdParamName));
 
-    private static final Set<String> UNDO_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(
-            Arrays.asList("locale", WorkingCapitalLoanConstants.reversalExternalIdParamName, WorkingCapitalLoanConstants.noteParamName));
+    private static final Set<String> UNDO_TRANSACTION_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
+            WorkingCapitalLoanConstants.reversalExternalIdParamName, WorkingCapitalLoanConstants.noteParamName));
 
     private static final Set<String> PAYMENT_DETAILS_SUPPORTED_PARAMETERS = new HashSet<>(
             Arrays.asList(WorkingCapitalLoanConstants.paymentTypeIdParamName, WorkingCapitalLoanConstants.accountNumberParamName,
@@ -110,6 +113,13 @@ public class WorkingCapitalLoanDataValidator {
                     WorkingCapitalLoanConstants.relatedResourceIdParamName, WorkingCapitalLoanConstants.paymentDetailsParamName,
                     WorkingCapitalLoanConstants.externalIdParameterName, WorkingCapitalLoanConstants.transactionDateParamName));
     private static final Set<String> CREDIT_BALANCE_REFUND_SUPPORTED_PARAMETERS = new HashSet<>(REPAYMENT_SUPPORTED_PARAMETERS);
+
+    private static final Set<String> CHARGE_OFF_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
+            WorkingCapitalLoanConstants.transactionDateParamName, WorkingCapitalLoanConstants.chargeOffReasonIdParamName,
+            WorkingCapitalLoanConstants.noteParamName, WorkingCapitalLoanConstants.externalIdParameterName));
+
+    private static final Set<String> UNDO_CHARGE_OFF_SUPPORTED_PARAMETERS = new HashSet<>(
+            Arrays.asList("locale", WorkingCapitalLoanConstants.reversalExternalIdParamName, WorkingCapitalLoanConstants.noteParamName));
 
     private static final Set<String> UPDATE_RATE_SUPPORTED_PARAMETERS = new HashSet<>(
             Arrays.asList(WorkingCapitalLoanConstants.localeParameterName, WorkingCapitalLoanConstants.periodPaymentRateParamName,
@@ -275,9 +285,11 @@ public class WorkingCapitalLoanDataValidator {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanProductRelatedDetailsParamName)
                     .failWithCode("discount.not.available");
         }
-        if (loan.getLoanStatus() == null || !loan.getLoanStatus().isActive()) {
+        final LoanStatus loanStatus = loan.getLoanStatus();
+        final boolean undoAllowedForStatus = LoanStatus.ACTIVE.equals(loanStatus) || LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loanStatus);
+        if (!undoAllowedForStatus) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
-                    .failWithCode("undo.discount.adjustment.only.allowed.for.active.loan");
+                    .failWithCode("undo.transaction.not.allowed.for.loan.status");
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -948,6 +960,101 @@ public class WorkingCapitalLoanDataValidator {
         if (!undoAllowedForStatus) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
                     .failWithCode("undo.transaction.not.allowed.for.loan.status");
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateChargeOff(final JsonCommand command, final WorkingCapitalLoan loan) {
+        final String json = command.getJsonCommand();
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, CHARGE_OFF_SUPPORTED_PARAMETERS);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        // The loan must be active; charge-off keeps it ACTIVE and has no portfolio impact.
+        if (!LoanStatus.ACTIVE.equals(loan.getLoanStatus())) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
+                    .failWithCode("error.msg.wc.loan.is.not.active");
+        }
+        // A loan cannot be charged off twice.
+        if (loan.isChargedOff()) {
+            baseDataValidator.reset().parameter("chargedOff").failWithCode("error.msg.wc.loan.is.already.charged.off");
+        }
+
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.transactionDateParamName,
+                element);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate).notNull();
+        if (transactionDate != null) {
+            // Charge-off can be backdated, but not into the future nor before the last transaction.
+            if (DateUtils.isDateInTheFuture(transactionDate)) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate)
+                        .failWithCode("cannot.be.a.future.date");
+            }
+            final LocalDate lastUserTransactionDate = this.transactionFinder.getLastUserTransactionDate(loan).orElse(null);
+            if (lastUserTransactionDate != null && DateUtils.isBefore(transactionDate, lastUserTransactionDate)) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate)
+                        .failWithCode("cannot.be.before.last.transaction.date");
+            }
+        }
+
+        // Charge-off reason is optional.
+        final Long chargeOffReasonId = this.fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanConstants.chargeOffReasonIdParamName,
+                element);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.chargeOffReasonIdParamName).value(chargeOffReasonId).ignoreIfNull()
+                .integerGreaterThanZero();
+
+        final String note = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.noteParamName, element);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.noteParamName).value(note).ignoreIfNull()
+                .notExceedingLengthOf(1000);
+
+        validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.externalIdParameterName);
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateUndoChargeOff(final JsonCommand command, final WorkingCapitalLoan loan) {
+        final String json = command.getJsonCommand();
+        final boolean hasBody = StringUtils.isNotBlank(json);
+        if (hasBody) {
+            final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+            this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, UNDO_CHARGE_OFF_SUPPORTED_PARAMETERS);
+        }
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
+
+        if (!loan.isChargedOff()) {
+            baseDataValidator.reset().parameter("chargedOff").failWithCode("error.msg.wc.loan.is.not.charged.off");
+        } else {
+            final WorkingCapitalLoanTransaction chargeOffTransaction = this.transactionFinder.findChargedOffTransaction(loan)
+                    .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.wc.loan.charge.off.transaction.not.found",
+                            "No active charge-off transaction found for loan " + loan.getId(), loan.getId()));
+
+            // The charge-off can only be undone when it is the last user transaction (compared by id, since transaction
+            // equality is identity-based and both lookups may return distinct instances).
+            final boolean chargeOffIsLastUserTransaction = this.transactionFinder.getLastUserTransaction(loan)
+                    .map(lastUserTransaction -> lastUserTransaction.getId().equals(chargeOffTransaction.getId())).orElse(false);
+            if (!chargeOffIsLastUserTransaction) {
+                throw new GeneralPlatformDomainRuleException("error.msg.wc.loan.charge.off.is.not.the.last.user.transaction",
+                        "Loan: " + loan.getId() + " charge-off cannot be undone. User transaction was found after charge-off!",
+                        loan.getId());
+            }
+        }
+
+        if (hasBody) {
+            final JsonElement element = this.fromApiJsonHelper.parse(json);
+            validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.reversalExternalIdParamName);
+            final String note = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.noteParamName, element);
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.noteParamName).value(note).ignoreIfNull()
+                    .notExceedingLengthOf(1000);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

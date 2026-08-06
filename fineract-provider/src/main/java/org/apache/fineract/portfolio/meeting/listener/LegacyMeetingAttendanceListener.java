@@ -226,7 +226,7 @@ final class LegacyMeetingAttendanceListener {
         var calendarForUpdate = this.calendarRepository.findById(calendarId).orElseThrow(() -> new CalendarNotFoundException(calendarId));
 
         Long entityId = null;// command.getSupportedEntityId();
-        CalendarEntityType entityType = CalendarEntityType.INVALID;// CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase());
+        CalendarEntityType entityType = CalendarEntityType.INVALID;// CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase(Locale.ROOT));
         if (command.getLoanId() != null) {
             entityId = command.getLoanId();
             entityType = CalendarEntityType.LOANS;

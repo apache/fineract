@@ -53,12 +53,9 @@ All scripts/configs used in build/dev/test, GitHub actions, and the project webs
 - **Physical access to the database server:** If an attacker has OS-level access to the PostgreSQL/MariaDB host, the project assumes the game is already lost.
 - **Network-level DDoS:** The embedded Tomcat has configurable connection limits, but volumetric DDoS mitigation is explicitly left to the reverse proxy / cloud provider.
 
-### Proper reporting
+### Improper security report
 
-* Security reports must be private.
-* Reports must refer to a release version or a commit on the `develop` (main integration) branch.
-* Reports should include repro steps and example data (API calls or a loadable database dump).
-* Repro steps must be performed directly on a running Fineract backend (API server), not `demo.mifos.org` nor `sandbox.mifos.community` nor any other third-party demo/deployment.
+Follow our [guidance for submitting security reports](https://github.com/apache/fineract/blob/develop/CONTRIBUTING.md#security-reports) to avoid delays, confusion, and rejection.
 
 ## §4 Trust boundaries and data flow
 

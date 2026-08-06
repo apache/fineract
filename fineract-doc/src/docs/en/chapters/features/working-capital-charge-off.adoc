@@ -1,0 +1,253 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+= Working Capital Loan Charge-Off
+
+This documentation describes the Charge-Off feature for Working Capital Loans.
+
+Charge-off marks a loan account as charged off for accounting purposes. In the Working Capital Loan
+module it is modeled as a *pure accounting tag with no portfolio impact*: the loan stays `ACTIVE`, its
+schedule and balance are unchanged, and all other actions and calculations behave exactly as they do on
+a loan that is not charged off. This differs from the Term Loan implementation, whose charge-off carries
+interest-recalculation behaviour — Working Capital Loans have no interest concept, so that machinery does
+not apply here.
+
+[NOTE]
+====
+Charge-off is an accounting treatment only. It does not change the schedule, balance or delinquency
+data returned by the existing Working Capital Loan APIs; the loan resource only gains the charged-off
+state fields (see <<wc-charge-off-read-model>>). The loan remains `ACTIVE` until its balance is cured, and the
+charged-off tag is never removed automatically — even if the loan is subsequently paid off. It is
+cleared only by an explicit undo.
+====
+
+== Charge-Off a Loan
+
+Marks the loan account as charged off and creates a non-monetary charge-off transaction.
+
+* *Endpoint*: `POST /working-capital-loans/{loanId}/transactions?command=chargeOff`
+* *Permission*: `CHARGEOFF_WORKINGCAPITALLOAN`
+
+=== Supported Fields
+
+==== Mandatory Fields
+
+* `transactionDate`
+** The charge-off date. It may be backdated but must not be in the future, and must not be earlier than
+the last user transaction date (system transactions such as accrual or discount-fee amortization are ignored).
+
+* `locale`
+
+* `dateFormat`
+
+==== Optional Fields
+
+* `chargeOffReasonId`
+** Code value id from the `ChargeOffReasons` code.
+
+* `note`
+** Free-text note (up to 1000 characters).
+
+* `externalId`
+** External identifier for the charge-off transaction (up to 100 characters).
+
+=== Behaviour
+
+* A non-monetary `CHARGE_OFF` transaction is created for the charge-off amount, which is the outstanding
+balance as of the charge-off date. The charge-off date cannot precede the last user transaction, and system
+transactions do not move the balance, so the current outstanding balance equals the as-of-date balance.
+* The transaction does *not* move the loan balance and is excluded from transaction replay.
+* The loan is flagged as charged off (`chargedOff = true`) and remains `ACTIVE`.
+* All credit transactions — repayment, goodwill credit, payout refund, credit balance refund — and payment,
+waiver or adjustment of *existing* charges remain allowed afterwards, so the balance can still be cured.
+Only their accounting treatment changes (see <<wc-charge-off-accounting>>); the loan otherwise behaves like
+a loan that is not charged off.
+* Adding a *new* charge is the single action blocked while the loan is charged off.
+
+.Charge-off request/response flow
+[plantuml,format=svg]
+....
+@startuml
+actor User
+participant "Transactions API" as API
+participant "ChargeOff Write Service" as SVC
+participant "Accounting Processor" as ACC
+database "m_wc_loan" as DB
+
+User -> API : POST .../transactions?command=chargeOff
+API -> SVC : chargeOff(loanId, command)
+SVC -> SVC : validate (active, not already charged off, date rules)
+SVC -> DB : mark loan charged off + create CHARGE_OFF txn
+SVC -> ACC : post charge-off journal entries
+SVC --> User : transaction id
+@enduml
+....
+
+== Undo Charge-Off
+
+Reverses a charge-off that was applied in error.
+
+* *Endpoint*: `POST /working-capital-loans/{loanId}/transactions?command=undoChargeOff`
+* *Permission*: `UNDOCHARGEOFF_WORKINGCAPITALLOAN`
+
+Undo removes the charged-off tag, reverses the charge-off transaction and reverses its journal entries.
+It is only allowed when the charge-off is still the last user transaction, that is, when no user transaction
+has been posted after it (the same restriction as term and progressive loans). System transactions
+(accrual and discount-fee amortization) are not user transactions and therefore do not block undo.
+
+== Charge-Off Template
+
+Returns the data needed to prefill the charge-off form.
+
+* *Endpoint*: `GET /working-capital-loans/{loanId}/template?templateType=chargeOff`
+
+[cols="1,3"]
+|===
+|*Field* |*Description*
+
+|`chargeOffAmount`
+|Auto-calculated outstanding balance as of the charge-off date. Read-only.
+
+|`chargeOffDate`
+|Suggested charge-off date, defaulting to the current business date.
+
+|`chargeOffReasonOptions`
+|Available `ChargeOffReasons` code values.
+
+|`currency`
+|Loan currency.
+|===
+
+[#wc-charge-off-read-model]
+== Loan Read Model
+
+The Working Capital Loan resource exposes the charged-off state:
+
+[cols="1,3"]
+|===
+|*Field* |*Description*
+
+|`chargedOff`
+|`true` when the loan is charged off, otherwise `false`.
+
+|`chargedOffOnDate`
+|The charge-off date. Only present while the loan is charged off.
+
+|`chargeOffReason`
+|The `ChargeOffReasons` code value selected at charge-off time, when one was provided.
+|===
+
+== Validations
+
+[cols="1,3,2"]
+|===
+|*Operation* |*Rule* |*Error code*
+
+|Charge-off |The loan must be active. |`error.msg.wc.loan.is.not.active`
+|Charge-off |The loan must not already be charged off. |`error.msg.wc.loan.is.already.charged.off`
+|Charge-off |The charge-off date must not be earlier than the last user transaction date. |`cannot.be.before.last.transaction.date`
+|Charge-off |The charge-off date must not be in the future. |`cannot.be.a.future.date`
+|Add charge |New charges cannot be added once the loan is charged off. |`error.msg.wc.loan.is.charged.off`
+|Undo charge-off |The loan must be charged off. |`error.msg.wc.loan.is.not.charged.off`
+|Undo charge-off |Undo is not allowed if any user transaction was posted after the charge-off. |`error.msg.wc.loan.charge.off.is.not.the.last.user.transaction`
+|===
+
+[NOTE]
+====
+A second charge-off on an already charged-off loan, and a second undo on a loan that is not charged off,
+both return a validation error.
+====
+
+[#wc-charge-off-accounting]
+== Accounting
+
+Charge-off accounting applies to products configured with the *Accrual (deferred revenue amortization)*
+accounting rule. The charge-off transaction writes off the outstanding receivables against the charge-off
+expense. There is no interest leg — Working Capital Loans have no interest concept.
+
+[cols="1,2,2"]
+|===
+|*Portion* |*Debit* |*Credit*
+
+|Principal |`CHARGE_OFF_EXPENSE` |`LOAN_PORTFOLIO`
+|Fee |`INCOME_FROM_CHARGE_OFF_FEES` |`FEES_RECEIVABLE`
+|Penalty |`INCOME_FROM_CHARGE_OFF_PENALTY` |`PENALTIES_RECEIVABLE`
+|===
+
+Undo reverses these journal entries. The charge-off General Ledger accounts are configured per product
+through the Working Capital Loan product accounting mapping.
+
+=== While the Loan Is Charged Off
+
+Transactions posted while the loan carries the charged-off tag are accepted as usual, but their accounting
+treatment changes: credits that would normally reduce the portfolio or receivables — already written off by
+the charge-off — instead recognize recovery income or reverse what the charge-off recognized, and
+discount-fee amortization is recognized against the charge-off expense instead of discount-fee income.
+
+[cols="2,2,3"]
+|===
+|*Transaction* |*Debit* |*Credit*
+
+|Repayment
+|`FUND_SOURCE`
+|`INCOME_FROM_RECOVERY` for the principal, fee and penalty portions; `OVERPAYMENT` for any overpaid
+excess
+
+|Goodwill credit
+|`GOODWILL_CREDIT` for the principal and overpayment portions,
+`INCOME_FROM_GOODWILL_CREDIT_FEES` / `INCOME_FROM_GOODWILL_CREDIT_PENALTY` per portion (unchanged)
+|`INCOME_FROM_RECOVERY` for the principal, fee and penalty portions; `OVERPAYMENT` for any overpaid
+excess
+
+|Payout refund
+|`FUND_SOURCE`
+|`CHARGE_OFF_EXPENSE` for the principal portion, `INCOME_FROM_CHARGE_OFF_FEES` /
+`INCOME_FROM_CHARGE_OFF_PENALTY` per portion — reversing what the charge-off recognized; `OVERPAYMENT` for
+any overpaid excess
+
+|Charge adjustment
+|`INCOME_FROM_RECOVERY`
+|`LOAN_PORTFOLIO` / `FEES_RECEIVABLE` / `PENALTIES_RECEIVABLE` per portion
+
+|Discount-fee amortization
+|`DEFERRED_INCOME_LIABILITY`
+|`CHARGE_OFF_EXPENSE` (instead of `INCOME_FROM_DISCOUNT_FEE`)
+|===
+
+Charge accrual keeps its regular treatment (receivable against fee/penalty income). Once the
+charge-off is undone, subsequent transactions return to the regular accounting treatment.
+
+== Permissions
+
+[cols="1,1,1"]
+|===
+|*Code* |*Entity* |*Action*
+
+|`CHARGEOFF_WORKINGCAPITALLOAN` |`WORKINGCAPITALLOAN` |`CHARGEOFF`
+|`UNDOCHARGEOFF_WORKINGCAPITALLOAN` |`WORKINGCAPITALLOAN` |`UNDOCHARGEOFF`
+|===
+
+== Out of Scope
+
+The following are intentionally not part of the first version:
+
+* Overriding the charge-off expense account per charge-off reason (currently the default
+`CHARGE_OFF_EXPENSE` account is used).
+* Fraud-expense routing (`CHARGE_OFF_FRAUD_EXPENSE`), which depends on the Working Capital Loan fraud
+feature.

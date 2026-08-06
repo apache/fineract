@@ -19,6 +19,9 @@
 
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import static org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyPauseUtils.isPauseActiveOnDate;
+import static org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyPauseUtils.resolveEffectivePauseEnd;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -27,12 +30,16 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
+import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCollectionData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDelinquencyTagHistoryData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanRangeScheduleDelinquencyData;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeScheduleTagHistory;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryMapper;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository;
 import org.springframework.stereotype.Service;
@@ -47,6 +54,7 @@ public class WorkingCapitalLoanDelinquencyReadPlatformServiceImpl implements Wor
     private final WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryMapper delinquencyRangeScheduleTagHistoryMapper;
     private final WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository delinquencyRangeScheduleTagHistoryRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleRepository delinquencyRangeScheduleRepository;
+    private final WorkingCapitalLoanDelinquencyActionRepository delinquencyActionRepository;
 
     @Override
     public WorkingCapitalLoanCollectionData getCollectionData(Long loanId, LocalDate businessDate) {
@@ -73,8 +81,24 @@ public class WorkingCapitalLoanDelinquencyReadPlatformServiceImpl implements Wor
                 .map(WorkingCapitalLoanDelinquencyRangeSchedule::getDelinquentDays).ifPresent(template::setPastDueDays);
 
         template.setInstallmentLevelDelinquency(list);
+        template.setDelinquencyPausePeriods(retrieveDelinquencyPausePeriods(loanId, businessDate));
 
         return template;
+    }
+
+    private List<DelinquencyPausePeriod> retrieveDelinquencyPausePeriods(final Long loanId, final LocalDate businessDate) {
+        final List<WorkingCapitalLoanDelinquencyAction> pauses = delinquencyActionRepository
+                .findByWorkingCapitalLoanIdAndActionOrderByStartDateAsc(loanId, DelinquencyAction.PAUSE);
+        final List<WorkingCapitalLoanDelinquencyAction> resumes = delinquencyActionRepository
+                .findByWorkingCapitalLoanIdAndActionOrderByStartDateAsc(loanId, DelinquencyAction.RESUME);
+        return pauses.stream().map(pause -> toPausePeriod(pause, resumes, businessDate)).toList();
+    }
+
+    private DelinquencyPausePeriod toPausePeriod(final WorkingCapitalLoanDelinquencyAction pause,
+            final List<WorkingCapitalLoanDelinquencyAction> resumes, final LocalDate businessDate) {
+        final LocalDate effectiveEnd = resolveEffectivePauseEnd(pause, resumes);
+        return new DelinquencyPausePeriod(isPauseActiveOnDate(pause.getStartDate(), effectiveEnd, businessDate), pause.getStartDate(),
+                effectiveEnd);
     }
 
     @Override

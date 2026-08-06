@@ -1754,6 +1754,27 @@ final class LoansApiResourceSwagger {
             public BigDecimal principal;
         }
 
+        @Schema(description = "Originator data for loan disbursement request")
+        public static final class PostLoansLoanIdOriginatorData {
+
+            private PostLoansLoanIdOriginatorData() {}
+
+            @Schema(description = "Originator internal ID (use this OR externalId, not both)", example = "1")
+            public Long id;
+
+            @Schema(description = "Originator external ID (use this OR id, not both)", example = "REV-SHARE-001")
+            public String externalId;
+
+            @Schema(description = "Originator name (used when creating a new originator during disbursement)", example = "PP Merchant")
+            public String name;
+
+            @Schema(description = "Code value ID for originator type (from LoanOriginatorType code)", example = "1")
+            public Long typeId;
+
+            @Schema(description = "Code value ID for channel type (from LoanOriginationChannelType code)", example = "2")
+            public Long channelTypeId;
+        }
+
         @Schema(example = "2")
         public Long toLoanOfficerId;
         @Schema(example = "02 September 2014")
@@ -1793,6 +1814,13 @@ final class LoansApiResourceSwagger {
         public BigDecimal fixedEmiAmount;
         @Schema(example = "28 July 2022")
         public String adjustRepaymentDate;
+        @Schema(description = """
+                Optional array of originators to reconcile during loan disbursement. \
+                Omit the field to leave existing mappings unchanged. \
+                Send an empty array to detach all originators. \
+                Each entry can reference an existing originator by 'id' or 'externalId'. \
+                Missing externalIds are created during disbursement.""")
+        public List<PostLoansLoanIdOriginatorData> originators;
     }
 
     @Schema(description = "PostLoansLoanIdResponse")

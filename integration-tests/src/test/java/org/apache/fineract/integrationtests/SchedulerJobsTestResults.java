@@ -46,11 +46,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
 import org.apache.fineract.client.models.GetHolidaysResponse;
+import org.apache.fineract.client.models.GetJobsResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
@@ -1200,10 +1200,10 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
         this.schedulerJobHelper.executeAndAwaitJob(JobName);
 
-        Map<String, Object> schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId);
+        GetJobsResponse schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId);
 
         Assertions.assertNotNull(schedulerJob);
-        while ((Boolean) schedulerJob.get("currentlyRunning")) {
+        while (schedulerJob.getCurrentlyRunning()) {
             Thread.sleep(15000);
             schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId);
             Assertions.assertNotNull(schedulerJob);

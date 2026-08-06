@@ -654,10 +654,26 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
     }
 
     @Then("The asset external owner has the following OWNER Journal entries:")
-    public void checkJournalEntriesOwner(DataTable table) throws IOException {
-        String ownerExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_OWNER_EXTERNAL_ID);
+    public void checkJournalEntriesOwner(final DataTable table) throws IOException {
+        final String ownerExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_OWNER_EXTERNAL_ID);
+        assertOwnerJournalEntries(ownerExternalId, table, true);
+    }
 
+    @Then("The asset external owner has the following OWNER Journal entries containing:")
+    public void checkJournalEntriesOwnerContaining(final DataTable table) throws IOException {
+        final String ownerExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_OWNER_EXTERNAL_ID);
+        assertOwnerJournalEntries(ownerExternalId, table, false);
+    }
+
+    @Then("The previous asset external owner has the following OWNER Journal entries:")
+    public void checkJournalEntriesPreviousOwner(final DataTable table) throws IOException {
+        final String ownerExternalId = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_PREVIOUS_OWNER_EXTERNAL_ID);
+        assertOwnerJournalEntries(ownerExternalId, table, false);
+    }
+
+    private void assertOwnerJournalEntries(final String ownerExternalId, final DataTable table, final boolean assertExactCount) {
         ExternalOwnerJournalEntryData journalEntriesOfOwner = externalAssetOwnersApi().getJournalEntriesOfOwner(ownerExternalId, Map.of());
+        assert journalEntriesOfOwner.getJournalEntryData() != null;
         List<JournalEntryData> content = journalEntriesOfOwner.getJournalEntryData().getContent();
 
         List<List<String>> data = table.asLists();
@@ -681,9 +697,11 @@ public class AssetExternalizationStepDef extends AbstractStepDef {
                     .isTrue();
         }
 
-        int linesActual = journalEntriesOfOwner.getJournalEntryData().getNumberOfElements();
-        assertThat(linesActual).as(ErrorMessageHelper.wrongNumberOfLinesInAssetExternalizationJournalEntry(linesActual, linesExpected))
-                .isEqualTo(linesExpected);
+        if (assertExactCount) {
+            int linesActual = journalEntriesOfOwner.getJournalEntryData().getNumberOfElements();
+            assertThat(linesActual).as(ErrorMessageHelper.wrongNumberOfLinesInAssetExternalizationJournalEntry(linesActual, linesExpected))
+                    .isEqualTo(linesExpected);
+        }
 
         log.debug("ownerExternalId: {}", journalEntriesOfOwner.getOwnerData().getExternalId());
     }

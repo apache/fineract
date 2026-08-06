@@ -130,7 +130,7 @@ public class WorkingCapitalLoanChargeAccrualService {
         final WorkingCapitalLoanTransactionAllocation allocation = WorkingCapitalLoanTransactionAllocation
                 .forChargeAccrual(accrualTransaction, charge.getAmount(), charge.isPenaltyCharge());
         allocationRepository.saveAndFlush(allocation);
-        accountingProcessor.postJournalEntries(loan, accrualTransaction, allocation, false);
+        accountingProcessor.postJournalEntries(loan, accrualTransaction, allocation, loan.isChargedOff());
     }
 
     private boolean isAlreadyAccrued(final WorkingCapitalLoanCharge charge) {
