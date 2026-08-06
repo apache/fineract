@@ -26,6 +26,7 @@ import static org.apache.fineract.portfolio.workingcapitalloan.validator.Working
 import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.LOCALE;
 import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.MINIMUM_PAYMENT;
 import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.MINIMUM_PAYMENT_TYPE;
+import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.RESTART_PERIOD_FROM_RESET_DATE;
 import static org.apache.fineract.portfolio.workingcapitalloan.validator.WorkingCapitalLoanBreachActionParameters.START_DATE;
 
 import com.google.gson.JsonElement;
@@ -202,6 +203,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         final WorkingCapitalLoanBreachAction action = new WorkingCapitalLoanBreachAction();
         action.setAction(WorkingCapitalLoanBreachActionType.RESET);
         action.setStartDate(resetDate);
+        action.setRestartPeriodFromResetDate(extractBoolean(json, RESTART_PERIOD_FROM_RESET_DATE));
         action.setWorkingCapitalLoan(workingCapitalLoan);
         return action;
     }
@@ -293,6 +295,13 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
             return jsonHelper.extractIntegerWithLocaleNamed(paramName, json);
         }
         return null;
+    }
+
+    private Boolean extractBoolean(final JsonElement json, final String paramName) {
+        if (json.getAsJsonObject().has(paramName)) {
+            return jsonHelper.extractBooleanNamed(paramName, json);
+        }
+        return false;
     }
 
     private WorkingCapitalBreachAmountCalculationType extractMinimumPaymentType(final JsonElement json,

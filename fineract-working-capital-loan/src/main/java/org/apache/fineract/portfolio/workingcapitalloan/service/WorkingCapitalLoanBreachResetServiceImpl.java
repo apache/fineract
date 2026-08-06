@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
@@ -41,6 +43,17 @@ public class WorkingCapitalLoanBreachResetServiceImpl implements WorkingCapitalL
         if (actionDate == null) {
             return;
         }
+
+        final List<WorkingCapitalLoanBreachSchedule> periods = breachScheduleRepository.findByLoanIdOrderByPeriodNumberAsc(loan.getId());
+        if (Boolean.TRUE.equals(resetAction.getRestartPeriodFromResetDate()) && !periods.isEmpty()
+                && !periods.getLast().getFromDate().isEqual(actionDate)) {
+            final WorkingCapitalLoanBreachSchedule lastPeriod = periods.getLast();
+            lastPeriod.setToDate(actionDate.minusDays(1));
+            lastPeriod.setNumberOfDays((int) ChronoUnit.DAYS.between(lastPeriod.getFromDate(), lastPeriod.getToDate()) + 1);
+            breachScheduleService.generateNextPeriodIfNeeded(loan, actionDate);
+            breachScheduleService.reprocessBreachSchedule(loan);
+        }
+
         breachScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(loan.getId(), actionDate, actionDate)
                 .filter(period -> !period.isReset()).ifPresent(period -> {
                     period.setReset(true);

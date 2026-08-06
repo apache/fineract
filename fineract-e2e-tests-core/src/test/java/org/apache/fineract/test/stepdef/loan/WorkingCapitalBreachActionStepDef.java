@@ -247,6 +247,14 @@ public class WorkingCapitalBreachActionStepDef extends AbstractStepDef {
         executeBreachAction(workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansBreachActionRequest("reset"));
     }
 
+    @When("Admin creates WC breach reset action with restart period from reset date")
+    public void createBreachResetActionWithRestartPeriodFromResetDate() {
+        final PostWorkingCapitalLoansBreachActionRequest request = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoansBreachActionRequest("reset");
+        request.setRestartPeriodFromResetDate(true);
+        executeBreachAction(request);
+    }
+
     @When("Admin creates WC breach undo reset action")
     public void createBreachUndoResetAction() {
         executeBreachAction(workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansBreachActionRequest("undo_reset"));
