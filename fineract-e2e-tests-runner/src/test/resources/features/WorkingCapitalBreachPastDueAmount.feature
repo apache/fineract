@@ -24,6 +24,7 @@ Feature: Working Capital Breach Past Due Amount
       | 1            | 2026-01-01 | 2026-01-07 | 7            | 500.00           | 500.00            | null       | true   |
       | 2            | 2026-01-08 | 2026-01-14 | 7            | 500.00           | 500.00            | null       | null   |
     Then Working Capital loan balance has breach past due amount "500"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
 
   @TestRailId:C85562
   Scenario: Verify that partial payment within the period reduces breach past due amount
@@ -44,6 +45,7 @@ Feature: Working Capital Breach Past Due Amount
     And Admin runs inline COB job for Working Capital Loan by loanId
     # Period 1 past due = MAX(0, 500 - 200) = 300
     Then Working Capital loan balance has breach past due amount "300"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
 
   @TestRailId:C85563
   Scenario: Verify that a fully paid period contributes zero to breach past due amount
@@ -63,6 +65,7 @@ Feature: Working Capital Breach Past Due Amount
     When Admin sets the business date to "09 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan balance has breach past due amount "0"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
 
   @TestRailId:C85564
   Scenario: Verify that breach past due amount accumulates cumulatively across multiple unpaid periods
@@ -85,6 +88,7 @@ Feature: Working Capital Breach Past Due Amount
     And Working capital loan account has the correct data:
       | breachPastDueAmount |
       | 1000.0              |
+    Then Admin closes the Working Capital loan with a full repayment on "16 January 2026"
 
   @TestRailId:C85565
   Scenario: Verify that a period contributes to breach past due amount from the COB run after its toDate (boundary)
@@ -107,6 +111,7 @@ Feature: Working Capital Breach Past Due Amount
     When Admin sets the business date to "08 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan balance has breach past due amount "500"
+    Then Admin closes the Working Capital loan with a full repayment on "08 January 2026"
 
   @TestRailId:C85566
   Scenario: Verify that a forward repayment into the open period does not reduce past due while a backdated repayment recalculates it immediately
@@ -130,6 +135,7 @@ Feature: Working Capital Breach Past Due Amount
     # Backdated repayment dated inside P1 settles it - recalculated immediately, no COB needed (AC3)
     When Customer makes repayment on "05 January 2026" with 500.0 transaction amount on Working Capital loan
     Then Working Capital loan balance has breach past due amount "0"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
 
   @TestRailId:C85567
   Scenario: Verify that undoing a repayment restores breach past due amount immediately
@@ -151,6 +157,7 @@ Feature: Working Capital Breach Past Due Amount
     Then Working Capital loan balance has breach past due amount "0"
     When Customer undo "1"th working capital transaction made on "05 January 2026"
     Then Working Capital loan balance has breach past due amount "500"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
 
   @TestRailId:C85568
   Scenario: Verify that breach reschedule drives past due of subsequent periods with the new minimum payment
@@ -207,6 +214,7 @@ Feature: Working Capital Breach Past Due Amount
     When Admin sets the business date to "20 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan balance has breach past due amount "1000"
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
   @TestRailId:C85570
   Scenario: Verify that breach disable freezes past due calculation and enable resumes it
@@ -235,6 +243,7 @@ Feature: Working Capital Breach Past Due Amount
     When Admin sets the business date to "18 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan balance has breach past due amount "1000"
+    Then Admin closes the Working Capital loan with a full repayment on "18 January 2026"
 
   @TestRailId:C85571
   Scenario: Verify that breach reset clears past due amount immediately
@@ -262,6 +271,7 @@ Feature: Working Capital Breach Past Due Amount
     When Admin sets the business date to "11 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan balance has breach past due amount "0"
+    Then Admin closes the Working Capital loan with a full repayment on "11 January 2026"
 
   @TestRailId:C85572
   Scenario: Verify that an excess forward repayment does not retroactively settle completed periods
@@ -288,6 +298,7 @@ Feature: Working Capital Breach Past Due Amount
     # Backdated repayment of 10 into P1 reduces exactly P1: 500 - 10 = 490
     When Customer makes repayment on "05 January 2026" with 10.0 transaction amount on Working Capital loan
     Then Working Capital loan balance has breach past due amount "490"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
 
   @TestRailId:C85573
   Scenario: Verify breach past due amount with percentage based breach amount calculation
@@ -306,3 +317,147 @@ Feature: Working Capital Breach Past Due Amount
     When Admin sets the business date to "09 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan balance has breach past due amount "900"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
+
+  @TestRailId:TODO_ADD_001
+  Scenario: Verify breach past due amount after backdated repayment - no payment
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | delinquencyGraceDays |
+      | 7               | DAYS                | PERCENTAGE                  | 9            |                      |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # Minimum payment = (9000 principal + 1000 discount) * 9% = 900
+    When Admin sets the business date to "09 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan balance has breach past due amount "900"
+    When Customer makes repayment on "05 January 2026" with 900.0 transaction amount on Working Capital loan
+    Then Working Capital loan balance has breach past due amount "0"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
+
+  @TestRailId:TODO_ADD_002
+  Scenario: Verify breach past due amount after backdated repayment - partial payment
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | delinquencyGraceDays |
+      | 7               | DAYS                | PERCENTAGE                  | 9            |                      |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # Minimum payment = (9000 principal + 1000 discount) * 9% = 900
+    When Customer makes repayment on "01 January 2026" with 400.0 transaction amount on Working Capital loan
+    Then Working Capital loan balance has breach past due amount "0"
+    When Admin sets the business date to "09 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan balance has breach past due amount "500"
+    When Customer makes repayment on "05 January 2026" with 500.0 transaction amount on Working Capital loan
+    Then Working Capital loan balance has breach past due amount "0"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
+
+  @TestRailId:TODO_ADD_003
+  Scenario: Verify breach past due amount after backdated repayment - full payment
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | delinquencyGraceDays |
+      | 7               | DAYS                | PERCENTAGE                  | 9            |                      |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # Minimum payment = (9000 principal + 1000 discount) * 9% = 900
+    When Customer makes repayment on "01 January 2026" with 400.0 transaction amount on Working Capital loan
+    Then Working Capital loan balance has breach past due amount "0"
+    When Admin sets the business date to "09 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan balance has breach past due amount "500"
+    When Customer makes repayment on "05 January 2026" with 400.0 transaction amount on Working Capital loan
+    Then Working Capital loan balance has breach past due amount "100"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
+
+
+  @TestRailId:TODO_ADD_004
+  Scenario: Verify breach past due amount after undo repayment dates back to an already past breach period - results no breach
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | delinquencyGraceDays |
+      | 7               | DAYS                | PERCENTAGE                  | 9            |                      |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # Minimum payment = (9000 principal + 1000 discount) * 9% = 900
+    When Customer makes repayment on "01 January 2026" with 900.0 transaction amount on Working Capital loan
+    Then Working Capital loan balance has breach past due amount "0"
+    When Admin sets the business date to "09 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan balance has breach past due amount "0"
+    When Customer undo "3"th working capital transaction made on "01 January 2026"
+    Then Working Capital loan balance has breach past due amount "900"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
+
+  @TestRailId:TODO_ADD_005
+  Scenario: Verify breach past due amount after undo repayment dates back to an already past breach period - results partial breach
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | delinquencyGraceDays |
+      | 7               | DAYS                | PERCENTAGE                  | 9            |                      |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # Minimum payment = (9000 principal + 1000 discount) * 9% = 900
+    When Admin sets the business date to "09 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan balance has breach past due amount "900"
+    When Customer makes repayment on "01 January 2026" with 400.0 transaction amount on Working Capital loan
+    When Customer makes repayment on "01 January 2026" with 500.0 transaction amount on Working Capital loan
+    Then Working Capital loan balance has breach past due amount "0"
+    When Admin sets the business date to "09 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan balance has breach past due amount "0"
+    When Customer undo "3"th working capital transaction made on "01 January 2026"
+    Then Working Capital loan balance has breach past due amount "400"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
+
+  @TestRailId:TODO_ADD_006
+  Scenario: Verify breach past due amount after undo repayment dates back to an already past breach period - results full breach
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | delinquencyGraceDays |
+      | 7               | DAYS                | PERCENTAGE                  | 9            |                      |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # Minimum payment = (9000 principal + 1000 discount) * 9% = 900
+    When Customer makes repayment on "01 January 2026" with 400.0 transaction amount on Working Capital loan
+    When Customer makes repayment on "01 January 2026" with 900.0 transaction amount on Working Capital loan
+    Then Working Capital loan balance has breach past due amount "0"
+    When Admin sets the business date to "09 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan balance has breach past due amount "0"
+    When Customer undo "3"th working capital transaction made on "01 January 2026"
+    Then Working Capital loan balance has breach past due amount "900"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
+
