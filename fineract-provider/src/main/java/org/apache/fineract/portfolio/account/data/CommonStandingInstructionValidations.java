@@ -134,13 +134,7 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
 
         MonthDay monthDay = null;
         if (isMonthlyOrYearlyFrequency(recurrenceFrequency)) {
-            final String monthDayFormat = this.standingInstruction.getMonthDayFormat();
-            this.baseDataValidator.reset().parameter(monthDayFormatParamName).value(monthDayFormat).notBlank();
-
-            final String monthDayStr = this.standingInstruction.getMonthDayStr();
-            this.baseDataValidator.reset().parameter(recurrenceOnMonthDayParamName).value(monthDayStr).notBlank();
-
-            monthDay = extractAndValidateMonthDay(monthDayStr, monthDayFormat);
+            monthDay = this.standingInstruction.getMonthDay();
         }
 
         final LocalDate validFrom = this.standingInstruction.getValidFrom();
@@ -174,21 +168,6 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
     private boolean isMonthlyOrYearlyFrequency(final Integer recurrenceFrequency) {
         final PeriodFrequencyType frequencyType = PeriodFrequencyType.fromInt(recurrenceFrequency);
         return frequencyType != null && (frequencyType.isMonthly() || frequencyType.isYearly());
-    }
-
-    private MonthDay extractAndValidateMonthDay(final String monthDayStr, final String monthDayFormat) {
-        if (StringUtils.isBlank(monthDayStr) || StringUtils.isBlank(monthDayFormat)) {
-            return null;
-        }
-
-        try {
-
-            return new FromJsonHelper().extractMonthDayNamed(recurrenceOnMonthDayParamName, this.element);
-        } catch (Exception e) {
-            this.baseDataValidator.reset().parameter(recurrenceOnMonthDayParamName)
-                    .failWithCode(StandingInstructionApiConstants.INVALID_MONTH_DAY_FORMAT_ERROR_CODE);
-            return null;
-        }
     }
 
     private boolean areValidDates(LocalDate... dates) {

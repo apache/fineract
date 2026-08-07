@@ -64,8 +64,6 @@ public class StandingInstructionHelper {
         instruction.setRecurrenceType(command.integerValueSansLocaleOfParameterNamed(recurrenceTypeParamName));
         instruction.setRecurrenceFrequency(command.integerValueSansLocaleOfParameterNamed(recurrenceFrequencyParamName));
         instruction.setRecurrenceInterval(command.integerValueSansLocaleOfParameterNamed(recurrenceIntervalParamName));
-        instruction.setMonthDayStr(command.stringValueOfParameterNamed(recurrenceOnMonthDayParamName));
-        instruction.setMonthDayFormat(command.stringValueOfParameterNamed(monthDayFormatParamName));
 
         return instruction;
     }

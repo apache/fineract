@@ -42,6 +42,5 @@ public class StandingInstruction {
     private Integer recurrenceType;
     private Integer recurrenceFrequency;
     private Integer recurrenceInterval;
-    private String monthDayStr;
-    private String monthDayFormat;
+    private MonthDay monthDay;
 }
