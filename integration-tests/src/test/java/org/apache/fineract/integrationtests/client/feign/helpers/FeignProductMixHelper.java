@@ -16,25 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.integrationtests.common;
+package org.apache.fineract.integrationtests.client.feign.helpers;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetLoanProductsResponse;
 import org.apache.fineract.client.models.GetLoanProductsTemplateResponse;
 
-@Slf4j
-public class ProductMixHelper {
+public class FeignProductMixHelper {
 
-    public List<GetLoanProductsResponse> getProductsMixList() {
-        log.info("------------------------ RETRIEVING PRODUCT MIX -------------------------");
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().loanProducts().retrieveAllLoanProducts());
+    /** The {@code isProductMixTemplate} query flag; {@code false} returns the ordinary loan product template. */
+    private static final boolean IS_PRODUCT_MIX_TEMPLATE = true;
+
+    private final FineractFeignClient fineractClient;
+
+    public FeignProductMixHelper(FineractFeignClient fineractClient) {
+        this.fineractClient = fineractClient;
     }
 
-    public GetLoanProductsTemplateResponse getProductMixTemplate() {
-        log.info("-------------------- RETRIEVING PRODUCT MIX TEMPLATE ---------------------");
-        return ok(() -> FineractFeignClientHelper.getFineractFeignClient().loanProducts().retrieveTemplateLoanProduct(true));
+    public List<GetLoanProductsResponse> retrieveAllLoanProducts() {
+        return ok(() -> fineractClient.loanProducts().retrieveAllLoanProducts());
+    }
+
+    public GetLoanProductsTemplateResponse retrieveProductMixTemplate() {
+        return ok(() -> fineractClient.loanProducts().retrieveTemplateLoanProduct(IS_PRODUCT_MIX_TEMPLATE));
     }
 }

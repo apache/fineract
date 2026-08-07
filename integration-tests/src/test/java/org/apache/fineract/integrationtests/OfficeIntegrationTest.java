@@ -24,14 +24,21 @@ import org.apache.fineract.client.models.GetOfficesResponse;
 import org.apache.fineract.client.models.PostOfficesResponse;
 import org.apache.fineract.client.models.PutOfficesOfficeIdResponse;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.integrationtests.common.OfficeHelper;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class OfficeIntegrationTest {
+public class OfficeIntegrationTest extends FeignIntegrationTest {
 
-    private final OfficeHelper officeHelper = new OfficeHelper();
+    private FeignOfficeHelper officeHelper;
+
+    @BeforeAll
+    public void setup() {
+        officeHelper = new FeignOfficeHelper(fineractClient());
+    }
 
     @Test
     public void testOfficeModification() {
