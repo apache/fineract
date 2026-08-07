@@ -53,7 +53,7 @@ public class StandingInstructionValidatorFactoryTest {
 
     @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenTransferTypeIsNull() {
-        when(this.standingInstruction.getTransferType()).thenReturn(null);
+        setUpInstructionField(StandingInstruction::getTransferType, null);
 
         assertInstanceStrategy(InexistingStandingInstruction.class);
         
@@ -61,67 +61,67 @@ public class StandingInstructionValidatorFactoryTest {
 
     @Test
     public void shouldReturnAnAccountTransferStandingInstructionInstance() {
-        setUpParamWithValue(transferTypeParamName, AccountTransferType.ACCOUNT_TRANSFER.getValue());
+        setUpInstructionField(StandingInstruction::getTransferType, AccountTransferType.ACCOUNT_TRANSFER.getValue());
 
         assertInstanceStrategy(AccountTransferStandingInstruction.class);
     }
 
     @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenInstructionTypeIsNull() {
-        setUpParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
-        setUpParamWithValue(instructionTypeParamName, null);
-        setUpParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
+        setUpInstructionField(StandingInstruction::getTransferType, AccountTransferType.LOAN_REPAYMENT.getValue());
+        setUpInstructionField(StandingInstruction::getInstructionType, null);
+        setUpInstructionField(StandingInstruction::getRecurrenceType, AccountTransferRecurrenceType.PERIODIC.getValue());
 
         assertInstanceStrategy(InexistingStandingInstruction.class);
     }
 
     @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenRecurrenceTypeIsNull() {
-        setUpParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
-        setUpParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
-        setUpParamWithValue(recurrenceTypeParamName, null);
+        setUpInstructionField(StandingInstruction::getTransferType, AccountTransferType.LOAN_REPAYMENT.getValue());
+        setUpInstructionField(StandingInstruction::getInstructionType, StandingInstructionType.FIXED.getValue());
+        setUpInstructionField(StandingInstruction::getRecurrenceType, null);
 
         assertInstanceStrategy(InexistingStandingInstruction.class);
     }
 
     @Test
     public void shouldReturnAPeriodicFixedAmountLoanRepaymentStandingInstructionInstance() {
-        setUpParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
-        setUpParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
-        setUpParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
+        setUpInstructionField(StandingInstruction::getTransferType, AccountTransferType.LOAN_REPAYMENT.getValue());
+        setUpInstructionField(StandingInstruction::getInstructionType, StandingInstructionType.FIXED.getValue());
+        setUpInstructionField(StandingInstruction::getRecurrenceType, AccountTransferRecurrenceType.PERIODIC.getValue());
 
         assertInstanceStrategy(PeriodicFixedAmountLoanRepaymentStandingInstruction.class);
     }
 
     @Test
     public void shouldReturnAPeriodicDuesLoanRepaymentStandingInstructionInstance() {
-        setUpParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
-        setUpParamWithValue(instructionTypeParamName, StandingInstructionType.DUES.getValue());
-        setUpParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.PERIODIC.getValue());
+        setUpInstructionField(StandingInstruction::getTransferType, AccountTransferType.LOAN_REPAYMENT.getValue());
+        setUpInstructionField(StandingInstruction::getInstructionType, StandingInstructionType.DUES.getValue());
+        setUpInstructionField(StandingInstruction::getRecurrenceType, AccountTransferRecurrenceType.PERIODIC.getValue());
 
         assertInstanceStrategy(PeriodicDuesLoanRepaymentStandingInstruction.class);
     }
 
     @Test
     public void shouldReturnALoanRepaymentStandingInstructionInstance() {
-        setUpParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
-        setUpParamWithValue(instructionTypeParamName, StandingInstructionType.DUES.getValue());
-        setUpParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
+        setUpInstructionField(StandingInstruction::getTransferType, AccountTransferType.LOAN_REPAYMENT.getValue());
+        setUpInstructionField(StandingInstruction::getInstructionType, StandingInstructionType.DUES.getValue());
+        setUpInstructionField(StandingInstruction::getRecurrenceType, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
 
         assertInstanceStrategy(LoanRepaymentStandingInstruction.class);
     }
 
     @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWithFixedInstructionAndAsPerDuesRecurrence() {
-        setUpParamWithValue(transferTypeParamName, AccountTransferType.LOAN_REPAYMENT.getValue());
-        setUpParamWithValue(instructionTypeParamName, StandingInstructionType.FIXED.getValue());
-        setUpParamWithValue(recurrenceTypeParamName, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
+        setUpInstructionField(StandingInstruction::getTransferType, AccountTransferType.LOAN_REPAYMENT.getValue());
+        setUpInstructionField(StandingInstruction::getInstructionType, StandingInstructionType.FIXED.getValue());
+        setUpInstructionField(StandingInstruction::getRecurrenceType, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
 
         assertInstanceStrategy(InexistingStandingInstruction.class);
     }
 
-    private void setUpParamWithValue(final String paramName, final Integer value) {
-        when(fromApiJsonHelper.extractIntegerNamed(eq(paramName), eq(element), any(Locale.class))).thenReturn(value);
+    private <T> void setUpInstructionField(Function<StandingInstruction, T> getter, T value) {
+        when(getter.apply(this.standingInstruction)).thenReturn(value);
     }
 
     private <T extends StandingInstructionValidator> void assertInstanceStrategy(Class<T> expectedClass) {
