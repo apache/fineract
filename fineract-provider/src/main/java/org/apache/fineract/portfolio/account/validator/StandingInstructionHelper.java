@@ -49,10 +49,10 @@ public class StandingInstructionHelper {
 
         final StandingInstruction instruction = new StandingInstruction();
         instruction.setAccountTransferDetails(details);
-        instruction.setLocale(command.stringValueValueOfParameterNamed(localeParamName));
-        instruction.setDateFormat(command.stringValueValueOfParameterNamed(dateFormatParamName));
+        instruction.setLocale(command.stringValueOfParameterNamed(localeParamName));
+        instruction.setDateFormat(command.stringValueOfParameterNamed(dateFormatParamName));
         instruction.setTransferType(command.integerValueSansLocaleOfParameterNamed(transferTypeParamName));
-        instruction.setName(command.stringValueValueOfParameterNamed(nameParamName));
+        instruction.setName(command.stringValueOfParameterNamed(nameParamName));
         instruction.setPriority(command.integerValueSansLocaleOfParameterNamed(priorityParamName));
         instruction.setStatus(command.integerValueSansLocaleOfParameterNamed(statusParamName));
         instruction.setInstructionType(command.integerValueSansLocaleOfParameterNamed(instructionTypeParamName));
@@ -62,8 +62,8 @@ public class StandingInstructionHelper {
         instruction.setRecurrenceType(command.integerValueSansLocaleOfParameterNamed(recurrenceTypeParamName));
         instruction.setRecurrenceFrequency(command.integerValueSansLocaleOfParameterNamed(recurrenceFrequencyParamName));
         instruction.setRecurrenceInterval(command.integerValueSansLocaleOfParameterNamed(recurrenceIntervalParamName));
-        instruction.setMonthDayStr(command.stringValueValueOfParameterNamed(recurrenceOnMonthDayParamName));
-        instruction.setMonthDayFormat(command.stringValueValueOfParameterNamed(monthDayFormatParamName));
+        instruction.setMonthDayStr(command.stringValueOfParameterNamed(recurrenceOnMonthDayParamName));
+        instruction.setMonthDayFormat(command.stringValueOfParameterNamed(monthDayFormatParamName));
 
         return instruction;
     }
