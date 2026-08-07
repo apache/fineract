@@ -35,11 +35,9 @@ import org.apache.fineract.organisation.office.service.OfficeReadPlatformService
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.group.domain.GroupingTypeEnumerations;
 import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
-import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountStatusEnumData;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
 import org.apache.fineract.portfolio.search.SearchConstants;
@@ -81,10 +79,6 @@ public class SearchReadServiceImpl implements SearchReadService {
         } else {
             params.addValue("search", "%" + searchConditions.getSearchQuery() + "%");
         }
-        params.addValue("searchTransactionId", parseSearchTransactionId(searchConditions.getSearchQuery()));
-        params.addValue("loanRepaymentTransactionType", LoanTransactionType.REPAYMENT.getValue());
-        params.addValue("savingsDepositTransactionType", SavingsAccountTransactionType.DEPOSIT.getValue());
-        params.addValue("savingsWithdrawalTransactionType", SavingsAccountTransactionType.WITHDRAWAL.getValue());
         return namedParameterJdbcTemplate.query(searchSchema(searchConditions), params, rm);
     }
 
@@ -95,9 +89,7 @@ public class SearchReadServiceImpl implements SearchReadService {
                 ( (select 'CLIENT' as entityType, c.id as entityId, c.display_name as entityName, \
                 c.external_id as entityExternalId, c.account_no as entityAccountNo, \
                 c.office_id as parentId, o.name as parentName, c.mobile_no as entityMobileNo, \
-                c.status_enum as entityStatusEnum, null as subEntityType, null as parentType, \
-                null as transactionId, null as transactionType, null as transactionExternalId, null as transactionRefNo, \
-                null as accountId, null as accountNo, null as accountType \
+                c.status_enum as entityStatusEnum, null as subEntityType, null as parentType \
                 from m_client c join m_office o on o.id = c.office_id \
                 where o.hierarchy like :hierarchy \
                 and (c.account_no like :search or c.display_name like :search \
@@ -109,9 +101,7 @@ public class SearchReadServiceImpl implements SearchReadService {
                 l.external_id as entityExternalId, l.account_no as entityAccountNo, \
                 coalesce(c.id,g.id) as parentId, coalesce(c.display_name,g.display_name) as parentName, \
                 null as entityMobileNo, l.loan_status_id as entityStatusEnum, null as subEntityType, \
-                CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType, \
-                null as transactionId, null as transactionType, null as transactionExternalId, null as transactionRefNo, \
-                null as accountId, null as accountNo, null as accountType \
+                CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType \
                 from m_loan l left join m_client c on l.client_id = c.id \
                 left join m_group g ON l.group_id = g.id \
                 left join m_office o on o.id = c.office_id \
@@ -126,9 +116,7 @@ public class SearchReadServiceImpl implements SearchReadService {
                 coalesce(c.id,g.id) as parentId, coalesce(c.display_name, g.display_name) as parentName, \
                 null as entityMobileNo, s.status_enum as entityStatusEnum, \
                 concat(s.deposit_type_enum, '') as subEntityType, \
-                CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType, \
-                null as transactionId, null as transactionType, null as transactionExternalId, null as transactionRefNo, \
-                null as accountId, null as accountNo, null as accountType \
+                CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType \
                 from m_savings_account s left join m_client c on s.client_id = c.id \
                 left join m_group g ON s.group_id = g.id \
                 left join m_office o on o.id = c.office_id \
@@ -141,9 +129,7 @@ public class SearchReadServiceImpl implements SearchReadService {
                 ( (select 'SHARE' as entityType, s.id as entityId, sp.name as entityName, \
                 s.external_id as entityExternalId, s.account_no as entityAccountNo, \
                 c.id as parentId, c.display_name as parentName, null as entityMobileNo, \
-                s.status_enum as entityStatusEnum, null as subEntityType, 'client' as parentType, \
-                null as transactionId, null as transactionType, null as transactionExternalId, null as transactionRefNo, \
-                null as accountId, null as accountNo, null as accountType \
+                s.status_enum as entityStatusEnum, null as subEntityType, 'client' as parentType \
                 from m_share_account s left join m_client c on s.client_id = c.id \
                 left join m_office o on o.id = c.office_id \
                 left join m_share_product sp on sp.id=s.product_id \
@@ -155,9 +141,7 @@ public class SearchReadServiceImpl implements SearchReadService {
                 ( (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, \
                 null as entityExternalId, null as entityAccountNo, c.id as parentId, \
                 c.display_name as parentName, null as entityMobileNo, \
-                c.status_enum as entityStatusEnum, null as subEntityType, null as parentType, \
-                null as transactionId, null as transactionType, null as transactionExternalId, null as transactionRefNo, \
-                null as accountId, null as accountNo, null as accountType \
+                c.status_enum as entityStatusEnum, null as subEntityType, null as parentType \
                 from m_client_identifier ci join m_client c on ci.client_id=c.id \
                 join m_office o on o.id = c.office_id \
                 where o.hierarchy like :hierarchy and ci.document_key like :search) \
@@ -168,53 +152,12 @@ public class SearchReadServiceImpl implements SearchReadService {
                 g.id as entityId, g.display_name as entityName, \
                 g.external_id as entityExternalId, g.account_no as entityAccountNo, \
                 g.office_id as parentId, o.name as parentName, null as entityMobileNo, \
-                g.status_enum as entityStatusEnum, null as subEntityType, null as parentType, \
-                null as transactionId, null as transactionType, null as transactionExternalId, null as transactionRefNo, \
-                null as accountId, null as accountNo, null as accountType \
+                g.status_enum as entityStatusEnum, null as subEntityType, null as parentType \
                 from m_group g join m_office o on o.id = g.office_id \
                 where o.hierarchy like :hierarchy \
                 and (g.account_no like :search or g.display_name like :search \
                 or g.external_id like :search)) \
                 order by g.id desc)""";
-
-        final String loanTransactionMatchSql = """
-                ( (select 'LOAN_TRANSACTION' as entityType, l.id as entityId, pl.name as entityName, \
-                lt.external_id as entityExternalId, l.account_no as entityAccountNo, \
-                coalesce(c.id,g.id) as parentId, coalesce(c.display_name,g.display_name) as parentName, \
-                null as entityMobileNo, l.loan_status_id as entityStatusEnum, null as subEntityType, \
-                CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType, \
-                lt.id as transactionId, 'repayment' as transactionType, lt.external_id as transactionExternalId, \
-                null as transactionRefNo, l.id as accountId, l.account_no as accountNo, 'loan' as accountType \
-                from m_loan_transaction lt join m_loan l on l.id = lt.loan_id \
-                left join m_client c on l.client_id = c.id \
-                left join m_group g ON l.group_id = g.id \
-                left join m_office o on o.id = coalesce(c.office_id, g.office_id) \
-                left join m_product_loan pl on pl.id=l.product_id \
-                where o.hierarchy like :hierarchy \
-                and lt.transaction_type_enum = :loanRepaymentTransactionType \
-                and (lt.id = :searchTransactionId or lt.external_id like :search)) \
-                order by lt.id desc)""";
-
-        final String savingTransactionMatchSql = """
-                ( (select 'SAVINGS_TRANSACTION' as entityType, s.id as entityId, sp.name as entityName, \
-                st.external_id as entityExternalId, s.account_no as entityAccountNo, \
-                coalesce(c.id,g.id) as parentId, coalesce(c.display_name, g.display_name) as parentName, \
-                null as entityMobileNo, s.status_enum as entityStatusEnum, \
-                concat(s.deposit_type_enum, '') as subEntityType, \
-                CASE WHEN g.id is null THEN 'client' ELSE 'group' END as parentType, \
-                st.id as transactionId, CASE WHEN st.transaction_type_enum = :savingsDepositTransactionType THEN 'deposit' ELSE 'withdrawal' END as transactionType, \
-                st.external_id as transactionExternalId, st.ref_no as transactionRefNo, \
-                s.id as accountId, s.account_no as accountNo, 'savings' as accountType \
-                from m_savings_account_transaction st join m_savings_account s on s.id = st.savings_account_id \
-                left join m_client c on s.client_id = c.id \
-                left join m_group g ON s.group_id = g.id \
-                left join m_office o on o.id = coalesce(c.office_id, g.office_id) \
-                left join m_savings_product sp on sp.id=s.product_id \
-                where o.hierarchy like :hierarchy \
-                and st.transaction_type_enum in (:savingsDepositTransactionType, :savingsWithdrawalTransactionType) \
-                and st.is_reversal = false \
-                and (st.id = :searchTransactionId or st.external_id like :search or st.ref_no like :search)) \
-                order by st.id desc)""";
 
         final StringBuilder sql = new StringBuilder();
 
@@ -242,25 +185,6 @@ public class SearchReadServiceImpl implements SearchReadService {
             sql.append(groupMatchSql).append(union);
         }
 
-        if (searchConditions.isLoanTransactionSearch()) {
-            sql.append(loanTransactionMatchSql).append(union);
-        }
-
-        if (searchConditions.isSavingTransactionSearch()) {
-            sql.append(savingTransactionMatchSql).append(union);
-        }
-
-        if (sql.isEmpty()) {
-            sql.append("""
-                    select null as entityType, null as entityId, null as entityName, null as entityExternalId, \
-                    null as entityAccountNo, null as parentId, null as parentName, null as entityMobileNo, \
-                    null as entityStatusEnum, null as subEntityType, null as parentType, null as transactionId, \
-                    null as transactionType, null as transactionExternalId, null as transactionRefNo, null as accountId, \
-                    null as accountNo, null as accountType where 1 = 0""");
-            sql.append(" ").append(sqlGenerator.limit(50, 0));
-            return sql.toString();
-        }
-
         // remove last occurrence of "union all" string
         sql.replace(sql.lastIndexOf(union), sql.length(), "");
 
@@ -285,13 +209,6 @@ public class SearchReadServiceImpl implements SearchReadService {
             final String parentType = rs.getString("parentType");
             final Integer subEntityTypeValue = JdbcSupport.getInteger(rs, "subEntityType");
             final EnumOptionData subEntityTypeCode = SavingsEnumerations.depositType(subEntityTypeValue);
-            final Long transactionId = JdbcSupport.getLong(rs, "transactionId");
-            final String transactionType = rs.getString("transactionType");
-            final String transactionExternalId = rs.getString("transactionExternalId");
-            final String transactionRefNo = rs.getString("transactionRefNo");
-            final Long accountId = JdbcSupport.getLong(rs, "accountId");
-            final String accountNo = rs.getString("accountNo");
-            final String accountType = rs.getString("accountType");
 
             EnumOptionData entityStatus = new EnumOptionData(0L, "", "");
 
@@ -299,11 +216,11 @@ public class SearchReadServiceImpl implements SearchReadService {
                 entityStatus = ClientEnumerations.status(entityStatusEnum);
             } else if (entityType.equalsIgnoreCase("group") || entityType.equalsIgnoreCase("center")) {
                 entityStatus = GroupingTypeEnumerations.status(entityStatusEnum);
-            } else if (entityType.equalsIgnoreCase("loan") || entityType.equalsIgnoreCase("loan_transaction")) {
+            } else if (entityType.equalsIgnoreCase("loan")) {
                 LoanStatusEnumData loanStatusEnumData = LoanEnumerations.status(entityStatusEnum);
 
                 entityStatus = LoanEnumerations.status(loanStatusEnumData);
-            } else if (entityType.equalsIgnoreCase("saving") || entityType.equalsIgnoreCase("savings_transaction")) {
+            } else if (entityType.equalsIgnoreCase("saving")) {
                 SavingsAccountStatusEnumData savingsAccountStatusEnumData = SavingsEnumerations.status(entityStatusEnum);
 
                 entityStatus = SavingsEnumerations.status(savingsAccountStatusEnumData);
@@ -314,21 +231,9 @@ public class SearchReadServiceImpl implements SearchReadService {
             }
 
             return new SearchData(entityId, entityAccountNo, entityExternalId, entityName, entityType, parentId, parentName, parentType,
-                    entityMobileNo, entityStatus, subEntityTypeCode.getCode(), transactionId, transactionType, transactionExternalId,
-                    transactionRefNo, accountId, accountNo, accountType);
+                    entityMobileNo, entityStatus, subEntityTypeCode.getCode());
         }
 
-    }
-
-    private static Long parseSearchTransactionId(final String searchQuery) {
-        if (StringUtils.isBlank(searchQuery)) {
-            return -1L;
-        }
-        try {
-            return Long.valueOf(searchQuery);
-        } catch (final NumberFormatException e) {
-            return -1L;
-        }
     }
 
     @Override

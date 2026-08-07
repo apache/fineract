@@ -47,16 +47,7 @@ public final class SearchConstants {
         PARENT_ID("parentId"), //
         PARENT_NAME("parentName"), //
         ENTITY_MOBILE_NO("entityMobileNo"), //
-        ENTITY_STATUS("entityStatus"), //
-        PARENT_TYPE("parentType"), //
-        SUB_ENTITY_TYPE("subEntityType"), //
-        TRANSACTION_ID("transactionId"), //
-        TRANSACTION_TYPE("transactionType"), //
-        TRANSACTION_EXTERNAL_ID("transactionExternalId"), //
-        TRANSACTION_REF_NO("transactionRefNo"), //
-        ACCOUNT_ID("accountId"), //
-        ACCOUNT_NO("accountNo"), //
-        ACCOUNT_TYPE("accountType"); //
+        ENTITY_STATUS("entityStatus"); //
 
         private final String value;
 
@@ -127,9 +118,7 @@ public final class SearchConstants {
         LOANS("loans"), //
         SAVINGS("savings"), //
         SHARES("shares"), //
-        CLIENTIDENTIFIERS("clientIdentifiers"), //
-        LOANTRANSACTIONS("loanTransactions"), //
-        SAVINGSTRANSACTIONS("savingsTransactions"); //
+        CLIENTIDENTIFIERS("clientIdentifiers"); //
 
         private final String value;
 

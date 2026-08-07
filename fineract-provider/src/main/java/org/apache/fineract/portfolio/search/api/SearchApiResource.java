@@ -76,10 +76,7 @@ public class SearchApiResource {
             search?query=Petra&resource=clients,groups
 
 
-            search?query=Petra&resource=clients,groups&exactMatch=true
-
-
-            search?query=7253&resource=loanTransactions,savingsTransactions""")
+            search?query=Petra&resource=clients,groups&exactMatch=true""")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = SearchApiResourceSwagger.GetSearchResponse.class))))
     public List<SearchData> searchData(@QueryParam("query") @Parameter(description = "query") final String query,
             @QueryParam("resource") @Parameter(description = "resource") final String resource,
