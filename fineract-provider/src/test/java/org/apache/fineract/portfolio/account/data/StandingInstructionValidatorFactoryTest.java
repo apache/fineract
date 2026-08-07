@@ -35,8 +35,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class StandingInstructionValidatorFactoryTest {
-
-    @Mock
     private StandingInstructionHelper standingInstructionHelper;
 
     @Mock
@@ -49,6 +47,7 @@ public class StandingInstructionValidatorFactoryTest {
 
     @BeforeEach
     public void setUp() {
+        this.standingInstructionHelper = new StandingInstructionHelper();
         this.standingInstructionValidatorFactory = new StandingInstructionValidatorFactory(this.standingInstructionHelper);
     }
 
