@@ -52,7 +52,7 @@ public class StandingInstructionValidatorFactoryTest {
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenTransferTypeIsNull() {
         setUpInstructionField(StandingInstruction::getTransferType, null);
 
-        assertInstanceStrategy(InexistingStandingInstruction.class);
+        assertValidatorInstance(InexistingStandingInstruction.class);
         
     }
 
@@ -60,7 +60,7 @@ public class StandingInstructionValidatorFactoryTest {
     public void shouldReturnAnAccountTransferStandingInstructionInstance() {
         setUpInstructionField(StandingInstruction::getTransferType, AccountTransferType.ACCOUNT_TRANSFER.getValue());
 
-        assertInstanceStrategy(AccountTransferStandingInstruction.class);
+        assertValidatorInstance(AccountTransferStandingInstruction.class);
     }
 
     @Test
@@ -69,7 +69,7 @@ public class StandingInstructionValidatorFactoryTest {
         setUpInstructionField(StandingInstruction::getInstructionType, null);
         setUpInstructionField(StandingInstruction::getRecurrenceType, AccountTransferRecurrenceType.PERIODIC.getValue());
 
-        assertInstanceStrategy(InexistingStandingInstruction.class);
+        assertValidatorInstance(InexistingStandingInstruction.class);
     }
 
     @Test
@@ -78,7 +78,7 @@ public class StandingInstructionValidatorFactoryTest {
         setUpInstructionField(StandingInstruction::getInstructionType, StandingInstructionType.FIXED.getValue());
         setUpInstructionField(StandingInstruction::getRecurrenceType, null);
 
-        assertInstanceStrategy(InexistingStandingInstruction.class);
+        assertValidatorInstance(InexistingStandingInstruction.class);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class StandingInstructionValidatorFactoryTest {
         setUpInstructionField(StandingInstruction::getInstructionType, StandingInstructionType.FIXED.getValue());
         setUpInstructionField(StandingInstruction::getRecurrenceType, AccountTransferRecurrenceType.PERIODIC.getValue());
 
-        assertInstanceStrategy(PeriodicFixedAmountLoanRepaymentStandingInstruction.class);
+        assertValidatorInstance(PeriodicFixedAmountLoanRepaymentStandingInstruction.class);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class StandingInstructionValidatorFactoryTest {
         setUpInstructionField(StandingInstruction::getInstructionType, StandingInstructionType.DUES.getValue());
         setUpInstructionField(StandingInstruction::getRecurrenceType, AccountTransferRecurrenceType.PERIODIC.getValue());
 
-        assertInstanceStrategy(PeriodicDuesLoanRepaymentStandingInstruction.class);
+        assertValidatorInstance(PeriodicDuesLoanRepaymentStandingInstruction.class);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class StandingInstructionValidatorFactoryTest {
         setUpInstructionField(StandingInstruction::getInstructionType, StandingInstructionType.DUES.getValue());
         setUpInstructionField(StandingInstruction::getRecurrenceType, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
 
-        assertInstanceStrategy(LoanRepaymentStandingInstruction.class);
+        assertValidatorInstance(LoanRepaymentStandingInstruction.class);
     }
 
     @Test
@@ -114,15 +114,15 @@ public class StandingInstructionValidatorFactoryTest {
         setUpInstructionField(StandingInstruction::getInstructionType, StandingInstructionType.FIXED.getValue());
         setUpInstructionField(StandingInstruction::getRecurrenceType, AccountTransferRecurrenceType.AS_PER_DUES.getValue());
 
-        assertInstanceStrategy(InexistingStandingInstruction.class);
+        assertValidatorInstance(InexistingStandingInstruction.class);
     }
 
     private <T> void setUpInstructionField(Function<StandingInstruction, T> getter, T value) {
         when(getter.apply(this.standingInstruction)).thenReturn(value);
     }
 
-    private <T extends StandingInstructionValidator> void assertInstanceStrategy(Class<T> expectedClass) {
-        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(this.standingInstruction, this.baseDataValidator);
+    private <T extends StandingInstructionValidator> void assertValidatorInstance(Class<T> expectedClass) {
+        StandingInstructionValidator result = StandingInstructionValidatorFactory.getValidator(this.standingInstruction, this.baseDataValidator);
         assertTrue(expectedClass.isInstance(result));
     }
 }
