@@ -126,8 +126,8 @@ public class StandingInstructionDataValidator {
             instruction.setMonthDay(command.extractMonthDayNamed(recurrenceOnMonthDayParamName));
         } catch (Exception e) {
             instruction.setMonthDay(null);
-            this.baseDataValidator.reset().parameter(recurrenceOnMonthDayParamName)
-                    .failWithCode(StandingInstructionApiConstants.INVALID_MONTH_DAY_FORMAT_ERROR_CODE);
+            baseDataValidator.reset().parameter(recurrenceOnMonthDayParamName)
+                .failWithCode(StandingInstructionApiConstants.INVALID_MONTH_DAY_FORMAT_ERROR_CODE);
         }
         
         AccountTransferDetails details = instruction.getAccountTransferDetails();
