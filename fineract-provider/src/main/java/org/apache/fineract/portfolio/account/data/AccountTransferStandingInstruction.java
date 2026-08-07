@@ -21,12 +21,9 @@ package org.apache.fineract.portfolio.account.data;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.instructionTypeParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.recurrenceTypeParamName;
 
-import com.google.gson.JsonElement;
-import java.util.Locale;
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants;
-import org.apache.fineract.portfolio.account.data.StandingInstructionHelper;
+import org.apache.fineract.portfolio.account.validator.StandingInstructionHelper;
 
 public class AccountTransferStandingInstruction extends CommonStandingInstructionValidations {
     
@@ -67,7 +64,7 @@ public class AccountTransferStandingInstruction extends CommonStandingInstructio
                     .failWithCode(StandingInstructionApiConstants.INSTRUCTION_TYPE_DUES_NOT_ALLOWED_FOR_ACCOUNT_TRANSFER_ERROR_CODE);
         }
 
-        final Integer recurrenceType = this.fromApiJsonHelper.extractIntegerNamed(recurrenceTypeParamName, this.element, this.locale);
+        final Integer recurrenceType = this.standingInstruction.getRecurrenceType();
         if (isAsPerDuesRecurrence(recurrenceType)) {
             this.baseDataValidator.reset().parameter(recurrenceTypeParamName)
                     .failWithCode(StandingInstructionApiConstants.RECURRENCE_AS_PER_DUES_NOT_ALLOWED_FOR_SAVINGS_ERROR_CODE);
