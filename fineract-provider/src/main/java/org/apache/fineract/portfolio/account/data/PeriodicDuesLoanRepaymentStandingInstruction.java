@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.account.data;
 import com.google.gson.JsonElement;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants;
 import org.apache.fineract.portfolio.account.validator.StandingInstructionHelper;
 
 public class PeriodicDuesLoanRepaymentStandingInstruction extends CommonStandingInstructionValidations {

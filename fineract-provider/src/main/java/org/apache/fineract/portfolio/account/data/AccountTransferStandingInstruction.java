@@ -68,7 +68,7 @@ public class AccountTransferStandingInstruction extends CommonStandingInstructio
         }
 
         final Integer recurrenceType = this.standingInstruction.getRecurrenceType();
-        if (isAsPerDuesRecurrence(recurrenceType)) {
+        if (this.standingInstructionHelper.isAsPerDuesRecurrence(recurrenceType)) {
             this.baseDataValidator.reset().parameter(recurrenceTypeParamName)
                     .failWithCode(StandingInstructionApiConstants.RECURRENCE_AS_PER_DUES_NOT_ALLOWED_FOR_SAVINGS_ERROR_CODE);
         }
