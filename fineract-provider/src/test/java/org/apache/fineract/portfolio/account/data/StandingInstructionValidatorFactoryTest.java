@@ -21,11 +21,12 @@ package org.apache.fineract.portfolio.account.data;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.util.function.Function;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
-import org.apache.fineract.portfolio.account.data.StandingInstructionHelper;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
+import org.apache.fineract.portfolio.account.validator.StandingInstructionHelper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
