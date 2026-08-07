@@ -24,13 +24,25 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 
 public class PeriodicFixedAmountLoanRepaymentStandingInstruction extends CommonStandingInstructionValidations {
     
-    public PeriodicFixedAmountLoanRepaymentStandingInstruction(final FromJsonHelper fromApiJsonHelper, final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-        super(fromApiJsonHelper, element, baseDataValidator);
+    public PeriodicFixedAmountLoanRepaymentStandingInstruction(final StandingInstructionHelper standingInstructionHelper,
+            final StandingInstruction standingInstruction,
+            final DataValidatorBuilder baseDataValidator) {
+        super(standingInstructionHelper,  standingInstruction, baseDataValidator);
     }
 
     @Override
     protected void validateSpecificFields() {
         validatePeriodicFields();
         validateAmountForFixedInstructionType();
+
+        AccountTransferDetails details = this.standingInstruction.getAccountTransferDetails();
+        
+        final Integer fromAccountType = details.getFromAccountType();
+        final Integer toAccountType = details.getToAccountType();
+
+        if (!isValidLoanRepayment(fromAccountType, toAccountType)) {
+            this.baseDataValidator.reset().parameter(transferTypeParamName)
+                    .failWithCode(StandingInstructionApiConstants.NOT_A_VALID_LOAN_REPAYMENT_ERROR_CODE);
+        }
     }
 }

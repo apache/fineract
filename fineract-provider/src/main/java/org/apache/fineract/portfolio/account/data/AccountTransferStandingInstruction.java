@@ -29,8 +29,10 @@ import org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants
 
 public class AccountTransferStandingInstruction extends CommonStandingInstructionValidations {
     
-    public AccountTransferStandingInstruction(final FromJsonHelper fromApiJsonHelper, final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-        super(fromApiJsonHelper, element, baseDataValidator);
+    public AccountTransferStandingInstruction(final StandingInstructionHelper standingInstructionHelper,
+            final StandingInstruction standingInstruction,
+            final DataValidatorBuilder baseDataValidator) {
+        super(standingInstructionHelper,  standingInstruction, baseDataValidator);
     }
 
     @Override
@@ -38,8 +40,28 @@ public class AccountTransferStandingInstruction extends CommonStandingInstructio
         validatePeriodicFields();
         validateAmountForFixedInstructionType();
         
-        final Integer instructionType = this.fromApiJsonHelper.extractIntegerNamed(instructionTypeParamName, this.element, this.locale);
-        if (isDuesInstruction(instructionType)) {
+        AccountTransferDetails details = this.standingInstruction.getAccountTransferDetails();
+        
+        final Integer fromAccountType = details.getFromAccountType();
+        final Integer toAccountType = details.getToAccountType();
+        
+        if (isValidAccountTransfer(fromAccountType, toAccountType)) {
+            final Long fromOfficeId = details.getFromOfficeId();
+            final Long toOfficeId = details.getToOfficeId();
+            final Long fromAccountId = details.getFromAccountId();
+            final Long toAccountId = details.getToAccountId();
+
+            if (isSelfAccountTransfer(fromOfficeId, toOfficeId, fromAccountId, toAccountId)) {
+                this.baseDataValidator.reset().parameter(toAccountIdParamName)
+                    .failWithCode(StandingInstructionApiConstants.CANNOT_TRANSFER_TO_SAME_ACCOUNT_ERROR_CODE);
+            }
+        } else {
+            this.baseDataValidator.reset().parameter(transferTypeParamName)
+                .failWithCode(StandingInstructionApiConstants.NOT_A_VALID_ACCOUNT_TRANSFER_ERROR_CODE);
+        }
+
+        final Integer instructionType = this.standingInstruction.getInstructionType();
+        if (this.standingInstructionHelper.isDuesInstruction(instructionType)) {
             this.baseDataValidator.reset().parameter(instructionTypeParamName)
                     .failWithCode(StandingInstructionApiConstants.INSTRUCTION_TYPE_DUES_NOT_ALLOWED_FOR_ACCOUNT_TRANSFER_ERROR_CODE);
         }

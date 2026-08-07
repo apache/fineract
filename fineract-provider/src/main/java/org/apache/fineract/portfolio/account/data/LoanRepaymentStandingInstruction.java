@@ -24,12 +24,24 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 
 public class LoanRepaymentStandingInstruction extends CommonStandingInstructionValidations {
     
-    public LoanRepaymentStandingInstruction(final FromJsonHelper fromApiJsonHelper, final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-        super(fromApiJsonHelper, element, baseDataValidator);
+    public LoanRepaymentStandingInstruction(final StandingInstructionHelper standingInstructionHelper,
+            final StandingInstruction standingInstruction,
+            final DataValidatorBuilder baseDataValidator) {
+        super(standingInstructionHelper,  standingInstruction, baseDataValidator);
     }
 
     @Override
     protected void validateSpecificFields() {
         validateAmountForFixedInstructionType();
+        
+        AccountTransferDetails details = this.standingInstruction.getAccountTransferDetails();
+        
+        final Integer fromAccountType = details.getFromAccountType();
+        final Integer toAccountType = details.getToAccountType();
+
+        if (!isValidLoanRepayment(fromAccountType, toAccountType)) {
+            this.baseDataValidator.reset().parameter(transferTypeParamName)
+                    .failWithCode(StandingInstructionApiConstants.NOT_A_VALID_LOAN_REPAYMENT_ERROR_CODE);
+        }
     }
 }

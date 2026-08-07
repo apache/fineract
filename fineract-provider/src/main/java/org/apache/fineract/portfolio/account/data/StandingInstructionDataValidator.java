@@ -77,7 +77,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class StandingInstructionDataValidator {
-
+    private final StandingInstructionHelper standingInstructionHelper;
     private final FromJsonHelper fromApiJsonHelper;
     private final AccountTransfersDetailDataValidator accountTransfersDetailDataValidator;
     private static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
@@ -93,10 +93,14 @@ public class StandingInstructionDataValidator {
                     recurrenceIntervalParamName, recurrenceOnMonthDayParamName, monthDayFormatParamName));
 
     @Autowired
-    public StandingInstructionDataValidator(final FromJsonHelper fromApiJsonHelper,
-            final AccountTransfersDetailDataValidator accountTransfersDetailDataValidator) {
+    public StandingInstructionDataValidator(final StandingInstructionHelper standingInstructionHelper, 
+            final FromJsonHelper fromApiJsonHelper,
+            final AccountTransfersDetailDataValidator accountTransfersDetailDataValidator,
+            final StandingInstructionValidatorFactory standingInstructionValidatorFactory) {
+        this.standingInstructionHelper = standingInstructionHelper;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.accountTransfersDetailDataValidator = accountTransfersDetailDataValidator;
+        this.standingInstructionValidatorFactory = standingInstructionValidatorFactory;
     }
 
     public void validateForCreate(final JsonCommand command) {
@@ -107,17 +111,19 @@ public class StandingInstructionDataValidator {
         }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, CREATE_REQUEST_DATA_PARAMETERS);
+        command.checkForUnsupportedParameters(typeOfMap, json, CREATE_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(STANDING_INSTRUCTION_RESOURCE_NAME);
-        this.accountTransfersDetailDataValidator.validate(command, baseDataValidator);
+        
+        StandingInstruction instruction = this.standingInstructionHelper.extractStandingInstruction(command);
+        
+        AccountTransferDetails details = instruction.getAccountTransferDetails();
+        this.accountTransfersDetailDataValidator.validate(this.standingInstructionHelper, details, baseDataValidator);
 
-        final JsonElement element = command.parsedJson();
-
-        StandingInstructionValidator standingInstructionValidator = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
-        standingInstructionValidator.validate();
+        StandingInstructionValidator validator = this.standingInstructionValidatorFactory.getValidator(instruction, baseDataValidator);
+        validator.validate();
         
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

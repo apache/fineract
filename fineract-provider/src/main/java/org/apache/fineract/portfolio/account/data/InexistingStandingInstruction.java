@@ -30,17 +30,21 @@ import org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants
 
 public class InexistingStandingInstruction extends CommonStandingInstructionValidations {
     
-    public InexistingStandingInstruction(final FromJsonHelper fromApiJsonHelper, final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-        super(fromApiJsonHelper, element, baseDataValidator);
+    public InexistingStandingInstruction(final StandingInstructionHelper standingInstructionHelper,
+            final StandingInstruction standingInstruction,
+            final DataValidatorBuilder baseDataValidator) {
+        super(standingInstructionHelper,  standingInstruction, baseDataValidator);
     }
 
     @Override
     protected void validateSpecificFields() {
-        final Integer transferType = fromApiJsonHelper.extractIntegerNamed(transferTypeParamName, this.element, this.locale);
-        final Integer instructionType = fromApiJsonHelper.extractIntegerNamed(instructionTypeParamName, this.element, this.locale);
-        final Integer recurrenceType = fromApiJsonHelper.extractIntegerNamed(recurrenceTypeParamName, this.element, this.locale);
+        final Integer transferType = this.standingInstruction.getTransferType();
+        final Integer instructionType = this.standingInstruction.getInstructionType();
+        final Integer recurrenceType = this.standingInstruction.getRecurrenceType();
 
-        if (isLoanRepayment(transferType) && isFixedInstruction(instructionType) && isAsPerDuesRecurrence(recurrenceType)) {
+        if (this.standingInstructionHelper.isLoanRepayment(transferType) && 
+            this.standingInstructionHelper.isFixedInstruction(instructionType) && 
+            this.standingInstructionHelper.isAsPerDuesRecurrence(recurrenceType)) {
             this.baseDataValidator.reset().parameter(recurrenceTypeParamName)
                     .failWithCode(StandingInstructionApiConstants.RECURRENCE_AS_PER_DUES_NOT_ALLOWED_WITH_FIXED_INSTRUCTION_ERROR_CODE);
         }

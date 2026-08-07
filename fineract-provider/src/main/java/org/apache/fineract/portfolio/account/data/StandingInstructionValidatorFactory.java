@@ -18,78 +18,60 @@
  */
 package org.apache.fineract.portfolio.account.data;
 
-import static org.apache.fineract.portfolio.account.AccountDetailConstants.transferTypeParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.instructionTypeParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.recurrenceTypeParamName;
-
-
-import com.google.gson.JsonElement;
-import java.util.Locale;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
-import org.apache.fineract.portfolio.account.domain.AccountTransferType;
-import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
+import org.apache.fineract.portfolio.account.validator.StandingInstructionHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public final class StandingInstructionValidatorFactory {
+@Component
+public class StandingInstructionValidatorFactory {
 
-    private StandingInstructionValidatorFactory() {}
+    private final StandingInstructionHelper standingInstructionHelper;
 
-    public static StandingInstructionValidator getStrategy(final FromJsonHelper fromApiJsonHelper, final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-        final Locale locale = Locale.getDefault();
-        final Integer transferType = fromApiJsonHelper.extractIntegerNamed(transferTypeParamName, element, locale);
+    @Autowired
+    public StandingInstructionValidatorFactory(final StandingInstructionHelper standingInstructionHelper) {
+        this.standingInstructionHelper = standingInstructionHelper;
+    }
+
+    public StandingInstructionValidator getValidator(final StandingInstruction standingInstruction,
+            final DataValidatorBuilder baseDataValidator) {
+
+        if (standingInstruction == null) {
+            return new InexistingStandingInstruction(standingInstruction, baseDataValidator);
+        }
+
+        final Integer transferType = standingInstruction.getTransferType();
 
         if (transferType == null) {
-            return new InexistingStandingInstruction(fromApiJsonHelper, element, baseDataValidator);
+            return new InexistingStandingInstruction(standingInstruction, baseDataValidator);
         }
 
-        if (isAccountTransfer(transferType)) {
-            return new AccountTransferStandingInstruction(fromApiJsonHelper, element, baseDataValidator);
+        if (this.standingInstructionHelper.isAccountTransfer(transferType)) {
+            return new AccountTransferStandingInstructionValidator(standingInstruction, baseDataValidator);
         }
 
-        final Integer instructionType = fromApiJsonHelper.extractIntegerNamed(instructionTypeParamName, element, locale);
-        final Integer recurrenceType = fromApiJsonHelper.extractIntegerNamed(recurrenceTypeParamName, element, locale);
+        final Integer instructionType = standingInstruction.getInstructionType();
+        final Integer recurrenceType = standingInstruction.getRecurrenceType();
 
         if (instructionType == null || recurrenceType == null) {
-            return new InexistingStandingInstruction(fromApiJsonHelper, element, baseDataValidator);
-        }
-        
-        if (isLoanRepayment(transferType) && isFixedInstruction(instructionType) && isPeriodicRecurrence(recurrenceType)) {
-            return new PeriodicFixedAmountLoanRepaymentStandingInstruction(fromApiJsonHelper, element, baseDataValidator);
+            return new InexistingStandingInstruction(standingInstruction, baseDataValidator);
         }
 
-        if (isLoanRepayment(transferType) && isDuesInstruction(instructionType)) {
-            if (isPeriodicRecurrence(recurrenceType)) {
-                return new PeriodicDuesLoanRepaymentStandingInstruction(fromApiJsonHelper, element, baseDataValidator);
-            } else if (isAsPerDuesRecurrence(recurrenceType)) {
-                return new LoanRepaymentStandingInstruction(fromApiJsonHelper, element, baseDataValidator);
+        if (this.standingInstructionHelper.isLoanRepayment(transferType)
+                && this.standingInstructionHelper.isFixedInstruction(instructionType)
+                && this.standingInstructionHelper.isPeriodicRecurrence(recurrenceType)) {
+            return new PeriodicFixedAmountLoanRepaymentStandingInstruction(standingInstruction, baseDataValidator);
+        }
+
+        if (this.standingInstructionHelper.isLoanRepayment(transferType)
+                && this.standingInstructionHelper.isDuesInstruction(instructionType)) {
+            if (this.standingInstructionHelper.isPeriodicRecurrence(recurrenceType)) {
+                return new PeriodicDuesLoanRepaymentStandingInstruction(standingInstruction, baseDataValidator);
+            } else if (this.standingInstructionHelper.isAsPerDuesRecurrence(recurrenceType)) {
+                return new LoanRepaymentStandingInstruction(standingInstruction, baseDataValidator);
             }
         }
 
-        return new InexistingStandingInstruction(fromApiJsonHelper, element, baseDataValidator);
-    }
-
-    private static boolean isAccountTransfer(final Integer transferType) {
-        return AccountTransferType.fromInt(transferType).isAccountTransfer();
-    }
-
-    private static boolean isLoanRepayment(final Integer transferType) {
-        return AccountTransferType.fromInt(transferType).isLoanRepayment();
-    }
-
-    private static boolean isFixedInstruction(final Integer instructionType) {
-        return StandingInstructionType.fromInt(instructionType).isFixedAmoutTransfer();
-    }
-
-    private static boolean isDuesInstruction(final Integer instructionType) {
-        return StandingInstructionType.fromInt(instructionType).isDuesAmoutTransfer();
-    }
-
-    private static boolean isPeriodicRecurrence(final Integer recurrenceType) {
-        return AccountTransferRecurrenceType.fromInt(recurrenceType).isPeriodicRecurrence();
-    }
-
-    private static boolean isAsPerDuesRecurrence(final Integer recurrenceType) {
-        return AccountTransferRecurrenceType.fromInt(recurrenceType).isDuesRecurrence();
+        return new InexistingStandingInstruction(standingInstruction, baseDataValidator);
     }
 }

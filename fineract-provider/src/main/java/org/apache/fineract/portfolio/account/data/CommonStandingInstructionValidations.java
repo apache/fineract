@@ -58,14 +58,13 @@ import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 public abstract class CommonStandingInstructionValidations implements StandingInstructionValidator {
-    protected final Locale locale = Locale.getDefault();
-    protected final FromJsonHelper fromApiJsonHelper;
-    protected final JsonElement element;
+    protected final StandingInstructionHelper standingInstructionHelper;
+    protected final StandingInstruction standingInstruction;
     protected final DataValidatorBuilder baseDataValidator;
 
-    protected CommonStandingInstructionValidations(final FromJsonHelper fromApiJsonHelper, final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-        this.fromApiJsonHelper = fromApiJsonHelper;
-        this.element = element;
+    protected CommonStandingInstructionValidations(final StandingInstructionHelper standingInstructionHelper, final StandingInstruction standingInstruction, final DataValidatorBuilder baseDataValidator) {
+        this.standingInstructionHelper = standingInstructionHelper;
+        this.standingInstruction = standingInstruction;
         this.baseDataValidator = baseDataValidator;
     }
 
@@ -76,80 +75,50 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
     }
 
     private void validateCommonFields() {
-        final Integer transferType = this.fromApiJsonHelper.extractIntegerNamed(transferTypeParamName, this.element, this.locale);
+        final Integer transferType = this.standingInstruction.getTransferType();
         this.baseDataValidator.reset().parameter(transferTypeParamName).value(transferType).notNull().inMinMaxRange(1, 3);
 
-        final String name = this.fromApiJsonHelper.extractStringNamed(nameParamName, this.element);
+        final String name = this.standingInstruction.getName();
         this.baseDataValidator.reset().parameter(nameParamName).value(name).notBlank();
 
-        final Integer priority = this.fromApiJsonHelper.extractIntegerNamed(priorityParamName, this.element, this.locale);
+        final Integer priority = this.standingInstruction.getPriority();
         this.baseDataValidator.reset().parameter(priorityParamName).value(priority).notNull().inMinMaxRange(1, 4);
 
-        final Integer instructionType = this.fromApiJsonHelper.extractIntegerNamed(instructionTypeParamName, this.element, this.locale);
+        final Integer instructionType = this.standingInstruction.getInstructionType();
         this.baseDataValidator.reset().parameter(instructionTypeParamName).value(instructionType).notNull().inMinMaxRange(1, 2);
 
-        final Integer status = this.fromApiJsonHelper.extractIntegerNamed(statusParamName, this.element, this.locale);
+        final Integer status = this.standingInstruction.getStatus();
         this.baseDataValidator.reset().parameter(statusParamName).value(status).notNull().inMinMaxRange(1, 2);
 
-        final LocalDate validFrom = this.fromApiJsonHelper.extractLocalDateNamed(validFromParamName, this.element);
+        final LocalDate validFrom = this.standingInstruction.getValidFrom();
         this.baseDataValidator.reset().parameter(validFromParamName).value(validFrom).notNull();
 
-        final LocalDate validTill = this.fromApiJsonHelper.extractLocalDateNamed(validTillParamName, this.element);
+        final LocalDate validTill = this.standingInstruction.getValidTill();
         this.baseDataValidator.reset().parameter(validTillParamName).value(validTill).validateDateAfter(validFrom);
 
-        final Integer recurrenceType = this.fromApiJsonHelper.extractIntegerNamed(recurrenceTypeParamName, this.element, this.locale);
-        this.baseDataValidator.reset().parameter(recurrenceTypeParamName).value(recurrenceType).notNull().inMinMaxRange(1, 2);
-
-        validateAccountTypesAndTransferEligibility(transferType);
+        final Integer recurrenceType = this.standingInstruction.getRecurrenceType();
+        this.baseDataValidator.reset().parameter(recurrenceTypeParamName).value(recurrenceType).notNull().inMinMaxRange(1, 2); 
     }
-
-    private void validateAccountTypesAndTransferEligibility(final Integer transferType) {
-        final Integer fromAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(fromAccountTypeParamName, this.element);
-        final Integer toAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(toAccountTypeParamName, this.element);
-
-        if (fromAccountType == null || toAccountType == null) {
-            return;
-        }
-
-        validateTransferTypeEligibility(transferType, fromAccountType, toAccountType);
-        validateSelfAccountTransfer(transferType, fromAccountType, toAccountType);
-    }
-
-    private void validateTransferTypeEligibility(final Integer transferType, final Integer fromAccountType, final Integer toAccountType) {
-        if (isInvalidAccountTransfer(transferType, fromAccountType, toAccountType)) {
-            this.baseDataValidator.reset().parameter(transferTypeParamName)
-                    .failWithCode(StandingInstructionApiConstants.ACCOUNT_TRANSFER_NOT_ALLOWED_FOR_LOAN_ERROR_CODE);
-        } else if (isInvalidLoanRepayment(transferType, fromAccountType, toAccountType)) {
-            this.baseDataValidator.reset().parameter(transferTypeParamName)
-                    .failWithCode(StandingInstructionApiConstants.NOT_A_VALID_LOAN_REPAYMENT_ERROR_CODE);
-        }
-    }
-
-    private boolean isInvalidAccountTransfer(final Integer transferType, final Integer fromAccountType, final Integer toAccountType) {
-        return isAccountTransfer(transferType) && (isLoanAccount(fromAccountType) || isLoanAccount(toAccountType));
-    }
-
-    private boolean isInvalidLoanRepayment(final Integer transferType, final Integer fromAccountType, final Integer toAccountType) {
-        return isLoanRepayment(transferType) && (isLoanAccount(fromAccountType) || isSavingsAccount(toAccountType));
-    }
-
-    private void validateSelfAccountTransfer(final Integer transferType, final Integer fromAccountType, final Integer toAccountType) {
-        if (!isAccountTransfer(transferType) || !isSavingsAccount(fromAccountType) || !isSavingsAccount(toAccountType)) {
-            return;
-        }
-
-        final Long fromOfficeId = this.fromApiJsonHelper.extractLongNamed(fromOfficeIdParamName, this.element);
-        final Long toOfficeId = this.fromApiJsonHelper.extractLongNamed(toOfficeIdParamName, this.element);
-        final Long fromAccountId = this.fromApiJsonHelper.extractLongNamed(fromAccountIdParamName, this.element);
-        final Long toAccountId = this.fromApiJsonHelper.extractLongNamed(toAccountIdParamName, this.element);
-
-        if (areEqualOfficesAndEqualAccounts(fromOfficeId, toOfficeId, fromAccountId, toAccountId)) {
-            this.baseDataValidator.reset().parameter(toAccountIdParamName)
-                    .failWithCode(StandingInstructionApiConstants.CANNOT_TRANSFER_TO_SAME_ACCOUNT_ERROR_CODE);
-        }
-    }
-
+    
     protected abstract void validateSpecificFields();
+
+    protected boolean isValidAccountTransfer(final Integer fromAccountType, final Integer toAccountType) {
+        return this.standingInstructionHelper.isSavingsAccount(fromAccountType) && 
+                this.standingInstructionHelper.isSavingsAccount(toAccountType);
+    }
+
+    protected boolean isValidLoanRepayment(final Integer fromAccountType, final Integer toAccountType) {
+        return this.standingInstructionHelper.isSavingsAccount(fromAccountType) && 
+                this.standingInstructionHelper.isLoanAccount(toAccountType);
+    }
+
+    protected boolean isSelfAccountTransfer(final Long fromOfficeId, final Long toOfficeId, final Long fromAccountId, final Long toAccountId) {
+        if (fromOfficeId == null || toOfficeId == null || fromAccountId == null || toAccountId == null) {
+            return false;
+        }
+
+        return Objects.equals(fromOfficeId, toOfficeId) && Objects.equals(fromAccountId, toAccountId);
+    }
 
     protected void validatePeriodicFields() {
         final Integer recurrenceFrequency = this.fromApiJsonHelper.extractIntegerNamed(recurrenceFrequencyParamName, this.element, this.locale);
@@ -297,48 +266,5 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
             this.baseDataValidator.reset().parameter(amountParamName)
                     .failWithCode(StandingInstructionApiConstants.AMOUNT_NOT_ALLOWED_FOR_DUES_ERROR_CODE);
         }
-    }
-
-    private boolean isValidInstructionType(final Integer instructionType) {
-        return isFixedInstruction(instructionType) || isDuesInstruction(instructionType);
-    }
-    
-    protected boolean isDuesInstruction(final Integer instructionType) {
-        return isMatchingType(instructionType, StandingInstructionType::fromInt, StandingInstructionType::isDuesAmoutTransfer);
-    }
-
-    protected boolean isFixedInstruction(final Integer instructionType) {
-        return isMatchingType(instructionType, StandingInstructionType::fromInt, StandingInstructionType::isFixedAmoutTransfer);
-    }
-
-    protected boolean isAsPerDuesRecurrence(final Integer recurrenceType) {
-        return isMatchingType(recurrenceType, AccountTransferRecurrenceType::fromInt, AccountTransferRecurrenceType::isDuesRecurrence);
-    }
-
-    protected boolean isAccountTransfer(final Integer transferType) {
-        return isMatchingType(transferType, AccountTransferType::fromInt, AccountTransferType::isAccountTransfer);
-    }
-
-    protected boolean isLoanRepayment(final Integer transferType) {
-        return isMatchingType(transferType, AccountTransferType::fromInt, AccountTransferType::isLoanRepayment);
-    }
-
-    protected boolean isLoanAccount(final Integer accountType) {
-        return isMatchingType(accountType, PortfolioAccountType::fromInt, PortfolioAccountType.LOAN::equals);
-    }
-
-    protected boolean isSavingsAccount(final Integer accountType) {
-        return isMatchingType(accountType, PortfolioAccountType::fromInt, PortfolioAccountType.SAVINGS::equals);
-    }
-
-    private <T> boolean isMatchingType(final Integer codeType, final Function<Integer, T> resolver, final Function<T, Boolean> predicate) {
-        return Optional.ofNullable(codeType)
-                       .map(resolver)
-                       .map(predicate)
-                       .orElse(false);
-    }
-
-    protected boolean areEqualOfficesAndEqualAccounts(final Long fromOfficeId, final Long toOfficeId, final Long fromAccountId, final Long toAccountId) {
-        return Objects.equals(fromOfficeId, toOfficeId) && Objects.equals(fromAccountId, toAccountId);
     }
 }

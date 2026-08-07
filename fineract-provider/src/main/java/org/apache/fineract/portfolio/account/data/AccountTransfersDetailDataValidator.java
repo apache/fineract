@@ -73,7 +73,20 @@ public class AccountTransfersDetailDataValidator {
         final Integer toAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(toAccountTypeParamName, element);
         baseDataValidator.reset().parameter(toAccountTypeParamName).value(toAccountType).notNull().isOneOfTheseValues(Integer.valueOf(1),
                 Integer.valueOf(2));
+    }
 
+    public void validate(final AccountTransferDetails details, final DataValidatorBuilder baseDataValidator) {
+        baseDataValidator.reset().parameter(fromOfficeIdParamName).value(details.getFromOfficeId()).notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter(fromClientIdParamName).value(details.getFromClientId()).notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter(fromAccountIdParamName).value(details.getFromAccountId()).notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter(fromAccountTypeParamName).value(details.getFromAccountType()).notNull()
+                .isOneOfTheseValues(PortfolioAccountType.LOAN.getValue(), PortfolioAccountType.SAVINGS.getValue());
+
+        baseDataValidator.reset().parameter(toOfficeIdParamName).value(details.getToOfficeId()).notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter(toClientIdParamName).value(details.getToClientId()).notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter(toAccountIdParamName).value(details.getToAccountId()).notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter(toAccountTypeParamName).value(details.getToAccountType()).notNull()
+                .isOneOfTheseValues(PortfolioAccountType.LOAN.getValue(), PortfolioAccountType.SAVINGS.getValue());
     }
 
 }
