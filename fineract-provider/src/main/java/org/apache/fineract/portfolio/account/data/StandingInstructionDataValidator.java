@@ -123,7 +123,7 @@ public class StandingInstructionDataValidator {
         StandingInstruction instruction = this.standingInstructionHelper.extractStandingInstruction(command);
         
         AccountTransferDetails details = instruction.getAccountTransferDetails();
-        this.accountTransfersDetailDataValidator.validate(this.standingInstructionHelper, details, baseDataValidator);
+        this.accountTransfersDetailDataValidator.validate(details, baseDataValidator);
 
         StandingInstructionValidator validator = this.standingInstructionValidatorFactory.getValidator(instruction, baseDataValidator);
         validator.validate();
