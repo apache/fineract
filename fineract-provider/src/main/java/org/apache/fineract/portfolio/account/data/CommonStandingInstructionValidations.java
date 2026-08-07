@@ -122,10 +122,10 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
     }
 
     protected void validatePeriodicFields() {
-        final Integer recurrenceFrequency = this.fromApiJsonHelper.extractIntegerNamed(recurrenceFrequencyParamName, this.element, this.locale);
+        final Integer recurrenceFrequency = this.standingInstruction.getRecurrenceFrequency();
         this.baseDataValidator.reset().parameter(recurrenceFrequencyParamName).value(recurrenceFrequency).notNull().inMinMaxRange(0, 3);
 
-        final Integer recurrenceInterval = this.fromApiJsonHelper.extractIntegerNamed(recurrenceIntervalParamName, this.element, this.locale);
+        final Integer recurrenceInterval = this.standingInstruction.getRecurrenceInterval();
         this.baseDataValidator.reset().parameter(recurrenceIntervalParamName).value(recurrenceInterval).notNull().integerGreaterThanZero();
 
         if (!isValidFrequencyData(recurrenceFrequency, recurrenceInterval)) {
@@ -134,23 +134,23 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
 
         MonthDay monthDay = null;
         if (isMonthlyOrYearlyFrequency(recurrenceFrequency)) {
-            final String monthDayFormat = this.fromApiJsonHelper.extractStringNamed(monthDayFormatParamName, this.element);
+            final String monthDayFormat = this.standingInstruction.getMonthDayFormat();
             this.baseDataValidator.reset().parameter(monthDayFormatParamName).value(monthDayFormat).notBlank();
 
-            final String monthDayStr = this.fromApiJsonHelper.extractStringNamed(recurrenceOnMonthDayParamName, this.element);
+            final String monthDayStr = this.standingInstruction.getMonthDayStr();
             this.baseDataValidator.reset().parameter(recurrenceOnMonthDayParamName).value(monthDayStr).notBlank();
 
             monthDay = extractAndValidateMonthDay(monthDayStr, monthDayFormat);
         }
 
-        final LocalDate validFrom = this.fromApiJsonHelper.extractLocalDateNamed(validFromParamName, this.element);
+        final LocalDate validFrom = this.standingInstruction.getValidFrom();
         if (!areValidDates(validFrom)) {
             return;
         }
 
         final LocalDate firstExecutionDate = getFirstExecutionDate(recurrenceFrequency, validFrom, recurrenceInterval, monthDay);
 
-        final LocalDate validTill = this.fromApiJsonHelper.extractLocalDateNamed(validTillParamName, this.element);
+        final LocalDate validTill = this.standingInstruction.getValidTill();
         if (isValidTillBeforeFirstExecution(validFrom, firstExecutionDate, validTill)) {
             this.baseDataValidator.reset().parameter(validTillParamName).value(validTill)
                     .failWithCode(StandingInstructionApiConstants.BEFORE_FIRST_EXECUTION_DATE_ERROR_CODE);
@@ -182,7 +182,8 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
         }
 
         try {
-            return this.fromApiJsonHelper.extractMonthDayNamed(recurrenceOnMonthDayParamName, this.element);
+
+            return new FromJsonHelper().extractMonthDayNamed(recurrenceOnMonthDayParamName, this.element);
         } catch (Exception e) {
             this.baseDataValidator.reset().parameter(recurrenceOnMonthDayParamName)
                     .failWithCode(StandingInstructionApiConstants.INVALID_MONTH_DAY_FORMAT_ERROR_CODE);
