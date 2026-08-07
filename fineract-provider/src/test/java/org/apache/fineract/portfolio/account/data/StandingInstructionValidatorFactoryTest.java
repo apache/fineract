@@ -27,6 +27,7 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceTyp
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.apache.fineract.portfolio.account.validator.StandingInstructionHelper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -34,18 +35,30 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class StandingInstructionValidatorFactoryTest {
+
+    @Mock
+    private StandingInstructionHelper standingInstructionHelper;
+
     @Mock
     private StandingInstruction standingInstruction;
 
     @Mock
     private DataValidatorBuilder baseDataValidator;
 
+    private StandingInstructionValidatorFactory standingInstructionValidatorFactory;
+
+    @BeforeEach
+    public void setUp() {
+        this.standingInstructionValidatorFactory = new StandingInstructionValidatorFactory(this.standingInstructionHelper);
+    }
+
     @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenStandingInstructionIsNull() {
-        StandingInstruction instruction = null;
+        final StandingInstruction instruction = null;
         
-        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(instruction, this.baseDataValidator);
-        assertTrue(expectedClass.isInstance(result));
+        final StandingInstructionValidator result = this.standingInstructionValidatorFactory.getValidator(instruction, this.baseDataValidator);
+        
+        assertTrue(InexistingStandingInstruction.class.isInstance(result));
     }
 
     @Test
@@ -53,7 +66,6 @@ public class StandingInstructionValidatorFactoryTest {
         setUpInstructionField(StandingInstruction::getTransferType, null);
 
         assertValidatorInstance(InexistingStandingInstruction.class);
-        
     }
 
     @Test
@@ -122,7 +134,7 @@ public class StandingInstructionValidatorFactoryTest {
     }
 
     private <T extends StandingInstructionValidator> void assertValidatorInstance(Class<T> expectedClass) {
-        StandingInstructionValidator result = new StandingInstructionValidatorFactory().getValidator(this.standingInstruction, this.baseDataValidator);
+        StandingInstructionValidator result = this.standingInstructionValidatorFactory.getValidator(this.standingInstruction, this.baseDataValidator);
         assertTrue(expectedClass.isInstance(result));
     }
 }
