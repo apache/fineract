@@ -70,19 +70,19 @@ public class StandingInstructionHelper {
         return instruction;
     }
 
-    protected boolean isAccountTransfer(final Integer transferType) {
+    public boolean isAccountTransfer(final Integer transferType) {
         return isMatchingType(transferType, AccountTransferType::fromInt, AccountTransferType::isAccountTransfer);
     }
 
-    protected boolean isLoanRepayment(final Integer transferType) {
+    public boolean isLoanRepayment(final Integer transferType) {
         return isMatchingType(transferType, AccountTransferType::fromInt, AccountTransferType::isLoanRepayment);
     }
 
-    protected boolean isFixedInstruction(final Integer instructionType) {
+    public boolean isFixedInstruction(final Integer instructionType) {
         return isMatchingType(instructionType, StandingInstructionType::fromInt, StandingInstructionType::isFixedAmoutTransfer);
     }
 
-    protected boolean isDuesInstruction(final Integer instructionType) {
+    public boolean isDuesInstruction(final Integer instructionType) {
         return isMatchingType(instructionType, StandingInstructionType::fromInt, StandingInstructionType::isDuesAmoutTransfer);
     }
 
@@ -90,15 +90,15 @@ public class StandingInstructionHelper {
         return isMatchingType(recurrenceType, AccountTransferRecurrenceType::fromInt, AccountTransferRecurrenceType::isPeriodicRecurrence);
     }
 
-    protected boolean isAsPerDuesRecurrence(final Integer recurrenceType) {
+    public boolean isAsPerDuesRecurrence(final Integer recurrenceType) {
         return isMatchingType(recurrenceType, AccountTransferRecurrenceType::fromInt, AccountTransferRecurrenceType::isDuesRecurrence);
     }
 
-    protected boolean isLoanAccount(final Integer accountType) {
+    public boolean isLoanAccount(final Integer accountType) {
         return isMatchingType(accountType, PortfolioAccountType::fromInt, PortfolioAccountType.LOAN::equals);
     }
 
-    protected boolean isSavingsAccount(final Integer accountType) {
+    public boolean isSavingsAccount(final Integer accountType) {
         return isMatchingType(accountType, PortfolioAccountType::fromInt, PortfolioAccountType.SAVINGS::equals);
     }
 
