@@ -37,7 +37,7 @@ public class StandingInstructionValidatorFactory {
             final DataValidatorBuilder baseDataValidator) {
 
         if (standingInstruction == null) {
-            return new InexistingStandingInstruction(standingInstruction, baseDataValidator);
+            return new InexistingStandingInstruction(new StandingInstruction(), baseDataValidator);
         }
 
         final Integer transferType = standingInstruction.getTransferType();

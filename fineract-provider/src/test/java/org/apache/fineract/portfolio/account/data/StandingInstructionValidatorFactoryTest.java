@@ -26,10 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import com.google.gson.JsonElement;
-import java.util.Locale;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
@@ -40,19 +37,23 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class StandingInstructionValidatorFactoryTest {
-
     @Mock
-    private FromJsonHelper fromApiJsonHelper;
-
-    @Mock
-    private JsonElement element;
+    private StandingInstruction standingInstruction;
 
     @Mock
     private DataValidatorBuilder baseDataValidator;
 
     @Test
+    public void shouldReturnAnInexistingStandingInstructionInstanceWhenStandingInstructionIsNull() {
+        StandingInstruction instruction = null;
+        
+        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(instruction, this.baseDataValidator);
+        assertTrue(expectedClass.isInstance(result));
+    }
+
+    @Test
     public void shouldReturnAnInexistingStandingInstructionInstanceWhenTransferTypeIsNull() {
-        setUpParamWithValue(transferTypeParamName, null);
+        when(this.standingInstruction.getTransferType()).thenReturn(null);
 
         assertInstanceStrategy(InexistingStandingInstruction.class);
         
@@ -124,7 +125,7 @@ public class StandingInstructionValidatorFactoryTest {
     }
 
     private <T extends StandingInstructionValidator> void assertInstanceStrategy(Class<T> expectedClass) {
-        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(fromApiJsonHelper, element, baseDataValidator);
+        StandingInstructionValidator result = StandingInstructionValidatorFactory.getStrategy(this.standingInstruction, this.baseDataValidator);
         assertTrue(expectedClass.isInstance(result));
     }
 }
