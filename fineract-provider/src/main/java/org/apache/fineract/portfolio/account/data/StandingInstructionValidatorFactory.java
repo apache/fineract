@@ -47,7 +47,7 @@ public class StandingInstructionValidatorFactory {
         }
 
         if (this.standingInstructionHelper.isAccountTransfer(transferType)) {
-            return new AccountTransferStandingInstructionValidator(this.standingInstructionHelper, standingInstruction, baseDataValidator);
+            return new AccountTransferStandingInstruction(this.standingInstructionHelper, standingInstruction, baseDataValidator);
         }
 
         final Integer instructionType = standingInstruction.getInstructionType();
