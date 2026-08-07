@@ -24,6 +24,7 @@ import static org.apache.fineract.portfolio.account.api.StandingInstructionApiCo
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.validFromParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.validTillParamName;
 
+import java.util.function.Function;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.portfolio.account.data.AccountTransferDetails;
 import org.apache.fineract.portfolio.account.data.StandingInstruction;
