@@ -81,7 +81,7 @@ public class StandingInstructionDataValidator {
     private final StandingInstructionHelper standingInstructionHelper;
     private final FromJsonHelper fromApiJsonHelper;
     private final AccountTransfersDetailDataValidator accountTransfersDetailDataValidator;
-    private final StandingInstructionValidatorHelper standingInstructionValidatorHelper;
+    private final StandingInstructionValidatorFactory standingInstructionValidatorFactory;
 
     private static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(localeParamName, dateFormatParamName, fromOfficeIdParamName, fromClientIdParamName, fromAccountTypeParamName,
