@@ -45,6 +45,7 @@ public final class StandingInstructionApiConstants {
     public static final String CANNOT_TRANSFER_TO_SAME_ACCOUNT_ERROR_CODE = "transfer.to.same.account.not.allowed";
     public static final String INSTRUCTION_TYPE_DUES_NOT_ALLOWED_FOR_ACCOUNT_TRANSFER_ERROR_CODE = "dues.not.allowed.for.account.transfer";
     public static final String RECURRENCE_AS_PER_DUES_NOT_ALLOWED_FOR_SAVINGS_ERROR_CODE = "as.per.dues.not.allowed.for.account.transfer";
+    public static final String NOT_A_VALID_ACCOUNT_TRANSFER_ERROR_CODE = "not.a.valid.account.transfer";
     public static final String ACCOUNT_TRANSFER_NOT_ALLOWED_FOR_LOAN_ERROR_CODE = "account.transfer.is.not.allowed.for.loan.accounts";
     public static final String RECURRENCE_AS_PER_DUES_NOT_ALLOWED_WITH_FIXED_INSTRUCTION_ERROR_CODE = "as.per.dues.not.allowed.with.fixed.amount";
     public static final String NOT_A_VALID_LOAN_REPAYMENT_ERROR_CODE = "is.not.a.valid.loan.repayment";

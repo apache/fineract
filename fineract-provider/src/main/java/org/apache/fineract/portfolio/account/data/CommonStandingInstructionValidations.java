@@ -257,12 +257,12 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
     }
 
     protected void validateAmountForFixedInstructionType() {
-        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(amountParamName, this.element);
+        final BigDecimal amount = this.standingInstruction.getAmount();
         this.baseDataValidator.reset().parameter(amountParamName).value(amount).notNull().positiveAmount();
     }
 
     protected void validateAmountForDuesInstructionType() {
-        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(amountParamName, this.element);
+        final BigDecimal amount = this.standingInstruction.getAmount();
 
         if (amount != null) {
             this.baseDataValidator.reset().parameter(amountParamName)

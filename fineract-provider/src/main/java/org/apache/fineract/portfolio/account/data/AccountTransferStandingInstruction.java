@@ -18,8 +18,11 @@
  */
 package org.apache.fineract.portfolio.account.data;
 
+import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.toAccountIdParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.instructionTypeParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.recurrenceTypeParamName;
+import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.transferTypeParamName;
+import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.NOT_A_VALID_ACCOUNT_TRANSFER_ERROR_CODE
 
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants;
