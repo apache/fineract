@@ -18,15 +18,11 @@
  */
 package org.apache.fineract.portfolio.account.data;
 
-import static org.apache.fineract.portfolio.account.AccountDetailConstants.transferTypeParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.instructionTypeParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.recurrenceTypeParamName;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.portfolio.account.data.StandingInstructionHelper;
 import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceType;
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
