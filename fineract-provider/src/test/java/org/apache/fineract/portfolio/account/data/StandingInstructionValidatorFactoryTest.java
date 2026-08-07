@@ -122,7 +122,7 @@ public class StandingInstructionValidatorFactoryTest {
     }
 
     private <T extends StandingInstructionValidator> void assertValidatorInstance(Class<T> expectedClass) {
-        StandingInstructionValidator result = StandingInstructionValidatorFactory.getValidator(this.standingInstruction, this.baseDataValidator);
+        StandingInstructionValidator result = new StandingInstructionValidatorFactory().getValidator(this.standingInstruction, this.baseDataValidator);
         assertTrue(expectedClass.isInstance(result));
     }
 }
