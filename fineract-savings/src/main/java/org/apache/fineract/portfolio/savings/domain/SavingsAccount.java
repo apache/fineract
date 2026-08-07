@@ -3058,8 +3058,21 @@ public class SavingsAccount extends AbstractAuditableWithUTCDateTimeCustom<Long>
 
     public SavingsAccountTransaction payCharge(final SavingsAccountCharge savingsAccountCharge, final Money amountPaid,
             final LocalDate transactionDate, final boolean backdatedTxnsAllowedTill, String refNo) {
-        savingsAccountCharge.pay(getCurrency(), amountPaid);
-        return handlePayChargeTransactions(savingsAccountCharge, amountPaid, transactionDate, backdatedTxnsAllowedTill, refNo);
+        final BigDecimal baseAmount = amountPaid.getAmount();
+        final TaxGroup taxGroup = savingsAccountCharge.getCharge().getTaxGroup();
+        final BigDecimal chargeAmountWithTax = TaxUtils.calculateChargeAmountWithTax(baseAmount, taxGroup, transactionDate,
+                getCurrency().getDigitsAfterDecimal());
+        final Money taxInclusiveAmount = Money.of(getCurrency(), chargeAmountWithTax);
+        savingsAccountCharge.pay(getCurrency(), taxInclusiveAmount);
+        final SavingsAccountTransaction chargeTransaction = handlePayChargeTransactions(savingsAccountCharge, taxInclusiveAmount,
+                transactionDate, backdatedTxnsAllowedTill, refNo);
+        if (taxGroup != null) {
+            // Use tax-inclusive amount to calculate tax split so amounts match the gross total
+            final Map<TaxComponent, BigDecimal> taxSplit = TaxUtils.splitTax(chargeAmountWithTax, transactionDate,
+                    taxGroup.getTaxGroupMappings(), getCurrency().getDigitsAfterDecimal());
+            SavingsAccountTransaction.updateTaxDetails(taxSplit, chargeTransaction);
+        }
+        return chargeTransaction;
     }
 
     private SavingsAccountTransaction handlePayChargeTransactions(SavingsAccountCharge savingsAccountCharge, Money transactionAmount,

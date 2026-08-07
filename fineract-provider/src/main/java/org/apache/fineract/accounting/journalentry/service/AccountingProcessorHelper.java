@@ -814,6 +814,16 @@ public class AccountingProcessorHelper {
             final Long savingsProductId, final Long paymentTypeId, final Long loanId, final String transactionId,
             final LocalDate transactionDate, final BigDecimal totalAmount, final Boolean isReversal,
             final List<ChargePaymentDTO> chargePaymentDTOs) {
+        createCashBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode, accountTypeToBeDebited, accountTypeToBeCredited,
+                savingsProductId, paymentTypeId, loanId, transactionId, transactionDate, totalAmount, isReversal, chargePaymentDTOs,
+                List.of());
+    }
+
+    public void createCashBasedJournalEntriesAndReversalsForSavingsCharges(final Office office, final String currencyCode,
+            final CashAccountsForSavings accountTypeToBeDebited, CashAccountsForSavings accountTypeToBeCredited,
+            final Long savingsProductId, final Long paymentTypeId, final Long loanId, final String transactionId,
+            final LocalDate transactionDate, final BigDecimal totalAmount, final Boolean isReversal,
+            final List<ChargePaymentDTO> chargePaymentDTOs, final List<TaxPaymentDTO> taxPayments) {
         // TODO Vishwas: Remove this validation, as and when appropriate Junit
         // tests are written for accounting
         /**
@@ -831,16 +841,42 @@ public class AccountingProcessorHelper {
 
         final GLAccount savingsControlAccount = getLinkedGLAccountForSavingsProduct(savingsProductId, accountTypeToBeDebited.getValue(),
                 paymentTypeId);
+
+        // Compute total tax to separate the net charge from the VAT
+        final BigDecimal totalTax = taxPayments.stream().map(TaxPaymentDTO::getAmount).filter(Objects::nonNull).reduce(BigDecimal.ZERO,
+                BigDecimal::add);
+        final BigDecimal netChargeAmount = totalAmount.subtract(totalTax);
+
         if (isReversal) {
+            // Debit income GL with net charge amount
             createDebitJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, loanId, transactionId, transactionDate,
-                    totalAmount);
+                    netChargeAmount);
+            // Debit VAT payable GL for each tax component
+            for (TaxPaymentDTO taxPayment : taxPayments) {
+                if (taxPayment.getAmount() != null && taxPayment.getCreditAccountId() != null) {
+                    final GLAccount vatPayableAccount = getGLAccountById(taxPayment.getCreditAccountId());
+                    createDebitJournalEntryForSavings(office, currencyCode, vatPayableAccount, loanId, transactionId, transactionDate,
+                            taxPayment.getAmount());
+                }
+            }
+            // Credit savings control with full amount
             createCreditJournalEntryForSavings(office, currencyCode, savingsControlAccount, loanId, transactionId, transactionDate,
                     totalAmount);
         } else {
+            // Debit savings control with full amount
             createDebitJournalEntryForSavings(office, currencyCode, savingsControlAccount, loanId, transactionId, transactionDate,
                     totalAmount);
+            // Credit income GL with net charge amount
             createCreditJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, loanId, transactionId, transactionDate,
-                    totalAmount);
+                    netChargeAmount);
+            // Credit VAT payable GL for each tax component
+            for (TaxPaymentDTO taxPayment : taxPayments) {
+                if (taxPayment.getAmount() != null && taxPayment.getCreditAccountId() != null) {
+                    final GLAccount vatPayableAccount = getGLAccountById(taxPayment.getCreditAccountId());
+                    createCreditJournalEntryForSavings(office, currencyCode, vatPayableAccount, loanId, transactionId, transactionDate,
+                            taxPayment.getAmount());
+                }
+            }
         }
     }
 
@@ -849,6 +885,17 @@ public class AccountingProcessorHelper {
             final AccountingConstants.AccrualAccountsForSavings accountTypeToBeCredited, final Long savingsProductId,
             final Long paymentTypeId, final Long loanId, final String transactionId, final LocalDate transactionDate,
             final BigDecimal totalAmount, final Boolean isReversal, final List<ChargePaymentDTO> chargePaymentDTOs) {
+        createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(office, currencyCode, accountTypeToBeDebited, accountTypeToBeCredited,
+                savingsProductId, paymentTypeId, loanId, transactionId, transactionDate, totalAmount, isReversal, chargePaymentDTOs,
+                List.of());
+    }
+
+    public void createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(final Office office, final String currencyCode,
+            final AccountingConstants.AccrualAccountsForSavings accountTypeToBeDebited,
+            final AccountingConstants.AccrualAccountsForSavings accountTypeToBeCredited, final Long savingsProductId,
+            final Long paymentTypeId, final Long loanId, final String transactionId, final LocalDate transactionDate,
+            final BigDecimal totalAmount, final Boolean isReversal, final List<ChargePaymentDTO> chargePaymentDTOs,
+            final List<TaxPaymentDTO> taxPayments) {
         // TODO Vishwas: Remove this validation, as and when appropriate Junit
         // tests are written for accounting
         /**
@@ -866,16 +913,42 @@ public class AccountingProcessorHelper {
 
         final GLAccount savingsControlAccount = getLinkedGLAccountForSavingsProduct(savingsProductId, accountTypeToBeDebited.getValue(),
                 paymentTypeId);
+
+        // Compute total tax to separate the net charge from the VAT
+        final BigDecimal totalTax = taxPayments.stream().map(TaxPaymentDTO::getAmount).filter(Objects::nonNull).reduce(BigDecimal.ZERO,
+                BigDecimal::add);
+        final BigDecimal netChargeAmount = totalAmount.subtract(totalTax);
+
         if (isReversal) {
+            // Debit income GL with net charge amount
             createDebitJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, loanId, transactionId, transactionDate,
-                    totalAmount);
+                    netChargeAmount);
+            // Debit VAT payable GL for each tax component
+            for (TaxPaymentDTO taxPayment : taxPayments) {
+                if (taxPayment.getAmount() != null && taxPayment.getCreditAccountId() != null) {
+                    final GLAccount vatPayableAccount = getGLAccountById(taxPayment.getCreditAccountId());
+                    createDebitJournalEntryForSavings(office, currencyCode, vatPayableAccount, loanId, transactionId, transactionDate,
+                            taxPayment.getAmount());
+                }
+            }
+            // Credit savings control with full amount
             createCreditJournalEntryForSavings(office, currencyCode, savingsControlAccount, loanId, transactionId, transactionDate,
                     totalAmount);
         } else {
+            // Debit savings control with full amount
             createDebitJournalEntryForSavings(office, currencyCode, savingsControlAccount, loanId, transactionId, transactionDate,
                     totalAmount);
+            // Credit income GL with net charge amount
             createCreditJournalEntryForSavings(office, currencyCode, chargeSpecificAccount, loanId, transactionId, transactionDate,
-                    totalAmount);
+                    netChargeAmount);
+            // Credit VAT payable GL for each tax component
+            for (TaxPaymentDTO taxPayment : taxPayments) {
+                if (taxPayment.getAmount() != null && taxPayment.getCreditAccountId() != null) {
+                    final GLAccount vatPayableAccount = getGLAccountById(taxPayment.getCreditAccountId());
+                    createCreditJournalEntryForSavings(office, currencyCode, vatPayableAccount, loanId, transactionId, transactionDate,
+                            taxPayment.getAmount());
+                }
+            }
         }
     }
 
