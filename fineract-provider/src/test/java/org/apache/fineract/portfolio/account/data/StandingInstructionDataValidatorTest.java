@@ -61,8 +61,10 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants;
+import org.apache.fineract.portfolio.account.data.StandingInstructionValidatorFactory;
 import org.apache.fineract.portfolio.account.domain.AccountTransferDetails;
 import org.apache.fineract.portfolio.account.domain.AccountTransferStandingInstruction;
+import org.apache.fineract.portfolio.account.validator.StandingInstructionHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -96,6 +98,12 @@ public class StandingInstructionDataValidatorTest {
     @Mock
     private AccountTransferDetails accountTransferDetails;
 
+    @Mock
+    private StandingInstructionHelper standingInstructionHelper;
+
+    @Mock
+    private StandingInstructionValidatorFactory standingInstructionValidatorFactory;
+
     private static final FromJsonHelper fromApiJsonHelper = new FromJsonHelper();
     private StandingInstructionDataValidator standingInstructionDataValidator;
 
@@ -103,8 +111,9 @@ public class StandingInstructionDataValidatorTest {
 
     @BeforeEach
     public void setUp() {
-        this.standingInstructionDataValidator = new StandingInstructionDataValidator(fromApiJsonHelper,
-                this.accountTransfersDetailDataValidator);
+        this.standingInstructionDataValidator = new StandingInstructionDataValidator(
+            this.standingInstructionHelper, this.fromApiJsonHelper,
+            this.accountTransfersDetailDataValidator, this.standingInstructionValidatorFactory);
     }
 
     @Nested
