@@ -24,4 +24,5 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <include file="parts/0146_add_final_constraints.xml" relativeToChangelogFile="true"/>
     <include file="parts/0241_set_datetime_precision.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0242_add_provisioning_entry_approval_lifecycle.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

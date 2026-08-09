@@ -3318,6 +3318,30 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder approveProvisioningEntry(final Long entryId) {
+        this.actionName = ACTION_APPROVE;
+        this.entityName = ENTITY_PROVISIONENTRIES;
+        this.entityId = entryId;
+        this.href = "/provisioningentries/" + entryId;
+        return this;
+    }
+
+    public CommandWrapperBuilder rejectProvisioningEntry(final Long entryId) {
+        this.actionName = ACTION_REJECT;
+        this.entityName = ENTITY_PROVISIONENTRIES;
+        this.entityId = entryId;
+        this.href = "/provisioningentries/" + entryId;
+        return this;
+    }
+
+    public CommandWrapperBuilder undoProvisioningEntryApproval(final Long entryId) {
+        this.actionName = ACTION_UNDOAPPROVAL;
+        this.entityName = ENTITY_PROVISIONENTRIES;
+        this.entityId = entryId;
+        this.href = "/provisioningentries/" + entryId;
+        return this;
+    }
+
     public CommandWrapperBuilder createFloatingRate() {
         this.actionName = ACTION_CREATE;
         this.entityName = ENTITY_FLOATINGRATE;

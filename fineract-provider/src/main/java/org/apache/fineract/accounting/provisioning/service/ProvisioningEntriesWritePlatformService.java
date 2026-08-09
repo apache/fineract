@@ -32,4 +32,10 @@ public interface ProvisioningEntriesWritePlatformService {
     CommandProcessingResult reCreateProvisioningEntries(Long provisioningEntryId, JsonCommand command);
 
     CommandProcessingResult createProvisioningJournalEntries(Long provisioningEntryId, JsonCommand command);
+
+    CommandProcessingResult approveProvisioningEntry(Long provisioningEntryId, JsonCommand command);
+
+    CommandProcessingResult rejectProvisioningEntry(Long provisioningEntryId, JsonCommand command);
+
+    CommandProcessingResult undoProvisioningEntryApproval(Long provisioningEntryId, JsonCommand command);
 }

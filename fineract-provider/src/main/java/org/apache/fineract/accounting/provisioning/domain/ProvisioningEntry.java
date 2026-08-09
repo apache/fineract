@@ -34,6 +34,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.apache.fineract.accounting.provisioning.exception.InvalidProvisioningEntryStateTransitionException;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.useradministration.domain.AppUser;
 
@@ -47,6 +48,23 @@ public class ProvisioningEntry extends AbstractPersistableCustom<Long> {
 
     @Column(name = "journal_entry_created")
     private Boolean isJournalEntryCreated;
+
+    @Column(name = "status_enum", nullable = false)
+    private Integer statusEnum = ProvisioningEntryStatus.DRAFT.getValue();
+
+    @Column(name = "approved_on_date")
+    private LocalDate approvedOnDate;
+
+    @OneToOne
+    @JoinColumn(name = "approvedby_id")
+    private AppUser approvedByUser;
+
+    @Column(name = "rejected_on_date")
+    private LocalDate rejectedOnDate;
+
+    @OneToOne
+    @JoinColumn(name = "rejectedby_id")
+    private AppUser rejectedByUser;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<LoanProductProvisioningEntry> provisioningEntries = new HashSet<>();
@@ -74,6 +92,80 @@ public class ProvisioningEntry extends AbstractPersistableCustom<Long> {
 
     public Collection<LoanProductProvisioningEntry> getLoanProductProvisioningEntries() {
         return this.provisioningEntries;
+    }
+
+    public ProvisioningEntryStatus status() {
+        return ProvisioningEntryStatus.fromInt(this.statusEnum);
+    }
+
+    /**
+     * Transitions this entry from DRAFT to APPROVED. Only a DRAFT entry may be approved - approving an already approved
+     * or rejected entry is a domain-rule violation, since re-approval has no well-defined meaning.
+     */
+    public void approve(final AppUser approvedByUser, final LocalDate approvedOnDate) {
+        if (!status().isDraft()) {
+            throw new InvalidProvisioningEntryStateTransitionException("approve", "not.in.draft.state",
+                    "Provisioning entry with id `" + getId() + "` cannot be approved because it is not in draft status.", getId());
+        }
+        this.approvedByUser = approvedByUser;
+        this.approvedOnDate = approvedOnDate;
+        this.statusEnum = ProvisioningEntryStatus.APPROVED.getValue();
+    }
+
+    /**
+     * Transitions this entry from DRAFT to REJECTED. Only a DRAFT entry may be rejected.
+     */
+    public void reject(final AppUser rejectedByUser, final LocalDate rejectedOnDate) {
+        if (!status().isDraft()) {
+            throw new InvalidProvisioningEntryStateTransitionException("reject", "not.in.draft.state",
+                    "Provisioning entry with id `" + getId() + "` cannot be rejected because it is not in draft status.", getId());
+        }
+        this.rejectedByUser = rejectedByUser;
+        this.rejectedOnDate = rejectedOnDate;
+        this.statusEnum = ProvisioningEntryStatus.REJECTED.getValue();
+    }
+
+    /**
+     * Reverts an APPROVED entry back to DRAFT, clearing the approval audit fields. Only permitted while journal entries
+     * have not yet been created for this entry - once journal entries exist, the approval that produced them must not
+     * be silently undone.
+     */
+    public void undoApproval() {
+        if (!status().isApproved()) {
+            throw new InvalidProvisioningEntryStateTransitionException("undo.approval", "not.in.approved.state",
+                    "Provisioning entry with id `" + getId() + "` cannot have its approval undone because it is not approved.", getId());
+        }
+        if (Boolean.TRUE.equals(this.isJournalEntryCreated)) {
+            throw new InvalidProvisioningEntryStateTransitionException("undo.approval", "journal.entries.already.created",
+                    "Provisioning entry with id `" + getId() + "` cannot have its approval undone because journal entries have "
+                            + "already been created for it.",
+                    getId());
+        }
+        this.approvedByUser = null;
+        this.approvedOnDate = null;
+        this.statusEnum = ProvisioningEntryStatus.DRAFT.getValue();
+    }
+
+    /**
+     * A DRAFT entry may still be regenerated; an APPROVED or REJECTED entry may not, since regenerating its rows would
+     * silently change what was actually approved or rejected.
+     */
+    public void validateCanBeRegenerated() {
+        if (!status().isDraft()) {
+            throw new InvalidProvisioningEntryStateTransitionException("recreate", "not.in.draft.state",
+                    "Provisioning entry with id `" + getId() + "` cannot be regenerated because it is not in draft status.", getId());
+        }
+    }
+
+    /**
+     * Journal entries may only be created for an APPROVED entry.
+     */
+    public void validateCanCreateJournalEntries() {
+        if (!status().isApproved()) {
+            throw new InvalidProvisioningEntryStateTransitionException("create.journal.entries", "not.in.approved.state",
+                    "Provisioning entry with id `" + getId() + "` cannot have journal entries created because it is not approved.",
+                    getId());
+        }
     }
 
 }

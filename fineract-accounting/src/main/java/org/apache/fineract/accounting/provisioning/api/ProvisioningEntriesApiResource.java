@@ -18,8 +18,11 @@
  */
 package org.apache.fineract.accounting.provisioning.api;
 
+import static org.apache.fineract.accounting.provisioning.constant.ProvisioningEntriesApiConstants.APPROVE_PROVISIONING_ENTRY;
 import static org.apache.fineract.accounting.provisioning.constant.ProvisioningEntriesApiConstants.CREATE_JOURNAL_ENTRY;
 import static org.apache.fineract.accounting.provisioning.constant.ProvisioningEntriesApiConstants.RECREATE_PROVISION_IN_ENTRY;
+import static org.apache.fineract.accounting.provisioning.constant.ProvisioningEntriesApiConstants.REJECT_PROVISIONING_ENTRY;
+import static org.apache.fineract.accounting.provisioning.constant.ProvisioningEntriesApiConstants.UNDO_APPROVAL_PROVISIONING_ENTRY;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -101,7 +104,7 @@ public class ProvisioningEntriesApiResource {
     @RequestBody(content = @Content(schema = @Schema(implementation = ProvisioningEntriesApiResourceSwagger.PutProvisioningEntriesRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ProvisioningEntriesApiResourceSwagger.PutProvisioningEntriesResponse.class)))
     public CommandProcessingResult modifyProvisioningEntry(@PathParam("entryId") @Parameter(description = "entryId") final Long entryId,
-            @QueryParam("command") @Parameter(description = "command=createjournalentry\ncommand=recreateprovisioningentry") final String commandParam,
+            @QueryParam("command") @Parameter(description = "command=createjournalentry\ncommand=recreateprovisioningentry\ncommand=approveprovisioningentry\ncommand=rejectprovisioningentry\ncommand=undoapprovalprovisioningentry") final String commandParam,
             @Parameter(hidden = true) String provisionCommandRequest) {
         platformSecurityContext.authenticatedUser();
         return getResultByCommandParam(commandParam, entryId, provisionCommandRequest);
@@ -153,6 +156,16 @@ public class ProvisioningEntriesApiResource {
             case RECREATE_PROVISION_IN_ENTRY -> {
                 return commandsSourceWritePlatformService
                         .logCommandSource(commandWrapperBuilder.reCreateProvisioningEntries(entryId).build());
+            }
+            case APPROVE_PROVISIONING_ENTRY -> {
+                return commandsSourceWritePlatformService.logCommandSource(commandWrapperBuilder.approveProvisioningEntry(entryId).build());
+            }
+            case REJECT_PROVISIONING_ENTRY -> {
+                return commandsSourceWritePlatformService.logCommandSource(commandWrapperBuilder.rejectProvisioningEntry(entryId).build());
+            }
+            case UNDO_APPROVAL_PROVISIONING_ENTRY -> {
+                return commandsSourceWritePlatformService
+                        .logCommandSource(commandWrapperBuilder.undoProvisioningEntryApproval(entryId).build());
             }
             default -> throw new UnrecognizedQueryParamException("command", commandParam);
         }
