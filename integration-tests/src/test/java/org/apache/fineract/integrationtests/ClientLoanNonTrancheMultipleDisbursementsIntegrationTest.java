@@ -23,7 +23,7 @@ import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Assertions;
@@ -92,22 +92,8 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest extends Fe
     private Long applyForLoanApplication(final Long clientId, final Long loanProductID, String principal, String submitDate,
             String repaymentsNo) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal(principal) //
-                .withLoanTermFrequency(repaymentsNo) //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments(repaymentsNo) //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate(submitDate) //
-                .withTranches(null) //
-                .withSubmittedOnDate(submitDate) //
-                .build(clientId.toString(), loanProductID.toString(), null);
-        return applyForLoanFromJson(loanApplicationJSON);
+        return applyForLoan(LoanRequestBuilders.legacyIndividualApplication(clientId, loanProductID, principal,
+                Integer.parseInt(repaymentsNo), new BigDecimal("2"), submitDate));
     }
 
     /***

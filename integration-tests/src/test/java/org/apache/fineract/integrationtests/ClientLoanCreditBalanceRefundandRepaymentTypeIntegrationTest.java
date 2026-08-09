@@ -49,7 +49,6 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuil
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Assertions;
@@ -110,22 +109,9 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
 
     private Long applyForLoanApplication(final Long clientID, final Long loanProductID, String principal, String submitDate,
             String repaymentStrategy) {
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal(principal) //
-                .withLoanTermFrequency("4") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("4") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate(submitDate) //
-                .withSubmittedOnDate(submitDate) //
-                .withRepaymentStrategy(repaymentStrategy) //
-                .build(clientID.toString(), loanProductID.toString(), null);
-        return applyForLoanFromJson(loanApplicationJSON);
+        return applyForLoan(
+                LoanRequestBuilders.legacyIndividualApplication(clientID, loanProductID, principal, 4, new BigDecimal("2"), submitDate)
+                        .transactionProcessingStrategyCode(repaymentStrategy));
     }
 
     private Long fromStartToDisburseLoan(LoanProductTestBuilder loanProductTestBuilder, String submitApproveDisburseDate, String principal,

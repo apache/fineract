@@ -124,6 +124,37 @@ public final class LoanRequestBuilders {
                 .dateFormat(LoanTestData.DATETIME_PATTERN);
     }
 
+    /**
+     * The equal-installment declining-balance application that LoanApplicationTestBuilder produced, including the
+     * fields its build() always emitted but no call site named: maxOutstandingLoanBalance, an empty collateral list,
+     * the default strategy and the en_GB locale.
+     */
+    public static PostLoansRequest legacyIndividualApplication(Long clientId, Long productId, String principal, int repayments,
+            BigDecimal interestRatePerPeriod, String date) {
+        return new PostLoansRequest()//
+                .clientId(clientId)//
+                .productId(productId)//
+                // the JSON builder sent grouped amounts like "12,000.00" for the server to parse under en_GB
+                .principal(new BigDecimal(principal.replace(",", "")))//
+                .loanTermFrequency(repayments)//
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .numberOfRepayments(repayments)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .interestRatePerPeriod(interestRatePerPeriod)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS)//
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                .transactionProcessingStrategyCode(LoanTestData.TransactionProcessingStrategyCode.MIFOS_STANDARD_STRATEGY)//
+                .expectedDisbursementDate(date)//
+                .submittedOnDate(date)//
+                .loanType("individual")//
+                .maxOutstandingLoanBalance(new BigDecimal("36000"))//
+                .collateral(List.of())//
+                .locale("en_GB")//
+                .dateFormat(LoanTestData.DATETIME_PATTERN);
+    }
+
     public static PostLoansLoanIdRequest disburseLoanWithRepaymentReschedule(String disbursedOnDate, String adjustRepaymentDate) {
         return new PostLoansLoanIdRequest()//
                 .actualDisbursementDate(disbursedOnDate)//
