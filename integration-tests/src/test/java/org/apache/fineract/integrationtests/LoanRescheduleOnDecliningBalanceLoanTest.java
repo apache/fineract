@@ -22,8 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -225,9 +224,9 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
 
         chargeOffLoan(this.loanId, "04 January 2015");
 
-        Map<?, ?> response = loanHelper.createRescheduleRequestWithFullResponse(rescheduleRequest, 403);
-        assertEquals("error.msg.loan.is.charged.off",
-                ((Map<?, ?>) ((List<?>) response.get("errors")).get(0)).get("userMessageGlobalisationCode"));
+        CallFailedRuntimeException exception = loanHelper.createRescheduleRequestExpectingError(rescheduleRequest);
+        assertEquals(403, exception.getStatus());
+        assertEquals("error.msg.loan.is.charged.off", extractErrorGlobalisationCode(exception));
 
         undoChargeOffLoan(this.loanId);
         closeRescheduledLoan(this.loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN)

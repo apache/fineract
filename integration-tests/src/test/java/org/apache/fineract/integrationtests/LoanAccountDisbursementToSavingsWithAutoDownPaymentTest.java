@@ -104,7 +104,7 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Fei
 
             PostLoansLoanIdResponse responseLoanDisburseToSavings = disburseToSavings(loanId,
                     new PostLoansLoanIdRequest().actualDisbursementDate("01 March 2023").transactionAmount(new BigDecimal("1000"))
-                            .locale("en").dateFormat("dd MMMM yyyy"));
+                            .netDisbursalAmount(new BigDecimal("1000")).note("DISBURSE NOTE").locale("en").dateFormat("dd MMMM yyyy"));
 
             assertEquals(loanExternalIdStr, responseLoanDisburseToSavings.getResourceExternalId());
 

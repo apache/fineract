@@ -27,6 +27,7 @@ import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
+import org.apache.fineract.client.models.PostLoansLoanIdDisbursementData;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestValidators;
@@ -53,14 +54,14 @@ public class LoanRepaymentRescheduleAtDisbursementTest extends FeignLoanTestBase
         List<PostLoansDisbursementData> createTranches = List.of(LoanRequestBuilders.applyTrancheDetail("01 March 2015", 5000.0),
                 LoanRequestBuilders.applyTrancheDetail("01 May 2015", 5000.0));
 
-        List<PostLoansDisbursementData> approveTranches = List.of(LoanRequestBuilders.applyTrancheDetail("01 March 2015", 5000.0),
-                LoanRequestBuilders.applyTrancheDetail("01 May 2015", 5000.0));
+        List<PostLoansLoanIdDisbursementData> approveTranches = List.of(LoanRequestBuilders.approveTrancheDetail("01 March 2015", 5000.0),
+                LoanRequestBuilders.approveTrancheDetail("01 May 2015", 5000.0));
 
         Long loanId = applyForLoanFromJson(buildLoanApplicationJson(clientId, loanProductId, disbursementDate, createTranches));
 
         verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        approveLoanFromJson(loanId, LoanRequestBuilders.approveLoanWithTranchesJson(Double.valueOf(approvalAmount), approveDate,
+        approveLoan(loanId, LoanRequestBuilders.approveLoanWithTranches(Double.valueOf(approvalAmount), approveDate,
                 expectedDisbursementDate, approveTranches));
 
         GetLoansLoanIdResponse approvedLoan = getLoanDetails(loanId);

@@ -1651,15 +1651,11 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
     }
 
     protected void disburseLoanWithRepaymentReschedule(Long loanId, String date, String adjustRepaymentDate) {
-        loanHelper.disburseLoanFromJson(loanId, LoanRequestBuilders.disburseLoanWithRepaymentRescheduleJson(date, adjustRepaymentDate));
+        loanHelper.disburseLoan(loanId, LoanRequestBuilders.disburseLoanWithRepaymentReschedule(date, adjustRepaymentDate));
     }
 
     protected void disburseLoanWithNetDisbursalAmount(Long loanId, String date, String netDisbursalAmount) {
-        loanHelper.disburseLoanFromJson(loanId, LoanRequestBuilders.disburseLoanWithNetDisbursalAmountJson(date, netDisbursalAmount));
-    }
-
-    protected void approveLoanFromJson(Long loanId, String approveLoanJson) {
-        loanHelper.approveLoanFromJson(loanId, approveLoanJson);
+        loanHelper.disburseLoan(loanId, LoanRequestBuilders.disburseLoanWithNetDisbursalAmount(date, new BigDecimal(netDisbursalAmount)));
     }
 
     protected Long addRepaymentForLoan(Long loanId, Double amount, String date) {

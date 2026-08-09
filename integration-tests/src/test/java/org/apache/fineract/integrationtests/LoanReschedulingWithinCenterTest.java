@@ -42,6 +42,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
+import org.apache.fineract.client.models.PostLoansLoanIdDisbursementData;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignCenterHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
@@ -198,8 +199,9 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
 
         List<PostLoansDisbursementData> createTranches = List.of(LoanRequestBuilders.applyTrancheDetail(disbursementDate, 5000.0),
                 LoanRequestBuilders.applyTrancheDetail(secondDisbursement, 5000.0));
-        List<PostLoansDisbursementData> approveTranches = List.of(LoanRequestBuilders.applyTrancheDetail(disbursementDate, 5000.0),
-                LoanRequestBuilders.applyTrancheDetail(secondDisbursement, 5000.0));
+        List<PostLoansLoanIdDisbursementData> approveTranches = List.of(
+                LoanRequestBuilders.approveTrancheDetail(disbursementDate, 5000.0),
+                LoanRequestBuilders.approveTrancheDetail(secondDisbursement, 5000.0));
 
         Long collateralId = createCollateralProduct();
         assertNotNull(collateralId);
@@ -215,8 +217,7 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
-        approveLoanFromJson(loanId,
-                LoanRequestBuilders.approveLoanWithTranchesJson(10000.0, approveDate, expectedDisbursementDate, approveTranches));
+        approveLoan(loanId, LoanRequestBuilders.approveLoanWithTranches(10000.0, approveDate, expectedDisbursementDate, approveTranches));
         GetLoansLoanIdResponse approvedLoan = getLoanDetails(loanId);
         verifyLoanStatus(approvedLoan, LoanStatus.APPROVED);
         verifyLoanStatus(approvedLoan, status -> Boolean.TRUE.equals(status.getWaitingForDisbursal()));
