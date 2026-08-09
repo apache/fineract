@@ -58,6 +58,7 @@ public interface WorkingCapitalLoanSummaryDataMapper {
     @Mapping(target = "totalDisbursement", source = "balance.totalDisbursement", qualifiedByName = "nullToZero")
     @Mapping(target = "totalDiscountFee", source = "balance.totalDiscountFee", qualifiedByName = "nullToZero")
     @Mapping(target = "totalDiscountFeeAdjustment", source = "balance.totalDiscountFeeAdjustment", qualifiedByName = "nullToZero")
+    @Mapping(target = "overdueSinceDate", ignore = true)
     WorkingCapitalLoanSummaryData toData(WorkingCapitalLoan loan);
 
     @Named("toCurrency")

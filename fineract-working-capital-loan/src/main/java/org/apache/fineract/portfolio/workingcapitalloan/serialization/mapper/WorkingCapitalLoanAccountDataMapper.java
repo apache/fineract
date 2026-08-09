@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.serialization.mapper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Optional;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanAccountDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanBreachSchedulePeriodDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanChargeDataV1;
@@ -29,6 +30,7 @@ import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinque
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencyScheduleTagDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDisbursementDetailDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanSummaryDataV1;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanChargeData;
@@ -64,6 +66,7 @@ public interface WorkingCapitalLoanAccountDataMapper {
     @Mapping(source = "breachStartDate", target = "breach.breachStartDate")
     @Mapping(source = "nearBreach", target = "breach.nearBreach")
     @Mapping(target = "breach.breachSchedule", ignore = true)
+    @Mapping(target = "breach.breachPastDueAmount", ignore = true)
     @Mapping(target = "overpaidOnDate", ignore = true)
     @Mapping(target = "customData", ignore = true)
     WorkingCapitalLoanAccountDataV1 map(WorkingCapitalLoanData source);
@@ -76,6 +79,7 @@ public interface WorkingCapitalLoanAccountDataMapper {
     @Mapping(source = "penalty", target = "penaltyChargesCharged")
     @Mapping(source = "penaltyPaid", target = "penaltyChargesPaid")
     @Mapping(source = "penaltyOutstanding", target = "penaltyChargesOutstanding")
+    @Mapping(target = "totalChargeAmount", source = ".", qualifiedByName = "toTotalChargeAmount")
     @Mapping(source = "principalAdjustment", target = "principalAdjustments")
     @Mapping(target = "principalWrittenOff", ignore = true)
     @Mapping(target = "feeChargesWrittenOff", ignore = true)
@@ -96,6 +100,8 @@ public interface WorkingCapitalLoanAccountDataMapper {
     @Mapping(target = "totalCreditBalanceRefundReversed", ignore = true)
     @Mapping(target = "totalRepaymentTransaction", ignore = true)
     @Mapping(target = "totalRepaymentTransactionReversed", ignore = true)
+    @Mapping(target = "totalPayment", ignore = true)
+    @Mapping(target = "totalPaymentReversed", ignore = true)
     WorkingCapitalLoanSummaryDataV1 map(WorkingCapitalLoanSummaryData source);
 
     @Mapping(source = "delinquentPrincipal", target = "totalDelinquentAmount")
@@ -126,6 +132,12 @@ public interface WorkingCapitalLoanAccountDataMapper {
     WorkingCapitalLoanBreachSchedulePeriodDataV1 map(WorkingCapitalLoanBreachScheduleData source);
 
     List<WorkingCapitalLoanBreachSchedulePeriodDataV1> mapBreachSchedule(List<WorkingCapitalLoanBreachScheduleData> source);
+
+    @Named("toTotalChargeAmount")
+    default BigDecimal toTotalChargeAmount(final WorkingCapitalLoanSummaryData source) {
+        return Optional.ofNullable(source.getFee()).map(fee -> fee.add(MathUtil.nullToZero(source.getPenalty())))
+                .orElseGet(source::getPenalty);
+    }
 
     @Named("toAvroDecimalScale")
     default BigDecimal toAvroDecimalScale(final BigDecimal value) {

@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,4 +67,7 @@ public class WorkingCapitalLoanSummaryData implements Serializable {
     private BigDecimal totalExpectedRepayment;
     private BigDecimal totalRepayment;
     private BigDecimal totalOutstanding;
+
+    // Delinquency
+    private LocalDate overdueSinceDate;
 }

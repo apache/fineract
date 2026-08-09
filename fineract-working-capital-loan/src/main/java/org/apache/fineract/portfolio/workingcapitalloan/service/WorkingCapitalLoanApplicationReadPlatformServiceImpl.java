@@ -249,6 +249,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
         delinquencyRangeScheduleRepository.findTopByLoanIdAndMinPaymentCriteriaMetFalseOrderByFromDateAsc(loan.getId())
                 .ifPresent(period -> {
                     data.setDelinquencyStartDate(period.getFromDate());
+                    Optional.ofNullable(data.getSummary()).ifPresent(summary -> summary.setOverdueSinceDate(period.getToDate()));
                 });
     }
 

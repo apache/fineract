@@ -22,6 +22,8 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanNearBreachChangeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.NearBreachActionType;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanNearBreachAction;
@@ -37,6 +39,7 @@ public class NearBreachEvaluationBusinessStep extends WorkingCapitalLoanCOBBusin
 
     private final WorkingCapitalLoanNearBreachEvaluationService nearBreachEvaluationService;
     private final WorkingCapitalLoanNearBreachActionRepository nearBreachActionRepository;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     public WorkingCapitalLoan execute(final WorkingCapitalLoan loan) {
@@ -53,7 +56,9 @@ public class NearBreachEvaluationBusinessStep extends WorkingCapitalLoanCOBBusin
         }
 
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        nearBreachEvaluationService.evaluateNearBreach(loan, latestAction, businessDate);
+        if (nearBreachEvaluationService.evaluateNearBreach(loan, latestAction, businessDate)) {
+            businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanNearBreachChangeBusinessEvent(loan));
+        }
         return loan;
     }
 

@@ -19,8 +19,6 @@
 package org.apache.fineract.portfolio.workingcapitalloan.serialization.serializer;
 
 import java.math.BigDecimal;
-import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,7 +32,6 @@ import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanCollecti
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencySchedulePeriodDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencyScheduleTagDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanSummaryDataV1;
-import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroDateTimeMapper;
@@ -42,12 +39,10 @@ import org.apache.fineract.infrastructure.event.external.service.serialization.s
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
-import org.apache.fineract.portfolio.workingcapitalloan.data.ChargeIdAndAmountHolder;
 import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionTypeTotalHolder;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanBreachScheduleMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryMapper;
@@ -67,10 +62,11 @@ public class WorkingCapitalLoanBusinessEventSerializer
     private static final List<LoanTransactionType> SUMMARY_TOTAL_TRANSACTION_TYPES = List.of(LoanTransactionType.PAYOUT_REFUND,
             LoanTransactionType.GOODWILL_CREDIT, LoanTransactionType.CHARGE_ADJUSTMENT, LoanTransactionType.CREDIT_BALANCE_REFUND,
             LoanTransactionType.REPAYMENT);
+    private static final List<LoanTransactionType> PAYMENT_TRANSACTION_TYPES = List.of(LoanTransactionType.REPAYMENT,
+            LoanTransactionType.PAYOUT_REFUND, LoanTransactionType.GOODWILL_CREDIT, LoanTransactionType.CHARGE_ADJUSTMENT);
 
     private final WorkingCapitalLoanApplicationReadPlatformService readPlatformService;
     private final WorkingCapitalLoanAccountDataMapper mapper;
-    private final WorkingCapitalLoanTransactionRelationRepository transactionRelationRepository;
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleRepository rangeScheduleRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleMapper rangeScheduleMapper;
@@ -80,7 +76,7 @@ public class WorkingCapitalLoanBusinessEventSerializer
     private final WorkingCapitalLoanBreachScheduleMapper breachScheduleMapper;
     private final AvroDateTimeMapper avroDateTimeMapper;
     private final List<ExternalEventCustomDataSerializer<WorkingCapitalLoanBusinessEvent>> externalEventCustomDataSerializers;
-    private final List<WorkingCapitalLoanChargeExternalEventCustomDataSerializer> chargeExternalEventCustomDataSerializers;
+    private final WorkingCapitalLoanChargeEnricher chargeEnricher;
 
     @Override
     public <T> boolean canSerialize(BusinessEvent<T> event) {
@@ -98,6 +94,7 @@ public class WorkingCapitalLoanBusinessEventSerializer
         }
         populateChargeAccruals(loan, result);
         populateChargeCustomData(event, result);
+        populateChargeOffReason(data, result);
         populateSummaryTransactionTypeTotals(loan, result);
         populateLastTransactions(loan, result);
         populateDelinquencySchedule(loan, result);
@@ -107,34 +104,23 @@ public class WorkingCapitalLoanBusinessEventSerializer
     }
 
     private void populateChargeAccruals(final WorkingCapitalLoan loan, final WorkingCapitalLoanAccountDataV1 result) {
-        if (result.getCharges() == null || result.getCharges().isEmpty() || loan.getLoanProduct() == null
-                || !loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            return;
-        }
-        final Map<Long, BigDecimal> accruedAmountsByChargeId = transactionRelationRepository
-                .fetchTransactionAmountPerCharge(loan.getId(), LoanTransactionType.ACCRUAL).stream()
-                .collect(Collectors.toMap(ChargeIdAndAmountHolder::chargeId, ChargeIdAndAmountHolder::amount));
-        result.getCharges().forEach(charge -> {
-            final BigDecimal amountAccrued = accruedAmountsByChargeId.getOrDefault(charge.getId(), BigDecimal.ZERO);
-            charge.setAmountAccrued(amountAccrued);
-            charge.setAmountUnrecognized(MathUtil.subtractToZero(charge.getAmount(), amountAccrued));
-        });
+        chargeEnricher.populateAccruals(loan, result.getCharges());
     }
 
     private void populateChargeCustomData(final WorkingCapitalLoanBusinessEvent event, final WorkingCapitalLoanAccountDataV1 result) {
         if (result.getCharges() == null) {
             return;
         }
-        result.getCharges().forEach(charge -> charge.setCustomData(collectChargeCustomData(event, charge.getId())));
+        result.getCharges().forEach(charge -> charge.setCustomData(chargeEnricher.collectCustomData(event, charge.getId())));
     }
 
-    private Map<String, ByteBuffer> collectChargeCustomData(final WorkingCapitalLoanBusinessEvent event, final Long chargeId) {
-        return chargeExternalEventCustomDataSerializers.stream().collect(HashMap::new, (map, serializer) -> {
-            final ByteBuffer buffer = serializer.serialize(event, chargeId);
-            if (buffer != null) {
-                map.put(serializer.key(), buffer);
-            }
-        }, HashMap::putAll);
+    private void populateChargeOffReason(final WorkingCapitalLoanData data, final WorkingCapitalLoanAccountDataV1 result) {
+        final WorkingCapitalLoanSummaryDataV1 summary = result.getSummary();
+        if (summary == null || data.getChargeOffReason() == null) {
+            return;
+        }
+        summary.setChargeOffReasonId(data.getChargeOffReason().getId());
+        summary.setChargeOffReason(data.getChargeOffReason().getName());
     }
 
     private void populateSummaryTransactionTypeTotals(final WorkingCapitalLoan loan, final WorkingCapitalLoanAccountDataV1 result) {
@@ -156,11 +142,19 @@ public class WorkingCapitalLoanBusinessEventSerializer
         summary.setTotalCreditBalanceRefundReversed(totalOf(totals, LoanTransactionType.CREDIT_BALANCE_REFUND, true));
         summary.setTotalRepaymentTransaction(totalOf(totals, LoanTransactionType.REPAYMENT, false));
         summary.setTotalRepaymentTransactionReversed(totalOf(totals, LoanTransactionType.REPAYMENT, true));
+        summary.setTotalPayment(sumOf(totals, PAYMENT_TRANSACTION_TYPES, false));
+        summary.setTotalPaymentReversed(sumOf(totals, PAYMENT_TRANSACTION_TYPES, true));
     }
 
     private BigDecimal totalOf(final Map<LoanTransactionType, Map<Boolean, BigDecimal>> totals, final LoanTransactionType transactionType,
             final boolean reversed) {
         return totals.getOrDefault(transactionType, Map.of()).getOrDefault(reversed, BigDecimal.ZERO);
+    }
+
+    private BigDecimal sumOf(final Map<LoanTransactionType, Map<Boolean, BigDecimal>> totals,
+            final List<LoanTransactionType> transactionTypes, final boolean reversed) {
+        return transactionTypes.stream().map(transactionType -> totalOf(totals, transactionType, reversed)).reduce(BigDecimal.ZERO,
+                BigDecimal::add);
     }
 
     private void populateLastTransactions(final WorkingCapitalLoan loan, final WorkingCapitalLoanAccountDataV1 result) {
@@ -205,6 +199,7 @@ public class WorkingCapitalLoanBusinessEventSerializer
         }
         breach.setBreachSchedule(mapper.mapBreachSchedule(
                 breachScheduleMapper.toDataList(breachScheduleRepository.findByLoanIdOrderByPeriodNumberAsc(loan.getId()))));
+        Optional.ofNullable(loan.getBalance()).ifPresent(balance -> breach.setBreachPastDueAmount(balance.getBreachPastDueAmount()));
     }
 
     @Override

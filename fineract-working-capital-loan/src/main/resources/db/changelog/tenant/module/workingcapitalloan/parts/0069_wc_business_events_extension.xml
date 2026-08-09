@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet author="fineract" id="wcl-0069-1">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanPeriodPaymentRateChangedBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanPeriodPaymentRateChangedBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-2">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanDelinquencyScheduleChangedBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanDelinquencyScheduleChangedBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-3">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanDelinquencyDisableBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanDelinquencyDisableBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-4">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanDelinquencyEnableBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanDelinquencyEnableBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-5">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanBreachScheduleChangedBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanBreachScheduleChangedBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-6">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanBreachDisableBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanBreachDisableBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-7">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanBreachEnableBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanBreachEnableBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-8">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanChargeOffBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanChargeOffBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-9">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanFraudChangedBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanFraudChangedBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-10">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanPayoutRefundTransactionBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanPayoutRefundTransactionBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-11">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanGoodwillCreditTransactionBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanGoodwillCreditTransactionBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-12">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanTransactionReversedBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanTransactionReversedBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-13">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanChargeOffTransactionBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanChargeOffTransactionBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-14">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-15">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanDiscountFeeAmortizationAdjustmentTransactionBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanDiscountFeeAmortizationAdjustmentTransactionBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-16">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanAddChargeBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanAddChargeBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-17">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanJournalEntryCreatedBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanJournalEntryCreatedBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-18">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanBreachPastDueChangeBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanBreachPastDueChangeBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-19">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanUndoChargeOffBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanUndoChargeOffBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-20">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanBreachChangeBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanBreachChangeBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-21">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanNearBreachChangeBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanNearBreachChangeBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-22">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanBreachPauseBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanBreachPauseBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-23">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanBreachResumeBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanBreachResumeBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-24">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanBreachRescheduleBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanBreachRescheduleBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-25">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanBreachResetBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanBreachResetBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-26">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanBreachUndoResetBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanBreachUndoResetBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-27">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanDelinquencyPauseBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanDelinquencyPauseBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-28">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanDelinquencyResumeBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanDelinquencyResumeBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-29">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanDelinquencyRescheduleBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanDelinquencyRescheduleBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-30">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanDelinquencyResetBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanDelinquencyResetBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0069-31">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanDelinquencyUndoResetBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanDelinquencyUndoResetBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

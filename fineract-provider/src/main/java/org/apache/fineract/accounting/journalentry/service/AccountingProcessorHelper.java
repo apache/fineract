@@ -66,6 +66,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.journalentry.LoanJournalEntryCreatedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.journalentry.WorkingCapitalLoanJournalEntryCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepository;
@@ -1416,6 +1417,9 @@ public class AccountingProcessorHelper {
         JournalEntry savedJournalEntry = this.glJournalEntryRepository.saveAndFlush(journalEntry);
         if (isNew && journalEntry.getLoanTransactionId() != null) {
             businessEventNotifierService.notifyPostBusinessEvent(new LoanJournalEntryCreatedBusinessEvent(savedJournalEntry));
+        }
+        if (isNew && Objects.equals(journalEntry.getEntityType(), PortfolioProductType.WORKING_CAPITAL_LOAN.getValue())) {
+            businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanJournalEntryCreatedBusinessEvent(savedJournalEntry));
         }
         return savedJournalEntry;
     }

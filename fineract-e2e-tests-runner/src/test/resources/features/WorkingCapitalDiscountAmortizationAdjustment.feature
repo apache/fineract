@@ -1202,3 +1202,24 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 03 January 2026 | Discount Fee Adjustment              | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
       | 03 January 2026 | Discount Fee Amortization Adjustment | 499.84            |                  |                   |                       | false    |
       | 04 January 2026 | Credit Balance Refund                | 400.0             | 0.0              | 0.0               | 0.0                   | false    |
+
+  Scenario: Working Capital loan raises Discount Fee Amortization Adjustment transaction business event when the amortization runs backwards
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And a Working Capital Loan Balance Changed business event is raised on approval
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    When Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+    And Customer makes repayment on "05 January 2026" with 50 transaction amount on Working Capital loan
+    When Admin sets the business date to "08 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+    And Admin adds Discount fee adjustment with "500" amount on transaction date "08 January 2026" on Working Capital loan account for last discount
+    When Admin sets the business date to "09 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+    Then a Working Capital Loan Discount Fee Amortization Adjustment transaction business event is raised on "08 January 2026"
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"

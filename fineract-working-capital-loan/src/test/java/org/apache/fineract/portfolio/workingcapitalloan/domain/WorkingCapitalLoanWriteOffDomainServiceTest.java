@@ -98,7 +98,7 @@ class WorkingCapitalLoanWriteOffDomainServiceTest {
     void writeOffMarksEachChargeRemainderAndZeroesTheBalance() {
         domainService.writeOff(loan, WRITE_OFF_DATE, user, null, List.of(charge));
 
-        verify(loanLifecycleStateMachine).transition(WorkingCapitalLoanEvent.LOAN_WRITTEN_OFF, loan);
+        verify(loanLifecycleStateMachine).transition(WorkingCapitalLoanEvent.LOAN_WRITTEN_OFF, loan, WRITE_OFF_DATE);
         assertThat(balance.getPrincipalOutstanding()).isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(balance.getFeeOutstanding()).isEqualByComparingTo(BigDecimal.ZERO);
         // Only the unpaid remainder moves to the written-off bucket; what was paid stays paid.
@@ -112,7 +112,7 @@ class WorkingCapitalLoanWriteOffDomainServiceTest {
 
         domainService.undoWriteOff(loan, List.of(charge));
 
-        verify(loanLifecycleStateMachine).transition(WorkingCapitalLoanEvent.LOAN_WRITTEN_OFF_UNDO, loan);
+        verify(loanLifecycleStateMachine).transition(WorkingCapitalLoanEvent.LOAN_WRITTEN_OFF_UNDO, loan, WRITE_OFF_DATE);
         assertThat(balance.getPrincipalOutstanding()).isEqualByComparingTo(new BigDecimal("100"));
         assertThat(balance.getFeeOutstanding()).isEqualByComparingTo(new BigDecimal("6"));
         assertThat(charge.getAmountWrittenOff()).isEqualByComparingTo(BigDecimal.ZERO);

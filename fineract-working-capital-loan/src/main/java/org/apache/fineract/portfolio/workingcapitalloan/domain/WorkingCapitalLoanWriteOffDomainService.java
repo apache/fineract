@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.stereotype.Component;
@@ -50,7 +51,7 @@ public class WorkingCapitalLoanWriteOffDomainService {
      */
     public void writeOff(final WorkingCapitalLoan loan, final LocalDate writtenOffOnDate, final AppUser writtenOffBy,
             final CodeValue writeOffReason, final List<WorkingCapitalLoanCharge> charges) {
-        loanLifecycleStateMachine.transition(WorkingCapitalLoanEvent.LOAN_WRITTEN_OFF, loan);
+        loanLifecycleStateMachine.transition(WorkingCapitalLoanEvent.LOAN_WRITTEN_OFF, loan, writtenOffOnDate);
         loan.setWrittenOffOnDate(writtenOffOnDate);
         loan.setClosedOnDate(writtenOffOnDate);
         loan.setClosedBy(writtenOffBy);
@@ -64,7 +65,7 @@ public class WorkingCapitalLoanWriteOffDomainService {
      * charge) and clears the audit trail.
      */
     public void undoWriteOff(final WorkingCapitalLoan loan, final List<WorkingCapitalLoanCharge> charges) {
-        loanLifecycleStateMachine.transition(WorkingCapitalLoanEvent.LOAN_WRITTEN_OFF_UNDO, loan);
+        loanLifecycleStateMachine.transition(WorkingCapitalLoanEvent.LOAN_WRITTEN_OFF_UNDO, loan, DateUtils.getBusinessLocalDate());
         loan.setWrittenOffOnDate(null);
         loan.setClosedOnDate(null);
         loan.setClosedBy(null);

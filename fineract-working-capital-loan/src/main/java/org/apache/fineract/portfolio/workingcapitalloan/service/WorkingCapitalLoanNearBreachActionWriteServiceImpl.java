@@ -26,6 +26,8 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanBreachRescheduleBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.NearBreachActionType;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
@@ -47,6 +49,7 @@ public class WorkingCapitalLoanNearBreachActionWriteServiceImpl implements Worki
     private final WorkingCapitalLoanNearBreachActionRepository actionRepository;
     private final WorkingCapitalLoanDataValidator validator;
     private final FromJsonHelper fromApiJsonHelper;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Transactional
     @Override
@@ -74,6 +77,8 @@ public class WorkingCapitalLoanNearBreachActionWriteServiceImpl implements Worki
         final WorkingCapitalLoanNearBreachAction saved = actionRepository.saveAndFlush(action);
 
         log.debug("Created near breach action {} ({}) for WC loan {}", saved.getId(), actionType, loanId);
+
+        businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanBreachRescheduleBusinessEvent(loan));
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

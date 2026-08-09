@@ -20,21 +20,37 @@ package org.apache.fineract.portfolio.workingcapitalloan.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class WorkingCapitalLoanLifecycleStateMachine {
 
-    public void transition(final WorkingCapitalLoanEvent event, final WorkingCapitalLoan loan) {
+    private final PlatformSecurityContext context;
+
+    public void transition(final WorkingCapitalLoanEvent event, final WorkingCapitalLoan loan, final LocalDate transitionDate) {
         LoanStatus newStatus = getNextStatus(event, loan);
         if (newStatus != null) {
             loan.setLoanStatus(newStatus);
+            applyClosure(loan, newStatus, transitionDate);
         } else {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
                     "Transition " + event + " is not allowed from status " + loan.getLoanStatus(), "loanStatus");
+        }
+    }
+
+    private void applyClosure(final WorkingCapitalLoan loan, final LoanStatus newStatus, final LocalDate transitionDate) {
+        if (newStatus.isClosedObligationsMet()) {
+            loan.setClosedOnDate(transitionDate);
+            loan.setClosedBy(context.getAuthenticatedUserIfPresent());
+        } else if (newStatus.isActive() || newStatus.isOverpaid()) {
+            loan.setClosedOnDate(null);
+            loan.setClosedBy(null);
         }
     }
 
@@ -55,21 +71,21 @@ public class WorkingCapitalLoanLifecycleStateMachine {
         final BigDecimal dueOutstanding = MathUtil.nullToZero(loan.getBalance().getTotalOutstanding());
         if (overpaymentAmount.compareTo(BigDecimal.ZERO) > 0) {
             if (currentStatus == null || !currentStatus.isOverpaid()) {
-                transition(WorkingCapitalLoanEvent.LOAN_OVERPAID, loan);
+                transition(WorkingCapitalLoanEvent.LOAN_OVERPAID, loan, transactionDate);
             }
             if (loan.getMaturedOnDate() == null) {
                 loan.setMaturedOnDate(transactionDate);
             }
         } else if (dueOutstanding.compareTo(BigDecimal.ZERO) == 0) {
             if (currentStatus == null || !currentStatus.isClosedObligationsMet()) {
-                transition(WorkingCapitalLoanEvent.LOAN_REPAID_IN_FULL, loan);
+                transition(WorkingCapitalLoanEvent.LOAN_REPAID_IN_FULL, loan, transactionDate);
             }
             if (loan.getMaturedOnDate() == null) {
                 loan.setMaturedOnDate(transactionDate);
             }
         } else if (dueOutstanding.compareTo(BigDecimal.ZERO) > 0 && loan.getMaturedOnDate() != null
                 && canTransition(WorkingCapitalLoanEvent.LOAN_REOPENED, loan)) {
-            transition(WorkingCapitalLoanEvent.LOAN_REOPENED, loan);
+            transition(WorkingCapitalLoanEvent.LOAN_REOPENED, loan, transactionDate);
             loan.setMaturedOnDate(null);
         }
     }

@@ -1,0 +1,125 @@
+{
+    "name": "WorkingCapitalLoanJournalEntryDataV1",
+    "namespace": "org.apache.fineract.avro.workingcapitalloan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "id",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "loanId",
+            "doc": "Identifier of the working capital loan the journal entry belongs to.",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "transactionId",
+            "doc": "Ledger transaction identifier shared by every entry of the same working capital loan transaction.",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "wcLoanTransactionId",
+            "doc": "Numeric identifier of the working capital loan transaction the entry was posted for.",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "glAccount",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.gl.v1.GLAccountDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "type",
+            "doc": "DEBIT or CREDIT.",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.StringEnumOptionDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "amount",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "currencyCode",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "officeId",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "transactionDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "submittedOnDate",
+            "type": [
+                "null",
+                "string"
+            ]
+        },
+        {
+            "default": null,
+            "name": "reversed",
+            "doc": "True when the entry is a reversal. Entries can arrive with this flag already set.",
+            "type": [
+                "null",
+                "boolean"
+            ]
+        },
+        {
+            "default": null,
+            "name": "reversalId",
+            "doc": "Identifier of the mirror entry that reversed this one, when it was reversed.",
+            "type": [
+                "null",
+                "long"
+            ]
+        },
+        {
+            "default": null,
+            "name": "paymentDetailData",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.payment.v1.PaymentDetailDataV1"
+            ]
+        }
+    ]
+}

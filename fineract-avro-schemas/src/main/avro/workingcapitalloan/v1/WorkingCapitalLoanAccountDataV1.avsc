@@ -262,7 +262,7 @@
         {
             "default": null,
             "name": "chargedOff",
-            "doc": "Always null: working capital does not yet implement charge-off.",
+            "doc": "True once the loan has been charged off.",
             "type": [
                 "null",
                 "boolean"

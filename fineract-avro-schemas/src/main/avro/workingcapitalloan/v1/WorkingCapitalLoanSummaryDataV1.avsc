@@ -120,6 +120,15 @@
         },
         {
             "default": null,
+            "name": "totalChargeAmount",
+            "doc": "Sum of feeChargesCharged and penaltyChargesCharged.",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
             "name": "totalExpectedRepayment",
             "type": [
                 "null",
@@ -129,9 +138,37 @@
         {
             "default": null,
             "name": "totalRepayment",
+            "doc": "Principal, fee and penalty actually settled. Not a sum of transaction amounts.",
             "type": [
                 "null",
                 "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "totalPayment",
+            "doc": "Sum of non-reversed repayment-like transaction amounts: REPAYMENT, PAYOUT_REFUND, GOODWILL_CREDIT, CHARGE_ADJUSTMENT.",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "totalPaymentReversed",
+            "doc": "Sum of reversed repayment-like transaction amounts: REPAYMENT, PAYOUT_REFUND, GOODWILL_CREDIT, CHARGE_ADJUSTMENT.",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "overdueSinceDate",
+            "doc": "End date of the earliest delinquency period whose minimum payment criteria was not met.",
+            "type": [
+                "null",
+                "string"
             ]
         },
         {
@@ -181,7 +218,7 @@
         {
             "default": null,
             "name": "chargeOffReasonId",
-            "doc": "Always null: working capital does not yet implement charge-off.",
+            "doc": "Code value id of the reason the loan was charged off, when one was recorded.",
             "type": [
                 "null",
                 "long"
@@ -190,7 +227,7 @@
         {
             "default": null,
             "name": "chargeOffReason",
-            "doc": "Always null: working capital does not yet implement charge-off.",
+            "doc": "Name of the reason the loan was charged off, when one was recorded.",
             "type": [
                 "null",
                 "string"
@@ -263,6 +300,7 @@
         {
             "default": null,
             "name": "totalRepaymentTransaction",
+            "doc": "Sum of non-reversed REPAYMENT transaction amounts.",
             "type": [
                 "null",
                 "bigdecimal"
@@ -271,6 +309,7 @@
         {
             "default": null,
             "name": "totalRepaymentTransactionReversed",
+            "doc": "Sum of reversed REPAYMENT transaction amounts.",
             "type": [
                 "null",
                 "bigdecimal"
