@@ -174,6 +174,7 @@ public final class LoanRequestBuilders {
                 .interestType(LoanTestData.InterestType.FLAT)//
                 .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
                 .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                .transactionProcessingStrategyCode(LoanTestData.TransactionProcessingStrategyCode.MIFOS_STANDARD_STRATEGY)//
                 .expectedDisbursementDate(expectedDisbursementDate)//
                 .submittedOnDate(submittedOnDate)//
                 .loanType("individual")//
