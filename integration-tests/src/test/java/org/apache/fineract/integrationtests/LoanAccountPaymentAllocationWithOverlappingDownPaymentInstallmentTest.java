@@ -34,10 +34,12 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Test;
@@ -759,15 +761,13 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
     private Long createLoanAccountMultipleRepaymentsDisbursement(final Long clientId, final Long loanProductId, final String externalId,
             final String repaymentStrategy) {
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("2")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("2").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("03 March 2023").withSubmittedOnDate("03 March 2023").withLoanType("individual")
-                .withExternalId(externalId).withRepaymentStrategy(repaymentStrategy)
-                .build(clientId.toString(), loanProductId.toString(), null);
+        PostLoansRequest loanApplication = LoanRequestBuilders
+                .legacyIndividualApplication(clientId, loanProductId, "1000", 2, BigDecimal.ZERO, "03 March 2023")
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .externalId(externalId)//
+                .transactionProcessingStrategyCode(repaymentStrategy);
 
-        final Long loanId = applyForLoanFromJson(loanApplicationJSON);
+        final Long loanId = applyForLoan(loanApplication);
         approveLoan(loanId, approveLoanRequest(1000.0, "03 March 2023"));
         return loanId;
     }
