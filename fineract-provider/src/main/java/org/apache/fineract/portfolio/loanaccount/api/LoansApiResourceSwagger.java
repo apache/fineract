@@ -1408,6 +1408,10 @@ final class LoansApiResourceSwagger {
         public String daysInYearCustomStrategy;
         @Schema(example = "individual")
         public String loanType;
+        @Schema(example = "false", description = "Take the rate from the product's floating rate instead of interestRatePerPeriod")
+        public Boolean isFloatingInterestRate;
+        @Schema(example = "0", description = "Added to the floating rate when isFloatingInterestRate is true")
+        public BigDecimal interestRateDifferential;
         @Schema(example = "1", description = "Meeting calendar to attach the loan to; required for jlg loans")
         public Long calendarId;
         @Schema(example = "true", description = "Sync the disbursement date with the attached meeting")

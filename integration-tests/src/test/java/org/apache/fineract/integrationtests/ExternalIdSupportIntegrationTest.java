@@ -66,10 +66,11 @@ import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationC
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
@@ -410,14 +411,15 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             final Integer savingsId = openSavingsAccount(clientId, "10000.0", "01 August 2022");
 
             loanExternalIdStr = UUID.randomUUID().toString();
-            final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("10000.0").withLoanTermFrequency("10")
-                    .withLoanTermFrequencyAsMonths().withNumberOfRepayments("5").withRepaymentEveryAfter("2")
-                    .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("1").withInterestTypeAsFlatBalance()
-                    .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                    .withExpectedDisbursementDate(formattedDate).withSubmittedOnDate(formattedDate).withLoanType("individual")
-                    .withExternalId(loanExternalIdStr)
-                    .build(clientId.toString(), loanProductWithInterestID.toString(), savingsId.toString());
-            final PostLoansResponse loanWithInterest = getLoanIdFromApplication(loanApplicationJSON);
+            final PostLoansResponse loanWithInterest = applyForLoanResponse(LoanRequestBuilders
+                    .legacyIndividualApplication(clientId.longValue(), loanProductWithInterestID.longValue(), "10000.0", 5,
+                            new BigDecimal("1"), formattedDate)
+                    .loanTermFrequency(10)//
+                    .repaymentEvery(2)//
+                    .interestType(LoanTestData.InterestType.FLAT)//
+                    .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                    .externalId(loanExternalIdStr)//
+                    .linkAccountId(savingsId.longValue()));
             Integer loanWithInterestId = loanWithInterest.getResourceId().intValue();
 
             String chargeExternalId = UUID.randomUUID().toString();

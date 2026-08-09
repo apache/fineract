@@ -336,10 +336,6 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return loanHelper.calculateLoanSchedule(request);
     }
 
-    protected Long applyForLoanFromJson(String loanApplicationJson) {
-        return loanHelper.applyForLoanFromJson(loanApplicationJson);
-    }
-
     protected PostLoansLoanIdResponse approveLoan(Long loanId, PostLoansLoanIdRequest request) {
         return loanHelper.approveLoan(loanId, request);
     }
@@ -1074,22 +1070,23 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
     }
 
     protected PostLoansResponse applyForLoanApplication(Integer clientId, Integer loanProductId, String externalId, String linkAccountId) {
-        final String loanApplicationJSON = new org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder()
-                .withPrincipal("1000").withLoanTermFrequency("1").withLoanTermFrequencyAsMonths().withNumberOfRepayments("1")
-                .withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0")
-                .withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualPrincipalPayments()
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("03 September 2022")
-                .withSubmittedOnDate("01 September 2022").withLoanType("individual").withInArrearsTolerance("1001")
-                .withExternalId(externalId).build(clientId.toString(), loanProductId.toString(), linkAccountId);
-        return getLoanIdFromApplication(loanApplicationJSON);
+        PostLoansRequest request = LoanRequestBuilders
+                .legacyIndividualApplication(clientId.longValue(), loanProductId.longValue(), "1000", 1, BigDecimal.ZERO,
+                        "03 September 2022")
+                .submittedOnDate("01 September 2022")//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .inArrearsTolerance(new BigDecimal("1001"))//
+                .externalId(externalId);
+        if (linkAccountId != null) {
+            request.linkAccountId(Long.valueOf(linkAccountId));
+        }
+        return applyForLoanResponse(request);
     }
 
-    protected PostLoansResponse getLoanIdFromApplication(String loanApplicationJson) {
-        Long loanId = applyForLoanFromJson(loanApplicationJson);
-        PostLoansResponse result = new PostLoansResponse();
-        result.setResourceId(loanId);
-        result.setResourceExternalId(getLoanDetails(loanId).getExternalId());
-        return result;
+    /** Mirrors the old JSON path, which returned only an id and then read the external id back. */
+    protected PostLoansResponse applyForLoanResponse(PostLoansRequest request) {
+        Long loanId = applyForLoan(request);
+        return new PostLoansResponse().resourceId(loanId).resourceExternalId(getLoanDetails(loanId).getExternalId());
     }
 
     protected PostLoansLoanIdResponse disburseLoan(String date, Integer loanId, String transactionAmount, String externalId) {

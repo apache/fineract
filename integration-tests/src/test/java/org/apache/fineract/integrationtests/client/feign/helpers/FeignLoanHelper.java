@@ -22,11 +22,6 @@ import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
 import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +81,6 @@ import org.apache.fineract.integrationtests.common.Utils;
 public class FeignLoanHelper {
 
     private static final String CREATE_LOAN_PRODUCT_URL = "/fineract-provider/api/v1/loanproducts?" + Utils.TENANT_IDENTIFIER;
-    private static final String APPLY_LOAN_URL = "/fineract-provider/api/v1/loans?" + Utils.TENANT_IDENTIFIER;
 
     private final FineractFeignClient fineractClient;
 
@@ -201,13 +195,6 @@ public class FeignLoanHelper {
 
     public List<AdvancedPaymentData> getAdvancedPaymentAllocationRules(Long loanId) {
         return ok(() -> fineractClient.defaultApi().getAdvancedPaymentAllocationRulesOfLoan(loanId));
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    public Long applyForLoanFromJson(String loanApplicationJson) {
-        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        Integer loanId = Utils.performServerPost(jsonRequestSpec(), responseSpec, APPLY_LOAN_URL, loanApplicationJson, "loanId");
-        return loanId.longValue();
     }
 
     public GetLoanProductsProductIdResponse retrieveLoanProduct(Long productId) {
@@ -521,14 +508,6 @@ public class FeignLoanHelper {
 
     public CallFailedRuntimeException createRescheduleRequestExpectingError(PostCreateRescheduleLoansRequest request) {
         return fail(() -> fineractClient.rescheduleLoans().createRescheduleLoan(request));
-    }
-
-    // TODO: Rewrite to use fineract-client instead!
-    private static RequestSpecification jsonRequestSpec() {
-        Utils.initializeRESTAssured();
-        return new RequestSpecBuilder().setContentType(ContentType.JSON)
-                .addHeader("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey())
-                .addHeader("Fineract-Platform-TenantId", "default").build();
     }
 
     public PostUpdateRescheduleLoansResponse approveRescheduleRequest(Long scheduleId, PostUpdateRescheduleLoansRequest request) {
