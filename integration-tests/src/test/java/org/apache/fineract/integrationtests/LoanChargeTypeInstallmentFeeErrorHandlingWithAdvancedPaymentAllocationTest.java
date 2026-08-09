@@ -26,11 +26,11 @@ import java.util.UUID;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Disabled;
@@ -83,14 +83,12 @@ public class LoanChargeTypeInstallmentFeeErrorHandlingWithAdvancedPaymentAllocat
 
     private Long createLoanAccount(final Long clientId, final Long loanProductId, final String externalId) {
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("60")
-                .withLoanTermFrequencyAsDays().withNumberOfRepayments("4").withRepaymentEveryAfter("15").withRepaymentFrequencyTypeAsDays()
-                .withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance().withAmortizationTypeAsEqualPrincipalPayments()
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("15 February 2023")
-                .withSubmittedOnDate("15 February 2023").withLoanType("individual").withExternalId(externalId)
-                .withRepaymentStrategy("advanced-payment-allocation-strategy").build(clientId.toString(), loanProductId.toString(), null);
+        PostLoansRequest loanApplication = LoanRequestBuilders
+                .legacyDaysBasedApplication(clientId, loanProductId, "1000", 60, 4, 15, "15 February 2023", "15 February 2023")
+                .externalId(externalId)//
+                .transactionProcessingStrategyCode("advanced-payment-allocation-strategy");
 
-        final Long loanId = applyForLoanFromJson(loanApplicationJSON);
+        final Long loanId = applyForLoan(loanApplication);
         approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "15 February 2023"));
         return loanId;
     }

@@ -155,6 +155,34 @@ public final class LoanRequestBuilders {
                 .dateFormat(LoanTestData.DATETIME_PATTERN);
     }
 
+    /**
+     * The days-based equal-principal application the JSON builder produced, with the same invisible build() defaults as
+     * {@link #legacyIndividualApplication}. Interest type defaults to flat; override it on the returned request.
+     */
+    public static PostLoansRequest legacyDaysBasedApplication(Long clientId, Long productId, String principal, int termDays, int repayments,
+            int repaymentEveryDays, String expectedDisbursementDate, String submittedOnDate) {
+        return new PostLoansRequest()//
+                .clientId(clientId)//
+                .productId(productId)//
+                .principal(new BigDecimal(principal.replace(",", "")))//
+                .loanTermFrequency(termDays)//
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS)//
+                .numberOfRepayments(repayments)//
+                .repaymentEvery(repaymentEveryDays)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS)//
+                .interestRatePerPeriod(BigDecimal.ZERO)//
+                .interestType(LoanTestData.InterestType.FLAT)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                .expectedDisbursementDate(expectedDisbursementDate)//
+                .submittedOnDate(submittedOnDate)//
+                .loanType("individual")//
+                .maxOutstandingLoanBalance(new BigDecimal("36000"))//
+                .collateral(List.of())//
+                .locale("en_GB")//
+                .dateFormat(LoanTestData.DATETIME_PATTERN);
+    }
+
     public static PostLoansLoanIdRequest disburseLoanWithRepaymentReschedule(String disbursedOnDate, String adjustRepaymentDate) {
         return new PostLoansLoanIdRequest()//
                 .actualDisbursementDate(disbursedOnDate)//
