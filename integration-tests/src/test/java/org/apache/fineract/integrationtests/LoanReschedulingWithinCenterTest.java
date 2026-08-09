@@ -43,6 +43,8 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.client.models.PostLoansLoanIdDisbursementData;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansRequestCollateralData;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignCenterHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
@@ -120,8 +122,8 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         Long clientCollateralId = createClientCollateral(clientId, collateralId);
         assertNotNull(clientCollateralId);
 
-        List<HashMap> collaterals = new ArrayList<>();
-        collaterals.add(collateral(clientCollateralId.intValue(), BigDecimal.valueOf(1)));
+        List<PostLoansRequestCollateralData> collaterals = new ArrayList<>();
+        collaterals.add(collateral(clientCollateralId, BigDecimal.valueOf(1)));
 
         Long loanProductId = createLoanProductWithInterestRecalculation(LoanProductTestBuilder.RBI_INDIA_STRATEGY,
                 LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
@@ -208,8 +210,8 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         Long clientCollateralId = createClientCollateral(clientId, collateralId);
         assertNotNull(clientCollateralId);
 
-        List<HashMap> collaterals = new ArrayList<>();
-        collaterals.add(collateral(clientCollateralId.intValue(), BigDecimal.valueOf(1)));
+        List<PostLoansRequestCollateralData> collaterals = new ArrayList<>();
+        collaterals.add(collateral(clientCollateralId, BigDecimal.valueOf(1)));
 
         Long loanId = applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductId, disbursementDate,
                 recalculationRestFrequencyDate, LoanApplicationTestBuilder.RBI_INDIA_STRATEGY, createTranches, collaterals);
@@ -255,11 +257,12 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
     }
 
     @SuppressWarnings("rawtypes")
-    private HashMap collateral(Integer collateralId, BigDecimal amount) {
-        HashMap collateral = new HashMap(2);
-        collateral.put("clientCollateralId", collateralId.toString());
-        collateral.put("amount", amount.toString());
-        return collateral;
+    /**
+     * The server only reads collateral for individual accounts (LoanApplicationValidator guards on
+     * {@code loanType.isIndividualAccount()}), so for the jlg loans here it is accepted and ignored.
+     */
+    private PostLoansRequestCollateralData collateral(Long collateralId, BigDecimal quantity) {
+        return new PostLoansRequestCollateralData().clientCollateralId(collateralId).quantity(quantity);
     }
 
     private static Long createCollateralProduct() {
@@ -321,43 +324,41 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
 
     private Long applyForLoanApplicationForInterestRecalculation(final Long clientId, Long groupId, Long calendarId,
             final Long loanProductId, final String disbursementDate, final String restStartDate, final String repaymentStrategy,
-            List<HashMap> collaterals) {
+            List<PostLoansRequestCollateralData> collaterals) {
         return applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductId, disbursementDate,
                 restStartDate, repaymentStrategy, null, collaterals);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private Long applyForLoanApplicationForInterestRecalculation(final Long clientId, Long groupId, Long calendarId,
             final Long loanProductId, final String disbursementDate, final String restStartDate, final String repaymentStrategy,
-            List<PostLoansDisbursementData> tranches, List<HashMap> collaterals) {
+            List<PostLoansDisbursementData> tranches, List<PostLoansRequestCollateralData> collaterals) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        List<HashMap> trancheMaps = null;
-        if (tranches != null) {
-            trancheMaps = tranches.stream().map(tranche -> {
-                HashMap map = new HashMap();
-                map.put("expectedDisbursementDate", tranche.getExpectedDisbursementDate());
-                map.put("principal", tranche.getPrincipal().toPlainString());
-                return map;
-            }).toList();
-        }
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal("10000.00") //
-                .withLoanTermFrequency("24") //
-                .withLoanTermFrequencyAsWeeks() //
-                .withNumberOfRepayments("12") //
-                .withRepaymentEveryAfter("2") //
-                .withRepaymentFrequencyTypeAsWeeks() //
-                .withInterestRatePerPeriod("2").withLoanType("jlg") //
-                .withCalendarID(calendarId.toString()).withAmortizationTypeAsEqualInstallments() //
-                .withFixedEmiAmount("") //
-                .withTranches(trancheMaps).withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeAsDays() //
-                .withExpectedDisbursementDate(disbursementDate) //
-                .withSubmittedOnDate(disbursementDate) //
-                .withRepaymentStrategy(repaymentStrategy) //
-                .withCollaterals(collaterals).withCharges(new ArrayList<>())//
-                .build(clientId.toString(), groupId.toString(), loanProductId.toString(), null);
-        return applyForLoanFromJson(loanApplicationJSON);
+        return applyForLoan(new PostLoansRequest()//
+                .clientId(clientId)//
+                .groupId(groupId)//
+                .productId(loanProductId)//
+                .principal(new BigDecimal("10000.00"))//
+                .loanTermFrequency(24)//
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.WEEKS)//
+                .numberOfRepayments(12)//
+                .repaymentEvery(2)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.WEEKS)//
+                .interestRatePerPeriod(new BigDecimal("2"))//
+                .loanType("jlg")//
+                .calendarId(calendarId)//
+                .syncDisbursementWithMeeting(false)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS)//
+                .disbursementData(tranches)//
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.DAILY)//
+                .expectedDisbursementDate(disbursementDate)//
+                .submittedOnDate(disbursementDate)//
+                .transactionProcessingStrategyCode(repaymentStrategy)//
+                .collateral(collaterals)//
+                .charges(List.of())//
+                .maxOutstandingLoanBalance(new BigDecimal("36000"))//
+                .locale("en_GB")//
+                .dateFormat(LoanTestData.DATETIME_PATTERN));
     }
 
     private static LocalDate toLocalDate(Calendar calendar) {
