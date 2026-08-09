@@ -29,7 +29,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -201,8 +200,7 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
 
         List<PostLoansDisbursementData> createTranches = List.of(LoanRequestBuilders.applyTrancheDetail(disbursementDate, 5000.0),
                 LoanRequestBuilders.applyTrancheDetail(secondDisbursement, 5000.0));
-        List<PostLoansLoanIdDisbursementData> approveTranches = List.of(
-                LoanRequestBuilders.approveTrancheDetail(disbursementDate, 5000.0),
+        List<PostLoansLoanIdDisbursementData> approveTranches = List.of(LoanRequestBuilders.approveTrancheDetail(disbursementDate, 5000.0),
                 LoanRequestBuilders.approveTrancheDetail(secondDisbursement, 5000.0));
 
         Long collateralId = createCollateralProduct();

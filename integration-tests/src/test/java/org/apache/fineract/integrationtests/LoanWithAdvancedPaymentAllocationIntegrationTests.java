@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -27,10 +28,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -108,14 +110,28 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests extends FeignLoan
     }
 
     private Long createLoanAccount(Long clientId, Long loanProductId, String operationDate) {
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("15,000.00").withLoanTermFrequency("4")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("4").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withExpectedDisbursementDate(operationDate)
-                .withInterestTypeAsDecliningBalance().withSubmittedOnDate(operationDate)
-                .withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString())
-                .build(clientId.toString(), loanProductId.toString(), null);
-        return applyForLoanFromJson(loanApplicationJSON);
+        return applyForLoan(new PostLoansRequest()//
+                .clientId(clientId)//
+                .productId(loanProductId)//
+                .principal(new BigDecimal("15000.00"))//
+                .loanTermFrequency(4)//
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .numberOfRepayments(4)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .interestRatePerPeriod(BigDecimal.ZERO)//
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString())//
+                .loanType("individual")//
+                .expectedDisbursementDate(operationDate)//
+                .submittedOnDate(operationDate)//
+                .maxOutstandingLoanBalance(new BigDecimal("36000"))//
+                .collateral(List.of())//
+                .locale("en_GB")//
+                .dateFormat(LoanTestData.DATETIME_PATTERN));
     }
 
     private AdvancedPaymentData createRepaymentPaymentAllocation() {
