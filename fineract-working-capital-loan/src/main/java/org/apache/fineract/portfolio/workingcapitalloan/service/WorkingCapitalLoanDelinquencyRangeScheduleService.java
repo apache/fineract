@@ -21,8 +21,6 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import org.apache.fineract.portfolio.delinquency.domain.DelinquencyFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
@@ -62,13 +60,6 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
      * {@link #reprocessDelinquencySchedule(WorkingCapitalLoan)}, which the caller must invoke afterwards.
      */
     void rescheduleMinimumPayment(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyAction action);
-
-    /**
-     * Returns the toDate {@link #rescheduleMinimumPayment} would set on the current open period for the given
-     * frequency, or empty when there is no current open period. Exposed so validation and the re-date itself share one
-     * implementation.
-     */
-    Optional<LocalDate> calculateRescheduledCurrentPeriodToDate(Long loanId, Integer frequency, DelinquencyFrequencyType frequencyType);
 
     void resumeActivePause(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyAction activePause,
             WorkingCapitalLoanDelinquencyAction resumeAction);

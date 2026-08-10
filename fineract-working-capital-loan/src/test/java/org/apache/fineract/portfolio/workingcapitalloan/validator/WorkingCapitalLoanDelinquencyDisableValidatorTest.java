@@ -45,7 +45,6 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
-import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanDelinquencyRangeScheduleService;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,8 +70,6 @@ class WorkingCapitalLoanDelinquencyDisableValidatorTest {
     @Mock
     private WorkingCapitalLoanDelinquencyActionRepository actionRepository;
     @Mock
-    private WorkingCapitalLoanDelinquencyRangeScheduleService rangeScheduleService;
-    @Mock
     private WorkingCapitalLoan loan;
     @Mock
     private WorkingCapitalLoanProductRelatedDetails productRelatedDetails;
@@ -85,7 +82,7 @@ class WorkingCapitalLoanDelinquencyDisableValidatorTest {
     @BeforeEach
     void setUp() {
         validator = new WorkingCapitalLoanDelinquencyActionParseAndValidator(new FromJsonHelper(), rangeScheduleRepository,
-                actionRepository, rangeScheduleService);
+                actionRepository);
         ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         final HashMap<BusinessDateType, LocalDate> businessDates = new HashMap<>();

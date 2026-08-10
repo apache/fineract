@@ -53,11 +53,11 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachScheduleEvaluationUtils;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPausePeriodUtils;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanActiveBreachResetResolver;
-import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanBreachScheduleService;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalBreachAmountCalculationType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanBreachStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
@@ -80,7 +80,6 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     private final WorkingCapitalLoanBreachScheduleRepository breachScheduleRepository;
     private final WorkingCapitalLoanActiveBreachResetResolver activeBreachResetResolver;
     private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
-    private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
 
     public WorkingCapitalLoanBreachAction validateAndParse(final JsonCommand command, final WorkingCapitalLoan workingCapitalLoan,
             final List<WorkingCapitalLoanBreachAction> existing) {
@@ -102,7 +101,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         }
 
         if (RESCHEDULE_ACTION.equalsIgnoreCase(actionString)) {
-            return parseAndValidateReschedule(json, workingCapitalLoan, dataValidator);
+            return parseAndValidateReschedule(json, workingCapitalLoan, existing, dataValidator);
         }
         if (RESUME_ACTION.equalsIgnoreCase(actionString)) {
             return parseAndValidateResume(json, workingCapitalLoan, existing, dataValidator);
@@ -146,7 +145,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     }
 
     private WorkingCapitalLoanBreachAction parseAndValidateReschedule(final JsonElement json, final WorkingCapitalLoan workingCapitalLoan,
-            final DataValidatorBuilder dataValidator) {
+            final List<WorkingCapitalLoanBreachAction> existing, final DataValidatorBuilder dataValidator) {
         final WorkingCapitalLoanBreachAction action = new WorkingCapitalLoanBreachAction();
         action.setAction(WorkingCapitalLoanBreachActionType.RESCHEDULE);
         action.setStartDate(DateUtils.getBusinessLocalDate());
@@ -155,7 +154,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         action.setFrequency(extractInteger(json, FREQUENCY));
         action.setFrequencyType(extractFrequencyType(json, dataValidator));
         action.setWorkingCapitalLoan(workingCapitalLoan);
-        validateReschedule(action, workingCapitalLoan, dataValidator);
+        validateReschedule(action, workingCapitalLoan, existing, dataValidator);
 
         throwExceptionIfValidationWarningsExist(dataValidator);
         return action;
@@ -415,7 +414,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
             return;
         }
         final boolean overlaps = existing.stream().filter(action -> WorkingCapitalLoanBreachActionType.PAUSE.equals(action.getAction()))
-                .anyMatch(pause -> WorkingCapitalLoanBreachPauseUtils.inclusivePausePeriodsOverlap(startDate, endDate, pause.getStartDate(),
+                .anyMatch(pause -> WorkingCapitalLoanPausePeriodUtils.inclusivePausePeriodsOverlap(startDate, endDate, pause.getStartDate(),
                         WorkingCapitalLoanBreachPauseUtils.resolveEffectivePauseEnd(pause, existing)));
         if (overlaps) {
             failGeneralValidation(dataValidator, "overlapping.pause.periods",
@@ -424,7 +423,7 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
     }
 
     private void validateReschedule(final WorkingCapitalLoanBreachAction action, final WorkingCapitalLoan workingCapitalLoan,
-            final DataValidatorBuilder dataValidator) {
+            final List<WorkingCapitalLoanBreachAction> existing, final DataValidatorBuilder dataValidator) {
         validateLoanIsDisbursed(workingCapitalLoan, dataValidator);
         validateScheduleExists(workingCapitalLoan, dataValidator);
 
@@ -441,20 +440,22 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
         if (hasFrequencyGroup) {
             validateFrequencyGroupProvided(action, dataValidator);
             if (action.getFrequency() != null && action.getFrequency() > 0 && action.getFrequencyType() != null) {
-                validateFrequencyDoesNotEndBeforeBusinessDate(action, workingCapitalLoan, dataValidator);
+                validateFrequencyDoesNotEndBeforeBusinessDate(action, workingCapitalLoan, existing, dataValidator);
             }
         }
     }
 
     /**
-     * Rejects a frequency change whose resulting period end date falls before the current business date. The candidate
-     * end date comes from the breach schedule service, so it is the very date the re-date would persist.
+     * Rejects a frequency change whose resulting period end date falls before the business date. The candidate end date
+     * is derived exactly as the re-date derives it: from the current open period fromDate, extended by the pauses.
      */
     private void validateFrequencyDoesNotEndBeforeBusinessDate(final WorkingCapitalLoanBreachAction action,
-            final WorkingCapitalLoan workingCapitalLoan, final DataValidatorBuilder dataValidator) {
+            final WorkingCapitalLoan workingCapitalLoan, final List<WorkingCapitalLoanBreachAction> existing,
+            final DataValidatorBuilder dataValidator) {
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-        final Optional<LocalDate> candidateToDate = breachScheduleService
-                .calculateRescheduledCurrentPeriodToDate(workingCapitalLoan.getId(), action.getFrequency(), action.getFrequencyType());
+        final Optional<LocalDate> candidateToDate = breachScheduleRepository.findCurrentOpenPeriod(workingCapitalLoan.getId(), businessDate)
+                .map(currentPeriod -> WorkingCapitalLoanBreachScheduleEvaluationUtils.calculateRescheduledToDate(
+                        currentPeriod.getFromDate(), action.getFrequency(), action.getFrequencyType(), existing));
         if (candidateToDate.filter(toDate -> toDate.isBefore(businessDate)).isPresent()) {
             failGeneralValidation(dataValidator, "reschedule.frequency.results.endDate.before.businessDate",
                     "Frequency change results a breach period endDate before current businessDate is not allowed");

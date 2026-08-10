@@ -61,14 +61,17 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleRepository
     Optional<WorkingCapitalLoanDelinquencyRangeSchedule> findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(Long loanId,
             LocalDate date, LocalDate date2);
 
+    /**
+     * The not yet evaluated period covering the business date. Periods are built contiguously and every mutation
+     * (append, re-date, pause shift, reset) keeps the chain contiguous, so at most one of them can cover a given date.
+     */
     @Query("""
             SELECT s FROM WorkingCapitalLoanDelinquencyRangeSchedule s
             WHERE s.loan.id = :loanId
               AND s.minPaymentCriteriaMet IS NULL
               AND s.fromDate <= :businessDate
-              AND s.toDate >= :businessDate
-            ORDER BY s.periodNumber DESC""")
-    List<WorkingCapitalLoanDelinquencyRangeSchedule> findCurrentOpenPeriodsOrderByPeriodNumberDesc(@Param("loanId") Long loanId,
+              AND s.toDate >= :businessDate""")
+    Optional<WorkingCapitalLoanDelinquencyRangeSchedule> findCurrentOpenPeriod(@Param("loanId") Long loanId,
             @Param("businessDate") LocalDate businessDate);
 
     @Query("""

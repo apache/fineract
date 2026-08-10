@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.workingcapitalloan.domain;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -27,18 +26,6 @@ import java.util.Objects;
 public final class WorkingCapitalLoanBreachPauseUtils {
 
     private WorkingCapitalLoanBreachPauseUtils() {}
-
-    /**
-     * Returns whether a new inclusive pause period shares at least one day with an existing one. Touching periods
-     * (where one ends on the day the other starts) are treated as overlapping.
-     */
-    public static boolean inclusivePausePeriodsOverlap(final LocalDate parsedPauseStart, final LocalDate parsedPauseEnd,
-            final LocalDate existingPauseStart, final LocalDate existingPauseEnd) {
-        if (parsedPauseStart == null || parsedPauseEnd == null || existingPauseStart == null || existingPauseEnd == null) {
-            return false;
-        }
-        return !parsedPauseStart.isAfter(existingPauseEnd) && !parsedPauseEnd.isBefore(existingPauseStart);
-    }
 
     /**
      * A resumed pause effectively ends on the (inclusive) resume date, so a later pause may start the next day.
@@ -57,37 +44,24 @@ public final class WorkingCapitalLoanBreachPauseUtils {
     }
 
     /**
-     * Extends an inclusive period end date by every recorded pause overlapping the period, mirroring the pause replay
-     * performed by the schedule rebuild.
+     * The recorded pauses as plain date ranges, with resumes already applied to their end dates.
      */
-    public static LocalDate extendToDateByRecordedPauses(final LocalDate fromDate, final LocalDate baseToDate,
-            final List<WorkingCapitalLoanBreachAction> actions) {
-        if (fromDate == null || baseToDate == null || actions == null) {
-            return baseToDate;
+    public static List<WorkingCapitalLoanPausePeriod> toEffectivePauses(final List<WorkingCapitalLoanBreachAction> actions) {
+        if (actions == null) {
+            return List.of();
         }
-        final List<WorkingCapitalLoanBreachAction> pauses = actions.stream().filter(Objects::nonNull)
-                .filter(action -> WorkingCapitalLoanBreachActionType.PAUSE.equals(action.getAction()) && action.getStartDate() != null)
-                .sorted(Comparator.comparing(WorkingCapitalLoanBreachAction::getStartDate)).toList();
-        LocalDate toDate = baseToDate;
-        for (final WorkingCapitalLoanBreachAction pause : pauses) {
-            final LocalDate pauseStart = pause.getStartDate();
-            final LocalDate pauseEnd = resolveEffectivePauseEnd(pause, actions);
-            if (pauseEnd == null || pauseEnd.isBefore(fromDate) || pauseStart.isAfter(toDate)) {
-                continue;
-            }
-            toDate = toDate.plusDays(calculatePauseExtensionDays(pauseStart, pauseEnd));
-        }
-        return toDate;
+        return actions.stream().filter(Objects::nonNull)
+                .filter(action -> WorkingCapitalLoanBreachActionType.PAUSE.equals(action.getAction()))
+                .map(pause -> new WorkingCapitalLoanPausePeriod(pause.getStartDate(), resolveEffectivePauseEnd(pause, actions))).toList();
     }
 
     /**
-     * Inclusive pause length: both start and end dates count as paused days.
+     * Extends an inclusive period end date by the recorded pauses. See
+     * {@link WorkingCapitalLoanPausePeriodUtils#applyPauses} for the rule.
      */
-    public static long calculatePauseExtensionDays(final LocalDate pauseStart, final LocalDate pauseEnd) {
-        if (pauseStart == null || pauseEnd == null || pauseStart.isAfter(pauseEnd)) {
-            return 0L;
-        }
-        return ChronoUnit.DAYS.between(pauseStart, pauseEnd) + 1;
+    public static LocalDate extendToDateByRecordedPauses(final LocalDate fromDate, final LocalDate baseToDate,
+            final List<WorkingCapitalLoanBreachAction> actions) {
+        return WorkingCapitalLoanPausePeriodUtils.extendToDate(fromDate, baseToDate, toEffectivePauses(actions));
     }
 
 }
