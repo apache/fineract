@@ -69,4 +69,7 @@ public class WorkingCapitalLoanBreachAction extends AbstractAuditableWithUTCDate
     @Column(name = "frequency_type")
     private WorkingCapitalLoanPeriodFrequencyType frequencyType;
 
+    @Column(name = "restart_period_from_reset_date")
+    private Boolean restartPeriodFromResetDate = false;
+
 }

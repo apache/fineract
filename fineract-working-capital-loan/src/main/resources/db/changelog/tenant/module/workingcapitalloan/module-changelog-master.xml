@@ -87,4 +87,5 @@
   <include relativeToChangelogFile="true" file="parts/0063_wc_loan_charge_off.xml"/>
   <include relativeToChangelogFile="true" file="parts/0064_wc_loan_charge_paid_by.xml"/>
   <include relativeToChangelogFile="true" file="parts/0065_wc_loan_add_fraud_attribute.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0066_wc_loan_breach_reset_restart_period.xml"/>
 </databaseChangeLog>

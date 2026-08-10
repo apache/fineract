@@ -32,4 +32,5 @@ public final class WorkingCapitalLoanBreachActionParameters {
     public static final String MINIMUM_PAYMENT_TYPE = "minimumPaymentType";
     public static final String FREQUENCY = "frequency";
     public static final String FREQUENCY_TYPE = "frequencyType";
+    public static final String RESTART_PERIOD_FROM_RESET_DATE = "restartPeriodFromResetDate";
 }

@@ -44,6 +44,8 @@ public final class WorkingCapitalLoanBreachActionApiResourceSwagger {
         public Integer frequency;
         @Schema(example = "DAYS", description = "Frequency type: DAYS, WEEKS, MONTHS, YEARS (required together with frequency)")
         public String frequencyType;
+        @Schema(example = "true", description = "Optional reset flag. If true for action=reset, starts a new breach period from the reset date")
+        public Boolean restartPeriodFromResetDate;
         @Schema(example = "yyyy-MM-dd")
         public String dateFormat;
         @Schema(example = "en")
