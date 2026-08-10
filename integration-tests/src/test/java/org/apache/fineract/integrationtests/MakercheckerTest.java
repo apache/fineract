@@ -27,6 +27,7 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +62,7 @@ public class MakercheckerTest {
     private SavingsAccountHelper savingsAccountHelper;
     private static final String START_DATE_STRING = "03 June 2023";
     private static final String TRANSACTION_DATE_STRING = "05 June 2023";
+    private static final String CLIENTS_URL = "/fineract-provider/api/v1/clients";
     private GlobalConfigurationHelper globalConfigurationHelper;
 
     @BeforeEach
@@ -365,6 +367,83 @@ public class MakercheckerTest {
             PutPermissionsRequest putPermissionsRequest = new PutPermissionsRequest().putPermissionsItem("CREATE_CLIENT", false);
             rolesHelper.updatePermissions(putPermissionsRequest);
         }
+    }
+
+    @Test
+    public void testDuplicatePendingSubmissionAndCheckerOnlyInitiationAreRefusedWith403() {
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                new PutGlobalConfigurationsRequest().enabled(true));
+        List<Long> pendingIds = new ArrayList<>();
+        try {
+            Integer clientId = Utils.performServerPost(requestSpec, responseSpec, CLIENTS_URL + "?" + Utils.TENANT_IDENTIFIER,
+                    ClientHelper.getTestClientAsJSONPending(START_DATE_STRING, "1"), "clientId");
+            rolesHelper.updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", true));
+
+            Integer makerRoleId = RolesHelper.createRole(requestSpec, responseSpec);
+            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, makerRoleId,
+                    Map.of("ACTIVATE_CLIENT", true, "ACTIVATE_CLIENT_CHECKER", true));
+            Integer checkerOnlyRoleId = RolesHelper.createRole(requestSpec, responseSpec);
+            RolesHelper.addPermissionsToRole(requestSpec, responseSpec, checkerOnlyRoleId, Map.of("ACTIVATE_CLIENT_CHECKER", true));
+            Integer staffId = StaffHelper.createStaff(requestSpec, responseSpec);
+            String password = "A1b2c3d4e5f$";
+            String maker = Utils.uniqueRandomStringGenerator("user", 8);
+            Integer makerUserId = (Integer) UserHelper.createUser(requestSpec, responseSpec, makerRoleId, staffId, maker, password,
+                    "resourceId");
+            String otherMaker = Utils.uniqueRandomStringGenerator("user", 8);
+            Integer otherMakerUserId = (Integer) UserHelper.createUser(requestSpec, responseSpec, makerRoleId, staffId, otherMaker,
+                    password, "resourceId");
+            String checkerOnly = Utils.uniqueRandomStringGenerator("user", 8);
+            UserHelper.createUser(requestSpec, responseSpec, checkerOnlyRoleId, staffId, checkerOnly, password, "resourceId");
+            RequestSpecification makerSpec = userRequestSpec(maker, password);
+            ResponseSpecification forbidden = new ResponseSpecBuilder().expectStatusCode(403).build();
+
+            assertNull(activateClient(makerSpec, responseSpec, clientId, TRANSACTION_DATE_STRING, "clientId"),
+                    "The first activation should be queued for approval");
+
+            assertRefusal(activateClient(makerSpec, forbidden, clientId, TRANSACTION_DATE_STRING, ""),
+                    "error.msg.maker.checker.duplicate.pending.submission");
+            assertRefusal(activateClient(userRequestSpec(otherMaker, password), forbidden, clientId, TRANSACTION_DATE_STRING, ""),
+                    "error.msg.maker.checker.duplicate.pending.submission");
+
+            assertNull(activateClient(makerSpec, responseSpec, clientId, "06 June 2023", "clientId"),
+                    "An activation with a different payload should be queued too");
+
+            assertRefusal(activateClient(userRequestSpec(checkerOnly, password), forbidden, clientId, "07 June 2023", ""),
+                    "error.msg.maker.checker.checker.only.cannot.initiate");
+
+            makercheckersHelper
+                    .getMakerCheckerList(Map.of("actionName", "ACTIVATE", "entityName", "CLIENT", "makerId", makerUserId.toString()))
+                    .forEach(entry -> pendingIds.add(((Double) entry.get("id")).longValue()));
+            assertEquals(2, pendingIds.size(), "Only the two distinct activations should be pending");
+            assertEquals(0,
+                    makercheckersHelper
+                            .getMakerCheckerList(
+                                    Map.of("actionName", "ACTIVATE", "entityName", "CLIENT", "makerId", otherMakerUserId.toString()))
+                            .size());
+        } finally {
+            pendingIds.forEach(id -> MakercheckersHelper.rejectMakerCheckerEntry(FineractClientHelper.getFineractClient(), id));
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.MAKER_CHECKER,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+            rolesHelper.updatePermissions(new PutPermissionsRequest().putPermissionsItem("ACTIVATE_CLIENT", false));
+        }
+    }
+
+    private static <T> T activateClient(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer clientId,
+            String activationDate, String jsonAttributeToGetBack) {
+        String body = "{\"activationDate\":\"" + activationDate + "\",\"dateFormat\":\"dd MMMM yyyy\",\"locale\":\"en\"}";
+        return Utils.performServerPost(requestSpec, responseSpec,
+                CLIENTS_URL + "/" + clientId + "?command=activate&" + Utils.TENANT_IDENTIFIER, body, jsonAttributeToGetBack);
+    }
+
+    private RequestSpecification userRequestSpec(String username, String password) {
+        return new RequestSpecBuilder().setContentType(ContentType.JSON).build().header("Authorization",
+                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, password));
+    }
+
+    private void assertRefusal(Map<?, ?> response, String expectedCode) {
+        assertEquals("403", response.get("httpStatusCode"));
+        List<?> errors = (List<?>) response.get("errors");
+        assertEquals(expectedCode, ((Map<?, ?>) errors.get(0)).get("userMessageGlobalisationCode"));
     }
 
     private Integer createSavingsProductDailyPosting() {

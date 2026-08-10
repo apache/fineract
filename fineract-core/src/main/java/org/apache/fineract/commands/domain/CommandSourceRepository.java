@@ -30,8 +30,8 @@ public interface CommandSourceRepository extends JpaRepository<CommandSource, Lo
 
     CommandSource findByActionNameAndEntityNameAndIdempotencyKey(String actionName, String entityName, String idempotencyKey);
 
-    Optional<CommandSource> findFirstByActionNameAndEntityNameAndResourceIdAndStatusOrderByMadeOnDateDesc(String actionName,
-            String entityName, Long resourceId, Integer status);
+    Optional<CommandSource> findFirstByActionNameAndEntityNameAndResourceIdAndSubResourceIdAndCommandAsJsonAndStatusOrderByIdDesc(
+            String actionName, String entityName, Long resourceId, Long subResourceId, String commandAsJson, Integer status);
 
     @Modifying(flushAutomatically = true)
     @Query("delete from CommandSource c where c.status = :status and c.madeOnDate is not null and c.madeOnDate <= :dateForPurgeCriteria")

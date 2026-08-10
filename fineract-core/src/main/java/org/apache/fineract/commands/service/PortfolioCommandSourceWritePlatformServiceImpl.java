@@ -77,7 +77,8 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                 return approveEntry(pendingCommand.getId());
             }
             currentUser.validateHasPermissionTo(taskPermission);
-            if (isMakerOnly(currentUser, taskPermission) && findPendingCommand(wrapper).isPresent()) {
+            if (configurationService.isMakerCheckerEnabledForTask(taskPermission) && !currentUser.isCheckerSuperUser()
+                    && findPendingCommand(wrapper).isPresent()) {
                 throw new MakerCheckerDuplicatePendingSubmissionException(wrapper.actionName(), wrapper.entityName());
             }
         }
@@ -158,10 +159,6 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         return user.hasNotPermissionForAnyOf(taskPermission) && hasCheckerPermission(user, taskPermission);
     }
 
-    private boolean isMakerOnly(final AppUser user, final String taskPermission) {
-        return !hasCheckerPermission(user, taskPermission) && configurationService.isMakerCheckerEnabledForTask(taskPermission);
-    }
-
     private boolean hasCheckerPermission(final AppUser user, final String taskPermission) {
         return !user.hasNotPermissionForAnyOf("CHECKER_SUPER_USER", taskPermission + "_CHECKER");
     }
@@ -170,9 +167,10 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         if (wrapper.getEntityId() == null) {
             return Optional.empty();
         }
-        return this.commandSourceRepository.findFirstByActionNameAndEntityNameAndResourceIdAndStatusOrderByMadeOnDateDesc(
-                wrapper.actionName(), wrapper.entityName(), wrapper.getEntityId(),
-                CommandProcessingResultType.AWAITING_APPROVAL.getValue());
+        return this.commandSourceRepository
+                .findFirstByActionNameAndEntityNameAndResourceIdAndSubResourceIdAndCommandAsJsonAndStatusOrderByIdDesc(
+                        wrapper.getActionName(), wrapper.getEntityName(), wrapper.getEntityId(), wrapper.getSubentityId(),
+                        Objects.requireNonNullElse(wrapper.getJson(), "{}"), CommandProcessingResultType.AWAITING_APPROVAL.getValue());
     }
 
     @Override
