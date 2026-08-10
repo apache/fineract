@@ -23,11 +23,14 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.commands.domain.CommandProcessingResultType;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.CommandNotAwaitingApprovalException;
 import org.apache.fineract.commands.exception.CommandNotFoundException;
+import org.apache.fineract.commands.exception.MakerCheckerCheckerOnlyInitiationException;
+import org.apache.fineract.commands.exception.MakerCheckerDuplicatePendingSubmissionException;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -67,7 +70,25 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         } else {
             // if not user changing their own details - check user has
             // permission to perform specific task.
-            this.context.authenticatedUser(wrapper).validateHasPermissionTo(wrapper.getTaskPermissionName());
+            final AppUser currentUser = this.context.authenticatedUser(wrapper);
+            final String taskPermission = wrapper.getTaskPermissionName();
+            final boolean makerCheckerEnabledForTask = configurationService.isMakerCheckerEnabledForTask(taskPermission);
+            final boolean hasBasePermission = !currentUser.hasNotPermissionForAnyOf(taskPermission);
+            final boolean checkerSuperUser = currentUser.isCheckerSuperUser();
+            final boolean hasCheckerPermission = checkerSuperUser || currentUser.hasSpecificPermissionTo(taskPermission + "_CHECKER");
+
+            if (makerCheckerEnabledForTask && !hasBasePermission && hasCheckerPermission && !hasIdenticalPendingSubmission(wrapper)) {
+                throw new MakerCheckerCheckerOnlyInitiationException(taskPermission);
+            }
+
+            currentUser.validateHasPermissionTo(taskPermission);
+
+            // Only a checker super user's submission skips the queue; any pending entry blocks everyone else.
+            // A CREATE has no resource id yet, so there is no existing resource to match a pending entry against.
+            if (makerCheckerEnabledForTask && !checkerSuperUser && hasIdenticalPendingSubmission(wrapper)) {
+                throw new MakerCheckerDuplicatePendingSubmissionException(wrapper.getActionName(), wrapper.getEntityName(),
+                        wrapper.getEntityId(), wrapper.getSubentityId());
+            }
         }
         validateIsUpdateAllowed();
 
@@ -115,6 +136,13 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         this.commandSourceRepository.deleteById(makerCheckerId);
 
         return makerCheckerId;
+    }
+
+    private boolean hasIdenticalPendingSubmission(final CommandWrapper wrapper) {
+        return wrapper.getEntityId() != null
+                && this.commandSourceRepository.existsByActionNameAndEntityNameAndResourceIdAndSubResourceIdAndCommandAsJsonAndStatus(
+                        wrapper.getActionName(), wrapper.getEntityName(), wrapper.getEntityId(), wrapper.getSubentityId(),
+                        Objects.requireNonNullElse(wrapper.getJson(), "{}"), CommandProcessingResultType.AWAITING_APPROVAL.getValue());
     }
 
     private CommandSource validateMakerCheckerTransaction(final Long makerCheckerId) {

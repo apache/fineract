@@ -29,6 +29,9 @@ public interface CommandSourceRepository extends JpaRepository<CommandSource, Lo
 
     CommandSource findByActionNameAndEntityNameAndIdempotencyKey(String actionName, String entityName, String idempotencyKey);
 
+    boolean existsByActionNameAndEntityNameAndResourceIdAndSubResourceIdAndCommandAsJsonAndStatus(String actionName, String entityName,
+            Long resourceId, Long subResourceId, String commandAsJson, Integer status);
+
     @Modifying(flushAutomatically = true)
     @Query("delete from CommandSource c where c.status = :status and c.madeOnDate is not null and c.madeOnDate <= :dateForPurgeCriteria")
     void deleteOlderEventsWithStatus(@Param("status") Integer status, @Param("dateForPurgeCriteria") OffsetDateTime dateForPurgeCriteria);
