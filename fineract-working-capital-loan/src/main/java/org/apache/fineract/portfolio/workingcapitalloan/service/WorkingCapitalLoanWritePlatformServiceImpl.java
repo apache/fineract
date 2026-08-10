@@ -366,6 +366,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
         updateBalanceOnDisburse(loan, transactionAmount);
         amortizationScheduleWriteService.generateAndSaveAmortizationScheduleOnDisbursement(loan, transactionAmount, actualDisbursementDate);
+        generateInitialDelinquencyAndBreachPeriods(loan);
 
         this.loanRepository.saveAndFlush(loan);
         changes.put("status", loan.getLoanStatus());
@@ -1074,6 +1075,15 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             return paymentDetailService.createPaymentDetail(paymentDetailsCommand, changes);
         }
         return paymentDetailService.createPaymentDetail(command, changes);
+    }
+
+    private void generateInitialDelinquencyAndBreachPeriods(final WorkingCapitalLoan loan) {
+        if (!delinquencyRangeScheduleService.hasSchedule(loan.getId())) {
+            delinquencyRangeScheduleService.generateInitialPeriod(loan);
+        }
+        if (!breachScheduleService.hasSchedule(loan.getId())) {
+            breachScheduleService.generateInitialPeriod(loan);
+        }
     }
 
     private void updateBalanceOnDisburse(final WorkingCapitalLoan loan, final BigDecimal disbursedAmount) {
