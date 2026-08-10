@@ -106,7 +106,7 @@ public final class UserDataValidator {
         if (sendPasswordToEmail != null) {
             if (sendPasswordToEmail.booleanValue()) {
                 final String email = this.fromApiJsonHelper.extractStringNamed(EMAIL, element);
-                baseDataValidator.reset().parameter(EMAIL).value(email).notBlank().notExceedingLengthOf(100);
+                baseDataValidator.reset().parameter(EMAIL).value(email).notBlank().notExceedingLengthOf(254);
             } else {
                 validatePassword(baseDataValidator, element);
             }
@@ -245,7 +245,7 @@ public final class UserDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(EMAIL, element)) {
             final String email = this.fromApiJsonHelper.extractStringNamed(EMAIL, element);
-            baseDataValidator.reset().parameter(EMAIL).value(email).notBlank().notExceedingLengthOf(100);
+            baseDataValidator.reset().parameter(EMAIL).value(email).notBlank().notExceedingLengthOf(254);
         }
 
         if (this.fromApiJsonHelper.parameterExists(ROLES, element)) {
