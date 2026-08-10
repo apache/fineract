@@ -1,4 +1,4 @@
-= Event-driven architecture for modular design
+= FSIP-012: Event-driven architecture for modular design
 
 == Summary
 

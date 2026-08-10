@@ -1,4 +1,4 @@
-= FSIP-10: (Revenue-based) Working Capital Loan product
+= FSIP-010: (Revenue-based) Working Capital Loan product
 
 *Status:* Draft
 *Author(s):* Adam Saghy, Bharath Gowda, Mihaly Dallos

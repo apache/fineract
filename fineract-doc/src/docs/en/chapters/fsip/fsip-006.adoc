@@ -1,4 +1,4 @@
-= FSIP-6: Type Safe Native SQL Queries
+= FSIP-006: Type Safe Native SQL Queries
 
 == Summary
 

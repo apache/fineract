@@ -1,4 +1,4 @@
-= FSIP-5: New Command Processing Infrastructure
+= FSIP-005: New Command Processing Infrastructure
 
 == Summary
 

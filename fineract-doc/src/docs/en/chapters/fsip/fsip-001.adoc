@@ -1,4 +1,4 @@
-= FSIP-1: Modular Security Architecture
+= FSIP-001: Modular Security Architecture
 
 Adopted by the Community over many months beginning April 2023 and continuing until May 2024 See listserv discussions.
 

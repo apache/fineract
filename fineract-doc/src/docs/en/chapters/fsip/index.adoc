@@ -4,26 +4,26 @@ Fineract Significant Improvement Proposals (FSIPs) are the mechanism the communi
 
 NOTE: See https://cwiki.apache.org/confluence/display/FINERACT/Fineract+Significant+Improvement+Proposals[the Apache Fineract wiki] for the authoritative, up-to-date list of FSIPs. The proposals below were imported from that wiki.
 
-include::fsip-1.adoc[leveloffset=+1]
+include::fsip-001.adoc[leveloffset=+1]
 
-include::fsip-2.adoc[leveloffset=+1]
+include::fsip-002.adoc[leveloffset=+1]
 
-include::fsip-3.adoc[leveloffset=+1]
+include::fsip-003.adoc[leveloffset=+1]
 
-include::fsip-4.adoc[leveloffset=+1]
+include::fsip-004.adoc[leveloffset=+1]
 
-include::fsip-5.adoc[leveloffset=+1]
+include::fsip-005.adoc[leveloffset=+1]
 
-include::fsip-6.adoc[leveloffset=+1]
+include::fsip-006.adoc[leveloffset=+1]
 
-include::fsip-7.adoc[leveloffset=+1]
+include::fsip-007.adoc[leveloffset=+1]
 
-include::fsip-8.adoc[leveloffset=+1]
+include::fsip-008.adoc[leveloffset=+1]
 
-include::fsip-9.adoc[leveloffset=+1]
+include::fsip-009.adoc[leveloffset=+1]
 
-include::fsip-10.adoc[leveloffset=+1]
+include::fsip-010.adoc[leveloffset=+1]
 
-include::fsip-11.adoc[leveloffset=+1]
+include::fsip-011.adoc[leveloffset=+1]
 
-include::fsip-12.adoc[leveloffset=+1]
+include::fsip-012.adoc[leveloffset=+1]

@@ -1,4 +1,4 @@
-= FSIP-11: Implement the "Q" in CQRS
+= FSIP-011: Implement the "Q" in CQRS
 
 == Summary
 

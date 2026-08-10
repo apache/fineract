@@ -1,4 +1,4 @@
-= FSIP-7: Traditional Merge Strategy
+= FSIP-007: Traditional Merge Strategy
 
 == Summary
 

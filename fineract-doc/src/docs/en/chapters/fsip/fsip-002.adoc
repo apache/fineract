@@ -1,4 +1,4 @@
-= FSIP-2: Scarf Data Tracking
+= FSIP-002: Scarf Data Tracking
 
 Adopted with three binding votes: Jdailey, Javier, Alexandar on May 16, 2024.
 

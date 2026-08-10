@@ -1,4 +1,4 @@
-= FSIP-9: Standardize on PostgreSQL
+= FSIP-009: Standardize on PostgreSQL
 
 == Summary
 

@@ -1,4 +1,4 @@
-= FSIP-3: Continue Enhancing New Progressive Loan Module to Support Interest-Bearing Loans
+= FSIP-003: Continue Enhancing New Progressive Loan Module to Support Interest-Bearing Loans
 
 Adopted June 17th.
 
