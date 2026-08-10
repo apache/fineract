@@ -371,6 +371,10 @@ public class AccountingScenarioIntegrationTest {
 
         // Verifying Balance after applying Charge for Withdrawal Fee
         assertEquals(balance, summary.get("accountBalance"), "Verifying Balance");
+
+        // "Post Interest For Savings" is a server wide job: an account left active on a 2013 date forces every
+        // later run to replay more than a decade of interest, which times out other tests sharing the instance
+        this.savingsAccountHelper.closeSavingsAccount(savingsID, "true");
     }
 
     @Test
@@ -469,6 +473,9 @@ public class AccountingScenarioIntegrationTest {
 
         // Verifying Balance after applying Charge for Withdrawal Fee
         assertEquals(balance, summary.get("accountBalance"), "Verifying Balance");
+
+        // see checkAccountingWithSavingsFlow: do not leave a 2013 dated account active for the interest posting job
+        this.savingsAccountHelper.closeSavingsAccount(savingsID, "true");
     }
 
     @Test

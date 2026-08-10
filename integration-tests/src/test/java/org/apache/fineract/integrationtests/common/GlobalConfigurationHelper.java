@@ -694,6 +694,13 @@ public class GlobalConfigurationHelper {
         retainedEarningUsedByReportName.put("string_value", "Trial Balance Summary Report with Asset Owner");
         defaults.add(retainedEarningUsedByReportName);
 
+        HashMap<String, Object> isDisallowBackdatedTransactions = new HashMap<>();
+        isDisallowBackdatedTransactions.put("name", GlobalConfigurationConstants.DISALLOW_BACKDATED_TRANSACTIONS);
+        isDisallowBackdatedTransactions.put("value", 0L);
+        isDisallowBackdatedTransactions.put("enabled", false);
+        isDisallowBackdatedTransactions.put("trapDoor", false);
+        defaults.add(isDisallowBackdatedTransactions);
+
         return defaults;
     }
 
