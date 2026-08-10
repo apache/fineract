@@ -764,3 +764,75 @@ Feature: Working Capital Delinquency
       | 2            | 2026-03-02  | 2026-05-10   | D00            | 1              | 30             |
       | 1            | 2026-03-02  | 2026-05-10   | D30            | 31             | 60             |
       | 1            | 2026-01-31  | 2026-05-10   | D00            | 1              | 30             |
+
+
+  @TestRailId:TODO_ADD_001
+  Scenario: Verify working capital loan delinquency range schedule with grace period set to 10 days.
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays | delinquencyGraceDays |
+      | 1               | MONTHS              | FLAT                        | 270          | 15              | 15                   |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000.0          | 100000.0           | 18.0              | 0.0      |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Working capital loan account has the correct data:
+      | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
+      | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
+
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-14 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-14 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    And Customer makes repayment on "10 January 2026" with 270.0 transaction amount on Working Capital loan
+    # first delinquency period should be completed
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-14 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+
+    When Admin sets the business date to "10 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-14 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+
+    When Admin sets the business date to "10 March 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-14 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 2            | 2026-02-15 | 2026-03-16 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+
+    When Admin sets the business date to "02 April 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-14 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 2            | 2026-02-15 | 2026-03-16 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 17             |
+      | 3            | 2026-03-17 | 2026-04-15 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+
+    # there should be 1 delinquent period
+    And Customer makes repayment on "02 April 2026" with 270.0 transaction amount on Working Capital loan
+    # there should be no delinquent period, and current period should show as minimum payment criteria met.
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-14 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 2            | 2026-02-15 | 2026-03-16 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 3            | 2026-03-17 | 2026-04-15 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    And Customer makes repayment on "02 April 2026" with 270.0 transaction amount on Working Capital loan
+    # there should be no delinquent period, and current period should show as minimum payment criteria met.
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-02-14 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 2            | 2026-02-15 | 2026-03-16 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+      | 3            | 2026-03-17 | 2026-04-15 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
+

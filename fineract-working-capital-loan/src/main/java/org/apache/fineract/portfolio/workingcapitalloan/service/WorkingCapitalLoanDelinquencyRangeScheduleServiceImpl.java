@@ -72,12 +72,12 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
 
     @Override
     public void generateInitialPeriod(WorkingCapitalLoan loan) {
-        DelinquencyMinimumPaymentPeriodAndRule rule = getMinimumPaymentRule(loan);
+        final DelinquencyMinimumPaymentPeriodAndRule rule = getMinimumPaymentRule(loan);
         if (rule == null) {
             return;
         }
 
-        LocalDate fromDate = resolveScheduleAnchorDate(loan);
+        final LocalDate fromDate = resolveScheduleAnchorDate(loan);
         if (fromDate == null) {
             log.warn("No anchor date found for WC loan {}, skipping initial period generation", loan.getId());
             return;
@@ -86,7 +86,10 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
         final EffectiveDelinquencyRescheduleParams params = resolveEffectiveRescheduleParams(loan.getId(), rule);
         final LocalDate toDate = WorkingCapitalLoanDelinquencyRangeScheduleEvaluationUtils.calculateToDate(fromDate, params.frequency(),
                 params.frequencyType());
-        final WorkingCapitalLoanDelinquencyRangeSchedule period = buildPeriod(loan, 1, fromDate, toDate,
+        final Integer graceDays = loan.getLoanProductRelatedDetails().getDelinquencyGraceDays();
+        final LocalDate graceDaysAdjustedToDate = graceDays == null ? toDate : toDate.plusDays(graceDays);
+
+        final WorkingCapitalLoanDelinquencyRangeSchedule period = buildPeriod(loan, 1, fromDate, graceDaysAdjustedToDate,
                 calculateExpectedAmount(loan, params));
 
         loanDelinquencyRangeScheduleRepository.saveAndFlush(period);

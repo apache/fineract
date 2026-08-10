@@ -11,7 +11,7 @@ Feature: Working Capital Near Breach Evaluation
       | 3               | MONTHS              | FLAT                        | 900          | 60                  | DAYS                    | 33.33               |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -32,7 +32,7 @@ Feature: Working Capital Near Breach Evaluation
       | 3               | MONTHS              | FLAT                        | 900          | 60                  | DAYS                    | 33.33               |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -57,7 +57,7 @@ Feature: Working Capital Near Breach Evaluation
       | 1               | MONTHS              | FLAT                        | 500          |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -77,7 +77,7 @@ Feature: Working Capital Near Breach Evaluation
       | 3               | MONTHS              | FLAT                        | 900          | 60                  | DAYS                    | 33.33               |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -106,7 +106,7 @@ Feature: Working Capital Near Breach Evaluation
       | 3               | MONTHS              | FLAT                        | 900          | 60                  | DAYS                    | 33.33               |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -126,7 +126,7 @@ Feature: Working Capital Near Breach Evaluation
       | 2               | MONTHS              | PERCENTAGE                  | 10           | 2                   | WEEKS                   | 50                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -148,7 +148,7 @@ Feature: Working Capital Near Breach Evaluation
       | 3               | MONTHS              | FLAT                        | 900          | 60                  | DAYS                    | 50                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -173,7 +173,7 @@ Feature: Working Capital Near Breach Evaluation
       | 1               | MONTHS              | FLAT                        | 500          | 15                  | DAYS                    | 50                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -205,13 +205,13 @@ Feature: Working Capital Near Breach Evaluation
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
-    # graceDays=10 -> Period 1: 01-11 -> 04-10; freq=60d -> 1 eval at 03-12 (cumulative required = 33.33% of 900 = 299.97)
+    # graceDays=10 -> Period 1: 01-01 -> 04-10; freq=60d -> 1 eval at 03-12 (cumulative required = 33.33% of 900 = 299.97)
     # No payment by 03-12 -> cumulative paid=0 < 299.97 -> trigger Y
     When Admin sets the business date to "13 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-11 | 2026-04-10 | 900.00           | 900.00            | true       | null   |
+      | 1            | 2026-01-01 | 2026-04-10 | 900.00           | 900.00            | true       | null   |
 
   @TestRailId:C76645
   Scenario: Verify near breach with PERCENTAGE breach amount and non-zero discount
@@ -222,7 +222,7 @@ Feature: Working Capital Near Breach Evaluation
       | 2               | MONTHS              | PERCENTAGE                  | 10           | 30                  | DAYS                    | 50                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 500      |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 500      |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "500" discount amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "500" discount amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -245,7 +245,7 @@ Feature: Working Capital Near Breach Evaluation
       | 1               | MONTHS              | FLAT                        | 500          | 29                  | DAYS                    | 50                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate  | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 February 2026 | 01 February 2026         | 9000            | 100000       | 18                | 0        |
+      | 01 February 2026 | 01 February 2026         | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 February 2026" with "9000" amount and expected disbursement date on "01 February 2026"
     When Admin successfully disburse the Working Capital loan on "01 February 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -266,7 +266,7 @@ Feature: Working Capital Near Breach Evaluation
       | 2               | MONTHS              | FLAT                        | 500          | 58                  | DAYS                    | 50                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -290,7 +290,7 @@ Feature: Working Capital Near Breach Evaluation
       | 3               | MONTHS              | FLAT                        | 900          | 60                  | DAYS                    | 50                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -319,7 +319,7 @@ Feature: Working Capital Near Breach Evaluation
       | 3               | MONTHS              | FLAT                        | 900          | 60                  | DAYS                    | 33.33               |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -344,7 +344,7 @@ Feature: Working Capital Near Breach Evaluation
       | 1               | MONTHS              | FLAT                        | 300          | 15                  | DAYS                    | 50                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -388,7 +388,7 @@ Feature: Working Capital Near Breach Evaluation
       | 3               | MONTHS              | FLAT                        | 900          | 60                  | DAYS                    | 33.33               |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     # Loan is approved but NOT disbursed - no breach schedule should exist
     Then Working Capital loan breach schedule has no data
@@ -402,7 +402,7 @@ Feature: Working Capital Near Breach Evaluation
       | 9               | DAYS                | FLAT                        | 90           | 3                   | DAYS                    | 33                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -428,7 +428,7 @@ Feature: Working Capital Near Breach Evaluation
       | 9               | DAYS                | FLAT                        | 90           | 3                   | DAYS                    | 50                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -455,7 +455,7 @@ Feature: Working Capital Near Breach Evaluation
       | 9               | DAYS                | FLAT                        | 90           | 3                   | DAYS                    | 33                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -483,7 +483,7 @@ Feature: Working Capital Near Breach Evaluation
       | 9               | DAYS                | PERCENTAGE                  | 50           | 3                   | DAYS                    | 33                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 800             | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -519,7 +519,7 @@ Feature: Working Capital Near Breach Evaluation
       | 9               | DAYS                | FLAT                        | 90           | 3                   | DAYS                    | 33.33               |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -545,7 +545,7 @@ Feature: Working Capital Near Breach Evaluation
       | 9               | DAYS                | FLAT                        | 90           | 3                   | DAYS                    | 33.33               |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -565,7 +565,9 @@ Feature: Working Capital Near Breach Evaluation
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-09 | 90.00            | 40.00             | true       | null   |
 
-  @TestRailId:C80953
+  @TestRailId:C80953 @Skip
+  ### Breach start date is no longer shifted for the first period.
+  ### TODO alter test scenario to check 2nd period
   Scenario: Verify that grace days shift breach period start and near breach is evaluated at shifted eval dates - UC4
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -574,11 +576,11 @@ Feature: Working Capital Near Breach Evaluation
       | 9               | DAYS                | PERCENTAGE                  | 50           | 3                   | DAYS                    | 33                  | 3                    | 3               |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 800             | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
-    # Grace=3 -> P1: 01-04 -> 01-12 (9d from 01-04 minus 1 day). minPayment = 50% of 800 = 400.
+    # Grace=3 -> P1: 01-01 -> 01-12 (9d from 01-04 minus 1 day). minPayment = 50% of 800 = 400.
     # near-breach freq=3 -> evals: 01-07 (#1), 01-10 (#2). step required = 33% of 400 = 132.
     # Pay 100 on 05 Jan -> cumulative paid by eval#1 is 100.
     When Admin sets the business date to "05 January 2026"
@@ -588,13 +590,13 @@ Feature: Working Capital Near Breach Evaluation
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-04 | 2026-01-12 | 400.00           | 300.00            | null       | null   |
+      | 1            | 2026-01-01 | 2026-01-12 | 400.00           | 300.00            | null       | null   |
     # Phase B: advance past eval#1 (01-07) -> cumulative paid by 01-07 = 100 < 132 -> trigger Y at eval#1.
     When Admin sets the business date to "08 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-04 | 2026-01-12 | 400.00           | 300.00            | true       | null   |
+      | 1            | 2026-01-01 | 2026-01-12 | 400.00           | 300.00            | true       | null   |
 
   @TestRailId:C80954
   Scenario: Verify that near breach stays null between evals and is detected when cumulative paid falls short of stepped requirement at a later eval - UC5
@@ -605,7 +607,7 @@ Feature: Working Capital Near Breach Evaluation
       | 9               | DAYS                | PERCENTAGE                  | 10           | 3                   | DAYS                    | 33                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 10000           | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 10000           | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "10000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "10000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -638,7 +640,7 @@ Feature: Working Capital Near Breach Evaluation
       | 9               | DAYS                | FLAT                        | 90           | 3                   | DAYS                    | 33.33               |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -669,13 +671,13 @@ Feature: Working Capital Near Breach Evaluation
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
-    # breachGraceDays=5 -> Period 1: 01-06 -> 04-05; freq=60d -> 1 eval at 03-07 (cumulative required = 33.33% of 900 = 299.97)
+    # breachGraceDays=5 -> Period 1: 01-01 -> 04-05; freq=60d -> 1 eval at 03-07 (cumulative required = 33.33% of 900 = 299.97)
     # No payment by 03-07 -> cumulative paid=0 < 299.97 -> trigger Y
     When Admin sets the business date to "08 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-06 | 2026-04-05 | 900.00           | 900.00            | true       | null   |
+      | 1            | 2026-01-01 | 2026-04-05 | 900.00           | 900.00            | true       | null   |
 
   @TestRailId:C85315
   Scenario: Verify near breach RESCHEDULE action - UC1: threshold raised so period that would have triggered no longer triggers
@@ -997,7 +999,7 @@ Feature: Working Capital Near Breach Evaluation
     # No near breach config on product -> RESCHEDULE action must fail.
     When Admin sets the business date to "02 January 2026"
     When Admin creates a near breach reschedule action with threshold "33.33" frequency 3 frequencyType "DAYS" expecting error:
-      | httpCode | errorMessage                                                                                                    |
+      | httpCode | errorMessage                                                                                         |
       | 400      | Failed data validation due to: near.breach.action.not.allowed.loan.has.no.near.breach.configuration. |
 
   @TestRailId:C85325
@@ -1015,7 +1017,7 @@ Feature: Working Capital Near Breach Evaluation
       | submittedOnDate | expectedDisbursementDate | status                         | approvedPrincipal | proposedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 0.0               | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin creates a near breach reschedule action with threshold "50" frequency 3 frequencyType "DAYS" expecting error:
-      | httpCode | errorMessage                                                                                        |
+      | httpCode | errorMessage                                                                       |
       | 400      | Failed data validation due to: near.breach.action.not.allowed.for.non.active.loan. |
 
   @TestRailId:C85326
@@ -1034,7 +1036,7 @@ Feature: Working Capital Near Breach Evaluation
       | submittedOnDate | expectedDisbursementDate | status   | approvedPrincipal | proposedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin creates a near breach reschedule action with threshold "50" frequency 3 frequencyType "DAYS" expecting error:
-      | httpCode | errorMessage                                                                                        |
+      | httpCode | errorMessage                                                                       |
       | 400      | Failed data validation due to: near.breach.action.not.allowed.for.non.active.loan. |
 
   @TestRailId:C85327
@@ -1050,5 +1052,5 @@ Feature: Working Capital Near Breach Evaluation
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     When Admin creates a near breach reschedule action with threshold "101" frequency 3 frequencyType "DAYS" expecting error:
-      | httpCode | errorMessage                                                                                        |
+      | httpCode | errorMessage                                                |
       | 400      | Failed data validation due to: must.not.exceed.100.percent. |

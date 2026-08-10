@@ -489,7 +489,8 @@ Feature: Working Capital Breach Reset and Undo Reset
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
 
-  @TestRailId:C85441
+  ### first breach period always starts from submitted/disbursement date
+  @TestRailId:C85441 @Skip
   Scenario: Verify breach reset fails when no breach evaluation period exists for business date
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data

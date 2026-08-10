@@ -129,12 +129,12 @@ Feature: Working Capital Breach Schedule
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-04 | 2026-01-10 | 7            | 900.00           | 900.00            | null       | null   |
+      | 1            | 2026-01-01 | 2026-01-10 | 10           | 900.00           | 900.00            | null       | null   |
     When Admin sets the business date to "09 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-04 | 2026-01-10 | 7            | 900.00           | 900.00            | null       | true   |
+      | 1            | 2026-01-01 | 2026-01-10 | 10           | 900.00           | 900.00            | null       | true   |
       | 2            | 2026-01-11 | 2026-01-17 | 7            | 900.00           | 900.00            | null       | true   |
       | 3            | 2026-01-18 | 2026-01-24 | 7            | 900.00           | 900.00            | null       | true   |
       | 4            | 2026-01-25 | 2026-01-31 | 7            | 900.00           | 900.00            | null       | true   |
@@ -368,7 +368,7 @@ Feature: Working Capital Breach Schedule
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-02-15 | 2026-02-21 | 7            | 900.00           | 900.00            | null       | null   |
+      | 1            | 2026-01-01 | 2026-02-21 | 52           | 900.00           | 900.00            | null       | null   |
 
   @TestRailId:C74560
   Scenario: Verify working capital loan breach schedule - FLAT breachAmount=0 yields breach=false on expiry
@@ -408,7 +408,7 @@ Feature: Working Capital Breach Schedule
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-06 | 2026-02-05 | 31           | 500.00           | 500.00            | null       | null   |
+      | 1            | 2026-01-01 | 2026-02-05 | 36           | 500.00           | 500.00            | null       | null   |
 
   @TestRailId:C77002
   Scenario: Verify working capital loan account inherits breachGraceDays from product and breach schedule is shifted accordingly
@@ -426,7 +426,7 @@ Feature: Working Capital Breach Schedule
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-05 | 2026-02-04 | 31           | 500.00           | 500.00            | null       | null   |
+      | 1            | 2026-01-01 | 2026-02-04 | 35           | 500.00           | 500.00            | null       | null   |
 
   @TestRailId:C77003
   Scenario: Verify working capital loan account breachGraceDays override takes precedence over product value in breach schedule
@@ -444,7 +444,7 @@ Feature: Working Capital Breach Schedule
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-10 | 2026-02-09 | 31           | 500.00           | 500.00            | null       | null   |
+      | 1            | 2026-01-01 | 2026-02-09 | 40           | 500.00           | 500.00            | null       | null   |
 
   @TestRailId:C77004
   Scenario: Verify breach schedule is not shifted by delinquencyGraceDays when breachGraceDays is not set
@@ -479,15 +479,18 @@ Feature: Working Capital Breach Schedule
       | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
-    # Breach period 1 = [Jan 6 .. Jan 20], delinquency period 1 = [Jan 1 .. Jan 30]
+    # Breach period 1 = [Jan 1 .. Jan 20], delinquency period 1 = [Jan 1 .. February 4]
     When Admin sets the business date to "21 January 2026"
-    And Admin runs inline COB job for Working Capital Loan by loanId
-    # ...and Jan 31 (= delinquency toDate + 1) flags the delinquency; the breach flag set above stays
-    When Admin sets the business date to "31 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working capital loan account has the correct data:
       | breachStartDate | delinquencyStartDate |
-      | 2026-01-06      | 2026-01-04           |
+      | 2026-01-01      | null                 |
+    # ...and February 04 (= delinquency toDate + 1) flags the delinquency; the breach flag set above stays
+    When Admin sets the business date to "04 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working capital loan account has the correct data:
+      | breachStartDate | delinquencyStartDate |
+      | 2026-01-01      | 2026-01-01           |
 
   @TestRailId:C85265
   Scenario: Verify that only breachStartDate is set while the breach period has elapsed but the delinquency period has not
@@ -506,7 +509,7 @@ Feature: Working Capital Breach Schedule
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working capital loan account has the correct data:
       | breachStartDate | delinquencyStartDate |
-      | 2026-01-06      | null                 |
+      | 2026-01-01      | null                 |
 
   @TestRailId:C85266
   Scenario: Verify that only delinquencyStartDate is set for a delinquency-only product with no breach configuration
@@ -558,7 +561,7 @@ Feature: Working Capital Breach Schedule
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working capital loan account has the correct data:
       | breachStartDate | delinquencyStartDate |
-      | null            | 2026-01-04           |
+      | null            | 2026-01-01           |
 
   @TestRailId:C89812
   Scenario: Verify working capital loan breach schedule - test whether last period is capped
@@ -575,7 +578,7 @@ Feature: Working Capital Breach Schedule
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-04 | 2026-01-10 | 7            | 900.00           | 900.00            | null       | null   |
+      | 1            | 2026-01-01 | 2026-01-10 | 10           | 900.00           | 900.00            | null       | null   |
     When Admin sets the business date to "23 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Customer makes repayment on "10 January 2026" with 900.0 transaction amount on Working Capital loan
@@ -591,7 +594,7 @@ Feature: Working Capital Breach Schedule
     And Customer makes repayment on "21 March 2026" with 800.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-04 | 2026-01-10 | 7            | 900.00           | 0.00              | null       | false  |
+      | 1            | 2026-01-01 | 2026-01-10 | 10           | 900.00           | 0.00              | null       | false  |
       | 2            | 2026-01-11 | 2026-01-17 | 7            | 900.00           | 0.00              | null       | false  |
       | 3            | 2026-01-18 | 2026-01-24 | 7            | 900.00           | 0.00              | null       | false  |
       | 4            | 2026-01-25 | 2026-01-31 | 7            | 900.00           | 0.00              | null       | false  |
@@ -606,7 +609,7 @@ Feature: Working Capital Breach Schedule
     And Customer makes repayment on "21 March 2026" with 100.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-04 | 2026-01-10 | 7            | 900.00           | 0.00              | null       | false  |
+      | 1            | 2026-01-01 | 2026-01-10 | 10           | 900.00           | 0.00              | null       | false  |
       | 2            | 2026-01-11 | 2026-01-17 | 7            | 900.00           | 0.00              | null       | false  |
       | 3            | 2026-01-18 | 2026-01-24 | 7            | 900.00           | 0.00              | null       | false  |
       | 4            | 2026-01-25 | 2026-01-31 | 7            | 900.00           | 0.00              | null       | false  |
@@ -621,7 +624,7 @@ Feature: Working Capital Breach Schedule
     And Customer makes repayment on "21 March 2026" with 100.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-04 | 2026-01-10 | 7            | 900.00           | 0.00              | null       | false  |
+      | 1            | 2026-01-01 | 2026-01-10 | 10           | 900.00           | 0.00              | null       | false  |
       | 2            | 2026-01-11 | 2026-01-17 | 7            | 900.00           | 0.00              | null       | false  |
       | 3            | 2026-01-18 | 2026-01-24 | 7            | 900.00           | 0.00              | null       | false  |
       | 4            | 2026-01-25 | 2026-01-31 | 7            | 900.00           | 0.00              | null       | false  |

@@ -82,10 +82,10 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
             return;
         }
 
-        final LocalDate fromDate = anchorDateOptional.get().plusDays(getBreachGraceDays(loan));
+        final LocalDate fromDate = anchorDateOptional.get();
         final EffectiveBreachRescheduleParams params = resolveEffectiveRescheduleParams(loan.getId(), breachOpt.get());
-        final LocalDate toDate = WorkingCapitalLoanBreachScheduleEvaluationUtils.calculateToDate(fromDate, params.frequency(),
-                params.frequencyType());
+        final LocalDate toDate = WorkingCapitalLoanBreachScheduleEvaluationUtils
+                .calculateToDate(fromDate, params.frequency(), params.frequencyType()).plusDays(getBreachGraceDays(loan));
         final BigDecimal minPaymentAmount = calculateMinPaymentAmount(loan, params);
 
         final WorkingCapitalLoanBreachSchedule period = createPeriod(loan, 1, fromDate, toDate, minPaymentAmount);
