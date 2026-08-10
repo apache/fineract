@@ -69,9 +69,9 @@ public interface EMICalculator {
      * amount, therefore its amount is raised back to the paid amount and the difference is moved onto a period which
      * still has room for it.
      * <p>
-     * Loans without interest recalculation do not report most of their payments to the interest model, so the model
-     * needs the paid amounts of the installments to be able to do this. They are taken over only when there is a period
-     * to correct, hence a model which is in line with its installments is left untouched.
+     * Loans whose payments are not reported to the interest model need the paid amounts of the installments to be able
+     * to do this. They are taken over only when there is a period to correct, hence a model which is in line with its
+     * installments is left untouched.
      */
     void alignPeriodsWithPaidAmounts(ProgressiveLoanInterestScheduleModel scheduleModel,
             List<RepaymentScheduleInstallmentData> installments, LocalDate tillDate);

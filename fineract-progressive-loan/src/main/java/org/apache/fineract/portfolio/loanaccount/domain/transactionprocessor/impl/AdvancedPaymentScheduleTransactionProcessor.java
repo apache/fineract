@@ -3783,12 +3783,17 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     /**
      * Keeps an EMI recalculation from leaving an installment with less amount than what has already been paid on it,
-     * which would show up as a negative outstanding amount on the loan. To be called after an operation which
-     * recalculates the EMI amounts on the interest model, and before the installments are updated from the model.
+     * which would show up as a negative outstanding amount on the loan. Called after a disbursement or a capitalized
+     * income has recalculated the EMI amounts on the interest model, and before the installments are updated from the
+     * model.
      * <p>
      * Only loans which do not report their payments to the interest model need this, therefore this is guarded by the
      * very same condition which decides whether the payments are reported to the model. The interest model of the other
      * loans knows the paid amounts on its own and corrects itself while the payments are processed.
+     * <p>
+     * Loan term variations recalculate the EMI amounts as well, but they are not aligned yet: each of them updates only
+     * the installments which have not met their obligations, so none of them can leave a fully paid installment below
+     * its paid amount. A partially paid installment still can be left below its paid amount by them.
      */
     private void alignModelWithPaidAmounts(final TransactionCtx ctx, final Loan loan, final ProgressiveLoanInterestScheduleModel model,
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate tillDate) {

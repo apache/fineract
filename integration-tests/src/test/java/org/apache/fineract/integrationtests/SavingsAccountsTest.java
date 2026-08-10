@@ -19,11 +19,13 @@
 package org.apache.fineract.integrationtests;
 
 import java.time.format.DateTimeFormatter;
+import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsResponse;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
 import org.junit.jupiter.api.Order;
@@ -47,14 +49,16 @@ public class SavingsAccountsTest extends IntegrationTest {
     private final String locale = "en";
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(dateFormat);
     private final String formattedDate = dateFormatter.format(Utils.getLocalDateOfTenant());
-    private int savingId = 1;
+    private int savingId;
 
     @Test
     @Order(1)
     void submitSavingsAccountsApplication() {
         LOG.info("------------------------------ CREATING NEW SAVINGS ACCOUNT APPLICATION ---------------------------------------");
         PostSavingsAccountsRequest request = new PostSavingsAccountsRequest();
-        request.setClientId(1L);
+
+        final PostClientsResponse client = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        request.setClientId(client.getClientId());
         request.setProductId(1L);
         request.setLocale(locale);
         request.setDateFormat(dateFormat);

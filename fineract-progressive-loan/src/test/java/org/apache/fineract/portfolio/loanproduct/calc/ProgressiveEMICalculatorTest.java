@@ -72,8 +72,8 @@ class ProgressiveEMICalculatorTest {
 
     private static ProgressiveEMICalculator emiCalculator = new ProgressiveEMICalculator(new DefaultScheduledDateGenerator());
 
-    private static MockedStatic<ThreadLocalContextUtil> threadLocalContextUtil = Mockito.mockStatic(ThreadLocalContextUtil.class);
-    private static MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
+    private static MockedStatic<ThreadLocalContextUtil> threadLocalContextUtil;
+    private static MockedStatic<MoneyHelper> moneyHelper;
     private static MathContext mc = new MathContext(12, RoundingMode.HALF_EVEN);
     private static ILoanConfigurationDetails loanProductRelatedDetail = Mockito.mock(ILoanConfigurationDetails.class);
 
@@ -95,6 +95,8 @@ class ProgressiveEMICalculatorTest {
         periods.add(createPeriod(6, startDate.plusMonths(5), startDate.plusMonths(6)));
 
         // When
+        threadLocalContextUtil = Mockito.mockStatic(ThreadLocalContextUtil.class);
+        moneyHelper = Mockito.mockStatic(MoneyHelper.class);
         moneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.HALF_EVEN);
         moneyHelper.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.HALF_EVEN));
     }

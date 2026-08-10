@@ -30,8 +30,8 @@ import java.time.Year;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -134,8 +134,14 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         if (!hasPeriodBelowPaidAmount) {
             return;
         }
-        paidAmountsByPeriod
-                .forEach((repaymentPeriod, paidAmounts) -> repaymentPeriod.setPaidAmounts(paidAmounts.principal(), paidAmounts.interest()));
+        // Iterated on the model and not on the map, since setting the paid amounts changes the very periods which are
+        // the keys of the map
+        scheduleModel.repaymentPeriods().forEach(repaymentPeriod -> {
+            final PaidAmounts paidAmounts = paidAmountsByPeriod.get(repaymentPeriod);
+            if (paidAmounts != null) {
+                repaymentPeriod.setPaidAmounts(paidAmounts.principal(), paidAmounts.interest());
+            }
+        });
         calculateOutstandingBalance(scheduleModel);
         calculateLastUnpaidRepaymentPeriodEMI(scheduleModel, tillDate);
     }
@@ -145,12 +151,15 @@ public final class ProgressiveEMICalculator implements EMICalculator {
      * to the same repayment period are summed up, since a repayment period can cover more than one installment once
      * intermediate stub periods got collapsed. Only the amounts which the model does not know about yet are collected,
      * so that the paid amounts the model tracks on its own are never contradicted.
+     * <p>
+     * The periods are kept apart by their identity, since the equality of a period is derived from its amounts, which
+     * are exactly what the caller is about to change.
      */
     private Map<RepaymentPeriod, PaidAmounts> collectPaidAmountsByPeriod(final ProgressiveLoanInterestScheduleModel scheduleModel,
             final List<RepaymentScheduleInstallmentData> installments) {
         final MathContext mc = scheduleModel.mc();
         final CurrencyData currency = scheduleModel.loanProductRelatedDetail().getCurrencyData();
-        final Map<RepaymentPeriod, PaidAmounts> paidAmountsByPeriod = new LinkedHashMap<>();
+        final Map<RepaymentPeriod, PaidAmounts> paidAmountsByPeriod = new IdentityHashMap<>();
         for (final RepaymentScheduleInstallmentData installment : installments) {
             if (installment.isDownPayment() || installment.isAdditional()) {
                 continue;

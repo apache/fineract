@@ -643,7 +643,8 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 18 February 2026 | Disbursement     | 1.0    | 0.0       | 0.0      | 0.0  | 0.0       | 1.0          |
       | 18 May 2026      | Repayment        | 1.04   | 1.0       | 0.04     | 0.0  | 0.0       | 0.0          |
       | 18 May 2026      | Accrual          | 0.04   | 0.0       | 0.04     | 0.0  | 0.0       | 0.0          |
-    
+
+  @TestRailId:C94000
   Scenario: Verify that 0.01 disbursement after Merchant Issued Refund allocated to last installment does not result in negative outstanding balance on the loan
     When Admin sets the business date to "05 November 2025"
     And Admin creates a client with random data
@@ -695,3 +696,31 @@ Feature: EMI calculation and repayment schedule checks for interest bearing loan
       | 93.55         | 93.55 | 93.55 | 0.0         |
     And Admin set "LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_NO_MULTIPLES_OF" loan product "DEFAULT" transaction type to "REAMORTIZATION" future installment allocation rule
     And Admin set "LP2_DOWNPAYMENT_AUTO_ADV_PMT_ALLOC_NO_MULTIPLES_OF" loan product "MERCHANT_ISSUED_REFUND" transaction type to "LAST_INSTALLMENT" future installment allocation rule
+
+  @TestRailId:C94001
+  Scenario: Verify that 0.01 disbursement after Merchant Issued Refund allocated to last installment does not result in negative outstanding balance on an interest-bearing loan
+    When Admin sets the business date to "05 November 2025"
+    And Admin creates a client with random data
+    And Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "MERCHANT_ISSUED_REFUND" transaction type to "LAST_INSTALLMENT" future installment allocation rule
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT | 05 November 2025  | 93.55          | 7                      | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 48                | DAYS                  | 16             | DAYS                   | 3                   | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "05 November 2025" with "93.55" amount and expected disbursement date on "05 November 2025"
+    When Admin successfully disburse the loan on "05 November 2025" with "60.62" EUR transaction amount
+    When Admin successfully disburse the loan on "05 November 2025" with "32.92" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+# --- Merchant Issued Refund fully pays the last installment and part of the previous one ---
+    When Admin sets the business date to "08 November 2025"
+    And Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "08 November 2025" with 32.91 EUR transaction amount and system-generated Idempotency key
+# --- 0.01 disbursement triggers a schedule recalculation ---
+    When Admin sets the business date to "10 November 2025"
+    When Admin successfully disburse the loan on "10 November 2025" with "0.01" EUR transaction amount
+    Then Loan status will be "ACTIVE"
+# --- remaining scheduled repayments ---
+    When Admin sets the business date to "21 November 2025"
+    And Customer makes "AUTOPAY" repayment on "21 November 2025" with 23.53 EUR transaction amount
+    When Admin sets the business date to "07 December 2025"
+# --- Closing the loan with a pay-off avoids hard-coding the exact residual interest amount ---
+    When Loan Pay-off is made on "07 December 2025"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+    And Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "MERCHANT_ISSUED_REFUND" transaction type to "REAMORTIZATION" future installment allocation rule
