@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
+import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -54,6 +55,8 @@ import org.apache.fineract.integrationtests.common.savings.AccountTransferHelper
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
+import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -285,6 +288,75 @@ public class AccountTransferTest {
         Assertions.assertEquals("RT-2733", paymentDetailData.get("routingCode"));
         Assertions.assertEquals("RC-2733", paymentDetailData.get("receiptNumber"));
         Assertions.assertEquals("BNK-2733", paymentDetailData.get("bankNumber"));
+    }
+
+    @Test
+    public void testAccountTransferDeniedForSiblingOfficeScopedUser() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer sourceUserOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
+        Integer targetSiblingOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
+
+        final Integer savingsProductId = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
+                incomeAccount, expenseAccount, liabilityAccount);
+
+        // Both transfer accounts are in a sibling office the scoped user should not access.
+        final Integer fromClientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
+                String.valueOf(targetSiblingOfficeId));
+        final Integer fromSavingsId = createActiveSavingsAccount(fromClientId, savingsProductId);
+        final Integer toClientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
+                String.valueOf(targetSiblingOfficeId));
+        final Integer toSavingsId = createActiveSavingsAccount(toClientId, savingsProductId);
+
+        RequestSpecification siblingScopedUserRequestSpec = createOfficeScopedUserRequestSpec(sourceUserOfficeId);
+        ResponseSpecification forbiddenResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
+
+        new AccountTransferHelper(siblingScopedUserRequestSpec, forbiddenResponse).accountTransfer(fromClientId, fromSavingsId, toClientId,
+                toSavingsId, FROM_SAVINGS_ACCOUNT_TYPE, TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
+    }
+
+    @Test
+    public void testAccountTransferAllowedForSameOfficeScopedUser() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+
+        final Account assetAccount = this.accountHelper.createAssetAccount();
+        final Account incomeAccount = this.accountHelper.createIncomeAccount();
+        final Account expenseAccount = this.accountHelper.createExpenseAccount();
+        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer officeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
+
+        final Integer savingsProductId = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
+                incomeAccount, expenseAccount, liabilityAccount);
+
+        final Integer fromClientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
+                String.valueOf(officeId));
+        final Integer fromSavingsId = createActiveSavingsAccount(fromClientId, savingsProductId);
+        final Integer toClientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
+                String.valueOf(officeId));
+        final Integer toSavingsId = createActiveSavingsAccount(toClientId, savingsProductId);
+
+        Float expectedFromBalance = Float.valueOf(MINIMUM_OPENING_BALANCE) - TRANSFER_AMOUNT;
+        Float expectedToBalance = Float.valueOf(MINIMUM_OPENING_BALANCE) + TRANSFER_AMOUNT;
+
+        RequestSpecification sameOfficeUserRequestSpec = createOfficeScopedUserRequestSpec(officeId);
+        ResponseSpecification successResponse = new ResponseSpecBuilder().expectStatusCode(200).build();
+        new AccountTransferHelper(sameOfficeUserRequestSpec, successResponse).accountTransfer(fromClientId, fromSavingsId, toClientId,
+                toSavingsId, FROM_SAVINGS_ACCOUNT_TYPE, TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
+
+        HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsId);
+        assertEquals(expectedFromBalance, fromSavingsSummaryAfter.get("accountBalance"),
+                "Verifying from savings balance after same-office scoped transfer");
+        HashMap toSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(toSavingsId);
+        assertEquals(expectedToBalance, toSavingsSummaryAfter.get("accountBalance"),
+                "Verifying to savings balance after same-office scoped transfer");
     }
 
     @Test
@@ -1013,6 +1085,21 @@ public class AccountTransferTest {
                 .createPaymentType(
                         new PaymentTypeCreateRequest().name(paymentTypeName).description(description).isCashPayment(false).position(1L))
                 .getResourceId();
+    }
+
+    private RequestSpecification createOfficeScopedUserRequestSpec(final Integer officeId) {
+        String username = Utils.uniqueRandomStringGenerator("officeScopedUser", 6);
+        String password = "QwE!5rTy#9uP0";
+
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(username).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).email(username + "@example.com").password(password)
+                .repeatPassword(password).sendPasswordToEmail(false).officeId(officeId.longValue())
+                .roles(List.of(RolesHelper.SUPER_USER_ROLE_ID));
+        UserHelper.createUser(this.requestSpec, this.responseSpec, createUserRequest);
+
+        RequestSpecification scopedRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        scopedRequestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, password));
+        return scopedRequestSpec;
     }
 
     private Integer createLoanProduct(final Account... accounts) {
