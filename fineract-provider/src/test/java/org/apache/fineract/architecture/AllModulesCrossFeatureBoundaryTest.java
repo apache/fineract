@@ -137,6 +137,15 @@ class AllModulesCrossFeatureBoundaryTest {
         LOG.info("clean modules        : {}", cleanModules);
         LOG.info("modules with issues  : {}", sortedModules.size() - cleanModules);
         LOG.info("total violations     : {}", totalViolations);
+
+        // Assertions are placed after the logging so the full report is always printed, including on failure.
+        assertThat(sortedModules).as("no application modules were discovered, so the report analysed nothing").isNotEmpty();
+
+        assertThat(totalViolations) //
+                .as("Every module may depend only on fineract-core and fineract-command, so the expected number of "
+                        + "cross-feature violations is 0 but %d were found. Until the modularisation is complete this "
+                        + "assertion is expected to fail; the report logged above lists every offending module.", totalViolations) //
+                .isZero();
     }
 
     @Test
