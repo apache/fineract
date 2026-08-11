@@ -663,3 +663,17 @@ Feature: Working Capital Charge-Off Accounting Entries
       | httpCode | errorMessage     |
       | 400      | already.charged.off |
     And Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+
+  @TestRailId:C94004
+  Scenario: Verify Working Capital charge-off accounting - UC23: NONE accounting rule produces no journal entries
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "10 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type | Account code | Account name | Debit | Credit |
+    Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"

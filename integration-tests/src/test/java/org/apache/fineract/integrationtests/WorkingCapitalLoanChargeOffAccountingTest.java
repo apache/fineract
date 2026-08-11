@@ -290,6 +290,77 @@ public class WorkingCapitalLoanChargeOffAccountingTest {
     }
 
     @Test
+    public void testUndoOfRepaymentAfterChargeOffReversesRecoveryIncomeEntries() {
+        final Long productId = createAccrualWithDeferredRevenueAmortizationProduct();
+        final LocalDate currentDate = LocalDate.now(ZoneId.systemDefault());
+        final AtomicLong loanId = new AtomicLong(0L);
+        BusinessDateHelper.runAt(currentDate.format(BUSINESS_DATE),
+                () -> loanId.set(createApprovedAndDisbursedLoan(productId, BigDecimal.valueOf(5000), currentDate)));
+
+        final LocalDate chargeOffDate = currentDate.plusDays(1);
+        BusinessDateHelper.runAt(chargeOffDate.format(BUSINESS_DATE), () -> loanHelper.chargeOffByLoanId(loanId.get(),
+                WorkingCapitalLoanDisbursementTestBuilder.buildChargeOffRequest(chargeOffDate, null)));
+
+        final LocalDate repaymentDate = chargeOffDate.plusDays(1);
+        final AtomicLong repaymentTxnId = new AtomicLong(0L);
+        BusinessDateHelper.runAt(repaymentDate.format(BUSINESS_DATE),
+                () -> repaymentTxnId.set(loanHelper.makeRepaymentByLoanId(loanId.get(), WorkingCapitalLoanDisbursementTestBuilder
+                        .buildRepaymentRequest(repaymentDate, BigDecimal.valueOf(1000), null, null, null, null))));
+
+        // Undo the repayment that was posted after charge-off: the recovery-income entries it booked must be
+        // reversed exactly like any other transaction's entries, not left dangling on the ledger.
+        final LocalDate undoDate = repaymentDate.plusDays(1);
+        BusinessDateHelper.runAt(undoDate.format(BUSINESS_DATE),
+                () -> loanHelper.undoTransactionByLoanId(loanId.get(), repaymentTxnId.get()));
+
+        // The loan is still charged off - only the repayment was undone, not the charge-off itself.
+        final GetWorkingCapitalLoansLoanIdResponse loanData = loanHelper.retrieveById(loanId.get());
+        assertEquals(Boolean.TRUE, loanData.getChargedOff());
+
+        final List<JournalEntryTransactionItem> entries = getJournalEntriesForWCTransaction(repaymentTxnId.get());
+        assertEquals(4, entries.size(), "Expected 4 journal entries (2 original + 2 reversal)");
+        // Originals: Dr Fund source 1000, Cr Income from recovery 1000. Reversal mirrors flip both sides.
+        assertJournalEntry(entries, "DEBIT", fundSourceAccount, 1000.0);
+        assertJournalEntry(entries, "CREDIT", incomeFromRecoveryAccount, 1000.0);
+        assertJournalEntry(entries, "CREDIT", fundSourceAccount, 1000.0);
+        assertJournalEntry(entries, "DEBIT", incomeFromRecoveryAccount, 1000.0);
+    }
+
+    @Test
+    public void testChargeAdjustmentAfterChargeOffPostsToChargeOffFeeIncome() {
+        final Long productId = createAccrualWithDeferredRevenueAmortizationProduct();
+        final LocalDate currentDate = LocalDate.now(ZoneId.systemDefault());
+        final AtomicLong loanId = new AtomicLong(0L);
+        final AtomicLong feeChargeId = new AtomicLong(0L);
+        final FeignWorkingCapitalLoanHelper feignLoanHelper = new FeignWorkingCapitalLoanHelper(
+                FineractFeignClientHelper.getFineractFeignClient());
+        BusinessDateHelper.runAt(currentDate.format(BUSINESS_DATE), () -> {
+            loanId.set(createApprovedAndDisbursedLoan(productId, BigDecimal.valueOf(5000), currentDate));
+
+            // The fee charge must be added before charge-off: new charges are rejected once the loan is charged off.
+            final Long chargeId = feignLoanHelper.createGlobalCharge(WorkingCapitalLoanRequestBuilders.specifiedDueDateCharge(false, 300));
+            feeChargeId.set(feignLoanHelper.addCharge(loanId.get(),
+                    WorkingCapitalLoanRequestBuilders.addCharge(chargeId, 300, currentDate.format(BUSINESS_DATE))));
+        });
+
+        final LocalDate chargeOffDate = currentDate.plusDays(1);
+        BusinessDateHelper.runAt(chargeOffDate.format(BUSINESS_DATE), () -> loanHelper.chargeOffByLoanId(loanId.get(),
+                WorkingCapitalLoanDisbursementTestBuilder.buildChargeOffRequest(chargeOffDate, null)));
+
+        // A charge adjustment on a charged-off loan still debits the fee's own income account, but the credit
+        // recognizes charge-off fee income instead of the (already written-off) fees receivable.
+        final LocalDate adjustmentDate = chargeOffDate.plusDays(1);
+        final AtomicLong adjustmentTxnId = new AtomicLong(0L);
+        BusinessDateHelper.runAt(adjustmentDate.format(BUSINESS_DATE), () -> adjustmentTxnId.set(feignLoanHelper.adjustCharge(loanId.get(),
+                feeChargeId.get(), WorkingCapitalLoanRequestBuilders.chargeAdjustment(BigDecimal.valueOf(100)))));
+
+        final List<JournalEntryTransactionItem> entries = getJournalEntriesForWCTransaction(adjustmentTxnId.get());
+        assertEquals(2, entries.size(), "Expected 2 journal entries (1 debit + 1 credit)");
+        assertJournalEntry(entries, "DEBIT", incomeFromFeeAccount, 100.0);
+        assertJournalEntry(entries, "CREDIT", incomeFromChargeOffFeesAccount, 100.0);
+    }
+
+    @Test
     public void testAddChargeAfterChargeOffIsRejected() {
         final Long productId = createAccrualWithDeferredRevenueAmortizationProduct();
         final LocalDate currentDate = LocalDate.now(ZoneId.systemDefault());
