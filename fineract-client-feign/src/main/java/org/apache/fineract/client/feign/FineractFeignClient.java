@@ -32,8 +32,6 @@ import org.apache.fineract.client.feign.services.BusinessDateManagementApi;
 import org.apache.fineract.client.feign.services.BusinessStepConfigurationApi;
 import org.apache.fineract.client.feign.services.CacheApi;
 import org.apache.fineract.client.feign.services.CalendarApi;
-import org.apache.fineract.client.feign.services.CashierJournalsApi;
-import org.apache.fineract.client.feign.services.CashiersApi;
 import org.apache.fineract.client.feign.services.CentersApi;
 import org.apache.fineract.client.feign.services.ChargesApi;
 import org.apache.fineract.client.feign.services.ClientApi;
@@ -269,14 +267,6 @@ public final class FineractFeignClient {
 
     public CalendarApi calendar() {
         return create(CalendarApi.class);
-    }
-
-    public CashierJournalsApi cashierJournals() {
-        return create(CashierJournalsApi.class);
-    }
-
-    public CashiersApi cashiers() {
-        return create(CashiersApi.class);
     }
 
     public CentersApi centers() {
