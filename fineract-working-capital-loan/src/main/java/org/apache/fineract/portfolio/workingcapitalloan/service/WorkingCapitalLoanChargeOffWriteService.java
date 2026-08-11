@@ -26,7 +26,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
  * <p>
  * Charge-off is a pure accounting tag: it marks the account as charged-off and records a non-monetary charge-off
  * transaction, but it does not affect the portfolio (balance, schedule) and the loan stays {@code ACTIVE}. The tag is
- * only removed by an explicit undo (used when the charge-off was applied in error).
+ * removed by an explicit undo (used when the charge-off was applied in error) or by auto-lift during reprocess when
+ * nothing remains outstanding at the charge-off point.
  */
 public interface WorkingCapitalLoanChargeOffWriteService {
 

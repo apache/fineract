@@ -677,3 +677,1381 @@ Feature: Working Capital Charge-Off Accounting Entries
     Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "10 January 2026" which has the following Journal entries:
       | Type | Account code | Account name | Debit | Credit |
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC23: backdated repayment before charge-off keeps regular JE and restates charge-off
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Backdated repayment before charge-off ---
+    And Customer makes repayment on "10 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 6000.0            | 6000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC24: backdated full repayment before charge-off reverses charge-off and lifts flag
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Backdated full repayment before charge-off ---
+    And Customer makes repayment on "10 January 2026" with 9000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 9000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 9000.0 |
+    And Working Capital Loan Transactions tab has a reversed "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | false      |
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  Scenario: Verify Working Capital charge-off accounting - UC25: undo repayment before charge-off restates charge-off up
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Repayment before charge-off ---
+    And Customer makes repayment on "05 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | false      |
+    And Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 6000.0            | 6000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Undo repayment that sits before charge-off ---
+    When Customer undo "1"th "Repayment" transaction made on "05 January 2026" on Working Capital loan
+    Then Working Capital Loan Transactions tab has a reversed "REPAYMENT" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 3000.0 |
+      | ASSET     | 112601       | Loans Receivable          | 3000.0 |        |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | true     |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 6000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 6000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC26: same-day repayment after charge-off posts to recoveries
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+# --- Same-day repayment after charge-off ---
+    And Customer makes repayment on "15 January 2026" with 500.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 500.0 |        |
+      | INCOME    | 744008       | Recoveries                |       | 500.0  |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Repayment    | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC27: undo earlier repayment after charge-off leaves charge-off amount unchanged
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "16 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "16 January 2026" with 1000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "16 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 1000.0 |        |
+      | INCOME    | 744008       | Recoveries                |        | 1000.0 |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 16 January 2026 | Repayment    | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "20 January 2026" with 500.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "20 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 500.0 |        |
+      | INCOME    | 744008       | Recoveries                |       | 500.0  |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 16 January 2026 | Repayment    | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 20 January 2026 | Repayment    | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+# --- Undo earlier post-charge-off repayment; charge-off stays in prefix ---
+    When Customer undo "1"th "Repayment" transaction made on "16 January 2026" on Working Capital loan
+    Then Working Capital Loan Transactions tab has a reversed "REPAYMENT" transaction with date "16 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 1000.0 |        |
+      | INCOME    | 744008       | Recoveries                |        | 1000.0 |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+      | INCOME    | 744008       | Recoveries                | 1000.0 |        |
+    And Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "20 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 500.0 |        |
+      | INCOME    | 744008       | Recoveries                |       | 500.0  |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 16 January 2026 | Repayment    | 1000.0            | 1000.0           | 0.0               | 0.0                   | true     |
+      | 20 January 2026 | Repayment    | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC28: backdated repayment before charge-off restates charge-off and keeps later recovery JE
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "20 January 2026" with 500.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "20 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 500.0 |        |
+      | INCOME    | 744008       | Recoveries                |       | 500.0  |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 20 January 2026 | Repayment    | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+# --- Backdated repayment before charge-off; later repayment stays after charge-off ---
+    And Customer makes repayment on "10 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "20 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 500.0 |        |
+      | INCOME    | 744008       | Recoveries                |       | 500.0  |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 6000.0            | 6000.0           | 0.0               | 0.0                   | false    |
+      | 20 January 2026 | Repayment    | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC29: backdated repayment before charge-off with fee restates charge-off fee portion
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "due-date"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "05 January 2026" due date and 50.0 transaction amount
+    And Admin sets the business date to "06 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name            | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt    | 9000.0 |        |
+      | INCOME  | 404008       | Fee Charge Off          | 50.0   |        |
+      | ASSET   | 112601       | Loans Receivable        |        | 9000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable |        | 50.0   |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Accrual      | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9050.0            | 9000.0           | 50.0              | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Backdated repayment covers the fee before charge-off ---
+    And Customer makes repayment on "10 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 50.0  |        |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 50.0   |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name            | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt    | 9000.0 |        |
+      | INCOME  | 404008       | Fee Charge Off          | 50.0   |        |
+      | ASSET   | 112601       | Loans Receivable        |        | 9000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable |        | 50.0   |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt    |        | 9000.0 |
+      | INCOME  | 404008       | Fee Charge Off          |        | 50.0   |
+      | ASSET   | 112601       | Loans Receivable        | 9000.0 |        |
+      | ASSET   | 112603       | Interest/Fee Receivable | 50.0   |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt    | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable        |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Accrual      | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC30: backdated goodwill credit before charge-off keeps regular JE and restates charge-off
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Backdated goodwill credit before charge-off ---
+    And Customer makes "GOODWILL_CREDIT" transaction on "10 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "GOODWILL_CREDIT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name             | Debit  | Credit |
+      | EXPENSE | 744003       | Goodwill Expense Account | 3000.0 |        |
+      | ASSET   | 112601       | Loans Receivable         |        | 3000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Goodwill Credit | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off      | 6000.0            | 6000.0           | 0.0               | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC31: backdated payout refund before charge-off keeps regular JE and restates charge-off
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Backdated payout refund before charge-off ---
+    And Customer makes "PAYOUT_REFUND" transaction on "10 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "PAYOUT_REFUND" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type          | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement  | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Payout Refund | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off    | 6000.0            | 6000.0           | 0.0               | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC32: backdated full repayment before charge-off restates later recovery to overpayment
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "20 January 2026" with 1000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "20 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 1000.0 |        |
+      | INCOME    | 744008       | Recoveries                |        | 1000.0 |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 20 January 2026 | Repayment    | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+# --- Backdated full repayment lifts charge-off; later repayment becomes overpayment ---
+    And Customer makes repayment on "10 January 2026" with 9000.0 transaction amount on Working Capital loan
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | false      |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+      | 20 January 2026 | Repayment    | 1000.0            | 0.0              | 0.0               | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 9000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 9000.0 |
+    And Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "20 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 1000.0 |        |
+      | INCOME    | 744008       | Recoveries                |        | 1000.0 |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 1000.0 |
+      | INCOME    | 744008       | Recoveries                | 1000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account | 1000.0 |        |
+      | LIABILITY | 245000       | Other Credit Liability    |        | 1000.0 |
+    And Working Capital Loan Transactions tab has a reversed "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+    Then Working Capital loan status will be "OVERPAID"
+    And Customer makes credit balance refund on "20 January 2026" with 1000.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  Scenario: Verify Working Capital charge-off accounting - UC33: undo backdated repayment before charge-off restates charge-off back up
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Backdated repayment before charge-off ---
+    And Customer makes repayment on "10 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 6000.0            | 6000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+# --- Undo that backdated repayment ---
+    When Customer undo "1"th "Repayment" transaction made on "10 January 2026" on Working Capital loan
+    Then Working Capital Loan Transactions tab has a reversed "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 3000.0 |
+      | ASSET     | 112601       | Loans Receivable          | 3000.0 |        |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | true     |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 6000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 6000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC34: two successive backdated repayments before charge-off restate charge-off twice
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- First backdated repayment ---
+    And Customer makes repayment on "10 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 6000.0            | 6000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+# --- Second backdated repayment ---
+    And Customer makes repayment on "12 January 2026" with 2000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "12 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 2000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 2000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 12 January 2026 | Repayment    | 2000.0            | 2000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 4000.0            | 4000.0           | 0.0               | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 6000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 6000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 4000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 4000.0 |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC35: backdated repayment before charge-off restates later full recovery into recovery plus overpayment
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "20 January 2026" with 9000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "20 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 9000.0 |        |
+      | INCOME    | 744008       | Recoveries                |        | 9000.0 |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 20 January 2026 | Repayment    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+# --- Backdated repayment before charge-off changes later allocation ---
+    And Customer makes repayment on "10 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 6000.0            | 6000.0           | 0.0               | 0.0                   | false    |
+      | 20 January 2026 | Repayment    | 9000.0            | 6000.0           | 0.0               | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "20 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 9000.0 |        |
+      | INCOME    | 744008       | Recoveries                |        | 9000.0 |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 9000.0 |
+      | INCOME    | 744008       | Recoveries                | 9000.0 |        |
+      | LIABILITY | 145023       | Suspense/Clearing account | 9000.0 |        |
+      | INCOME    | 744008       | Recoveries                |        | 6000.0 |
+      | LIABILITY | 245000       | Other Credit Liability    |        | 3000.0 |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Working Capital loan status will be "OVERPAID"
+    And Customer makes credit balance refund on "20 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  Scenario: Verify Working Capital charge-off accounting - UC36: backdated overpayment before charge-off reverses charge-off and books overpayment on the backdated repayment
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Backdated overpayment before charge-off ---
+    And Customer makes repayment on "10 January 2026" with 10000.0 transaction amount on Working Capital loan
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | false      |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 10000.0           | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+    And Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit   | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 10000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |         | 9000.0 |
+      | LIABILITY | 245000       | Other Credit Liability    |         | 1000.0 |
+    And Working Capital Loan Transactions tab has a reversed "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+    Then Working Capital loan status will be "OVERPAID"
+    And Customer makes credit balance refund on "20 January 2026" with 1000.0 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  Scenario: Verify Working Capital charge-off accounting - UC37: backdated repayment before fraud charge-off restates fraud expense
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+# --- Fraud flag ---
+    When Admin sets the fraud flag of the Working Capital loan to true
+    And Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name               | Debit  | Credit |
+      | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable           |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Backdated repayment before charge-off ---
+    And Customer makes repayment on "10 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name               | Debit  | Credit |
+      | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable           |        | 9000.0 |
+      | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable           | 9000.0 |        |
+      | EXPENSE | 744037       | Credit Loss/Bad Debt-Fraud | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable           |        | 6000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 6000.0            | 6000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC38: undo charge-off is still allowed after a backdated repayment before charge-off
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Backdated repayment is earlier by date, so charge-off remains the last user transaction ---
+    And Customer makes repayment on "10 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 6000.0            | 6000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    When Admin undoes the charge-off on the Working Capital loan
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | false      |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 6000.0            | 6000.0           | 0.0               | 0.0                   | true     |
+    And Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan Transactions tab has a reversed "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 9000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 9000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 6000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 6000.0 |        |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC39: undo goodwill credit before charge-off restates charge-off up
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Goodwill credit before charge-off ---
+    And Customer makes "GOODWILL_CREDIT" transaction on "05 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "GOODWILL_CREDIT" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name             | Debit  | Credit |
+      | EXPENSE | 744003       | Goodwill Expense Account | 3000.0 |        |
+      | ASSET   | 112601       | Loans Receivable         |        | 3000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Goodwill Credit | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | false      |
+    And Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "GOODWILL_CREDIT" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name             | Debit  | Credit |
+      | EXPENSE | 744003       | Goodwill Expense Account | 3000.0 |        |
+      | ASSET   | 112601       | Loans Receivable         |        | 3000.0 |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Goodwill Credit | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off      | 6000.0            | 6000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Undo goodwill credit that sits before charge-off ---
+    When Customer undo "1"th "GOODWILL_CREDIT" transaction made on "05 January 2026" on Working Capital loan
+    Then Working Capital Loan Transactions tab has a reversed "GOODWILL_CREDIT" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name             | Debit  | Credit |
+      | EXPENSE | 744003       | Goodwill Expense Account | 3000.0 |        |
+      | ASSET   | 112601       | Loans Receivable         |        | 3000.0 |
+      | EXPENSE | 744003       | Goodwill Expense Account |        | 3000.0 |
+      | ASSET   | 112601       | Loans Receivable         | 3000.0 |        |
+    And Working Capital Loan has transactions:
+      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Goodwill Credit | 3000.0            | 3000.0           | 0.0               | 0.0                   | true     |
+      | 15 January 2026 | Charge-off      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 6000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 6000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC40: undo payout refund before charge-off restates charge-off up
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Payout refund before charge-off ---
+    And Customer makes "PAYOUT_REFUND" transaction on "05 January 2026" with 3000.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "PAYOUT_REFUND" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type          | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement  | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Payout Refund | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | false      |
+    And Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "PAYOUT_REFUND" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+    And Working Capital Loan has transactions:
+      | transactionDate | type          | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement  | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Payout Refund | 3000.0            | 3000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off    | 6000.0            | 6000.0           | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Undo payout refund that sits before charge-off ---
+    When Customer undo "1"th "PAYOUT_REFUND" transaction made on "05 January 2026" on Working Capital loan
+    Then Working Capital Loan Transactions tab has a reversed "PAYOUT_REFUND" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 3000.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 3000.0 |
+      | LIABILITY | 145023       | Suspense/Clearing account |        | 3000.0 |
+      | ASSET     | 112601       | Loans Receivable          | 3000.0 |        |
+    And Working Capital Loan has transactions:
+      | transactionDate | type          | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement  | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Payout Refund | 3000.0            | 3000.0           | 0.0               | 0.0                   | true     |
+      | 15 January 2026 | Charge-off    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name         | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 6000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 6000.0 |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt |        | 6000.0 |
+      | ASSET   | 112601       | Loans Receivable     | 6000.0 |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt | 9000.0 |        |
+      | ASSET   | 112601       | Loans Receivable     |        | 9000.0 |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC41: backdated repayment before charge-off covers penalty only and leaves fee on charge-off
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "due-date"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "05 January 2026" due date and 50.0 transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "05 January 2026" due date and 30.0 transaction amount
+    And Admin sets the business date to "06 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name            | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt    | 9000.0 |        |
+      | INCOME  | 404008       | Fee Charge Off          | 50.0   |        |
+      | INCOME  | 404008       | Fee Charge Off          | 30.0   |        |
+      | ASSET   | 112601       | Loans Receivable        |        | 9000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable |        | 50.0   |
+      | ASSET   | 112603       | Interest/Fee Receivable |        | 30.0   |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Accrual      | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+      | 05 January 2026 | Accrual      | 30.0              | 0.0              | 0.0               | 30.0                  | false    |
+      | 15 January 2026 | Charge-off   | 9080.0            | 9000.0           | 50.0              | 30.0                  | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Backdated repayment covers penalty first ---
+    And Customer makes repayment on "10 January 2026" with 30.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 30.0  |        |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 30.0   |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name            | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt    | 9000.0 |        |
+      | INCOME  | 404008       | Fee Charge Off          | 50.0   |        |
+      | INCOME  | 404008       | Fee Charge Off          | 30.0   |        |
+      | ASSET   | 112601       | Loans Receivable        |        | 9000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable |        | 50.0   |
+      | ASSET   | 112603       | Interest/Fee Receivable |        | 30.0   |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt    |        | 9000.0 |
+      | INCOME  | 404008       | Fee Charge Off          |        | 50.0   |
+      | INCOME  | 404008       | Fee Charge Off          |        | 30.0   |
+      | ASSET   | 112601       | Loans Receivable        | 9000.0 |        |
+      | ASSET   | 112603       | Interest/Fee Receivable | 50.0   |        |
+      | ASSET   | 112603       | Interest/Fee Receivable | 30.0   |        |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt    | 9000.0 |        |
+      | INCOME  | 404008       | Fee Charge Off          | 50.0   |        |
+      | ASSET   | 112601       | Loans Receivable        |        | 9000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable |        | 50.0   |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Accrual      | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+      | 05 January 2026 | Accrual      | 30.0              | 0.0              | 0.0               | 30.0                  | false    |
+      | 10 January 2026 | Repayment    | 30.0              | 0.0              | 0.0               | 30.0                  | false    |
+      | 15 January 2026 | Charge-off   | 9050.0            | 9000.0           | 50.0              | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC42: fee charge adjustment before charge-off keeps receivable JE and after charge-off posts to charge-off income
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "due-date"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "05 January 2026" due date and 100.0 transaction amount
+    And Admin sets the business date to "06 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin sets the business date to "08 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge adjustment before charge-off ---
+    And Admin makes a charge adjustment for the last added fee charge with 50.0 amount on working capital loan
+    Then Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "08 January 2026" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | INCOME | 404007       | Fee Income              | 50.0  |        |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 50.0   |
+    And Working Capital Loan has transactions:
+      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Accrual           | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+      | 08 January 2026 | Charge Adjustment | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | false      |
+    And Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "08 January 2026" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | INCOME | 404007       | Fee Income              | 50.0  |        |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 50.0   |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name            | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt    | 9000.0 |        |
+      | INCOME  | 404008       | Fee Charge Off          | 50.0   |        |
+      | ASSET   | 112601       | Loans Receivable        |        | 9000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable |        | 50.0   |
+    And Working Capital Loan has transactions:
+      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Accrual           | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+      | 08 January 2026 | Charge Adjustment | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+      | 15 January 2026 | Charge-off        | 9050.0            | 9000.0           | 50.0              | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge adjustment after charge-off ---
+    And Admin makes a charge adjustment for the last added fee charge with 50.0 amount on working capital loan
+    Then Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "20 January 2026" which has the following Journal entries:
+      | Type   | Account code | Account name   | Debit | Credit |
+      | INCOME | 404007       | Fee Income     | 50.0  |        |
+      | INCOME | 404008       | Fee Charge Off |       | 50.0   |
+    And Working Capital Loan has transactions:
+      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Accrual           | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+      | 08 January 2026 | Charge Adjustment | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+      | 15 January 2026 | Charge-off        | 9050.0            | 9000.0           | 50.0              | 0.0                   | false    |
+      | 20 January 2026 | Charge Adjustment | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC43: penalty charge adjustment before charge-off keeps receivable JE and after charge-off posts to charge-off income
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "due-date"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "05 January 2026" due date and 100.0 transaction amount
+    And Admin sets the business date to "06 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin sets the business date to "08 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge adjustment before charge-off ---
+    And Admin makes a charge adjustment for the last added penalty charge with 50.0 amount on working capital loan
+    Then Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "08 January 2026" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | INCOME | 404007       | Fee Income              | 50.0  |        |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 50.0   |
+    And Working Capital Loan has transactions:
+      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Accrual           | 100.0             | 0.0              | 0.0               | 100.0                 | false    |
+      | 08 January 2026 | Charge Adjustment | 50.0              | 0.0              | 0.0               | 50.0                  | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | false      |
+    And Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "08 January 2026" which has the following Journal entries:
+      | Type   | Account code | Account name            | Debit | Credit |
+      | INCOME | 404007       | Fee Income              | 50.0  |        |
+      | ASSET  | 112603       | Interest/Fee Receivable |       | 50.0   |
+    And Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name            | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt    | 9000.0 |        |
+      | INCOME  | 404008       | Fee Charge Off          | 50.0   |        |
+      | ASSET   | 112601       | Loans Receivable        |        | 9000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable |        | 50.0   |
+    And Working Capital Loan has transactions:
+      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Accrual           | 100.0             | 0.0              | 0.0               | 100.0                 | false    |
+      | 08 January 2026 | Charge Adjustment | 50.0              | 0.0              | 0.0               | 50.0                  | false    |
+      | 15 January 2026 | Charge-off        | 9050.0            | 9000.0           | 0.0               | 50.0                  | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge adjustment after charge-off ---
+    And Admin makes a charge adjustment for the last added penalty charge with 50.0 amount on working capital loan
+    Then Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "20 January 2026" which has the following Journal entries:
+      | Type   | Account code | Account name   | Debit | Credit |
+      | INCOME | 404007       | Fee Income     | 50.0  |        |
+      | INCOME | 404008       | Fee Charge Off |       | 50.0   |
+    And Working Capital Loan has transactions:
+      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Accrual           | 100.0             | 0.0              | 0.0               | 100.0                 | false    |
+      | 08 January 2026 | Charge Adjustment | 50.0              | 0.0              | 0.0               | 50.0                  | false    |
+      | 15 January 2026 | Charge-off        | 9050.0            | 9000.0           | 0.0               | 50.0                  | false    |
+      | 20 January 2026 | Charge Adjustment | 50.0              | 0.0              | 0.0               | 50.0                  | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify Working Capital charge-off accounting - UC44: backdated repayment before charge-off lifts flag and restates post-charge-off fee charge adjustment to regular JE
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "due-date"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "05 January 2026" due date and 50.0 transaction amount
+    And Admin sets the business date to "06 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "15 January 2026"
+    Then Working Capital Loan Transactions tab has a "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name            | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt    | 9000.0 |        |
+      | INCOME  | 404008       | Fee Charge Off          | 50.0   |        |
+      | ASSET   | 112601       | Loans Receivable        |        | 9000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable |        | 50.0   |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Accrual      | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 9050.0            | 9000.0           | 50.0              | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+    And Admin sets the business date to "20 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Charge adjustment after charge-off ---
+    And Admin makes a charge adjustment for the last added fee charge with 50.0 amount on working capital loan
+    Then Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "20 January 2026" which has the following Journal entries:
+      | Type   | Account code | Account name   | Debit | Credit |
+      | INCOME | 404007       | Fee Income     | 50.0  |        |
+      | INCOME | 404008       | Fee Charge Off |       | 50.0   |
+    And Working Capital Loan has transactions:
+      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Accrual           | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+      | 15 January 2026 | Charge-off        | 9050.0            | 9000.0           | 50.0              | 0.0                   | false    |
+      | 20 January 2026 | Charge Adjustment | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | true       |
+# --- Backdated repayment before charge-off lifts charge-off ---
+    And Customer makes repayment on "10 January 2026" with 9050.0 transaction amount on Working Capital loan
+    Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 145023       | Suspense/Clearing account | 9050.0 |        |
+      | ASSET     | 112601       | Loans Receivable          |        | 9000.0 |
+      | ASSET     | 112603       | Interest/Fee Receivable   |        | 50.0   |
+    And Working Capital Loan Transactions tab has a reversed "CHARGE_OFF" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name            | Debit  | Credit |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt    | 9000.0 |        |
+      | INCOME  | 404008       | Fee Charge Off          | 50.0   |        |
+      | ASSET   | 112601       | Loans Receivable        |        | 9000.0 |
+      | ASSET   | 112603       | Interest/Fee Receivable |        | 50.0   |
+      | EXPENSE | 744007       | Credit Loss/Bad Debt    |        | 9000.0 |
+      | INCOME  | 404008       | Fee Charge Off          |        | 50.0   |
+      | ASSET   | 112601       | Loans Receivable        | 9000.0 |        |
+      | ASSET   | 112603       | Interest/Fee Receivable | 50.0   |        |
+    And Working Capital Loan Transactions tab has a "CHARGE_ADJUSTMENT" transaction with date "20 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name            | Debit | Credit |
+      | INCOME    | 404007       | Fee Income              | 50.0  |        |
+      | INCOME    | 404008       | Fee Charge Off          |       | 50.0   |
+      | INCOME    | 404007       | Fee Income              |       | 50.0   |
+      | INCOME    | 404008       | Fee Charge Off          | 50.0  |        |
+      | INCOME    | 404007       | Fee Income              | 50.0  |        |
+      | LIABILITY | 245000       | Other Credit Liability  |       | 50.0   |
+    And Working Capital Loan has transactions:
+      | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Accrual           | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+      | 10 January 2026 | Repayment         | 9050.0            | 9000.0           | 50.0              | 0.0                   | false    |
+      | 15 January 2026 | Charge-off        | 9050.0            | 9000.0           | 50.0              | 0.0                   | true     |
+      | 20 January 2026 | Charge Adjustment | 50.0              | 0.0              | 0.0               | 0.0                   | false    |
+    Then Working capital loan account has the correct data:
+      | chargedOff |
+      | false      |
+    Then Working Capital loan status will be "OVERPAID"
