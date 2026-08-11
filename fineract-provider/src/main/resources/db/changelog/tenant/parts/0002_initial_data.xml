@@ -8599,6 +8599,30 @@
             <column name="can_maker_checker" valueBoolean="false"/>
         </insert>
         <insert tableName="m_permission">
+            <column name="id" valueNumeric="900"/>
+            <column name="grouping" value="LOAN_PROVISIONING"/>
+            <column name="code" value="APPROVE_PROVISIONENTRIES"/>
+            <column name="entity_name" value="PROVISIONINGENTRIES"/>
+            <column name="action_name" value="APPROVE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="id" valueNumeric="901"/>
+            <column name="grouping" value="LOAN_PROVISIONING"/>
+            <column name="code" value="REJECT_PROVISIONENTRIES"/>
+            <column name="entity_name" value="PROVISIONINGENTRIES"/>
+            <column name="action_name" value="REJECT"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="id" valueNumeric="902"/>
+            <column name="grouping" value="LOAN_PROVISIONING"/>
+            <column name="code" value="UNDOAPPROVAL_PROVISIONENTRIES"/>
+            <column name="entity_name" value="PROVISIONINGENTRIES"/>
+            <column name="action_name" value="UNDOAPPROVAL"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
             <column name="id" valueNumeric="691"/>
             <column name="grouping" value="portfolio"/>
             <column name="code" value="READ_FLOATINGRATE"/>

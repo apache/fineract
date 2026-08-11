@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+    <changeSet id="1" author="fineract">
+        <addColumn tableName="m_provisioning_history">
+            <column name="status_enum" type="SMALLINT" defaultValueNumeric="100">
+                <constraints nullable="false"/>
+            </column>
+            <column name="approved_on_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="approvedby_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="rejected_on_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="rejectedby_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="approvedby_id" baseTableName="m_provisioning_history"
+                                 constraintName="FK_m_provisioning_history_approvedby_id" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="m_appuser" validate="true"/>
+        <addForeignKeyConstraint baseColumnNames="rejectedby_id" baseTableName="m_provisioning_history"
+                                 constraintName="FK_m_provisioning_history_rejectedby_id" deferrable="false"
+                                 initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="id" referencedTableName="m_appuser" validate="true"/>
+    </changeSet>
+    <changeSet id="2" author="fineract">
+        <!--
+            Existing provisioning entries were created without a review step, and their journal-entry state
+            (journal_entry_created) already reflects a completed lifecycle. Backfill them as APPROVED (200) rather
+            than the new default DRAFT (100), so pre-existing entries are not retroactively blocked from having
+            journal entries created or from being treated as awaiting review.
+        -->
+        <update tableName="m_provisioning_history">
+            <column name="status_enum" valueNumeric="200"/>
+        </update>
+    </changeSet>
+</databaseChangeLog>

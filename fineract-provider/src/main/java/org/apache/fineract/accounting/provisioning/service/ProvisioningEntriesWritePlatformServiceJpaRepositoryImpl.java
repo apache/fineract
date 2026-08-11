@@ -87,6 +87,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     public CommandProcessingResult createProvisioningJournalEntries(Long provisioningEntryId, JsonCommand command) {
         ProvisioningEntry requestedEntry = this.provisioningEntryRepository.findById(provisioningEntryId)
                 .orElseThrow(() -> new ProvisioningEntryNotfoundException(provisioningEntryId));
+        requestedEntry.validateCanCreateJournalEntries();
 
         ProvisioningEntryData exisProvisioningEntryData = this.provisioningEntriesReadPlatformService
                 .retrieveExistingProvisioningIdDateWithJournals();
@@ -166,6 +167,12 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
         Collection<LoanProductProvisioningEntry> entries = generateLoanProvisioningEntry(requestedEntry, date);
         requestedEntry.setProvisioningEntries(entries);
         if (addJournalEntries) {
+            // A freshly created entry is always DRAFT (see below), so this will always fail - which is
+            // intentional: immediate posting at creation time is exactly the gap this feature closes. Routing
+            // through the same guard used by the standalone journal-creation action (rather than silently
+            // ignoring the caller's request) keeps both entry points consistent and gives a clear error instead
+            // of a confusing silent no-op.
+            requestedEntry.validateCanCreateJournalEntries();
             ProvisioningEntryData existingProvisioningEntryData = this.provisioningEntriesReadPlatformService
                     .retrieveExistingProvisioningIdDateWithJournals();
             revertAndAddJournalEntries(existingProvisioningEntryData, requestedEntry);
@@ -179,6 +186,7 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
     public CommandProcessingResult reCreateProvisioningEntries(Long provisioningEntryId, JsonCommand command) {
         ProvisioningEntry requestedEntry = this.provisioningEntryRepository.findById(provisioningEntryId)
                 .orElseThrow(() -> new ProvisioningEntryNotfoundException(provisioningEntryId));
+        requestedEntry.validateCanBeRegenerated();
         requestedEntry.getLoanProductProvisioningEntries().clear();
         this.provisioningEntryRepository.saveAndFlush(requestedEntry);
         Collection<LoanProductProvisioningEntry> entries = generateLoanProvisioningEntry(requestedEntry, requestedEntry.getCreatedDate());
@@ -247,5 +255,52 @@ public class ProvisioningEntriesWritePlatformServiceJpaRepositoryImpl implements
             }
         }
         return provisioningEntries.values();
+    }
+
+    @Override
+    public CommandProcessingResult approveProvisioningEntry(Long provisioningEntryId, JsonCommand command) {
+        ProvisioningEntry requestedEntry = this.provisioningEntryRepository.findById(provisioningEntryId)
+                .orElseThrow(() -> new ProvisioningEntryNotfoundException(provisioningEntryId));
+        final AppUser currentUser = this.platformSecurityContext.authenticatedUser();
+        // Like the pre-existing recreateprovisioningentry/createjournalentry commands, this command accepts an
+        // empty request body - command.parsedJson() is then null, and localDateValueOfParameterNamed() does not
+        // tolerate that, so check hasParameter() first and fall back to the current business date.
+        final LocalDate approvedOnDate = command.hasParameter("approvedOnDate") ? command.localDateValueOfParameterNamed("approvedOnDate")
+                : DateUtils.getBusinessLocalDate();
+        requestedEntry.approve(currentUser, approvedOnDate);
+        this.provisioningEntryRepository.saveAndFlush(requestedEntry);
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(requestedEntry.getId()) //
+                .build();
+    }
+
+    @Override
+    public CommandProcessingResult rejectProvisioningEntry(Long provisioningEntryId, JsonCommand command) {
+        ProvisioningEntry requestedEntry = this.provisioningEntryRepository.findById(provisioningEntryId)
+                .orElseThrow(() -> new ProvisioningEntryNotfoundException(provisioningEntryId));
+        final AppUser currentUser = this.platformSecurityContext.authenticatedUser();
+        // See the note in approveProvisioningEntry above - empty request bodies are an existing convention for
+        // provisioning-entry commands, so this must not depend on a non-empty JSON body being present.
+        final LocalDate rejectedOnDate = command.hasParameter("rejectedOnDate") ? command.localDateValueOfParameterNamed("rejectedOnDate")
+                : DateUtils.getBusinessLocalDate();
+        requestedEntry.reject(currentUser, rejectedOnDate);
+        this.provisioningEntryRepository.saveAndFlush(requestedEntry);
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(requestedEntry.getId()) //
+                .build();
+    }
+
+    @Override
+    public CommandProcessingResult undoProvisioningEntryApproval(Long provisioningEntryId, JsonCommand command) {
+        ProvisioningEntry requestedEntry = this.provisioningEntryRepository.findById(provisioningEntryId)
+                .orElseThrow(() -> new ProvisioningEntryNotfoundException(provisioningEntryId));
+        requestedEntry.undoApproval();
+        this.provisioningEntryRepository.saveAndFlush(requestedEntry);
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(requestedEntry.getId()) //
+                .build();
     }
 }

@@ -34,5 +34,8 @@ public interface ProvisioningEntriesApiConstants {
 
     String CREATE_JOURNAL_ENTRY = "createjournalentry";
     String RECREATE_PROVISION_IN_ENTRY = "recreateprovisioningentry";
+    String APPROVE_PROVISIONING_ENTRY = "approveprovisioningentry";
+    String REJECT_PROVISIONING_ENTRY = "rejectprovisioningentry";
+    String UNDO_APPROVAL_PROVISIONING_ENTRY = "undoapprovalprovisioningentry";
 
 }

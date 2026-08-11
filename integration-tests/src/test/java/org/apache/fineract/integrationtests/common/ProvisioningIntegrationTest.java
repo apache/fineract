@@ -145,6 +145,7 @@ public class ProvisioningIntegrationTest {
         Assertions.assertNotNull(provisioningEntryId);
 
         transactionHelper.updateProvisioningEntry("recreateprovisioningentry", provisioningEntryId, "");
+        transactionHelper.updateProvisioningEntry("approveprovisioningentry", provisioningEntryId, "");
         transactionHelper.updateProvisioningEntry("createjournalentry", provisioningEntryId, "");
         Map entry = transactionHelper.retrieveProvisioningEntry(provisioningEntryId);
         Assertions.assertTrue((Boolean) entry.get("journalEntry"));
