@@ -105,9 +105,6 @@ import org.apache.fineract.client.feign.services.LoansPointInTimeApi;
 import org.apache.fineract.client.feign.services.MakerCheckerOr4EyeFunctionalityApi;
 import org.apache.fineract.client.feign.services.MappingFinancialActivitiesToAccountsApi;
 import org.apache.fineract.client.feign.services.MeetingsApi;
-import org.apache.fineract.client.feign.services.MixMappingApi;
-import org.apache.fineract.client.feign.services.MixReportApi;
-import org.apache.fineract.client.feign.services.MixTaxonomyApi;
 import org.apache.fineract.client.feign.services.NotesApi;
 import org.apache.fineract.client.feign.services.NotificationApi;
 import org.apache.fineract.client.feign.services.OfficesApi;
@@ -560,18 +557,6 @@ public final class FineractFeignClient {
 
     public MeetingsApi meetings() {
         return create(MeetingsApi.class);
-    }
-
-    public MixMappingApi mixMapping() {
-        return create(MixMappingApi.class);
-    }
-
-    public MixReportApi mixReport() {
-        return create(MixReportApi.class);
-    }
-
-    public MixTaxonomyApi mixTaxonomy() {
-        return create(MixTaxonomyApi.class);
     }
 
     public NotesApi notes() {

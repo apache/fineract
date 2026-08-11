@@ -29,8 +29,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 @Profile("!liquibase-only")
 @Configuration
 @EnableJdbcRepositories(basePackages = { "org.apache.fineract.command.jdbc.store.domain",
-        "org.apache.fineract.infrastructure.documentmanagement.domain",
-        "org.apache.fineract.mix.domain" }, jdbcOperationsRef = "namedParameterJdbcTemplate", transactionManagerRef = "jdbcTransactionManager")
+        "org.apache.fineract.infrastructure.documentmanagement.domain" }, jdbcOperationsRef = "namedParameterJdbcTemplate", transactionManagerRef = "jdbcTransactionManager")
 public class JdbcConfig {
 
     @Bean

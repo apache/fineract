@@ -61,8 +61,7 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 @EnableJpaRepositories(basePackages = { "org.apache.fineract.**.domain",
         "org.apache.fineract.**.repository" }, excludeFilters = @ComponentScan.Filter(type = FilterType.REGEX, pattern = {
                 "org\\.apache\\.fineract\\.command\\.jdbc\\.store\\.domain\\..*",
-                "org\\.apache\\.fineract\\.infrastructure\\.documentmanagement\\.domain\\..*Repository",
-                "org\\.apache\\.fineract\\.mix\\.domain\\..*Repository" }))
+                "org\\.apache\\.fineract\\.infrastructure\\.documentmanagement\\.domain\\..*Repository" }))
 @EnableConfigurationProperties(JpaProperties.class)
 @Import(JpaAuditingHandlerRegistrar.class)
 public class JPAConfig extends JpaBaseConfiguration {

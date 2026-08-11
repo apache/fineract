@@ -261,6 +261,7 @@
     <include file="parts/0240_add_retained_earning_global_configuration.xml" relativeToChangelogFile="true"/>
     <include file="parts/0242_fix_group_summary_report_parameters.xml" relativeToChangelogFile="true"/>
     <include file="parts/0242_update_m_tellers_unique_key.xml" relativeToChangelogFile="true" />
+    <include file="parts/0243_remove_mix_module.xml" relativeToChangelogFile="true" />
     <include file="parts/0243_add_client_lifecycle_event_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0244_add_payment_detail_to_account_transfer_transaction.xml" relativeToChangelogFile="true" />
     <include file="parts/0245_standardize_email_address_column_length.xml" relativeToChangelogFile="true" />
