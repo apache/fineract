@@ -18,70 +18,67 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.ArrayList;
+import static org.apache.fineract.integrationtests.client.feign.modules.ExternalEventConfigurationTestData.CENTERS_CREATE_EVENT;
+import static org.apache.fineract.integrationtests.client.feign.modules.ExternalEventConfigurationTestData.CLIENT_ACTIVATE_EVENT;
+import static org.apache.fineract.integrationtests.client.feign.modules.ExternalEventConfigurationTestData.DEFAULT_DISABLED_EVENT_TYPES;
+
+import java.util.List;
 import java.util.Map;
-import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.client.models.ExternalEventConfigurationItemResponse;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalEventConfigurationHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class ExternalEventConfigurationIntegrationTest {
+public class ExternalEventConfigurationIntegrationTest extends FeignIntegrationTest {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
+    private static final String EXTERNAL_EVENT_CONFIGURATIONS_KEY = "externalEventConfigurations";
 
-    @BeforeEach
+    private FeignExternalEventConfigurationHelper externalEventConfigurationHelper;
+
+    @BeforeAll
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-
+        externalEventConfigurationHelper = new FeignExternalEventConfigurationHelper(fineractClient());
     }
 
     @Test
     public void getExternalEventConfigurations() {
-        final ArrayList<Map<String, Object>> externalEventConfigurations = ExternalEventConfigurationHelper
-                .getAllExternalEventConfigurations(requestSpec, responseSpec);
+        final List<ExternalEventConfigurationItemResponse> externalEventConfigurations = externalEventConfigurationHelper
+                .retrieveAllConfigurations().getExternalEventConfiguration();
+
         Assertions.assertNotNull(externalEventConfigurations);
-        final ArrayList<Map<String, Object>> defaultConfigurations = ExternalEventConfigurationHelper
-                .getDefaultExternalEventConfigurations();
-        Assertions.assertEquals(defaultConfigurations.size(), externalEventConfigurations.size());
-        verifyAllEventConfigurations(externalEventConfigurations, defaultConfigurations);
-
-    }
-
-    private void verifyAllEventConfigurations(ArrayList<Map<String, Object>> actualEventConfigurations,
-            ArrayList<Map<String, Object>> defaultConfigurations) {
-
-        for (int index = 0; index < actualEventConfigurations.size(); index++) {
-            Assertions.assertTrue(defaultConfigurations.contains(actualEventConfigurations.get(index)));
+        Assertions.assertEquals(DEFAULT_DISABLED_EVENT_TYPES.size(), externalEventConfigurations.size());
+        for (final ExternalEventConfigurationItemResponse configuration : externalEventConfigurations) {
+            Assertions.assertTrue(DEFAULT_DISABLED_EVENT_TYPES.contains(configuration.getType()),
+                    "Unexpected external event type: " + configuration.getType());
+            Assertions.assertEquals(Boolean.FALSE, configuration.getEnabled(),
+                    "External event " + configuration.getType() + " is expected to be disabled by default");
         }
     }
 
     @Test
     public void updateExternalEventConfigurations() {
-        String updateRequestJson = ExternalEventConfigurationHelper.getExternalEventConfigurationsForUpdateJSON();
-        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, updateRequestJson);
-        Assertions.assertEquals(updatedConfigurations.size(), 2);
-        Assertions.assertTrue(updatedConfigurations.containsKey("CentersCreateBusinessEvent"));
-        Assertions.assertTrue(updatedConfigurations.containsKey("ClientActivateBusinessEvent"));
-        Assertions.assertTrue(updatedConfigurations.get("CentersCreateBusinessEvent"));
-        Assertions.assertTrue(updatedConfigurations.get("ClientActivateBusinessEvent"));
+        final Map<String, Boolean> update = Map.of(CENTERS_CREATE_EVENT, true, CLIENT_ACTIVATE_EVENT, true);
 
+        final Map<String, Object> changes = externalEventConfigurationHelper.updateConfigurations(update).getChanges();
+
+        // The command nests the flags it changed one level down, under the same key the request used.
+        final Map<?, ?> changedFlags = (Map<?, ?>) changes.get(EXTERNAL_EVENT_CONFIGURATIONS_KEY);
+        Assertions.assertNotNull(changedFlags, "changes payload did not contain " + EXTERNAL_EVENT_CONFIGURATIONS_KEY);
+        Assertions.assertEquals(2, changedFlags.size());
+        Assertions.assertEquals(Boolean.TRUE, changedFlags.get(CENTERS_CREATE_EVENT));
+        Assertions.assertEquals(Boolean.TRUE, changedFlags.get(CLIENT_ACTIVATE_EVENT));
+
+        final Map<String, Boolean> enabledByEventType = externalEventConfigurationHelper.retrieveEnabledByEventType();
+        Assertions.assertEquals(Boolean.TRUE, enabledByEventType.get(CENTERS_CREATE_EVENT), CENTERS_CREATE_EVENT + " was not enabled");
+        Assertions.assertEquals(Boolean.TRUE, enabledByEventType.get(CLIENT_ACTIVATE_EVENT), CLIENT_ACTIVATE_EVENT + " was not enabled");
     }
 
     @AfterEach
     public void tearDown() {
-        ExternalEventConfigurationHelper.resetDefaultConfigurations(requestSpec, responseSpec);
+        externalEventConfigurationHelper.disableEventTypes(List.of(CENTERS_CREATE_EVENT, CLIENT_ACTIVATE_EVENT));
     }
 
 }

@@ -18,41 +18,28 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.List;
-import org.apache.fineract.integrationtests.common.ProductMixHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignProductMixHelper;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class ProductMixIntegrationTest {
+public class ProductMixIntegrationTest extends FeignIntegrationTest {
 
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
+    private FeignProductMixHelper productMixHelper;
 
-    private ProductMixHelper productMixHelper;
-
-    @BeforeEach
-    public void setUp() throws Exception {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.productMixHelper = new ProductMixHelper();
+    @BeforeAll
+    public void setup() {
+        productMixHelper = new FeignProductMixHelper(fineractClient());
     }
 
     @Test
     public void getProductMixList() {
-        final List productMixList = this.productMixHelper.getProductsMixList();
-        Assertions.assertNotNull(productMixList);
+        Assertions.assertNotNull(productMixHelper.retrieveAllLoanProducts());
 
-        final var productMixTemplate = this.productMixHelper.getProductMixTemplate();
-        Assertions.assertNotNull(productMixTemplate);
+        // GetLoanProductsTemplateResponse has no productOptions field, so this can only prove the call returned 200;
+        // adding the field means touching LoanProductsApiResourceSwagger, which is production code.
+        Assertions.assertNotNull(productMixHelper.retrieveProductMixTemplate());
     }
 
 }
