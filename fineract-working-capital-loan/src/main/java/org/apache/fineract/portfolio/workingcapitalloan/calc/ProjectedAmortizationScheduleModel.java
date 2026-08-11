@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.Accessors;
@@ -282,6 +281,32 @@ public final class ProjectedAmortizationScheduleModel {
         return asOfModel;
     }
 
+    /**
+     * How many periods the schedule currently runs to: the contractual term, or the number of periods that have already
+     * gone by if the borrower has fallen past it.
+     *
+     * <p>
+     * A working capital loan does not stop having a schedule because its original last day went by unpaid. The debt is
+     * still there and still being billed, so the periods keep coming: a borrower who pays nothing for two years has two
+     * years of missed instalments behind them and the same remaining days ahead, pushed out day by day. Bounding the
+     * schedule at the contractual term instead froze it one term past maturity, and everything measured from it - what
+     * a payment can be dated, where a rate change may take effect, which days count as missed - froze with it.
+     */
+    private int scheduleTerm() {
+        // Today's period counts: it is due now, so it must have a row for a payment or a rate change dated today to
+        // land on. Only the periods before it have elapsed.
+        return Math.max(effectiveTotalTerm(), elapsedPeriodCount() + 1);
+    }
+
+    /** Periods whose date has already gone by, counted from the dates alone so it cannot depend on the schedule. */
+    private int elapsedPeriodCount() {
+        if (calculatedTillDate == null) {
+            return 0;
+        }
+        final long elapsed = ChronoUnit.DAYS.between(expectedDisbursementDate, calculatedTillDate) - currentFirstPeriodDayOffset();
+        return (int) Math.clamp(elapsed, 0L, MAX_CALCULABLE_TOTAL_DAYS);
+    }
+
     public int effectiveTotalTerm() {
         if (rateSegments == null || rateSegments.isEmpty()) {
             return originalPaymentNumber;
@@ -452,7 +477,7 @@ public final class ProjectedAmortizationScheduleModel {
 
     private LocalDate calculateAllocationDate(final LocalDate paymentDate, final int firstPeriodDayOffset) {
         final LocalDate firstInstallmentDate = dateOfPeriod(1, firstPeriodDayOffset);
-        final LocalDate lastInstallmentDate = dateOfPeriod(effectiveTotalTerm(), firstPeriodDayOffset);
+        final LocalDate lastInstallmentDate = dateOfPeriod(scheduleTerm(), firstPeriodDayOffset);
         if (paymentDate.isBefore(firstInstallmentDate) || paymentDate.equals(expectedDisbursementDate)) {
             return firstInstallmentDate;
         }
@@ -470,9 +495,9 @@ public final class ProjectedAmortizationScheduleModel {
         final int firstPeriodDayOffset = hasDisbursementDatePayment() || paymentDate.equals(expectedDisbursementDate) ? 0 : 1;
         final LocalDate allocationDate = calculateAllocationDate(paymentDate, firstPeriodDayOffset);
         final int index = resolvePaymentIndex(allocationDate, firstPeriodDayOffset);
-        if (index < 0 || index >= effectiveTotalTerm()) {
+        if (index < 0 || index >= scheduleTerm()) {
             throw new IllegalArgumentException("paymentDate " + paymentDate + " is outside the valid range ["
-                    + dateOfPeriod(1, firstPeriodDayOffset) + " .. " + dateOfPeriod(effectiveTotalTerm(), firstPeriodDayOffset) + "]");
+                    + dateOfPeriod(1, firstPeriodDayOffset) + " .. " + dateOfPeriod(scheduleTerm(), firstPeriodDayOffset) + "]");
         }
         actualPayments.add(new ActualPayment(allocationDate, money(amount)));
         rebuildPayments();
@@ -491,6 +516,33 @@ public final class ProjectedAmortizationScheduleModel {
         actualPayments.remove(first.get());
         rebuildPayments();
         recalculateNetAmortizationAndDeferredBalanceFrom(paymentDate);
+    }
+
+    /**
+     * Records that time has moved on to {@code businessDate}, so every instalment date it has passed with no payment
+     * against it reports a nil payment rather than nothing at all.
+     *
+     * <p>
+     * This fills the actual columns and stops there. It does not re-base the projection: a zeroed date is not a
+     * transaction, it only says nothing has come in for that day yet, and the plan is restated when money actually
+     * lands. A loan that has never paid therefore keeps the schedule it was written with, with the actual balance
+     * standing at the full amount beside it.
+     *
+     * <p>
+     * Payments and rate changes already carry the date forward on their own; this is what covers the loan where nothing
+     * happens at all. The date only ever moves forward, so a call that would take it backwards - a COB re-run, a loan
+     * whose last action is already later than today - leaves the schedule untouched.
+     *
+     * @return {@code true} when the schedule was rebuilt
+     */
+    public boolean acknowledgeElapsedPeriods(final LocalDate businessDate) {
+        Objects.requireNonNull(businessDate, "businessDate");
+        if (calculatedTillDate != null && !businessDate.isAfter(calculatedTillDate)) {
+            return false;
+        }
+        updateCalculatedTillDate(businessDate);
+        rebuildPayments();
+        return true;
     }
 
     private void updateCalculatedTillDate(final LocalDate actionDate) {
@@ -581,7 +633,7 @@ public final class ProjectedAmortizationScheduleModel {
         // to a period number via the first-period offset (0 when a disbursement-date repayment shifted the grid),
         // else the new rate starts one day early. Clamped to the active (effective) term so a change at/after the
         // current end of an already-segmented schedule starts on the final period.
-        final int splitDayIndex = Math.min(rawSplitDayIndex + (1 - currentFirstPeriodDayOffset()), effectiveTotalTerm());
+        final int splitDayIndex = Math.min(rawSplitDayIndex + (1 - currentFirstPeriodDayOffset()), scheduleTerm());
 
         // Remove existing segments at or after split (supports overwrite on second rate change)
         // Guard against null rateSegments from V1 model deserialization
@@ -612,7 +664,11 @@ public final class ProjectedAmortizationScheduleModel {
             final int lastPeriodBeforeSplit = splitDayIndex - 1;
             final Map<LocalDate, BigDecimal> settledPaymentsByDate = aggregatePaymentsByDate();
             final BalancesAndAmortizations ba = computeBalancesAndAmortizations(lastPeriodBeforeSplit, settledPaymentsByDate);
-            balanceAtSplit = ba.balances().get(lastPeriodBeforeSplit - 1).getAmount();
+            // What the split period continues from, which on a loan behind on its instalments is the balance really
+            // outstanding rather than the one the plan had drawn down to. Sizing the segment against the plan while
+            // every period after it re-bases on reality left the two disagreeing across the boundary, and the schedule
+            // stepped back up a period later.
+            balanceAtSplit = ba.basisForNextPeriod();
             newDiscount = MathUtil.negativeToZero(unearnedFeeAt(lastPeriodBeforeSplit, settledPaymentsByDate, ba.expectedAmortizations()));
         } else {
             balanceAtSplit = netDisbursementAmount.getAmount();
@@ -672,7 +728,7 @@ public final class ProjectedAmortizationScheduleModel {
             final int periodNo = i + 1;
             final RateSegment seg = segmentForDay(periodNo);
             final long segRelativePeriod = seg != null ? periodNo - seg.startDayIndex() + 1 : periodNo;
-            final BigDecimal periodExpectedPayment = MathUtil.negativeToZero(expectedPaymentForDay(periodNo));
+            final BigDecimal periodExpectedPayment = ba.billedPayments().get(i).getAmount();
             final BigDecimal safeDf = safeDiscountFactor(segRelativePeriod, periodNo);
             final BigDecimal npvValue = MathUtil.negativeToZero(periodExpectedPayment.multiply(safeDf, mc));
             final BigDecimal safeExpectedAmort = ba.expectedAmortizations().get(i).getAmount().min(discountFee);
@@ -693,11 +749,16 @@ public final class ProjectedAmortizationScheduleModel {
         // Every elapsed instalment date is seeded with zero and then overwritten by whatever really landed on it, so a
         // period the borrower missed is recorded as a nil payment rather than left absent. This has to happen for a
         // loan that has never paid too - that is precisely the loan whose every period was missed.
+        //
+        // Elapsed means strictly before the date reached, matching the passed-period test the actual columns are drawn
+        // from: the instalment falling due today has not been missed, the borrower still has the day to pay it. Seeding
+        // it would re-base the projection off a period that is still open, holding the next period at today's balance.
         if (calculatedTillDate != null) {
             final LocalDate firstInstallmentDate = dateOfPeriod(1);
-            final LocalDate lastInstallmentDate = dateOfPeriod(effectiveTotalTerm());
-            if (!calculatedTillDate.isBefore(firstInstallmentDate)) {
-                final LocalDate mapEnd = calculatedTillDate.isAfter(lastInstallmentDate) ? lastInstallmentDate : calculatedTillDate;
+            final LocalDate lastInstallmentDate = dateOfPeriod(scheduleTerm());
+            final LocalDate lastElapsedDate = calculatedTillDate.minusDays(1);
+            if (!lastElapsedDate.isBefore(firstInstallmentDate)) {
+                final LocalDate mapEnd = lastElapsedDate.isAfter(lastInstallmentDate) ? lastInstallmentDate : lastElapsedDate;
                 result.putAll(generateDateMap(firstInstallmentDate, mapEnd));
             }
         }
@@ -721,7 +782,7 @@ public final class ProjectedAmortizationScheduleModel {
     }
 
     private List<BigDecimal> buildPaymentList(final Map<LocalDate, BigDecimal> paymentsByDate) {
-        final int totalTerm = effectiveTotalTerm();
+        final int totalTerm = scheduleTerm();
         final List<BigDecimal> result = new ArrayList<>(totalTerm);
         for (int i = 0; i < totalTerm; i++) {
             final LocalDate paymentDate = dateOfPeriod(i + 1);
@@ -751,14 +812,13 @@ public final class ProjectedAmortizationScheduleModel {
         final BigDecimal discountFee = discountFeeAmount.getAmount();
         final BigDecimal netDisb = netDisbursementAmount.getAmount();
 
-        final List<ProjectedPayment> result = new ArrayList<>(effectiveTotalTerm() + 2 + tailPayments.size());
+        final List<ProjectedPayment> result = new ArrayList<>(scheduleTerm() + 2 + tailPayments.size());
         result.add(createDisbursementPayment());
 
-        final Set<LocalDate> recordedDates = recordedPaymentDates();
         BigDecimal cumulativeActualAmort = BigDecimal.ZERO;
         BigDecimal cumulativeExpectedAmort = BigDecimal.ZERO;
         BigDecimal runningActualBalance = netDisb;
-        for (int i = 0; i < effectiveTotalTerm(); i++) {
+        for (int i = 0; i < scheduleTerm(); i++) {
             final int periodNo = i + 1;
             final LocalDate periodDate = dateOfPeriod(periodNo);
             final BigDecimal periodPayment = payments.get(i);
@@ -766,7 +826,7 @@ public final class ProjectedAmortizationScheduleModel {
             final boolean passedPeriod = calculatedTillDate != null && periodDate.isBefore(calculatedTillDate);
             final long paymentsLeft = paymentsLeft(periodNo, appliedCount);
             final BigDecimal safeDf = safeDiscountFactor(paymentsLeft, periodNo);
-            final BigDecimal periodExpectedPayment = MathUtil.negativeToZero(expectedPaymentForDay(periodNo));
+            final BigDecimal periodExpectedPayment = ba.billedPayments().get(i).getAmount();
             final BigDecimal safeRunningExpected = MathUtil.negativeToZero(runningExpected.get(i));
             final BigDecimal npvSource = resolveNpvSource(hasPositivePayment, passedPeriod, periodPayment, safeRunningExpected);
             final BigDecimal npvValue = MathUtil.negativeToZero(npvSource.multiply(safeDf, mc));
@@ -801,11 +861,12 @@ public final class ProjectedAmortizationScheduleModel {
                     incomeModification != null ? money(incomeModification) : null, money(expectedDiscountFeeBalance),
                     resolveActualBalance(hasPositivePayment, passedPeriod, actualDiscountFeeBalance)));
 
-            // The deferred fee rewinds at a payment for the same reason the balance does. The periods before it booked
+            // The deferred fee rewinds at a settled period for the same reason the balance does. Those periods booked
             // fee against instalments that were never collected; carrying that total forward would charge it a second
             // time as the re-projected periods earn it again. From here the fee runs down from what the payments have
-            // really earned, so a loan two instalments behind shows the same fee balance two days later.
-            if (recordedDates.contains(periodDate)) {
+            // really earned, so a loan two instalments behind shows the same fee balance two days later. A nil payment
+            // earns nothing, which is exactly what a missed instalment should do to the fee.
+            if (periodPayment != null) {
                 cumulativeExpectedAmort = cumulativeActualAmort;
             }
         }
@@ -862,11 +923,19 @@ public final class ProjectedAmortizationScheduleModel {
     /**
      * Drops the trailing periods the loan will never see, keeping a period that carries a principal adjustment: it is
      * due even though nothing of the projected disbursement is left to discount on it.
+     *
+     * <p>
+     * A period is only spent when the loan was already square before it began. Zero present value alone does not say
+     * that: an elapsed period that went unpaid contributes nothing to present value yet still owes its instalment, so a
+     * loan that has never paid a penny would otherwise have its whole schedule trimmed away the day it passed maturity.
+     * The balance the period opened on is what tells the two apart.
      */
     private static void trimTrailingZeroNpvPayments(final List<ProjectedPayment> payments, final Set<LocalDate> adjustedDates) {
         while (payments.size() > 1) {
             final ProjectedPayment last = payments.getLast();
-            if (last.npvValue() != null && last.npvValue().isZero() && !adjustedDates.contains(last.date())) {
+            final Money openingBalance = payments.get(payments.size() - 2).expectedBalance();
+            final boolean nothingLeftToBill = openingBalance != null && openingBalance.getAmount().signum() <= 0;
+            if (last.npvValue() != null && last.npvValue().isZero() && nothingLeftToBill && !adjustedDates.contains(last.date())) {
                 payments.removeLast();
             } else {
                 break;
@@ -922,7 +991,7 @@ public final class ProjectedAmortizationScheduleModel {
      * once the tail has taken its share is the shortfall to distribute.
      */
     private BalancesAndAmortizations computeBalancesAndAmortizations(final Map<LocalDate, BigDecimal> settledPaymentsByDate) {
-        final BalancesAndAmortizations ba = computeBalancesAndAmortizations(effectiveTotalTerm(), settledPaymentsByDate);
+        final BalancesAndAmortizations ba = computeBalancesAndAmortizations(scheduleTerm(), settledPaymentsByDate);
         final BigDecimal earnedByTail = ba.balances().isEmpty() ? BigDecimal.ZERO
                 : simulateTail(ba.balances().getLast().getAmount()).stream().map(TailPeriod::amortization).reduce(BigDecimal.ZERO,
                         (a, b) -> a.add(b, mc));
@@ -943,7 +1012,6 @@ public final class ProjectedAmortizationScheduleModel {
     private BigDecimal unearnedFeeAt(final int period, final Map<LocalDate, BigDecimal> settledPaymentsByDate,
             final List<Money> amortizations) {
         final List<BigDecimal> amounts = amortizations.stream().map(Money::getAmount).toList();
-        final Set<LocalDate> recordedDates = recordedPaymentDates();
         final BigDecimal fee = discountFeeAmount.getAmount();
         BigDecimal cumulativeExpected = BigDecimal.ZERO;
         BigDecimal cumulativeActual = BigDecimal.ZERO;
@@ -962,9 +1030,7 @@ public final class ProjectedAmortizationScheduleModel {
             // take back off, and the schedule then closes on a negative deferred balance.
             cumulativeActual = cumulativeActual.add(consumeExpectedAmortization(amounts, cursor, periodsConsumed), mc);
             cursor = cursor.add(periodsConsumed, mc);
-            if (recordedDates.contains(periodDate)) {
-                cumulativeExpected = cumulativeActual;
-            }
+            cumulativeExpected = cumulativeActual;
         }
         // Signed on purpose. Rounding each period to the currency scale can push the booked amortization a cent past
         // the fee, and the settle below needs to see that overshoot to take it back off; clamping here would hide it
@@ -995,7 +1061,7 @@ public final class ProjectedAmortizationScheduleModel {
         final List<Money> balances = new ArrayList<>(upToDayIndex);
         final List<Money> expectedAmortizations = new ArrayList<>(upToDayIndex);
         final List<BigDecimal> exactAmortizations = new ArrayList<>(upToDayIndex);
-        final Set<LocalDate> recordedDates = recordedPaymentDates();
+        final List<Money> billedPayments = new ArrayList<>(upToDayIndex);
 
         BigDecimal prevBalance = netDisbursementAmount.getAmount();
         BigDecimal actualBalance = netDisbursementAmount.getAmount();
@@ -1010,9 +1076,15 @@ public final class ProjectedAmortizationScheduleModel {
                 prevBalance = seg.netDisbursementAtSplit().getAmount();
             }
             final BigDecimal eir = seg != null ? seg.effectiveInterestRate() : effectiveInterestRate;
-            final BigDecimal payment = expectedPaymentForDay(dayIndex);
-            final BigDecimal balance = prevBalance.multiply(BigDecimal.ONE.add(eir, mc), mc).subtract(payment, mc);
+            final BigDecimal grown = prevBalance.multiply(BigDecimal.ONE.add(eir, mc), mc);
+            // A period can never ask for more than the balance it has to close. A segment's final instalment is solved
+            // when the segment is created, so a later segment or a repayment can move the balance out from under it and
+            // leave it billing far more than is owed - which is how a schedule ended on a negative balance. The
+            // catch-up periods have always been capped this way; the term's periods now are too.
+            final BigDecimal payment = MathUtil.negativeToZero(expectedPaymentForDay(dayIndex)).min(MathUtil.negativeToZero(grown));
+            final BigDecimal balance = grown.subtract(payment, mc);
             final BigDecimal amortization = balance.add(payment, mc).subtract(prevBalance, mc);
+            billedPayments.add(money(payment));
             balances.add(money(balance));
             expectedAmortizations.add(money(amortization));
             exactAmortizations.add(amortization);
@@ -1035,21 +1107,14 @@ public final class ProjectedAmortizationScheduleModel {
                     .add(consumeExpectedAmortization(exactAmortizations, amortizationCursor, periodsConsumed), mc);
             amortizationCursor = amortizationCursor.add(periodsConsumed, mc);
 
-            // Every recorded payment re-bases what follows it. Periods before the first one keep the schedule they were
-            // written with - nothing is known about them - but from each payment onwards the projection continues from
-            // what the borrower actually owes, so a loan that has fallen behind is not projected as though the
-            // instalments it missed had been collected. A backdated payment lands earlier in this same walk and takes
-            // the periods after it with it.
-            if (recordedDates.contains(periodDate)) {
-                prevBalance = actualBalance;
-            }
+            // Every settled period re-bases what follows it. A day that elapsed with nothing on it is settled just as
+            // firmly as one that was paid - it says the instalment was not collected - so from here the projection
+            // continues from what the borrower actually owes rather than from instalments the plan merely assumed. Only
+            // periods that have not come round yet keep the schedule they were written with. A backdated payment lands
+            // earlier in this same walk and takes the periods after it with it.
+            prevBalance = actualBalance;
         }
-        return new BalancesAndAmortizations(balances, expectedAmortizations);
-    }
-
-    /** The dates the loan actually has transactions on, as opposed to the elapsed days filled in with a nil payment. */
-    private Set<LocalDate> recordedPaymentDates() {
-        return actualPayments.stream().map(ActualPayment::date).filter(Objects::nonNull).collect(Collectors.toSet());
+        return new BalancesAndAmortizations(balances, expectedAmortizations, prevBalance, billedPayments);
     }
 
     /**
@@ -1135,7 +1200,7 @@ public final class ProjectedAmortizationScheduleModel {
     }
 
     private List<BigDecimal> computeRunningExpectedPayments(final BigDecimal excess) {
-        final int totalTerm = effectiveTotalTerm();
+        final int totalTerm = scheduleTerm();
         final List<BigDecimal> running = new ArrayList<>(totalTerm);
         for (int i = 0; i < totalTerm; i++) {
             running.add(expectedPaymentForDay(i + 1));
@@ -1151,21 +1216,57 @@ public final class ProjectedAmortizationScheduleModel {
 
     private void buildTailPeriodsAndComputeNpv(final List<ProjectedPayment> tailPayments, final int appliedCount,
             final BigDecimal balanceAfterTerm, final BigDecimal earnedFeeAtTermEnd) {
-        final int totalTerm = effectiveTotalTerm();
-        BigDecimal cumulativeAmort = earnedFeeAtTermEnd;
+        final int totalTerm = scheduleTerm();
         final BigDecimal fee = discountFeeAmount.getAmount();
-        int tailIndex = 0;
-        for (final TailPeriod tail : simulateTail(balanceAfterTerm)) {
+        final List<TailPeriod> tail = simulateTail(balanceAfterTerm);
+        if (tail.isEmpty()) {
+            return;
+        }
+
+        // The catch-up periods are where a loan that fell behind actually earns its fee, so the rounding residue has to
+        // be settled onto them and not onto the term's final periods: those were rewound to what the payments really
+        // earned, which for a loan that never paid is nothing at all, and the top-up placed there would simply vanish -
+        // leaving the schedule closing on an unearned deferred balance.
+        // Summed on the rounded figures, because those are what the fee balance is displayed from: totalling the exact
+        // ones would leave the settle a cent out of step with the column it is settling.
+        final List<Money> amortizations = new ArrayList<>(tail.size());
+        BigDecimal earnedByTail = BigDecimal.ZERO;
+        for (final TailPeriod period : tail) {
+            final Money amortization = money(period.amortization());
+            amortizations.add(amortization);
+            earnedByTail = earnedByTail.add(amortization.getAmount(), mc);
+        }
+        // Settled onto the last period that still bills something. A catch-up run can end on a period asking for a
+        // fraction of a cent, which rounds to nothing and is trimmed off the finished schedule - and the top-up would
+        // be trimmed away with it, leaving the fee short by exactly the amount being settled.
+        final List<Money> settleTarget = amortizations.subList(0, lastBillingPeriod(tail) + 1);
+        settleAmortizationOntoFinalPeriods(settleTarget, fee.subtract(earnedFeeAtTermEnd, mc).subtract(earnedByTail, mc));
+
+        BigDecimal cumulativeAmort = earnedFeeAtTermEnd;
+        for (int tailIndex = 0; tailIndex < tail.size(); tailIndex++) {
             final int periodNo = totalTerm + tailIndex + 1;
             final long dl = paymentsLeft(periodNo, appliedCount);
             final BigDecimal df = safeDiscountFactor(dl, totalTerm);
-            final BigDecimal npv = MathUtil.negativeToZero(tail.payment().multiply(df, mc));
-            cumulativeAmort = cumulativeAmort.add(tail.amortization(), mc);
-            tailPayments.add(new ProjectedPayment(periodNo, dateOfPeriod(periodNo), dl, money(tail.payment()), df, money(npv),
-                    money(tail.balance()), null, money(tail.amortization()), null, null, null,
+            final BigDecimal npv = MathUtil.negativeToZero(tail.get(tailIndex).payment().multiply(df, mc));
+            final Money amortization = amortizations.get(tailIndex);
+            cumulativeAmort = cumulativeAmort.add(amortization.getAmount(), mc);
+            tailPayments.add(new ProjectedPayment(periodNo, dateOfPeriod(periodNo), dl, money(tail.get(tailIndex).payment()), df,
+                    money(npv), money(tail.get(tailIndex).balance()), null, amortization, null, null, null,
                     money(MathUtil.negativeToZero(fee.subtract(cumulativeAmort, mc))), null));
-            tailIndex++;
         }
+    }
+
+    /**
+     * Index of the last catch-up period that bills a whole cent, so the settle above lands somewhere that survives
+     * {@link #trimTrailingZeroNpvPayments}. Falls back to the final period when none of them bills anything.
+     */
+    private int lastBillingPeriod(final List<TailPeriod> tail) {
+        for (int i = tail.size() - 1; i >= 0; i--) {
+            if (money(tail.get(i).payment()).getAmount().signum() > 0) {
+                return i;
+            }
+        }
+        return tail.size() - 1;
     }
 
     /** A catch-up period: what it bills, the balance it leaves, and the fee it earns on the way. */
@@ -1261,7 +1362,15 @@ public final class ProjectedAmortizationScheduleModel {
         return Money.of(currency, amount, mc);
     }
 
-    private record BalancesAndAmortizations(List<Money> balances, List<Money> expectedAmortizations) {
+    /**
+     * @param basisForNextPeriod
+     *            the balance the period after the walk continues from. Not the last row's own balance: once a period is
+     *            settled the walk carries reality forward instead, so on a loan that fell behind the two differ - the
+     *            row shows what the period would have left had it been paid, this is what the borrower really owes.
+     *            Exact rather than rounded, for the same reason the walk itself works on exact figures.
+     */
+    private record BalancesAndAmortizations(List<Money> balances, List<Money> expectedAmortizations, BigDecimal basisForNextPeriod,
+            List<Money> billedPayments) {
     }
 
     private record PaymentAnalysis(BigDecimal shortfall, BigDecimal excess) {

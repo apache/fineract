@@ -244,7 +244,7 @@ As repayments are received, the cursor-based amortization mechanism determines h
 | *Approve* | Generates a projected schedule from approved loan parameters and expected disbursement date.
 | *Disburse* | Regenerates the schedule using the actual disbursement amount and actual disbursement date.
 | *Repayment* | `applyPayment()` records the repayment against the calculated schedule date and rebuilds the schedule. Calculates actual amortization and income modification for applied payment rows.
-| *Period Payment Rate Change* | Adds a rate segment from the business date and rebuilds the schedule using the new period payment rate for the remaining term.
+| *Period Payment Rate Change* | Adds a rate segment from the change's effective date and rebuilds the schedule using the new period payment rate for the remaining term. The effective date may be in the future, in which case the schedule carries the new segment immediately while the rate stored on the loan is switched over by the `WC_PERIOD_PAYMENT_RATE_EFFECTIVE_DATE` COB step once that date arrives.
 |===
 
 === State Transitions
@@ -518,24 +518,36 @@ The following business steps are executed during COB for each eligible loan:
 | Step Order | Step Name | Description
 
 | 2
+| `WC_MISSED_PAYMENT_ACKNOWLEDGEMENT`
+| Advances the projected schedule to the business date, so instalment dates that passed with no payment against them report a nil payment instead of being left blank. Affects the actual columns only — the expected projection is restated when a payment lands, not when a date elapses. Runs ahead of the steps that read the schedule.
+
+| 3
 | `WC_DELINQUENCY_RANGE_SCHEDULE`
 | Generates and evaluates delinquency range periods based on product configuration.
 
-| 3
+| 4
 | `WC_LOAN_DELINQUENCY_CLASSIFICATION`
 | Assigns or lifts delinquency range tags based on the configured bucket ranges.
 
-| 4
+| 5
 | `WC_BREACH_SCHEDULE`
 | Generates and evaluates breach schedule periods.
 
-| 5
+| 6
 | `WC_NEAR_BREACH_EVALUATION`
 | Evaluates near-breach conditions against the configured breach.
 
-| 6
+| 7
 | `WC_DISCOUNT_FEE_AMORTIZATION`
 | Posts newly recognized discount fee amortization from the projected schedule.
+
+| 8
+| `WC_CHARGE_ACCRUAL`
+| Accrues charges that have fallen due on the loan.
+
+| 9
+| `WC_PERIOD_PAYMENT_RATE_EFFECTIVE_DATE`
+| Brings the period payment rate stored on the loan up to date with its rate-change history. A rate change may be booked with a future effective date, and the stored rate is otherwise only refreshed when a change is submitted, so without this step the loan keeps reporting the old rate after the effective date arrives — the projected schedule already carries the new segment, so it is the summary on the loan that would drift. Resolves the rate in force as at the business date; does nothing when the loan has no rate changes or the rate has not moved.
 |===
 
 === Inline COB

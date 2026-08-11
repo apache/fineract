@@ -19,9 +19,12 @@
 package org.apache.fineract.integrationtests.client.feign.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +44,21 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The projected schedule is restated from what the borrower actually owes rather than from the instalments the plan
- * assumed would arrive. These tests pin the three things that follow from that: a loan paid to schedule is projected
- * exactly as it was at disbursement, a loan running late has its remaining periods re-projected from its real position,
- * and a rate change only ever re-rates what is genuinely left to bill.
+ * assumed would arrive. These tests pin what follows from that: a loan paid to schedule is projected exactly as it was
+ * at disbursement and closes on nothing at all, a loan running late has its remaining periods re-projected from its
+ * real position, a rate change only ever re-rates what is genuinely left to bill, and COB is what tells the schedule
+ * that a day went by unpaid.
+ *
+ * <p>
+ * A period that elapsed unpaid counts as settled just as firmly as one that was paid: it says the instalment was not
+ * collected. So COB, which fills the elapsed dates in with nil payments, re-bases the projection exactly as a payment
+ * does. The consequence is that the schedule keeps pace with the calendar — every missed instalment pushes the last
+ * period out by a day — and a loan left unpaid indefinitely always shows the same days remaining, never a plan that
+ * quietly paid itself off on its original last day.
+ *
+ * <p>
+ * A delinquent loan therefore bills more across its schedule than it owes, by the arrears: the missed money is
+ * re-presented on later dates. That is why {@code assertBillsWhatIsOwed} is only applied to loans with nothing missed.
  *
  * <p>
  * The loan is deliberately tiny — 1000 net, 100 discount, 18% of a 100000 payment volume over 360 days, so 50 a day
@@ -115,10 +130,10 @@ public class FeignWorkingCapitalLoanScheduleRestatementTest extends FeignIntegra
     }
 
     /**
-     * Two days elapse with nothing paid and the third is settled. The periods that fell due before the payment keep the
-     * schedule they were written with — nothing was known about them at the time, and a payment arriving later says
-     * nothing about them — while the periods after it are re-projected from the balance really outstanding. The loan is
-     * two instalments behind, so it simply runs two days later than planned.
+     * Two days elapse with nothing paid and the third is settled. Nothing was collected on the first two, so the
+     * projection makes no progress across them and each repeats the balance the loan actually carried; only the
+     * instalment that really arrived moves it on. The loan is two instalments behind, so it runs two days later than
+     * planned.
      */
     @Test
     void testRepaymentRestatesTheProjectionFromWhatIsReallyOwed() {
@@ -130,21 +145,33 @@ public class FeignWorkingCapitalLoanScheduleRestatementTest extends FeignIntegra
             wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(DAILY_PAYMENT, "04 January 2026"));
             final ProjectedAmortizationScheduleData restated = wcLoanHelper.getAmortizationSchedule(loanId);
 
-            assertProjectionMatchesThrough(atDisbursement, restated, 3, "up to and including the day the payment landed");
+            // The first period is the only one nothing can have changed: it is projected from the opening balance,
+            // which is also what the borrower still owed.
+            assertProjectionMatchesThrough(atDisbursement, restated, 1, "the first period is projected from the opening balance");
 
-            // Being two instalments behind, every period from here repeats what the period two days earlier said.
-            assertCloseTo(balanceOf(atDisbursement, 2), balanceOf(restated, 4), "period 4 must repeat the balance of period 2");
-            assertCloseTo(feeBalanceOf(atDisbursement, 2), feeBalanceOf(restated, 4), "period 4 must repeat the fee balance of period 2");
+            // 2 and 3 January went by with nothing collected, so neither made any progress on the debt.
+            assertCloseTo(balanceOf(atDisbursement, 1), balanceOf(restated, 2), "a period that collected nothing cannot pay the loan down");
+            assertCloseTo(balanceOf(atDisbursement, 1), balanceOf(restated, 3), "a period that collected nothing cannot pay the loan down");
+
+            // The 4 January instalment did arrive, so from there the loan stands exactly one instalment along.
+            assertCloseTo(balanceOf(atDisbursement, 2), balanceOf(restated, 4),
+                    "the period after the payment must stand one instalment on");
+            assertCloseTo(feeBalanceOf(atDisbursement, 2), feeBalanceOf(restated, 4),
+                    "the fee must have been earned by exactly the one instalment collected");
 
             assertTrue(periods(restated).size() > BASE_TERM, "two missed instalments must push the schedule out");
             assertScheduleClosesCleanly(restated, "after a repayment two days late");
+            assertNoNegativeAmounts(restated, "after a repayment two days late");
         });
     }
 
     /**
-     * A rate change re-rates what is still outstanding and nothing more. Raising the rate pays the loan down faster, so
-     * the schedule shortens, but the money billed across it is the same debt — it cannot re-bill the periods that came
-     * before the change.
+     * A rate change re-rates what is still outstanding and nothing more: the periods before it keep the rate they were
+     * billed at, and the new one takes effect on its own date.
+     *
+     * <p>
+     * The total billed is not checked after the change. Thirteen instalments went by unpaid on the way to 15 January,
+     * so the schedule legitimately re-presents that money later and bills more than the loan owes.
      */
     @Test
     void testInTermRateChangeBillsOnlyWhatIsLeftToBill() {
@@ -159,8 +186,8 @@ public class FeignWorkingCapitalLoanScheduleRestatementTest extends FeignIntegra
             final ProjectedAmortizationScheduleData schedule = wcLoanHelper.getAmortizationSchedule(loanId);
             assertEquals(0, DAILY_PAYMENT.compareTo(paymentOf(schedule, 13)), "the day before must still bill the original rate");
             assertEquals(0, RAISED_DAILY_PAYMENT.compareTo(paymentOf(schedule, 14)), "the new rate must take effect on its own date");
-            assertBillsWhatIsOwed(schedule, "after an in-term rate change");
             assertScheduleClosesCleanly(schedule, "after an in-term rate change");
+            assertNoNegativeAmounts(schedule, "after an in-term rate change");
         });
     }
 
@@ -197,6 +224,142 @@ public class FeignWorkingCapitalLoanScheduleRestatementTest extends FeignIntegra
 
             assertScheduleClosesCleanly(schedule, "after a repayment following a rate change");
         });
+    }
+
+    @Test
+    void testPayingEveryInstalmentClosesTheLoanAtExactlyZero() {
+        businessDateHelper.runAt("2026-01-01", () -> {
+            final Long loanId = disburseLoan();
+            final ProjectedAmortizationScheduleData atDisbursement = wcLoanHelper.getAmortizationSchedule(loanId);
+
+            // Period N falls on the disbursement date plus N days, so the 22 period term runs 02..23 January.
+            for (int dayOfMonth = 2; dayOfMonth <= 23; dayOfMonth++) {
+                businessDateHelper.updateBusinessDate("BUSINESS_DATE", String.format("2026-01-%02d", dayOfMonth));
+                wcLoanHelper.makeRepayment(loanId,
+                        WorkingCapitalLoanRequestBuilders.repayment(DAILY_PAYMENT, String.format("%02d January 2026", dayOfMonth)));
+            }
+
+            final ProjectedAmortizationScheduleData paidOff = wcLoanHelper.getAmortizationSchedule(loanId);
+            assertEquals(BASE_TERM, periods(paidOff).size(), "paying every instalment on time must not change the term");
+            assertProjectionMatchesThrough(atDisbursement, paidOff, BASE_TERM, "after paying the loan off to schedule");
+            assertNoNegativeAmounts(paidOff, "after paying the loan off to schedule");
+
+            final ProjectedAmortizationSchedulePaymentData last = periods(paidOff).getLast();
+            assertNotNull(last.getExpectedBalance());
+            assertNotNull(last.getExpectedDiscountFeeBalance());
+            assertNotNull(last.getActualBalance());
+            assertNotNull(last.getActualDiscountFeeBalance());
+            assertEquals(0, last.getExpectedBalance().signum(), "the plan must end owing nothing\n" + render(paidOff));
+            assertEquals(0, last.getExpectedDiscountFeeBalance().signum(), "the fee must be exactly earned\n" + render(paidOff));
+            assertEquals(0, last.getActualBalance().signum(), "the borrower must end owing nothing\n" + render(paidOff));
+            assertEquals(0, last.getActualDiscountFeeBalance().signum(),
+                    "the payments must have earned exactly the fee\n" + render(paidOff));
+
+            BigDecimal earned = BigDecimal.ZERO;
+            for (final ProjectedAmortizationSchedulePaymentData period : periods(paidOff)) {
+                if (period.getActualAmortizationAmount() != null) {
+                    earned = earned.add(period.getActualAmortizationAmount());
+                }
+            }
+            assertEquals(0, DISCOUNT.compareTo(earned),
+                    "the amortization must sum to exactly the " + DISCOUNT + " fee, but summed to " + earned + "\n" + render(paidOff));
+        });
+    }
+
+    /**
+     * COB is what tells the schedule that a day went by without a payment. Until it runs, a period that has fallen due
+     * has nothing recorded against it at all; afterwards every elapsed instalment date reads as a nil payment, the
+     * actual balance stands exactly where it did because no money moved, and the days those instalments should have
+     * covered are pushed onto the end of the schedule.
+     */
+    @Test
+    void testCobRecordsElapsedInstalmentsAsMissed() {
+        businessDateHelper.runAt("2026-01-01", () -> {
+            final Long loanId = disburseLoan();
+
+            final ProjectedAmortizationScheduleData beforeCob = wcLoanHelper.getAmortizationSchedule(loanId);
+            assertNull(period(beforeCob, 1).getActualPaymentAmount(),
+                    "nothing is known about a period until its day has passed\n" + render(beforeCob));
+
+            // Five days go by and the borrower pays nothing at all.
+            final LocalDate cobDate = LocalDate.of(2026, 1, 6);
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-06");
+            wcLoanHelper.executeInlineWCCOB(loanId);
+
+            final ProjectedAmortizationScheduleData afterCob = wcLoanHelper.getAmortizationSchedule(loanId);
+            int elapsed = 0;
+            for (final ProjectedAmortizationSchedulePaymentData period : periods(afterCob)) {
+                assertNotNull(period.getPaymentDate());
+                if (period.getPaymentDate().isBefore(cobDate)) {
+                    elapsed++;
+                    assertTrue(period.getActualPaymentAmount() != null && period.getActualPaymentAmount().signum() == 0,
+                            "period " + period.getPaymentNo() + " fell due unpaid and must read as a nil payment, but was "
+                                    + period.getActualPaymentAmount() + "\n" + render(afterCob));
+                    assertCloseTo(TOTAL_OWED.subtract(DISCOUNT), period.getActualBalance(),
+                            "period " + period.getPaymentNo() + " collected nothing, so the balance must not have moved");
+                } else {
+                    assertNull(period.getActualPaymentAmount(),
+                            "period " + period.getPaymentNo() + " has not fallen due yet and must report nothing\n" + render(afterCob));
+                }
+            }
+            assertTrue(elapsed > 0, "the business date moved past several instalments, so some must have elapsed");
+            assertEquals(BASE_TERM + elapsed, periods(afterCob).size(),
+                    "each missed instalment must push the schedule out by a day\n" + render(afterCob));
+
+            assertScheduleClosesCleanly(afterCob, "after COB acknowledged five missed instalments");
+            assertNoNegativeAmounts(afterCob, "after COB acknowledged five missed instalments");
+        });
+    }
+
+    /**
+     * The worst loan on the book: disbursed, never paid a penny, and now past the day it was due to mature. Its
+     * schedule is exactly what someone chasing the debt needs to see, so COB carrying the date past the final period
+     * must not take it away.
+     *
+     * <p>
+     * It very nearly did. Trailing periods with no present value are dropped as periods the loan will never see, and
+     * once every period counts as elapsed-and-unpaid the whole schedule qualified — collapsing to the disbursement row
+     * alone. A loan with even one payment was never affected, which is why this needs a test of its own.
+     */
+    @Test
+    void testCobPastMaturityKeepsTheScheduleOfALoanThatNeverPaid() {
+        businessDateHelper.runAt("2026-01-01", () -> {
+            final Long loanId = disburseLoan();
+
+            // Well past 23 January, the last period of the original term.
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-02-15");
+            wcLoanHelper.executeInlineWCCOB(loanId);
+
+            final ProjectedAmortizationScheduleData afterCob = wcLoanHelper.getAmortizationSchedule(loanId);
+            assertTrue(periods(afterCob).size() >= BASE_TERM, "a loan that never paid still owes every instalment, so its schedule must "
+                    + "survive passing maturity, but only " + periods(afterCob).size() + " periods remain\n" + render(afterCob));
+            assertScheduleClosesCleanly(afterCob, "after COB carried a never-paid loan past maturity");
+            assertNoNegativeAmounts(afterCob, "after COB carried a never-paid loan past maturity");
+        });
+    }
+
+    /**
+     * No column of a repayment period may go negative. Balances, deferred fee and amortization are all amounts of money
+     * owed, held or earned, and none of those has a negative reading in Fineract. The disbursement row is excluded: it
+     * carries the money going out, so its payment and present value are negative by design.
+     */
+    private void assertNoNegativeAmounts(final ProjectedAmortizationScheduleData schedule, final String context) {
+        for (final ProjectedAmortizationSchedulePaymentData period : periods(schedule)) {
+            assertNotNegative(period, "expected payment", period.getExpectedPaymentAmount(), schedule, context);
+            assertNotNegative(period, "actual payment", period.getActualPaymentAmount(), schedule, context);
+            assertNotNegative(period, "expected balance", period.getExpectedBalance(), schedule, context);
+            assertNotNegative(period, "actual balance", period.getActualBalance(), schedule, context);
+            assertNotNegative(period, "expected amortization", period.getExpectedAmortizationAmount(), schedule, context);
+            assertNotNegative(period, "actual amortization", period.getActualAmortizationAmount(), schedule, context);
+            assertNotNegative(period, "expected discount fee balance", period.getExpectedDiscountFeeBalance(), schedule, context);
+            assertNotNegative(period, "actual discount fee balance", period.getActualDiscountFeeBalance(), schedule, context);
+        }
+    }
+
+    private static void assertNotNegative(final ProjectedAmortizationSchedulePaymentData period, final String column,
+            final BigDecimal value, final ProjectedAmortizationScheduleData schedule, final String context) {
+        assertTrue(value == null || value.signum() >= 0,
+                "period " + period.getPaymentNo() + " has a negative " + column + " of " + value + ' ' + context + "\n" + render(schedule));
     }
 
     /**

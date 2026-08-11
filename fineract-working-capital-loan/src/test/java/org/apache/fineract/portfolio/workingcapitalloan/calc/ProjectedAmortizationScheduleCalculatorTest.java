@@ -1352,7 +1352,8 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 198, 198, LocalDate.of(2019, 7, 18), 196, 50.00, null, 0.81124922, 40.56, 33.47, null, 0.09, null, null, 3.35,
                 null);
-        checkInst(model, 199, 199, LocalDate.of(2019, 7, 19), 197, 50.00, null, 0.81038388, 40.52, -16.49, null, 0.04, null, null, 3.31,
+        // Same reason: what is left to close, not a full instalment, which had driven the balance to -16.49.
+        checkInst(model, 199, 199, LocalDate.of(2019, 7, 19), 197, 33.51, null, 0.81038388, 40.52, 0.00, null, 0.04, null, null, 3.31,
                 null);
 
         assertEquals(200, model.projectedPayments().size(), "disbursement + 199 regular (period 200 removed, forecast was 0)");
@@ -2199,7 +2200,10 @@ class ProjectedAmortizationScheduleCalculatorTest {
         checkInst(model, 8, 8, LocalDate.of(2019, 1, 9), 7, 50.00, null, 0.87277405, 43.64, 106.56, null, 3.01, null, null, 3.43, null);
         checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 8, 50.00, null, 0.85597135, 42.80, 58.66, null, 2.09, null, null, 1.34, null);
         checkInst(model, 10, 10, LocalDate.of(2019, 1, 11), 9, 50.00, null, 0.83949214, 41.97, 9.81, null, 1.14, null, null, 0.20, null);
-        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 10, 10.00, null, 0.82333018, 8.24, 0.00, null, 0.19, null, null, 0.00, null);
+        // The catch-up period earns exactly the 0.20 of fee the term left unearned, so the deferred balance closes on
+        // it
+        // rather than a cent short.
+        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 10, 10.00, null, 0.82333018, 8.24, 0.00, null, 0.20, null, null, 0.00, null);
 
     }
 
@@ -2227,7 +2231,9 @@ class ProjectedAmortizationScheduleCalculatorTest {
         checkInst(model, 6, 6, LocalDate.of(2019, 1, 7), 5, 50.00, null, 0.90737544, 45.37, 124.43, null, 3.36, null, null, 7.51, null);
         checkInst(model, 7, 7, LocalDate.of(2019, 1, 8), 6, 50.00, null, 0.88990659, 44.50, 76.88, null, 2.44, null, null, 5.07, null);
         checkInst(model, 8, 8, LocalDate.of(2019, 1, 9), 7, 50.00, null, 0.87277405, 43.64, 28.38, null, 1.51, null, null, 3.56, null);
-        checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 8, 50.00, null, 0.85597135, 34.24, -21.06, null, 0.56, null, null, 3.00, null);
+        // An overpaid loan has less left to close, so the final period bills only the 28.94 still outstanding.
+        // Billing a whole instalment drove the balance to -21.06.
+        checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 8, 28.94, null, 0.85597135, 34.24, 0.00, null, 0.56, null, null, 3.00, null);
 
     }
 
@@ -2297,10 +2303,10 @@ class ProjectedAmortizationScheduleCalculatorTest {
 
         model.applyRateChange(new BigDecimal("15"), rateChangeDate, rateChangeDate);
 
-        // Past-term rate change should succeed — segment starts clamped at originalPaymentNumber
+        // The schedule runs as far as the day reached, so a change dated past the original term takes effect on its own
+        // period rather than being clamped back onto the term's last day, where it would have re-rated nothing.
         assertFalse(model.rateSegments().isEmpty(), "should have a rate segment");
-        assertEquals(originalTerm, model.rateSegments().getFirst().startDayIndex(),
-                "segment should start at base originalPaymentNumber when past-term");
+        assertEquals(250, model.rateSegments().getFirst().startDayIndex(), "segment must start on the period its effective date falls on");
         assertTrue(model.effectiveTotalTerm() > originalTerm, "effective term should extend beyond base term");
     }
 

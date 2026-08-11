@@ -60,6 +60,14 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
     void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
 
     /**
+     * Moves the schedule's notion of today forward to {@code businessDate}, so instalment dates that have passed with
+     * no payment against them report a nil payment instead of nothing at all. The expected projection is left alone —
+     * only a real payment restates that. Does nothing when the loan has no schedule, or when nothing has elapsed since
+     * it was last calculated.
+     */
+    void acknowledgeElapsedPeriods(WorkingCapitalLoan loan, LocalDate businessDate);
+
+    /**
      * Rebuilds the schedule after a rate change has been persisted. The new rate is not passed in: the schedule is
      * reconstructed by replaying every non-reversed rate change in effective-date order, so it is read back from the
      * loan's rate-change history along with the ones already there.

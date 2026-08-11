@@ -144,7 +144,7 @@ Feature: Working Capital Loan Details
       | timeline.disbursedByUsername                   | mifos                        |
       | timeline.disbursedByFirstname                  | App                          |
       | timeline.disbursedByLastname                   | Administrator                |
-      | timeline.expectedMaturityDate                  | null                         |
+      | timeline.expectedMaturityDate                  | 2053-05-19                   |
       | timeline.actualMaturityDate                    | null                         |
       | charges.size                                   | 0                            |
       | disbursementDetails.size                       | 1                            |

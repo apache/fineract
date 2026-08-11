@@ -224,11 +224,11 @@ Delinquency processing for Working Capital loans is part of the `WORKING_CAPITAL
 [cols="1,2,3",options="header"]
 |===
 | Step Order | Step Name | Description
-| 2 | `WC_DELINQUENCY_RANGE_SCHEDULE` | Generates the initial period on first run, advances to the next period when needed, and evaluates all expired periods (sets `minPaymentCriteriaMet`).
-| 3 | `WC_LOAN_DELINQUENCY_CLASSIFICATION` | Iterates over all periods whose `toDate < businessDate + 1` and assigns or lifts delinquency range tags based on the configured bucket ranges.
+| 3 | `WC_DELINQUENCY_RANGE_SCHEDULE` | Generates the initial period on first run, advances to the next period when needed, and evaluates all expired periods (sets `minPaymentCriteriaMet`).
+| 4 | `WC_LOAN_DELINQUENCY_CLASSIFICATION` | Iterates over all periods whose `toDate < businessDate + 1` and assigns or lifts delinquency range tags based on the configured bucket ranges.
 |===
 
-Step 2 (`DelinquencyRangeScheduleBusinessStep`) is skipped for loans that have not yet been disbursed. If no delinquency bucket or minimum payment rule exists, no schedule period is generated. Step 3 (`WorkingCapitalLoanDelinquencyClassificationBusinessStep`) is skipped when no delinquency bucket is configured on the product.
+Step 3 (`DelinquencyRangeScheduleBusinessStep`) is skipped for loans that have not yet been disbursed. If no delinquency bucket or minimum payment rule exists, no schedule period is generated. Step 4 (`WorkingCapitalLoanDelinquencyClassificationBusinessStep`) is skipped when no delinquency bucket is configured on the product.
 
 == API Design
 
