@@ -266,4 +266,5 @@
     <include file="parts/0244_add_payment_detail_to_account_transfer_transaction.xml" relativeToChangelogFile="true" />
     <include file="parts/0245_standardize_email_address_column_length.xml" relativeToChangelogFile="true" />
     <include file="parts/0246_drop_request_audit_table.xml" relativeToChangelogFile="true" />
+    <include file="parts/0247_add_payment_detail_search_indexes.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

@@ -191,9 +191,15 @@ public class SearchReadServiceImpl implements SearchReadService {
                 left join m_group g ON l.group_id = g.id \
                 left join m_office o on o.id = coalesce(c.office_id, g.office_id) \
                 left join m_product_loan pl on pl.id=l.product_id \
+                left join m_account_transfer_transaction att on lt.id in (att.from_loan_transaction_id, att.to_loan_transaction_id) \
+                and att.is_reversed = false \
+                left join m_payment_detail pd on pd.id = lt.payment_detail_id \
+                left join m_payment_detail atpd on atpd.id = att.payment_detail_id \
                 where o.hierarchy like :hierarchy \
                 and lt.transaction_type_enum = :loanRepaymentTransactionType \
-                and (lt.id = :searchTransactionId or lt.external_id like :search)) \
+                and (lt.id = :searchTransactionId or lt.external_id like :search or pd.check_number like :search \
+                or pd.routing_code like :search or pd.receipt_number like :search or atpd.check_number like :search \
+                or atpd.routing_code like :search or atpd.receipt_number like :search)) \
                 order by lt.id desc)""";
 
         final String savingTransactionMatchSql = """
@@ -211,10 +217,16 @@ public class SearchReadServiceImpl implements SearchReadService {
                 left join m_group g ON s.group_id = g.id \
                 left join m_office o on o.id = coalesce(c.office_id, g.office_id) \
                 left join m_savings_product sp on sp.id=s.product_id \
+                left join m_account_transfer_transaction att on st.id in (att.from_savings_transaction_id, att.to_savings_transaction_id) \
+                and att.is_reversed = false \
+                left join m_payment_detail pd on pd.id = st.payment_detail_id \
+                left join m_payment_detail atpd on atpd.id = att.payment_detail_id \
                 where o.hierarchy like :hierarchy \
                 and st.transaction_type_enum in (:savingsDepositTransactionType, :savingsWithdrawalTransactionType) \
                 and st.is_reversal = false \
-                and (st.id = :searchTransactionId or st.external_id like :search or st.ref_no like :search)) \
+                and (st.id = :searchTransactionId or st.external_id like :search or st.ref_no like :search or pd.check_number like :search \
+                or pd.routing_code like :search or pd.receipt_number like :search or atpd.check_number like :search \
+                or atpd.routing_code like :search or atpd.receipt_number like :search)) \
                 order by st.id desc)""";
 
         final StringBuilder sql = new StringBuilder();
