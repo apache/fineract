@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.core.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -38,6 +39,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import org.apache.commons.lang3.LocaleUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -349,6 +351,49 @@ public final class DateUtils {
             final List<ApiParameterError> errors = List.of(ApiParameterError.parameterError("validation.msg.invalid.date.pattern",
                     "The parameter date (" + stringDate + ") format is invalid", "date", stringDate));
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", errors, e);
+        }
+    }
+
+    /**
+     * Parses a date with the given pattern and locale, reporting failure by returning {@code null} rather than by
+     * throwing, so Bean Validation constraints can turn a malformed value into a proper field violation.
+     *
+     * @return the parsed date, or {@code null} when the value is blank or the value, pattern or locale is invalid
+     */
+    public static LocalDate parseLocalDateOrNull(String stringDate, String format, String locale) {
+        if (Strings.isBlank(stringDate)) {
+            return null;
+        }
+        try {
+            return parseLocalDate(stringDate, format, Strings.isBlank(locale) ? null : JsonParserHelper.localeFromString(locale));
+        } catch (final RuntimeException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Parses a month/day value (e.g. {@code "04 March"}) with the given pattern (e.g. {@code "dd MMMM"}) and locale,
+     * leniently and case-insensitively, the way the JSON command helper has always parsed {@code monthDayFormat}
+     * parameters.
+     * <p>
+     * Like {@link #parseLocalDateOrNull(String, String, String)} and unlike
+     * {@link #parseLocalDate(String, String, Locale)} this returns {@code null} instead of throwing, so Bean Validation
+     * constraints can turn a malformed value into a proper field violation.
+     *
+     * @return the parsed month/day, or {@code null} when the value or the pattern is blank, or when the value, the
+     *         pattern or the locale is invalid
+     */
+    public static MonthDay parseMonthDay(String stringMonthDay, String format, String locale) {
+        if (Strings.isBlank(stringMonthDay) || Strings.isBlank(format)) {
+            return null;
+        }
+        try {
+            Locale clientApplicationLocale = Strings.isBlank(locale) ? Locale.getDefault() : LocaleUtils.toLocale(locale);
+            DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive().parseLenient().appendPattern(format)
+                    .toFormatter(clientApplicationLocale).withResolverStyle(ResolverStyle.STRICT);
+            return MonthDay.parse(stringMonthDay, formatter);
+        } catch (final IllegalArgumentException | DateTimeException e) {
+            return null;
         }
     }
 

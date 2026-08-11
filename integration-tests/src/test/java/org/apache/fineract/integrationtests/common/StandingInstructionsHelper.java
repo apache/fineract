@@ -22,43 +22,46 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.util.Set;
 import org.apache.fineract.client.feign.services.StandingInstructionsHistoryApi.RetrieveAllStandingInstructionHistoryQueryParams;
 import org.apache.fineract.client.models.GetStandingInstructionHistoryPageItemsResponse;
 import org.apache.fineract.client.models.GetStandingInstructionRunHistoryResponse;
 import org.apache.fineract.client.models.GetStandingInstructionsStandingInstructionIdResponse;
-import org.apache.fineract.client.models.PostStandingInstructionsResponse;
+import org.apache.fineract.client.models.StandingInstructionCreateResponse;
 import org.apache.fineract.client.models.StandingInstructionCreationRequest;
 
 public class StandingInstructionsHelper {
 
     private static final String LOCALE = "en_GB";
-    private static final String OFFICE_ID = "1";
-    private static final String INSTRUCTION_TYPE_FIXED = "1";
-    private static final String PRIORITY_URGENT = "1";
-    private static final String RECURRENCE_FREQUENCY_WEEKS = "1";
-    private static final String RECURRENCE_TYPE_PERIODIC = "1";
-    private static final String STATUS_ACTIVE = "1";
-    private static final String TRANSFER_TYPE_ACCOUNT_TRANSFER = "1";
+    private static final Long OFFICE_ID = 1L;
+    private static final Integer INSTRUCTION_TYPE_FIXED = 1;
+    private static final Integer PRIORITY_URGENT = 1;
+    private static final Integer RECURRENCE_FREQUENCY_WEEKS = 1;
+    private static final Integer RECURRENCE_TYPE_PERIODIC = 1;
+    private static final Integer STATUS_ACTIVE = 1;
+    private static final Integer TRANSFER_TYPE_ACCOUNT_TRANSFER = 1;
 
-    private String officeId = OFFICE_ID;
+    private Long officeId = OFFICE_ID;
 
     public StandingInstructionsHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {}
 
-    public StandingInstructionCreationRequest build(final String clientId, final String fromAccountId, final String toAccountId,
-            final String fromAccountType, final String toAccountType, final String validFrom, final String validTo, final String monthDay) {
+    public StandingInstructionCreationRequest build(final Long clientId, final Long fromAccountId, final Long toAccountId,
+            final Integer fromAccountType, final Integer toAccountType, final String validFrom, final String validTo,
+            final String monthDay) {
         return new StandingInstructionCreationRequest().name(Utils.uniqueRandomStringGenerator("STANDING_INSTRUCTION_", 5))
                 .dateFormat("dd MMMM yyyy").monthDayFormat("dd MMMM").locale(LOCALE).fromClientId(clientId).fromAccountId(fromAccountId)
                 .fromAccountType(fromAccountType).fromOfficeId(this.officeId).toClientId(clientId).toAccountId(toAccountId)
-                .toAccountType(toAccountType).toOfficeId(this.officeId).amount("500").transferType(TRANSFER_TYPE_ACCOUNT_TRANSFER)
-                .priority(PRIORITY_URGENT).status(STATUS_ACTIVE).instructionType(INSTRUCTION_TYPE_FIXED).validFrom(validFrom)
-                .validTill(validTo).recurrenceType(RECURRENCE_TYPE_PERIODIC).recurrenceInterval("1")
-                .recurrenceFrequency(RECURRENCE_FREQUENCY_WEEKS).recurrenceOnMonthDay(monthDay);
+                .toAccountType(toAccountType).toOfficeId(this.officeId).amount(BigDecimal.valueOf(500))
+                .transferType(TRANSFER_TYPE_ACCOUNT_TRANSFER).priority(PRIORITY_URGENT).status(STATUS_ACTIVE)
+                .instructionType(INSTRUCTION_TYPE_FIXED).validFrom(validFrom).validTill(validTo).recurrenceType(RECURRENCE_TYPE_PERIODIC)
+                .recurrenceInterval(1).recurrenceFrequency(RECURRENCE_FREQUENCY_WEEKS).recurrenceOnMonthDay(monthDay);
     }
 
-    public Integer createStandingInstruction(final String clientId, final String fromAccountId, final String toAccountId,
-            final String fromAccountType, final String toAccountType, final String validFrom, final String validTo, final String monthDay) {
-        PostStandingInstructionsResponse response = ok(
+    public Long createStandingInstruction(final Long clientId, final Long fromAccountId, final Long toAccountId,
+            final Integer fromAccountType, final Integer toAccountType, final String validFrom, final String validTo,
+            final String monthDay) {
+        StandingInstructionCreateResponse response = ok(
                 () -> FineractFeignClientHelper.getFineractFeignClient().standingInstructions().createStandingInstruction(
                         build(clientId, fromAccountId, toAccountId, fromAccountType, toAccountType, validFrom, validTo, monthDay)));
         return response.getResourceId();

@@ -39,7 +39,7 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceTyp
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
-import org.apache.fineract.portfolio.account.service.StandingInstructionReadPlatformService;
+import org.apache.fineract.portfolio.account.service.StandingInstructionReadService;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
@@ -55,14 +55,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @RequiredArgsConstructor
 public class ExecuteStandingInstructionsTasklet implements Tasklet {
 
-    private final StandingInstructionReadPlatformService standingInstructionReadPlatformService;
+    private final StandingInstructionReadService standingInstructionReadService;
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        Collection<StandingInstructionData> instructionData = standingInstructionReadPlatformService
+        Collection<StandingInstructionData> instructionData = standingInstructionReadService
                 .retrieveAll(StandingInstructionStatus.ACTIVE.getValue());
         List<Throwable> errors = new ArrayList<>();
         for (StandingInstructionData data : instructionData) {
@@ -92,7 +92,7 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
             BigDecimal transactionAmount = data.getAmount();
             if (PortfolioAccountType.LOAN.equals(data.getToAccountTypeEnum())
                     && (recurrenceType.isDuesRecurrence() || (isDueForTransfer && instructionType.isDuesAmoutTransfer()))) {
-                StandingInstructionDuesData standingInstructionDuesData = standingInstructionReadPlatformService
+                StandingInstructionDuesData standingInstructionDuesData = standingInstructionReadService
                         .retriveLoanDuesData(data.getToAccount().getId());
                 if (data.getInstructionTypeEnum().isDuesAmoutTransfer()) {
                     transactionAmount = standingInstructionDuesData.totalDueAmount();

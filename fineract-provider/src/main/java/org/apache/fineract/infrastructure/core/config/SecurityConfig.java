@@ -20,10 +20,12 @@
 package org.apache.fineract.infrastructure.core.config;
 
 import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.fullyAuthenticated;
+import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAnyAuthority;
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.cache.service.CacheWritePlatformService;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -34,6 +36,7 @@ import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreFilter;
 import org.apache.fineract.infrastructure.core.filters.IdempotencyStoreHelper;
 import org.apache.fineract.infrastructure.core.filters.RequestResponseFilter;
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
 import org.apache.fineract.infrastructure.core.service.MDCWrapper;
 import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceModeApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBApiFilter;
@@ -385,6 +388,20 @@ public class SecurityConfig {
 
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/standinginstructionrunhistory"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STANDINGINSTRUCTION")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/standinginstructions"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STANDINGINSTRUCTION")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/standinginstructions/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STANDINGINSTRUCTION")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/standinginstructions"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_STANDINGINSTRUCTION")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/standinginstructions/*"))
+                    .access(byCommandParameter(
+                            Map.of(CommandParameterUtil.UPDATE_COMMAND_VALUE,
+                                    hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STANDINGINSTRUCTION"),
+                                    CommandParameterUtil.DELETE_COMMAND_VALUE,
+                                    hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_STANDINGINSTRUCTION")),
+                            hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_STANDINGINSTRUCTION",
+                                    "DELETE_STANDINGINSTRUCTION")))
 
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
@@ -483,6 +500,30 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    /**
+     * Authorizes an endpoint where a single HTTP method serves several commands selected by the {@code command} query
+     * parameter, against the authority that belongs to the requested command - so holding one command's permission does
+     * not also grant the others.
+     * <p>
+     * An unrecognised (or missing) command falls through to {@code unknownCommand}, which should be the union of the
+     * per-command authorities: the request is then rejected by the resource itself with the usual "unrecognized query
+     * parameter" error rather than as an authorization failure.
+     */
+    private static final String COMMAND_QUERY_PARAM = "command";
+
+    private AuthorizationManager<RequestAuthorizationContext> byCommandParameter(
+            Map<String, AuthorizationManager<RequestAuthorizationContext>> byCommand,
+            AuthorizationManager<RequestAuthorizationContext> unknownCommand) {
+        return (authentication, context) -> {
+            String commandParam = context.getRequest().getParameter(COMMAND_QUERY_PARAM);
+            AuthorizationManager<RequestAuthorizationContext> delegate = byCommand.entrySet().stream()
+                    .filter(entry -> CommandParameterUtil.is(commandParam, entry.getKey())).map(Map.Entry::getValue).findFirst()
+                    .orElse(unknownCommand);
+            AuthorizationResult result = delegate.authorize(authentication, context);
+            return result == null ? null : new AuthorizationDecision(result.isGranted());
+        };
     }
 
     private AuthorizationManager<RequestAuthorizationContext> allOfRequestManagers(
