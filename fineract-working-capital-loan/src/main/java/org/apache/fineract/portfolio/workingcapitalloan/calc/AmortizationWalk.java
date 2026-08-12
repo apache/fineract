@@ -24,6 +24,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -115,8 +116,11 @@ final class AmortizationWalk {
      *            the day the rate currently in force was solved to close on. What the schedule would run to if the
      *            borrower paid exactly to plan from here, which is what the loan reports as its number of repayments -
      *            not the same as {@code days.size()}, which grows when instalments are missed.
+     * @param rateChangeSolves
+     *            what each rate change was solved to on the day the walk reached it, keyed by its effective date. A
+     *            change the loan had already gone square before is absent: it re-priced nothing.
      */
-    record Result(List<AmortizationDay> days, int contractualTerm) {
+    record Result(List<AmortizationDay> days, int contractualTerm, Map<LocalDate, AmortizationParams.Solved> rateChangeSolves) {
     }
 
     Result walk() {
@@ -136,6 +140,7 @@ final class AmortizationWalk {
 
         int rateStartDay = 1;
         int nextRateChange = 0;
+        final Map<LocalDate, AmortizationParams.Solved> rateChangeSolves = new LinkedHashMap<>();
         // The rate the days still to come are projected at. It starts as the rate the loan was written at and is
         // re-solved wherever the position it was solved for stops being the position the loan is really in - at a rate
         // change, and after reality has diverged from the plan. Separate from the rate the plan cursor earns fee at,
@@ -160,6 +165,7 @@ final class AmortizationWalk {
                 plan.changeRateTo(change.periodPaymentRate(), balance, discountFee.subtract(aggregatedNormalizedExpected, mc), collected);
                 rateInForce = change.periodPaymentRate();
                 projection = plan.solved();
+                rateChangeSolves.put(change.effectiveDate(), projection);
                 projectionStale = false;
                 rateStartDay = dayIndex;
             }
@@ -302,7 +308,7 @@ final class AmortizationWalk {
                 break;
             }
         }
-        return new Result(days, rateStartDay + plan.solved().term() - 1);
+        return new Result(days, rateStartDay + plan.solved().term() - 1, rateChangeSolves);
     }
 
     private BigDecimal safeDiscountFactor(final BigDecimal eir, final long paymentsLeft) {

@@ -320,7 +320,7 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
     }
 
     @Override
-    public void regenerateAmortizationScheduleOnRateChange(final WorkingCapitalLoan loan) {
+    public ProjectedAmortizationScheduleModel regenerateAmortizationScheduleOnRateChange(final WorkingCapitalLoan loan) {
         Validate.notNull(loan, "loan must not be null");
 
         final MathContext mc = MoneyHelper.getMathContext();
@@ -339,7 +339,7 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         final List<PrincipalAdjustment> preservedAdjustments = currentModel.snapshotPrincipalAdjustments().stream()
                 .map(adjustment -> new PrincipalAdjustment(adjustment.date(), adjustment.amount().getAmount())).toList();
 
-        writeReconstructed(loan, preservedPayments, preservedAdjustments);
+        return writeReconstructed(loan, preservedPayments, preservedAdjustments);
     }
 
     @Override
@@ -392,7 +392,7 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         }
     }
 
-    private void writeReconstructed(final WorkingCapitalLoan loan, final List<PrincipalPayment> payments,
+    private ProjectedAmortizationScheduleModel writeReconstructed(final WorkingCapitalLoan loan, final List<PrincipalPayment> payments,
             final List<PrincipalAdjustment> adjustments) {
         // A pathological rate can make a re-solved segment non-computable (zero daily payment, over-cap term,
         // non-convergent EIR); surface those as a domain-rule error.
@@ -404,6 +404,7 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         }
 
         scheduleRepositoryWrapper.writeModel(loan, model);
+        return model;
     }
 
     @Override

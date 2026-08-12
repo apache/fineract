@@ -21,9 +21,11 @@ package org.apache.fineract.portfolio.workingcapitalloan.calc;
 import com.google.gson.annotations.SerializedName;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -81,6 +83,13 @@ public final class ProjectedAmortizationScheduleModel {
      * meaningless.
      */
     public static final int MAX_CALCULABLE_TOTAL_DAYS = 100_000;
+
+    /**
+     * Scale the annual EIR percentage is persisted at, applied when it is computed so the event and the API read the
+     * same value.
+     */
+    public static final int ANNUAL_EIR_SCALE = 6;
+    public static final RoundingMode ANNUAL_EIR_ROUNDING = RoundingMode.HALF_EVEN;
 
     @SerializedName(value = "discountFeeAmount", alternate = "originationFeeAmount")
     private final Money discountFeeAmount;
@@ -150,6 +159,14 @@ public final class ProjectedAmortizationScheduleModel {
     private int contractualTerm;
 
     /**
+     * What each rate change was solved to on the day the walk reached it, keyed by its effective date. Derived with the
+     * payment list and not persisted for the same reason.
+     */
+    @JsonExclude
+    @Getter(AccessLevel.NONE)
+    private Map<LocalDate, RateChangeSolve> rateChangeSolves;
+
+    /**
      * Set whenever the list above is known to be out of date - on load, and when an elapsed-period acknowledgement
      * moves {@link #calculatedTillDate}. The rebuild is deferred until something actually reads a period, because most
      * callers want only the scalars beside it (the rate, the term, the payment amount) and a same-date acknowledgement
@@ -214,6 +231,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.principalAdjustments = new ArrayList<>();
         this.projectedPayments = List.of();
         this.contractualTerm = 0;
+        this.rateChangeSolves = Map.of();
         // Nothing has been read off the JSON yet, and the list is never in it.
         this.derivedPaymentsStale = true;
         this.calculatedTillDate = null;
@@ -523,6 +541,33 @@ public final class ProjectedAmortizationScheduleModel {
     }
 
     /**
+     * Null unless a change was recorded on exactly that day: a change never replayed into this model must get nothing
+     * rather than a neighbouring change's numbers.
+     */
+    public RateChangeSolve rateChangeSolveOn(final LocalDate effectiveDate) {
+        Objects.requireNonNull(effectiveDate, "effectiveDate");
+        materializeDerivedPayments();
+        return rateChangeSolves.get(effectiveDate);
+    }
+
+    /** {@code (1 + dailyEir)^npvDayCount - 1}: the year is measured in the day count that prices the daily payment. */
+    public static BigDecimal annualiseEir(final BigDecimal dailyEir, final int npvDayCount, final MathContext mc) {
+        if (dailyEir == null || npvDayCount <= 0) {
+            return null;
+        }
+        return BigDecimal.ONE.add(dailyEir, mc).pow(npvDayCount, mc).subtract(BigDecimal.ONE, mc);
+    }
+
+    /**
+     * {@link #annualiseEir} as a percentage, the unit the period payment rates themselves are expressed in, rounded to
+     * {@link #ANNUAL_EIR_SCALE} decimals before it is stored rather than leaving the rounding to the column.
+     */
+    public static BigDecimal annualEirPercentage(final BigDecimal dailyEir, final int npvDayCount, final MathContext mc) {
+        final BigDecimal annualEir = annualiseEir(dailyEir, npvDayCount, mc);
+        return annualEir == null ? null : annualEir.movePointRight(2).setScale(ANNUAL_EIR_SCALE, ANNUAL_EIR_ROUNDING);
+    }
+
+    /**
      * Records a rate change taking effect on {@code rateChangeDate} and rebuilds.
      *
      * <p>
@@ -640,6 +685,10 @@ public final class ProjectedAmortizationScheduleModel {
                 calculatedTillDate, paymentsByDate, rateChanges, minimumScheduleDays(), currency, mc);
         final AmortizationWalk.Result walked = amortizationWalk.walk();
         this.contractualTerm = walked.contractualTerm();
+        final Map<LocalDate, RateChangeSolve> solves = new LinkedHashMap<>();
+        walked.rateChangeSolves().forEach((effectiveDate, solved) -> solves.put(effectiveDate,
+                new RateChangeSolve(effectiveDate, money(solved.dailyPayment()), solved.term(), solved.eir())));
+        this.rateChangeSolves = Collections.unmodifiableMap(solves);
         this.projectedPayments = List.copyOf(buildPayments(walked.days()));
     }
 
@@ -792,6 +841,13 @@ public final class ProjectedAmortizationScheduleModel {
 
     /** A rate change: the day the new rate takes effect and the rate itself, as a percentage. */
     public record RateChange(LocalDate effectiveDate, BigDecimal periodPaymentRate) {
+    }
+
+    /**
+     * The solve the schedule bills by from the change's day on, as it was then: a later re-solve on divergence does not
+     * restate it.
+     */
+    public record RateChangeSolve(LocalDate effectiveDate, Money dailyPayment, int term, BigDecimal eir) {
     }
 
     /** Principal re-injected on a date by an over-refunding credit balance refund. */
