@@ -18,11 +18,18 @@
  */
 package org.apache.fineract.infrastructure.businessdate.domain;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface BusinessDateRepository extends JpaRepository<BusinessDate, Long>, JpaSpecificationExecutor<BusinessDate> {
 
-    Optional<BusinessDate> findByType(BusinessDateType type);
+    @Query("SELECT b FROM BusinessDate b WHERE b.type = :type")
+    Optional<BusinessDate> findByType(@Param("type") BusinessDateType type);
+
+    @Query("SELECT b FROM BusinessDate b")
+    List<BusinessDate> findAllBusinessDates();
 }

@@ -19,11 +19,14 @@
 package org.apache.fineract.investor.domain;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.investor.data.ExternalTransferStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -32,11 +35,14 @@ import org.springframework.data.repository.query.Param;
 public interface ExternalAssetOwnerTransferRepository
         extends JpaRepository<ExternalAssetOwnerTransfer, Long>, JpaSpecificationExecutor<ExternalAssetOwnerTransfer> {
 
-    Page<ExternalAssetOwnerTransfer> findAllByLoanId(Long loanId, PageRequest pageable);
+    @Query("SELECT e FROM ExternalAssetOwnerTransfer e WHERE e.loanId = :loanId")
+    Page<ExternalAssetOwnerTransfer> findAllByLoanId(@Param("loanId") Long loanId, PageRequest pageable);
 
-    Page<ExternalAssetOwnerTransfer> findAllByExternalLoanId(ExternalId externalLoanId, PageRequest pageable);
+    @Query("SELECT e FROM ExternalAssetOwnerTransfer e WHERE e.externalLoanId = :externalLoanId")
+    Page<ExternalAssetOwnerTransfer> findAllByExternalLoanId(@Param("externalLoanId") ExternalId externalLoanId, PageRequest pageable);
 
-    Page<ExternalAssetOwnerTransfer> findAllByExternalId(ExternalId externalId, PageRequest pageable);
+    @Query("SELECT e FROM ExternalAssetOwnerTransfer e WHERE e.externalId = :externalId")
+    Page<ExternalAssetOwnerTransfer> findAllByExternalId(@Param("externalId") ExternalId externalId, PageRequest pageable);
 
     @Query("select e from ExternalAssetOwnerTransfer e where e.loanId = :loanId and e.id = (select max(ex.id) from ExternalAssetOwnerTransfer ex where ex.loanId = :loanId)")
     Optional<ExternalAssetOwnerTransfer> findLatestByLoanId(@Param("loanId") Long loanId);
@@ -51,7 +57,26 @@ public interface ExternalAssetOwnerTransferRepository
     List<ExternalAssetOwnerTransfer> findEffectiveTransfersOrderByIdDesc(@Param("loanId") Long loanId,
             @Param("effectiveDate") LocalDate effectiveDate);
 
-    Optional<ExternalAssetOwnerTransfer> findFirstByExternalIdOrderByIdAsc(ExternalId externalTransferId);
+    @Query("SELECT e FROM ExternalAssetOwnerTransfer e WHERE e.externalId = :externalTransferId ORDER BY e.id ASC")
+    List<ExternalAssetOwnerTransfer> findByExternalIdOrderByIdAsc(@Param("externalTransferId") ExternalId externalTransferId,
+            Pageable pageable);
+
+    @Query("SELECT e FROM ExternalAssetOwnerTransfer e WHERE e.loanId = :loanId AND e.owner = :owner"
+            + " AND e.status IN :statuses AND e.effectiveDateTo = :effectiveDateTo ORDER BY e.id ASC")
+    Optional<ExternalAssetOwnerTransfer> findOneByLoanIdAndOwnerAndStatusInAndEffectiveDateTo(@Param("loanId") Long loanId,
+            @Param("owner") ExternalAssetOwner owner, @Param("statuses") Collection<ExternalTransferStatus> statuses,
+            @Param("effectiveDateTo") LocalDate effectiveDateTo);
+
+    @Query("SELECT e FROM ExternalAssetOwnerTransfer e WHERE e.loanId = :loanId AND e.status IN :statuses"
+            + " AND e.effectiveDateTo = :effectiveDateTo ORDER BY e.id ASC")
+    List<ExternalAssetOwnerTransfer> findAllByLoanIdAndStatusInAndEffectiveDateTo(@Param("loanId") Long loanId,
+            @Param("statuses") Collection<ExternalTransferStatus> statuses, @Param("effectiveDateTo") LocalDate effectiveDateTo);
+
+    @Query("SELECT e FROM ExternalAssetOwnerTransfer e WHERE e.loanId = :loanId AND e.settlementDate = :settlementDate"
+            + " AND e.status IN :statuses AND e.effectiveDateTo >= :effectiveDateTo ORDER BY e.id ASC")
+    List<ExternalAssetOwnerTransfer> findAllByLoanIdAndSettlementDateAndStatusInAndEffectiveDateToGreaterThanEqual(
+            @Param("loanId") Long loanId, @Param("settlementDate") LocalDate settlementDate,
+            @Param("statuses") Collection<ExternalTransferStatus> statuses, @Param("effectiveDateTo") LocalDate effectiveDateTo);
 
     @Query("select max(e.id) from ExternalAssetOwnerTransfer e where e.externalId = :externalTransferId")
     Optional<Long> findLastByExternalIdOrderByIdDesc(@Param("externalTransferId") ExternalId externalTransferId);

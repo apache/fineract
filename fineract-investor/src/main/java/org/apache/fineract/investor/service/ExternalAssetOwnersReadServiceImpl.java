@@ -120,7 +120,8 @@ public class ExternalAssetOwnersReadServiceImpl implements ExternalAssetOwnersRe
 
     @Override
     public ExternalTransferData retrieveFirstTransferByExternalId(ExternalId externalTransferId) {
-        return externalAssetOwnerTransferRepository.findFirstByExternalIdOrderByIdAsc(externalTransferId).map(mapper::mapTransfer)
+        return externalAssetOwnerTransferRepository.findByExternalIdOrderByIdAsc(externalTransferId, PageRequest.of(0, 1)).stream()
+                .findFirst().map(mapper::mapTransfer)
                 .orElseThrow(() -> new ExternalAssetOwnerTransferNotFoundException(externalTransferId));
     }
 

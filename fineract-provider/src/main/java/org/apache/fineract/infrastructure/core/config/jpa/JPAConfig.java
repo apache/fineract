@@ -19,9 +19,11 @@
 
 package org.apache.fineract.infrastructure.core.config.jpa;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
@@ -31,6 +33,7 @@ import org.apache.fineract.infrastructure.core.persistence.DatabaseSelectingPers
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
+import org.eclipse.persistence.sessions.SessionCustomizer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilderCustomizer;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
@@ -94,7 +97,21 @@ public class JPAConfig extends JpaBaseConfiguration {
         vendorProperties.put(PersistenceUnitProperties.WEAVING, "static");
         vendorProperties.put(PersistenceUnitProperties.PERSISTENCE_CONTEXT_CLOSE_ON_COMMIT, "true");
         vendorProperties.put(PersistenceUnitProperties.CACHE_SHARED_DEFAULT, "false");
-        emFactoryCustomizers.forEach(c -> vendorProperties.putAll(c.additionalVendorProperties()));
+        List<SessionCustomizer> sessionCustomizers = new ArrayList<>();
+        emFactoryCustomizers.forEach(customizer -> customizer.additionalVendorProperties().forEach((key, value) -> {
+            if (PersistenceUnitProperties.SESSION_CUSTOMIZER.equals(key) && value instanceof SessionCustomizer sessionCustomizer) {
+                sessionCustomizers.add(sessionCustomizer);
+            } else {
+                vendorProperties.put(key, value);
+            }
+        }));
+        if (!sessionCustomizers.isEmpty()) {
+            vendorProperties.put(PersistenceUnitProperties.SESSION_CUSTOMIZER, (SessionCustomizer) session -> {
+                for (SessionCustomizer customizer : sessionCustomizers) {
+                    customizer.customize(session);
+                }
+            });
+        }
         return vendorProperties;
     }
 

@@ -61,8 +61,7 @@ public class LoanRepaymentScheduleService {
     }
 
     public Integer countInstallmentsByLoanIdWhereIsAdditionalFalseAndIsDownPaymentFalse(Long loanId) {
-        return Math.toIntExact(loanRepaymentScheduleInstallmentRepository
-                .countLoanRepaymentScheduleInstallmentsByLoan_IdAndAdditionalAndIsDownPayment(loanId, false, false));
+        return Math.toIntExact(loanRepaymentScheduleInstallmentRepository.countLoanRepaymentScheduleInstallments(loanId, false, false));
     }
 
     public LoanScheduleData extractLoanScheduleData(final List<LoanRepaymentScheduleInstallment> installments,
