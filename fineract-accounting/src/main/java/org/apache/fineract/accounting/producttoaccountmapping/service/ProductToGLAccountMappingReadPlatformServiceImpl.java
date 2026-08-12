@@ -266,7 +266,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
                 ? productToGLAccountMappingRepository.findAllPenaltyToIncomeAccountMappings(loanProductId, portfolioProductType.getValue())
                 : productToGLAccountMappingRepository.findAllFeeToIncomeAccountMappings(loanProductId, portfolioProductType.getValue());
         if (mappings.isEmpty()) {
-            return null;
+            return List.of();
         }
 
         final Set<Long> chargeIds = mappings.stream().map(ProductToGLAccountMapping::getChargeId).collect(Collectors.toSet());
@@ -275,11 +275,16 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
         final List<ChargeToGLAccountMapper> chargeToGLAccountMappers = new ArrayList<>();
         for (final ProductToGLAccountMapping mapping : mappings) {
+            final ChargeData chargeData = chargesById.get(mapping.getChargeId());
+            if (chargeData == null) {
+                log.warn("Charge {} referenced by product to GL account mapping {} no longer exists; mapping is skipped",
+                        mapping.getChargeId(), mapping.getId());
+                continue;
+            }
             final GLAccount glAccount = mapping.getGlAccount();
             final GLAccountData gLAccountData = new GLAccountData().setId(glAccount.getId()).setName(glAccount.getName())
                     .setGlCode(glAccount.getGlCode());
-            chargeToGLAccountMappers
-                    .add(new ChargeToGLAccountMapper().setCharge(chargesById.get(mapping.getChargeId())).setIncomeAccount(gLAccountData));
+            chargeToGLAccountMappers.add(new ChargeToGLAccountMapper().setCharge(chargeData).setIncomeAccount(gLAccountData));
         }
         return chargeToGLAccountMappers;
     }
