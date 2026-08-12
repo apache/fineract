@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanPeriodPaymentRateChangeData;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodPaymentRateChange;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
@@ -41,6 +42,15 @@ public class WorkingCapitalLoanPeriodPaymentRateChangeReadServiceImpl implements
         if (!loanRepository.existsById(loanId)) {
             throw new WorkingCapitalLoanNotFoundException(loanId);
         }
+        return historyOf(loanId);
+    }
+
+    @Override
+    public List<WorkingCapitalLoanPeriodPaymentRateChangeData> retrieveRateChangeHistory(final WorkingCapitalLoan loan) {
+        return historyOf(loan.getId());
+    }
+
+    private List<WorkingCapitalLoanPeriodPaymentRateChangeData> historyOf(final Long loanId) {
         return repository.findByWorkingCapitalLoanIdOrderByIdDesc(loanId).stream().map(e -> toData(e, loanId)).toList();
     }
 
@@ -48,6 +58,7 @@ public class WorkingCapitalLoanPeriodPaymentRateChangeReadServiceImpl implements
             final Long loanId) {
         return new WorkingCapitalLoanPeriodPaymentRateChangeData(entity.getId(), loanId, entity.getEffectiveDate(),
                 entity.getPreviousRate(), entity.getNewRate(), entity.isReversed(), entity.getReversedOnDate(),
-                entity.getCreatedDate().orElse(null), entity.getSubmittedOnDate());
+                entity.getCreatedDate().orElse(null), entity.getSubmittedOnDate(), entity.getCalculatedAnnualEir(),
+                entity.getDailyPaymentAmount(), entity.getSegmentTerm());
     }
 }
