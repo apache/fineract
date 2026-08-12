@@ -339,6 +339,55 @@ public class FeignWorkingCapitalLoanScheduleRestatementTest extends FeignIntegra
     }
 
     /**
+     * A rate change re-rates the periods still to run, so one dated past the last of them has nothing to apply to. The
+     * request is refused rather than recorded in the rate history and then quietly ignored by the schedule.
+     *
+     * <p>
+     * Reaching this needs a date far beyond the loan's own life, because every missed instalment pushes maturity out by
+     * a day: merely being overdue never puts the loan past its own end.
+     */
+    @Test
+    void testRateChangeEffectiveAfterMaturityIsRejected() {
+        businessDateHelper.runAt("2026-01-01", () -> {
+            final Long loanId = disburseLoan();
+            final ProjectedAmortizationScheduleData beforeAttempt = wcLoanHelper.getAmortizationSchedule(loanId);
+
+            final CallFailedRuntimeException failure = wcLoanHelper.updateRateExpectingError(loanId,
+                    WorkingCapitalLoanRequestBuilders.updateRate(RAISED_RATE, "01 January 2030"));
+
+            assertEquals(400, failure.getStatus(), "a rate change past maturity must be a validation error");
+            assertTrue(failure.getDeveloperMessage().contains("cannot.be.after.maturity.date"),
+                    "the error must name the maturity rule, but was: " + failure.getDeveloperMessage());
+
+            // Refused means refused: the schedule is exactly as it was.
+            final ProjectedAmortizationScheduleData afterAttempt = wcLoanHelper.getAmortizationSchedule(loanId);
+            assertEquals(periods(beforeAttempt).size(), periods(afterAttempt).size(), "a rejected rate change must not touch the schedule");
+            assertProjectionMatchesThrough(beforeAttempt, afterAttempt, periods(beforeAttempt).size(), "after a rejected rate change");
+        });
+    }
+
+    /**
+     * The mirror of the case above: the same loan, left unpaid well past the day it was written to mature, still takes
+     * a rate change. Maturity travels with the missed instalments, so an overdue loan is never past its own end.
+     */
+    @Test
+    void testRateChangeIsStillAcceptedOnALoanLeftUnpaidPastItsOriginalMaturity() {
+        businessDateHelper.runAt("2026-01-01", () -> {
+            final Long loanId = disburseLoan();
+
+            // 15 February is three weeks past 23 January, the last period the loan was written with.
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-02-15");
+            wcLoanHelper.executeInlineWCCOB(loanId);
+            wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(RAISED_RATE, "15 February 2026"));
+
+            final ProjectedAmortizationScheduleData schedule = wcLoanHelper.getAmortizationSchedule(loanId);
+            assertTrue(periods(schedule).size() > BASE_TERM, "the schedule must have grown past its original term\n" + render(schedule));
+            assertScheduleClosesCleanly(schedule, "after re-rating a loan left unpaid past its original maturity");
+            assertNoNegativeAmounts(schedule, "after re-rating a loan left unpaid past its original maturity");
+        });
+    }
+
+    /**
      * No column of a repayment period may go negative. Balances, deferred fee and amortization are all amounts of money
      * owed, held or earned, and none of those has a negative reading in Fineract. The disbursement row is excluded: it
      * carries the money going out, so its payment and present value are negative by design.

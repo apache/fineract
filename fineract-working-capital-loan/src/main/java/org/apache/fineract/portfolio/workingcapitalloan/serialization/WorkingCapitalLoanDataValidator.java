@@ -988,6 +988,20 @@ public class WorkingCapitalLoanDataValidator {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.effectiveDateParamName)
                     .failWithCode("cannot.be.before.disbursal.date");
         }
+        // A rate change re-rates the periods still to run, so a date beyond the last of them has nothing to apply to:
+        // the schedule cannot express the request and would silently ignore it.
+        //
+        // Maturity alone is enough to test against, because the schedule keeps pace with the calendar - every missed
+        // instalment pushes the last period out by a day - so a loan that is merely behind still matures in the future
+        // and stays open to re-rating.
+        //
+        // The date is kept in step with the schedule on every rewrite, so it already means "maturity including every
+        // segment and everything paid so far". Null only before the loan has a schedule at all.
+        final LocalDate maturityDate = loan.getExpectedMaturityDate();
+        if (maturityDate != null && DateUtils.isAfter(effectiveDate, maturityDate)) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.effectiveDateParamName)
+                    .failWithCode("cannot.be.after.maturity.date");
+        }
 
         final BigDecimal periodPaymentRate = this.fromApiJsonHelper
                 .extractBigDecimalNamed(WorkingCapitalLoanConstants.periodPaymentRateParamName, element, new HashSet<>());
