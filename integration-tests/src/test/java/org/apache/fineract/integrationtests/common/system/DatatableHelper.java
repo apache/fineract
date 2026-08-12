@@ -237,6 +237,31 @@ public class DatatableHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
+    public <T> T readDatatableEntryWithOrder(final String datatableName, final Integer resourceId, final boolean genericResultset,
+            final String order, final String jsonAttributeToGetBack) {
+        final String orderParam = order == null ? "" : "&order=" + order;
+        return Utils.performServerGet(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + resourceId
+                + "?genericResultSet=" + genericResultset + orderParam + "&" + Utils.TENANT_IDENTIFIER, jsonAttributeToGetBack);
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public <T> T readDatatableManyEntryWithOrder(final String datatableName, final Integer apptableId, final Long datatableId,
+            final boolean genericResultSet, final String order, final String jsonAttributeToGetBack) {
+        final String orderParam = order == null ? "" : "&order=" + order;
+        return Utils
+                .performServerGet(
+                        this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId + "/" + datatableId
+                                + "?genericResultSet=" + genericResultSet + "&" + Utils.TENANT_IDENTIFIER + orderParam,
+                        jsonAttributeToGetBack);
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
     public <T> T updateDatatableEntry(final String datatableName, final Integer apptableId, final boolean genericResultSet,
             final String json) {
         return Utils.performServerPut(this.requestSpec, this.responseSpec, DATATABLE_URL + "/" + datatableName + "/" + apptableId
