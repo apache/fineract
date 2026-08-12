@@ -26,6 +26,7 @@ import org.apache.fineract.portfolio.charge.data.ChargeData;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Charge module implementation of the contract declared by the accounting module. Keeping the implementation here means
@@ -38,6 +39,7 @@ public class AccountingChargeReadServiceImpl implements AccountingChargeReadServ
     private final ChargeRepository chargeRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ChargeData> findChargesByIds(final Set<Long> chargeIds) {
         if (chargeIds == null || chargeIds.isEmpty()) {
             return List.of();
