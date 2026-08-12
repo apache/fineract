@@ -36,9 +36,11 @@ import java.util.Optional;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
@@ -56,6 +58,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanWriteOffDomainService;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanNoteRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionAllocationRepository;
@@ -102,6 +105,8 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
     private WorkingCapitalLoanTransactionRepository transactionRepository;
     @Mock
     private WorkingCapitalLoanTransactionAllocationRepository allocationRepository;
+    @Mock
+    private WorkingCapitalLoanChargeRepository chargeRepository;
     @Mock
     private WorkingCapitalLoanNoteRepository noteRepository;
     @Mock
@@ -182,6 +187,21 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
     }
 
     @Test
+    void undoWriteOffToleratesARequestWithNoBody() {
+        when(loan.getLoanStatus()).thenReturn(LoanStatus.CLOSED_WRITTEN_OFF, LoanStatus.ACTIVE);
+        when(transactionRepository.findActiveByTypeOrderByIdDesc(LOAN_ID, LoanTransactionType.WRITEOFF))
+                .thenReturn(List.of(WorkingCapitalLoanTransaction.writeOff(loan, BigDecimal.TEN, businessDate, null)));
+        // A real command built from an empty request body: parsedCommand is null, which validateUndoWriteOff permits.
+        // The service must not dereference the parsed JSON on this path.
+        final JsonCommand bodilessCommand = JsonCommand.from(null, null, new FromJsonHelper(), "WORKINGCAPITALLOAN", LOAN_ID, null, null,
+                null, LOAN_ID, null, null, null, null, null, null, null, null);
+
+        final CommandProcessingResult result = writeOffService.undoWriteOff(LOAN_ID, bodilessCommand);
+
+        assertThat(result.getLoanId()).isEqualTo(LOAN_ID);
+    }
+
+    @Test
     void writeOffIsRejectedWhenTheLoanHasNoBalanceRow() {
         when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
         when(loan.getBalance()).thenReturn(null);
@@ -191,7 +211,7 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
 
         assertThat(ex.getGlobalisationMessageCode()).isEqualTo("error.msg.wc.loan.balance.not.found");
         // Nothing was closed, posted or published on the way out.
-        verify(writeOffDomainService, never()).writeOff(any(), any(), any(), any());
+        verify(writeOffDomainService, never()).writeOff(any(), any(), any(), any(), any());
         verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any());
     }
 
@@ -204,7 +224,7 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
                 () -> writeOffService.undoWriteOff(LOAN_ID, command));
 
         assertThat(ex.getGlobalisationMessageCode()).isEqualTo("error.msg.wc.loan.balance.not.found");
-        verify(writeOffDomainService, never()).undoWriteOff(any());
+        verify(writeOffDomainService, never()).undoWriteOff(any(), any());
         verify(businessEventNotifierService, never()).notifyPostBusinessEvent(any());
     }
 

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,11 +48,13 @@ import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConsta
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanNote;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanWriteOffDomainService;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanNoteRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionAllocationRepository;
@@ -71,6 +74,7 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
     private final WorkingCapitalLoanWriteOffDomainService writeOffDomainService;
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
     private final WorkingCapitalLoanTransactionAllocationRepository allocationRepository;
+    private final WorkingCapitalLoanChargeRepository chargeRepository;
     private final WorkingCapitalLoanNoteRepository noteRepository;
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final ExternalIdFactory externalIdFactory;
@@ -103,11 +107,13 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
         final BigDecimal penaltyPortion = balance.getPenaltyOutstanding();
         final BigDecimal writeOffAmount = MathUtil.add(principalPortion, feePortion, penaltyPortion);
 
-        // Terminal write-off: transition to CLOSED_WRITTEN_OFF, zero the balance and record the audit trail.
-        this.writeOffDomainService.writeOff(loan, transactionDate, currentUser, writeOffReason);
+        // Terminal write-off: transition to CLOSED_WRITTEN_OFF, zero the balance (marking each active charge's
+        // remainder as written off so the charge view matches it) and record the audit trail.
+        final List<WorkingCapitalLoanCharge> charges = this.chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loanId);
+        this.writeOffDomainService.writeOff(loan, transactionDate, currentUser, writeOffReason, charges);
 
-        final ExternalId externalId = this.externalIdFactory
-                .create(command.stringValueOfParameterNamedAllowingNull(WorkingCapitalLoanConstants.externalIdParameterName));
+        final ExternalId externalId = this.externalIdFactory.createFromCommand(command,
+                WorkingCapitalLoanConstants.externalIdParameterName);
         final WorkingCapitalLoanTransaction writeOffTransaction = WorkingCapitalLoanTransaction.writeOff(loan, writeOffAmount,
                 transactionDate, externalId);
         this.transactionRepository.saveAndFlush(writeOffTransaction);
@@ -116,7 +122,14 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
         this.allocationRepository.saveAndFlush(allocation);
 
         this.loanRepository.saveAndFlush(loan);
-        createNote(command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName), loan);
+        this.chargeRepository.saveAll(charges);
+
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put(WorkingCapitalLoanConstants.transactionDateParamName, transactionDate);
+        if (writeOffReasonId != null) {
+            changes.put(WorkingCapitalLoanConstants.writeoffReasonIdParamName, writeOffReasonId);
+        }
+        createNote(command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName), loan, changes);
 
         // The zeroed balance has to be pushed through the delinquency schedule: its periods are capped to what the
         // customer can still owe, so a written-off loan classifies as not delinquent and its active tags are lifted.
@@ -131,17 +144,12 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
         notifyBalanceChanged(loan);
         notifyStatusChanged(loan, oldStatus);
 
-        final Map<String, Object> changes = new LinkedHashMap<>();
-        changes.put(WorkingCapitalLoanConstants.transactionDateParamName, transactionDate);
-        if (writeOffReasonId != null) {
-            changes.put(WorkingCapitalLoanConstants.writeoffReasonIdParamName, writeOffReasonId);
-        }
-
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withLoanId(loanId) //
+                .withLoanExternalId(loan.getExternalId()) //
                 .withEntityId(writeOffTransaction.getId()) //
                 .withEntityExternalId(writeOffTransaction.getExternalId()) //
                 .with(changes) //
@@ -164,17 +172,28 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
                 .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.wc.loan.write.off.transaction.not.found",
                         "No active write-off transaction found for loan " + loanId, loanId));
 
-        final ExternalId reversalExternalId = this.externalIdFactory
-                .create(command.stringValueOfParameterNamedAllowingNull(WorkingCapitalLoanConstants.reversalExternalIdParamName));
+        // createFromCommand tolerates a bodiless request, which validateUndoWriteOff explicitly permits.
+        final ExternalId reversalExternalId = this.externalIdFactory.createFromCommand(command,
+                WorkingCapitalLoanConstants.reversalExternalIdParamName);
         writeOffTransaction.setReversed(true);
         writeOffTransaction.setReversalExternalId(reversalExternalId);
         writeOffTransaction.setReversedOnDate(DateUtils.getBusinessLocalDate());
         this.transactionRepository.saveAndFlush(writeOffTransaction);
 
-        // Reopen the loan to ACTIVE, restore the outstanding balance and clear the write-off audit trail.
-        this.writeOffDomainService.undoWriteOff(loan);
+        // Reopen the loan to ACTIVE, restore the outstanding balance (and the charges' outstanding) and clear the
+        // write-off audit trail.
+        final List<WorkingCapitalLoanCharge> charges = this.chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loanId);
+        this.writeOffDomainService.undoWriteOff(loan, charges);
         this.loanRepository.saveAndFlush(loan);
-        createNote(command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName), loan);
+        this.chargeRepository.saveAll(charges);
+
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put(WorkingCapitalLoanConstants.reversalExternalIdParamName, reversalExternalId);
+        // The note parameter is only readable when the request carried a body; the command permits none at all.
+        final String noteText = command.parsedJson() != null
+                ? command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName)
+                : null;
+        createNote(noteText, loan, changes);
 
         // The restored balance re-derives the delinquency the loan had before the write-off: the schedule replays the
         // repayment history and reclassifies against the outstanding that is back on the books.
@@ -193,8 +212,10 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withLoanId(loanId) //
+                .withLoanExternalId(loan.getExternalId()) //
                 .withEntityId(writeOffTransaction.getId()) //
                 .withEntityExternalId(writeOffTransaction.getExternalId()) //
+                .with(changes) //
                 .build();
     }
 
@@ -222,9 +243,10 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
         }
     }
 
-    private void createNote(final String noteText, final WorkingCapitalLoan loan) {
+    private void createNote(final String noteText, final WorkingCapitalLoan loan, final Map<String, Object> changes) {
         if (StringUtils.isNotBlank(noteText)) {
             this.noteRepository.save(WorkingCapitalLoanNote.create(loan, noteText));
+            changes.put(WorkingCapitalLoanConstants.noteParamName, noteText);
         }
     }
 }

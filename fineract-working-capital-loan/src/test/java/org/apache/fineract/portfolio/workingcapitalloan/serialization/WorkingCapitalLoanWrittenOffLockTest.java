@@ -79,7 +79,7 @@ class WorkingCapitalLoanWrittenOffLockTest {
         ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
 
-        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, null, null, null);
+        validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, null, null, null, null);
         lenient().when(loan.getDisbursementDetails()).thenReturn(List.of());
         lenient().when(loan.getLoanStatus()).thenReturn(LoanStatus.CLOSED_WRITTEN_OFF);
         lenient().when(transaction.isReversed()).thenReturn(false);

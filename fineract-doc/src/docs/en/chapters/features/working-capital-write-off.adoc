@@ -42,6 +42,7 @@ It ensures:
 == Write-Off Handling
 
 * Outstanding is zeroed by moving each portion into a *written-off bucket* (`principalWrittenOff` / `feeWrittenOff` / `penaltyWrittenOff`) on the loan balance. The paid columns are untouched, so the original outstanding can be restored by an undo.
+* Each active loan charge has its unpaid remainder marked as `amountWrittenOff`, so the charge view reports a zero `amountOutstanding` consistent with the zeroed balance. The charge is *not* marked paid.
 * The loan status transitions `ACTIVE -> CLOSED_WRITTEN_OFF`.
 * Audit fields are recorded on the loan: `writtenOffOnDate`, `closedOnDate`, `closedBy`, and the optional `writeOffReason`.
 
@@ -51,7 +52,7 @@ Reverses a write-off applied in error:
 
 * Reverses the `WRITEOFF` transaction (kept in the ledger, flagged reversed).
 * Transitions the loan back `CLOSED_WRITTEN_OFF -> ACTIVE`.
-* Restores the outstanding balance (clears the written-off buckets).
+* Restores the outstanding balance (clears the written-off buckets, on the loan balance and on each charge).
 * Clears the write-off audit fields.
 
 == Validation Rules

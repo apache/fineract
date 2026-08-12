@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -43,29 +44,33 @@ public class WorkingCapitalLoanWriteOffDomainService {
     private final WorkingCapitalLoanLifecycleStateMachine loanLifecycleStateMachine;
 
     /**
-     * Applies a write-off to the loan. The {@code writeOffReason} is optional and may be {@code null}.
+     * Applies a write-off to the loan. The {@code writeOffReason} is optional and may be {@code null}. The
+     * {@code charges} are the loan's active charges: each one's unpaid remainder is marked written off so the charge
+     * view stays consistent with the zeroed balance.
      */
     public void writeOff(final WorkingCapitalLoan loan, final LocalDate writtenOffOnDate, final AppUser writtenOffBy,
-            final CodeValue writeOffReason) {
+            final CodeValue writeOffReason, final List<WorkingCapitalLoanCharge> charges) {
         loanLifecycleStateMachine.transition(WorkingCapitalLoanEvent.LOAN_WRITTEN_OFF, loan);
         loan.setWrittenOffOnDate(writtenOffOnDate);
         loan.setClosedOnDate(writtenOffOnDate);
         loan.setClosedBy(writtenOffBy);
         loan.setWriteOffReason(writeOffReason);
         zeroOutstanding(loan.getBalance());
+        writeOffCharges(charges);
     }
 
     /**
-     * Reverses a write-off applied in error: reopens the loan, restores the outstanding balance and clears the audit
-     * trail.
+     * Reverses a write-off applied in error: reopens the loan, restores the outstanding balance (loan-level and per
+     * charge) and clears the audit trail.
      */
-    public void undoWriteOff(final WorkingCapitalLoan loan) {
+    public void undoWriteOff(final WorkingCapitalLoan loan, final List<WorkingCapitalLoanCharge> charges) {
         loanLifecycleStateMachine.transition(WorkingCapitalLoanEvent.LOAN_WRITTEN_OFF_UNDO, loan);
         loan.setWrittenOffOnDate(null);
         loan.setClosedOnDate(null);
         loan.setClosedBy(null);
         loan.setWriteOffReason(null);
         restoreOutstanding(loan.getBalance());
+        restoreCharges(charges);
     }
 
     private void zeroOutstanding(final WorkingCapitalLoanBalance balance) {
@@ -83,5 +88,21 @@ public class WorkingCapitalLoanWriteOffDomainService {
         balance.setPrincipalWrittenOff(BigDecimal.ZERO);
         balance.setFeeWrittenOff(BigDecimal.ZERO);
         balance.setPenaltyWrittenOff(BigDecimal.ZERO);
+    }
+
+    private void writeOffCharges(final List<WorkingCapitalLoanCharge> charges) {
+        for (final WorkingCapitalLoanCharge charge : charges) {
+            // Capture the outstanding before mutating: it is derived from the written-off amount being set.
+            final BigDecimal outstanding = charge.getAmountOutstanding();
+            charge.setAmountWrittenOff(MathUtil.add(charge.getAmountWrittenOff(), outstanding));
+        }
+    }
+
+    private void restoreCharges(final List<WorkingCapitalLoanCharge> charges) {
+        // A single terminal write-off is the only writer of this bucket, so the undo resets it outright -- the same
+        // treatment the balance buckets get in restoreOutstanding.
+        for (final WorkingCapitalLoanCharge charge : charges) {
+            charge.setAmountWrittenOff(BigDecimal.ZERO);
+        }
     }
 }

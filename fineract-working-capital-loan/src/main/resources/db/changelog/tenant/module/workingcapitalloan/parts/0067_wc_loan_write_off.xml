@@ -70,6 +70,20 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="fineract" id="wcl-0067-charge-written-off">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_charge"/>
+            <not>
+                <columnExists tableName="m_wc_loan_charge" columnName="amount_written_off"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_charge">
+            <column name="amount_written_off" type="DECIMAL(19,6)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
     <changeSet author="fineract" id="wcl-0067-written-off-event">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
