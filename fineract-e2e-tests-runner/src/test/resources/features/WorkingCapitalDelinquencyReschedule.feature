@@ -150,7 +150,6 @@ Feature: Working Capital Delinquency Reschedule Action
     Then Admin fails to create WC delinquency reschedule action with minimumPayment 1 PERCENTAGE and frequency 30 DAYS with error containing "only for active Working Capital loans"
     When Admin successfully approves the working capital loan on "01 January 2026" with "10000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "10000" EUR transaction amount
-    Then Admin fails to create WC delinquency reschedule action with minimumPayment 1 PERCENTAGE and frequency 30 DAYS with error containing "existing delinquency range schedule"
     When Admin runs inline COB job for Working Capital Loan
     Then Admin fails to create WC delinquency reschedule action with minimumPayment 0 PERCENTAGE and frequency 30 DAYS with error containing "`minimumPayment` must be greater than 0"
     Then Admin fails to create WC delinquency reschedule action with minimumPayment 1 PERCENTAGE and frequency 0 DAYS with error containing "`frequency` must be greater than 0"

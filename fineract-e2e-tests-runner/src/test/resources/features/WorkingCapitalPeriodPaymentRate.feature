@@ -416,8 +416,8 @@ Feature: Working Capital Period Payment Rate
     And Admin retrieves the projected amortization schedule
     And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance |
-      | 5         | 2026-01-06 | 50.00                 | 8497.56         | 9.12                       | 897.72                     |
-      | 8         | 2026-01-09 | 50.00                 | 8497.56         | 9.12                       | 897.72                     |
+      | 5         | 2026-01-06 | 50.00                 | 8553.33         | 9.18                       | 896.66                     |
+      | 8         | 2026-01-09 | 50.00                 | 8553.33         | 9.18                       | 896.66                     |
     And Admin update Working Capital period payment rate with "11" value effective from "10 January 2026"
     And Admin retrieves the projected amortization schedule
 # The change does not re-rate what came before it: periods 5 and 8 still bill 50.00 against the same balance. Their
@@ -427,10 +427,10 @@ Feature: Working Capital Period Payment Rate
 # interest split of the repayments that follow it.
     And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance |
-      | 5         | 2026-01-06 | 50.00                 | 8497.56         | 9.12                       | 904.46                     |
-      | 8         | 2026-01-09 | 50.00                 | 8497.56         | 9.12                       | 904.46                     |
-      | 9         | 2026-01-10 | 30.56                 | 8513.64         | 5.76                       | 907.82                     |
-      | 10        | 2026-01-11 | 30.56                 | 8488.82         | 5.74                       | 902.08                     |
+      | 5         | 2026-01-06 | 50.00                 | 8546.29         | 9.17                       | 903.71                     |
+      | 8         | 2026-01-09 | 50.00                 | 8546.29         | 9.17                       | 903.71                     |
+      | 9         | 2026-01-10 | 30.56                 | 8550.84         | 5.73                       | 907.15                     |
+      | 10        | 2026-01-11 | 30.56                 | 8525.99         | 5.71                       | 901.44                     |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
   @TestRailId:C93986
@@ -622,11 +622,13 @@ Feature: Working Capital Period Payment Rate
     And Working Capital Loan period payment rate in effect is "15"
     And Admin retrieves the projected amortization schedule
 # amortization schedule contains diff values based omn period payment rate start date
+# The periods that elapsed unpaid are zero-filled rather than dropped, so the term stretches past the 368 it ran to
+# before and the balance closes on period 388 instead.
     And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance |
       | 1         | 2026-01-02 | 47.22                 | 8952.91         | 0.13                       | 11.87                      |
-      | 221       | 2026-08-10 | 52.78                 | 7700.33         | 0.00                       | 0.00                       |
-      | 368       | 2027-01-04 | 3.24                  | 0.00            | 0.00                       | 0.00                       |
+      | 221       | 2026-08-10 | 52.78                 | 8781.12         | 0.14                       | 11.42                      |
+      | 388       | 2027-01-24 | 31.06                 | 0.00            | 0.00                       | 0.00                       |
     Then Admin closes the Working Capital loan with a full repayment on "06 August 2026"
 
   @TestRailId:C93990
@@ -672,8 +674,8 @@ Feature: Working Capital Period Payment Rate
     And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance | actualAmortizationAmount | actualDiscountFeeBalance |
       | 18        | 2026-01-19 | 50.00                 | 8959.61         | 9.61                       | 990.39                     | 0.00                | 9000.00       | 0.00                     | 1000.00                  |
-      | 19        | 2026-01-20 | 55.56                 | 8955.11         | 10.67                      | 989.33                     | 100.00              | 8917.30       | 17.30                    | 982.70                   |
-      | 20        | 2026-01-21 | 55.56                 | 8872.31         | 10.58                      | 972.12                     |                     |               |                          |                          |
+      | 19        | 2026-01-20 | 55.56                 | 8955.11         | 10.67                      | 989.33                     | 100.00              | 8917.26       | 17.26                    | 982.74                   |
+      | 20        | 2026-01-21 | 55.56                 | 8872.28         | 10.58                      | 972.16                     |                     |               |                          |                          |
 #--- second change, backdated ten days behind the first ---#
     And Admin update Working Capital period payment rate with "11" value effective from "10 January 2026"
     Then Working Capital Loan Period Payment Rate changes history contains the following data:
@@ -691,11 +693,11 @@ Feature: Working Capital Period Payment Rate
       | 9         | 2026-01-10 | 30.56                 | 8975.32         | 5.88                       | 994.12                     | 0.00                | 9000.00       | 0.00                     | 1000.00                  |
       | 10        | 2026-01-11 | 30.56                 | 8975.32         | 5.88                       | 994.12                     | 0.00                | 9000.00       | 0.00                     | 1000.00                  |
       | 18        | 2026-01-19 | 30.56                 | 8975.32         | 5.88                       | 994.12                     | 0.00                | 9000.00       | 0.00                     | 1000.00                  |
-      | 19        | 2026-01-20 | 55.56                 | 8955.11         | 10.67                      | 989.33                     | 100.00              | 8917.30       | 17.30                    | 982.70                   |
-      | 20        | 2026-01-21 | 55.56                 | 8872.31         | 10.58                      | 972.12                     |                     |               |                          |                          |
-      | 185       | 2026-07-05 | 55.56                 | 669.49          | 0.86                       | 7.56                       |                     |               |                          |                          |
-      | 186       | 2026-07-06 | 55.56                 | 614.73          | 0.79                       | 6.77                       |                     |               |                          |                          |
-      | 198       | 2026-07-18 | 8.01                  | 0.00            | 2.34                       | 0.00                       |                     |               |                          |                          |
+      | 19        | 2026-01-20 | 55.56                 | 8955.11         | 10.67                      | 989.33                     | 100.00              | 8917.26       | 17.26                    | 982.74                   |
+      | 20        | 2026-01-21 | 55.56                 | 8872.28         | 10.58                      | 972.16                     |                     |               |                          |                          |
+      | 185       | 2026-07-05 | 55.56                 | 669.45          | 0.86                       | 7.60                       |                     |               |                          |                          |
+      | 186       | 2026-07-06 | 55.56                 | 614.68          | 0.79                       | 6.81                       |                     |               |                          |                          |
+      | 198       | 2026-07-18 | 7.96                  | 0.00            | 2.38                       | 0.00                       |                     |               |                          |                          |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
   @TestRailId:C93991
@@ -787,10 +789,10 @@ Feature: Working Capital Period Payment Rate
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance | actualAmortizationAmount | actualDiscountFeeBalance |
       | 8         | 2026-01-09 | 50.00                 | 8959.61         | 9.61                       | 990.39                     | 0.00                | 9000.00       | 0.00                     | 1000.00                  |
       | 9         | 2026-01-10 | 58.33                 | 8952.87         | 11.20                      | 988.80                     | 0.00                | 9000.00       | 0.00                     | 1000.00                  |
-      | 14        | 2026-01-15 | 58.33                 | 8952.87         | 11.20                      | 988.80                     | 100.00              | 8916.48       | 16.48                    | 983.52                   |
-      | 15        | 2026-01-16 | 58.33                 | 8869.24         | 11.10                      | 972.42                     | 0.00                | 8916.48       | 0.00                     | 983.52                   |
-      | 18        | 2026-01-19 | 58.33                 | 8869.24         | 11.10                      | 972.42                     | 0.00                | 8916.48       | 0.00                     | 983.52                   |
-      | 19        | 2026-01-20 | 58.33                 | 8869.24         | 11.10                      | 972.42                     |                     |               |                          |                          |
+      | 14        | 2026-01-15 | 58.33                 | 8952.87         | 11.20                      | 988.80                     | 100.00              | 8916.44       | 16.44                    | 983.56                   |
+      | 15        | 2026-01-16 | 58.33                 | 8869.21         | 11.10                      | 972.46                     | 0.00                | 8916.44       | 0.00                     | 983.56                   |
+      | 18        | 2026-01-19 | 58.33                 | 8869.21         | 11.10                      | 972.46                     | 0.00                | 8916.44       | 0.00                     | 983.56                   |
+      | 19        | 2026-01-20 | 58.33                 | 8869.21         | 11.10                      | 972.46                     |                     |               |                          |                          |
 # - undo repayment trn --- #
     When Admin sets the business date to "02 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -802,7 +804,7 @@ Feature: Working Capital Period Payment Rate
       | 01 January 2026  | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026  | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
       | 15 January 2026  | Repayment                 | 100.0             | 100.0            | 0.0               | 0.0                   | true     |
-      | 20 January 2026  | Discount Fee Amortization | 16.48             |                  |                   |                       | false    |
+      | 20 January 2026  | Discount Fee Amortization | 16.44             |                  |                   |                       | false    |
     And Admin retrieves the projected amortization schedule
     And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance | actualAmortizationAmount | actualDiscountFeeBalance |

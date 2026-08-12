@@ -39,7 +39,9 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest.AccountingRuleEnum;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.client.models.WorkingCapitalLoanChargeData;
+import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
@@ -145,7 +147,7 @@ public class FeignWorkingCapitalLoanChargeAfterMaturityTest extends FeignIntegra
     }
 
     @Test
-    @DisplayName("charge on CLOSED loan reopens to ACTIVE with fee outstanding, new maturity, 1 delinquency + 1 breach period")
+    @DisplayName("charge on CLOSED loan reopens to ACTIVE with fee outstanding, new maturity, delinquency + breach covering the due date")
     void chargeOnClosedLoan_reopensToActive() {
         businessDateHelper.runAt("2026-01-01", () -> {
             final Long clientId = clientHelper.createClient("01 January 2026");
@@ -168,10 +170,8 @@ public class FeignWorkingCapitalLoanChargeAfterMaturityTest extends FeignIntegra
             assertEqualBigDecimal(BigDecimal.valueOf(CHARGE_AMOUNT), balance.getTotalOutstanding(),
                     "total outstanding must equal the charge amount");
 
-            assertEquals(delinquencyBefore + 1, wcLoanHelper.getDelinquencyRangeSchedule(loanId).size(),
-                    "exactly one new delinquency period must be created from the charge due date");
-            assertEquals(breachBefore + 1, wcLoanHelper.getBreachSchedule(loanId).size(),
-                    "exactly one new breach period must be created from the charge due date");
+            assertDelinquencyExtendedTo(loanId, LocalDate.of(2026, 6, 1), delinquencyBefore);
+            assertBreachExtendedTo(loanId, LocalDate.of(2026, 6, 1), breachBefore);
         });
     }
 
@@ -361,10 +361,8 @@ public class FeignWorkingCapitalLoanChargeAfterMaturityTest extends FeignIntegra
             assertEqualBigDecimal(BigDecimal.valueOf(60), balance.getFeeOutstanding(),
                     "residual fee outstanding must be charge minus overpayment (100 - 40)");
 
-            assertEquals(delinquencyBefore + 1, wcLoanHelper.getDelinquencyRangeSchedule(loanId).size(),
-                    "exactly one new delinquency period must be created from the charge due date");
-            assertEquals(breachBefore + 1, wcLoanHelper.getBreachSchedule(loanId).size(),
-                    "exactly one new breach period must be created from the charge due date");
+            assertDelinquencyExtendedTo(loanId, LocalDate.of(2026, 9, 1), delinquencyBefore);
+            assertBreachExtendedTo(loanId, LocalDate.of(2026, 9, 1), breachBefore);
         });
     }
 
@@ -389,10 +387,8 @@ public class FeignWorkingCapitalLoanChargeAfterMaturityTest extends FeignIntegra
             assertEquals(LocalDate.of(2026, 10, 1), loan.getTimeline().getActualMaturityDate(),
                     "maturity date must be updated to the charge due date (N+1 term)");
 
-            assertEquals(delinquencyBefore + 1, wcLoanHelper.getDelinquencyRangeSchedule(loanId).size(),
-                    "a delinquency period must be created covering the charge due date");
-            assertEquals(breachBefore + 1, wcLoanHelper.getBreachSchedule(loanId).size(),
-                    "a breach period must be created covering the charge due date");
+            assertDelinquencyExtendedTo(loanId, LocalDate.of(2026, 10, 1), delinquencyBefore);
+            assertBreachExtendedTo(loanId, LocalDate.of(2026, 10, 1), breachBefore);
         });
     }
 
@@ -519,6 +515,37 @@ public class FeignWorkingCapitalLoanChargeAfterMaturityTest extends FeignIntegra
             throw new AssertionError(scenarioContext + " — adding a charge on a closed/overpaid/past-maturity WC loan must be allowed, "
                     + "but the server rejected it: " + e.getMessage(), e);
         }
+    }
+
+    private void assertDelinquencyExtendedTo(final Long loanId, final LocalDate chargeDueDate, final int periodsBefore) {
+        final List<WorkingCapitalLoanDelinquencyRangeScheduleData> periods = wcLoanHelper.getDelinquencyRangeSchedule(loanId);
+        assertTrue(periods.size() > periodsBefore, "the charge must extend the delinquency schedule past its " + periodsBefore
+                + " existing periods, but it still has " + periods.size());
+        assertContiguousAndCovering(periods.stream().map(WorkingCapitalLoanDelinquencyRangeScheduleData::getFromDate).toList(),
+                periods.stream().map(WorkingCapitalLoanDelinquencyRangeScheduleData::getToDate).toList(), chargeDueDate, "delinquency");
+    }
+
+    private void assertBreachExtendedTo(final Long loanId, final LocalDate chargeDueDate, final int periodsBefore) {
+        final List<WorkingCapitalLoanBreachScheduleData> periods = wcLoanHelper.getBreachSchedule(loanId);
+        assertTrue(periods.size() > periodsBefore, "the charge must extend the breach schedule past its " + periodsBefore
+                + " existing periods, but it still has " + periods.size());
+        assertContiguousAndCovering(periods.stream().map(WorkingCapitalLoanBreachScheduleData::getFromDate).toList(),
+                periods.stream().map(WorkingCapitalLoanBreachScheduleData::getToDate).toList(), chargeDueDate, "breach");
+    }
+
+    private void assertContiguousAndCovering(final List<LocalDate> fromDates, final List<LocalDate> toDates, final LocalDate chargeDueDate,
+            final String scheduleName) {
+        boolean covered = false;
+        for (int i = 0; i < fromDates.size(); i++) {
+            final LocalDate from = fromDates.get(i);
+            final LocalDate to = toDates.get(i);
+            if (i > 0) {
+                assertEquals(toDates.get(i - 1).plusDays(1), from,
+                        "the " + scheduleName + " schedule must have no gap before the period starting " + from);
+            }
+            covered = covered || (!chargeDueDate.isBefore(from) && !chargeDueDate.isAfter(to));
+        }
+        assertTrue(covered, "a " + scheduleName + " period must cover the charge due date " + chargeDueDate);
     }
 
     private Long addChargeReturningId(Long loanId, double amount, String dueDate, String scenarioContext) {
