@@ -192,8 +192,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
             Assertions.assertEquals(111.0D, toDouble(chargePaidBy.get("amount")));
-            Assertions.assertEquals(chargeId.doubleValue(), toDouble(chargePaidBy.get("chargeId")));
-            Assertions.assertEquals(transactionId.doubleValue(), toDouble(chargePaidBy.get("transactionId")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
         });
     }
 
@@ -234,8 +234,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
             Assertions.assertEquals(69.0D, toDouble(chargePaidBy.get("amount")));
-            Assertions.assertEquals(chargeId.doubleValue(), toDouble(chargePaidBy.get("chargeId")));
-            Assertions.assertEquals(transactionId.doubleValue(), toDouble(chargePaidBy.get("transactionId")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check second part
             deleteAllExternalEvents();
@@ -254,8 +254,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
             Assertions.assertEquals(42.0D, toDouble(chargePaidBy.get("amount")));
-            Assertions.assertEquals(chargeId.doubleValue(), toDouble(chargePaidBy.get("chargeId")));
-            Assertions.assertEquals(transactionId.doubleValue(), toDouble(chargePaidBy.get("transactionId")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
             Assertions.assertFalse((Boolean) event.getPayLoad().get("reversed"));
 
             // check that third part cannot post for that charge, because it already fully adjusted
@@ -301,8 +301,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
             Assertions.assertEquals(111.0D, toDouble(chargePaidBy.get("amount")));
-            Assertions.assertEquals(chargeId.doubleValue(), toDouble(chargePaidBy.get("chargeId")));
-            Assertions.assertEquals(transactionId.doubleValue(), toDouble(chargePaidBy.get("transactionId")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check first part
             deleteAllExternalEvents();
@@ -377,8 +377,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
             Assertions.assertEquals(111.0D, toDouble(chargePaidBy.get("amount")));
-            Assertions.assertEquals(chargeId.doubleValue(), toDouble(chargePaidBy.get("chargeId")));
-            Assertions.assertEquals(transactionId.doubleValue(), toDouble(chargePaidBy.get("transactionId")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
         });
     }
 
@@ -420,8 +420,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
             Assertions.assertEquals(69.0D, toDouble(chargePaidBy.get("amount")));
-            Assertions.assertEquals(chargeId.doubleValue(), toDouble(chargePaidBy.get("chargeId")));
-            Assertions.assertEquals(transactionId.doubleValue(), toDouble(chargePaidBy.get("transactionId")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check second part
             deleteAllExternalEvents();
@@ -440,8 +440,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
             Assertions.assertEquals(42.0D, toDouble(chargePaidBy.get("amount")));
-            Assertions.assertEquals(chargeId.doubleValue(), toDouble(chargePaidBy.get("chargeId")));
-            Assertions.assertEquals(transactionId.doubleValue(), toDouble(chargePaidBy.get("transactionId")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check that third part cannot post for that charge, because it already fully adjusted
             Assertions.assertThrows(RuntimeException.class, () -> loanTransactionHelper.chargeAdjustment(loanId, chargeId,
@@ -487,8 +487,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
             Assertions.assertEquals(111.0D, toDouble(chargePaidBy.get("amount")));
-            Assertions.assertEquals(chargeId.doubleValue(), toDouble(chargePaidBy.get("chargeId")));
-            Assertions.assertEquals(transactionId.doubleValue(), toDouble(chargePaidBy.get("transactionId")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check first part
             deleteAllExternalEvents();
@@ -562,8 +562,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
             Assertions.assertEquals(111.0D, toDouble(chargePaidBy.get("amount")));
-            Assertions.assertEquals(chargeId.doubleValue(), toDouble(chargePaidBy.get("chargeId")));
-            Assertions.assertEquals(transactionId.doubleValue(), toDouble(chargePaidBy.get("transactionId")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
         });
     }
 
@@ -604,8 +604,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
             Assertions.assertEquals(69.0D, toDouble(chargePaidBy.get("amount")));
-            Assertions.assertEquals(chargeId.doubleValue(), toDouble(chargePaidBy.get("chargeId")));
-            Assertions.assertEquals(transactionId.doubleValue(), toDouble(chargePaidBy.get("transactionId")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check second part
             deleteAllExternalEvents();
@@ -624,8 +624,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
             Assertions.assertEquals(42.0D, toDouble(chargePaidBy.get("amount")));
-            Assertions.assertEquals(chargeId.doubleValue(), toDouble(chargePaidBy.get("chargeId")));
-            Assertions.assertEquals(transactionId.doubleValue(), toDouble(chargePaidBy.get("transactionId")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check that third part cannot post for that charge, because it already fully adjusted
             Assertions.assertThrows(RuntimeException.class, () -> loanTransactionHelper.chargeAdjustment(loanId, chargeId,
@@ -670,8 +670,8 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
             Assertions.assertEquals(111.0D, toDouble(chargePaidBy.get("amount")));
-            Assertions.assertEquals(chargeId.doubleValue(), toDouble(chargePaidBy.get("chargeId")));
-            Assertions.assertEquals(transactionId.doubleValue(), toDouble(chargePaidBy.get("transactionId")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check first part
             deleteAllExternalEvents();
@@ -1132,6 +1132,13 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             return ((Number) value).doubleValue();
         }
         return (Double) value;
+    }
+
+    private static Long toLong(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        return (Long) value;
     }
 
 }
