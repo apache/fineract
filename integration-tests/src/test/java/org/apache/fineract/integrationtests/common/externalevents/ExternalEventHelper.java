@@ -18,28 +18,22 @@
  */
 package org.apache.fineract.integrationtests.common.externalevents;
 
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.List;
 import java.util.Map;
 import lombok.Builder;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.ExternalEventConfigurationUpdateRequest;
 import org.apache.fineract.client.models.ExternalEventConfigurationUpdateResponse;
-import org.apache.fineract.client.util.Calls;
-import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
+import org.apache.fineract.integrationtests.client.feign.helpers.InternalExternalEventsApi;
 import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
-import org.apache.fineract.integrationtests.common.FineractClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.Assertions;
 
-@Slf4j
 public final class ExternalEventHelper {
-
-    private static final Gson GSON = new JSON().getGson();
 
     public ExternalEventHelper() {}
 
@@ -51,79 +45,53 @@ public final class ExternalEventHelper {
         private final String category;
         private final Long aggregateRootId;
 
-        public String toQueryParams() {
-            StringBuilder stringBuilder = new StringBuilder();
+        public Map<String, Object> toQueryParams() {
+            Map<String, Object> queryParams = new java.util.HashMap<>();
             if (idempotencyKey != null) {
-                stringBuilder.append("idempotencyKey=").append(idempotencyKey).append("&");
+                queryParams.put("idempotencyKey", idempotencyKey);
             }
-
             if (type != null) {
-                stringBuilder.append("type=").append(type).append("&");
+                queryParams.put("type", type);
             }
-
             if (category != null) {
-                stringBuilder.append("category=").append(category).append("&");
+                queryParams.put("category", category);
             }
-
             if (aggregateRootId != null) {
-                stringBuilder.append("aggregateRootId=").append(aggregateRootId).append("&");
+                queryParams.put("aggregateRootId", aggregateRootId);
             }
-
-            return stringBuilder.toString();
-
+            return queryParams;
         }
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static List<ExternalEventResponse> getAllExternalEvents(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec) {
-        final String url = "/fineract-provider/api/v1/internal/externalevents?" + Utils.TENANT_IDENTIFIER;
-        log.info("---------------------------------GETTING ALL EXTERNAL EVENTS---------------------------------------------");
-        String response = Utils.performServerGet(requestSpec, responseSpec, url);
-        return GSON.fromJson(response, new TypeToken<List<ExternalEventResponse>>() {}.getType());
+        return ok(() -> internalExternalEventsApi().getAllExternalEvents(Map.of()));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static List<ExternalEventResponse> getAllExternalEvents(final RequestSpecification requestSpec,
             final ResponseSpecification responseSpec, Filter filter) {
-        final String url = "/fineract-provider/api/v1/internal/externalevents?" + filter.toQueryParams() + Utils.TENANT_IDENTIFIER;
-        log.info("---------------------------------GETTING ALL EXTERNAL EVENTS---------------------------------------------");
-        String response = Utils.performServerGet(requestSpec, responseSpec, url);
-        return GSON.fromJson(response, new TypeToken<List<ExternalEventResponse>>() {}.getType());
+        return ok(() -> internalExternalEventsApi().getAllExternalEvents(filter.toQueryParams()));
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static void deleteAllExternalEvents(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        final String url = "/fineract-provider/api/v1/internal/externalevents?" + Utils.TENANT_IDENTIFIER;
-        log.info("-----------------------------DELETE ALL EXTERNAL EVENTS PARTITIONS----------------------------------------");
-        Utils.performServerDelete(requestSpec, responseSpec, url, null);
+        ok(() -> {
+            internalExternalEventsApi().deleteAllExternalEvents();
+            return null;
+        });
     }
 
-    // TODO: Rewrite to use fineract-client instead!
-    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
-    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
-    @Deprecated(forRemoval = true)
     public static void changeEventState(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, String eventName,
             boolean status) {
         final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, "{\"externalEventConfigurations\":{\"" + eventName + "\":" + status + "}}\n");
+                responseSpec, new ExternalEventConfigurationUpdateRequest().externalEventConfigurations(Map.of(eventName, status)));
         Assertions.assertEquals(updatedConfigurations.size(), 1);
         Assertions.assertTrue(updatedConfigurations.containsKey(eventName));
         Assertions.assertEquals(status, updatedConfigurations.get(eventName));
     }
 
     public void configureBusinessEvent(String eventName, boolean enabled) {
-        ExternalEventConfigurationUpdateResponse result = Calls
-                .ok(FineractClientHelper.getFineractClient().externalEventConfigurationApi.updateExternalEventConfigurations(
+        ExternalEventConfigurationUpdateResponse result = ok(
+                () -> FineractFeignClientHelper.getFineractFeignClient().externalEventConfiguration().updateExternalEventConfigurations(
                         new ExternalEventConfigurationUpdateRequest().externalEventConfigurations(Map.of(eventName, enabled))));
         Map<String, Object> changes = result.getChanges();
         Assertions.assertNotNull(changes);
@@ -141,6 +109,10 @@ public final class ExternalEventHelper {
 
     public void disableBusinessEvent(String eventName) {
         configureBusinessEvent(eventName, false);
+    }
+
+    private static InternalExternalEventsApi internalExternalEventsApi() {
+        return FineractFeignClientHelper.getFineractFeignClient().create(InternalExternalEventsApi.class);
     }
 
 }

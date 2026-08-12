@@ -63,7 +63,7 @@ final class StandingInstructionApiResourceSwagger {
             @Schema(example = "accountType.savings")
             public String code;
             @Schema(example = "Savings Account")
-            public String description;
+            public String value;
         }
 
         static final class GetFromOfficeOptionsResponseStandingInstructionSwagger {
@@ -101,7 +101,7 @@ final class StandingInstructionApiResourceSwagger {
             @Schema(example = "accountType.savings")
             public String code;
             @Schema(example = "Savings Account")
-            public String description;
+            public String value;
         }
 
         static final class GetToOfficeOptionsResponseStandingInstructionSwagger {
@@ -125,7 +125,7 @@ final class StandingInstructionApiResourceSwagger {
             @Schema(example = "accountType.loan")
             public String code;
             @Schema(example = "Loan Account")
-            public String description;
+            public String value;
         }
 
         static final class GetTransferTypeOptionsResponseStandingInstructionSwagger {
@@ -137,7 +137,7 @@ final class StandingInstructionApiResourceSwagger {
             @Schema(example = "accountTransferType.account.transfer")
             public String code;
             @Schema(example = "Account Transfer")
-            public String description;
+            public String value;
         }
 
         static final class GetStatusOptionsResponseStandingInstructionSwagger {
@@ -149,7 +149,7 @@ final class StandingInstructionApiResourceSwagger {
             @Schema(example = "standingInstructionStatus.active")
             public String code;
             @Schema(example = "Active")
-            public String description;
+            public String value;
         }
 
         static final class GetInstructionTypeOptionsResponseStandingInstructionSwagger {
@@ -161,7 +161,7 @@ final class StandingInstructionApiResourceSwagger {
             @Schema(example = "standingInstructionType.fixed")
             public String code;
             @Schema(example = "Fixed")
-            public String description;
+            public String value;
         }
 
         static final class GetPriorityOptionsResponseStandingInstructionSwagger {
@@ -173,7 +173,7 @@ final class StandingInstructionApiResourceSwagger {
             @Schema(example = "standingInstructionPriority.urgent")
             public String code;
             @Schema(example = "Urgent Priority")
-            public String description;
+            public String value;
         }
 
         static final class GetRecurrenceTypeOptionsResponseStandingInstructionSwagger {
@@ -185,7 +185,7 @@ final class StandingInstructionApiResourceSwagger {
             @Schema(example = "accountTransferRecurrenceType.periodic")
             public String code;
             @Schema(example = "Periodic Recurrence")
-            public String description;
+            public String value;
         }
 
         static final class GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger {
@@ -197,7 +197,7 @@ final class StandingInstructionApiResourceSwagger {
             @Schema(example = "frequencyperiodFrequencyType.days")
             public String code;
             @Schema(example = "Days")
-            public String description;
+            public String value;
         }
 
         public GetFromOfficeResponseStandingInstructionSwagger fromOffice;
@@ -266,7 +266,7 @@ final class StandingInstructionApiResourceSwagger {
                 @Schema(example = "accountType.savings")
                 public String code;
                 @Schema(example = "Savings Account")
-                public String description;
+                public String value;
             }
 
             static final class GetFromAccountStandingInstructionSwagger {
@@ -316,7 +316,7 @@ final class StandingInstructionApiResourceSwagger {
                 @Schema(example = "accountType.savings")
                 public String code;
                 @Schema(example = "Savings Account")
-                public String description;
+                public String value;
             }
 
             static final class GetToAccountStandingInstructionSwagger {
@@ -333,18 +333,6 @@ final class StandingInstructionApiResourceSwagger {
                 public String productName;
             }
 
-            static final class GetTransferTypeStandingInstructionSwagger {
-
-                private GetTransferTypeStandingInstructionSwagger() {}
-
-                @Schema(example = "1")
-                public Integer id;
-                @Schema(example = "accountTransferType.account.transfer")
-                public String code;
-                @Schema(example = "Account Transfer")
-                public String description;
-            }
-
             static final class GetPriorityStandingInstructionSwagger {
 
                 private GetPriorityStandingInstructionSwagger() {}
@@ -354,19 +342,7 @@ final class StandingInstructionApiResourceSwagger {
                 @Schema(example = "standingInstructionPriority.medium")
                 public String code;
                 @Schema(example = "Medium Priority")
-                public String description;
-            }
-
-            static final class GetInstructionTypeStandingInstructionSwagger {
-
-                private GetInstructionTypeStandingInstructionSwagger() {}
-
-                @Schema(example = "1")
-                public Integer id;
-                @Schema(example = "standingInstructionType.fixed")
-                public String code;
-                @Schema(example = "Fixed")
-                public String description;
+                public String value;
             }
 
             static final class GetStatusStandingInstructionSwagger {
@@ -378,7 +354,31 @@ final class StandingInstructionApiResourceSwagger {
                 @Schema(example = "standingInstructionStatus.deleted")
                 public String code;
                 @Schema(example = "Deleted")
-                public String description;
+                public String value;
+            }
+
+            static final class GetTransferTypeStandingInstructionSwagger {
+
+                private GetTransferTypeStandingInstructionSwagger() {}
+
+                @Schema(example = "1")
+                public Integer id;
+                @Schema(example = "accountTransferType.account.transfer")
+                public String code;
+                @Schema(example = "Account Transfer")
+                public String value;
+            }
+
+            static final class GetInstructionTypeStandingInstructionSwagger {
+
+                private GetInstructionTypeStandingInstructionSwagger() {}
+
+                @Schema(example = "1")
+                public Integer id;
+                @Schema(example = "standingInstructionType.fixed")
+                public String code;
+                @Schema(example = "Fixed")
+                public String value;
             }
 
             static final class GetRecurrenceTypeStandingInstructionSwagger {
@@ -390,7 +390,7 @@ final class StandingInstructionApiResourceSwagger {
                 @Schema(example = "accountTransferRecurrenceType.periodic")
                 public String code;
                 @Schema(example = "Periodic Recurrence")
-                public String description;
+                public String value;
             }
 
             static final class GetRecurrenceFrequencyStandingInstructionSwagger {
@@ -402,7 +402,7 @@ final class StandingInstructionApiResourceSwagger {
                 @Schema(example = "frequencyperiodFrequencyType.months")
                 public String code;
                 @Schema(example = "Months")
-                public String description;
+                public String value;
             }
 
             @Schema(example = "1")

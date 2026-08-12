@@ -191,9 +191,9 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
-            Assertions.assertEquals(111.0D, chargePaidBy.get("amount"));
-            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
-            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+            Assertions.assertEquals(111.0D, toDouble(chargePaidBy.get("amount")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
         });
     }
 
@@ -233,9 +233,9 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
-            Assertions.assertEquals(69.0D, chargePaidBy.get("amount"));
-            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
-            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+            Assertions.assertEquals(69.0D, toDouble(chargePaidBy.get("amount")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check second part
             deleteAllExternalEvents();
@@ -253,9 +253,9 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
             chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
-            Assertions.assertEquals(42.0D, chargePaidBy.get("amount"));
-            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
-            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+            Assertions.assertEquals(42.0D, toDouble(chargePaidBy.get("amount")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
             Assertions.assertFalse((Boolean) event.getPayLoad().get("reversed"));
 
             // check that third part cannot post for that charge, because it already fully adjusted
@@ -295,14 +295,14 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             ExternalEventResponse event = list.get(0);
             log.info(event.toString());
             Object loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
-            Assertions.assertEquals(111.0D, event.getPayLoad().get("feeChargesPortion"));
+            Assertions.assertEquals(111.0D, toDouble(event.getPayLoad().get("feeChargesPortion")));
             Assertions.assertInstanceOf(List.class, loanChargePaidByList);
             Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
-            Assertions.assertEquals(111.0D, chargePaidBy.get("amount"));
-            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
-            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+            Assertions.assertEquals(111.0D, toDouble(chargePaidBy.get("amount")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check first part
             deleteAllExternalEvents();
@@ -376,9 +376,9 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
-            Assertions.assertEquals(111.0D, chargePaidBy.get("amount"));
-            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
-            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+            Assertions.assertEquals(111.0D, toDouble(chargePaidBy.get("amount")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
         });
     }
 
@@ -419,9 +419,9 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
-            Assertions.assertEquals(69.0D, chargePaidBy.get("amount"));
-            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
-            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+            Assertions.assertEquals(69.0D, toDouble(chargePaidBy.get("amount")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check second part
             deleteAllExternalEvents();
@@ -439,9 +439,9 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
             chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
-            Assertions.assertEquals(42.0D, chargePaidBy.get("amount"));
-            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
-            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+            Assertions.assertEquals(42.0D, toDouble(chargePaidBy.get("amount")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check that third part cannot post for that charge, because it already fully adjusted
             Assertions.assertThrows(RuntimeException.class, () -> loanTransactionHelper.chargeAdjustment(loanId, chargeId,
@@ -481,14 +481,14 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             ExternalEventResponse event = list.get(0);
             log.info(event.toString());
             Object loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
-            Assertions.assertEquals(111.0D, event.getPayLoad().get("feeChargesPortion"));
+            Assertions.assertEquals(111.0D, toDouble(event.getPayLoad().get("feeChargesPortion")));
             Assertions.assertInstanceOf(List.class, loanChargePaidByList);
             Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
-            Assertions.assertEquals(111.0D, chargePaidBy.get("amount"));
-            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
-            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+            Assertions.assertEquals(111.0D, toDouble(chargePaidBy.get("amount")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check first part
             deleteAllExternalEvents();
@@ -561,9 +561,9 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
-            Assertions.assertEquals(111.0D, chargePaidBy.get("amount"));
-            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
-            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+            Assertions.assertEquals(111.0D, toDouble(chargePaidBy.get("amount")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
         });
     }
 
@@ -603,9 +603,9 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
-            Assertions.assertEquals(69.0D, chargePaidBy.get("amount"));
-            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
-            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+            Assertions.assertEquals(69.0D, toDouble(chargePaidBy.get("amount")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check second part
             deleteAllExternalEvents();
@@ -623,9 +623,9 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
             chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
-            Assertions.assertEquals(42.0D, chargePaidBy.get("amount"));
-            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
-            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+            Assertions.assertEquals(42.0D, toDouble(chargePaidBy.get("amount")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check that third part cannot post for that charge, because it already fully adjusted
             Assertions.assertThrows(RuntimeException.class, () -> loanTransactionHelper.chargeAdjustment(loanId, chargeId,
@@ -664,14 +664,14 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             ExternalEventResponse event = list.get(0);
             log.info(event.toString());
             Object loanChargePaidByList = event.getPayLoad().get("loanChargePaidByList");
-            Assertions.assertEquals(111.0D, event.getPayLoad().get("feeChargesPortion"));
+            Assertions.assertEquals(111.0D, toDouble(event.getPayLoad().get("feeChargesPortion")));
             Assertions.assertInstanceOf(List.class, loanChargePaidByList);
             Assertions.assertEquals(1, ((List<?>) loanChargePaidByList).size());
             Map<?, ?> chargePaidBy = (Map<?, ?>) ((List<?>) loanChargePaidByList).get(0);
             Assertions.assertInstanceOf(Map.class, chargePaidBy);
-            Assertions.assertEquals(111.0D, chargePaidBy.get("amount"));
-            Assertions.assertEquals(chargeId.doubleValue(), chargePaidBy.get("chargeId"));
-            Assertions.assertEquals(transactionId.doubleValue(), chargePaidBy.get("transactionId"));
+            Assertions.assertEquals(111.0D, toDouble(chargePaidBy.get("amount")));
+            Assertions.assertEquals(chargeId, toLong(chargePaidBy.get("chargeId")));
+            Assertions.assertEquals(transactionId, toLong(chargePaidBy.get("transactionId")));
 
             // check first part
             deleteAllExternalEvents();
@@ -925,7 +925,7 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
             Assertions.assertEquals(1, modifiedEvents.size());
             ExternalEventResponse event = modifiedEvents.get(0);
 
-            Assertions.assertEquals(550.0D, event.getPayLoad().get("principal")); // the new principal
+            Assertions.assertEquals(550.0D, toDouble(event.getPayLoad().get("principal"))); // the new principal
         });
     }
 
@@ -1126,4 +1126,19 @@ public class ExternalBusinessEventTest extends BaseLoanIntegrationTest {
     private void configureLoanAccrualTransactionCreatedBusinessEvent(boolean enabled) {
         externalEventHelper.configureBusinessEvent("LoanAccrualTransactionCreatedBusinessEvent", enabled);
     }
+
+    private static Double toDouble(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+        return (Double) value;
+    }
+
+    private static Long toLong(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        return (Long) value;
+    }
+
 }

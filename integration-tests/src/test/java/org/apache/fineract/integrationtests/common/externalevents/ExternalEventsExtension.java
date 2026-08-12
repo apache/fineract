@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.ExternalEventConfigurationUpdateRequest;
 import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Assertions;
@@ -80,7 +81,7 @@ public class ExternalEventsExtension implements AfterEachCallback, BeforeEachCal
 
     private void restore(String key, Boolean value) {
         final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, "{\"externalEventConfigurations\":{\"" + key + "\":" + value + "}}\n");
+                responseSpec, new ExternalEventConfigurationUpdateRequest().externalEventConfigurations(Map.of(key, value)));
         Assertions.assertEquals(updatedConfigurations.size(), 1);
         Assertions.assertTrue(updatedConfigurations.containsKey(key));
         Assertions.assertEquals(value, updatedConfigurations.get(key));
