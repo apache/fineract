@@ -142,7 +142,7 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
             return;
         }
 
-        final LocalDate firstExecutionDate = getFirstExecutionDate(recurrenceFrequency, validFrom, recurrenceInterval, monthDay);
+        final LocalDate firstExecutionDate = getFirstExecutionDate(validFrom, recurrenceFrequency, recurrenceInterval, monthDay);
 
         final LocalDate validTill = this.standingInstruction.getValidTill();
         if (isValidTillBeforeFirstExecution(validFrom, firstExecutionDate, validTill)) {
@@ -176,18 +176,7 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
                 .allMatch(Objects::nonNull);
     }
 
-    private boolean isValidTillBeforeFirstExecution(final LocalDate validFrom, final LocalDate firstExecutionDate, final LocalDate validTill) {
-        if (!areValidDates(validFrom, firstExecutionDate, validTill)) {
-            return false;
-        }
-
-        final boolean isValidTillNotBeforeValidFrom = !validTill.isBefore(validFrom);
-        final boolean isValidTillBeforeFirstExecution = validTill.isBefore(firstExecutionDate);
-
-        return isValidTillNotBeforeValidFrom && isValidTillBeforeFirstExecution;
-    }
-
-    private LocalDate getFirstExecutionDate(final Integer recurrenceFrequency, final LocalDate validFrom, final Integer recurrenceInterval, final MonthDay monthDay) {
+    private LocalDate getFirstExecutionDate(final LocalDate validFrom, final Integer recurrenceFrequency, final Integer recurrenceInterval, final MonthDay monthDay) {
         final PeriodFrequencyType frequencyType = PeriodFrequencyType.fromInt(recurrenceFrequency);
 
         if (frequencyType == null) {
@@ -213,6 +202,14 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
         }
 
         return date;
+    }
+
+    private boolean isValidTillBeforeFirstExecution(final LocalDate validFrom, final LocalDate firstExecutionDate, final LocalDate validTill) {
+        if (!areValidDates(firstExecutionDate, validTill)) {
+            return false;
+        }
+
+        return validTill.isBefore(firstExecutionDate);
     }
 
     private LocalDate calculateBaseDate(final PeriodFrequencyType frequencyType, final LocalDate validFrom, final MonthDay monthDay) {
