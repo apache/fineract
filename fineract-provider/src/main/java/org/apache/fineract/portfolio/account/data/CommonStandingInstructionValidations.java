@@ -195,10 +195,10 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
             return null;
         }
 
-        LocalDate date = calculateBaseDate(frequencyType, validFrom, monthDay);
+        LocalDate firstExecutionMonthlyOrYearlyDate = calculateFirstExecutionMonthlyOrYearlyDate(frequencyType, validFrom, monthDay);
 
-        if (areValidDates(date) && !date.isAfter(validFrom)) {
-            date = advanceToNextCycle(frequencyType, date);
+        if (areValidDates(firstExecutionMonthlyOrYearlyDate) && !firstExecutionMonthlyOrYearlyDate.isAfter(validFrom)) {
+            firstExecutionMonthlyOrYearlyDate = adjustFirstExecutionMonthlyOrYearlyDate(frequencyType, firstExecutionMonthlyOrYearlyDate);
         }
 
         return date;
@@ -212,7 +212,7 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
         return validTill.isBefore(firstExecutionDate);
     }
 
-    private LocalDate calculateBaseDate(final PeriodFrequencyType frequencyType, final LocalDate validFrom, final MonthDay monthDay) {
+    private LocalDate calculateFirstExecutionMonthlyOrYearlyDate(final PeriodFrequencyType frequencyType, final LocalDate validFrom, final MonthDay monthDay) {
         if (frequencyType.isMonthly()) {
             return LocalDate.of(validFrom.getYear(), validFrom.getMonth(), monthDay.getDayOfMonth());
         }
@@ -222,7 +222,7 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
         return null;
     }
 
-    private LocalDate advanceToNextCycle(final PeriodFrequencyType frequencyType, final LocalDate date) {
+    private LocalDate adjustFirstExecutionMonthlyOrYearlyDate(final PeriodFrequencyType frequencyType, final LocalDate date) {
         if (frequencyType.isMonthly()) {
             return date.plusMonths(1);
         }
