@@ -59,7 +59,12 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
 
     void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
 
-    void regenerateAmortizationScheduleOnRateChange(WorkingCapitalLoan loan, BigDecimal newRate);
+    /**
+     * Rebuilds the schedule after a rate change has been persisted. The new rate is not passed in: the schedule is
+     * reconstructed by replaying every non-reversed rate change in effective-date order, so it is read back from the
+     * loan's rate-change history along with the ones already there.
+     */
+    void regenerateAmortizationScheduleOnRateChange(WorkingCapitalLoan loan);
 
     /**
      * After a discount fee adjustment: regenerates the projected schedule with the new loan-level discount (as on

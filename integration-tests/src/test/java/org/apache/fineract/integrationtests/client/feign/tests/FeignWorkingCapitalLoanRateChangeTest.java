@@ -24,7 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
@@ -73,18 +75,23 @@ public class FeignWorkingCapitalLoanRateChangeTest extends FeignIntegrationTest 
     void testUpdateRateOnActiveLoan() {
         Long loanId = createAndDisburseLoan(BigDecimal.valueOf(5000), BigDecimal.valueOf(18));
 
-        wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(17)));
+        wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(17),
+                Utils.dateFormatter.format(Utils.getLocalDateOfTenant())));
 
         GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
         assertNotNull(loan);
-        assertEquals(0, BigDecimal.valueOf(17).compareTo(loan.getPaymentRate()));
+        assertEquals(0, BigDecimal.valueOf(18).compareTo(loan.getPaymentRate()),
+                "The loan reports the rate it was created with, which a rate change does not move");
+        assertEquals(0, BigDecimal.valueOf(17).compareTo(rateInEffectOn(loanId, Utils.getLocalDateOfTenant())),
+                "The rate in force is the one just booked");
     }
 
     @Test
     void testRateChangeHistoryIsRecorded() {
         Long loanId = createAndDisburseLoan(BigDecimal.valueOf(5000), BigDecimal.valueOf(18));
 
-        wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(17)));
+        wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(17),
+                Utils.dateFormatter.format(Utils.getLocalDateOfTenant())));
 
         List<WorkingCapitalLoanPeriodPaymentRateChangeData> history = wcLoanHelper.getRateChangeHistory(loanId);
         assertFalse(history.isEmpty(), "Rate change history should not be empty");
@@ -102,7 +109,7 @@ public class FeignWorkingCapitalLoanRateChangeTest extends FeignIntegrationTest 
         Long loanId = submitAndTrack(clientId, productId, BigDecimal.valueOf(5000), BigDecimal.valueOf(18), today);
 
         CallFailedRuntimeException exception = wcLoanHelper.updateRateExpectingError(loanId,
-                WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(17)));
+                WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(17), today));
         assertTrue(exception.getStatus() >= 400,
                 "Rate change on non-active loan should fail with 4xx status, got: " + exception.getStatus());
     }
@@ -111,8 +118,9 @@ public class FeignWorkingCapitalLoanRateChangeTest extends FeignIntegrationTest 
     void testMultipleRateChangesAutoReversesPrevious() {
         Long loanId = createAndDisburseLoan(BigDecimal.valueOf(5000), BigDecimal.valueOf(18));
 
-        wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(17)));
-        wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(15)));
+        String today = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
+        wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(17), today));
+        wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(15), today));
 
         List<WorkingCapitalLoanPeriodPaymentRateChangeData> history = wcLoanHelper.getRateChangeHistory(loanId);
         assertEquals(2, history.size(), "Should have 2 rate change records");
@@ -123,8 +131,8 @@ public class FeignWorkingCapitalLoanRateChangeTest extends FeignIntegrationTest 
         assertFalse(latestChange.getReversed(), "Latest rate change should be active");
         assertTrue(firstChange.getReversed(), "Previous rate change should be auto-reversed");
 
-        GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
-        assertEquals(0, BigDecimal.valueOf(15).compareTo(loan.getPaymentRate()));
+        assertEquals(0, BigDecimal.valueOf(15).compareTo(rateInEffectOn(loanId, Utils.getLocalDateOfTenant())),
+                "The surviving change of the two booked for today is the one in force");
     }
 
     @Test
@@ -134,24 +142,24 @@ public class FeignWorkingCapitalLoanRateChangeTest extends FeignIntegrationTest 
             Long loanId = createAndDisburseLoanOnDate(clientForTest, BigDecimal.valueOf(50000), BigDecimal.valueOf(18), "01 January 2026");
 
             // First rate change: 18 → 15 on Jan 1
-            wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(15)));
+            wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(15), "01 January 2026"));
 
             // Advance business date by 8 days
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-09");
 
             // Second rate change: 15 → 11 on Jan 9
-            wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(11)));
+            wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(11), "09 January 2026"));
 
-            GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
-            assertEquals(0, BigDecimal.valueOf(11).compareTo(loan.getPaymentRate()),
-                    "Rate should be updated to 11 after second rate change");
+            assertEquals(0, BigDecimal.valueOf(11).compareTo(rateInEffectOn(loanId, LocalDate.of(2026, 1, 9))),
+                    "Rate in force on 09 January should be 11 after the second rate change");
 
             List<WorkingCapitalLoanPeriodPaymentRateChangeData> history = wcLoanHelper.getRateChangeHistory(loanId);
             assertEquals(2, history.size(), "Should have 2 rate change records");
 
-            // Latest (11%) should be active, first (15%) should be auto-reversed
-            assertFalse(history.get(0).getReversed(), "Latest rate change should be active");
-            assertTrue(history.get(1).getReversed(), "Previous rate change should be auto-reversed");
+            // Both stay active: only a change sharing an effective date overwrites, and these take effect on different
+            // dates, so each governs its own segment of the schedule.
+            assertFalse(history.get(0).getReversed(), "Rate change effective 09 January should be active");
+            assertFalse(history.get(1).getReversed(), "Rate change effective 01 January should stay active on its own date");
         });
     }
 
@@ -167,12 +175,30 @@ public class FeignWorkingCapitalLoanRateChangeTest extends FeignIntegrationTest 
             // Advance past the loan term — rate change at day 5 is past the schedule end
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-06");
 
-            wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(15)));
+            wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(15), "06 January 2026"));
 
-            GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
-            assertEquals(0, BigDecimal.valueOf(15).compareTo(loan.getPaymentRate()),
-                    "Rate should be updated to 15 after past-term rate change");
+            assertEquals(0, BigDecimal.valueOf(15).compareTo(rateInEffectOn(loanId, LocalDate.of(2026, 1, 6))),
+                    "Rate in force on 06 January should be 15 after the past-term rate change");
         });
+    }
+
+    /**
+     * The rate the loan is actually billed at on {@code asOf}, taken from the rate-change history.
+     *
+     * <p>
+     * The loan resource reports the rate it was created with and does not move when a change is booked, so the two
+     * answers differ for any loan with a change in force. Ranked by effective date rather than by id, because a
+     * backdated change is created after the changes it precedes; id only breaks ties within one effective date, where
+     * the later-created change is the correction.
+     */
+    private BigDecimal rateInEffectOn(Long loanId, LocalDate asOf) {
+        return wcLoanHelper.getRateChangeHistory(loanId).stream() //
+                .filter(change -> !Boolean.TRUE.equals(change.getReversed())) //
+                .filter(change -> change.getEffectiveDate() != null && !change.getEffectiveDate().isAfter(asOf)) //
+                .max(Comparator.comparing(WorkingCapitalLoanPeriodPaymentRateChangeData::getEffectiveDate)
+                        .thenComparing(WorkingCapitalLoanPeriodPaymentRateChangeData::getId)) //
+                .map(WorkingCapitalLoanPeriodPaymentRateChangeData::getNewRate) //
+                .orElseGet(() -> wcLoanHelper.getLoanDetails(loanId).getPaymentRate());
     }
 
     private Long createAndDisburseLoanOnDate(Long clientIdParam, BigDecimal principal, BigDecimal rate, String date) {

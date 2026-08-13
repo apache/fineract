@@ -179,6 +179,21 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
                 assertNullableDecimal(assertions, p + "expectedDiscountFeeBalance", actual.getExpectedDiscountFeeBalance(),
                         expected.get("expectedDiscountFeeBalance"));
             }
+            if (expected.containsKey("actualPaymentAmount")) {
+                assertNullableDecimal(assertions, p + "actualPaymentAmount", actual.getActualPaymentAmount(),
+                        expected.get("actualPaymentAmount"));
+            }
+            if (expected.containsKey("actualBalance")) {
+                assertNullableDecimal(assertions, p + "actualBalance", actual.getActualBalance(), expected.get("actualBalance"));
+            }
+            if (expected.containsKey("actualAmortizationAmount")) {
+                assertNullableDecimal(assertions, p + "actualAmortizationAmount", actual.getActualAmortizationAmount(),
+                        expected.get("actualAmortizationAmount"));
+            }
+            if (expected.containsKey("actualDiscountFeeBalance")) {
+                assertNullableDecimal(assertions, p + "actualDiscountFeeBalance", actual.getActualDiscountFeeBalance(),
+                        expected.get("actualDiscountFeeBalance"));
+            }
         }
 
         assertions.assertAll();

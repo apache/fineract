@@ -840,11 +840,17 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         @Schema(example = "0.17", description = "New period payment rate")
         public BigDecimal periodPaymentRate;
 
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, example = "01 July 2022", description = "Date the new rate takes effect. Mandatory. May be backdated or set in the future, but not before the disbursement date.")
+        public String effectiveDate;
+
         @Schema(example = "Rate change note")
         public String note;
 
         @Schema(example = "en_GB")
         public String locale;
+
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
     }
 
 }

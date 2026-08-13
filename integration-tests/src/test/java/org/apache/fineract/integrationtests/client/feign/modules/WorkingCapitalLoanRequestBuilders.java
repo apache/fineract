@@ -81,8 +81,13 @@ public final class WorkingCapitalLoanRequestBuilders {
         return new PostWorkingCapitalLoansLoanIdRequest().locale(LOCALE).dateFormat(DATE_FORMAT);
     }
 
-    public static PutWorkingCapitalLoansLoanIdRateRequest updateRate(BigDecimal newRate) {
-        return new PutWorkingCapitalLoansLoanIdRateRequest().periodPaymentRate(newRate).locale(LOCALE);
+    /**
+     * The effective date is required, as it is for every other dated action here: a caller running under a simulated
+     * business date must state it, since the system date the tests otherwise default to is unrelated to it.
+     */
+    public static PutWorkingCapitalLoansLoanIdRateRequest updateRate(BigDecimal newRate, String effectiveDate) {
+        return new PutWorkingCapitalLoansLoanIdRateRequest().periodPaymentRate(newRate).effectiveDate(effectiveDate).locale(LOCALE)
+                .dateFormat(DATE_FORMAT);
     }
 
     public static PostWorkingCapitalLoansLoanIdNearBreachActionsRequest createNearBreachRescheduleAction(BigDecimal threshold,

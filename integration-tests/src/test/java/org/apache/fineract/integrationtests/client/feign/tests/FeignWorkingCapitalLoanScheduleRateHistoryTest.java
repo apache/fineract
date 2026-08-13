@@ -103,7 +103,7 @@ public class FeignWorkingCapitalLoanScheduleRateHistoryTest extends FeignIntegra
 
             // Change the rate on day 10, splitting the schedule into an 18% segment then an 11% segment.
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-10");
-            wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(11)));
+            wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(11), "10 January 2026"));
             assertTrue(distinctPositiveExpectedAmounts(expectedByDate(wcLoanHelper.getAmortizationSchedule(loanId))) >= 2,
                     "The rate change must produce at least two distinct projected payment amounts (two segments)");
 

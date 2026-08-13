@@ -2006,7 +2006,78 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_RATE_CHANGE_ID, rateChangeId);
         assertThat(rateChangeResponse.getChanges()).isNotNull();
-        checkWorkingCapitalPeriodPaymentRate(loanId, periodPaymentRate);
+        // The request defaults the effective date to the business date, so the new rate is in force straight away. It
+        // is asserted through the rate-change history rather than off the loan, whose own rate stays as created.
+        checkWorkingCapitalPeriodPaymentRateInEffect(loanId, businessDateHelper.getBusinessLocalDate(), periodPaymentRate);
+    }
+
+    @When("Admin update Working Capital period payment rate with {string} value effective from {string}")
+    public void adminAddWorkingCapitalPeriodPaymentRateEffectiveFrom(final String periodPaymentRate, final String effectiveDate) {
+        final PostWorkingCapitalLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+
+        PutWorkingCapitalLoansLoanIdRateRequest rateChangeRequest = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoanUpdateRateRequest().periodPaymentRate(new BigDecimal(periodPaymentRate))
+                .effectiveDate(effectiveDate);
+
+        final CommandProcessingResult rateChangeResponse = ok(
+                () -> fineractClient.workingCapitalLoans().updateWorkingCapitalLoanRateById(loanId, rateChangeRequest));
+        final Long rateChangeId = rateChangeResponse.getResourceId();
+
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_RATE_CHANGE_ID, rateChangeId);
+
+        final List<WorkingCapitalLoanPeriodPaymentRateChangeData> rateChanges = ok(
+                () -> fineractClient.workingCapitalLoans().getWorkingCapitalLoanRateChangeHistoryById(loanId));
+        final WorkingCapitalLoanPeriodPaymentRateChangeData persistedRateChange = rateChanges.stream()//
+                .filter(rateChange -> rateChangeId.equals(rateChange.getId()))//
+                .findFirst()//
+                .orElseThrow(() -> new IllegalStateException(
+                        String.format("Rate change [%s] cannot be found in the rate change history of loan [%s]", rateChangeId, loanId)));
+
+        assertThat(persistedRateChange.getNewRate()).isEqualByComparingTo(new BigDecimal(periodPaymentRate));
+        assertThat(persistedRateChange.getEffectiveDate()).isNotNull();
+        assertThat(FORMATTER.format(persistedRateChange.getEffectiveDate())).isEqualTo(effectiveDate);
+    }
+
+    @Then("Working Capital Loan period payment rate in effect is {string}")
+    public void workingCapitalLoanPeriodPaymentRateInEffectIs(final String expectedRate) {
+        checkWorkingCapitalPeriodPaymentRateInEffect(getCreatedLoanId(), businessDateHelper.getBusinessLocalDate(), expectedRate);
+    }
+
+    @Then("Working Capital Loan period payment rate in effect on {string} is {string}")
+    public void workingCapitalLoanPeriodPaymentRateInEffectOnIs(final String asOfDate, final String expectedRate) {
+        checkWorkingCapitalPeriodPaymentRateInEffect(getCreatedLoanId(), LocalDate.parse(asOfDate, FORMATTER), expectedRate);
+    }
+
+    /**
+     * Asserts the rate the loan is actually being billed at on {@code asOf}, derived from the rate-change history
+     * rather than read off the loan.
+     *
+     * <p>
+     * The loan resource reports the rate the loan was created with and does not move when a rate change is booked, so
+     * the two answers differ for any loan with a change in force. The rate in force is the newest non-reversed change
+     * effective on or before the date, and the loan's own rate when none has taken effect yet.
+     *
+     * <p>
+     * Ranked by effective date, not by id: a backdated change is created after the changes it precedes, so insertion
+     * order does not reflect the timeline. Id only breaks ties between changes sharing an effective date, where the
+     * later-created one is the correction.
+     */
+    public void checkWorkingCapitalPeriodPaymentRateInEffect(final Long loanId, final LocalDate asOf, final String expectedRate) {
+        final List<WorkingCapitalLoanPeriodPaymentRateChangeData> rateChanges = ok(
+                () -> fineractClient.workingCapitalLoans().getWorkingCapitalLoanRateChangeHistoryById(loanId));
+
+        final BigDecimal rateInEffect = rateChanges.stream()//
+                .filter(change -> !Boolean.TRUE.equals(change.getReversed()))//
+                .filter(change -> change.getEffectiveDate() != null && !change.getEffectiveDate().isAfter(asOf))//
+                .max(Comparator.comparing(WorkingCapitalLoanPeriodPaymentRateChangeData::getEffectiveDate)
+                        .thenComparing(WorkingCapitalLoanPeriodPaymentRateChangeData::getId))//
+                .map(WorkingCapitalLoanPeriodPaymentRateChangeData::getNewRate)//
+                .orElseGet(() -> retrieveLoanDetails(loanId).getPaymentRate());
+
+        assertThat(rateInEffect).as("period payment rate in effect on %s for loan %s", asOf, loanId).isNotNull();
+        assertThat(rateInEffect).as("period payment rate in effect on %s for loan %s", asOf, loanId)
+                .isEqualByComparingTo(new BigDecimal(expectedRate));
     }
 
     @When("Admin update Working Capital period payment rate with {string} value by externalId")
@@ -2023,7 +2094,9 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_RATE_CHANGE_ID, rateChangeId);
         assertThat(rateChangeResponse.getChanges()).isNotNull();
-        checkWorkingCapitalPeriodPaymentRate(loanId, periodPaymentRate);
+        // The request defaults the effective date to the business date, so the new rate is in force straight away. It
+        // is asserted through the rate-change history rather than off the loan, whose own rate stays as created.
+        checkWorkingCapitalPeriodPaymentRateInEffect(loanId, businessDateHelper.getBusinessLocalDate(), periodPaymentRate);
     }
 
     @When("Admin update Working Capital period payment rate failed with {string} value on non active loan")
@@ -3702,12 +3775,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
         assertThat(exception.getStatus()).as(errorMessage).isEqualTo(responseCode);
         assertThat(exception.getDeveloperMessage()).contains(errorMessage);
-    }
-
-    public void checkWorkingCapitalPeriodPaymentRate(Long loanId, String periodPaymentRate) {
-        final GetWorkingCapitalLoansLoanIdResponse loanDetailsResponse = retrieveLoanDetails(loanId);
-        assert loanDetailsResponse.getPaymentRate() != null;
-        assertThat(loanDetailsResponse.getPaymentRate().compareTo(new BigDecimal(periodPaymentRate))).isZero();
     }
 
     public void checkPeriodPaymentRateChangeHistory(List<List<String>> data,

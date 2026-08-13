@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.repository;
 
 import java.util.List;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodPaymentRateChange;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodPaymentRateHistoryHelper;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -29,5 +30,10 @@ public interface WorkingCapitalLoanPeriodPaymentRateChangeRepository
 
     List<WorkingCapitalLoanPeriodPaymentRateChange> findByWorkingCapitalLoanIdOrderByIdDesc(Long loanId);
 
+    /**
+     * The changes actually in force. Deliberately unordered: callers rank them by effective date via
+     * {@link WorkingCapitalLoanPeriodPaymentRateHistoryHelper}, which insertion order does not reflect once changes can
+     * be backdated.
+     */
     List<WorkingCapitalLoanPeriodPaymentRateChange> findByWorkingCapitalLoanIdAndReversedFalse(Long loanId);
 }

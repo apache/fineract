@@ -52,9 +52,11 @@ import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConsta
 import org.apache.fineract.portfolio.workingcapitalloan.domain.NearBreachActionType;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodPaymentRateHistoryHelper;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
 import org.springframework.stereotype.Component;
@@ -69,6 +71,7 @@ public class WorkingCapitalLoanDataValidator {
     private final WorkingCapitalLoanTransactionFinder transactionFinder;
     private final CodeValueRepository codeValueRepository;
     private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
+    private final WorkingCapitalLoanPeriodPaymentRateChangeRepository rateChangeRepository;
 
     // Per requirement: only principal, discount, approved date, expected disbursement date, and notes
     private static final Set<String> APPROVAL_SUPPORTED_PARAMETERS = new HashSet<>(
@@ -122,7 +125,8 @@ public class WorkingCapitalLoanDataValidator {
             Arrays.asList("locale", WorkingCapitalLoanConstants.reversalExternalIdParamName, WorkingCapitalLoanConstants.noteParamName));
 
     private static final Set<String> UPDATE_RATE_SUPPORTED_PARAMETERS = new HashSet<>(
-            Arrays.asList(WorkingCapitalLoanConstants.localeParameterName, WorkingCapitalLoanConstants.periodPaymentRateParamName,
+            Arrays.asList(WorkingCapitalLoanConstants.localeParameterName, WorkingCapitalLoanConstants.dateFormatParameterName,
+                    WorkingCapitalLoanConstants.periodPaymentRateParamName, WorkingCapitalLoanConstants.effectiveDateParamName,
                     WorkingCapitalLoanConstants.noteParamName));
 
     private static final Set<String> NEAR_BREACH_ACTION_SUPPORTED_PARAMETERS = new HashSet<>(
@@ -893,14 +897,27 @@ public class WorkingCapitalLoanDataValidator {
                     .failWithCode("rate.change.not.allowed.for.non.active.loan");
         }
 
+        final LocalDate effectiveDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.effectiveDateParamName,
+                element);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.effectiveDateParamName).value(effectiveDate).notNull();
+        final LocalDate disbursalDate = loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()
+                ? loan.getDisbursementDetails().getFirst().getActualDisbursementDate()
+                : null;
+        if (DateUtils.isBefore(effectiveDate, disbursalDate)) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.effectiveDateParamName)
+                    .failWithCode("cannot.be.before.disbursal.date");
+        }
+
         final BigDecimal periodPaymentRate = this.fromApiJsonHelper
                 .extractBigDecimalNamed(WorkingCapitalLoanConstants.periodPaymentRateParamName, element, new HashSet<>());
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.periodPaymentRateParamName).value(periodPaymentRate).notNull()
                 .positiveAmount();
 
-        if (periodPaymentRate != null) {
-            final BigDecimal previousRate = loan.getLoanProductRelatedDetails().getPeriodPaymentRate();
-            if (previousRate != null && previousRate.compareTo(periodPaymentRate) == 0) {
+        if (periodPaymentRate != null && effectiveDate != null) {
+            final BigDecimal rateInEffect = WorkingCapitalLoanPeriodPaymentRateHistoryHelper.rateInEffectAt(
+                    rateChangeRepository.findByWorkingCapitalLoanIdAndReversedFalse(loan.getId()),
+                    loan.getLoanProductRelatedDetails().getPeriodPaymentRate(), effectiveDate);
+            if (rateInEffect != null && rateInEffect.compareTo(periodPaymentRate) == 0) {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.periodPaymentRateParamName)
                         .failWithCode("rate.must.differ.from.current");
             }
