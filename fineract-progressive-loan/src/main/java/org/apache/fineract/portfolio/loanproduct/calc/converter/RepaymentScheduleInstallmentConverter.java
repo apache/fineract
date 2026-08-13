@@ -28,7 +28,7 @@ public final class RepaymentScheduleInstallmentConverter {
 
     public static RepaymentScheduleInstallmentData toData(LoanRepaymentScheduleInstallment installment) {
         return RepaymentScheduleInstallmentData.of(installment.getFromDate(), installment.getDueDate(), installment.isDownPayment(),
-                installment.isAdditional());
+                installment.isAdditional(), installment.getPrincipalCompleted(), installment.getInterestPaid());
     }
 
     public static List<RepaymentScheduleInstallmentData> toDataList(List<LoanRepaymentScheduleInstallment> installments) {

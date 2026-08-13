@@ -68,9 +68,32 @@ ALL_TESTS=$(find . -type f -path "*/src/test/java/*.java" \
       # Extract fully qualified test class name
       class_name=$(echo "$filepath" | sed 's|^.*src/test/java/||; s|/|.|g; s|.java$||')
 
-      echo "$module_name,$class_name"
+      # Read a class-level @Order annotation, if present. Stop at the first
+      # class declaration so method-level @Order annotations are ignored.
+      order=$(awk '
+        {
+          if (match($0, /@Order[[:space:]]*\([[:space:]]*-?[0-9]+[[:space:]]*\)/)) {
+            annotation = substr($0, RSTART, RLENGTH)
+            gsub(/[^0-9-]/, "", annotation)
+            class_order = annotation
+          }
+
+          if ($0 ~ /(^|[[:space:]])(class|interface|enum)[[:space:]]+[A-Za-z_][A-Za-z0-9_]*/) {
+            print class_order
+            exit
+          }
+        }
+      ' "$filepath")
+
+      if [[ -n "$order" ]]; then
+        # The first field keeps ordered tests ahead of unordered tests.
+        echo "0,$order,$module_name,$class_name"
+      else
+        # The second field is a placeholder because unordered tests are last.
+        echo "1,0,$module_name,$class_name"
+      fi
     done \
-  | sort)
+  | sort -t, -k1,1n -k2,2n -k3,3 -k4,4)
 
 TOTAL_COUNT=$(echo "$ALL_TESTS" | wc -l)
 echo "Found $TOTAL_COUNT eligible test classes."
@@ -79,7 +102,7 @@ SELECTED_CLASSES=$(echo "$ALL_TESTS" \
   | awk -v ts="$TOTAL_SHARDS" -v si="$SHARD_INDEX" 'NR % ts == (si - 1)')
 
 OUTPUT_FILE="shard-tests_${SHARD_INDEX}.txt"
-echo "$SELECTED_CLASSES" > "$OUTPUT_FILE"
+echo "$SELECTED_CLASSES" | cut -d, -f3- > "$OUTPUT_FILE"
 
 echo "Selected $(wc -l < "$OUTPUT_FILE") classes for shard $SHARD_INDEX of $TOTAL_SHARDS:"
 cat "$OUTPUT_FILE"
