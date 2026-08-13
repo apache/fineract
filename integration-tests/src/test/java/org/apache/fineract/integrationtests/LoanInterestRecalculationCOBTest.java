@@ -62,7 +62,6 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     private static PostClientsResponse client;
     private static InlineLoanCOBHelper inlineLoanCOBHelper;
     private static BusinessStepHelper businessStepHelper;
-    private static SchedulerJobHelper schedulerJobHelper;
 
     @BeforeAll
     public static void setup() {
@@ -72,7 +71,6 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         requestSpec.header("Fineract-Platform-TenantId", Utils.DEFAULT_TENANT);
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
         client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
         inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
@@ -223,8 +221,8 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     }
 
     private void executeInterestRecalculationJobs() {
-        schedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Ageing");
-        schedulerJobHelper.executeAndAwaitJob("Recalculate Interest For Loans");
+        SchedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Ageing");
+        SchedulerJobHelper.executeAndAwaitJob("Recalculate Interest For Loans");
     }
 
     @Test

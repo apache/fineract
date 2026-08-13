@@ -32,7 +32,6 @@ import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
@@ -67,7 +66,6 @@ public class SavingsAccountRecalculateBalanceTest {
     private RequestSpecification requestSpec;
     private SavingsAccountHelper savingsAccountHelper;
     private SavingsProductHelper savingsProductHelper;
-    private SchedulerJobHelper scheduleJobHelper;
     private PaymentTypeHelper paymentTypeHelper;
     private GlobalConfigurationHelper globalConfigurationHelper;
 

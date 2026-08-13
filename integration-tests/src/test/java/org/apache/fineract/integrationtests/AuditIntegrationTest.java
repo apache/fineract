@@ -51,7 +51,6 @@ public class AuditIntegrationTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
-    private SchedulerJobHelper schedulerJobHelper;
     private static final SecureRandom rand = new SecureRandom();
 
     /**
@@ -65,7 +64,6 @@ public class AuditIntegrationTest {
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
     }
 
     @Test
@@ -173,11 +171,11 @@ public class AuditIntegrationTest {
     @Test
     public void executeSchedulerJobShouldCreateAuditEntry() {
         // given
-        int jobId = schedulerJobHelper.getSchedulerJobIdByShortName("SA_AANF").intValue();
+        int jobId = SchedulerJobHelper.getSchedulerJobIdByShortName("SA_AANF").intValue();
         List<AuditData> auditsRecievedInitial = AuditHelper.getAuditDetails(jobId, "EXECUTEJOB", "SCHEDULER");
 
         // when
-        schedulerJobHelper.runSchedulerJob(jobId);
+        SchedulerJobHelper.runSchedulerJob(jobId);
 
         // then
         List<AuditData> auditsRecieved = AuditHelper.getAuditDetails(jobId, "EXECUTEJOB", "SCHEDULER");

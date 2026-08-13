@@ -70,7 +70,6 @@ public class SavingsInterestPostingJobIntegrationTest {
     private static RequestSpecification requestSpec;
     private SavingsProductHelper savingsProductHelper;
     private SavingsAccountHelper savingsAccountHelper;
-    private SchedulerJobHelper scheduleJobHelper;
     private JournalEntryHelper journalEntryHelper;
     private AccountHelper accountHelper;
     private GlobalConfigurationHelper globalConfigurationHelper;
@@ -83,7 +82,6 @@ public class SavingsInterestPostingJobIntegrationTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
-        this.scheduleJobHelper = new SchedulerJobHelper(requestSpec);
         this.globalConfigurationHelper = new GlobalConfigurationHelper();
     }
 
@@ -97,7 +95,7 @@ public class SavingsInterestPostingJobIntegrationTest {
 
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+        SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
         Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
         HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 48);
@@ -133,7 +131,7 @@ public class SavingsInterestPostingJobIntegrationTest {
 
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+        SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
         Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
@@ -161,7 +159,7 @@ public class SavingsInterestPostingJobIntegrationTest {
 
             this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+            SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
             Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
             ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
             HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 3);
@@ -190,7 +188,7 @@ public class SavingsInterestPostingJobIntegrationTest {
 
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-        this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+        SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
         Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
         HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 2);
@@ -216,7 +214,7 @@ public class SavingsInterestPostingJobIntegrationTest {
         Float balance = Float.parseFloat("800.0");
         assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is 800");
 
-        this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+        SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
         Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
         ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
         HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 5);
@@ -241,8 +239,8 @@ public class SavingsInterestPostingJobIntegrationTest {
             final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
             this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
-            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+            SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+            SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
 
             Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
             ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
@@ -272,12 +270,12 @@ public class SavingsInterestPostingJobIntegrationTest {
             final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
             this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
-            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+            SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
             HashMap summaryAfterFirstRun = this.savingsAccountHelper.getSavingsSummary(savingsId);
             Float balanceAfterFirstRun = Float.parseFloat(summaryAfterFirstRun.get("accountBalance").toString());
             LOG.info("Balance after first run: {}", balanceAfterFirstRun);
 
-            this.scheduleJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
+            SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
             HashMap summaryAfterSecondRun = this.savingsAccountHelper.getSavingsSummary(savingsId);
             Float balanceAfterSecondRun = Float.parseFloat(summaryAfterSecondRun.get("accountBalance").toString());
             LOG.info("Balance after second run: {}", balanceAfterSecondRun);

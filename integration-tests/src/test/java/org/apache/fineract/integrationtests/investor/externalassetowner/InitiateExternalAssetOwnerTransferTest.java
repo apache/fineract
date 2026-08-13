@@ -128,7 +128,6 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
     private static FinancialActivityAccountHelper FINANCIAL_ACTIVITY_ACCOUNT_HELPER;
     private static ExternalAssetOwnerHelper EXTERNAL_ASSET_OWNER_HELPER;
     private static LoanTransactionHelper LOAN_TRANSACTION_HELPER;
-    private static SchedulerJobHelper SCHEDULER_JOB_HELPER;
     private static OfficeHelper OFFICE_HELPER;
     private static LocalDate TODAYS_DATE;
     public String ownerExternalId;
@@ -143,7 +142,6 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
         RESPONSE_SPEC = new ResponseSpecBuilder().expectStatusCode(200).build();
         AccountHelper accountHelper = new AccountHelper(REQUEST_SPEC, RESPONSE_SPEC);
         EXTERNAL_ASSET_OWNER_HELPER = new ExternalAssetOwnerHelper();
-        SCHEDULER_JOB_HELPER = new SchedulerJobHelper(REQUEST_SPEC);
         FINANCIAL_ACTIVITY_ACCOUNT_HELPER = new FinancialActivityAccountHelper(REQUEST_SPEC);
         LOAN_TRANSACTION_HELPER = new LoanTransactionHelper(REQUEST_SPEC, RESPONSE_SPEC);
         OFFICE_HELPER = new OfficeHelper();
@@ -1440,7 +1438,7 @@ public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationT
 
     private void updateBusinessDateAndExecuteCOBJob(String date) {
         BusinessDateHelper.updateBusinessDate(BUSINESS_DATE, LocalDate.parse(date));
-        SCHEDULER_JOB_HELPER.executeAndAwaitJob("Loan COB");
+        SchedulerJobHelper.executeAndAwaitJob("Loan COB");
     }
 
     private PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate) {
