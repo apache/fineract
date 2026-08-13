@@ -201,6 +201,42 @@ Feature: Working Capital Delinquency Pause
       | 1            | 2026-01-01 | 2026-03-13 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 2              |
       | 2            | 2026-03-14 | 2026-04-12 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
 
+  Scenario: Verify working capital loan delinquency pause - UC6 variant: second future-dated pause overlapping an existing future-dated pause results an error (Negative)
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin initiate a Working Capital loan delinquency pause with startDate "15 January 2026" and endDate "25 February 2026"
+    Then Working Capital loan delinquency action has the following data:
+      | action | startDate  | endDate    |
+      | PAUSE  | 2026-01-15 | 2026-02-25 |
+    And Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-03-13 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    When Admin initiate a Working Capital loan delinquency pause with startDate "17 March 2026" and endDate "24 March 2026"
+    Then Working Capital loan delinquency action has the following data:
+      | action | startDate  | endDate    |
+      | PAUSE  | 2026-01-15 | 2026-02-25 |
+      | PAUSE  | 2026-03-17 | 2026-03-24 |
+    Then Initiating a Working Capital loan delinquency pause with startDate "17 March 2026" and endDate "30 March 2026" results an error with the following data:
+      | httpCode | errorMessage                                                      |
+      | 400      | Delinquency pause period cannot overlap with another pause period |
+    And Working Capital loan delinquency action has the following data:
+      | action | startDate  | endDate    |
+      | PAUSE  | 2026-01-15 | 2026-02-25 |
+      | PAUSE  | 2026-03-17 | 2026-03-24 |
+
   @TestRailId:C78810
   Scenario: Verify working capital loan delinquency pause - UC6.1: delinquency pause in the middle of first period with future pauses overlapping to a few periods
     When Admin sets the business date to "01 January 2026"
