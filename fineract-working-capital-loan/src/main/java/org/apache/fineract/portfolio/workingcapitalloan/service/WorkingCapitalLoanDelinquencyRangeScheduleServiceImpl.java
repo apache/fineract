@@ -54,7 +54,6 @@ import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapita
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.springframework.stereotype.Service;
 
@@ -464,15 +463,14 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
     }
 
     private DelinquencyMinimumPaymentPeriodAndRule getMinimumPaymentRule(WorkingCapitalLoan loan) {
-        WorkingCapitalLoanProduct product = loan.getLoanProduct();
-        if (product == null) {
+        if (loan.getLoanProductRelatedDetails() == null) {
             return null;
         }
-        DelinquencyBucket bucket = product.getDelinquencyBucket();
-        if (bucket == null) {
+        DelinquencyBucket delinquencyBucket = loan.getLoanProductRelatedDetails().getDelinquencyBucket();
+        if (delinquencyBucket == null) {
             return null;
         }
-        return minimumPaymentPeriodAndRuleRepository.findByBucketId(bucket.getId()).orElse(null);
+        return minimumPaymentPeriodAndRuleRepository.findByBucketId(delinquencyBucket.getId()).orElse(null);
     }
 
     private BigDecimal calculateExpectedAmount(final WorkingCapitalLoan loan, final EffectiveDelinquencyRescheduleParams params) {

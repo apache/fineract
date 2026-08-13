@@ -22,6 +22,7 @@ import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.math.BigDecimal;
@@ -90,6 +91,26 @@ public class WorkingCapitalDelinquencyConfigStepDef extends AbstractStepDef {
         assertThat(ok.getResourceId()).isNotNull();
         TestContext.GLOBAL.set(TestContextKey.DELINQUENCY_BUCKET_ID, ok.getResourceId());
         TestContext.GLOBAL.set(TestContextKey.DELINQUENCY_BUCKET_CREATE_REQUEST, delinquencyBucketRequest);
+    }
+
+    @When("Admin creates WC Delinquency Bucket With Values:")
+    public void adminCreatesWCDelinquencyBucketWithCustomValues(final DataTable table) {
+        Map<String, String> data = table.asMaps().getFirst();
+        DelinquencyBucketRequest delinquencyBucketRequest = new DelinquencyBucketRequest() //
+                .name("DB-WCL-" + Utils.randomStringGenerator(12)) //
+                .bucketType(DelinquencyBucketType.WORKING_CAPITAL.toString())//
+                .ranges(List.of(1L)) //
+                .minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule() //
+                        .frequency(Integer.parseInt(data.get("frequency"))) //
+                        .minimumPaymentType(data.get("minimumPaymentType")) //
+                        .frequencyType(data.get("frequencyType")) //
+                        .minimumPayment(BigDecimal.valueOf(Double.parseDouble(data.get("minimumPayment"))))); //
+        PostDelinquencyBucketResponse ok = ok(
+                () -> fineractFeignClient.delinquencyRangeAndBucketsManagement().createBucket(delinquencyBucketRequest));
+        assertThat(ok).isNotNull();
+        assertThat(ok.getResourceId()).isNotNull();
+        testContext().set(TestContextKey.DELINQUENCY_BUCKET_ID, ok.getResourceId());
+        testContext().set(TestContextKey.DELINQUENCY_BUCKET_CREATE_REQUEST, delinquencyBucketRequest);
     }
 
     @When("Admin creates WC Delinquency Bucket With Values for update")
