@@ -54,10 +54,12 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
     /**
      * Re-derives the base expectation of the current period and the boundaries of future periods from the effective
      * reschedule parameters resolved from the persisted RESCHEDULE actions; a newly created reschedule action must
-     * therefore be saved before this is called. Amounts, the remaining-balance cap and expired-period evaluation are
-     * left to {@link #reprocessDelinquencySchedule(WorkingCapitalLoan)}, which the caller must invoke afterwards.
+     * therefore be saved before this is called. When {@code action} carries a frequency group, the current open period
+     * is also re-dated: its toDate is recalculated from its fromDate and the new frequency, extended by the recorded
+     * pauses that overlap the period. Amounts, the remaining-balance cap and expired-period evaluation are left to
+     * {@link #reprocessDelinquencySchedule(WorkingCapitalLoan)}, which the caller must invoke afterwards.
      */
-    void rescheduleMinimumPayment(WorkingCapitalLoan loan);
+    void rescheduleMinimumPayment(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyAction action);
 
     void resumeActivePause(WorkingCapitalLoan loan, WorkingCapitalLoanDelinquencyAction activePause,
             WorkingCapitalLoanDelinquencyAction resumeAction);

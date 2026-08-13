@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface WorkingCapitalLoanBreachScheduleRepository extends JpaRepository<WorkingCapitalLoanBreachSchedule, Long> {
 
@@ -41,4 +43,25 @@ public interface WorkingCapitalLoanBreachScheduleRepository extends JpaRepositor
             LocalDate transactionDate, LocalDate transactionDate1);
 
     Optional<WorkingCapitalLoanBreachSchedule> findTopByLoanIdAndBreachTrueOrderByFromDateAsc(Long loanId);
+
+    /**
+     * The not yet breached period covering the business date. Periods are built contiguously, so at most one of them
+     * can cover a given date.
+     */
+    @Query("""
+            SELECT s FROM WorkingCapitalLoanBreachSchedule s
+            WHERE s.loan.id = :loanId
+              AND s.breach IS NULL
+              AND s.fromDate <= :businessDate
+              AND s.toDate >= :businessDate""")
+    Optional<WorkingCapitalLoanBreachSchedule> findCurrentOpenPeriod(@Param("loanId") Long loanId,
+            @Param("businessDate") LocalDate businessDate);
+
+    @Query("""
+            SELECT s FROM WorkingCapitalLoanBreachSchedule s
+            WHERE s.loan.id = :loanId
+              AND s.fromDate > :businessDate
+            ORDER BY s.periodNumber ASC""")
+    List<WorkingCapitalLoanBreachSchedule> findFuturePeriodsOrderByPeriodNumberAsc(@Param("loanId") Long loanId,
+            @Param("businessDate") LocalDate businessDate);
 }

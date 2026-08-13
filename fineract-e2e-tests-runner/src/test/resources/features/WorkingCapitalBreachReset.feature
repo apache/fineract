@@ -359,7 +359,7 @@ Feature: Working Capital Breach Reset and Undo Reset
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Admin sets the business date to "15 April 2026"
     And Admin creates WC breach reset action
-    Then Admin fails to create WC breach reset action with error containing "reset.already.exists.in.current.period"
+    Then Admin fails to create WC breach reset action with error containing "A breach reset already exists in the current breach period."
     Then Admin closes the Working Capital loan with a full repayment on "15 April 2026"
 
   @TestRailId:C85436
@@ -424,7 +424,7 @@ Feature: Working Capital Breach Reset and Undo Reset
     When Admin sets the business date to "03 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Admin sets the business date to "15 April 2026"
-    Then Admin fails to create WC breach undo reset action with error containing "no.breach.reset.to.undo"
+    Then Admin fails to create WC breach undo reset action with error containing "There is no active breach reset to undo for this Working Capital loan."
     Then Admin closes the Working Capital loan with a full repayment on "15 April 2026"
 
   @TestRailId:C85438
@@ -449,7 +449,7 @@ Feature: Working Capital Breach Reset and Undo Reset
     When Admin sets the business date to "15 April 2026"
     And Admin creates WC breach reset action
     And Admin creates WC breach undo reset action
-    Then Admin fails to create WC breach undo reset action with error containing "no.breach.reset.to.undo"
+    Then Admin fails to create WC breach undo reset action with error containing "There is no active breach reset to undo for this Working Capital loan."
     Then Admin closes the Working Capital loan with a full repayment on "15 April 2026"
 
   @TestRailId:C85439
@@ -463,7 +463,7 @@ Feature: Working Capital Breach Reset and Undo Reset
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
       | 01 January 2026 | 01 January 2026          | 800             | 10000              | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
-    Then Admin fails to create WC breach "<action>" action with error containing "loan.is.not.active"
+    Then Admin fails to create WC breach "<action>" action with error containing "Breach actions can be created only for active Working Capital loans."
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
@@ -485,7 +485,7 @@ Feature: Working Capital Breach Reset and Undo Reset
       | 01 January 2026 | 01 January 2026          | 800             | 10000              | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
-    Then Admin fails to create WC breach reset action with error containing "no.breach.schedule"
+    Then Admin fails to create WC breach reset action with error containing "Breach action requires an existing breach schedule."
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
 
@@ -503,7 +503,7 @@ Feature: Working Capital Breach Reset and Undo Reset
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
     When Admin sets the business date to "15 January 2026"
-    Then Admin fails to create WC breach reset action with error containing "no.breach.evaluation.period"
+    Then Admin fails to create WC breach reset action with error containing "There is no breach evaluation period covering the current business date."
     Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
   @TestRailId:C85442
@@ -517,7 +517,7 @@ Feature: Working Capital Breach Reset and Undo Reset
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin fails to create WC breach "<action>" action with error containing "no.breach.configuration"
+    Then Admin fails to create WC breach "<action>" action with error containing "Breach actions require a breach configuration on the Working Capital loan."
     Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
 
     Examples:

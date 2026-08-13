@@ -19,30 +19,15 @@
 package org.apache.fineract.portfolio.workingcapitalloan.domain;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import org.apache.fineract.portfolio.delinquency.domain.DelinquencyFrequencyType;
 
-public final class WorkingCapitalLoanBreachScheduleEvaluationUtils {
+public final class WorkingCapitalLoanDelinquencyRangeScheduleEvaluationUtils {
 
-    private WorkingCapitalLoanBreachScheduleEvaluationUtils() {}
-
-    public static Optional<WorkingCapitalLoanBreachSchedule> resolveEvaluationPeriod(final List<WorkingCapitalLoanBreachSchedule> periods,
-            final LocalDate actionDate) {
-        if (periods == null || periods.isEmpty() || actionDate == null) {
-            return Optional.empty();
-        }
-        final Optional<WorkingCapitalLoanBreachSchedule> containingPeriod = periods.stream().filter(p -> p.getFromDate() != null
-                && p.getToDate() != null && !p.getFromDate().isAfter(actionDate) && !p.getToDate().isBefore(actionDate)).findFirst();
-        if (containingPeriod.isPresent()) {
-            return containingPeriod;
-        }
-        return periods.stream().filter(p -> p.getToDate() != null && !p.getToDate().isAfter(actionDate))
-                .max(Comparator.comparingInt(period -> period.getPeriodNumber() != null ? period.getPeriodNumber() : Integer.MIN_VALUE));
-    }
+    private WorkingCapitalLoanDelinquencyRangeScheduleEvaluationUtils() {}
 
     public static LocalDate calculateToDate(final LocalDate fromDate, final Integer frequency,
-            final WorkingCapitalLoanPeriodFrequencyType frequencyType) {
+            final DelinquencyFrequencyType frequencyType) {
         return switch (frequencyType) {
             case DAYS -> fromDate.plusDays(frequency - 1);
             case WEEKS -> fromDate.plusWeeks(frequency).minusDays(1);
@@ -57,8 +42,8 @@ public final class WorkingCapitalLoanBreachScheduleEvaluationUtils {
      * cannot drift from the mutation it guards.
      */
     public static LocalDate calculateRescheduledToDate(final LocalDate fromDate, final Integer frequency,
-            final WorkingCapitalLoanPeriodFrequencyType frequencyType, final List<WorkingCapitalLoanBreachAction> actions) {
-        return WorkingCapitalLoanBreachPauseUtils.extendToDateByRecordedPauses(fromDate,
+            final DelinquencyFrequencyType frequencyType, final List<WorkingCapitalLoanDelinquencyAction> actions) {
+        return WorkingCapitalLoanDelinquencyPauseUtils.extendToDateByRecordedPauses(fromDate,
                 calculateToDate(fromDate, frequency, frequencyType), actions);
     }
 
