@@ -201,7 +201,7 @@ public abstract class CommonStandingInstructionValidations implements StandingIn
             firstExecutionMonthlyOrYearlyDate = adjustFirstExecutionMonthlyOrYearlyDate(frequencyType, firstExecutionMonthlyOrYearlyDate);
         }
 
-        return date;
+        return firstExecutionMonthlyOrYearlyDate;
     }
 
     private boolean isValidTillBeforeFirstExecution(final LocalDate validFrom, final LocalDate firstExecutionDate, final LocalDate validTill) {
