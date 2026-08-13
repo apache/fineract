@@ -36,6 +36,7 @@ import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormat;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.AccountNumberFormatRepositoryWrapper;
 import org.apache.fineract.infrastructure.accountnumberformat.domain.EntityAccountType;
+import org.apache.fineract.infrastructure.accountnumberformat.service.AccountNumberGeneratorService;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -65,10 +66,14 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
-import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
 import org.apache.fineract.portfolio.address.service.AddressWritePlatformService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.contract.ClientLoanReadService;
+import org.apache.fineract.portfolio.client.contract.ClientNoteWriteService;
+import org.apache.fineract.portfolio.client.contract.ClientSavingsActivationService;
+import org.apache.fineract.portfolio.client.contract.ClientSavingsReadService;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
+import org.apache.fineract.portfolio.client.data.ClientLoanStatusData;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientEnumerations;
 import org.apache.fineract.portfolio.client.domain.ClientNonPerson;
@@ -85,16 +90,6 @@ import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.group.exception.GroupMemberCountNotInPermissibleRangeException;
 import org.apache.fineract.portfolio.group.exception.GroupNotFoundException;
-import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
-import org.apache.fineract.portfolio.note.domain.Note;
-import org.apache.fineract.portfolio.note.domain.NoteRepository;
-import org.apache.fineract.portfolio.savings.data.SavingsAccountDataDTO;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
-import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
-import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
-import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
-import org.apache.fineract.portfolio.savings.service.SavingsApplicationProcessWritePlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -110,16 +105,15 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ClientRepositoryWrapper clientRepository;
     private final ClientNonPersonRepositoryWrapper clientNonPersonRepository;
     private final OfficeRepositoryWrapper officeRepositoryWrapper;
-    private final NoteRepository noteRepository;
+    private final ClientNoteWriteService clientNoteWriteService;
     private final GroupRepository groupRepository;
     private final ClientDataValidator fromApiJsonDeserializer;
-    private final AccountNumberGenerator accountNumberGenerator;
+    private final AccountNumberGeneratorService accountNumberGenerator;
     private final StaffRepositoryWrapper staffRepository;
     private final CodeValueRepositoryWrapper codeValueRepository;
-    private final LoanRepositoryWrapper loanRepositoryWrapper;
-    private final SavingsAccountRepositoryWrapper savingsRepositoryWrapper;
-    private final SavingsProductRepository savingsProductRepository;
-    private final SavingsApplicationProcessWritePlatformService savingsApplicationProcessWritePlatformService;
+    private final ClientLoanReadService clientLoanReadService;
+    private final ClientSavingsReadService clientSavingsReadService;
+    private final ClientSavingsActivationService clientSavingsActivationService;
     private final CommandProcessingService commandProcessingService;
     private final ConfigurationDomainService configurationDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
@@ -139,8 +133,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if (client.isNotPending()) {
                 throw new ClientMustBePendingToBeDeletedException(clientId);
             }
-            final List<Note> relatedNotes = this.noteRepository.findByClient(client);
-            this.noteRepository.deleteAllInBatch(relatedNotes);
+            this.clientNoteWriteService.deleteNotesByClient(client);
 
             final ClientNonPerson clientNonPerson = this.clientNonPersonRepository.findOneByClientId(clientId);
             if (clientNonPerson != null) {
@@ -236,8 +229,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
             if (savingsProductId != null) {
-                this.savingsProductRepository.findById(savingsProductId)
-                        .orElseThrow(() -> new SavingsProductNotFoundException(savingsProductId));
+                this.clientSavingsReadService.validateSavingsProductExists(savingsProductId);
             }
 
             boolean isEntity = false;
@@ -297,7 +289,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             this.clientRepository.saveAndFlush(newClient);
             if (StringUtils.isBlank(accountNo)) {
                 AccountNumberFormat accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(EntityAccountType.CLIENT);
-                newClient.updateAccountNo(accountNumberGenerator.generate(newClient, accountNumberFormat));
+                newClient.updateAccountNo(accountNumberGenerator.generate(EntityAccountType.CLIENT, newClient, accountNumberFormat));
                 this.clientRepository.saveAndFlush(newClient);
             }
 
@@ -583,8 +575,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 }
                 final Long savingsProductId = command.longValueOfParameterNamed(ClientApiConstants.savingsProductIdParamName);
                 if (savingsProductId != null) {
-                    this.savingsProductRepository.findById(savingsProductId)
-                            .orElseThrow(() -> new SavingsProductNotFoundException(savingsProductId));
+                    this.clientSavingsReadService.validateSavingsProductExists(savingsProductId);
                 }
                 clientForUpdate.updateSavingsProduct(savingsProductId);
             }
@@ -736,11 +727,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private CommandProcessingResult openSavingsAccount(final Client client, final DateTimeFormatter fmt) {
         CommandProcessingResult commandProcessingResult = CommandProcessingResult.empty();
         if (client.isActive() && client.savingsProductId() != null) {
-            SavingsAccountDataDTO savingsAccountDataDTO = new SavingsAccountDataDTO(client, null, client.savingsProductId(),
-                    client.getActivationDate(), client.activatedBy(), fmt);
-            commandProcessingResult = this.savingsApplicationProcessWritePlatformService.createActiveApplication(savingsAccountDataDTO);
+            commandProcessingResult = this.clientSavingsActivationService.createSavingsForClientActivation(client, fmt);
             if (commandProcessingResult.getSavingsId() != null) {
-                this.savingsRepositoryWrapper.findOneWithNotFoundDetection(commandProcessingResult.getSavingsId());
                 client.updateSavingsAccount(commandProcessingResult.getSavingsId());
                 client.updateSavingsProduct(null);
             }
@@ -854,28 +842,24 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             entityDatatableChecksWritePlatformService.runTheCheck(clientId, EntityTables.CLIENT.getName(), StatusEnum.CLOSE.getValue(),
                     EntityTables.CLIENT.getForeignKeyColumnNameOnDatatable(), legalForm.getLabel());
 
-            final List<Loan> clientLoans = this.loanRepositoryWrapper.findLoanByClientId(clientId);
-            for (final Loan loan : clientLoans) {
-                final LoanStatusMapper loanStatus = new LoanStatusMapper(loan.getStatus().getValue());
+            final List<ClientLoanStatusData> clientLoans = this.clientLoanReadService.retrieveClientLoanStatuses(clientId);
+            for (final ClientLoanStatusData loan : clientLoans) {
+                final LoanStatusMapper loanStatus = new LoanStatusMapper(loan.statusId());
                 if (loanStatus.isOpen() || loanStatus.isPendingApproval() || loanStatus.isAwaitingDisbursal()) {
                     final String errorMessage = "Client cannot be closed because of non-closed loans.";
                     throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
-                } else if (loanStatus.isClosed() && DateUtils.isAfter(loan.getClosedOnDate(), closureDate)) {
+                } else if (loanStatus.isClosed() && DateUtils.isAfter(loan.closedOnDate(), closureDate)) {
                     final String errorMessage = "The client closureDate cannot be before the loan closedOnDate.";
                     throw new InvalidClientStateTransitionException("close", "date.cannot.before.loan.closed.date", errorMessage,
-                            closureDate, loan.getClosedOnDate());
+                            closureDate, loan.closedOnDate());
                 } else if (loanStatus.isOverpaid()) {
                     final String errorMessage = "Client cannot be closed because of overpaid loans.";
                     throw new InvalidClientStateTransitionException("close", "loan.overpaid", errorMessage);
                 }
             }
-            final List<SavingsAccount> clientSavingAccounts = this.savingsRepositoryWrapper.findSavingAccountByClientId(clientId);
-
-            for (final SavingsAccount saving : clientSavingAccounts) {
-                if (saving.isActive() || saving.isSubmittedAndPendingApproval() || saving.isApproved()) {
-                    final String errorMessage = "Client cannot be closed because of non-closed savings account.";
-                    throw new InvalidClientStateTransitionException("close", "non-closed.savings.account", errorMessage);
-                }
+            if (this.clientSavingsReadService.hasNonClosedSavingsAccountsForClient(clientId)) {
+                final String errorMessage = "Client cannot be closed because of non-closed savings account.";
+                throw new InvalidClientStateTransitionException("close", "non-closed.savings.account", errorMessage);
             }
 
             client.close(currentUser, closureReason, closureDate);
@@ -904,11 +888,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         final Client clientForUpdate = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
-        SavingsAccount savingsAccount = null;
         final Long savingsId = command.longValueOfParameterNamed(ClientApiConstants.savingsAccountIdParamName);
         if (savingsId != null) {
-            savingsAccount = this.savingsRepositoryWrapper.findOneWithNotFoundDetection(savingsId);
-            if (!savingsAccount.getClient().identifiedBy(clientId)) {
+            if (!this.clientSavingsReadService.isSavingsAccountForClient(savingsId, clientId)) {
                 String defaultUserMessage = "saving account must belongs to client";
                 throw new InvalidClientSavingProductException("saving.account", "must.belongs.to.client", defaultUserMessage, savingsId,
                         clientForUpdate.getId());

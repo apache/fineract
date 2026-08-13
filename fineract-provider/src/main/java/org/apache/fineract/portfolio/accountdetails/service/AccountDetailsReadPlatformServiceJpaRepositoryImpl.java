@@ -27,6 +27,8 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
+import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.accountdetails.data.AccountSummaryCollectionData;
@@ -35,6 +37,8 @@ import org.apache.fineract.portfolio.accountdetails.data.LoanAccountSummaryData;
 import org.apache.fineract.portfolio.accountdetails.data.SavingsAccountSummaryData;
 import org.apache.fineract.portfolio.accountdetails.data.ShareAccountSummaryData;
 import org.apache.fineract.portfolio.accountdetails.data.WorkingCapitalLoanAccountSummaryData;
+import org.apache.fineract.portfolio.client.api.ClientApiConstants;
+import org.apache.fineract.portfolio.client.contract.ClientAccountSummaryReadService;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
@@ -54,13 +58,22 @@ import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements AccountDetailsReadPlatformService {
+public class AccountDetailsReadPlatformServiceJpaRepositoryImpl
+        implements AccountDetailsReadPlatformService, ClientAccountSummaryReadService {
 
     private final JdbcTemplate jdbcTemplate;
     private final ClientReadPlatformService clientReadPlatformService;
     private final GroupReadPlatformService groupReadPlatformService;
     private final ColumnValidator columnValidator;
     private final WorkingCapitalLoanApplicationReadPlatformService workingCapitalLoanApplicationReadPlatformService;
+    private final ToApiJsonSerializer<AccountSummaryCollectionData> clientAccountSummaryToApiJsonSerializer;
+
+    @Override
+    public String retrieveClientAccountSummaryAsJson(final Long clientId, final ApiRequestJsonSerializationSettings settings) {
+        final AccountSummaryCollectionData clientAccount = retrieveClientAccountDetails(clientId);
+        return this.clientAccountSummaryToApiJsonSerializer.serialize(settings, clientAccount,
+                ClientApiConstants.CLIENT_ACCOUNTS_DATA_PARAMETERS);
+    }
 
     @Override
     public AccountSummaryCollectionData retrieveClientAccountDetails(final Long clientId) {

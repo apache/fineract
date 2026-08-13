@@ -18,14 +18,12 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -56,8 +54,7 @@ import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.domain.ClientStatus;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.client.mapper.ClientMapper;
-import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
-import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagementRepositoryWrapper;
+import org.apache.fineract.portfolio.collateralmanagement.service.ClientCollateralReadService;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -83,7 +80,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final ParentGroupsMapper clientGroupsMapper = new ParentGroupsMapper();
 
     private final ColumnValidator columnValidator;
-    private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
+    private final ClientCollateralReadService clientCollateralReadService;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final ClientMapper clientMapper;
     private final InputValidator inputValidator;
@@ -223,20 +220,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final Client client = clientRepositoryWrapper.getClientByClientIdAndHierarchy(clientId, hierarchySearchString);
             final ClientData clientData = clientMapper.map(client);
 
-            // Get client collaterals
-            final Collection<ClientCollateralManagement> clientCollateralManagements = this.clientCollateralManagementRepositoryWrapper
-                    .getCollateralsPerClient(clientId);
-            final Set<ClientCollateralManagementData> clientCollateralManagementDataSet = new HashSet<>();
-
-            // Map to client collateral data class
-            for (ClientCollateralManagement clientCollateralManagement : clientCollateralManagements) {
-                BigDecimal total = clientCollateralManagement.getTotal();
-                BigDecimal totalCollateral = clientCollateralManagement.getTotalCollateral(total);
-                clientCollateralManagementDataSet.add(new ClientCollateralManagementData(clientCollateralManagement.getId(),
-                        clientCollateralManagement.getCollaterals().getName(), clientCollateralManagement.getQuantity(),
-                        clientCollateralManagement.getCollaterals().getPctToBase(),
-                        clientCollateralManagement.getCollaterals().getBasePrice(), total, totalCollateral));
-            }
+            // Get client collaterals (mapped to DTOs by the collateral-management module)
+            final Set<ClientCollateralManagementData> clientCollateralManagementDataSet = this.clientCollateralReadService
+                    .retrieveCollateralDataForClient(clientId);
 
             final String clientGroupsSql = "select " + this.clientGroupsMapper.parentGroupsSchema();
 

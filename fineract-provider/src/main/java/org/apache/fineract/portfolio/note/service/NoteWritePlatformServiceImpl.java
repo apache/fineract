@@ -18,10 +18,13 @@
  */
 package org.apache.fineract.portfolio.note.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.fineract.portfolio.client.contract.ClientNoteWriteService;
+import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.group.domain.GroupRepository;
 import org.apache.fineract.portfolio.group.exception.GroupNotFoundException;
@@ -51,7 +54,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 @ConditionalOnMissingBean(value = NoteWritePlatformService.class, ignored = NoteWritePlatformServiceImpl.class)
-public class NoteWritePlatformServiceImpl implements NoteWritePlatformService {
+public class NoteWritePlatformServiceImpl implements NoteWritePlatformService, ClientNoteWriteService {
 
     private final NoteRepository noteRepository;
     private final ClientRepositoryWrapper clientRepository;
@@ -205,5 +208,11 @@ public class NoteWritePlatformServiceImpl implements NoteWritePlatformService {
         }
 
         return Pair.of(note, officeId);
+    }
+
+    @Override
+    public void deleteNotesByClient(final Client client) {
+        final List<Note> relatedNotes = this.noteRepository.findByClient(client);
+        this.noteRepository.deleteAllInBatch(relatedNotes);
     }
 }

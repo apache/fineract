@@ -47,6 +47,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.account.data.AccountTransferData;
+import org.apache.fineract.portfolio.client.contract.ClientSavingsAccountLookupReadService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
@@ -86,7 +87,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
-public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountReadPlatformService {
+public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountReadPlatformService, ClientSavingsAccountLookupReadService {
+
+    @Override
+    public Collection<SavingsAccountData> retrieveSavingsAccountsForClientLookup(final Long clientId) {
+        return retrieveForLookup(clientId, null);
+    }
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;

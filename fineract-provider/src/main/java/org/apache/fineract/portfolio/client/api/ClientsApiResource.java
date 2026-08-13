@@ -63,16 +63,15 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
-import org.apache.fineract.portfolio.accountdetails.data.AccountSummaryCollectionData;
-import org.apache.fineract.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
+import org.apache.fineract.portfolio.client.contract.ClientAccountSummaryReadService;
+import org.apache.fineract.portfolio.client.contract.ClientObligeeReadService;
+import org.apache.fineract.portfolio.client.contract.ClientSavingsAccountLookupReadService;
 import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.client.service.ClientTemplateReadPlatformService;
 import org.apache.fineract.portfolio.loanaccount.guarantor.data.ObligeeData;
-import org.apache.fineract.portfolio.loanaccount.guarantor.service.GuarantorReadPlatformService;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountData;
-import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.stereotype.Component;
@@ -88,14 +87,13 @@ public class ClientsApiResource {
     private final ClientReadPlatformService clientReadPlatformService;
     private final ClientTemplateReadPlatformService clientTemplateReadPlatformService;
     private final ToApiJsonSerializer<ClientData> toApiJsonSerializer;
-    private final ToApiJsonSerializer<AccountSummaryCollectionData> clientAccountSummaryToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
-    private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
+    private final ClientAccountSummaryReadService clientAccountSummaryReadService;
+    private final ClientSavingsAccountLookupReadService savingsAccountReadPlatformService;
     private final BulkImportWorkbookService bulkImportWorkbookService;
     private final BulkImportWorkbookPopulatorService bulkImportWorkbookPopulatorService;
-    private final GuarantorReadPlatformService guarantorReadPlatformService;
+    private final ClientObligeeReadService guarantorReadPlatformService;
     private final SqlValidator sqlValidator;
 
     @GET
@@ -462,7 +460,8 @@ public class ClientsApiResource {
             final ClientData templateData = clientTemplateReadPlatformService.retrieveTemplate(clientData.getOfficeId(),
                     staffInSelectedOfficeOnly);
             clientData = ClientData.templateOnTop(clientData, templateData);
-            Collection<SavingsAccountData> savingAccountOptions = savingsAccountReadPlatformService.retrieveForLookup(clientId, null);
+            Collection<SavingsAccountData> savingAccountOptions = savingsAccountReadPlatformService
+                    .retrieveSavingsAccountsForClientLookup(clientId);
             if (savingAccountOptions != null && savingAccountOptions.size() > 0) {
                 clientData = ClientData.templateWithSavingAccountOptions(clientData, savingAccountOptions);
             }
@@ -566,11 +565,8 @@ public class ClientsApiResource {
         ExternalId clientExternalId = ExternalIdFactory.produce(externalId);
         clientId = getResolvedClientId(clientId, clientExternalId);
 
-        final AccountSummaryCollectionData clientAccount = accountDetailsReadPlatformService.retrieveClientAccountDetails(clientId);
-
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return clientAccountSummaryToApiJsonSerializer.serialize(settings, clientAccount,
-                ClientApiConstants.CLIENT_ACCOUNTS_DATA_PARAMETERS);
+        return clientAccountSummaryReadService.retrieveClientAccountSummaryAsJson(clientId, settings);
     }
 
     private String applyCommandOverClient(Long clientId, final String externalId, final String command, final String jsonPayload) {

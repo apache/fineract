@@ -16,17 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.service;
+package org.apache.fineract.portfolio.client.contract;
 
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksData;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
-import org.apache.fineract.portfolio.client.contract.ClientDatatableChecksReadService;
+import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 
-public interface EntityDatatableChecksReadService extends ClientDatatableChecksReadService {
+/**
+ * Core read-contract returning a client's account summary already serialized to JSON, so that the client feature does
+ * not need a compile-time dependency on {@code AccountSummaryCollectionData} (which transitively references the loan
+ * and shares domain types). Implemented by the account-details module.
+ */
+public interface ClientAccountSummaryReadService {
 
-    EntityDataTableChecksTemplateData retrieveTemplate();
-
-    Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, Integer status, String entity, Long productId);
+    String retrieveClientAccountSummaryAsJson(Long clientId, ApiRequestJsonSerializationSettings settings);
 }

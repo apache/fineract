@@ -16,17 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.service;
+package org.apache.fineract.portfolio.client.contract;
 
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksData;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
-import org.apache.fineract.portfolio.client.contract.ClientDatatableChecksReadService;
+import java.util.List;
+import org.apache.fineract.portfolio.client.data.ClientLoanStatusData;
 
-public interface EntityDatatableChecksReadService extends ClientDatatableChecksReadService {
+/**
+ * Core read-contract returning the loan-status projection of a client's loans, so that the client feature does not need
+ * a compile-time dependency on the loan domain/repository types. Implemented by the loan module.
+ */
+public interface ClientLoanReadService {
 
-    EntityDataTableChecksTemplateData retrieveTemplate();
-
-    Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, Integer status, String entity, Long productId);
+    List<ClientLoanStatusData> retrieveClientLoanStatuses(Long clientId);
 }

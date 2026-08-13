@@ -16,17 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.dataqueries.service;
+package org.apache.fineract.portfolio.client.data;
 
-import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.core.service.SearchParameters;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksData;
-import org.apache.fineract.infrastructure.dataqueries.data.EntityDataTableChecksTemplateData;
-import org.apache.fineract.portfolio.client.contract.ClientDatatableChecksReadService;
+import java.time.LocalDate;
 
-public interface EntityDatatableChecksReadService extends ClientDatatableChecksReadService {
-
-    EntityDataTableChecksTemplateData retrieveTemplate();
-
-    Page<EntityDataTableChecksData> retrieveAll(SearchParameters searchParameters, Integer status, String entity, Long productId);
+/**
+ * Minimal projection of a client's loan needed to decide whether the client can be closed, so that the client feature
+ * does not need a compile-time dependency on the loan domain types. Populated by the loan module.
+ */
+public record ClientLoanStatusData(Integer statusId, LocalDate closedOnDate) {
 }
