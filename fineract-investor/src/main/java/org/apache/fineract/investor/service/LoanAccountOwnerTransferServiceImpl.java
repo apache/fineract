@@ -48,7 +48,6 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerTransferRepository;
 import org.apache.fineract.investor.domain.LoanOwnershipTransferBusinessEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -178,21 +177,13 @@ public class LoanAccountOwnerTransferServiceImpl implements LoanAccountOwnerTran
     }
 
     private ExternalAssetOwnerTransfer findActiveOrActiveIntermediateTransfer(Loan loan, ExternalAssetOwnerTransfer buybackTransfer) {
-        return externalAssetOwnerTransferRepository
-                .findOne((root, query, criteriaBuilder) -> criteriaBuilder.and(criteriaBuilder.equal(root.get("loanId"), loan.getId()),
-                        criteriaBuilder.equal(root.get("owner"), buybackTransfer.getOwner()),
-                        root.get("status").in(List.of(ACTIVE, ACTIVE_INTERMEDIATE)),
-                        criteriaBuilder.equal(root.get("effectiveDateTo"), FUTURE_DATE_9999_12_31)))
-                .orElseThrow();
+        return externalAssetOwnerTransferRepository.findOneByLoanIdAndOwnerAndStatusInAndEffectiveDateTo(loan.getId(),
+                buybackTransfer.getOwner(), List.of(ACTIVE, ACTIVE_INTERMEDIATE), FUTURE_DATE_9999_12_31).orElseThrow();
     }
 
     private List<ExternalAssetOwnerTransfer> findAllPendingOrBuybackOrIntermediateTransfers(Long loanId) {
-        return externalAssetOwnerTransferRepository
-                .findAll(
-                        (root, query, criteriaBuilder) -> criteriaBuilder.and(criteriaBuilder.equal(root.get("loanId"), loanId),
-                                root.get("status").in(List.of(PENDING, BUYBACK, PENDING_INTERMEDIATE, BUYBACK_INTERMEDIATE)),
-                                criteriaBuilder.equal(root.get("effectiveDateTo"), FUTURE_DATE_9999_12_31)),
-                        Sort.by(Sort.Direction.ASC, "id"));
+        return externalAssetOwnerTransferRepository.findAllByLoanIdAndStatusInAndEffectiveDateTo(loanId,
+                List.of(PENDING, BUYBACK, PENDING_INTERMEDIATE, BUYBACK_INTERMEDIATE), FUTURE_DATE_9999_12_31);
     }
 
     private boolean isBiggerThanZero(BigDecimal loanTotalOverpaid) {

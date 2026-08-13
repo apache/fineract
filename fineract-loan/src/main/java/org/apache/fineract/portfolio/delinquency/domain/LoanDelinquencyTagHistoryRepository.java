@@ -18,26 +18,27 @@
  */
 package org.apache.fineract.portfolio.delinquency.domain;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface LoanDelinquencyTagHistoryRepository
         extends JpaRepository<LoanDelinquencyTagHistory, Long>, JpaSpecificationExecutor<LoanDelinquencyTagHistory> {
 
-    LoanDelinquencyTagHistory findFirstByLoanOrderByAddedOnDateDesc(Loan loan);
+    @Query("SELECT h FROM LoanDelinquencyTagHistory h WHERE h.loan = :loan ORDER BY h.addedOnDate DESC")
+    List<LoanDelinquencyTagHistory> findByLoanOrderByAddedOnDateDesc(@Param("loan") Loan loan);
 
-    List<LoanDelinquencyTagHistory> findByLoanOrderByAddedOnDateDesc(Loan loan);
+    @Query("SELECT h FROM LoanDelinquencyTagHistory h WHERE h.loan = :loan AND h.liftedOnDate IS NULL")
+    Optional<LoanDelinquencyTagHistory> findByLoanAndLiftedOnDateIsNull(@Param("loan") Loan loan);
 
-    Optional<LoanDelinquencyTagHistory> findByLoanAndLiftedOnDate(Loan loan, LocalDate liftedOnDate);
+    @Query("SELECT COUNT(h) FROM LoanDelinquencyTagHistory h WHERE h.delinquencyRange = :delinquencyRange")
+    Long countByDelinquencyRange(@Param("delinquencyRange") DelinquencyRange delinquencyRange);
 
-    Long countByDelinquencyRangeAndLiftedOnDate(DelinquencyRange delinquencyRange, LocalDate liftedOnDate);
-
-    Long countByDelinquencyRange(DelinquencyRange delinquencyRange);
-
-    List<LoanDelinquencyTagHistory> findByLoan(Loan loan);
+    @Query("SELECT h FROM LoanDelinquencyTagHistory h WHERE h.loan = :loan")
+    List<LoanDelinquencyTagHistory> findByLoan(@Param("loan") Loan loan);
 
 }

@@ -18,9 +18,13 @@
  */
 package org.apache.fineract.organisation.workingdays.domain;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 public interface WorkingDaysRepository extends JpaRepository<WorkingDays, Long>, JpaSpecificationExecutor<WorkingDays> {
 
+    @Query("SELECT w FROM WorkingDays w")
+    List<WorkingDays> findAllWorkingDays();
 }

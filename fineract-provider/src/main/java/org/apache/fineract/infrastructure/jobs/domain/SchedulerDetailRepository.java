@@ -18,9 +18,13 @@
  */
 package org.apache.fineract.infrastructure.jobs.domain;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 public interface SchedulerDetailRepository extends JpaRepository<SchedulerDetail, Long>, JpaSpecificationExecutor<SchedulerDetail> {
 
+    @Query("SELECT s FROM SchedulerDetail s")
+    List<SchedulerDetail> findAllSchedulerDetails();
 }

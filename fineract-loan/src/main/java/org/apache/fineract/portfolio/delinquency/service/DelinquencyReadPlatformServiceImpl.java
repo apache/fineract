@@ -104,7 +104,7 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
 
     @Override
     public List<DelinquencyBucketData> retrieveAllDelinquencyBuckets() {
-        final List<DelinquencyBucket> delinquencyRangeList = repositoryBucket.findAll();
+        final List<DelinquencyBucket> delinquencyRangeList = repositoryBucket.findAllBuckets();
         final List<DelinquencyBucketData> result = mapperBucket.map(delinquencyRangeList);
         result.forEach(this::enrichWorkingCapitalConfiguration);
         return result;
@@ -132,8 +132,8 @@ public class DelinquencyReadPlatformServiceImpl implements DelinquencyReadPlatfo
     @Override
     public DelinquencyRangeData retrieveCurrentDelinquencyTag(Long loanId) {
         final Loan loan = this.loanRepository.getReferenceById(loanId);
-        Optional<LoanDelinquencyTagHistory> optLoanDelinquencyTag = this.repositoryLoanDelinquencyTagHistory.findByLoanAndLiftedOnDate(loan,
-                null);
+        Optional<LoanDelinquencyTagHistory> optLoanDelinquencyTag = this.repositoryLoanDelinquencyTagHistory
+                .findByLoanAndLiftedOnDateIsNull(loan);
         return optLoanDelinquencyTag.map(loanDelinquencyTagHistory -> mapperRange.map(loanDelinquencyTagHistory.getDelinquencyRange()))
                 .orElse(null);
     }

@@ -47,7 +47,7 @@ public class BusinessDateReadPlatformServiceImpl implements BusinessDateReadPlat
 
     @Override
     public List<BusinessDateDTO> findAll() {
-        List<BusinessDate> businessDateList = repository.findAll();
+        List<BusinessDate> businessDateList = repository.findAllBusinessDates();
         return businessDateMapper.mapEntity(businessDateList);
     }
 

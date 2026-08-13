@@ -70,9 +70,9 @@ public class BusinessDateReadPlatformServiceTest {
     @Test
     public void findAll() {
         List<BusinessDate> resultList = Mockito.mock(List.class);
-        given(repository.findAll()).willReturn(resultList);
+        given(repository.findAllBusinessDates()).willReturn(resultList);
         businessDateReadPlatformService.findAll();
-        verify(repository, times(1)).findAll();
+        verify(repository, times(1)).findAllBusinessDates();
         verify(businessDateMapper, times(1)).mapEntity(resultList);
     }
 
