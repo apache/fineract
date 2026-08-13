@@ -1333,6 +1333,8 @@ final class LoansApiResourceSwagger {
 
         @Schema(example = "1")
         public Long clientId;
+        @Schema(example = "1", description = "Mandatory for group and GLIM loans")
+        public Long groupId;
         @Schema(example = "dd MMMM yyyy")
         public String dateFormat;
         @Schema(example = "en_GB")
@@ -1444,6 +1446,11 @@ final class LoansApiResourceSwagger {
         @Schema(example = "1")
         public Integer repaymentStartDateType;
 
+        @Schema(example = "true", description = "GLIM loans only: marks this application as the GLIM parent account")
+        public Boolean isParentAccount;
+        @Schema(example = "10000", description = "GLIM loans only: the total principal of the parent GLIM account")
+        public BigDecimal totalLoan;
+
         static final class PostLoansRequestChargeData {
 
             private PostLoansRequestChargeData() {}
@@ -1546,6 +1553,8 @@ final class LoansApiResourceSwagger {
         public Long resourceId;
         @Schema(example = "95174ff9-1a75-4d72-a413-6f9b1cb988b7")
         public String resourceExternalId;
+        @Schema(example = "1", description = "Returned for GLIM loans: the id of the parent GLIM account")
+        public Long glimId;
     }
 
     @Schema(description = "PutLoansLoanIdRequest")
@@ -1775,6 +1784,20 @@ final class LoansApiResourceSwagger {
             public Long channelTypeId;
         }
 
+        static final class PostLoansLoanIdGlimApprovalData {
+
+            private PostLoansLoanIdGlimApprovalData() {}
+
+            @Schema(example = "1")
+            public Long loanId;
+            @Schema(example = "28 June 2022")
+            public String approvedOnDate;
+            @Schema(example = "en")
+            public String locale;
+            @Schema(example = "dd MMMM yyyy")
+            public String dateFormat;
+        }
+
         @Schema(example = "2")
         public Long toLoanOfficerId;
         @Schema(example = "02 September 2014")
@@ -1821,6 +1844,10 @@ final class LoansApiResourceSwagger {
                 Each entry can reference an existing originator by 'id' or 'externalId'. \
                 Missing externalIds are created during disbursement.""")
         public List<PostLoansLoanIdOriginatorData> originators;
+        @Schema(description = "Approve GLIM Application only: the per-child-loan approval details")
+        public List<PostLoansLoanIdGlimApprovalData> approvalFormData;
+        @Schema(example = "1000", description = "Approve GLIM Application only: the approved principal of the parent GLIM account")
+        public BigDecimal glimPrincipal;
     }
 
     @Schema(description = "PostLoansLoanIdResponse")

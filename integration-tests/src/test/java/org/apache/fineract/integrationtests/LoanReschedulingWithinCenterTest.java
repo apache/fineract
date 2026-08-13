@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -34,13 +33,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.FeignCalls;
+import org.apache.fineract.client.models.ClientCollateralCreateRequest;
+import org.apache.fineract.client.models.CollateralProductCreateRequest;
+import org.apache.fineract.client.models.GetCentersCenterIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupCenterHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCenterHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.CalendarHelper;
@@ -58,12 +64,25 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanReschedulingWithinCenterTest.class);
     private static final Long LEGAL_FORM_PERSON = 1L;
+    private static final String STAFF_JOINING_DATE = "20 September 2011";
+    private static final String GROUP_ACTIVATION_DATE = "04 March 2011";
+    private static final BigDecimal COLLATERAL_PCT_TO_BASE = new BigDecimal("40");
+    private static final BigDecimal COLLATERAL_BASE_PRICE = new BigDecimal("100000000");
+    private static final BigDecimal CLIENT_COLLATERAL_QUANTITY = new BigDecimal("100");
 
+    private static FineractFeignClient fineractClient;
     private static FeignOfficeHelper officeHelper;
+    private static FeignStaffHelper staffHelper;
+    private static FeignGroupHelper groupHelper;
+    private static FeignCenterHelper centerHelper;
 
     @BeforeAll
-    public static void setupOfficeHelper() {
-        officeHelper = new FeignOfficeHelper(FineractFeignClientHelper.getFineractFeignClient());
+    public static void setupHelpers() {
+        fineractClient = FineractFeignClientHelper.getFineractFeignClient();
+        officeHelper = new FeignOfficeHelper(fineractClient);
+        staffHelper = new FeignStaffHelper(fineractClient);
+        groupHelper = new FeignGroupHelper(fineractClient);
+        centerHelper = new FeignCenterHelper(fineractClient);
     }
 
     @Test
@@ -71,21 +90,21 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         Long officeId = officeHelper.createOffice(LocalDate.of(2007, 7, 1)).getResourceId();
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
         String externalId = UUID.randomUUID().toString();
-        int staffId = FeignGroupCenterHelper.createStaff(officeId.intValue()).intValue();
-        long groupId = FeignGroupCenterHelper.createGroup(officeId.intValue());
+        int staffId = staffHelper.createStaff(officeId, STAFF_JOINING_DATE).getResourceId().intValue();
+        long groupId = groupHelper.createActiveGroup(officeId, GROUP_ACTIVATION_DATE).getResourceId();
         final String centerActivationDate = "01 July 2007";
-        Long centerId = FeignGroupCenterHelper.createCenter(name, officeId.intValue(), externalId, staffId, new long[] { groupId },
-                centerActivationDate);
-        JsonObject center = FeignGroupCenterHelper.retrieveCenter(centerId);
+        Long centerId = centerHelper.createCenter(name, officeId, externalId, Long.valueOf(staffId), List.of(groupId), centerActivationDate)
+                .getResourceId();
+        GetCentersCenterIdResponse center = centerHelper.retrieveCenter(centerId);
         assertNotNull(center);
-        assertEquals(staffId, center.get("staffId").getAsInt());
-        assertTrue(center.get("active").getAsBoolean());
+        assertEquals(staffId, center.getStaffId().intValue());
+        assertTrue(center.getActive());
 
         Long calendarId = createCalendarMeeting(centerId);
 
         Long clientId = createClient(officeId.intValue(), "01 July 2014");
 
-        FeignGroupCenterHelper.associateClientToGroup(groupId, clientId);
+        groupHelper.associateClient(groupId, clientId);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
@@ -95,9 +114,9 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         final String recalculationRestFrequencyDate = "01 January 2012";
         final boolean isMultiTrancheLoan = false;
 
-        Long collateralId = FeignGroupCenterHelper.createCollateralProduct();
+        Long collateralId = createCollateralProduct();
         assertNotNull(collateralId);
-        Long clientCollateralId = FeignGroupCenterHelper.createClientCollateral(clientId, collateralId);
+        Long clientCollateralId = createClientCollateral(clientId, collateralId);
         assertNotNull(clientCollateralId);
 
         List<HashMap> collaterals = new ArrayList<>();
@@ -141,21 +160,21 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         Long officeId = officeHelper.createOffice(LocalDate.of(2007, 7, 1)).getResourceId();
         String name = "TestFullCreation" + new Timestamp(new java.util.Date().getTime());
         String externalId = UUID.randomUUID().toString();
-        int staffId = FeignGroupCenterHelper.createStaff(officeId.intValue()).intValue();
-        long groupId = FeignGroupCenterHelper.createGroup(officeId.intValue());
+        int staffId = staffHelper.createStaff(officeId, STAFF_JOINING_DATE).getResourceId().intValue();
+        long groupId = groupHelper.createActiveGroup(officeId, GROUP_ACTIVATION_DATE).getResourceId();
         final String centerActivationDate = "01 July 2007";
-        Long centerId = FeignGroupCenterHelper.createCenter(name, officeId.intValue(), externalId, staffId, new long[] { groupId },
-                centerActivationDate);
-        JsonObject center = FeignGroupCenterHelper.retrieveCenter(centerId);
+        Long centerId = centerHelper.createCenter(name, officeId, externalId, Long.valueOf(staffId), List.of(groupId), centerActivationDate)
+                .getResourceId();
+        GetCentersCenterIdResponse center = centerHelper.retrieveCenter(centerId);
         assertNotNull(center);
-        assertEquals(staffId, center.get("staffId").getAsInt());
-        assertTrue(center.get("active").getAsBoolean());
+        assertEquals(staffId, center.getStaffId().intValue());
+        assertTrue(center.getActive());
 
         Long calendarId = createCalendarMeeting(centerId);
 
         Long clientId = createClient(officeId.intValue(), "01 July 2014");
 
-        FeignGroupCenterHelper.associateClientToGroup(groupId, clientId);
+        groupHelper.associateClient(groupId, clientId);
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
@@ -182,9 +201,9 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         List<PostLoansDisbursementData> approveTranches = List.of(LoanRequestBuilders.applyTrancheDetail(disbursementDate, 5000.0),
                 LoanRequestBuilders.applyTrancheDetail(secondDisbursement, 5000.0));
 
-        Long collateralId = FeignGroupCenterHelper.createCollateralProduct();
+        Long collateralId = createCollateralProduct();
         assertNotNull(collateralId);
-        Long clientCollateralId = FeignGroupCenterHelper.createClientCollateral(clientId, collateralId);
+        Long clientCollateralId = createClientCollateral(clientId, collateralId);
         assertNotNull(clientCollateralId);
 
         List<HashMap> collaterals = new ArrayList<>();
@@ -240,6 +259,26 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         collateral.put("clientCollateralId", collateralId.toString());
         collateral.put("amount", amount.toString());
         return collateral;
+    }
+
+    private static Long createCollateralProduct() {
+        CollateralProductCreateRequest request = new CollateralProductCreateRequest()//
+                .name(Utils.randomStringGenerator("COLLATERAL_PRODUCT", 5))//
+                .currency("USD")//
+                .unitType("acre")//
+                .quality("agriculture")//
+                .pctToBase(COLLATERAL_PCT_TO_BASE)//
+                .basePrice(COLLATERAL_BASE_PRICE)//
+                .locale(LoanTestData.LOCALE);
+        return FeignCalls.ok(() -> fineractClient.collateralManagement().createCollateral1(request)).getResourceId();
+    }
+
+    private static Long createClientCollateral(Long clientId, Long collateralId) {
+        ClientCollateralCreateRequest request = new ClientCollateralCreateRequest()//
+                .collateralId(collateralId)//
+                .quantity(CLIENT_COLLATERAL_QUANTITY)//
+                .locale(LoanTestData.LOCALE);
+        return FeignCalls.ok(() -> fineractClient.clientCollateralManagement().addClientCollateral(clientId, request)).getResourceId();
     }
 
     private Long createCalendarMeeting(Long centerId) {

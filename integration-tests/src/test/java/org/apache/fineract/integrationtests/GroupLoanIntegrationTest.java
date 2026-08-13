@@ -19,277 +19,200 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.GroupHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
+import org.apache.fineract.client.models.GetLoansLoanIdStatus;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlimHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/**
- * Group Loan Integration Test for checking Loan Application Repayment Schedule.
- */
-@SuppressWarnings({ "rawtypes", "unchecked" })
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class GroupLoanIntegrationTest {
+/** Group-loan repayment schedule and GLIM (Group Loan Individual Monitoring) lifecycle and retrieval tests. */
+public class GroupLoanIntegrationTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private static final Logger LOG = LoggerFactory.getLogger(GroupLoanIntegrationTest.class);
+    private static final String PRODUCT_PRINCIPAL = "12,000.00";
+    private static final String PRODUCT_NUMBER_OF_REPAYMENTS = "4";
+    private static final String PRODUCT_INTEREST_RATE = "1";
+    private static final BigDecimal APPLICATION_PRINCIPAL = new BigDecimal("12000.00");
+    private static final Integer APPLICATION_NUMBER_OF_REPAYMENTS = 4;
+    private static final BigDecimal APPLICATION_INTEREST_RATE = new BigDecimal("2");
+    private static final BigDecimal MAX_OUTSTANDING_LOAN_BALANCE = new BigDecimal("36000");
+    private static final String LOAN_DATE = "20 September 2011";
+    private static final String DISBURSE_DATE = "25 September 2011";
+    private static final String REJECT_DATE = "22 September 2011";
+    /** Per-child GLIM principal supplied at approval. */
+    private static final BigDecimal GLIM_PRINCIPAL = new BigDecimal("1000");
+    /** The total principal of the parent GLIM account. */
+    private static final BigDecimal GLIM_TOTAL_LOAN = new BigDecimal("10000");
+    /** Fineract loan status id for a rejected loan. */
+    private static final Long LOAN_STATUS_REJECTED = 500L;
 
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+    private static FeignGroupHelper groupHelper;
+    private static FeignGlimHelper glimHelper;
+
+    /** The group id created by the most recent {@link #applyGlim()} call (GLIM retrieval tests need it). */
+    private Long currentGroupId;
+
+    @BeforeAll
+    public static void setupGroupLoanHelpers() {
+        FineractFeignClient client = FineractFeignClientHelper.getFineractFeignClient();
+        groupHelper = new FeignGroupHelper(client);
+        glimHelper = new FeignGlimHelper(client);
     }
 
     @Test
     public void checkGroupLoanCreateAndDisburseFlow() {
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        final Long clientId = createClient();
+        final Long groupId = groupHelper.createActiveGroup().getResourceId();
+        groupHelper.associateClient(groupId, clientId);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
+        final Long loanProductId = createLoanProductFromJson(loanProductJson());
+        final Long loanId = applyGroupLoan(groupId, loanProductId);
 
-        final Integer loanProductID = createLoanProduct();
-        final Integer loanID = applyForLoanApplication(groupID, loanProductID);
-        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
-                loanID);
-        verifyLoanRepaymentSchedule(loanSchedule);
+        final List<GetLoansLoanIdRepaymentPeriod> periods = getLoanDetails(loanId).getRepaymentSchedule().getPeriods();
+        verifyLoanRepaymentSchedule(periods);
     }
 
     @Test
     public void checkGlimAccountCommands() {
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        final Integer loanProductID = createLoanProduct();
+        final FeignGlimHelper.GlimApplication glim = applyGlim();
+        final Long glimId = glim.glimId();
+        final Long childLoanId = glim.loanId();
 
-        HashMap<String, Integer> glim = applyForGlimApplication(clientID, groupID, loanProductID);
-        LOG.info("Glim Loan Application: {} ", glim);
+        glimHelper.approveGlim(glimId, childLoanId, LOAN_DATE, GLIM_PRINCIPAL);
+        assertFalse(loanStatus(childLoanId).getPendingApproval(), "GLIM account should be approved");
 
-        final Integer glimId = glim.get("glimId");
-        LOG.info("GlimId : {} ", glimId);
+        glimHelper.disburseGlim(glimId, DISBURSE_DATE);
+        assertTrue(loanStatus(childLoanId).getActive(), "GLIM account should be active");
 
-        final Integer loanId = glim.get("loanId");
-        LOG.info("LoanId : {} ", loanId);
+        glimHelper.undoDisbursalGlim(glimId);
+        assertTrue(loanStatus(childLoanId).getWaitingForDisbursal(), "GLIM account should be waiting for disbursal");
 
-        List<Map<String, Object>> approvalFormData = new ArrayList<>();
-        approvalFormData.add(approvalFormData(loanId, "20 September 2011"));
+        glimHelper.undoApprovalGlim(glimId);
+        assertTrue(loanStatus(childLoanId).getPendingApproval(), "GLIM account should be pending approval");
 
-        HashMap loanStatusHashMap = this.loanTransactionHelper.approveGlimAccount(this.requestSpec, this.responseSpec, approvalFormData,
-                glimId);
-        LOG.info("glim approval loanSchedule: {} ", loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.disburseGlimAccount("25 September 2011", glimId);
-        LOG.info("glim disbursement loanSchedule: {} ", loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.undoDisburseGlimAccount(glimId);
-        LOG.info("glim undodisbursement loanSchedule: {} ", loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.undoApprovalGlimAccount(glimId);
-        LOG.info("glim undoApproval loanSchedule: {} ", loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.rejectGlimAccount("22 September 2011", glimId);
-        LOG.info("glim reject loanSchedule: {} ", loanStatusHashMap);
-        LoanStatusChecker.verifyLoanAccountRejected(loanStatusHashMap);
+        glimHelper.rejectGlim(glimId, REJECT_DATE);
+        assertEquals(LOAN_STATUS_REJECTED, loanStatus(childLoanId).getId(), "GLIM account should be rejected");
     }
 
     @Test
     public void getGlimAccountByGroupId() {
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(clientID);
-
-        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assertions.assertNotNull(groupID);
-
-        groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assertions.assertNotNull(groupID);
-
-        final Integer loanProductID = createLoanProduct();
-        Assertions.assertNotNull(loanProductID);
-
-        HashMap<String, Integer> glim = applyForGlimApplication(clientID, groupID, loanProductID);
-        LOG.info("Glim Loan Application: {} ", glim);
-
-        final Integer glimId = glim.get("glimId");
-        LOG.info("GlimId: {} ", glimId);
-
-        final Integer loanId = glim.get("loanId");
-        LOG.info("LoanId: {} ", loanId);
-
-        final List<String> retrievedGlimId = GroupHelper.verifyRetrieveGlimAccountsByGroupId(this.requestSpec, this.responseSpec, groupID);
-        Assertions.assertNotNull(retrievedGlimId.toString());
+        final FeignGlimHelper.GlimApplication glim = applyGlim();
+        assertReferencesGlim(glimHelper.retrieveGlimAccountsByGroup(currentGroupId), glim.glimId());
     }
 
     @Test
     public void getGlimAccountByGlimId() {
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(clientID);
-
-        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        Assertions.assertNotNull(groupID);
-
-        groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        Assertions.assertNotNull(groupID);
-
-        final Integer loanProductID = createLoanProduct();
-        Assertions.assertNotNull(loanProductID);
-
-        HashMap<String, Integer> glim = applyForGlimApplication(clientID, groupID, loanProductID);
-        LOG.info("Glim Loan Application: {} ", glim);
-
-        final Integer glimId = glim.get("glimId");
-        LOG.info("GlimId: {} ", glimId);
-
-        final Integer loanId = glim.get("loanId");
-        LOG.info("LoanId: {} ", loanId);
-
-        final List<String> retrievedGlimAccountId = GroupHelper.verifyRetrieveGlimAccountsByGlimId(this.requestSpec, this.responseSpec,
-                glimId);
-        Assertions.assertNotNull(retrievedGlimAccountId);
+        final FeignGlimHelper.GlimApplication glim = applyGlim();
+        assertReferencesGlim(glimHelper.retrieveGlimAccountByGlimId(glim.glimId()), glim.glimId());
     }
 
-    private Map<String, Object> approvalFormData(final Integer loanId, final String approvedOnDate) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("loanId", loanId);
-        map.put("approvedOnDate", approvedOnDate);
-        map.put("dateFormat", CommonConstants.DATE_FORMAT);
-        map.put("locale", "en");
-        return map;
+    /** Applies a group loan and returns its loan id. */
+    private Long applyGroupLoan(Long groupId, Long loanProductId) {
+        return applyForLoan(loanApplication(loanProductId).groupId(groupId).loanType("group"));
     }
 
-    private Integer createLoanProduct() {
-        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("12,000.00") //
-                .withNumberOfRepayments("4") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("1") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
+    /** Creates client + active group + product, associates the client, and submits a GLIM application. */
+    private FeignGlimHelper.GlimApplication applyGlim() {
+        final Long clientId = createClient();
+        currentGroupId = groupHelper.createActiveGroup().getResourceId();
+        groupHelper.associateClient(currentGroupId, clientId);
+        final Long loanProductId = createLoanProductFromJson(loanProductJson());
+
+        return glimHelper.applyGlim(loanApplication(loanProductId)//
+                .groupId(currentGroupId)//
+                .clientId(clientId)//
+                .loanType("glim")//
+                .isParentAccount(true)//
+                .totalLoan(GLIM_TOTAL_LOAN));
+    }
+
+    /** The application shared by both tests; the caller adds the loan type and its owner. */
+    private PostLoansRequest loanApplication(Long loanProductId) {
+        return new PostLoansRequest()//
+                .productId(loanProductId)//
+                .principal(APPLICATION_PRINCIPAL)//
+                .loanTermFrequency(APPLICATION_NUMBER_OF_REPAYMENTS)//
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .numberOfRepayments(APPLICATION_NUMBER_OF_REPAYMENTS)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .interestRatePerPeriod(APPLICATION_INTEREST_RATE)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS)//
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                .transactionProcessingStrategyCode("mifos-standard-strategy")//
+                .maxOutstandingLoanBalance(MAX_OUTSTANDING_LOAN_BALANCE)//
+                .expectedDisbursementDate(LOAN_DATE)//
+                .submittedOnDate(LOAN_DATE)//
+                .locale(LoanTestData.LOCALE)//
+                .dateFormat(LoanTestData.DATETIME_PATTERN);
+    }
+
+    private String loanProductJson() {
+        return new LoanProductTestBuilder()//
+                .withPrincipal(PRODUCT_PRINCIPAL)//
+                .withNumberOfRepayments(PRODUCT_NUMBER_OF_REPAYMENTS)//
+                .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth()//
+                .withinterestRatePerPeriod(PRODUCT_INTEREST_RATE).withInterestRateFrequencyTypeAsMonths()//
+                .withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()//
                 .build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
-    private Integer applyForLoanApplication(final Integer groupID, final Integer loanProductID) {
-        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal("12,000.00") //
-                .withLoanTermFrequency("4") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("4") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate("20 September 2011") //
-                .withSubmittedOnDate("20 September 2011") //
-                .withLoanType("group").build(groupID.toString(), loanProductID.toString(), null);
-        LOG.info(loanApplicationJSON);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+    private GetLoansLoanIdStatus loanStatus(Long loanId) {
+        return getLoanDetails(loanId).getStatus();
     }
 
-    private HashMap<String, Integer> applyForGlimApplication(final Integer clientID, final Integer groupID, final Integer loanProductID) {
-        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
+    private void verifyLoanRepaymentSchedule(final List<GetLoansLoanIdRepaymentPeriod> periods) {
+        assertEquals(LocalDate.of(2011, 10, 20), periods.get(1).getDueDate(), "Checking for Due Date for 1st Month");
+        assertEquals(0, periods.get(1).getPrincipalOriginalDue().compareTo(new BigDecimal("2911.49")),
+                "Checking for Principal Due for 1st Month");
+        assertEquals(0, periods.get(1).getInterestOriginalDue().compareTo(new BigDecimal("240.00")),
+                "Checking for Interest Due for 1st Month");
 
-        List<HashMap> collaterals = new ArrayList<>();
+        assertEquals(LocalDate.of(2011, 11, 20), periods.get(2).getDueDate(), "Checking for Due Date for 2nd Month");
+        assertEquals(0, periods.get(2).getPrincipalDue().compareTo(new BigDecimal("2969.72")), "Checking for Principal Due for 2nd Month");
+        assertEquals(0, periods.get(2).getInterestOriginalDue().compareTo(new BigDecimal("181.77")),
+                "Checking for Interest Due for 2nd Month");
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+        assertEquals(LocalDate.of(2011, 12, 20), periods.get(3).getDueDate(), "Checking for Due Date for 3rd Month");
+        assertEquals(0, periods.get(3).getPrincipalDue().compareTo(new BigDecimal("3029.11")), "Checking for Principal Due for 3rd Month");
+        assertEquals(0, periods.get(3).getInterestOriginalDue().compareTo(new BigDecimal("122.38")),
+                "Checking for Interest Due for 3rd Month");
 
-        final String GlimApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal("12,000.00") //
-                .withLoanTermFrequency("4") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("4") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate("20 September 2011") //
-                .withSubmittedOnDate("20 September 2011").withLoanType("glim").withtotalLoan("10000").withParentAccount("1")
-                .withCollaterals(collaterals).build(clientID.toString(), groupID.toString(), loanProductID.toString(), null);
-        LOG.info(GlimApplicationJSON);
-        return this.loanTransactionHelper.getGlimId(GlimApplicationJSON);
+        assertEquals(LocalDate.of(2012, 1, 20), periods.get(4).getDueDate(), "Checking for Due Date for 4th Month");
+        assertEquals(0, periods.get(4).getPrincipalDue().compareTo(new BigDecimal("3089.68")), "Checking for Principal Due for 4th Month");
+        assertEquals(0, periods.get(4).getInterestOriginalDue().compareTo(new BigDecimal("61.79")),
+                "Checking for Interest Due for 4th Month");
     }
 
-    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal amount) {
-        collaterals.add(collaterals(collateralId, amount));
+    /** Asserts the retrieved GLIM JSON (array or object, per endpoint) references {@code glimId}. */
+    private static void assertReferencesGlim(String json, Long glimId) {
+        JsonElement parsed = JsonParser.parseString(json);
+        boolean found = parsed.isJsonArray() ? parsed.getAsJsonArray().asList().stream().anyMatch(element -> hasGlimId(element, glimId))
+                : hasGlimId(parsed, glimId);
+        assertTrue(found, "Retrieved GLIM data should reference glimId " + glimId);
     }
 
-    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal amount) {
-        HashMap<String, String> collateral = new HashMap<String, String>(1);
-        collateral.put("clientCollateralId", collateralId.toString());
-        collateral.put("amount", amount.toString());
-        return collateral;
-    }
-
-    private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule) {
-        LOG.info("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
-
-        assertEquals(new ArrayList<>(Arrays.asList(2011, 10, 20)), loanSchedule.get(1).get("dueDate"),
-                "Checking for Due Date for 1st Month");
-        assertEquals(Float.valueOf("2911.49"), loanSchedule.get(1).get("principalOriginalDue"), "Checking for Principal Due for 1st Month");
-        assertEquals(Float.valueOf("240.00"), loanSchedule.get(1).get("interestOriginalDue"), "Checking for Interest Due for 1st Month");
-
-        assertEquals(new ArrayList<>(Arrays.asList(2011, 11, 20)), loanSchedule.get(2).get("dueDate"),
-                "Checking for Due Date for 2nd Month");
-        assertEquals(Float.valueOf("2969.72"), loanSchedule.get(2).get("principalDue"), "Checking for Principal Due for 2nd Month");
-        assertEquals(Float.valueOf("181.77"), loanSchedule.get(2).get("interestOriginalDue"), "Checking for Interest Due for 2nd Month");
-
-        assertEquals(new ArrayList<>(Arrays.asList(2011, 12, 20)), loanSchedule.get(3).get("dueDate"),
-                "Checking for Due Date for 3rd Month");
-        assertEquals(Float.valueOf("3029.11"), loanSchedule.get(3).get("principalDue"), "Checking for Principal Due for 3rd Month");
-        assertEquals(Float.valueOf("122.38"), loanSchedule.get(3).get("interestOriginalDue"), "Checking for Interest Due for 3rd Month");
-
-        assertEquals(new ArrayList<>(Arrays.asList(2012, 1, 20)), loanSchedule.get(4).get("dueDate"),
-                "Checking for Due Date for 4th Month");
-        assertEquals(Float.valueOf("3089.68"), loanSchedule.get(4).get("principalDue"), "Checking for Principal Due for 4th Month");
-        assertEquals(Float.valueOf("61.79"), loanSchedule.get(4).get("interestOriginalDue"), "Checking for Interest Due for 4th Month");
+    private static boolean hasGlimId(JsonElement element, Long glimId) {
+        if (!element.isJsonObject()) {
+            return false;
+        }
+        JsonObject object = element.getAsJsonObject();
+        return object.has("glimId") && glimId.equals(object.get("glimId").getAsLong());
     }
 }
