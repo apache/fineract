@@ -678,7 +678,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | Type | Account code | Account name | Debit | Credit |
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC23: backdated repayment before charge-off keeps regular JE and restates charge-off
+  @TestRailId:C94033
+  Scenario: Verify Working Capital charge-off accounting - UC24: backdated repayment before charge-off keeps regular JE and restates charge-off
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -724,7 +725,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC24: backdated full repayment before charge-off reverses charge-off and lifts flag
+  @TestRailId:C94034
+  Scenario: Verify Working Capital charge-off accounting - UC25: backdated full repayment before charge-off reverses charge-off and lifts flag
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -768,7 +770,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | false      |
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
-  Scenario: Verify Working Capital charge-off accounting - UC25: undo repayment before charge-off restates charge-off up
+  @TestRailId:C94035
+  Scenario: Verify Working Capital charge-off accounting - UC26: undo repayment before charge-off restates charge-off up
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -836,7 +839,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC26: same-day repayment after charge-off posts to recoveries
+  @TestRailId:C94036
+  Scenario: Verify Working Capital charge-off accounting - UC27: same-day repayment after charge-off posts to recoveries
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -872,7 +876,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC27: undo earlier repayment after charge-off leaves charge-off amount unchanged
+  @TestRailId:C94037
+  Scenario: Verify Working Capital charge-off accounting - UC28: undo earlier repayment after charge-off leaves charge-off amount unchanged
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -894,6 +899,7 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     And Admin sets the business date to "16 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Repayment after charge-off ---
     And Customer makes repayment on "16 January 2026" with 1000.0 transaction amount on Working Capital loan
     Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "16 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit  | Credit |
@@ -913,6 +919,7 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     And Admin sets the business date to "20 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Repayment after charge-off ---
     And Customer makes repayment on "20 January 2026" with 500.0 transaction amount on Working Capital loan
     Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "20 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
@@ -958,7 +965,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC28: backdated repayment before charge-off restates charge-off and keeps later recovery JE
+  @TestRailId:C94038
+  Scenario: Verify Working Capital charge-off accounting - UC29: backdated repayment before charge-off restates charge-off and keeps later recovery JE
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -980,6 +988,7 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     And Admin sets the business date to "20 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Repayment after charge-off ---
     And Customer makes repayment on "20 January 2026" with 500.0 transaction amount on Working Capital loan
     Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "20 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
@@ -1026,7 +1035,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC29: backdated repayment before charge-off with fee restates charge-off fee portion
+  @TestRailId:C94039
+  Scenario: Verify Working Capital charge-off accounting - UC30: backdated repayment before charge-off with fee restates charge-off fee portion
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1084,7 +1094,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC30: backdated goodwill credit before charge-off keeps regular JE and restates charge-off
+  @TestRailId:C94040
+  Scenario: Verify Working Capital charge-off accounting - UC31: backdated goodwill credit before charge-off keeps regular JE and restates charge-off
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1130,7 +1141,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC31: backdated payout refund before charge-off keeps regular JE and restates charge-off
+  @TestRailId:C94041
+  Scenario: Verify Working Capital charge-off accounting - UC32: backdated payout refund before charge-off keeps regular JE and restates charge-off
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1176,7 +1188,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC32: backdated full repayment before charge-off restates later recovery to overpayment
+  @TestRailId:C94042
+  Scenario: Verify Working Capital charge-off accounting - UC33: backdated full repayment before charge-off restates later recovery to overpayment
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1198,6 +1211,7 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     And Admin sets the business date to "20 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Repayment after charge-off ---
     And Customer makes repayment on "20 January 2026" with 1000.0 transaction amount on Working Capital loan
     Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "20 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit  | Credit |
@@ -1248,7 +1262,8 @@ Feature: Working Capital Charge-Off Accounting Entries
     And Customer makes credit balance refund on "20 January 2026" with 1000.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
-  Scenario: Verify Working Capital charge-off accounting - UC33: undo backdated repayment before charge-off restates charge-off back up
+  @TestRailId:C94043
+  Scenario: Verify Working Capital charge-off accounting - UC34: undo backdated repayment before charge-off restates charge-off back up
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1322,7 +1337,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC34: two successive backdated repayments before charge-off restate charge-off twice
+  @TestRailId:C94044
+  Scenario: Verify Working Capital charge-off accounting - UC35: two successive backdated repayments before charge-off restate charge-off twice
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1395,7 +1411,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC35: backdated repayment before charge-off restates later full recovery into recovery plus overpayment
+  @TestRailId:C94045
+  Scenario: Verify Working Capital charge-off accounting - UC36: backdated repayment before charge-off restates later full recovery into recovery plus overpayment
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1417,6 +1434,7 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     And Admin sets the business date to "20 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Repayment after charge-off ---
     And Customer makes repayment on "20 January 2026" with 9000.0 transaction amount on Working Capital loan
     Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "20 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit  | Credit |
@@ -1470,7 +1488,8 @@ Feature: Working Capital Charge-Off Accounting Entries
     And Customer makes credit balance refund on "20 January 2026" with 3000.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
-  Scenario: Verify Working Capital charge-off accounting - UC36: backdated overpayment before charge-off reverses charge-off and books overpayment on the backdated repayment
+  @TestRailId:C94046
+  Scenario: Verify Working Capital charge-off accounting - UC37: backdated overpayment before charge-off reverses charge-off and books overpayment on the backdated repayment
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1517,7 +1536,8 @@ Feature: Working Capital Charge-Off Accounting Entries
     And Customer makes credit balance refund on "20 January 2026" with 1000.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
-  Scenario: Verify Working Capital charge-off accounting - UC37: backdated repayment before fraud charge-off restates fraud expense
+  @TestRailId:C94047
+  Scenario: Verify Working Capital charge-off accounting - UC38: backdated repayment before fraud charge-off restates fraud expense
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1565,7 +1585,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC38: undo charge-off is still allowed after a backdated repayment before charge-off
+  @TestRailId:C94048
+  Scenario: Verify Working Capital charge-off accounting - UC39: undo charge-off is still allowed after a backdated repayment before charge-off
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1634,7 +1655,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | ASSET   | 112601       | Loans Receivable     | 6000.0 |        |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC39: undo goodwill credit before charge-off restates charge-off up
+  @TestRailId:C94049
+  Scenario: Verify Working Capital charge-off accounting - UC40: undo goodwill credit before charge-off restates charge-off up
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1702,7 +1724,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC40: undo payout refund before charge-off restates charge-off up
+  @TestRailId:C94050
+  Scenario: Verify Working Capital charge-off accounting - UC41: undo payout refund before charge-off restates charge-off up
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1770,7 +1793,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC41: backdated repayment before charge-off covers penalty only and leaves fee on charge-off
+  @TestRailId:C94051
+  Scenario: Verify Working Capital charge-off accounting - UC42: backdated repayment before charge-off covers penalty only and leaves fee on charge-off
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1839,7 +1863,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC42: fee charge adjustment before charge-off keeps receivable JE and after charge-off posts to charge-off income
+  @TestRailId:C94052
+  Scenario: Verify Working Capital charge-off accounting - UC43: fee charge adjustment before charge-off keeps receivable JE and after charge-off posts to charge-off income
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1907,7 +1932,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC43: penalty charge adjustment before charge-off keeps receivable JE and after charge-off posts to charge-off income
+  @TestRailId:C94053
+  Scenario: Verify Working Capital charge-off accounting - UC44: penalty charge adjustment before charge-off keeps receivable JE and after charge-off posts to charge-off income
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1975,7 +2001,8 @@ Feature: Working Capital Charge-Off Accounting Entries
       | true       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
-  Scenario: Verify Working Capital charge-off accounting - UC44: backdated repayment before charge-off lifts flag and restates post-charge-off fee charge adjustment to regular JE
+  @TestRailId:C94054
+  Scenario: Verify Working Capital charge-off accounting - UC45: backdated repayment before charge-off lifts flag and restates post-charge-off fee charge adjustment to regular JE
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -2055,3 +2082,33 @@ Feature: Working Capital Charge-Off Accounting Entries
       | chargedOff |
       | false      |
     Then Working Capital loan status will be "OVERPAID"
+
+  @TestRailId:C94055
+  Scenario: Verify Working Capital charge-off accounting - UC46: backdated discount fee adjustment before charge-off restates charge-off expense
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+# --- Discount fee ---
+    And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    When Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+# --- Repayment before charge-off ---
+    And Customer makes repayment on "05 January 2026" with 50.0 transaction amount on Working Capital loan
+    And Admin sets the business date to "08 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "05 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 9.61  |        |
+      | INCOME    | 404000       | Interest Income           |       | 9.61   |
+# --- Charge-off ---
+    And Admin charges off the Working Capital loan on "08 January 2026"
+# --- Backdated discount fee adjustment before charge-off ---
+    And Admin adds Discount fee adjustment with "500" amount on transaction date "07 January 2026" on Working Capital loan account for last discount
+    And Admin sets the business date to "09 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT" transaction with date "08 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | EXPENSE   | 744007       | Credit Loss/Bad Debt      | 4.47  |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |       | 4.47   |
+    Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
