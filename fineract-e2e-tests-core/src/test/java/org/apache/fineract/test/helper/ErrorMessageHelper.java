@@ -1185,4 +1185,8 @@ public final class ErrorMessageHelper {
     public static String workingCapitalInputValuesCauseUnableCalculateEIrErrorCodeFailure() {
         return "validation.msg.WORKINGCAPITALLOAN.principalAmount.unable.to.calculate.valid.eir";
     }
+
+    public static String workingCapitalPeriodPaymentRateAfterMaturityDateFailure() {
+        return "[effectiveDate] Failed data validation due to: cannot.be.after.maturity.date.";
+    }
 }

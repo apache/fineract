@@ -155,6 +155,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final String submittedOnDate = loanData.get(1);
         final String expectedDisbursementDate = loanData.get(2);
         final String principalAmount = loanData.get(3);
+        final String discountAmount = loanData.get(6);
 
         // Create client with random data
         final PostClientsRequest clientsRequest = clientRequestFactory.defaultClientCreationRequest();
@@ -179,6 +180,9 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .defaultWorkingCapitalLoanDisburseRequest()//
                 .actualDisbursementDate(submittedOnDate)//
                 .transactionAmount(new BigDecimal(principalAmount));
+        if (new BigDecimal(discountAmount).compareTo(new BigDecimal(0)) > 0) {
+            disburseRequest.discountAmount(new BigDecimal(discountAmount));
+        }
         executeStateTransition("disburse", disburseRequest, TestContextKey.LOAN_DISBURSE_RESPONSE, false);
 
         // Verify loan is ACTIVE
@@ -2196,6 +2200,22 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         updatePeriodPaymentRateFailed(periodPaymentRate, errorMessage, 403);
     }
 
+    @When("Admin update Working Capital period payment rate failed with {string} value on {string} date cause after maturity date")
+    public void adminAddWorkingCapitalPeriodPaymentRateAfterMaturityDateFailure(final String periodPaymentRate,
+            final String effectiveDate) {
+        final PostWorkingCapitalLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+        PutWorkingCapitalLoansLoanIdRateRequest rateChangeRequest = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoanUpdateRateRequest().periodPaymentRate(new BigDecimal(periodPaymentRate))
+                .effectiveDate(effectiveDate);
+
+        CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().updateWorkingCapitalLoanRateById(loanId, rateChangeRequest));
+        String errorMessage = ErrorMessageHelper.workingCapitalPeriodPaymentRateAfterMaturityDateFailure();
+        assertThat(exception.getStatus()).as(errorMessage).isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).contains(errorMessage);
+    }
+
     @When("Working Capital Loan Period Payment Rate changes history contains the following data:")
     public void adminChecksWorkingCapitalPeriodPaymentRateChangesHistory(DataTable table) {
         PostWorkingCapitalLoansResponse loanCreateResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
@@ -3839,19 +3859,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     }
 
     public void updatePeriodPaymentRateFailed(String periodPaymentRate, String errorMessage) {
-        /*
-         * final PostWorkingCapitalLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
-         * long loanId = loanResponse.getLoanId();
-         *
-         * PutWorkingCapitalLoansLoanIdRateRequest rateChangeRequest = workingCapitalLoanRequestFactory
-         * .defaultWorkingCapitalLoanUpdateRateRequest().periodPaymentRate(new BigDecimal(periodPaymentRate));
-         *
-         * CallFailedRuntimeException exception = fail( () ->
-         * fineractClient.workingCapitalLoans().updateWorkingCapitalLoanRateById(loanId, rateChangeRequest));
-         *
-         * assertThat(exception.getStatus()).as(errorMessage).isEqualTo(400);
-         * assertThat(exception.getDeveloperMessage()).contains(errorMessage);
-         */
         updatePeriodPaymentRateFailed(periodPaymentRate, errorMessage, 400);
     }
 

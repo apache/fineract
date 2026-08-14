@@ -28,7 +28,14 @@ SHARD_INDEX=${2:-1}  # Keep original 1-based index for output
 
 # Directory containing feature files
 FEATURES_DIR="fineract-e2e-tests-runner/src/test/resources/features"
-TEMP_FILE="/tmp/feature_scenarios_$(date +%s).txt"
+TEMP_FILE="/tmp/feature_scenarios_$$.txt"
+FEATURE_METADATA_FILE="/tmp/feature_metadata_$$.txt"
+SORTED_FEATURE_METADATA_FILE="/tmp/feature_metadata_sorted_$$.txt"
+
+cleanup() {
+  rm -f "$TEMP_FILE" "$FEATURE_METADATA_FILE" "$SORTED_FEATURE_METADATA_FILE"
+}
+trap cleanup EXIT
 
 # Check if features directory exists
 if [ ! -d "$FEATURES_DIR" ]; then
@@ -43,24 +50,41 @@ count_scenarios() {
   grep -v '^[[:space:]]*#' "$file" | grep -c 'Scenario\( Outline\)\?:' || echo "0"
 }
 
+# Extract the first numeric @Order annotation from a feature file.
+get_feature_order() {
+  local file="$1"
+  sed -nE 's/^[[:space:]]*@Order[[:space:]]*\([[:space:]]*(-?[0-9]+)[[:space:]]*\)[[:space:]]*$/\1/p' "$file" | head -n 1
+}
+
 # Process each feature file and count scenarios
 echo "Analyzing feature files to count scenarios..."
 > "$TEMP_FILE"
+> "$FEATURE_METADATA_FILE"
 
 while IFS= read -r -d $'\0' file; do
   # Remove the 'fineract-e2e-tests-runner/' prefix
   rel_path="${file#fineract-e2e-tests-runner/}"
   scenario_count=$(count_scenarios "$file")
-  echo "$scenario_count $rel_path"
-done < <(find "$FEATURES_DIR" -type f -name '*.feature' -print0) | sort -nr > "$TEMP_FILE"
+  feature_order=$(get_feature_order "$file")
+  if [ -n "$feature_order" ]; then
+    order_group=0
+  else
+    order_group=1
+    feature_order=0
+  fi
+  printf '%s\t%s\t%s\t%s\n' "$order_group" "$feature_order" "$scenario_count" "$rel_path" >> "$FEATURE_METADATA_FILE"
+done < <(find "$FEATURES_DIR" -type f -name '*.feature' -print0)
+
+# Ordered features take priority. Within the same order group, preserve the existing
+# scenario-count ordering and filename tie-breaker.
+sort -t $'\t' -k1,1n -k2,2n -k3,3nr -k4,4r "$FEATURE_METADATA_FILE" > "$SORTED_FEATURE_METADATA_FILE"
+awk -F '\t' '{ print $3 " " $4 }' "$SORTED_FEATURE_METADATA_FILE" > "$TEMP_FILE"
 
 # Read the sorted list of features
 SORTED_FEATURES=()
-while IFS= read -r line; do
-  # Extract just the file path (removing the scenario count)
-  path=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^ //')
+while IFS=$'\t' read -r order_group feature_order scenario_count path; do
   [ -n "$path" ] && SORTED_FEATURES+=("$path")
-done < "$TEMP_FILE"
+done < "$SORTED_FEATURE_METADATA_FILE"
 TOTAL_FEATURES=${#SORTED_FEATURES[@]}
 
 # Check if any feature files were found
@@ -86,23 +110,30 @@ for ((i=0; i<TOTAL_FEATURES; i++)); do
   fi
 done
 
-# Sort the feature files in this shard by name (with 0_* files first)
-# First, extract just the filenames and prepend a sort key
+# Sort the feature files in this shard by @Order first, then by name
+# (with 0_* files first). This keeps ordered features ahead of unannotated ones
+# even after round-robin shard distribution.
 while IFS= read -r line; do
   # Get just the filename part
   filename=$(basename "$line")
-  # Create a sort key: 0 for files starting with 0_, 1 otherwise
-  if [[ "$filename" == 0_* ]]; then
-    sort_key="0_$filename"
+  feature_order=$(get_feature_order "fineract-e2e-tests-runner/$line")
+  if [ -n "$feature_order" ]; then
+    order_group=0
   else
-    sort_key="1_$filename"
+    order_group=1
+    feature_order=0
   fi
-  echo "$sort_key|$line"
+
+  # Preserve the existing filename ordering as the final tie-breaker.
+  if [[ "$filename" == 0_* ]]; then
+    filename_group=0
+  else
+    filename_group=1
+  fi
+  printf '%s\t%s\t%s\t%s\t%s\n' "$order_group" "$feature_order" "$filename_group" "$filename" "$line"
 done < "$FEATURE_LIST_FILE.tmp" | \
-  # Sort by the sort key and filename
-  sort -t'|' -k1,1 -k2,2 | \
-  # Remove the sort key
-  cut -d'|' -f2- > "$FEATURE_LIST_FILE"
+  sort -t $'\t' -k1,1n -k2,2n -k3,3n -k4,4 | \
+  cut -f5- > "$FEATURE_LIST_FILE"
 
 # Clean up temporary file
 rm -f "$FEATURE_LIST_FILE.tmp"
@@ -138,9 +169,6 @@ if [ $NUM_FEATURES -gt 0 ]; then
 fi
 
 echo "Feature list written to $FEATURE_LIST_FILE"
-
-# Clean up temp file
-rm -f "$TEMP_FILE"
 
 # Set output for GitHub Actions
 if [ -n "$GITHUB_OUTPUT" ]; then

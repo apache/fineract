@@ -1,5 +1,6 @@
 @WorkingCapital
 @WCCOBFeature
+@Order(1)
 Feature: Working Capital COB Job
 
   Background:
