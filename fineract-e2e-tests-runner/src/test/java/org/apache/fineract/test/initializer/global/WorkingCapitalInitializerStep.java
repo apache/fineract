@@ -137,13 +137,13 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
                                                 .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.MONEY_TRANSFER))
                                                 .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES))))
                                 .chargeOffReasonToExpenseAccountMappings(List.of(
-                                        new org.apache.fineract.client.models.WorkingCapitalPostChargeOffReasonToExpenseAccountMappings()
+                                        new org.apache.fineract.client.models.WorkingCapitalLoanPostChargeOffReasonToExpenseAccountMappings()
                                                 .chargeOffReasonCodeValueId(
                                                         codeValueResolver.resolve(chargeOffReasonCodeId, DefaultCodeValue.valueOf("FRAUD")))
                                                 .expenseAccountId(
                                                         accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT_FRAUD))))
-                                .writeOffReasonsToExpenseMappings(List
-                                        .of(new org.apache.fineract.client.models.WorkingCapitalPostWriteOffReasonToExpenseAccountMappings()
+                                .writeOffReasonsToExpenseMappings(List.of(
+                                        new org.apache.fineract.client.models.WorkingCapitalLoanPostWriteOffReasonToExpenseAccountMappings()
                                                 .writeOffReasonCodeValueId(codeValueResolver.resolve(writeOffReasonCodeId,
                                                         DefaultCodeValue.valueOf("BAD_DEBT")))
                                                 .expenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT)))))),

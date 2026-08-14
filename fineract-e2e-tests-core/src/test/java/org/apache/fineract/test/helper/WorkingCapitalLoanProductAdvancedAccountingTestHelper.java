@@ -40,9 +40,9 @@ import org.apache.fineract.client.models.PostGLAccountsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanPaymentChannelToFundSourceMappings;
+import org.apache.fineract.client.models.WorkingCapitalLoanPostChargeOffReasonToExpenseAccountMappings;
+import org.apache.fineract.client.models.WorkingCapitalLoanPostWriteOffReasonToExpenseAccountMappings;
 import org.apache.fineract.client.models.WorkingCapitalLoanProductChargeToGLAccountMapper;
-import org.apache.fineract.client.models.WorkingCapitalPostChargeOffReasonToExpenseAccountMappings;
-import org.apache.fineract.client.models.WorkingCapitalPostWriteOffReasonToExpenseAccountMappings;
 import org.apache.fineract.test.data.ChargeCalculationType;
 import org.apache.fineract.test.data.ChargePaymentMode;
 import org.apache.fineract.test.data.ChargeTimeType;
@@ -100,8 +100,8 @@ public final class WorkingCapitalLoanProductAdvancedAccountingTestHelper {
             final Consumer<List<WorkingCapitalLoanPaymentChannelToFundSourceMappings>> setPaymentChannelMappings,
             final Consumer<List<WorkingCapitalLoanProductChargeToGLAccountMapper>> setFeeMappings,
             final Consumer<List<WorkingCapitalLoanProductChargeToGLAccountMapper>> setPenaltyMappings,
-            final Consumer<List<WorkingCapitalPostChargeOffReasonToExpenseAccountMappings>> setChargeOffMappings,
-            final Consumer<List<WorkingCapitalPostWriteOffReasonToExpenseAccountMappings>> setWriteOffMappings,
+            final Consumer<List<WorkingCapitalLoanPostChargeOffReasonToExpenseAccountMappings>> setChargeOffMappings,
+            final Consumer<List<WorkingCapitalLoanPostWriteOffReasonToExpenseAccountMappings>> setWriteOffMappings,
             final PaymentTypeResolver paymentTypeResolver, final FineractFeignClient fineractFeignClient) {
         final Long fundSourceAccountId = resolveOrCreateGLAccount(fineractFeignClient, "WC E2E Mapping Fund Source", "WCE2EFS1",
                 GLAType.ASSET.value);
@@ -129,9 +129,9 @@ public final class WorkingCapitalLoanProductAdvancedAccountingTestHelper {
                 List.of(new WorkingCapitalLoanProductChargeToGLAccountMapper().chargeId(feeChargeId).incomeAccountId(feeIncomeAccountId)));
         setPenaltyMappings.accept(List.of(
                 new WorkingCapitalLoanProductChargeToGLAccountMapper().chargeId(penaltyChargeId).incomeAccountId(penaltyIncomeAccountId)));
-        setChargeOffMappings.accept(List.of(new WorkingCapitalPostChargeOffReasonToExpenseAccountMappings()
+        setChargeOffMappings.accept(List.of(new WorkingCapitalLoanPostChargeOffReasonToExpenseAccountMappings()
                 .chargeOffReasonCodeValueId(chargeOffReasonId).expenseAccountId(writeOffExpenseAccountId)));
-        setWriteOffMappings.accept(List.of(new WorkingCapitalPostWriteOffReasonToExpenseAccountMappings()
+        setWriteOffMappings.accept(List.of(new WorkingCapitalLoanPostWriteOffReasonToExpenseAccountMappings()
                 .writeOffReasonCodeValueId(writeOffReasonId).expenseAccountId(writeOffExpenseAccountId)));
 
         return buildExpectation(paymentTypeId, fundSourceAccountId, feeChargeId, feeIncomeAccountId, penaltyChargeId,

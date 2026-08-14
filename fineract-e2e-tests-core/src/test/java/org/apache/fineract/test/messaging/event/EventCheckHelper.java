@@ -72,9 +72,9 @@ import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.client.models.WorkingCapitalCollection;
-import org.apache.fineract.client.models.WorkingCapitalCollectionDelinquencyPausePeriod;
-import org.apache.fineract.client.models.WorkingCapitalCollectionRangeScheduleDelinquency;
+import org.apache.fineract.client.models.WorkingCapitalLoanCollection;
+import org.apache.fineract.client.models.WorkingCapitalLoanCollectionDelinquencyPausePeriod;
+import org.apache.fineract.client.models.WorkingCapitalLoanCollectionRangeScheduleDelinquency;
 import org.apache.fineract.test.data.AssetExternalizationTransferStatus;
 import org.apache.fineract.test.data.AssetExternalizationTransferStatusReason;
 import org.apache.fineract.test.data.TransactionType;
@@ -753,7 +753,7 @@ public class EventCheckHelper {
             assertWorkingCapitalLoanAccountData(event, body);
 
             final WorkingCapitalLoanCollectionDataV1 eventDelinquent = event.getDelinquent();
-            final WorkingCapitalCollection bodyDelinquent = body.getDelinquent();
+            final WorkingCapitalLoanCollection bodyDelinquent = body.getDelinquent();
             assertThat(eventDelinquent).isNotNull();
             assertThat(bodyDelinquent).isNotNull();
             assertAmountEquals("delinquent.delinquentAmount", eventDelinquent.getDelinquentAmount(), bodyDelinquent.getDelinquentAmount());
@@ -768,7 +768,7 @@ public class EventCheckHelper {
             assertWorkingCapitalLoanAccountData(event, body);
 
             final WorkingCapitalLoanCollectionDataV1 eventDelinquent = event.getDelinquent();
-            final WorkingCapitalCollection bodyDelinquent = body.getDelinquent();
+            final WorkingCapitalLoanCollection bodyDelinquent = body.getDelinquent();
             assertThat(eventDelinquent).isNotNull();
             assertThat(bodyDelinquent).isNotNull();
             assertAmountEquals("delinquent.delinquentAmount", eventDelinquent.getDelinquentAmount(), bodyDelinquent.getDelinquentAmount());
@@ -787,19 +787,19 @@ public class EventCheckHelper {
                     .toList();
             assertThat(eventTags).as("delinquent.delinquencySchedule[].tags").isNotEmpty();
 
-            final List<WorkingCapitalCollectionRangeScheduleDelinquency> apiTags = Optional
+            final List<WorkingCapitalLoanCollectionRangeScheduleDelinquency> apiTags = Optional
                     .ofNullable(bodyDelinquent.getInstallmentLevelDelinquency()).orElse(List.of()).stream()
                     .sorted(Comparator
-                            .comparing(WorkingCapitalCollectionRangeScheduleDelinquency::getRangeId,
+                            .comparing(WorkingCapitalLoanCollectionRangeScheduleDelinquency::getRangeId,
                                     Comparator.nullsFirst(Comparator.naturalOrder()))
-                            .thenComparing(WorkingCapitalCollectionRangeScheduleDelinquency::getDelinquentAmount,
+                            .thenComparing(WorkingCapitalLoanCollectionRangeScheduleDelinquency::getDelinquentAmount,
                                     Comparator.nullsFirst(Comparator.naturalOrder())))
                     .toList();
             assertThat(eventTags).as("delinquent.delinquencySchedule[].tags vs API delinquent.installmentLevelDelinquency")
                     .hasSize(apiTags.size());
             IntStream.range(0, eventTags.size()).forEach(i -> {
                 final WorkingCapitalLoanDelinquencyScheduleTagDataV1 actual = eventTags.get(i);
-                final WorkingCapitalCollectionRangeScheduleDelinquency expected = apiTags.get(i);
+                final WorkingCapitalLoanCollectionRangeScheduleDelinquency expected = apiTags.get(i);
                 assertThat(actual.getRangeId()).as("tags[%s].rangeId", i).isEqualTo(expected.getRangeId());
                 assertThat(actual.getClassification()).as("tags[%s].classification", i).isNotBlank()
                         .isEqualTo(expected.getClassification());
@@ -932,11 +932,12 @@ public class EventCheckHelper {
             final List<DelinquencyPausePeriodV1> eventPausePeriods = event.getDelinquent().getDelinquencyPausePeriods();
             assertThat(eventPausePeriods).isNotNull().isNotEmpty();
             assertThat(body.getDelinquent()).isNotNull();
-            final List<WorkingCapitalCollectionDelinquencyPausePeriod> bodyPausePeriods = body.getDelinquent().getDelinquencyPausePeriods();
+            final List<WorkingCapitalLoanCollectionDelinquencyPausePeriod> bodyPausePeriods = body.getDelinquent()
+                    .getDelinquencyPausePeriods();
             assertThat(bodyPausePeriods).isNotNull().hasSize(eventPausePeriods.size());
             IntStream.range(0, eventPausePeriods.size()).forEach(i -> {
                 final DelinquencyPausePeriodV1 actual = eventPausePeriods.get(i);
-                final WorkingCapitalCollectionDelinquencyPausePeriod expected = bodyPausePeriods.get(i);
+                final WorkingCapitalLoanCollectionDelinquencyPausePeriod expected = bodyPausePeriods.get(i);
                 assertThat(actual.getActive()).as("delinquencyPausePeriods[%s].active", i).isEqualTo(expected.getActive());
                 assertEventDateEqualsApiDate("delinquencyPausePeriods[" + i + "].pausePeriodStart", actual.getPausePeriodStart(),
                         expected.getPausePeriodStart());

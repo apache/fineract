@@ -23,10 +23,10 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
-import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanBreachScheduleService;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
+import org.apache.fineract.portfolio.workingcapitalloan.breach.service.WorkingCapitalLoanBreachScheduleService;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.domain.WorkingCapitalLoanDisbursementDetails;
+import org.apache.fineract.portfolio.workingcapitalloan.product.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.springframework.stereotype.Component;
 
 @Slf4j

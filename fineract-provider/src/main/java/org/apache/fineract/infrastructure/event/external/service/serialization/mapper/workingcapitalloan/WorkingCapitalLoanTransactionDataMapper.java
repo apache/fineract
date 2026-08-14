@@ -20,7 +20,7 @@ package org.apache.fineract.infrastructure.event.external.service.serialization.
 
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanTransactionDataV1;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
-import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionData;
+import org.apache.fineract.portfolio.workingcapitalloan.transaction.data.WorkingCapitalLoanTransactionData;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

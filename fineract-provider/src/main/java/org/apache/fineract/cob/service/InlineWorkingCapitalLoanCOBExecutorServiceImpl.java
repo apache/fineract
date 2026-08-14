@@ -22,8 +22,8 @@ import java.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.conditions.LoanCOBEnabledCondition;
 import org.apache.fineract.cob.domain.LockOwner;
-import org.apache.fineract.cob.domain.WorkingCapitalAccountLockRepository;
 import org.apache.fineract.cob.domain.WorkingCapitalLoanAccountLock;
+import org.apache.fineract.cob.domain.WorkingCapitalLoanAccountLockRepository;
 import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanRetrieveIdService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
@@ -41,7 +41,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Conditional(LoanCOBEnabledCondition.class)
 public class InlineWorkingCapitalLoanCOBExecutorServiceImpl extends InlineCommonLockableCOBExecutorService<WorkingCapitalLoanAccountLock> {
 
-    public InlineWorkingCapitalLoanCOBExecutorServiceImpl(WorkingCapitalAccountLockRepository loanAccountLockRepository,
+    public InlineWorkingCapitalLoanCOBExecutorServiceImpl(WorkingCapitalLoanAccountLockRepository loanAccountLockRepository,
             InlineLoanCOBExecutionDataParser dataParser, JobLauncher jobLauncher, JobLocator jobLocator, JobExplorer jobExplorer,
             @Qualifier("requiresNewTransactionTemplate") TransactionTemplate requiresNewTransactionTemplate,
             CustomJobParameterRepository customJobParameterRepository, PlatformSecurityContext context,

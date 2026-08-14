@@ -59,7 +59,7 @@ import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCap
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
-import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.WorkingCapitalLoanConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 

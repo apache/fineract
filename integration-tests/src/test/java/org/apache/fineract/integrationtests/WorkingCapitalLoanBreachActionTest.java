@@ -29,16 +29,16 @@ import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachActionData;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachRequest;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDisbursementTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanHelper;
-import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalLoanBreachActionHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalLoanBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterEach;
@@ -48,7 +48,7 @@ public class WorkingCapitalLoanBreachActionTest {
 
     private final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
-    private final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
+    private final WorkingCapitalLoanBreachHelper breachHelper = new WorkingCapitalLoanBreachHelper();
     private final WorkingCapitalLoanBreachActionHelper breachActionHelper = new WorkingCapitalLoanBreachActionHelper();
 
     private final List<Long> createdLoanIds = new ArrayList<>();
@@ -240,7 +240,7 @@ public class WorkingCapitalLoanBreachActionTest {
         final String uniqueName = "WCL Breach Test " + Utils.uniqueRandomStringGenerator("", 8);
         final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
         final Long breachId = breachHelper
-                .create(new WorkingCapitalBreachRequest().name(Utils.randomStringGenerator("Breach", 12)).breachFrequency(60)
+                .create(new WorkingCapitalLoanBreachRequest().name(Utils.randomStringGenerator("Breach", 12)).breachFrequency(60)
                         .breachFrequencyType("DAYS").breachAmountCalculationType("PERCENTAGE").breachAmount(BigDecimal.valueOf(10)));
         createdBreachIds.add(breachId);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)

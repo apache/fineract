@@ -58,11 +58,11 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.StringEnumOptionData;
-import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanNearBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanPaymentChannelToFundSourceMappings;
-import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
-import org.apache.fineract.client.models.WorkingCapitalPostChargeOffReasonToExpenseAccountMappings;
-import org.apache.fineract.client.models.WorkingCapitalPostWriteOffReasonToExpenseAccountMappings;
+import org.apache.fineract.client.models.WorkingCapitalLoanPostChargeOffReasonToExpenseAccountMappings;
+import org.apache.fineract.client.models.WorkingCapitalLoanPostWriteOffReasonToExpenseAccountMappings;
 import org.apache.fineract.test.data.accounttype.AccountTypeResolver;
 import org.apache.fineract.test.data.accounttype.DefaultAccountType;
 import org.apache.fineract.test.data.codevalue.CodeNames;
@@ -72,7 +72,7 @@ import org.apache.fineract.test.data.paymenttype.DefaultPaymentType;
 import org.apache.fineract.test.data.paymenttype.PaymentTypeResolver;
 import org.apache.fineract.test.data.workingcapitalproduct.DefaultWorkingCapitalLoanProduct;
 import org.apache.fineract.test.data.workingcapitalproduct.WCGLAccountMapping;
-import org.apache.fineract.test.data.workingcapitalproduct.WorkingCapitalBreachFrequencyType;
+import org.apache.fineract.test.data.workingcapitalproduct.WorkingCapitalLoanBreachFrequencyType;
 import org.apache.fineract.test.factory.LoanProductsRequestFactory;
 import org.apache.fineract.test.factory.WorkingCapitalRequestFactory;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
@@ -149,8 +149,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
 
     @When("Admin creates a new Working Capital Loan Product with breach and near breach")
     public void createWorkingCapitalLoanProductWithBreachAndNearBreach() {
-        final Long breachId = getWcBreachIdForFrequency(2, WorkingCapitalBreachFrequencyType.MONTHS.getCode());
-        final Long nearBreachId = getWcNearBreachIdForFrequency(1, WorkingCapitalBreachFrequencyType.MONTHS.getCode());
+        final Long breachId = getWcBreachIdForFrequency(2, WorkingCapitalLoanBreachFrequencyType.MONTHS.getCode());
+        final Long nearBreachId = getWcNearBreachIdForFrequency(1, WorkingCapitalLoanBreachFrequencyType.MONTHS.getCode());
 
         final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
         final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest() //
@@ -184,7 +184,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
 
     @When("Admin failed to create Working Capital Loan Product without breach, but with near breach specified")
     public void createWorkingCapitalLoanProductWithoutBreachButNearBreachFailure() {
-        final Long nearBreachId = getWcNearBreachIdForFrequency(1, WorkingCapitalBreachFrequencyType.MONTHS.getCode());
+        final Long nearBreachId = getWcNearBreachIdForFrequency(1, WorkingCapitalLoanBreachFrequencyType.MONTHS.getCode());
 
         final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
         final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest() //
@@ -218,8 +218,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
 
     @When("Admin updates a Working Capital Loan Product with breach and near breach")
     public void updateWorkingCapitalLoanProductWithBreachAndNearBreach() throws JsonProcessingException {
-        final Long breachId = getWcBreachIdForFrequency(1, WorkingCapitalBreachFrequencyType.YEARS.getCode());
-        final Long nearBreachId = getWcNearBreachIdForFrequency(10, WorkingCapitalBreachFrequencyType.DAYS.getCode());
+        final Long breachId = getWcBreachIdForFrequency(1, WorkingCapitalLoanBreachFrequencyType.YEARS.getCode());
+        final Long nearBreachId = getWcNearBreachIdForFrequency(10, WorkingCapitalLoanBreachFrequencyType.DAYS.getCode());
 
         updateWorkingCapitalLoanProductWithBreachAndNearBreach(breachId, nearBreachId);
     }
@@ -229,7 +229,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         PostWorkingCapitalLoanProductsRequest workingCapitalLoanProductsRequest = testContext()
                 .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST);
         final Long breachId = workingCapitalLoanProductsRequest.getBreachId();
-        final Long nearBreachId = getWcNearBreachIdForFrequency(10, WorkingCapitalBreachFrequencyType.DAYS.getCode());
+        final Long nearBreachId = getWcNearBreachIdForFrequency(10, WorkingCapitalLoanBreachFrequencyType.DAYS.getCode());
 
         updateWorkingCapitalLoanProductWithBreachAndNearBreach(breachId, nearBreachId);
     }
@@ -273,7 +273,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
 
     @When("Admin failed to update Working Capital Loan Product without breach, but with near breach specified")
     public void updateWorkingCapitalLoanProductWithoutBreachButNearBreachFailure() {
-        final Long nearBreachId = getWcNearBreachIdForFrequency(1, WorkingCapitalBreachFrequencyType.MONTHS.getCode());
+        final Long nearBreachId = getWcNearBreachIdForFrequency(1, WorkingCapitalLoanBreachFrequencyType.MONTHS.getCode());
 
         final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
         PutWorkingCapitalLoanProductsProductIdRequest defaultWorkingCapitalLoanProductUpdateRequest = new PutWorkingCapitalLoanProductsProductIdRequest()
@@ -291,7 +291,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     @When("Admin creates a new Working Capital Loan Product with breachId")
     public void createWorkingCapitalLoanProductWithBreachId() {
         final CommandProcessingResult breachCreateResponse = ok(() -> fineractFeignClient.workingCapitalBreaches()
-                .createWorkingCapitalBreach(workingCapitalRequestFactory.defaultWorkingCapitalBreachRequest()));
+                .createWorkingCapitalLoanBreach(workingCapitalRequestFactory.defaultWorkingCapitalLoanBreachRequest()));
         final Long breachId = breachCreateResponse.getResourceId();
         testContext().set(WORKING_CAPITAL_BREACH_ID, breachId);
 
@@ -309,7 +309,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     @When("Admin creates a new Working Capital Loan Product with breachId and overrides enabled")
     public void createWorkingCapitalLoanProductWithBreachIdAndOverrides() {
         final CommandProcessingResult breachCreateResponse = ok(() -> fineractFeignClient.workingCapitalBreaches()
-                .createWorkingCapitalBreach(workingCapitalRequestFactory.defaultWorkingCapitalBreachRequest()));
+                .createWorkingCapitalLoanBreach(workingCapitalRequestFactory.defaultWorkingCapitalLoanBreachRequest()));
         final Long breachId = breachCreateResponse.getResourceId();
         testContext().set(TestContextKey.WORKING_CAPITAL_BREACH_ID, breachId);
 
@@ -330,12 +330,12 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         final Map<String, String> data = table.asMaps().getFirst();
 
         final String breachName = "WC Breach " + Utils.randomStringGenerator("", 10);
-        final WorkingCapitalBreachRequest breachRequest = new WorkingCapitalBreachRequest().name(breachName)
+        final WorkingCapitalLoanBreachRequest breachRequest = new WorkingCapitalLoanBreachRequest().name(breachName)
                 .breachFrequency(Integer.valueOf(data.get("breachFrequency"))).breachFrequencyType(data.get("breachFrequencyType"))
                 .breachAmountCalculationType(data.get("breachAmountCalculationType"))
                 .breachAmount(new BigDecimal(data.get("breachAmount")));
         final CommandProcessingResult breachCreateResponse = ok(
-                () -> fineractFeignClient.workingCapitalBreaches().createWorkingCapitalBreach(breachRequest));
+                () -> fineractFeignClient.workingCapitalBreaches().createWorkingCapitalLoanBreach(breachRequest));
         final Long breachId = breachCreateResponse.getResourceId();
         testContext().set(TestContextKey.WORKING_CAPITAL_BREACH_ID, breachId);
 
@@ -367,22 +367,22 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         final Map<String, String> data = table.asMaps().getFirst();
 
         final String breachName = "WC Breach " + Utils.randomStringGenerator("", 10);
-        final WorkingCapitalBreachRequest breachRequest = new WorkingCapitalBreachRequest().name(breachName)
+        final WorkingCapitalLoanBreachRequest breachRequest = new WorkingCapitalLoanBreachRequest().name(breachName)
                 .breachFrequency(Integer.valueOf(data.get("breachFrequency"))).breachFrequencyType(data.get("breachFrequencyType"))
                 .breachAmountCalculationType(data.get("breachAmountCalculationType"))
                 .breachAmount(new BigDecimal(data.get("breachAmount")));
         final CommandProcessingResult breachCreateResponse = ok(
-                () -> fineractFeignClient.workingCapitalBreaches().createWorkingCapitalBreach(breachRequest));
+                () -> fineractFeignClient.workingCapitalBreaches().createWorkingCapitalLoanBreach(breachRequest));
         final Long breachId = breachCreateResponse.getResourceId();
         testContext().set(TestContextKey.WORKING_CAPITAL_BREACH_ID, breachId);
 
-        final WorkingCapitalNearBreachRequest nearBreachRequest = new WorkingCapitalNearBreachRequest()
+        final WorkingCapitalLoanNearBreachRequest nearBreachRequest = new WorkingCapitalLoanNearBreachRequest()
                 .nearBreachName("WC Near Breach " + Utils.randomStringGenerator("", 10))
                 .nearBreachFrequency(Integer.valueOf(data.get("nearBreachFrequency")))
                 .nearBreachFrequencyType(data.get("nearBreachFrequencyType"))
                 .nearBreachThreshold(new BigDecimal(data.get("nearBreachThreshold")));
         final CommandProcessingResult nearBreachCreateResponse = ok(
-                () -> fineractFeignClient.workingCapitalNearBreaches().createWorkingCapitalNearBreach(nearBreachRequest));
+                () -> fineractFeignClient.workingCapitalNearBreaches().createWorkingCapitalLoanNearBreach(nearBreachRequest));
         final Long nearBreachId = nearBreachCreateResponse.getResourceId();
         testContext().set(TestContextKey.WORKING_CAPITAL_NEAR_BREACH_ID, nearBreachId);
 
@@ -1490,7 +1490,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
 
     public void createWorkingCapitalLoanProductWithBreachWithInvalidDataFailure(String fieldName, String value, String errorMessage) {
 
-        final Long breachId = getWcBreachIdForFrequency(3, WorkingCapitalBreachFrequencyType.MONTHS.getCode());
+        final Long breachId = getWcBreachIdForFrequency(3, WorkingCapitalLoanBreachFrequencyType.MONTHS.getCode());
 
         final String workingCapitalProductDefaultName = DefaultWorkingCapitalLoanProduct.WCLP.getName()
                 + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
@@ -1741,22 +1741,22 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     }
 
     public Long getWcBreachIdForFrequency(Integer breachFrequency, String breachFrequencyType) {
-        final WorkingCapitalBreachRequest breachRequest = workingCapitalRequestFactory.defaultWorkingCapitalBreachRequest()
+        final WorkingCapitalLoanBreachRequest breachRequest = workingCapitalRequestFactory.defaultWorkingCapitalLoanBreachRequest()
                 .name("Breach_WC_" + Utils.randomStringGenerator(10)).breachFrequency(breachFrequency)
                 .breachFrequencyType(breachFrequencyType);
         final CommandProcessingResult breachCreateResponse = ok(
-                () -> fineractFeignClient.workingCapitalBreaches().createWorkingCapitalBreach(breachRequest));
+                () -> fineractFeignClient.workingCapitalBreaches().createWorkingCapitalLoanBreach(breachRequest));
         final Long breachId = breachCreateResponse.getResourceId();
         testContext().set(WORKING_CAPITAL_BREACH_ID, breachId);
         return breachId;
     }
 
     public Long getWcNearBreachIdForFrequency(Integer nearBreachFrequency, String nearBreachFrequencyType) {
-        final WorkingCapitalNearBreachRequest nearBreachRequest = workingCapitalRequestFactory.defaultWorkingCapitalNearBreachRequest()
-                .nearBreachName("NearBreach_WC_" + Utils.randomStringGenerator(10)).nearBreachFrequency(nearBreachFrequency)
-                .nearBreachFrequencyType(nearBreachFrequencyType);
+        final WorkingCapitalLoanNearBreachRequest nearBreachRequest = workingCapitalRequestFactory
+                .defaultWorkingCapitalLoanNearBreachRequest().nearBreachName("NearBreach_WC_" + Utils.randomStringGenerator(10))
+                .nearBreachFrequency(nearBreachFrequency).nearBreachFrequencyType(nearBreachFrequencyType);
         final CommandProcessingResult nearBreachCreateResponse = ok(
-                () -> fineractFeignClient.workingCapitalNearBreaches().createWorkingCapitalNearBreach(nearBreachRequest));
+                () -> fineractFeignClient.workingCapitalNearBreaches().createWorkingCapitalLoanNearBreach(nearBreachRequest));
         final Long nearBreachId = nearBreachCreateResponse.getResourceId();
         testContext().set(WORKING_CAPITAL_NEAR_BREACH_ID, nearBreachId);
         return nearBreachId;
@@ -2045,16 +2045,16 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
 
     @When("Admin attempts to create Working Capital Loan Product with null chargeOffReasonCodeValueId in charge-off mappings")
     public void attemptCreateWithNullChargeOffReasonCodeValueId() {
-        List<WorkingCapitalPostChargeOffReasonToExpenseAccountMappings> chargeOffMappings = List
-                .of(new WorkingCapitalPostChargeOffReasonToExpenseAccountMappings().chargeOffReasonCodeValueId(null)
+        List<WorkingCapitalLoanPostChargeOffReasonToExpenseAccountMappings> chargeOffMappings = List
+                .of(new WorkingCapitalLoanPostChargeOffReasonToExpenseAccountMappings().chargeOffReasonCodeValueId(null)
                         .expenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT)));
         attemptCreateWithAdvancedMappings(buildDefaultPaymentChannelMappings(), chargeOffMappings, buildDefaultWriteOffMappings());
     }
 
     @When("Admin attempts to create Working Capital Loan Product with null expenseAccountId in charge-off mappings")
     public void attemptCreateWithNullChargeOffExpenseAccountId() {
-        List<WorkingCapitalPostChargeOffReasonToExpenseAccountMappings> chargeOffMappings = List
-                .of(new WorkingCapitalPostChargeOffReasonToExpenseAccountMappings()
+        List<WorkingCapitalLoanPostChargeOffReasonToExpenseAccountMappings> chargeOffMappings = List
+                .of(new WorkingCapitalLoanPostChargeOffReasonToExpenseAccountMappings()
                         .chargeOffReasonCodeValueId(
                                 codeValueResolver.resolve(CodeNames.CHARGE_OFF.getValue(), DefaultCodeValue.FRAUD.getName()))
                         .expenseAccountId(null));
@@ -2063,16 +2063,16 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
 
     @When("Admin attempts to create Working Capital Loan Product with null writeOffReasonCodeValueId in write-off mappings")
     public void attemptCreateWithNullWriteOffReasonCodeValueId() {
-        List<WorkingCapitalPostWriteOffReasonToExpenseAccountMappings> writeOffMappings = List
-                .of(new WorkingCapitalPostWriteOffReasonToExpenseAccountMappings().writeOffReasonCodeValueId(null)
+        List<WorkingCapitalLoanPostWriteOffReasonToExpenseAccountMappings> writeOffMappings = List
+                .of(new WorkingCapitalLoanPostWriteOffReasonToExpenseAccountMappings().writeOffReasonCodeValueId(null)
                         .expenseAccountId(accountTypeResolver.resolve(DefaultAccountType.WRITTEN_OFF)));
         attemptCreateWithAdvancedMappings(buildDefaultPaymentChannelMappings(), buildDefaultChargeOffMappings(), writeOffMappings);
     }
 
     @When("Admin attempts to create Working Capital Loan Product with null expenseAccountId in write-off mappings")
     public void attemptCreateWithNullWriteOffExpenseAccountId() {
-        List<WorkingCapitalPostWriteOffReasonToExpenseAccountMappings> writeOffMappings = List
-                .of(new WorkingCapitalPostWriteOffReasonToExpenseAccountMappings()
+        List<WorkingCapitalLoanPostWriteOffReasonToExpenseAccountMappings> writeOffMappings = List
+                .of(new WorkingCapitalLoanPostWriteOffReasonToExpenseAccountMappings()
                         .writeOffReasonCodeValueId(
                                 codeValueResolver.resolve(CodeNames.WRITE_OFF_REASON.getValue(), DefaultCodeValue.BAD_DEBT.getName()))
                         .expenseAccountId(null));
@@ -2124,14 +2124,14 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
                 .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES)));
     }
 
-    private List<WorkingCapitalPostChargeOffReasonToExpenseAccountMappings> buildDefaultChargeOffMappings() {
-        return List.of(new WorkingCapitalPostChargeOffReasonToExpenseAccountMappings()
+    private List<WorkingCapitalLoanPostChargeOffReasonToExpenseAccountMappings> buildDefaultChargeOffMappings() {
+        return List.of(new WorkingCapitalLoanPostChargeOffReasonToExpenseAccountMappings()
                 .chargeOffReasonCodeValueId(codeValueResolver.resolve(CodeNames.CHARGE_OFF.getValue(), DefaultCodeValue.FRAUD.getName()))
                 .expenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT)));
     }
 
-    private List<WorkingCapitalPostWriteOffReasonToExpenseAccountMappings> buildDefaultWriteOffMappings() {
-        return List.of(new WorkingCapitalPostWriteOffReasonToExpenseAccountMappings()
+    private List<WorkingCapitalLoanPostWriteOffReasonToExpenseAccountMappings> buildDefaultWriteOffMappings() {
+        return List.of(new WorkingCapitalLoanPostWriteOffReasonToExpenseAccountMappings()
                 .writeOffReasonCodeValueId(
                         codeValueResolver.resolve(CodeNames.WRITE_OFF_REASON.getValue(), DefaultCodeValue.BAD_DEBT.getName()))
                 .expenseAccountId(accountTypeResolver.resolve(DefaultAccountType.WRITTEN_OFF)));
@@ -2139,8 +2139,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
 
     private PostWorkingCapitalLoanProductsRequest buildAdvancedMappingsRequest(
             List<WorkingCapitalLoanPaymentChannelToFundSourceMappings> paymentChannelMappings,
-            List<WorkingCapitalPostChargeOffReasonToExpenseAccountMappings> chargeOffMappings,
-            List<WorkingCapitalPostWriteOffReasonToExpenseAccountMappings> writeOffMappings) {
+            List<WorkingCapitalLoanPostChargeOffReasonToExpenseAccountMappings> chargeOffMappings,
+            List<WorkingCapitalLoanPostWriteOffReasonToExpenseAccountMappings> writeOffMappings) {
         final String productName = DefaultWorkingCapitalLoanProduct.WCLP.getName()
                 + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
         return workingCapitalRequestFactory.defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest().name(productName)
@@ -2163,8 +2163,8 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     }
 
     private void attemptCreateWithAdvancedMappings(List<WorkingCapitalLoanPaymentChannelToFundSourceMappings> paymentChannelMappings,
-            List<WorkingCapitalPostChargeOffReasonToExpenseAccountMappings> chargeOffMappings,
-            List<WorkingCapitalPostWriteOffReasonToExpenseAccountMappings> writeOffMappings) {
+            List<WorkingCapitalLoanPostChargeOffReasonToExpenseAccountMappings> chargeOffMappings,
+            List<WorkingCapitalLoanPostWriteOffReasonToExpenseAccountMappings> writeOffMappings) {
         PostWorkingCapitalLoanProductsRequest request = buildAdvancedMappingsRequest(paymentChannelMappings, chargeOffMappings,
                 writeOffMappings);
         try {

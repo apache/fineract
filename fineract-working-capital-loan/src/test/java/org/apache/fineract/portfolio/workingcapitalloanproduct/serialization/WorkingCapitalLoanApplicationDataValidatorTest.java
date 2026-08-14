@@ -46,13 +46,15 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.ExpectedDisbursementDateValidator;
-import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
-import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
-import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanApplicationDataValidator;
-import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.repository.WorkingCapitalLoanProductRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.WorkingCapitalLoanConstants;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.serialization.WorkingCapitalLoanApplicationDataValidator;
+import org.apache.fineract.portfolio.workingcapitalloan.nearbreach.validator.WorkingCapitalLoanNearBreachParseAndValidator;
+import org.apache.fineract.portfolio.workingcapitalloan.product.WorkingCapitalLoanProductConstants;
+import org.apache.fineract.portfolio.workingcapitalloan.product.domain.WorkingCapitalLoanProduct;
+import org.apache.fineract.portfolio.workingcapitalloan.product.domain.WorkingCapitalLoanProductMinMaxConstraints;
+import org.apache.fineract.portfolio.workingcapitalloan.product.repository.WorkingCapitalLoanProductRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.product.serialization.WorkingCapitalLoanPaymentAllocationDataValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,9 +80,9 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
     @Mock
     private ExpectedDisbursementDateValidator expectedDisbursementDateValidator;
     @Mock
-    private WorkingCapitalPaymentAllocationDataValidator paymentAllocationDataValidator;
+    private WorkingCapitalLoanPaymentAllocationDataValidator paymentAllocationDataValidator;
     @Mock
-    private WorkingCapitalNearBreachParseAndValidator workingCapitalNearBreachValidator;
+    private WorkingCapitalLoanNearBreachParseAndValidator workingCapitalNearBreachValidator;
 
     private WorkingCapitalLoanApplicationDataValidator validator;
 
@@ -291,8 +293,8 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
 
     private WorkingCapitalLoanProduct createMockProduct() {
         final WorkingCapitalLoanProduct product = org.mockito.Mockito.mock(WorkingCapitalLoanProduct.class);
-        final org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductMinMaxConstraints minMax = new org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductMinMaxConstraints(
-                BigDecimal.valueOf(1000), BigDecimal.valueOf(10000), BigDecimal.valueOf(0.5), BigDecimal.valueOf(2.0));
+        final WorkingCapitalLoanProductMinMaxConstraints minMax = new WorkingCapitalLoanProductMinMaxConstraints(BigDecimal.valueOf(1000),
+                BigDecimal.valueOf(10000), BigDecimal.valueOf(0.5), BigDecimal.valueOf(2.0));
         when(product.getId()).thenReturn(PRODUCT_ID);
         when(product.getMinMaxConstraints()).thenReturn(minMax);
         when(product.getConfigurableAttributes()).thenReturn(null);

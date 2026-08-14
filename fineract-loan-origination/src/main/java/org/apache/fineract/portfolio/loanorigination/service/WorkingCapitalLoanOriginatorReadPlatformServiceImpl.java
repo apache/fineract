@@ -29,7 +29,7 @@ import org.apache.fineract.portfolio.loanorigination.domain.WorkingCapitalLoanOr
 import org.apache.fineract.portfolio.loanorigination.domain.WorkingCapitalLoanOriginatorMappingRepository;
 import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorNotFoundException;
 import org.apache.fineract.portfolio.loanorigination.mapper.LoanOriginatorMapper;
-import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanOriginatorReadPlatformService;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.service.WorkingCapitalLoanOriginatorReadPlatformService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -46,8 +46,8 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdTimeline;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansPagedResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansTemplateResponse;
-import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
-import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanNearBreachRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
@@ -55,8 +55,8 @@ import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHe
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDisbursementTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanHelper;
-import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
-import org.apache.fineract.integrationtests.common.workingcapitalloannearbreach.WorkingCapitalNearBreachHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalLoanBreachHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloannearbreach.WorkingCapitalLoanNearBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.BeforeAll;
@@ -69,8 +69,8 @@ public class WorkingCapitalLoanApplicationCRUDTest {
 
     private final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
-    private final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
-    private final WorkingCapitalNearBreachHelper nearBreachHelper = new WorkingCapitalNearBreachHelper();
+    private final WorkingCapitalLoanBreachHelper breachHelper = new WorkingCapitalLoanBreachHelper();
+    private final WorkingCapitalLoanNearBreachHelper nearBreachHelper = new WorkingCapitalLoanNearBreachHelper();
 
     @BeforeAll
     static void initDelinquency() {
@@ -152,7 +152,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
         final BigDecimal breachAmount = BigDecimal.valueOf(10);
         final Long breachId = createBreach(breachName, breachFrequency, breachFrequencyType, breachAmountCalculationType, breachAmount);
         final String nearBreachName = Utils.randomStringGenerator("NearBreach", 20);
-        final Long nearBreachId = nearBreachHelper.create(new WorkingCapitalNearBreachRequest() //
+        final Long nearBreachId = nearBreachHelper.create(new WorkingCapitalLoanNearBreachRequest() //
                 .nearBreachName(nearBreachName) //
                 .nearBreachFrequency(breachFrequency - 10) //
                 .nearBreachFrequencyType(breachFrequencyType)//
@@ -202,7 +202,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
         final Long productId = createProductWithBreachAndNearBreach(breachId, null, Boolean.TRUE);
         final Long clientId = createClient();
         final String nearBreachName = Utils.randomStringGenerator("NearBreach", 20);
-        final Long nearBreachId = nearBreachHelper.create(new WorkingCapitalNearBreachRequest() //
+        final Long nearBreachId = nearBreachHelper.create(new WorkingCapitalLoanNearBreachRequest() //
                 .nearBreachName(nearBreachName) //
                 .nearBreachFrequency(breachFrequency + 10) //
                 .nearBreachFrequencyType(breachFrequencyType)//
@@ -1018,7 +1018,7 @@ public class WorkingCapitalLoanApplicationCRUDTest {
     private Long createBreach(final String name, final Integer breachFrequency, final String breachFrequencyType,
             final String breachAmountCalculationType, final BigDecimal breachAmount) {
         return breachHelper.create(
-                new WorkingCapitalBreachRequest().name(name).breachFrequency(breachFrequency).breachFrequencyType(breachFrequencyType)
+                new WorkingCapitalLoanBreachRequest().name(name).breachFrequency(breachFrequency).breachFrequencyType(breachFrequencyType)
                         .breachAmountCalculationType(breachAmountCalculationType).breachAmount(breachAmount));
     }
 

@@ -22,12 +22,12 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.NearBreachActionType;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanNearBreachAction;
-import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanNearBreachActionRepository;
-import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanNearBreachEvaluationService;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.nearbreach.domain.NearBreachActionType;
+import org.apache.fineract.portfolio.workingcapitalloan.nearbreach.domain.WorkingCapitalLoanNearBreachAction;
+import org.apache.fineract.portfolio.workingcapitalloan.nearbreach.repository.WorkingCapitalLoanNearBreachActionRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.nearbreach.service.WorkingCapitalLoanNearBreachEvaluationService;
+import org.apache.fineract.portfolio.workingcapitalloan.product.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.springframework.stereotype.Component;
 
 @Slf4j

@@ -37,10 +37,10 @@ import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
-import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.transaction.accounting.WorkingCapitalLoanAccountingProcessor;
+import org.apache.fineract.portfolio.workingcapitalloan.transaction.domain.WorkingCapitalLoanTransaction;
+import org.apache.fineract.portfolio.workingcapitalloan.transaction.domain.WorkingCapitalLoanTransactionAllocation;
 import org.springframework.stereotype.Component;
 
 @Component
