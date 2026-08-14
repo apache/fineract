@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan;
 
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.domain.WorkingCapitalLoan;
 
 public class WorkingCapitalLoanRejectedBusinessEvent extends WorkingCapitalLoanBusinessEvent {
 

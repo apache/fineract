@@ -26,9 +26,11 @@ import org.apache.fineract.test.initializer.global.FineractGlobalInitializerStep
 import org.apache.fineract.test.initializer.scenario.FineractScenarioInitializerStep;
 import org.apache.fineract.test.initializer.suite.FineractSuiteInitializerStep;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.annotation.Order;
 
 @Slf4j
 @RequiredArgsConstructor
+@Order()
 public class FineractInitializer implements InitializingBean {
 
     public static final String DATE_FORMAT = "dd MMMM yyyy";

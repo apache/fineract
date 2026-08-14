@@ -42,10 +42,10 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorMappingResponse;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorsResponse;
-import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
-import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
-import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanApplicationReadPlatformService;
-import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanOriginatorReadPlatformService;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.WorkingCapitalLoanConstants;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.exception.WorkingCapitalLoanNotFoundException;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.service.WorkingCapitalLoanApplicationReadPlatformService;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.service.WorkingCapitalLoanOriginatorReadPlatformService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 

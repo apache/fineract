@@ -47,7 +47,7 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActionRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActionResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
-import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.test.factory.WorkingCapitalRequestFactory;
@@ -88,12 +88,12 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
 
         final Map<String, String> data = table.asMaps().getFirst();
         final String breachName = "WC Breach " + Utils.randomStringGenerator("", 10);
-        final WorkingCapitalBreachRequest breachRequest = new WorkingCapitalBreachRequest().name(breachName)
+        final WorkingCapitalLoanBreachRequest breachRequest = new WorkingCapitalLoanBreachRequest().name(breachName)
                 .breachFrequency(Integer.valueOf(data.get("breachFrequency"))).breachFrequencyType(data.get("breachFrequencyType"))
                 .breachAmountCalculationType(data.get("breachAmountCalculationType"))
                 .breachAmount(new BigDecimal(data.get("breachAmount")));
         final CommandProcessingResult breachCreateResponse = ok(
-                () -> fineractFeignClient.workingCapitalBreaches().createWorkingCapitalBreach(breachRequest));
+                () -> fineractFeignClient.workingCapitalBreaches().createWorkingCapitalLoanBreach(breachRequest));
         final Long breachId = breachCreateResponse.getResourceId();
         testContext().set(TestContextKey.WORKING_CAPITAL_BREACH_ID, breachId);
 

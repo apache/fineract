@@ -30,8 +30,8 @@ import org.apache.fineract.client.models.PostPaymentAllocation;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest.AccountingRuleEnum;
 import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdRequest;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.domain.WorkingCapitalLoanPeriodFrequencyType;
+import org.apache.fineract.portfolio.workingcapitalloan.product.domain.WorkingCapitalLoanAmortizationType;
 
 @Slf4j
 public class WorkingCapitalLoanProductTestBuilder {
@@ -41,7 +41,7 @@ public class WorkingCapitalLoanProductTestBuilder {
     private static final String DEFAULT_CURRENCY_CODE = "USD";
     private static final Integer DEFAULT_DECIMAL_PLACE = 2;
     private static final Integer DEFAULT_CURRENCY_IN_MULTIPLES_OF = 1;
-    private static final String DEFAULT_AMORTIZATION = WorkingCapitalAmortizationType.EIR.name();
+    private static final String DEFAULT_AMORTIZATION = WorkingCapitalLoanAmortizationType.EIR.name();
     private static final Integer DEFAULT_NPV_DAY_COUNT = 360;
     private static final BigDecimal DEFAULT_PRINCIPAL_AMOUNT = BigDecimal.valueOf(10000);
     public static final BigDecimal DEFAULT_PERIOD_PAYMENT_RATE_PERCENT = BigDecimal.valueOf(18);

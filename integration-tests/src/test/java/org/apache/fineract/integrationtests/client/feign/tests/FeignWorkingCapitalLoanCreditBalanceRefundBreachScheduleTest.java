@@ -35,7 +35,7 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelp
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignWorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalLoanBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterAll;
@@ -73,7 +73,7 @@ public class FeignWorkingCapitalLoanCreditBalanceRefundBreachScheduleTest extend
     private FeignClientHelper clientHelper;
     private FeignBusinessDateHelper businessDateHelper;
     private WorkingCapitalLoanProductHelper productHelper;
-    private WorkingCapitalBreachHelper breachHelper;
+    private WorkingCapitalLoanBreachHelper breachHelper;
 
     private final List<Long> createdLoanIds = new ArrayList<>();
     private final List<Long> createdProductIds = new ArrayList<>();
@@ -85,7 +85,7 @@ public class FeignWorkingCapitalLoanCreditBalanceRefundBreachScheduleTest extend
         clientHelper = new FeignClientHelper(feignClient);
         businessDateHelper = new FeignBusinessDateHelper(feignClient);
         productHelper = new WorkingCapitalLoanProductHelper();
-        breachHelper = new WorkingCapitalBreachHelper();
+        breachHelper = new WorkingCapitalLoanBreachHelper();
     }
 
     @AfterAll

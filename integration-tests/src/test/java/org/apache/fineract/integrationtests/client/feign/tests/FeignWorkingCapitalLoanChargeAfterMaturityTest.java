@@ -50,7 +50,7 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyRangeScheduleHelper;
-import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalLoanBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterAll;
@@ -94,7 +94,7 @@ public class FeignWorkingCapitalLoanChargeAfterMaturityTest extends FeignIntegra
     private FeignClientHelper clientHelper;
     private FeignBusinessDateHelper businessDateHelper;
     private WorkingCapitalLoanProductHelper productHelper;
-    private WorkingCapitalBreachHelper breachHelper;
+    private WorkingCapitalLoanBreachHelper breachHelper;
 
     // GL accounts (only needed for the accrual-with-deferred-revenue product used by the accounting test).
     private Account fundSourceAccount;
@@ -120,7 +120,7 @@ public class FeignWorkingCapitalLoanChargeAfterMaturityTest extends FeignIntegra
         clientHelper = new FeignClientHelper(feignClient);
         businessDateHelper = new FeignBusinessDateHelper(feignClient);
         productHelper = new WorkingCapitalLoanProductHelper();
-        breachHelper = new WorkingCapitalBreachHelper();
+        breachHelper = new WorkingCapitalLoanBreachHelper();
 
         final FeignAccountHelper accountHelper = new FeignAccountHelper(feignClient);
         fundSourceAccount = accountHelper.createLiabilityAccount("wcChgMatFundSrc");

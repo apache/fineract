@@ -31,7 +31,7 @@ import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
-import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -40,8 +40,8 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDisbursementTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanHelper;
-import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalLoanBreachActionHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalLoanBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterEach;
@@ -53,7 +53,7 @@ public class WorkingCapitalLoanBreachPastDueAmountTest {
 
     private final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
-    private final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
+    private final WorkingCapitalLoanBreachHelper breachHelper = new WorkingCapitalLoanBreachHelper();
     private final WorkingCapitalLoanBreachActionHelper breachActionHelper = new WorkingCapitalLoanBreachActionHelper();
 
     private final List<Long> createdLoanIds = new ArrayList<>();
@@ -323,7 +323,7 @@ public class WorkingCapitalLoanBreachPastDueAmountTest {
     }
 
     private Long createActiveLoanWithBreach(final LocalDate approvalAndDisbursementDate) {
-        final Long breachId = breachHelper.create(new WorkingCapitalBreachRequest().name(Utils.randomStringGenerator("Breach", 12))
+        final Long breachId = breachHelper.create(new WorkingCapitalLoanBreachRequest().name(Utils.randomStringGenerator("Breach", 12))
                 .breachFrequency(7).breachFrequencyType("DAYS").breachAmountCalculationType("FLAT").breachAmount(BREACH_AMOUNT));
         createdBreachIds.add(breachId);
 

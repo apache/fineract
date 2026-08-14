@@ -44,7 +44,7 @@ import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCap
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyRangeScheduleHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDisbursementTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanHelper;
-import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalLoanBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.Test;
@@ -219,7 +219,7 @@ public class WorkingCapitalLoanStartDatesTest {
         assertNotNull(bucketResponse);
 
         // Breach with a flat amount and a 15-day frequency.
-        final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
+        final WorkingCapitalLoanBreachHelper breachHelper = new WorkingCapitalLoanBreachHelper();
         final Long breachId = breachHelper.create(breachHelper.createBreachRequest(Utils.uniqueRandomStringGenerator("WCL_Breach_", 6),
                 BREACH_FREQUENCY_DAYS, "DAYS", "FLAT", BREACH_AMOUNT));
         assertNotNull(breachId);
@@ -269,7 +269,7 @@ public class WorkingCapitalLoanStartDatesTest {
                 .createWorkingCapitalLoanDelinquencyBucket(rangeIds, DELINQUENCY_FREQUENCY_DAYS, 0, DELINQUENCY_MIN_PAYMENT_PERCENT, 1);
         assertNotNull(bucketResponse);
 
-        final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
+        final WorkingCapitalLoanBreachHelper breachHelper = new WorkingCapitalLoanBreachHelper();
         final Long breachId = breachHelper.create(breachHelper.createBreachRequest(Utils.uniqueRandomStringGenerator("WCL_Breach_", 6),
                 BREACH_FREQUENCY_DAYS, "DAYS", "FLAT", BREACH_AMOUNT));
         assertNotNull(breachId);

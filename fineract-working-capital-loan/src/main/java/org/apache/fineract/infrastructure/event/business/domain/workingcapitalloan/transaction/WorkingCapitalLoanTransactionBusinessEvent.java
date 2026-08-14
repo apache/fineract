@@ -19,7 +19,7 @@
 package org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction;
 
 import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
+import org.apache.fineract.portfolio.workingcapitalloan.transaction.domain.WorkingCapitalLoanTransaction;
 
 public abstract class WorkingCapitalLoanTransactionBusinessEvent extends AbstractBusinessEvent<WorkingCapitalLoanTransaction> {
 

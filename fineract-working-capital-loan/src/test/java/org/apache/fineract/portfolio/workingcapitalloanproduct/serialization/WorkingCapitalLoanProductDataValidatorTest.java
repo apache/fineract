@@ -30,10 +30,12 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAdvancedPaymentAllocationsJsonParser;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.repository.WorkingCapitalLoanProductRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.nearbreach.validator.WorkingCapitalLoanNearBreachParseAndValidator;
+import org.apache.fineract.portfolio.workingcapitalloan.product.WorkingCapitalLoanProductConstants;
+import org.apache.fineract.portfolio.workingcapitalloan.product.domain.WorkingCapitalLoanAdvancedPaymentAllocationsJsonParser;
+import org.apache.fineract.portfolio.workingcapitalloan.product.repository.WorkingCapitalLoanProductRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.product.serialization.WorkingCapitalLoanPaymentAllocationDataValidator;
+import org.apache.fineract.portfolio.workingcapitalloan.product.serialization.WorkingCapitalLoanProductDataValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,12 +51,12 @@ class WorkingCapitalLoanProductDataValidatorTest {
     @Mock
     private WorkingCapitalLoanProductRepository repository;
     @Mock
-    private WorkingCapitalAdvancedPaymentAllocationsJsonParser advancedPaymentAllocationsJsonParser;
+    private WorkingCapitalLoanAdvancedPaymentAllocationsJsonParser advancedPaymentAllocationsJsonParser;
     @Mock
-    private WorkingCapitalPaymentAllocationDataValidator paymentAllocationDataValidator;
+    private WorkingCapitalLoanPaymentAllocationDataValidator paymentAllocationDataValidator;
     private WorkingCapitalLoanProductDataValidator validator;
     @Mock
-    private WorkingCapitalNearBreachParseAndValidator workingCapitalNearBreachValidator;
+    private WorkingCapitalLoanNearBreachParseAndValidator workingCapitalNearBreachValidator;
 
     @BeforeEach
     void setUp() {

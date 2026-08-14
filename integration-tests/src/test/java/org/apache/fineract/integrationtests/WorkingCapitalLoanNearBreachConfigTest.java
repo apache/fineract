@@ -35,10 +35,10 @@ import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdNearBreachActionsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdNearBreachActionsRequest.NearBreachFrequencyTypeEnum;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
-import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.client.models.WorkingCapitalLoanNearBreachActionData;
-import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanNearBreachRequest;
 import org.apache.fineract.integrationtests.client.feign.modules.WorkingCapitalLoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -47,9 +47,9 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDisbursementTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanHelper;
-import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalLoanBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloannearbreach.WorkingCapitalLoanNearBreachActionsHelper;
-import org.apache.fineract.integrationtests.common.workingcapitalloannearbreach.WorkingCapitalNearBreachHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloannearbreach.WorkingCapitalLoanNearBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterEach;
@@ -59,8 +59,8 @@ public class WorkingCapitalLoanNearBreachConfigTest {
 
     private final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
-    private final WorkingCapitalNearBreachHelper nearBreachHelper = new WorkingCapitalNearBreachHelper();
-    private final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
+    private final WorkingCapitalLoanNearBreachHelper nearBreachHelper = new WorkingCapitalLoanNearBreachHelper();
+    private final WorkingCapitalLoanBreachHelper breachHelper = new WorkingCapitalLoanBreachHelper();
     private final WorkingCapitalLoanNearBreachActionsHelper nearBreachActionsHelper = new WorkingCapitalLoanNearBreachActionsHelper();
 
     private final List<Long> createdLoanIds = new ArrayList<>();
@@ -374,7 +374,7 @@ public class WorkingCapitalLoanNearBreachConfigTest {
         final String uniqueName = "WCL NB Product " + UUID.randomUUID().toString().substring(0, 8);
         final String uniqueShortName = Utils.uniqueRandomStringGenerator("", 4);
         final Long breachId = breachHelper
-                .create(new WorkingCapitalBreachRequest().name(Utils.randomStringGenerator("Breach", 12)).breachFrequency(60)
+                .create(new WorkingCapitalLoanBreachRequest().name(Utils.randomStringGenerator("Breach", 12)).breachFrequency(60)
                         .breachFrequencyType("DAYS").breachAmountCalculationType("PERCENTAGE").breachAmount(BigDecimal.valueOf(10)));
         createdBreachIds.add(breachId);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
@@ -385,8 +385,8 @@ public class WorkingCapitalLoanNearBreachConfigTest {
 
     private Long createNearBreachTemplate(final BigDecimal threshold, final Integer frequency, final String frequencyType) {
         final String name = Utils.randomStringGenerator("NearBreach", 12);
-        final Long id = nearBreachHelper.create(new WorkingCapitalNearBreachRequest().nearBreachName(name).nearBreachThreshold(threshold)
-                .nearBreachFrequency(frequency).nearBreachFrequencyType(frequencyType)).getResourceId();
+        final Long id = nearBreachHelper.create(new WorkingCapitalLoanNearBreachRequest().nearBreachName(name)
+                .nearBreachThreshold(threshold).nearBreachFrequency(frequency).nearBreachFrequencyType(frequencyType)).getResourceId();
         createdNearBreachIds.add(id);
         return id;
     }

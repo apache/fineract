@@ -54,7 +54,7 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.products.DelinquencyRangesHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDelinquencyRangeScheduleHelper;
-import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalLoanBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterAll;
@@ -96,7 +96,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
     private FeignBusinessDateHelper businessDateHelper;
     private FeignJournalEntryHelper journalHelper;
     private WorkingCapitalLoanProductHelper productHelper;
-    private WorkingCapitalBreachHelper breachHelper;
+    private WorkingCapitalLoanBreachHelper breachHelper;
 
     // GL accounts for cash-accounting products (tests 5, 6, 10, 11).
     private Account fundSourceAccount;
@@ -123,7 +123,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
         businessDateHelper = new FeignBusinessDateHelper(feignClient);
         journalHelper = new FeignJournalEntryHelper(feignClient);
         productHelper = new WorkingCapitalLoanProductHelper();
-        breachHelper = new WorkingCapitalBreachHelper();
+        breachHelper = new WorkingCapitalLoanBreachHelper();
 
         final FeignAccountHelper accountHelper = new FeignAccountHelper(feignClient);
         fundSourceAccount = accountHelper.createLiabilityAccount("wcUndoFundSrc");
