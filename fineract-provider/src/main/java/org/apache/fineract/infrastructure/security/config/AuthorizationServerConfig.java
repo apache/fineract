@@ -111,7 +111,6 @@ public class AuthorizationServerConfig {
 
     @Autowired
     private FineractProperties fineractProperties;
-
     @Autowired
     private AuthTenantDetailsService tenantDetailsService;
 
