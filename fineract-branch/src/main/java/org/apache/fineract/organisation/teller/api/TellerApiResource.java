@@ -53,14 +53,11 @@ import org.apache.fineract.organisation.teller.data.CashierData;
 import org.apache.fineract.organisation.teller.data.CashierTransactionData;
 import org.apache.fineract.organisation.teller.data.CashierTransactionsWithSummaryData;
 import org.apache.fineract.organisation.teller.data.TellerData;
-import org.apache.fineract.organisation.teller.data.TellerJournalData;
-import org.apache.fineract.organisation.teller.data.TellerTransactionData;
 import org.apache.fineract.organisation.teller.domain.model.CashiersForTeller;
 import org.apache.fineract.organisation.teller.domain.model.request.CashierRequest;
 import org.apache.fineract.organisation.teller.domain.model.request.CashierTransactionRequest;
 import org.apache.fineract.organisation.teller.domain.model.request.TellerRequest;
 import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatformService;
-import org.apache.fineract.organisation.teller.util.DateRange;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/tellers")
@@ -321,41 +318,4 @@ public class TellerApiResource {
         return this.readPlatformService.retrieveCashierTxnTemplate(cashierId);
     }
 
-    @GET
-    @Path("{tellerId}/transactions")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "List Teller Transactions", operationId = "retrieveAllTransactionsForTeller")
-    @AlternativeOperationId("getTransactionData")
-    public Collection<TellerTransactionData> getTransactionData(
-            @PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
-            @QueryParam("dateRange") @Parameter(description = "dateRange") final String dateRange) {
-        final DateRange dateRangeHolder = DateRange.fromString(dateRange);
-
-        return this.readPlatformService.fetchTellerTransactionsByTellerId(tellerId, dateRangeHolder.getStartDate(),
-                dateRangeHolder.getEndDate());
-    }
-
-    @GET
-    @Path("{tellerId}/transactions/{transactionId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Retrieve Teller Transaction", operationId = "retrieveOneTransactionForTeller")
-    @AlternativeOperationId("findTransactionData")
-    public TellerTransactionData findTransactionData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerid,
-            @PathParam("transactionId") @Parameter(description = "transactionId") final Long transactionId) {
-        return this.readPlatformService.findTellerTransaction(transactionId);
-    }
-
-    @GET
-    @Path("{tellerId}/journals")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "List Teller Journals", operationId = "retrieveAllJournalsForTeller")
-    @AlternativeOperationId("getJournalData")
-    public Collection<TellerJournalData> getJournalData(@PathParam("tellerId") @Parameter(description = "tellerId") final Long tellerId,
-            @QueryParam("cashierId") @Parameter(description = "cashierId") final Long cashierDate,
-            @QueryParam("dateRange") @Parameter(description = "dateRange") final String dateRange) {
-        final DateRange dateRangeHolder = DateRange.fromString(dateRange);
-
-        return this.readPlatformService.fetchTellerJournals(tellerId, cashierDate, dateRangeHolder.getStartDate(),
-                dateRangeHolder.getEndDate());
-    }
 }
