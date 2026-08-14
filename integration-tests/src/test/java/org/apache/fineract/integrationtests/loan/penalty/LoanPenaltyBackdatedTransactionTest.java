@@ -35,8 +35,10 @@ import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
+@Order(2)
 public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest {
 
     @BeforeEach

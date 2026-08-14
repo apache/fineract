@@ -41,11 +41,13 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuil
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.junit.jupiter.api.Named;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+@Order(1)
 public class LoanWaiveChargeTest extends FeignLoanTestBase {
 
     private static Stream<Arguments> processingStrategy() {

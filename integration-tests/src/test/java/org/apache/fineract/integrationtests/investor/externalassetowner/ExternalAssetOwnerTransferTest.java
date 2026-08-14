@@ -68,9 +68,11 @@ import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.springframework.lang.NonNull;
 
 @Slf4j
+@Order(1)
 public class ExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
 
     protected static ResponseSpecification RESPONSE_SPEC;

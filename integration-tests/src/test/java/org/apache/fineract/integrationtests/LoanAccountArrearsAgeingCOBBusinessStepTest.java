@@ -48,8 +48,10 @@ import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
+@Order(1)
 public class LoanAccountArrearsAgeingCOBBusinessStepTest extends BaseLoanIntegrationTest {
 
     private ResponseSpecification responseSpec;

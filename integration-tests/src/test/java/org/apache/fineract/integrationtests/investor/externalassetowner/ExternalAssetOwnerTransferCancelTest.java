@@ -283,6 +283,7 @@ public class ExternalAssetOwnerTransferCancelTest extends BaseLoanIntegrationTes
         BusinessDateHelper.updateBusinessDate(BUSINESS_DATE, TODAYS_DATE);
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                 new PutGlobalConfigurationsRequest().enabled(false));
+        globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, false);
     }
 
     @NonNull

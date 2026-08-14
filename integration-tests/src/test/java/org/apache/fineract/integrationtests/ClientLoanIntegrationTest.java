@@ -113,6 +113,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
@@ -123,7 +124,7 @@ import org.slf4j.LoggerFactory;
  * repayments and verifying accounting transactions
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-
+@Order(2)
 public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
 
     static {
