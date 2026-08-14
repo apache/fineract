@@ -43,25 +43,25 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsResponse;
 import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.StringEnumOptionData;
-import org.apache.fineract.client.models.WorkingCapitalBreachData;
-import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
-import org.apache.fineract.client.models.WorkingCapitalNearBreachData;
-import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachData;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanNearBreachData;
+import org.apache.fineract.client.models.WorkingCapitalLoanNearBreachRequest;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
-import org.apache.fineract.integrationtests.common.workingcapitalloannearbreach.WorkingCapitalNearBreachHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalLoanBreachHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloannearbreach.WorkingCapitalLoanNearBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanBreachStartType;
-import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
+import org.apache.fineract.portfolio.workingcapitalloan.product.domain.WorkingCapitalLoanBreachStartType;
+import org.apache.fineract.portfolio.workingcapitalloan.product.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class WorkingCapitalLoanProductCRUDTest {
 
     private WorkingCapitalLoanProductHelper wclProductHelper;
-    private final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
-    private final WorkingCapitalNearBreachHelper nearBreachHelper = new WorkingCapitalNearBreachHelper();
+    private final WorkingCapitalLoanBreachHelper breachHelper = new WorkingCapitalLoanBreachHelper();
+    private final WorkingCapitalLoanNearBreachHelper nearBreachHelper = new WorkingCapitalLoanNearBreachHelper();
 
     @BeforeEach
     public void setup() {
@@ -385,16 +385,16 @@ public class WorkingCapitalLoanProductCRUDTest {
             delinquencyBucketId = expectedBucket.getId();
         }
 
-        final WorkingCapitalBreachData expectedBreach = getBreachData(template);
+        final WorkingCapitalLoanBreachData expectedBreach = getBreachData(template);
         final Long breachId = (expectedBreach != null) ? expectedBreach.getId() : null;
         // Create a near breach with default values
-        final WorkingCapitalNearBreachRequest nearBreachRequest = new WorkingCapitalNearBreachRequest() //
+        final WorkingCapitalLoanNearBreachRequest nearBreachRequest = new WorkingCapitalLoanNearBreachRequest() //
                 .nearBreachName(Utils.randomStringGenerator("NearBreach", 20)) //
                 .nearBreachFrequency(5) //
                 .nearBreachFrequencyType("DAYS") //
                 .nearBreachThreshold(BigDecimal.valueOf(30)); //
         final Long nearBreachId = nearBreachHelper.create(nearBreachRequest).getResourceId();
-        WorkingCapitalNearBreachData nearBreach = nearBreachHelper.retrieveWorkingCapitalNearBreach(nearBreachId);
+        WorkingCapitalLoanNearBreachData nearBreach = nearBreachHelper.retrieveWorkingCapitalLoanNearBreach(nearBreachId);
         // All configurable attributes
         final HashMap<String, Boolean> allowAttributeOverrides = new HashMap<>();
         allowAttributeOverrides.put("delinquencyBucketClassification", false);
@@ -561,13 +561,13 @@ public class WorkingCapitalLoanProductCRUDTest {
 
     @Test
     public void testNegativeCreateWorkingCapitalLoanProductWithNearBreach() {
-        final WorkingCapitalBreachRequest createBody = breachHelper.createBreachRequest(Utils.randomStringGenerator("Breach", 20), 15,
+        final WorkingCapitalLoanBreachRequest createBody = breachHelper.createBreachRequest(Utils.randomStringGenerator("Breach", 20), 15,
                 "DAYS", "PERCENTAGE", BigDecimal.valueOf(7.5));
         Long breachId = breachHelper.create(createBody);
-        WorkingCapitalBreachData expectedBreach = breachHelper.retrieveWorkingCapitalBreach(breachId);
+        WorkingCapitalLoanBreachData expectedBreach = breachHelper.retrieveWorkingCapitalLoanBreach(breachId);
 
         assert expectedBreach.getBreachFrequencyType() != null;
-        final WorkingCapitalNearBreachRequest request = new WorkingCapitalNearBreachRequest() //
+        final WorkingCapitalLoanNearBreachRequest request = new WorkingCapitalLoanNearBreachRequest() //
                 .nearBreachName(Utils.randomStringGenerator("NearBreach", 20)) //
                 .nearBreachFrequency(expectedBreach.getBreachFrequency()) //
                 .nearBreachFrequencyType(expectedBreach.getBreachFrequencyType().getCode()) //
@@ -601,7 +601,7 @@ public class WorkingCapitalLoanProductCRUDTest {
         assertThat(exception.getDeveloperMessage()).contains("near.breach.frequency.must.be.lower.than.breach.frequency");
 
         // Given - Higher Frequency between Near Breach and Breach
-        final WorkingCapitalNearBreachRequest request2 = new WorkingCapitalNearBreachRequest() //
+        final WorkingCapitalLoanNearBreachRequest request2 = new WorkingCapitalLoanNearBreachRequest() //
                 .nearBreachName(Utils.randomStringGenerator("NearBreach", 20)) //
                 .nearBreachFrequency(expectedBreach.getBreachFrequency() + 2) //
                 .nearBreachFrequencyType(expectedBreach.getBreachFrequencyType().getCode()) //
@@ -714,8 +714,8 @@ public class WorkingCapitalLoanProductCRUDTest {
                 "breachStartTypeOptions should contain LOAN_CREATION and DISBURSEMENT; actual: " + optionCodes);
     }
 
-    private WorkingCapitalBreachData getBreachData(final GetWorkingCapitalLoanProductsTemplateResponse template) {
-        WorkingCapitalBreachData breach = null;
+    private WorkingCapitalLoanBreachData getBreachData(final GetWorkingCapitalLoanProductsTemplateResponse template) {
+        WorkingCapitalLoanBreachData breach = null;
         if (template.getBreachOptions() != null && !template.getBreachOptions().isEmpty()) {
             breach = template.getBreachOptions().getFirst();
             assertNotNull(breach.getId());
@@ -726,10 +726,10 @@ public class WorkingCapitalLoanProductCRUDTest {
         }
         if (breach == null) {
             // Create a breach if not present in template
-            final WorkingCapitalBreachRequest createBody = breachHelper.createBreachRequest(Utils.randomStringGenerator("Breach", 20), 20,
-                    "DAYS", "PERCENTAGE", BigDecimal.valueOf(7.5));
+            final WorkingCapitalLoanBreachRequest createBody = breachHelper.createBreachRequest(Utils.randomStringGenerator("Breach", 20),
+                    20, "DAYS", "PERCENTAGE", BigDecimal.valueOf(7.5));
             final Long breachId = breachHelper.create(createBody);
-            breach = breachHelper.retrieveWorkingCapitalBreach(breachId);
+            breach = breachHelper.retrieveWorkingCapitalLoanBreach(breachId);
         }
         return breach;
     }

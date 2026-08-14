@@ -2788,14 +2788,14 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
     private Long createBreachAndGetId() {
         final CommandProcessingResult breachResponse = ok(() -> fineractClient.workingCapitalBreaches()
-                .createWorkingCapitalBreach(workingCapitalProductRequestFactory.defaultWorkingCapitalBreachRequest()));
+                .createWorkingCapitalLoanBreach(workingCapitalProductRequestFactory.defaultWorkingCapitalLoanBreachRequest()));
         testContext().set(TestContextKey.WORKING_CAPITAL_BREACH_ID, breachResponse.getResourceId());
         return breachResponse.getResourceId();
     }
 
     private Long createBreachOverrideAndGetId() {
         final CommandProcessingResult breachResponse = ok(() -> fineractClient.workingCapitalBreaches()
-                .createWorkingCapitalBreach(workingCapitalProductRequestFactory.defaultWorkingCapitalBreachRequest()));
+                .createWorkingCapitalLoanBreach(workingCapitalProductRequestFactory.defaultWorkingCapitalLoanBreachRequest()));
         testContext().set(TestContextKey.WORKING_CAPITAL_BREACH_ID_OVERRIDE, breachResponse.getResourceId());
         return breachResponse.getResourceId();
     }
@@ -2809,23 +2809,23 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     }
 
     private Long createBreachOverrideAndGetId(String breachIdLink, int breachFrequency, String breachFrequencyType) {
-        final CommandProcessingResult breachResponse = ok(
-                () -> fineractClient.workingCapitalBreaches().createWorkingCapitalBreach(workingCapitalProductRequestFactory
-                        .defaultWorkingCapitalBreachRequest().breachFrequency(breachFrequency).breachFrequencyType(breachFrequencyType)));
+        final CommandProcessingResult breachResponse = ok(() -> fineractClient.workingCapitalBreaches()
+                .createWorkingCapitalLoanBreach(workingCapitalProductRequestFactory.defaultWorkingCapitalLoanBreachRequest()
+                        .breachFrequency(breachFrequency).breachFrequencyType(breachFrequencyType)));
         testContext().set(breachIdLink, breachResponse.getResourceId());
         return breachResponse.getResourceId();
     }
 
     private Long createNearBreachAndGetId() {
         final CommandProcessingResult nearBreachResponse = ok(() -> fineractClient.workingCapitalNearBreaches()
-                .createWorkingCapitalNearBreach(workingCapitalProductRequestFactory.defaultWorkingCapitalNearBreachRequest()));
+                .createWorkingCapitalLoanNearBreach(workingCapitalProductRequestFactory.defaultWorkingCapitalLoanNearBreachRequest()));
         testContext().set(TestContextKey.WORKING_CAPITAL_NEAR_BREACH_ID, nearBreachResponse.getResourceId());
         return nearBreachResponse.getResourceId();
     }
 
     private Long createNearBreachOverrideAndGetId() {
         final CommandProcessingResult nearBreachResponse = ok(() -> fineractClient.workingCapitalNearBreaches()
-                .createWorkingCapitalNearBreach(workingCapitalProductRequestFactory.defaultWorkingCapitalNearBreachRequest()));
+                .createWorkingCapitalLoanNearBreach(workingCapitalProductRequestFactory.defaultWorkingCapitalLoanNearBreachRequest()));
         testContext().set(TestContextKey.WORKING_CAPITAL_NEAR_BREACH_ID_OVERRIDE, nearBreachResponse.getResourceId());
         return nearBreachResponse.getResourceId();
     }
@@ -2841,7 +2841,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
     private Long createNearBreachAndGetId(String nearBreachIdLink, int nearBreachFrequency, String nearBreachFrequencyType) {
         final CommandProcessingResult nearBreachResponse = ok(() -> fineractClient.workingCapitalNearBreaches()
-                .createWorkingCapitalNearBreach(workingCapitalProductRequestFactory.defaultWorkingCapitalNearBreachRequest()
+                .createWorkingCapitalLoanNearBreach(workingCapitalProductRequestFactory.defaultWorkingCapitalLoanNearBreachRequest()
                         .nearBreachFrequency(nearBreachFrequency).nearBreachFrequencyType(nearBreachFrequencyType)));
         testContext().set(nearBreachIdLink, nearBreachResponse.getResourceId());
         return nearBreachResponse.getResourceId();

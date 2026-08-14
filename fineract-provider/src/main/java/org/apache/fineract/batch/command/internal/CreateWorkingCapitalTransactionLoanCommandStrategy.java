@@ -31,7 +31,7 @@ import org.apache.fineract.batch.domain.BatchRequest;
 import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.apache.fineract.portfolio.workingcapitalloan.api.WorkingCapitalLoanTransactionsApiResource;
+import org.apache.fineract.portfolio.workingcapitalloan.transaction.api.WorkingCapitalLoanTransactionsApiResource;
 import org.apache.http.HttpStatus;
 import org.springframework.stereotype.Component;
 

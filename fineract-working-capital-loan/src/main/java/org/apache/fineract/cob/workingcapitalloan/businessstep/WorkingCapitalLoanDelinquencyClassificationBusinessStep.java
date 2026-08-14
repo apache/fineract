@@ -26,8 +26,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanDelinquencyClassificationService;
+import org.apache.fineract.portfolio.workingcapitalloan.delinquency.service.WorkingCapitalLoanDelinquencyClassificationService;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.domain.WorkingCapitalLoan;
 import org.springframework.stereotype.Component;
 
 @Slf4j

@@ -20,7 +20,7 @@ package org.apache.fineract.cob.workingcapitalloan.businessstep;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.domain.WorkingCapitalLoan;
 import org.springframework.stereotype.Component;
 
 @Slf4j

@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction;
 
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
+import org.apache.fineract.portfolio.workingcapitalloan.transaction.domain.WorkingCapitalLoanTransaction;
 
 public class WorkingCapitalLoanChargeAdjustmentPostBusinessEvent extends WorkingCapitalLoanTransactionBusinessEvent {
 

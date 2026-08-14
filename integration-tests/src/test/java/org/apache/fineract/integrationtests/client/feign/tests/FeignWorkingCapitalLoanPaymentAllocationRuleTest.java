@@ -47,7 +47,7 @@ import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDisbursementTestBuilder;
-import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalBreachHelper;
+import org.apache.fineract.integrationtests.common.workingcapitalloanbreach.WorkingCapitalLoanBreachHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterAll;
@@ -290,7 +290,7 @@ public class FeignWorkingCapitalLoanPaymentAllocationRuleTest extends FeignInteg
         final Long[] loanIdHolder = new Long[1];
         final Long[] feeLoanChargeIdHolder = new Long[1];
         final Long[] adjustmentTransactionIdHolder = new Long[1];
-        final WorkingCapitalBreachHelper breachHelper = new WorkingCapitalBreachHelper();
+        final WorkingCapitalLoanBreachHelper breachHelper = new WorkingCapitalLoanBreachHelper();
         final Long breachId = breachHelper.create(breachHelper.createBreachRequest(
                 "WCL PayAlloc Breach " + Utils.uniqueRandomStringGenerator("", 8), 30, "DAYS", "PERCENTAGE", BigDecimal.TEN));
 

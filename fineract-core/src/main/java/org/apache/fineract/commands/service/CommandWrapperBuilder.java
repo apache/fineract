@@ -736,7 +736,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createWorkingCapitalBreach() {
+    public CommandWrapperBuilder createWorkingCapitalLoanBreach() {
         this.actionName = "CREATE";
         this.entityName = "WORKINGCAPITALBREACH";
         this.entityId = null;
@@ -744,7 +744,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder updateWorkingCapitalBreach(final Long breachId) {
+    public CommandWrapperBuilder updateWorkingCapitalLoanBreach(final Long breachId) {
         this.actionName = "UPDATE";
         this.entityName = "WORKINGCAPITALBREACH";
         this.entityId = breachId;
@@ -752,7 +752,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder deleteWorkingCapitalBreach(final Long breachId) {
+    public CommandWrapperBuilder deleteWorkingCapitalLoanBreach(final Long breachId) {
         this.actionName = "DELETE";
         this.entityName = "WORKINGCAPITALBREACH";
         this.entityId = breachId;
@@ -760,7 +760,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createWorkingCapitalNearBreach() {
+    public CommandWrapperBuilder createWorkingCapitalLoanNearBreach() {
         this.actionName = "CREATE";
         this.entityName = "WORKINGCAPITALNEARBREACH";
         this.entityId = null;
@@ -768,7 +768,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder updateWorkingCapitalNearBreach(final Long breachId) {
+    public CommandWrapperBuilder updateWorkingCapitalLoanNearBreach(final Long breachId) {
         this.actionName = "UPDATE";
         this.entityName = "WORKINGCAPITALNEARBREACH";
         this.entityId = breachId;
@@ -776,7 +776,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder deleteWorkingCapitalNearBreach(final Long breachId) {
+    public CommandWrapperBuilder deleteWorkingCapitalLoanNearBreach(final Long breachId) {
         this.actionName = "DELETE";
         this.entityName = "WORKINGCAPITALNEARBREACH";
         this.entityId = breachId;

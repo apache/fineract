@@ -20,8 +20,8 @@ package org.apache.fineract.cob.workingcapitalloan.businessstep;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanChargeAccrualService;
+import org.apache.fineract.portfolio.workingcapitalloan.charge.service.WorkingCapitalLoanChargeAccrualService;
+import org.apache.fineract.portfolio.workingcapitalloan.loan.domain.WorkingCapitalLoan;
 import org.springframework.stereotype.Component;
 
 @Component

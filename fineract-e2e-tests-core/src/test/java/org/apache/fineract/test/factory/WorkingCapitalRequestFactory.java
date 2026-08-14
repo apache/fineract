@@ -42,10 +42,10 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest.AccountingRuleEnum;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoanProductsProductIdRequest;
-import org.apache.fineract.client.models.WorkingCapitalBreachData;
-import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
-import org.apache.fineract.client.models.WorkingCapitalNearBreachData;
-import org.apache.fineract.client.models.WorkingCapitalNearBreachRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachData;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachRequest;
+import org.apache.fineract.client.models.WorkingCapitalLoanNearBreachData;
+import org.apache.fineract.client.models.WorkingCapitalLoanNearBreachRequest;
 import org.apache.fineract.test.data.DelinquencyBucket;
 import org.apache.fineract.test.data.accounttype.AccountTypeResolver;
 import org.apache.fineract.test.data.accounttype.DefaultAccountType;
@@ -53,8 +53,8 @@ import org.apache.fineract.test.data.delinquency.DelinquencyBucketResolver;
 import org.apache.fineract.test.data.delinquency.DelinquencyBucketType;
 import org.apache.fineract.test.data.delinquency.DelinquencyFrequencyType;
 import org.apache.fineract.test.data.delinquency.DelinquencyMinimumPayment;
-import org.apache.fineract.test.data.workingcapitalproduct.WorkingCapitalBreachCalculationType;
-import org.apache.fineract.test.data.workingcapitalproduct.WorkingCapitalBreachFrequencyType;
+import org.apache.fineract.test.data.workingcapitalproduct.WorkingCapitalLoanBreachCalculationType;
+import org.apache.fineract.test.data.workingcapitalproduct.WorkingCapitalLoanBreachFrequencyType;
 import org.apache.fineract.test.helper.Utils;
 import org.springframework.stereotype.Component;
 
@@ -79,12 +79,12 @@ public class WorkingCapitalRequestFactory {
     public static final String IN_ADVANCE_PRINCIPAL = "IN_ADVANCE_PRINCIPAL";
 
     public static final Integer DEFAULT_WC_BREACH_FREQUENCY = 2;
-    public static final String DEFAULT_WC_BREACH_FREQUENCY_TYPE = WorkingCapitalBreachFrequencyType.MONTHS.getCode();
-    public static final String DEFAULT_WC_BREACH_AMOUNT_CALCULATION_TYPE = WorkingCapitalBreachCalculationType.PERCENTAGE.getCode();
+    public static final String DEFAULT_WC_BREACH_FREQUENCY_TYPE = WorkingCapitalLoanBreachFrequencyType.MONTHS.getCode();
+    public static final String DEFAULT_WC_BREACH_AMOUNT_CALCULATION_TYPE = WorkingCapitalLoanBreachCalculationType.PERCENTAGE.getCode();
     public static final BigDecimal DEFAULT_WC_BREACH_AMOUNT = new BigDecimal("1.23");
     public static final String DEFAULT_WC_BREACH_NAME_PREFIX = "WCB-";
     public static final Integer DEFAULT_WC_NEAR_BREACH_FREQUENCY = 12;
-    public static final String DEFAULT_WC_NEAR_BREACH_FREQUENCY_TYPE = WorkingCapitalBreachFrequencyType.DAYS.getCode();
+    public static final String DEFAULT_WC_NEAR_BREACH_FREQUENCY_TYPE = WorkingCapitalLoanBreachFrequencyType.DAYS.getCode();
     public static final BigDecimal DEFAULT_WC_NEAR_BREACH_THRESHOLD = new BigDecimal("70.23");
 
     public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductRequestWithAccrualAccounting() {
@@ -284,8 +284,8 @@ public class WorkingCapitalRequestFactory {
                         .minimumPayment(new BigDecimal("1.23")));
     }
 
-    public WorkingCapitalBreachRequest defaultWorkingCapitalBreachRequest() {
-        return new WorkingCapitalBreachRequest() //
+    public WorkingCapitalLoanBreachRequest defaultWorkingCapitalLoanBreachRequest() {
+        return new WorkingCapitalLoanBreachRequest() //
                 .name(Utils.randomStringGenerator(DEFAULT_WC_BREACH_NAME_PREFIX, 12)) //
                 .breachFrequency(DEFAULT_WC_BREACH_FREQUENCY) //
                 .breachFrequencyType(DEFAULT_WC_BREACH_FREQUENCY_TYPE) //
@@ -293,8 +293,8 @@ public class WorkingCapitalRequestFactory {
                 .breachAmount(DEFAULT_WC_BREACH_AMOUNT);
     }
 
-    public WorkingCapitalNearBreachRequest defaultWorkingCapitalNearBreachRequest() {
-        return new WorkingCapitalNearBreachRequest() //
+    public WorkingCapitalLoanNearBreachRequest defaultWorkingCapitalLoanNearBreachRequest() {
+        return new WorkingCapitalLoanNearBreachRequest() //
                 .nearBreachName("NearBreach-WCL-" + Utils.randomStringGenerator(8)) //
                 .nearBreachFrequency(DEFAULT_WC_NEAR_BREACH_FREQUENCY) //
                 .nearBreachFrequencyType(DEFAULT_WC_NEAR_BREACH_FREQUENCY_TYPE) //
@@ -309,8 +309,9 @@ public class WorkingCapitalRequestFactory {
 
     private Long getWCBreachIdByName(String breachName) {
         try {
-            List<WorkingCapitalBreachData> breaches = fineractClient.workingCapitalBreaches().retrieveAllWorkingCapitalBreaches(Map.of());
-            return breaches.stream().filter(b -> breachName.equals(b.getName())).findFirst().map(WorkingCapitalBreachData::getId)
+            List<WorkingCapitalLoanBreachData> breaches = fineractClient.workingCapitalBreaches()
+                    .retrieveAllWorkingCapitalLoanBreaches(Map.of());
+            return breaches.stream().filter(b -> breachName.equals(b.getName())).findFirst().map(WorkingCapitalLoanBreachData::getId)
                     .orElseThrow(() -> new RuntimeException("Working Capital Breach not found with name: " + breachName));
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch Working Capital Breacht by name: " + breachName, e);
@@ -319,9 +320,9 @@ public class WorkingCapitalRequestFactory {
 
     private Long getWCNearBreachIdByName(String breachName) {
         try {
-            List<WorkingCapitalNearBreachData> breaches = fineractClient.workingCapitalNearBreaches()
-                    .retrieveAllWorkingCapitalNearBreaches(Map.of());
-            return breaches.stream().filter(b -> breachName.equals(b.getName())).findFirst().map(WorkingCapitalNearBreachData::getId)
+            List<WorkingCapitalLoanNearBreachData> breaches = fineractClient.workingCapitalNearBreaches()
+                    .retrieveAllWorkingCapitalLoanNearBreaches(Map.of());
+            return breaches.stream().filter(b -> breachName.equals(b.getName())).findFirst().map(WorkingCapitalLoanNearBreachData::getId)
                     .orElseThrow(() -> new RuntimeException("Working Capital Breach not found with name: " + breachName));
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch Working Capital Breacht by name: " + breachName, e);
