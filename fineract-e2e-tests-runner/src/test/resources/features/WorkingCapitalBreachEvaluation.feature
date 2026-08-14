@@ -246,8 +246,8 @@ Feature: Working Capital Breach Evaluation
       | 2            | 2026-02-01 | 2026-02-28 | 28           | 500.00           | 500.00            | null       | true   |
       | 3            | 2026-03-01 | 2026-03-31 | 31           | 500.00           | 500.00            | null       | null   |
 
-  @TestRailId:TODO_ADD_002
-  Scenario: Verify working capital loan breach periods with grace period set to 15 days.
+  @TestRailId:C94059
+  Scenario: Verify breach grace period boundary - UC1: breach periods with grace period set to 15 days.
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
@@ -257,63 +257,96 @@ Feature: Working Capital Breach Evaluation
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
       | 01 January 2026 | 01 January 2026          | 9000.0          | 100000.0           | 18.0              | 0.0      |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
-    And Working capital loan account has the correct data:
+    Then Working capital loan account has the correct data:
       | submittedOnDate | expectedDisbursementDate | status   | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountApproved |
       | 2026-01-01      | 2026-01-01               | Approved | 9000.0            | 9000.0            | 100000.0           | 18.0              | null             |
-
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
-
-    When Admin sets the business date to "02 January 2026"
+    And Admin sets the business date to "02 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
+    # --- The first breach period is extended by the configured breach grace days ---
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-02-15 | 46           | 270.000000       | 270.000000        | null       | null   |
-
+    # --- Inside grace window: breach is not yet evaluated ---
     When Admin sets the business date to "10 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-02-15 | 46           | 270.000000       | 270.000000        | null       | null   |
-
-    And Customer makes repayment on "10 January 2026" with 270.0 transaction amount on Working Capital loan
+    # --- Payment before grace expiry clears the period ---
+    When Customer makes repayment on "10 January 2026" with 270.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-02-15 | 46           | 270.000000       | 0.000000          | null       | false  |
-
+    # --- After period end: paid-off first period stays false, second period starts ---
     When Admin sets the business date to "10 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-02-15 | 46           | 270.000000       | 0.000000          | null       | false  |
-
-
     When Admin sets the business date to "10 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-02-15 | 46           | 270.000000       | 0.000000          | null       | false  |
       | 2            | 2026-02-16 | 2026-03-15 | 28           | 270.000000       | 270.000000        | null       | null   |
-
-
+    # --- Past grace period: second period breaches ---
     When Admin sets the business date to "02 April 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-
       | 1            | 2026-01-01 | 2026-02-15 | 46           | 270.000000       | 0.000000          | null       | false  |
       | 2            | 2026-02-16 | 2026-03-15 | 28           | 270.000000       | 270.000000        | null       | true   |
       | 3            | 2026-03-16 | 2026-04-15 | 31           | 270.000000       | 270.000000        | null       | null   |
-    And Customer makes repayment on "02 April 2026" with 270.0 transaction amount on Working Capital loan
+    # --- Repayment on breached period is applied to that period ---
+    When Customer makes repayment on "02 April 2026" with 270.0 transaction amount on Working Capital loan
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-02-15 | 46           | 270.000000       | 0.000000          | null       | false  |
+      | 2            | 2026-02-16 | 2026-03-15 | 28           | 270.000000       | 270.000000        | null       | true   |
+      | 3            | 2026-03-16 | 2026-04-15 | 31           | 270.000000       | 0.000000          | null       | false  |
+    When Customer makes repayment on "02 April 2026" with 270.0 transaction amount on Working Capital loan
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-02-15 | 46           | 270.000000       | 0.000000          | null       | false  |
       | 2            | 2026-02-16 | 2026-03-15 | 28           | 270.000000       | 270.000000        | null       | true   |
       | 3            | 2026-03-16 | 2026-04-15 | 31           | 270.000000       | 0.000000          | null       | false  |
 
-    And Customer makes repayment on "02 April 2026" with 270.0 transaction amount on Working Capital loan
+  @TestRailId:C94060
+  Scenario: Verify breach grace period boundary - UC2: breach flag only after grace expiry with 3 days
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays | delinquencyGraceDays |
+      | 1               | MONTHS              | FLAT                        | 270          | 3               | 0                    |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000.0          | 100000.0           | 18.0              | 0.0      |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    # --- First breach period is extended by the 3-day grace window ---
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-01 | 2026-02-15 | 46           | 270.000000       | 0.000000          | null       | false  |
-      | 2            | 2026-02-16 | 2026-03-15 | 28           | 270.000000       | 270.000000        | null       | true   |
-      | 3            | 2026-03-16 | 2026-04-15 | 31           | 270.000000       | 0.000000          | null       | false  |
+      | 1            | 2026-01-01 | 2026-02-03 | 34           | 270.000000       | 270.000000        | null       | null   |
+    # --- Last day of grace window: breach is not yet evaluated ---
+    When Admin sets the business date to "02 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-02-03 | 34           | 270.000000       | 270.000000        | null       | null   |
+    # --- Day after grace period end: breach is not yet evaluated, next period not generated ---
+    When Admin sets the business date to "03 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-02-03 | 34           | 270.000000       | 270.000000        | null       | null   |
+    # --- One day after period end: next period is generated and breach flag is raised ---
+    When Admin sets the business date to "04 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-02-03 | 34           | 270.000000       | 270.000000        | null       | true   |
+      | 2            | 2026-02-04 | 2026-03-03 | 28           | 270.000000       | 270.000000        | null       | null   |
 
