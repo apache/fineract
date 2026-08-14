@@ -32,6 +32,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargePaidByRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
@@ -57,6 +58,7 @@ public class WorkingCapitalLoanTransactionProcessor {
     private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     private final WorkingCapitalLoanChargeAccrualService chargeAccrualService;
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
+    private final WorkingCapitalLoanTransactionFinder transactionFinder;
 
     public void processRepaymentLikeTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
             final LocalDate transactionDate, final BigDecimal transactionAmount) {
@@ -72,9 +74,12 @@ public class WorkingCapitalLoanTransactionProcessor {
 
         // A backdated transaction that can reshuffle later allocations is handed straight to reprocessing, which
         // allocates this transaction as part of the replay. Charges reshuffle across the whole history (full rebuild);
-        // charge-free overpayment reshuffles only from the insertion point on (suffix rebuild). Either way, computing
-        // an incremental allocation first would only be rewound and redone.
-        final boolean reprocessRebuildsEverything = backdated && (!charges.isEmpty() || isLoanOverpaidWithCurrentTransaction);
+        // charge-free overpayment reshuffles only from the insertion point on (suffix rebuild). A money-mover before an
+        // active charge-off also goes through reprocessing so the charge-off snapshot and routing can be restated.
+        // Either way, computing an incremental allocation first would only be rewound and redone.
+        final boolean affectsChargeOffSnapshot = transactionFinder.isBeforeActiveChargeOff(loan, transaction);
+        final boolean reprocessRebuildsEverything = backdated
+                && (!charges.isEmpty() || isLoanOverpaidWithCurrentTransaction || affectsChargeOffSnapshot);
 
         final WorkingCapitalLoanTransactionAllocation allocation;
         if (reprocessRebuildsEverything) {
@@ -122,6 +127,11 @@ public class WorkingCapitalLoanTransactionProcessor {
             } else {
                 delinquencyRangeScheduleService.applyRepayment(loan, transactionDate, transactionAmount);
             }
+
+            if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+                accountingProcessor.postJournalEntries(loan, transaction, allocation,
+                        transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, transaction));
+            }
         }
 
         // Breach schedule is maintained incrementally here; reprocessing does not rebuild it.
@@ -132,10 +142,6 @@ public class WorkingCapitalLoanTransactionProcessor {
         // On early closure the loan leaves the COB scope, so any charge whose due-date accrual has not been posted yet
         // is accrued as of the closing date to make sure the income is recognized before the loan is closed.
         chargeAccrualService.accrueOnClosure(loan, transactionDate);
-
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntries(loan, transaction, allocation, loan.isChargedOff());
-        }
     }
 
     /**

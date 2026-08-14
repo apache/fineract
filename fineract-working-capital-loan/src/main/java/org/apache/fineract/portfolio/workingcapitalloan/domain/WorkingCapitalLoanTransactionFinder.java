@@ -47,7 +47,8 @@ public class WorkingCapitalLoanTransactionFinder {
      * for the last user-initiated transaction.
      */
     private static final List<LoanTransactionType> SYSTEM_GENERATED_TYPES = List.of(LoanTransactionType.ACCRUAL,
-            LoanTransactionType.DISCOUNT_FEE_AMORTIZATION, LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT);
+            LoanTransactionType.ACCRUAL_ADJUSTMENT, LoanTransactionType.DISCOUNT_FEE_AMORTIZATION,
+            LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT);
 
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
 
@@ -58,6 +59,26 @@ public class WorkingCapitalLoanTransactionFinder {
      */
     public Optional<WorkingCapitalLoanTransaction> findChargedOffTransaction(final WorkingCapitalLoan loan) {
         return findLatestActiveTransactionOfType(loan, LoanTransactionType.CHARGE_OFF);
+    }
+
+    /**
+     * True when {@code txn} is after the active charge-off in
+     * {@link WorkingCapitalLoanTransactionComparator#TRANSACTION_ORDER}.
+     */
+    public boolean isAfterActiveChargeOffForAccountingRouting(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn) {
+        if (!loan.isChargedOff()) {
+            return false;
+        }
+        return findChargedOffTransaction(loan)
+                .map(chargeOff -> WorkingCapitalLoanTransactionComparator.TRANSACTION_ORDER.compare(txn, chargeOff) > 0).orElse(false);
+    }
+
+    public boolean isBeforeActiveChargeOff(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn) {
+        if (!loan.isChargedOff()) {
+            return false;
+        }
+        return findChargedOffTransaction(loan)
+                .map(chargeOff -> WorkingCapitalLoanTransactionComparator.TRANSACTION_ORDER.compare(txn, chargeOff) < 0).orElse(false);
     }
 
     /**
