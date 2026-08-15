@@ -694,7 +694,6 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
 
             final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
             ArrayList<Long> rangeIds = new ArrayList<>();
             // First Range
@@ -737,7 +736,7 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
 
             // Run first time the Job
             final String jobName = "Loan Delinquency Classification";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             // Get loan details expecting to have not a delinquency classification
             GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -751,7 +750,7 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
             log.info("Current date {}", businessDate);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
             // Run Second time the Job
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             // Get loan details expecting to have a delinquency classification
             getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId);
@@ -787,7 +786,6 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
 
             // Given
             final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
             ArrayList<Long> rangeIds = new ArrayList<>();
             // First Range
@@ -888,7 +886,6 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
 
             // Given
             final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
             ArrayList<Long> rangeIds = new ArrayList<>();
             // First Range
@@ -965,7 +962,6 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
 
             // Given
             final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
             ArrayList<Long> rangeIds = new ArrayList<>();
             // First Range
@@ -1366,7 +1362,6 @@ public class DelinquencyBucketsIntegrationTest extends BaseLoanIntegrationTest {
 
             // Given
             final LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
             ArrayList<Long> rangeIds = new ArrayList<>();
             // First Range

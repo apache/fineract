@@ -18,11 +18,18 @@
  */
 package org.apache.fineract.portfolio.delinquency.domain;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface DelinquencyBucketRepository extends JpaRepository<DelinquencyBucket, Long>, JpaSpecificationExecutor<DelinquencyBucket> {
 
-    Optional<DelinquencyBucket> findByName(String name);
+    @Query("SELECT b FROM DelinquencyBucket b WHERE b.name = :name")
+    Optional<DelinquencyBucket> findByName(@Param("name") String name);
+
+    @Query("SELECT b FROM DelinquencyBucket b")
+    List<DelinquencyBucket> findAllBuckets();
 }

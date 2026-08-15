@@ -410,6 +410,15 @@ public class RepaymentPeriod {
         this.paidInterest = MathUtil.plus(this.getPaidInterest(), paidInterest, getMc());
     }
 
+    /**
+     * Overwrites the paid amounts of the period instead of accumulating them, so that the period can be aligned with
+     * the repayment schedule installment it belongs to. Idempotent, in contrast to the addPaid... methods.
+     */
+    public void setPaidAmounts(Money paidPrincipal, Money paidInterest) {
+        this.paidPrincipal = paidPrincipal;
+        this.paidInterest = paidInterest;
+    }
+
     public Money getInitialBalanceForEmiRecalculation() {
         Money initialBalance;
         if (getPrevious().isPresent()) {

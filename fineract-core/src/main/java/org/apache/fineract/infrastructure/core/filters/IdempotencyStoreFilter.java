@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.fineract.commands.service.SynchronousCommandProcessingService;
@@ -47,12 +48,14 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
+        boolean isAllowedContentTypeRequest = helper.isAllowedContentTypeRequest(request);
         Mutable<ContentCachingResponseWrapper> wrapper = new MutableObject<>();
-        if (helper.isAllowedContentTypeRequest(request)) {
+        if (isAllowedContentTypeRequest) {
             wrapper.setValue(new ContentCachingResponseWrapper(response));
         }
-        extractIdempotentKeyFromHttpServletRequest(request).ifPresent(idempotentKey -> fineractRequestContextHolder
-                .setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE, idempotentKey, request));
+        extractIdempotentKeyFromHttpServletRequest(request, isAllowedContentTypeRequest)
+                .ifPresent(idempotentKey -> fineractRequestContextHolder
+                        .setAttribute(SynchronousCommandProcessingService.IDEMPOTENCY_KEY_ATTRIBUTE, idempotentKey, request));
 
         filterChain.doFilter(request, wrapper.get() != null ? wrapper.get() : response);
         Optional<Long> commandId = helper.getCommandId(request);
@@ -68,7 +71,14 @@ public class IdempotencyStoreFilter extends OncePerRequestFilter {
         }
     }
 
-    private Optional<String> extractIdempotentKeyFromHttpServletRequest(HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader(fineractProperties.getIdempotencyKeyHeaderName()));
+    private Optional<String> extractIdempotentKeyFromHttpServletRequest(HttpServletRequest request, boolean isAllowedContentTypeRequest) {
+        String headerName = fineractProperties.getIdempotencyKeyHeaderName();
+        String headerValue = request.getHeader(headerName);
+        if (StringUtils.isBlank(headerValue) && isAllowedContentTypeRequest && fineractProperties.isIdempotencyKeyValidationEnabled()
+                && log.isWarnEnabled()) {
+            log.warn("Idempotency key header [{}] is missing. Clients should provide it to avoid unintended duplicate command processing.",
+                    headerName);
+        }
+        return Optional.ofNullable(headerValue);
     }
 }

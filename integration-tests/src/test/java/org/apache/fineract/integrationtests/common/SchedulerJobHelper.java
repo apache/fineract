@@ -25,7 +25,6 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import io.restassured.specification.RequestSpecification;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -45,24 +44,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Feign-based. Still instance-shaped (see constructor) purely for source compatibility with existing call sites; a
- * follow-up PR will static-ify this class and update all callers in one mechanical pass.
+ * Feign-based, fully static.
  */
-public class SchedulerJobHelper {
+public final class SchedulerJobHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedulerJobHelper.class);
 
-    /**
-     * @deprecated the {@code requestSpec} parameter is unused now that this Helper is Feign-based. Retained only so
-     *             existing {@code new SchedulerJobHelper(requestSpec)} call sites keep compiling; prefer relying on
-     *             static usage once callers are migrated in a follow-up PR.
-     */
-    @Deprecated
-    public SchedulerJobHelper(final RequestSpecification requestSpec) {
-        // no-op: retained for source compatibility with existing callers
+    private SchedulerJobHelper() {
+
     }
 
-    private List<GetJobsResponse> getAllSchedulerJobs() {
+    private static List<GetJobsResponse> getAllSchedulerJobs() {
         LOG.info("------------------------ RETRIEVING ALL SCHEDULER JOBS -------------------------");
         List<GetJobsResponse> response = ok(
                 () -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().retrieveAllSchedulerJobs());
@@ -70,19 +62,19 @@ public class SchedulerJobHelper {
         return response;
     }
 
-    private <T> List<T> getAllSchedulerJobDetails(Function<GetJobsResponse, T> mapper) {
+    private static <T> List<T> getAllSchedulerJobDetails(Function<GetJobsResponse, T> mapper) {
         return getAllSchedulerJobs().stream().map(mapper).collect(Collectors.toList());
     }
 
-    public List<Integer> getAllSchedulerJobIds() {
+    public static List<Integer> getAllSchedulerJobIds() {
         return getAllSchedulerJobDetails(job -> job.getJobId().intValue());
     }
 
-    public List<String> getAllSchedulerJobNames() {
+    public static List<String> getAllSchedulerJobNames() {
         return getAllSchedulerJobDetails(GetJobsResponse::getDisplayName);
     }
 
-    public GetJobsResponse getSchedulerJobById(int jobId) {
+    public static GetJobsResponse getSchedulerJobById(int jobId) {
         LOG.info("------------------------ RETRIEVING SCHEDULER JOB BY ID -------------------------");
         GetJobsResponse response = ok(
                 () -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().retrieveOneSchedulerJob((long) jobId));
@@ -91,40 +83,40 @@ public class SchedulerJobHelper {
         return response;
     }
 
-    public Boolean getSchedulerStatus() {
+    public static Boolean getSchedulerStatus() {
         LOG.info("------------------------ RETRIEVING SCHEDULER STATUS -------------------------");
         GetSchedulerResponse response = ok(() -> FineractFeignClientHelper.getFineractFeignClient().scheduler().retrieveSchedulerStatus());
         return response.getActive();
     }
 
-    public void updateSchedulerStatus(final boolean on) {
+    public static void updateSchedulerStatus(final boolean on) {
         String command = on ? "start" : "stop";
         executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().scheduler().handleCommandsScheduler(command));
     }
 
-    public Map<String, Object> updateSchedulerJob(int jobId, final boolean active) {
+    public static Map<String, Object> updateSchedulerJob(int jobId, final boolean active) {
         LOG.info("------------------------ UPDATING SCHEDULER JOB -------------------------");
         CommandProcessingResult response = ok(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob()
                 .updateJobDetail((long) jobId, new PutJobsJobIDRequest().active(active)));
         return response.getChanges();
     }
 
-    public void updateSchedulerJob(long jobId, PutJobsJobIDRequest request) {
+    public static void updateSchedulerJob(long jobId, PutJobsJobIDRequest request) {
         ok(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().updateJobDetail(jobId, request));
     }
 
-    public void runSchedulerJob(int jobId) {
+    public static void runSchedulerJob(int jobId) {
         executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().executeJob((long) jobId, "executeJob",
                 new ExecuteJobRequest()));
     }
 
-    public void runSchedulerJobByShortName(String shortName) {
+    public static void runSchedulerJobByShortName(String shortName) {
         LOG.info("------------------------ RUN SCHEDULER JOB -------------------------");
         executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().executeJobByShortName(shortName, "executeJob",
                 new ExecuteJobRequest()));
     }
 
-    public int getSchedulerJobIdByName(String jobName) {
+    public static int getSchedulerJobIdByName(String jobName) {
         List<GetJobsResponse> allSchedulerJobsData = getAllSchedulerJobs();
         for (GetJobsResponse job : allSchedulerJobsData) {
             if (jobName.equals(job.getDisplayName())) {
@@ -135,7 +127,7 @@ public class SchedulerJobHelper {
                 "No such named Job (see org.apache.fineract.infrastructure.jobs.service.JobName enum):" + jobName);
     }
 
-    public Long getSchedulerJobIdByShortName(String shortName) {
+    public static Long getSchedulerJobIdByShortName(String shortName) {
         LOG.info("------------------------ RETRIEVING SCHEDULER JOB ID BY SHORT NAME -------------------------");
         GetJobsResponse job = ok(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().retrieveByShortName(shortName));
         assertNotNull(job);
@@ -150,9 +142,9 @@ public class SchedulerJobHelper {
      *
      * @author Michael Vorburger.ch
      */
-    public void executeAndAwaitJob(String jobName) {
+    public static void executeAndAwaitJob(String jobName) {
         int jobId = getSchedulerJobIdByName(jobName);
-        executeAndAwaitJob(jobId, jobId, this::runSchedulerJob);
+        executeAndAwaitJob(jobId, jobId, SchedulerJobHelper::runSchedulerJob);
     }
 
     /**
@@ -163,12 +155,12 @@ public class SchedulerJobHelper {
      *
      * @author Michael Vorburger.ch
      */
-    public void executeAndAwaitJobByShortName(String shortName) {
+    public static void executeAndAwaitJobByShortName(String shortName) {
         Long jobId = getSchedulerJobIdByShortName(shortName);
-        executeAndAwaitJob(jobId, shortName, this::runSchedulerJobByShortName);
+        executeAndAwaitJob(jobId, shortName, SchedulerJobHelper::runSchedulerJobByShortName);
     }
 
-    private <T> void executeAndAwaitJob(long jobId, T jobParam, Consumer<T> runSchedulerJob) {
+    private static <T> void executeAndAwaitJob(long jobId, T jobParam, Consumer<T> runSchedulerJob) {
         // Stop the Scheduler while we manually trigger execution of job, to
         // avoid side effects and simplify debugging when readings logs
         updateSchedulerStatus(false);
@@ -180,7 +172,7 @@ public class SchedulerJobHelper {
         awaitJob(jobId, previousRunHistoryId);
     }
 
-    private void awaitJob(long jobId, Long previousRunHistoryId) {
+    private static void awaitJob(long jobId, Long previousRunHistoryId) {
         final Duration timeout = Duration.ofMinutes(2);
         final Duration pause = Duration.ofSeconds(1);
         // Await a new completed run-history entry for this job. The history id is
@@ -211,11 +203,11 @@ public class SchedulerJobHelper {
         }
     }
 
-    private Long getRunHistoryId(JobDetailHistoryDataSwagger runHistory) {
+    private static Long getRunHistoryId(JobDetailHistoryDataSwagger runHistory) {
         return runHistory == null ? null : runHistory.getId();
     }
 
-    private JobDetailHistoryDataSwagger getLatestJobRunHistory(long jobId) {
+    private static JobDetailHistoryDataSwagger getLatestJobRunHistory(long jobId) {
         LOG.info("------------------------ RETRIEVING LATEST SCHEDULER JOB RUN HISTORY -------------------------");
         RetrieveHistoryQueryParams queryParams = new RetrieveHistoryQueryParams().offset(0).limit(1).orderBy("id").sortOrder("DESC");
         GetJobsJobIDJobRunHistoryResponse response = ok(

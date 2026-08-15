@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
@@ -49,7 +48,6 @@ public class SavingsAccountBalanceCheckAfterReversalTest {
     private RequestSpecification requestSpec;
     private SavingsProductHelper savingsProductHelper;
     private SavingsAccountHelper savingsAccountHelper;
-    private SchedulerJobHelper scheduleJobHelper;
 
     @BeforeEach
     public void setup() {
@@ -59,7 +57,6 @@ public class SavingsAccountBalanceCheckAfterReversalTest {
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
-        this.scheduleJobHelper = new SchedulerJobHelper(requestSpec);
     }
 
     @SuppressWarnings("unchecked")

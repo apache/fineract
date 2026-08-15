@@ -32,6 +32,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelation;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
@@ -53,6 +54,7 @@ public class WorkingCapitalLoanChargeAccrualService {
     private final WorkingCapitalLoanTransactionAllocationRepository allocationRepository;
     private final WorkingCapitalLoanTransactionRelationRepository relationRepository;
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
+    private final WorkingCapitalLoanTransactionFinder transactionFinder;
 
     public void processOnChargeAdded(final WorkingCapitalLoan loan, final WorkingCapitalLoanCharge charge) {
         if (isAccrualPostingDisabled(loan)) {
@@ -130,7 +132,8 @@ public class WorkingCapitalLoanChargeAccrualService {
         final WorkingCapitalLoanTransactionAllocation allocation = WorkingCapitalLoanTransactionAllocation
                 .forChargeAccrual(accrualTransaction, charge.getAmount(), charge.isPenaltyCharge());
         allocationRepository.saveAndFlush(allocation);
-        accountingProcessor.postJournalEntries(loan, accrualTransaction, allocation, loan.isChargedOff());
+        accountingProcessor.postJournalEntries(loan, accrualTransaction, allocation,
+                transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, accrualTransaction));
     }
 
     private boolean isAlreadyAccrued(final WorkingCapitalLoanCharge charge) {

@@ -31,6 +31,7 @@ import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -122,8 +123,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
         runAt("09 January 2023", () -> {
             Long loanId = aLoanId.get();
             // run accrual posting
-            schedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
-            schedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            SchedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
+            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -147,8 +148,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
             deactivateOverdueLoanCharges(loanId, "07 January 2023");
 
             // run accrual posting
-            schedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
-            schedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            SchedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
+            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -233,8 +234,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
             Long loanId = aLoanId.get();
 
             // run accrual posting
-            schedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
-            schedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            SchedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
+            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -258,8 +259,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
             deactivateOverdueLoanCharges(loanId, "05 January 2023");
 
             // run accrual posting
-            schedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
-            schedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            SchedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
+            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -345,8 +346,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
             Long loanId = aLoanId.get();
 
             // run accrual posting
-            schedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
-            schedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            SchedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
+            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -370,8 +371,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
             deactivateOverdueLoanCharges(loanId, "07 January 2023");
 
             // run accrual posting
-            schedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
-            schedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            SchedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
+            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
 
             // verify transactions
             verifyTransactions(loanId, //

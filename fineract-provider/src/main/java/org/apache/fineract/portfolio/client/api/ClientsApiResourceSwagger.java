@@ -255,6 +255,8 @@ final class ClientsApiResourceSwagger {
         public String emailAddress;
         @Schema(example = "123")
         public String externalId;
+        @Schema(example = "1")
+        public Long staffId;
     }
 
     @Schema(description = "PostClientsRequest")
@@ -431,12 +433,22 @@ final class ClientsApiResourceSwagger {
         public Long withdrawalReasonId;
         @Schema(example = "03 August 2021")
         public String reopenedDate;
+        @Schema(example = "1")
+        public Long staffId;
     }
 
     @Schema(description = "PostClientsClientIdResponse")
     public static final class PostClientsClientIdResponse {
 
         private PostClientsClientIdResponse() {}
+
+        static final class PostClientsClientIdChanges {
+
+            private PostClientsClientIdChanges() {}
+
+            @Schema(example = "1")
+            public Long staffId;
+        }
 
         @Schema(example = "2")
         public Long officeId;
@@ -446,6 +458,7 @@ final class ClientsApiResourceSwagger {
         public Long resourceId;
         @Schema(example = "123-456")
         public String resourceExternalId;
+        public PostClientsClientIdChanges changes;
     }
 
     @Schema(description = "GetClientTransferProposalDateResponse")

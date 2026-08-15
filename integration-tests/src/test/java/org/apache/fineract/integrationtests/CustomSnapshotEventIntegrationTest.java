@@ -42,8 +42,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith({ LoanTestLifecycleExtension.class, ExternalEventsExtension.class })
 public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest {
 
-    private final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
-
     @Test
     public void testSnapshotEventGenerationWhenLoanInstallmentIsNotPayed() {
         runAt("31 January 2023", () -> {
@@ -327,7 +325,7 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
     private void updateBusinessDateAndExecuteCOBJob(String date) {
         businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
                 .date(date).dateFormat(DATETIME_PATTERN).locale("en"));
-        schedulerJobHelper.executeAndAwaitJob("Loan COB");
+        SchedulerJobHelper.executeAndAwaitJob("Loan COB");
     }
 
 }

@@ -41,4 +41,25 @@ public final class WorkingCapitalLoanBreachScheduleEvaluationUtils {
                 .max(Comparator.comparingInt(period -> period.getPeriodNumber() != null ? period.getPeriodNumber() : Integer.MIN_VALUE));
     }
 
+    public static LocalDate calculateToDate(final LocalDate fromDate, final Integer frequency,
+            final WorkingCapitalLoanPeriodFrequencyType frequencyType) {
+        return switch (frequencyType) {
+            case DAYS -> fromDate.plusDays(frequency - 1);
+            case WEEKS -> fromDate.plusWeeks(frequency).minusDays(1);
+            case MONTHS -> fromDate.plusMonths(frequency).minusDays(1);
+            case YEARS -> fromDate.plusYears(frequency).minusDays(1);
+        };
+    }
+
+    /**
+     * End date a period gets when a reschedule re-dates it: the new frequency applied from the period start, extended
+     * by the recorded pauses that overlap it. Shared by the reschedule validator and the schedule service so the check
+     * cannot drift from the mutation it guards.
+     */
+    public static LocalDate calculateRescheduledToDate(final LocalDate fromDate, final Integer frequency,
+            final WorkingCapitalLoanPeriodFrequencyType frequencyType, final List<WorkingCapitalLoanBreachAction> actions) {
+        return WorkingCapitalLoanBreachPauseUtils.extendToDateByRecordedPauses(fromDate,
+                calculateToDate(fromDate, frequency, frequencyType), actions);
+    }
+
 }

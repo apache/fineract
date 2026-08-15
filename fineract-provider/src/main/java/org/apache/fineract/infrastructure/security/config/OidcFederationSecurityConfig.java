@@ -87,7 +87,6 @@ public class OidcFederationSecurityConfig {
 
     @Autowired
     private FineractProperties fineractProperties;
-
     @Autowired
     private FineractOidcUserService oidcUserService;
 

@@ -50,7 +50,6 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest extends BaseLoanIntegrati
     private LoanCOBCatchUpHelper loanCOBCatchUpHelper;
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
-    private SchedulerJobHelper schedulerJobHelper;
     private Boolean originalSchedulerStatus;
 
     @BeforeEach
@@ -60,8 +59,7 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest extends BaseLoanIntegrati
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        schedulerJobHelper = new SchedulerJobHelper(requestSpec);
-        originalSchedulerStatus = schedulerJobHelper.getSchedulerStatus();
+        originalSchedulerStatus = SchedulerJobHelper.getSchedulerStatus();
         final LocalDate todaysDate = Utils.getLocalDateOfTenant();
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                 new PutGlobalConfigurationsRequest().enabled(true));
@@ -111,7 +109,7 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest extends BaseLoanIntegrati
     @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = true)
     @Test
     public void testSchedulerWorksWhenInBatchManagerMode() {
-        schedulerJobHelper.updateSchedulerStatus(false);
+        SchedulerJobHelper.updateSchedulerStatus(false);
     }
 
     @ConfigureInstanceMode(readEnabled = true, writeEnabled = true, batchWorkerEnabled = true, batchManagerEnabled = false)
@@ -119,7 +117,7 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest extends BaseLoanIntegrati
     public void testSchedulerDoesNotWorksWhenNotInBatchManagerMode() {
         org.apache.fineract.client.feign.util.CallFailedRuntimeException exception = assertThrows(
                 org.apache.fineract.client.feign.util.CallFailedRuntimeException.class,
-                () -> schedulerJobHelper.updateSchedulerStatus(false));
+                () -> SchedulerJobHelper.updateSchedulerStatus(false));
         assertEquals(405, exception.getStatus());
     }
 
@@ -127,7 +125,7 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest extends BaseLoanIntegrati
     public void tearDown() throws InterruptedException {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                 new PutGlobalConfigurationsRequest().enabled(false));
-        schedulerJobHelper.updateSchedulerStatus(originalSchedulerStatus);
+        SchedulerJobHelper.updateSchedulerStatus(originalSchedulerStatus);
     }
 
 }

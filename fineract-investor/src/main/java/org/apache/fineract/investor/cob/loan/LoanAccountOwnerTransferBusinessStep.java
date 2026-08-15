@@ -48,7 +48,6 @@ import org.apache.fineract.portfolio.loanaccount.service.LoanCapitalizedIncomeAm
 import org.apache.fineract.portfolio.loanaccount.service.LoanJournalEntryPoster;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.springframework.context.annotation.Conditional;
-import org.springframework.data.domain.Sort;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
@@ -79,12 +78,9 @@ public class LoanAccountOwnerTransferBusinessStep implements LoanCOBBusinessStep
         log.debug("start processing loan ownership transfer business step for loan with Id [{}]", loanId);
 
         LocalDate settlementDate = DateUtils.getBusinessLocalDate();
-        List<ExternalAssetOwnerTransfer> transferDataList = externalAssetOwnerTransferRepository.findAll(
-                (root, query, criteriaBuilder) -> criteriaBuilder.and(criteriaBuilder.equal(root.get("loanId"), loanId),
-                        criteriaBuilder.equal(root.get("settlementDate"), settlementDate),
-                        root.get("status").in(Stream.concat(PENDING_STATUSES.stream(), BUYBACK_STATUSES.stream()).toList()),
-                        criteriaBuilder.greaterThanOrEqualTo(root.get("effectiveDateTo"), FUTURE_DATE_9999_12_31)),
-                Sort.by(Sort.Direction.ASC, "id"));
+        List<ExternalAssetOwnerTransfer> transferDataList = externalAssetOwnerTransferRepository
+                .findAllByLoanIdAndSettlementDateAndStatusInAndEffectiveDateToGreaterThanEqual(loanId, settlementDate,
+                        Stream.concat(PENDING_STATUSES.stream(), BUYBACK_STATUSES.stream()).toList(), FUTURE_DATE_9999_12_31);
         int size = transferDataList.size();
 
         if (size == 2) {

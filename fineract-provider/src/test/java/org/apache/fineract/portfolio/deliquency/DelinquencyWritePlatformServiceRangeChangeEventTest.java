@@ -200,7 +200,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         when(loanProduct.getDelinquencyBucket()).thenReturn(delinquencyBucket);
         when(loanForProcessing.hasDelinquencyBucket()).thenReturn(true);
         when(loanForProcessing.isEnableInstallmentLevelDelinquency()).thenReturn(false);
-        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.empty());
+        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDateIsNull(any())).thenReturn(Optional.empty());
         when(loanDelinquencyDomainService.getLoanDelinquencyData(loanForProcessing, effectiveDelinquencyList))
                 .thenReturn(loanDelinquencyData);
 
@@ -260,7 +260,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         when(loanForProcessing.hasDelinquencyBucket()).thenReturn(true);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loanForProcessing.isEnableInstallmentLevelDelinquency()).thenReturn(true);
-        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.empty());
+        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDateIsNull(any())).thenReturn(Optional.empty());
         when(loanDelinquencyDomainService.getLoanDelinquencyData(loanForProcessing, effectiveDelinquencyList))
                 .thenReturn(loanDelinquencyData);
         when(loanInstallmentDelinquencyTagRepository.findByLoanAndInstallment(loanForProcessing, repaymentScheduleInstallments.get(0)))
@@ -306,7 +306,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         when(loanForProcessing.getLoanProduct()).thenReturn(loanProduct);
         when(loanProduct.getDelinquencyBucket()).thenReturn(delinquencyBucket);
         when(loanForProcessing.hasDelinquencyBucket()).thenReturn(true);
-        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.empty());
+        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDateIsNull(any())).thenReturn(Optional.empty());
         when(loanDelinquencyDomainService.getLoanDelinquencyData(loanForProcessing, effectiveDelinquencyList))
                 .thenReturn(loanDelinquencyData);
 
@@ -390,7 +390,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         when(loanForProcessing.hasDelinquencyBucket()).thenReturn(true);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loanForProcessing.isEnableInstallmentLevelDelinquency()).thenReturn(true);
-        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.empty());
+        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDateIsNull(any())).thenReturn(Optional.empty());
         when(loanDelinquencyDomainService.getLoanDelinquencyData(loanForProcessing, effectiveDelinquencyList))
                 .thenReturn(loanDelinquencyData);
         when(loanInstallmentDelinquencyTagRepository.findByLoanAndInstallment(loanForProcessing, repaymentScheduleInstallments.get(0)))
@@ -471,7 +471,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         when(loanForProcessing.hasDelinquencyBucket()).thenReturn(true);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loanForProcessing.isEnableInstallmentLevelDelinquency()).thenReturn(true);
-        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.empty());
+        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDateIsNull(any())).thenReturn(Optional.empty());
         when(loanDelinquencyDomainService.getLoanDelinquencyData(loanForProcessing, effectiveDelinquencyList))
                 .thenReturn(loanDelinquencyData);
         when(loanInstallmentDelinquencyTagRepository.findByLoanAndInstallment(loanForProcessing, repaymentScheduleInstallments.get(0)))
@@ -567,7 +567,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         when(loanForProcessing.hasDelinquencyBucket()).thenReturn(true);
         when(loanForProcessing.getRepaymentScheduleInstallments()).thenReturn(repaymentScheduleInstallments);
         when(loanForProcessing.isEnableInstallmentLevelDelinquency()).thenReturn(true);
-        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.empty());
+        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDateIsNull(any())).thenReturn(Optional.empty());
         when(loanDelinquencyDomainService.getLoanDelinquencyData(loanForProcessing, effectiveDelinquencyList))
                 .thenReturn(loanDelinquencyData);
         when(loanInstallmentDelinquencyTagRepository.findByLoanAndInstallment(loanForProcessing, repaymentScheduleInstallments.get(0)))
@@ -612,7 +612,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
         prevTagForLoan.setDelinquencyRange(range1);
 
         when(loanForProcessing.isEnableInstallmentLevelDelinquency()).thenReturn(true);
-        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.of(prevTagForLoan));
+        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDateIsNull(any())).thenReturn(Optional.of(prevTagForLoan));
 
         // when
         underTest.removeDelinquencyTagToLoan(loanForProcessing);
@@ -659,7 +659,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
 
         when(delinquencyEffectivePauseHelper.calculateEffectiveDelinquencyList(delinquencyActions)).thenReturn(effectiveDelinquency);
         when(loanDelinquencyDomainService.getOverdueCollectionData(any(), anyList())).thenReturn(loanCollectionData);
-        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.empty());
+        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDateIsNull(any())).thenReturn(Optional.empty());
 
         // when
         underTest.createDelinquencyAction(loanForProcessing.getId(), command);
@@ -710,7 +710,7 @@ public class DelinquencyWritePlatformServiceRangeChangeEventTest {
 
         when(delinquencyEffectivePauseHelper.calculateEffectiveDelinquencyList(delinquencyActions)).thenReturn(effectiveDelinquency);
         when(loanDelinquencyDomainService.getOverdueCollectionData(any(), anyList())).thenReturn(loanCollectionData);
-        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(any(), any())).thenReturn(Optional.empty());
+        when(loanDelinquencyTagRepository.findByLoanAndLiftedOnDateIsNull(any())).thenReturn(Optional.empty());
 
         // when
         underTest.createDelinquencyAction(loanForProcessing.getId(), command);

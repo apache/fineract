@@ -142,7 +142,6 @@ public class FixedDepositTest extends IntegrationTest {
     public static final Float THRESHOLD = 1.0f;
 
     private MockedStatic<MoneyHelper> moneyHelperStatic;
-    private SchedulerJobHelper schedulerJobHelper;
 
     @BeforeEach
     public void setup() {
@@ -152,7 +151,6 @@ public class FixedDepositTest extends IntegrationTest {
         this.requestSpec.header("Fineract-Platform-TenantId", "default");
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.schedulerJobHelper = new SchedulerJobHelper(this.requestSpec);
         this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
         this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
         this.globalConfigurationHelper = new GlobalConfigurationHelper();
@@ -651,9 +649,8 @@ public class FixedDepositTest extends IntegrationTest {
          * FD account verify whether account is matured
          */
 
-        SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         String JobName = "Update Deposit Accounts Maturity details";
-        schedulerJobHelper.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
 
         HashMap accountDetails = FixedDepositAccountHelper.getFixedDepositAccountById(this.requestSpec, this.responseSpec,
                 fixedDepositAccountId);
@@ -2667,7 +2664,7 @@ public class FixedDepositTest extends IntegrationTest {
             this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
             this.fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
 
-            schedulerJobHelper.executeAndAwaitJob("Update Deposit Accounts Maturity details");
+            SchedulerJobHelper.executeAndAwaitJob("Update Deposit Accounts Maturity details");
 
             HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                     this.responseSpec, fixedDepositAccountId.toString());
@@ -2742,7 +2739,7 @@ public class FixedDepositTest extends IntegrationTest {
             this.fixedDepositAccountHelper.approveFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
             this.fixedDepositAccountHelper.activateFixedDeposit(fixedDepositAccountId, APPROVED_ON_DATE);
 
-            schedulerJobHelper.executeAndAwaitJob("Update Deposit Accounts Maturity details");
+            SchedulerJobHelper.executeAndAwaitJob("Update Deposit Accounts Maturity details");
 
             HashMap fixedDepositAccountStatusHashMap = FixedDepositAccountStatusChecker.getStatusOfFixedDepositAccount(this.requestSpec,
                     this.responseSpec, fixedDepositAccountId.toString());

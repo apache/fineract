@@ -51,7 +51,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 public class SavingsTestLifecycleExtension implements AfterAllCallback {
 
     private SavingsAccountHelper savingsAccountHelper;
-    private SchedulerJobHelper schedulerJobHelper;
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     private static final int CLEANUP_THREAD_COUNT = 10;
     private final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(DATE_FORMAT).toFormatter();
@@ -64,9 +63,8 @@ public class SavingsTestLifecycleExtension implements AfterAllCallback {
             requestSpec.header("Fineract-Platform-TenantId", "default");
             ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
             this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
-            this.schedulerJobHelper = new SchedulerJobHelper(requestSpec);
             String jobName = "Post Interest For Savings";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
             // Close open savings accounts
             List<Long> savingsIds = SavingsAccountHelper.getSavingsIdsByStatusId(300);
             runInParallel(savingsIds, this::closeSavingsAccount);

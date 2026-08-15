@@ -79,7 +79,6 @@ public class LoanMultipleDisbursementRepaymentScheduleTest extends BaseLoanInteg
     @Test
     public void loanNoDuplicateRepaymentScheduleWithMultipleDisbursementTest() {
         try {
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
             // Accounts oof periodic accrual
             final Account assetAccount = this.accountHelper.createAssetAccount();
             final Account incomeAccount = this.accountHelper.createIncomeAccount();
@@ -125,7 +124,7 @@ public class LoanMultipleDisbursementRepaymentScheduleTest extends BaseLoanInteg
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, currentDate);
 
             final String jobName = "Loan COB";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             // verify accrual transaction created for charge due date
             checkAccrualTransaction(targetDate, 0.0f, 5.15f, 0.0f, loanId);
@@ -143,7 +142,7 @@ public class LoanMultipleDisbursementRepaymentScheduleTest extends BaseLoanInteg
             assertNotNull(merchantIssuedRefund_1);
 
             // run cob
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             // make another disbursement
             currentDate = LocalDate.of(2023, 7, 24);

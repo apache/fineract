@@ -43,6 +43,8 @@ public class FineractProperties {
 
     private String idempotencyKeyHeaderName;
 
+    private boolean idempotencyKeyValidationEnabled;
+
     private Boolean insecureHttpClient;
     private long clientConnectTimeout;
     private long clientReadTimeout;
@@ -453,6 +455,8 @@ public class FineractProperties {
     public static class FineractJpaProperties {
 
         private boolean statementLoggingEnabled;
+        private int expressionQueryCacheMaxSize;
+        private int updateCallCacheMaxSize;
     }
 
     @Getter

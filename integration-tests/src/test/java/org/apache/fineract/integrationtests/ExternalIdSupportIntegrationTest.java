@@ -64,8 +64,9 @@ import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupCenterHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -961,7 +962,8 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             result = undoLastDisbursalLoan(loanExternalIdStr9, new PostLoansLoanIdRequest());
             assertEquals(loanExternalIdStr9, result.getResourceExternalId());
 
-            Integer loanOfficerId = FeignGroupCenterHelper.createStaff(1).intValue();
+            Integer loanOfficerId = new FeignStaffHelper(FineractFeignClientHelper.getFineractFeignClient())
+                    .createStaff(1L, "20 September 2011").getResourceId().intValue();
             String loanExternalIdStr10 = UUID.randomUUID().toString();
             applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr10);
             result = assignLoanOfficerLoan(loanExternalIdStr10, new PostLoansLoanIdRequest().assignmentDate("2 September 2022").locale("en")

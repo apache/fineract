@@ -120,7 +120,6 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
-    private SchedulerJobHelper schedulerJobHelper;
     private SavingsAccountHelper savingsAccountHelper;
     private LoanTransactionHelper loanTransactionHelper;
     private AccountHelper accountHelper;
@@ -150,7 +149,6 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.accountHelper = new AccountHelper(requestSpec, responseSpec);
         this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
-        schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         clientHelper = new ClientHelper(requestSpec, responseSpec);
         this.businessDateHelper = new BusinessDateHelper();
         this.systemTimeZone = TimeZone.getTimeZone(Utils.TENANT_TIME_ZONE);
@@ -207,7 +205,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2022, 11, 11));
             String JobName = "Apply Annual Fee For Savings";
 
-            this.schedulerJobHelper.executeAndAwaitJob(JobName);
+            SchedulerJobHelper.executeAndAwaitJob(JobName);
 
             final HashMap savingsDetails = this.savingsAccountHelper.getSavingsDetails(savingsId);
             final HashMap annualFeeDetails = (HashMap) savingsDetails.get("annualFee");
@@ -252,7 +250,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
         String JobName = "Post Interest For Savings";
 
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
         final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
         Assertions.assertNotSame(summaryBefore.get("accountBalance"), summaryAfter.get("accountBalance"),
@@ -312,7 +310,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         final HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
         String JobName = "Transfer Fee For Loans From Savings";
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
         final HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
         final HashMap chargeData = ChargesHelper.getChargeById(requestSpec, responseSpec, specifiedDueDateChargeId);
@@ -385,7 +383,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
         String jobName = "Apply Holidays To Loans";
 
-        this.schedulerJobHelper.executeAndAwaitJob(jobName);
+        SchedulerJobHelper.executeAndAwaitJob(jobName);
 
         // Loan Repayment Schedule After Apply Holidays To Loans
         loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
@@ -464,7 +462,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         ArrayList<LinkedHashMap> periods = (ArrayList<LinkedHashMap>) repaymentScheduleHashMap.get("periods");
         String JobName = "Apply Holidays To Loans";
 
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
 
         // Loan Repayment Schedule After Apply Holidays To Loans
         loanDetails = this.loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
@@ -583,7 +581,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
         String JobName = "Pay Due Savings Charges";
 
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
         HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
 
         final HashMap chargeData = ChargesHelper.getChargeById(requestSpec, responseSpec, specifiedDueDateChargeId);
@@ -630,7 +628,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
         String JobName = "Update Accounting Running Balances";
 
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
         final HashMap runningBalanceAfter = this.accountHelper.getAccountingWithRunningBalanceById(accountID.toString());
 
         final Integer INT_BALANCE = Integer.valueOf(MINIMUM_OPENING_BALANCE);
@@ -665,7 +663,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
         String JobName = "Update Loan Arrears Ageing";
 
-        schedulerJobHelper.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
         HashMap loanSummaryData = loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
 
         Float totalLoanArrearsAging = (Float) loanSummaryData.get("principalOverdue") + (Float) loanSummaryData.get("interestOverdue");
@@ -738,7 +736,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         Assertions.assertNotNull(standingInstructionId);
 
         String JobName = "Execute Standing Instruction";
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
         HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsId);
         Float fromSavingsBalanceAfter = (Float) fromSavingsSummaryAfter.get("accountBalance");
 
@@ -795,7 +793,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         String JobName = "Apply penalty to overdue loans";
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
 
         final HashMap chargeData = ChargesHelper.getChargeById(requestSpec, responseSpec, overdueFeeChargeId);
 
@@ -844,7 +842,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
                 new PostLoansLoanIdTransactionsRequest().transactionDate("03 March 2020").locale("en").dateFormat("dd MMMM yyyy"));
 
         String JobName = "Apply penalty to overdue loans";
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
 
         ArrayList<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
                 loanID);
@@ -900,7 +898,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2020, 9, 2));
             String jobName = "Loan COB";
-            this.schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
             for (Integer loanId : loanIDs) {
                 List<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
                         loanId);
@@ -962,7 +960,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(fee), "02 June 2020", "10", null));
 
             String jobName = "Loan COB";
-            this.schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             List<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
                     loanID);
@@ -1027,18 +1025,18 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2020, 7, 2));
             String jobName = "Loan COB";
 
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
             GetLoansLoanIdResponse loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
             Assertions.assertEquals(LocalDate.of(2020, 7, 2), loan.getLastClosedBusinessDate());
 
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2020, 7, 3));
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
             Assertions.assertEquals(LocalDate.of(2020, 7, 3), loan.getLastClosedBusinessDate());
 
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2020, 7, 5));
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
             Assertions.assertEquals(LocalDate.of(2020, 7, 3), loan.getLastClosedBusinessDate());
@@ -1087,7 +1085,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2019, 4, 1));
             String jobName = "Loan COB";
 
-            this.schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
             List<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
                     loanID);
             Assertions.assertEquals(0, repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
@@ -1095,7 +1093,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
 
             LocalDate lastBusinessDateBeforeFastForward = LocalDate.of(2019, 4, 2);
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, lastBusinessDateBeforeFastForward);
-            this.schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
             repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
             Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
                     "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
@@ -1150,14 +1148,14 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             LocalDate dateToFastForward = LocalDate.of(2020, 5, 2);
             String jobName = "Loan COB";
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, dateToFastForward);
-            this.schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
             List<HashMap> repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec,
                     loanID2);
             Assertions.assertEquals(0, repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
                     "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
 
             BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2020, 5, 3));
-            this.schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
             repaymentScheduleDataAfter = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID2);
             Assertions.assertEquals(39.39f, (Float) repaymentScheduleDataAfter.get(1).get("penaltyChargesDue"),
                     "Verifying From Penalty Charges due fot first Repayment after Successful completion of Scheduler Job");
@@ -1202,14 +1200,14 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         String JobName = "Apply penalty to overdue loans";
         int jobId = 12;
 
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
 
-        GetJobsResponse schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId);
+        GetJobsResponse schedulerJob = SchedulerJobHelper.getSchedulerJobById(jobId);
 
         Assertions.assertNotNull(schedulerJob);
         while (schedulerJob.getCurrentlyRunning()) {
             Thread.sleep(15000);
-            schedulerJob = this.schedulerJobHelper.getSchedulerJobById(jobId);
+            schedulerJob = SchedulerJobHelper.getSchedulerJobById(jobId);
             Assertions.assertNotNull(schedulerJob);
         }
 
@@ -1254,7 +1252,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         final Boolean isNPABefore = (Boolean) this.loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanID, "isNPA");
         Assertions.assertFalse(isNPABefore);
         String JobName = "Update Non Performing Assets";
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
         final Boolean isNPAAfter = (Boolean) this.loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanID, "isNPA");
         assertTrue(isNPAAfter);
     }
@@ -1327,7 +1325,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
                 - Float.parseFloat(FixedDepositAccountHelper.DEPOSIT_AMOUNT);
 
         String JobName = "Transfer Interest To Savings";
-        this.schedulerJobHelper.executeAndAwaitJob(JobName);
+        SchedulerJobHelper.executeAndAwaitJob(JobName);
         fixedDepositSummary = savingsAccountHelper.getSavingsSummary(fixedDepositAccountId);
         assertEquals(Float.parseFloat(FixedDepositAccountHelper.DEPOSIT_AMOUNT), fixedDepositSummary.get("accountBalance"),
                 "Verifying opening Balance");
@@ -1379,8 +1377,8 @@ public class SchedulerJobsTestResults extends IntegrationTest {
             this.loanTransactionHelper.addChargesForLoan(loanId, LoanTransactionHelper
                     .getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10", null));
 
-            this.schedulerJobHelper.updateSchedulerStatus(true);
-            this.schedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().active(true).cronExpression("0/1 * * * * ?"));
+            SchedulerJobHelper.updateSchedulerStatus(true);
+            SchedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().active(true).cronExpression("0/1 * * * * ?"));
 
             Thread.sleep(2000);
             GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
@@ -1388,7 +1386,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
-            this.schedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().cronExpression("0 2 0 1/1 * ? *"));
+            SchedulerJobHelper.updateSchedulerJob(16L, new PutJobsJobIDRequest().cronExpression("0 2 0 1/1 * ? *"));
         }
     }
 

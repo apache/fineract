@@ -38,6 +38,7 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.Da
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RecalculationRestFrequencyType;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.SupportedInterestRefundTypesItem;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -48,7 +49,12 @@ import org.junit.jupiter.api.Test;
 @Slf4j
 public class LoanManualInterestRefundResponseStructureTest extends FeignLoanTestBase {
 
-    private final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+    private static PostClientsResponse client;
+
+    @BeforeAll
+    public static void beforeAll() {
+        client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+    }
 
     @Test
     public void testManualInterestRefundResponseStructureWithoutExternalIds() {

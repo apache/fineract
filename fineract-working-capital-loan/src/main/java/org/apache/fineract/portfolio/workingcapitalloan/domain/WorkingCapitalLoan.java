@@ -173,7 +173,8 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
 
     /**
      * Charge-off is a pure accounting tag: it does not affect the portfolio (balance, schedule) and the loan stays
-     * ACTIVE. Once set, the tag is only cleared by an explicit undo (it survives even when the loan is fully paid).
+     * ACTIVE. Once set, the tag is cleared by an explicit undo, or automatically when reprocessing finds that preceding
+     * money-movers have already cleared the outstanding at the charge-off point.
      */
     @Column(name = "is_charged_off", nullable = false)
     private boolean chargedOff;
@@ -216,19 +217,14 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     }
 
     /**
-     * Reverses the charge-off tag. Only used when the charge-off was applied in error.
+     * Reverses the charge-off tag. Used by explicit undo and by auto-lift when reprocessing finds nothing left to
+     * charge off.
      */
     public void liftChargeOff() {
         this.chargedOff = false;
         this.chargedOffOnDate = null;
         this.chargedOffBy = null;
         this.chargeOffReason = null;
-    }
-
-    public boolean isChargeOffOnDate(final LocalDate date) {
-        // Charged off as of {@code date}, i.e. the charge-off happened on or before it (parity with term/progressive
-        // loans).
-        return this.chargedOffOnDate != null && !this.chargedOffOnDate.isAfter(date);
     }
 
     public Long fetchChargeOffReasonId() {

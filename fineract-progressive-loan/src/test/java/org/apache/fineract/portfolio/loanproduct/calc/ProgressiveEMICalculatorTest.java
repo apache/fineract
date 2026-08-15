@@ -49,6 +49,7 @@ import org.apache.fineract.portfolio.loanproduct.calc.data.OutstandingDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.PeriodDueDetails;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanproduct.calc.data.RepaymentPeriod;
+import org.apache.fineract.portfolio.loanproduct.calc.data.RepaymentScheduleInstallmentData;
 import org.apache.fineract.portfolio.loanproduct.domain.ILoanConfigurationDetails;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
@@ -71,8 +72,8 @@ class ProgressiveEMICalculatorTest {
 
     private static ProgressiveEMICalculator emiCalculator = new ProgressiveEMICalculator(new DefaultScheduledDateGenerator());
 
-    private static MockedStatic<ThreadLocalContextUtil> threadLocalContextUtil = Mockito.mockStatic(ThreadLocalContextUtil.class);
-    private static MockedStatic<MoneyHelper> moneyHelper = Mockito.mockStatic(MoneyHelper.class);
+    private static MockedStatic<ThreadLocalContextUtil> threadLocalContextUtil;
+    private static MockedStatic<MoneyHelper> moneyHelper;
     private static MathContext mc = new MathContext(12, RoundingMode.HALF_EVEN);
     private static ILoanConfigurationDetails loanProductRelatedDetail = Mockito.mock(ILoanConfigurationDetails.class);
 
@@ -94,6 +95,8 @@ class ProgressiveEMICalculatorTest {
         periods.add(createPeriod(6, startDate.plusMonths(5), startDate.plusMonths(6)));
 
         // When
+        threadLocalContextUtil = Mockito.mockStatic(ThreadLocalContextUtil.class);
+        moneyHelper = Mockito.mockStatic(MoneyHelper.class);
         moneyHelper.when(MoneyHelper::getRoundingMode).thenReturn(RoundingMode.HALF_EVEN);
         moneyHelper.when(MoneyHelper::getMathContext).thenReturn(new MathContext(12, RoundingMode.HALF_EVEN));
     }
@@ -5410,5 +5413,72 @@ class ProgressiveEMICalculatorTest {
         Assertions.assertEquals(34.26, toDouble(interestSchedule.repaymentPeriods().get(5).getEmi()), 0.01, "Period 5 EMI (aggregated)");
         Assertions.assertEquals(17.13, toDouble(interestSchedule.repaymentPeriods().get(6).getEmi()), 0.01,
                 "Period 6 EMI (single tranche)");
+    }
+
+    @Test
+    public void test_disbursementAfterLastPeriodFullyPaid_zeroInterest_keepsPeriodsAbovePaidAmounts() {
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+        final LocalDate firstFromDate = LocalDate.of(2025, 11, 5);
+        final LocalDate firstDueDate = LocalDate.of(2025, 11, 21);
+        final LocalDate secondDueDate = LocalDate.of(2025, 12, 7);
+        final LocalDate thirdDueDate = LocalDate.of(2025, 12, 23);
+        expectedRepaymentPeriods.add(periodData(firstFromDate, firstDueDate));
+        expectedRepaymentPeriods.add(periodData(firstDueDate, secondDueDate));
+        expectedRepaymentPeriods.add(periodData(secondDueDate, thirdDueDate));
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(BigDecimal.ZERO);
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.DAYS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(16);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator
+                .generatePeriodInterestScheduleModel(expectedRepaymentPeriods, loanProductRelatedDetail, null, mc);
+
+        // Two tranches, disbursed on the same day, leave 70.15 to amortize: 23.38 / 23.38 / 23.39
+        emiCalculator.addDisbursement(interestSchedule, firstFromDate, toMoney(70.15));
+
+        Assertions.assertEquals(23.38, toDouble(interestSchedule.repaymentPeriods().get(0).getEmi()), 0.001);
+        Assertions.assertEquals(23.38, toDouble(interestSchedule.repaymentPeriods().get(1).getEmi()), 0.001);
+        Assertions.assertEquals(23.39, toDouble(interestSchedule.repaymentPeriods().get(2).getEmi()), 0.001);
+
+        // A refund allocated to the last installment pays it in full and part of the previous one. Loans without
+        // interest recalculation report their payments only on the installments, so this is all the model can know.
+        final List<RepaymentScheduleInstallmentData> installments = List.of(//
+                RepaymentScheduleInstallmentData.of(firstFromDate, firstDueDate, false, false, BigDecimal.ZERO, BigDecimal.ZERO), //
+                RepaymentScheduleInstallmentData.of(firstDueDate, secondDueDate, false, false, BigDecimal.valueOf(9.52), BigDecimal.ZERO), //
+                RepaymentScheduleInstallmentData.of(secondDueDate, thirdDueDate, false, false, BigDecimal.valueOf(23.39), BigDecimal.ZERO));
+
+        // Nothing is out of line yet, so the model has to be left untouched
+        emiCalculator.alignPeriodsWithPaidAmounts(interestSchedule, installments, firstFromDate);
+        Assertions.assertEquals(0.0, toDouble(interestSchedule.repaymentPeriods().get(2).getPaidPrincipal()), 0.001,
+                "An aligning which corrects nothing must not take over the paid amounts");
+        Assertions.assertEquals(23.38, toDouble(interestSchedule.repaymentPeriods().get(0).getEmi()), 0.001,
+                "An aligning which corrects nothing must not change the EMI amounts");
+        Assertions.assertEquals(23.38, toDouble(interestSchedule.repaymentPeriods().get(1).getEmi()), 0.001,
+                "An aligning which corrects nothing must not change the EMI amounts");
+        Assertions.assertEquals(23.39, toDouble(interestSchedule.repaymentPeriods().get(2).getEmi()), 0.001,
+                "An aligning which corrects nothing must not change the EMI amounts");
+
+        // Amortizing 70.16 over 3 periods rounds the EMI up to 23.39, so a cent has to be taken off somewhere. It must
+        // not be taken off the last period, which has 23.39 paid on it already.
+        final LocalDate secondDisbursementDate = LocalDate.of(2025, 11, 10);
+        emiCalculator.addDisbursement(interestSchedule, secondDisbursementDate, toMoney(0.01));
+        emiCalculator.alignPeriodsWithPaidAmounts(interestSchedule, installments, secondDisbursementDate);
+
+        // The EMI is the amount which ends up on the installment, so that is what must not fall below the paid amount.
+        // getDuePrincipal() would not show a violation, it is floored at the paid principal by definition.
+        for (RepaymentPeriod repaymentPeriod : interestSchedule.repaymentPeriods()) {
+            Assertions.assertTrue(!repaymentPeriod.getEmi().isLessThan(repaymentPeriod.getTotalPaidAmount()),
+                    "Period %s has a smaller EMI (%s) than what has been paid on it (%s)".formatted(repaymentPeriod.getDueDate(),
+                            repaymentPeriod.getEmi(), repaymentPeriod.getTotalPaidAmount()));
+        }
+        Assertions.assertEquals(23.39, toDouble(interestSchedule.repaymentPeriods().get(0).getEmi()), 0.001, "Period 1 EMI");
+        Assertions.assertEquals(23.38, toDouble(interestSchedule.repaymentPeriods().get(1).getEmi()), 0.001,
+                "The cent has to be taken off the period which still has room for it");
+        Assertions.assertEquals(23.39, toDouble(interestSchedule.repaymentPeriods().get(2).getEmi()), 0.001,
+                "The fully paid last period must keep its EMI");
+        Assertions.assertEquals(70.16, toDouble(interestSchedule.getTotalDuePrincipal()), 0.001,
+                "The amortized principal must stay equal to the disbursed amount");
     }
 }

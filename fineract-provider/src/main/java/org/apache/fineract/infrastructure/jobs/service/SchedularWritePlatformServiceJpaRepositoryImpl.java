@@ -106,7 +106,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     @Override
     public SchedulerDetail retriveSchedulerDetail() {
         SchedulerDetail schedulerDetail = null;
-        final List<SchedulerDetail> schedulerDetailList = this.schedulerDetailRepository.findAll();
+        final List<SchedulerDetail> schedulerDetailList = this.schedulerDetailRepository.findAllSchedulerDetails();
         if (schedulerDetailList != null) {
             schedulerDetail = schedulerDetailList.get(0);
         }

@@ -20,189 +20,100 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.GroupHelper;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/**
- * Group Test for checking Group: Creation, Activation, Client Association, Updating & Deletion
- */
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class GroupTest {
+/** Group tests: creation, activation, client association, update, and staff inheritance onto client accounts. */
+public class GroupTest extends FeignLoanTestBase {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GroupTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private final String principal = "10000.00";
-    private final String accountingRule = "1";
-    private final String numberOfRepayments = "5";
-    private final String interestRatePerPeriod = "18";
+    private static final String PRINCIPAL = "10000.00";
+    private static final String NUMBER_OF_REPAYMENTS = "5";
+    private static final String INTEREST_RATE_PER_PERIOD = "18";
+    private static final String LOAN_DATE = "20 September 2014";
 
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+    private static FeignGroupHelper groupHelper;
+    private static FeignStaffHelper staffHelper;
+
+    @BeforeAll
+    public static void setupGroupHelpers() {
+        FineractFeignClient client = FineractFeignClientHelper.getFineractFeignClient();
+        groupHelper = new FeignGroupHelper(client);
+        staffHelper = new FeignStaffHelper(client);
     }
 
     @Test
     public void checkGroupFunctions() {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec);
-        GroupHelper.verifyGroupCreatedOnServer(this.requestSpec, this.responseSpec, groupID);
+        final Long clientId = createClient();
+        final Long groupId = groupHelper.createGroup().getResourceId();
+        assertEquals(groupId, groupHelper.retrieveGroup(groupId).getId(), "ERROR IN CREATING THE GROUP");
 
-        groupID = GroupHelper.activateGroup(this.requestSpec, this.responseSpec, groupID.toString());
-        GroupHelper.verifyGroupActivatedOnServer(this.requestSpec, this.responseSpec, groupID, true);
+        groupHelper.activateGroup(groupId);
+        assertTrue(groupHelper.isGroupActive(groupId), "ERROR IN ACTIVATING THE GROUP");
 
-        groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        GroupHelper.verifyGroupMembers(this.requestSpec, this.responseSpec, groupID, clientID);
+        groupHelper.associateClient(groupId, clientId);
+        assertTrue(groupHelper.retrieveGroupMemberIds(groupId).contains(clientId), "ERROR IN GROUP MEMBER");
 
-        groupID = GroupHelper.disAssociateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        GroupHelper.verifyEmptyGroupMembers(this.requestSpec, this.responseSpec, groupID);
+        groupHelper.disAssociateClient(groupId, clientId);
+        assertTrue(groupHelper.retrieveGroupMemberIds(groupId).isEmpty(), "GROUP MEMBER LIST NOT EMPTY");
 
-        final String updatedGroupName = GroupHelper.randomNameGenerator("Group-", 5);
-        groupID = GroupHelper.updateGroup(this.requestSpec, this.responseSpec, updatedGroupName, groupID.toString());
-        GroupHelper.verifyGroupDetails(this.requestSpec, this.responseSpec, groupID, "name", updatedGroupName);
-
-        // NOTE: removed as consistently provides false positive result on
-        // cloudbees server.
-        // groupID = GroupHelper.createGroup(this.requestSpec,
-        // this.responseSpec);
-        // GroupHelper.deleteGroup(this.requestSpec, this.responseSpec,
-        // groupID.toString());
-        // GroupHelper.verifyGroupDeleted(this.requestSpec, this.responseSpec,
-        // groupID);
+        final String updatedGroupName = Utils.uniqueRandomStringGenerator("Group-", 5);
+        groupHelper.updateGroup(groupId, updatedGroupName);
+        assertEquals(updatedGroupName, groupHelper.retrieveGroup(groupId).getName(), "ERROR IN UPDATING THE GROUP NAME");
     }
 
     @Test
     public void assignStaffToGroup() {
-        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec);
-        GroupHelper.verifyGroupCreatedOnServer(this.requestSpec, this.responseSpec, groupID);
+        final Long groupId = groupHelper.createGroup().getResourceId();
+        assertEquals(groupId, groupHelper.retrieveGroup(groupId).getId(), "ERROR IN CREATING THE GROUP");
 
-        final String updateGroupName = Utils.uniqueRandomStringGenerator("Savings Group Help_", 5);
-        groupID = GroupHelper.activateGroup(this.requestSpec, this.responseSpec, groupID.toString());
-        Integer updateGroupId = GroupHelper.updateGroup(this.requestSpec, this.responseSpec, updateGroupName, groupID.toString());
+        groupHelper.activateGroup(groupId);
+        groupHelper.updateGroup(groupId, Utils.uniqueRandomStringGenerator("Savings Group Help_", 5));
 
         // create client and add client to group
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-
-        groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
-        GroupHelper.verifyGroupMembers(this.requestSpec, this.responseSpec, groupID, clientID);
+        final Long clientId = createClient();
+        groupHelper.associateClient(groupId, clientId);
+        assertTrue(groupHelper.retrieveGroupMemberIds(groupId).contains(clientId), "ERROR IN GROUP MEMBER");
 
         // create staff
-        Integer createStaffId1 = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        LOG.info("--------------creating first staff with id------------- {}", createStaffId1);
-        Assertions.assertNotNull(createStaffId1);
+        final Long staffId1 = staffHelper.createStaff().getResourceId();
+        assertNotNull(staffId1);
+        final Long staffId2 = staffHelper.createStaff().getResourceId();
+        assertNotNull(staffId2);
 
-        Integer createStaffId2 = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
-        LOG.info("--------------creating second staff with id------------- {}", createStaffId2);
-        Assertions.assertNotNull(createStaffId2);
+        // assign staff "staffId1" to the group
+        assertEquals(staffId1, groupHelper.assignStaff(groupId, staffId1).getStaffId(), "Verify assigned staff id is the same as id sent");
 
-        // assign staff "createStaffId1" to group
-        HashMap assignStaffGroupId = (HashMap) GroupHelper.assignStaff(this.requestSpec, this.responseSpec, groupID.toString(),
-                createStaffId1.longValue());
-        assertEquals(assignStaffGroupId.get("staffId"), createStaffId1, "Verify assigned staff id is the same as id sent");
+        // assign staff "staffId2" to the client
+        assertEquals(staffId2, clientHelper.assignStaffToClient(clientId, staffId2).getStaffId(),
+                "Verify assigned staff id is the same as id sent");
 
-        // assign staff "createStaffId2" to client
-        final HashMap assignStaffToClientChanges = (HashMap) ClientHelper.assignStaffToClient(this.requestSpec, this.responseSpec,
-                clientID.toString(), createStaffId2.toString());
-        assertEquals(assignStaffToClientChanges.get("staffId"), createStaffId2, "Verify assigned staff id is the same as id sent");
+        // create a client loan and disburse it (loan officer starts unset)
+        final Long loanProductId = createLoanProductFromJson(
+                new LoanProductTestBuilder().withPrincipal(PRINCIPAL).withNumberOfRepayments(NUMBER_OF_REPAYMENTS)
+                        .withinterestRatePerPeriod(INTEREST_RATE_PER_PERIOD).withInterestRateFrequencyTypeAsYear().build(null));
+        final Long loanId = applyForLoan(LoanRequestBuilders.applyLoan(clientId, loanProductId, LOAN_DATE, 10000.0, 4));
+        approveLoan(LOAN_DATE, loanId.intValue());
+        disburseLoanWithNetDisbursalAmount(loanId, LOAN_DATE, getLoanDetails(loanId).getNetDisbursalAmount().toPlainString());
 
-        final Integer loanProductId = this.createLoanProduct();
+        // assign staff "staffId1" to the group and cascade it to member client accounts
+        final Long inheritedStaffId = groupHelper.assignStaffInheritStaffForClientAccounts(groupId, staffId1).getStaffId();
 
-        final Integer loanId = this.applyForLoanApplication(clientID, loanProductId, this.principal);
+        // the client's staff officer changed away from staffId2 and now matches the inherited staff
+        assertNotEquals(staffId2, inheritedStaffId, "Verify if client staff has changed");
+        assertEquals(inheritedStaffId, clientHelper.getClientStaffId(clientId), "Verify if client inherited staff assigned above");
 
-        this.loanTransactionHelper.approveLoan("20 September 2014", loanId);
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2014", loanId,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-
-        final HashMap assignStaffAndInheritStaffForClientAccounts = (HashMap) GroupHelper.assignStaffInheritStaffForClientAccounts(
-                this.requestSpec, this.responseSpec, groupID.toString(), createStaffId1.toString());
-        final Integer getClientStaffId = ClientHelper.getClientsStaffId(this.requestSpec, this.responseSpec, clientID.toString());
-
-        // assert if client staff officer has change Note client was assigned
-        // staff with createStaffId2
-        assertNotEquals(assignStaffAndInheritStaffForClientAccounts.get("staffId"), createStaffId2, "Verify if client stuff has changed");
-        assertEquals(assignStaffAndInheritStaffForClientAccounts.get("staffId"), getClientStaffId,
-                "Verify if client inherited staff assigned above");
-
-        // assert if clients loan officer has changed
-        final Integer loanOfficerId = this.loanTransactionHelper.getLoanOfficerId(loanId.toString());
-        assertEquals(assignStaffAndInheritStaffForClientAccounts.get("staffId"), loanOfficerId, "Verify if client loan inherited staff");
-
+        // the client loan's officer also inherited the staff
+        assertEquals(inheritedStaffId, getLoanDetails(loanId).getLoanOfficerId(), "Verify if client loan inherited staff");
     }
-
-    private Integer createLoanProduct() {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(this.principal)
-                .withNumberOfRepayments(this.numberOfRepayments).withinterestRatePerPeriod(this.interestRatePerPeriod)
-                .withInterestRateFrequencyTypeAsYear().build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
-    }
-
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal) {
-        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                String.valueOf(clientID), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal(principal) //
-                .withLoanTermFrequency("4") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("4") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate("20 September 2014") //
-                .withSubmittedOnDate("20 September 2014") //
-                .withCollaterals(collaterals).build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
-    }
-
-    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
-        collaterals.add(collaterals(collateralId, quantity));
-    }
-
-    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
-        HashMap<String, String> collateral = new HashMap<String, String>(2);
-        collateral.put("clientCollateralId", collateralId.toString());
-        collateral.put("quantity", quantity.toString());
-        return collateral;
-    }
-
 }

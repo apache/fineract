@@ -89,7 +89,7 @@ public class DelinquencyWritePlatformServiceHelper {
         Map<String, Object> changes = new HashMap<>();
         List<LoanDelinquencyTagHistory> loanDelinquencyTagHistory = new ArrayList<>();
         final LocalDate transactionDate = DateUtils.getBusinessLocalDate();
-        Optional<LoanDelinquencyTagHistory> optLoanDelinquencyTag = this.loanDelinquencyTagRepository.findByLoanAndLiftedOnDate(loan, null);
+        Optional<LoanDelinquencyTagHistory> optLoanDelinquencyTag = this.loanDelinquencyTagRepository.findByLoanAndLiftedOnDateIsNull(loan);
         // The delinquencyRangeId in null means just goes out from Delinquency
         LoanDelinquencyTagHistory loanDelinquencyTagPrev = null;
         if (delinquencyRangeId == null) {

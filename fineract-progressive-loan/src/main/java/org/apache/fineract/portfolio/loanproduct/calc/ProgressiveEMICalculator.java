@@ -30,8 +30,10 @@ import java.time.Year;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -117,6 +119,60 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             return Optional.empty();
         }
         return scheduleModel.findRepaymentPeriodByFromAndDueDate(repaymentPeriodFromDate, repaymentPeriodDueDate);
+    }
+
+    @Override
+    public void alignPeriodsWithPaidAmounts(final ProgressiveLoanInterestScheduleModel scheduleModel,
+            final List<RepaymentScheduleInstallmentData> installments, final LocalDate tillDate) {
+        if (scheduleModel == null || installments == null || scheduleModel.repaymentPeriods().isEmpty()) {
+            return;
+        }
+        final MathContext mc = scheduleModel.mc();
+        final Map<RepaymentPeriod, PaidAmounts> paidAmountsByPeriod = collectPaidAmountsByPeriod(scheduleModel, installments);
+        final boolean hasPeriodBelowPaidAmount = paidAmountsByPeriod.entrySet().stream().anyMatch(entry -> entry.getValue().total(mc)
+                .isGreaterThan(entry.getKey().getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest()));
+        if (!hasPeriodBelowPaidAmount) {
+            return;
+        }
+        // Iterated on the model and not on the map, since setting the paid amounts changes the very periods which are
+        // the keys of the map
+        scheduleModel.repaymentPeriods().forEach(repaymentPeriod -> {
+            final PaidAmounts paidAmounts = paidAmountsByPeriod.get(repaymentPeriod);
+            if (paidAmounts != null) {
+                repaymentPeriod.setPaidAmounts(paidAmounts.principal(), paidAmounts.interest());
+            }
+        });
+        calculateOutstandingBalance(scheduleModel);
+        calculateLastUnpaidRepaymentPeriodEMI(scheduleModel, tillDate);
+    }
+
+    /**
+     * Collects the paid amounts of the installments per the repayment period they belong to. Installments which resolve
+     * to the same repayment period are summed up, since a repayment period can cover more than one installment once
+     * intermediate stub periods got collapsed. Only the amounts which the model does not know about yet are collected,
+     * so that the paid amounts the model tracks on its own are never contradicted.
+     * <p>
+     * The periods are kept apart by their identity, since the equality of a period is derived from its amounts, which
+     * are exactly what the caller is about to change.
+     */
+    private Map<RepaymentPeriod, PaidAmounts> collectPaidAmountsByPeriod(final ProgressiveLoanInterestScheduleModel scheduleModel,
+            final List<RepaymentScheduleInstallmentData> installments) {
+        final MathContext mc = scheduleModel.mc();
+        final CurrencyData currency = scheduleModel.loanProductRelatedDetail().getCurrencyData();
+        final Map<RepaymentPeriod, PaidAmounts> paidAmountsByPeriod = new IdentityHashMap<>();
+        for (final RepaymentScheduleInstallmentData installment : installments) {
+            if (installment.isDownPayment() || installment.isAdditional()) {
+                continue;
+            }
+            scheduleModel.findRepaymentPeriodByFromAndDueDate(installment.getFromDate(), installment.getDueDate())
+                    .ifPresent(repaymentPeriod -> paidAmountsByPeriod.merge(repaymentPeriod,
+                            new PaidAmounts(Money.of(currency, installment.getPaidPrincipal(), mc),
+                                    Money.of(currency, installment.getPaidInterest(), mc)),
+                            (accumulated, actual) -> accumulated.add(actual, mc)));
+        }
+        paidAmountsByPeriod.replaceAll((repaymentPeriod, paidAmounts) -> paidAmounts.atLeast(repaymentPeriod.getPaidPrincipal(),
+                repaymentPeriod.getPaidInterest()));
+        return paidAmountsByPeriod;
     }
 
     /**
@@ -2200,5 +2256,20 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         Money value = calculatedEMI.value().minus(sumOfOtherEqualAmortizationValues);
         Money adjust = outstanding.minus(value.multipliedBy(numberOfInstallments));
         return new EqualAmortizationValues(outstanding, numberOfInstallments, value, adjust);
+    }
+
+    private record PaidAmounts(Money principal, Money interest) {
+
+        PaidAmounts add(final PaidAmounts other, final MathContext mc) {
+            return new PaidAmounts(principal.plus(other.principal(), mc), interest.plus(other.interest(), mc));
+        }
+
+        PaidAmounts atLeast(final Money minimumPrincipal, final Money minimumInterest) {
+            return new PaidAmounts(MathUtil.max(principal, minimumPrincipal, false), MathUtil.max(interest, minimumInterest, false));
+        }
+
+        Money total(final MathContext mc) {
+            return principal.plus(interest, mc);
+        }
     }
 }

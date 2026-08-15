@@ -26,8 +26,6 @@ import org.apache.fineract.organisation.teller.data.CashierData;
 import org.apache.fineract.organisation.teller.data.CashierTransactionData;
 import org.apache.fineract.organisation.teller.data.CashierTransactionsWithSummaryData;
 import org.apache.fineract.organisation.teller.data.TellerData;
-import org.apache.fineract.organisation.teller.data.TellerJournalData;
-import org.apache.fineract.organisation.teller.data.TellerTransactionData;
 
 public interface TellerManagementReadPlatformService {
 
@@ -37,19 +35,9 @@ public interface TellerManagementReadPlatformService {
 
     CashierData findCashier(Long cashierId);
 
-    Collection<CashierData> getCashierData(Long officeId, Long tellerId, Long staffId, LocalDate date);
-
     CashierData retrieveCashierTemplate(Long officeId, Long tellerId, boolean staffInSelectedOfficeOnly);
 
     CashierTransactionData retrieveCashierTxnTemplate(Long cashierId);
-
-    TellerTransactionData findTellerTransaction(Long transactionId);
-
-    Collection<TellerTransactionData> fetchTellerTransactionsByTellerId(Long tellerId, LocalDate fromDate, LocalDate toDate);
-
-    Collection<TellerJournalData> getJournals(Long officeId, Long tellerId, Long cashierId, LocalDate dateFrom, LocalDate dateTo);
-
-    Collection<TellerJournalData> fetchTellerJournals(Long tellerId, Long cashierId, LocalDate fromDate, LocalDate toDate);
 
     Collection<CashierData> getCashiersForTeller(Long tellerId, LocalDate fromDate, LocalDate toDate);
 

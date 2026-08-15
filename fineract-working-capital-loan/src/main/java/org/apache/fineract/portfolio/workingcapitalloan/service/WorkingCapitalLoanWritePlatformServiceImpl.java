@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
@@ -74,8 +75,10 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanLifecycleStateMachine;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanNote;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodPaymentRateChange;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodPaymentRateHistoryHelper;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelation;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
@@ -120,6 +123,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
     private final WorkingCapitalLoanTransactionProcessor transactionProcessor;
     private final WorkingCapitalLoanChargeAccrualService chargeAccrualService;
+    private final WorkingCapitalLoanTransactionFinder transactionFinder;
 
     @Override
     public CommandProcessingResult approveApplication(final Long loanId, final JsonCommand command) {
@@ -875,7 +879,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         this.loanRepository.saveAndFlush(loan);
 
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntries(loan, creditBalanceRefundTransaction, allocation, loan.isChargedOff());
+            accountingProcessor.postJournalEntries(loan, creditBalanceRefundTransaction, allocation,
+                    transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, creditBalanceRefundTransaction));
         }
 
         businessEventNotifierService.notifyPostBusinessEvent(
@@ -905,26 +910,55 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         final BigDecimal newRate = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.periodPaymentRateParamName,
                 command.parsedJson(), new HashSet<>());
-        final BigDecimal previousRate = loan.getLoanProductRelatedDetails().getPeriodPaymentRate();
 
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
+        // Mandatory, so the validator has already rejected a request without it.
+        final LocalDate effectiveDate = command.localDateValueOfParameterNamed(WorkingCapitalLoanConstants.effectiveDateParamName);
 
-        final List<WorkingCapitalLoanPeriodPaymentRateChange> activeChanges = this.rateChangeRepository
+        // The loan's own rate is the one it was created with and stays that way - a rate change is recorded in the
+        // history, never written back onto the loan - so it is the right fallback for a loan whose changes have all
+        // been reversed.
+        final BigDecimal loanOriginalRate = loan.getLoanProductRelatedDetails().getPeriodPaymentRate();
+        final List<WorkingCapitalLoanPeriodPaymentRateChange> rateChanges = this.rateChangeRepository
                 .findByWorkingCapitalLoanIdAndReversedFalse(loanId);
-        for (final WorkingCapitalLoanPeriodPaymentRateChange active : activeChanges) {
-            active.reverse(businessDate);
+
+        // Only same-date changes are overwritten. Changes on other dates stay active
+        // and keep their own segment of the schedule. The reversal is stamped with the business date because it records
+        // when the correction was made, not what the reversed change was effective for.
+        final List<WorkingCapitalLoanPeriodPaymentRateChange> supersededChanges = rateChanges.stream()
+                .filter(change -> !change.isReversed() && change.getEffectiveDate().equals(effectiveDate)).toList();
+        for (final WorkingCapitalLoanPeriodPaymentRateChange superseded : supersededChanges) {
+            superseded.reverse(businessDate);
         }
-        if (!activeChanges.isEmpty()) {
-            this.rateChangeRepository.saveAll(activeChanges);
+        if (!supersededChanges.isEmpty()) {
+            this.rateChangeRepository.saveAll(supersededChanges);
         }
 
-        loan.getLoanProductRelatedDetails().setPeriodPaymentRate(newRate);
+        // Resolved after the reversal above, so the predecessor of a same-date overwrite is the rate that was in force
+        // before the mistaken change, not the mistaken change itself.
+        final BigDecimal previousRate = WorkingCapitalLoanPeriodPaymentRateHistoryHelper.rateInEffectAt(rateChanges, loanOriginalRate,
+                effectiveDate);
 
-        final WorkingCapitalLoanPeriodPaymentRateChange rateChange = WorkingCapitalLoanPeriodPaymentRateChange.create(loan, businessDate,
+        final WorkingCapitalLoanPeriodPaymentRateChange rateChange = WorkingCapitalLoanPeriodPaymentRateChange.create(loan, effectiveDate,
                 previousRate, newRate);
         this.rateChangeRepository.save(rateChange);
 
-        this.amortizationScheduleWriteService.regenerateAmortizationScheduleOnRateChange(loan, newRate);
+        final List<WorkingCapitalLoanPeriodPaymentRateChange> changesIncludingNew = Stream
+                .concat(rateChanges.stream(), Stream.of(rateChange)).toList();
+
+        // A backdated change slots in behind changes that were booked earlier, so the predecessor those recorded at the
+        // time is no longer the one in force before them. Restating the chain keeps the history reading the same way
+        // regardless of the order the changes were entered.
+        final List<WorkingCapitalLoanPeriodPaymentRateChange> restated = WorkingCapitalLoanPeriodPaymentRateHistoryHelper
+                .restatePreviousRates(changesIncludingNew, loanOriginalRate);
+        if (!restated.isEmpty()) {
+            this.rateChangeRepository.saveAll(restated);
+        }
+
+        // The rate on the loan's product-related details is deliberately left alone. It records the rate the loan was
+        // created with - the base every schedule rebuild starts from - and is a loan-product-level value, not a
+        // running "current rate". What is in force on any given date is derived from the history above.
+        this.amortizationScheduleWriteService.regenerateAmortizationScheduleOnRateChange(loan);
 
         final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName);
         createNote(noteText, loan);
@@ -932,14 +966,16 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(WorkingCapitalLoanConstants.periodPaymentRateParamName, newRate);
-        changes.put(WorkingCapitalLoanConstants.previousPeriodPaymentRateParamName, previousRate);
+        // Read back off the entity rather than reusing the value computed above, so the audit record can never disagree
+        // with the row the restate left behind.
+        changes.put(WorkingCapitalLoanConstants.previousPeriodPaymentRateParamName, rateChange.getPreviousRate());
+        changes.put(WorkingCapitalLoanConstants.effectiveDateParamName, effectiveDate);
         if (StringUtils.isNotBlank(noteText)) {
             changes.put(WorkingCapitalLoanConstants.noteParamName, noteText);
         }
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loanId)
-                .withEntityExternalId(loan.getExternalId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
-                .withLoanId(loanId).with(changes).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(rateChange.getId())
+                .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withLoanId(loanId).with(changes).build();
     }
 
     public CommandProcessingResult undoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,

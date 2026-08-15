@@ -105,7 +105,6 @@ public class LoanAccountArrearsAgeingCOBBusinessStepTest extends BaseLoanIntegra
             final Integer loanId_2 = createLoanAccount(loanOperationDate, clientId, loanProductId, loan2ExternalIdStr);
 
             // Run Loan cob with verfying business step for Update Arrears ageing details
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
 
             // COB Step Validation
             final JobBusinessStepConfigData jobBusinessStepConfigData = BusinessStepConfigurationHelper
@@ -118,7 +117,7 @@ public class LoanAccountArrearsAgeingCOBBusinessStepTest extends BaseLoanIntegra
 
             // Run the Loan COB Job
             final String jobName = "Loan COB";
-            schedulerJobHelper.executeAndAwaitJob(jobName);
+            SchedulerJobHelper.executeAndAwaitJob(jobName);
 
             // verify Arrears details are updated for both the loans, by verifying loan summary fields for
             // principalOverdue,totalOverdue,overdueSinceddate

@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.serialization;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +30,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
@@ -41,6 +43,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductMinMaxConstraints;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
@@ -67,6 +70,8 @@ class WorkingCapitalLoanDataValidatorUpdateRateTest {
     private WorkingCapitalLoanProduct product;
     @Mock
     private WorkingCapitalLoanProductMinMaxConstraints minMaxConstraints;
+    @Mock
+    private WorkingCapitalLoanPeriodPaymentRateChangeRepository rateChangeRepository;
 
     @BeforeEach
     void setUp() {
@@ -76,9 +81,11 @@ class WorkingCapitalLoanDataValidatorUpdateRateTest {
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
 
         final FromJsonHelper fromApiJsonHelper = new FromJsonHelper();
-        validator = new WorkingCapitalLoanDataValidator(fromApiJsonHelper, null, null, null, null, null);
+        validator = new WorkingCapitalLoanDataValidator(fromApiJsonHelper, null, null, null, null, null, rateChangeRepository);
 
-        // Default: active loan, current rate = 10, product min = 1, max = 95
+        // Default: active loan, current rate = 10, product min = 1, max = 95. With no rate changes on record the loan's
+        // own rate is the one in effect, so "10" is still the rate a request has to differ from.
+        lenient().when(rateChangeRepository.findByWorkingCapitalLoanIdAndReversedFalse(any())).thenReturn(List.of());
         lenient().when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
         lenient().when(loan.getLoanProductRelatedDetails()).thenReturn(relatedDetails);
         lenient().when(relatedDetails.getPeriodPaymentRate()).thenReturn(BigDecimal.TEN);
@@ -158,7 +165,7 @@ class WorkingCapitalLoanDataValidatorUpdateRateTest {
     @Test
     void shouldRejectNoteTooLong() {
         final JsonObject json = new JsonObject();
-        json.addProperty("locale", "en");
+        addCommonParameters(json);
         json.addProperty(WorkingCapitalLoanConstants.periodPaymentRateParamName, 20);
         json.addProperty(WorkingCapitalLoanConstants.noteParamName, "x".repeat(1001));
         PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
@@ -169,7 +176,7 @@ class WorkingCapitalLoanDataValidatorUpdateRateTest {
     @Test
     void shouldAcceptValidNote() {
         final JsonObject json = new JsonObject();
-        json.addProperty("locale", "en");
+        addCommonParameters(json);
         json.addProperty(WorkingCapitalLoanConstants.periodPaymentRateParamName, 20);
         json.addProperty(WorkingCapitalLoanConstants.noteParamName, "Rate adjusted per client request");
         assertDoesNotThrow(() -> validator.validateUpdatePeriodPaymentRate(json.toString(), loan));
@@ -216,9 +223,15 @@ class WorkingCapitalLoanDataValidatorUpdateRateTest {
         assertDoesNotThrow(() -> validator.validateUpdatePeriodPaymentRate(validJson("20"), loan));
     }
 
+    private void addCommonParameters(final JsonObject json) {
+        json.addProperty("locale", "en");
+        json.addProperty(WorkingCapitalLoanConstants.dateFormatParameterName, "dd MMMM yyyy");
+        json.addProperty(WorkingCapitalLoanConstants.effectiveDateParamName, "01 January 2026");
+    }
+
     private String validJson(final String rate) {
         final JsonObject json = new JsonObject();
-        json.addProperty("locale", "en");
+        addCommonParameters(json);
         json.addProperty(WorkingCapitalLoanConstants.periodPaymentRateParamName, new BigDecimal(rate));
         return json.toString();
     }

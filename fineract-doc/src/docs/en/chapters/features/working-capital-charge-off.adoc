@@ -32,9 +32,10 @@ not apply here.
 ====
 Charge-off is an accounting treatment only. It does not change the schedule, balance or delinquency
 data returned by the existing Working Capital Loan APIs; the loan resource only gains the charged-off
-state fields (see <<wc-charge-off-read-model>>). The loan remains `ACTIVE` until its balance is cured, and the
-charged-off tag is never removed automatically — even if the loan is subsequently paid off. It is
-cleared only by an explicit undo.
+state fields (see <<wc-charge-off-read-model>>). The loan remains `ACTIVE` until its balance is cured.
+The charged-off tag is cleared by an explicit undo, and also automatically when a backdated money-mover
+(or reversal) leaves nothing outstanding at the charge-off point in the transaction timeline — the
+charge-off transaction is then reversed and the flag is lifted.
 ====
 
 == Charge-Off a Loan
@@ -72,7 +73,9 @@ the last user transaction date (system transactions such as accrual or discount-
 * A non-monetary `CHARGE_OFF` transaction is created for the charge-off amount, which is the outstanding
 balance as of the charge-off date. The charge-off date cannot precede the last user transaction, and system
 transactions do not move the balance, so the current outstanding balance equals the as-of-date balance.
-* The transaction does *not* move the loan balance and is excluded from transaction replay.
+* The transaction does *not* move the loan balance. Reprocessing walks it in chronological order to refresh
+that outstanding snapshot (or to reverse and lift the charge-off when preceding money-movers have cleared
+the outstanding).
 * The loan is flagged as charged off (`chargedOff = true`) and remains `ACTIVE`.
 * All credit transactions — repayment, goodwill credit, payout refund, credit balance refund — and payment,
 waiver or adjustment of *existing* charges remain allowed afterwards, so the balance can still be cured.
@@ -107,9 +110,10 @@ Reverses a charge-off that was applied in error.
 * *Permission*: `UNDOCHARGEOFF_WORKINGCAPITALLOAN`
 
 Undo removes the charged-off tag, reverses the charge-off transaction and reverses its journal entries.
-It is only allowed when the charge-off is still the last user transaction, that is, when no user transaction
-has been posted after it (the same restriction as term and progressive loans). System transactions
-(accrual and discount-fee amortization) are not user transactions and therefore do not block undo.
+It is only allowed when the charge-off is still the last user transaction in (transaction date, id) order
+(the same restriction as term and progressive loans). A backdated money-mover dated before the charge-off
+does not block undo. System transactions (accrual and discount-fee amortization) are not user transactions
+and therefore do not block undo.
 
 == Charge-Off Template
 
@@ -195,10 +199,19 @@ through the Working Capital Loan product accounting mapping.
 
 === While the Loan Is Charged Off
 
+Accounting for a money-mover follows its place in the transaction timeline relative to the charge-off
+(date, then submitted-on, then created, then id), not merely whether the loan currently carries the
+charged-off flag. A backdated repayment that sorts *before* the charge-off keeps regular portfolio /
+receivable credits; a transaction that sorts *after* it uses the recovery / charge-off routing below
+(including a same-day repayment posted after the charge-off). Reprocessing refreshes the charge-off
+amount from the outstanding at its point in the timeline and restates journal entries when portions or
+that routing change.
+
 Transactions posted while the loan carries the charged-off tag are accepted as usual, but their accounting
-treatment changes: credits that would normally reduce the portfolio or receivables — already written off by
-the charge-off — instead recognize recovery income or reverse what the charge-off recognized, and
-discount-fee amortization is recognized against the charge-off expense instead of discount-fee income.
+treatment changes when they fall after the charge-off: credits that would normally reduce the portfolio or
+receivables — already written off by the charge-off — instead recognize recovery income or reverse what
+the charge-off recognized, and discount-fee amortization is recognized against the charge-off expense
+instead of discount-fee income.
 
 [cols="2,2,3"]
 |===
@@ -221,10 +234,6 @@ excess
 `INCOME_FROM_CHARGE_OFF_PENALTY` per portion — reversing what the charge-off recognized; `OVERPAYMENT` for
 any overpaid excess
 
-|Charge adjustment
-|`INCOME_FROM_RECOVERY`
-|`LOAN_PORTFOLIO` / `FEES_RECEIVABLE` / `PENALTIES_RECEIVABLE` per portion
-
 |Discount-fee amortization
 |`DEFERRED_INCOME_LIABILITY`
 |`CHARGE_OFF_EXPENSE` (instead of `INCOME_FROM_DISCOUNT_FEE`)
@@ -232,6 +241,24 @@ any overpaid excess
 
 Charge accrual keeps its regular treatment (receivable against fee/penalty income). Once the
 charge-off is undone, subsequent transactions return to the regular accounting treatment.
+
+=== Charge adjustment
+
+Credit accounts depend on whether the adjustment sorts *before* or *after* the charge-off transaction.
+Debit is always the full amount to `INCOME_FROM_FEES` or `INCOME_FROM_PENALTIES`
+(fee vs penalty charge). Credits:
+
+[cols="1,2,2"]
+|===
+|*Portion* |*Sorts before charge-off* |*Sorts after charge-off*
+
+|Principal |`LOAN_PORTFOLIO` |`INCOME_FROM_CHARGE_OFF_FEES` / `INCOME_FROM_CHARGE_OFF_PENALTY` (charge type)
+|Fee |`FEES_RECEIVABLE` |`INCOME_FROM_CHARGE_OFF_FEES`
+|Penalty |`PENALTIES_RECEIVABLE` |`INCOME_FROM_CHARGE_OFF_PENALTY`
+|Excess |`OVERPAYMENT` |`OVERPAYMENT`
+|===
+
+Restated on reprocess when the allocation or before/after charge-off routing changes.
 
 == Permissions
 

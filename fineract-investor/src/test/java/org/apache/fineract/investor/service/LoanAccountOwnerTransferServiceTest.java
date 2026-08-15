@@ -27,7 +27,6 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.data.domain.Sort.Direction.ASC;
 
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -65,8 +64,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.NonNull;
 
 @ExtendWith(MockitoExtension.class)
@@ -123,7 +120,8 @@ public class LoanAccountOwnerTransferServiceTest {
 
         List<ExternalAssetOwnerTransfer> response = List.of(pendingSaleTransfer, pendingBuybackTransfer, pendingIntermediateTransfer,
                 pendingBuyBackIntermediateTransfer);
-        when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(ASC, "id")))).thenReturn(response);
+        when(externalAssetOwnerTransferRepository.findAllByLoanIdAndStatusInAndEffectiveDateTo(eq(1L), any(),
+                eq(LoanAccountOwnerTransferServiceImpl.FUTURE_DATE_9999_12_31))).thenReturn(response);
         when(externalAssetOwnerTransferRepository.save(any(ExternalAssetOwnerTransfer.class))).thenReturn(pendingSaleTransfer)
                 .thenReturn(cancelledSaleTransfer).thenReturn(pendingBuybackTransfer).thenReturn(cancelledBuybackTransfer)
                 .thenReturn(pendingIntermediateTransfer).thenReturn(cancelledIntermediateTransfer)
@@ -163,7 +161,8 @@ public class LoanAccountOwnerTransferServiceTest {
 
         List<ExternalAssetOwnerTransfer> response = List.of(pendingSaleTransfer, pendingBuybackTransfer, pendingIntermediateTransfer,
                 pendingBuyBackIntermediateTransfer);
-        when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(ASC, "id")))).thenReturn(response);
+        when(externalAssetOwnerTransferRepository.findAllByLoanIdAndStatusInAndEffectiveDateTo(eq(1L), any(),
+                eq(LoanAccountOwnerTransferServiceImpl.FUTURE_DATE_9999_12_31))).thenReturn(response);
         when(externalAssetOwnerTransferRepository.save(any(ExternalAssetOwnerTransfer.class))).thenReturn(pendingSaleTransfer)
                 .thenReturn(declinedSaleTransfer).thenReturn(pendingBuybackTransfer).thenReturn(cancelledBuybackTransfer)
                 .thenReturn(pendingIntermediateTransfer).thenReturn(cancelledIntermediateTransfer)
@@ -192,7 +191,8 @@ public class LoanAccountOwnerTransferServiceTest {
         ExternalAssetOwnerTransfer declineTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
         List<ExternalAssetOwnerTransfer> response = List.of(pendingSaleTransfer);
 
-        when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(ASC, "id")))).thenReturn(response);
+        when(externalAssetOwnerTransferRepository.findAllByLoanIdAndStatusInAndEffectiveDateTo(eq(1L), any(),
+                eq(LoanAccountOwnerTransferServiceImpl.FUTURE_DATE_9999_12_31))).thenReturn(response);
         when(externalAssetOwnerTransferRepository.save(any(ExternalAssetOwnerTransfer.class))).thenReturn(declineTransfer)
                 .thenReturn(pendingSaleTransfer);
 
@@ -218,8 +218,10 @@ public class LoanAccountOwnerTransferServiceTest {
         ExternalAssetOwnerTransfer activeTransfer = Mockito.mock(ExternalAssetOwnerTransfer.class);
         List<ExternalAssetOwnerTransfer> response = List.of(pendingBuybackTransfer);
 
-        when(externalAssetOwnerTransferRepository.findAll(any(Specification.class), eq(Sort.by(ASC, "id")))).thenReturn(response);
-        when(externalAssetOwnerTransferRepository.findOne(any(Specification.class))).thenReturn(Optional.of(activeTransfer));
+        when(externalAssetOwnerTransferRepository.findAllByLoanIdAndStatusInAndEffectiveDateTo(eq(1L), any(),
+                eq(LoanAccountOwnerTransferServiceImpl.FUTURE_DATE_9999_12_31))).thenReturn(response);
+        when(externalAssetOwnerTransferRepository.findOneByLoanIdAndOwnerAndStatusInAndEffectiveDateTo(eq(1L), any(), any(),
+                eq(LoanAccountOwnerTransferServiceImpl.FUTURE_DATE_9999_12_31))).thenReturn(Optional.of(activeTransfer));
         when(externalAssetOwnerTransferRepository.save(any(ExternalAssetOwnerTransfer.class))).thenReturn(activeTransfer)
                 .thenReturn(pendingBuybackTransfer);
 
