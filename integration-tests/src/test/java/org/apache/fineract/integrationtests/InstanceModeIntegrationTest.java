@@ -26,8 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.ExecuteJobRequest;
 import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.models.JobExecuteRequest;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
@@ -115,7 +115,7 @@ public class InstanceModeIntegrationTest {
     public void testRunSchedulerJobDoesntWork_WhenReadOnly() {
         // when/then
         CallFailedRuntimeException exception = failVoid(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob()
-                .executeJob(jobId, "executeJob", new ExecuteJobRequest()));
+                .executeJob(jobId, "executeJob", new JobExecuteRequest()));
         assertEquals(405, exception.getStatus());
     }
 
@@ -124,7 +124,7 @@ public class InstanceModeIntegrationTest {
     public void testRunSchedulerJobDoesntWork_WhenWriteOnly() {
         // when/then
         CallFailedRuntimeException exception = failVoid(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob()
-                .executeJob(jobId, "executeJob", new ExecuteJobRequest()));
+                .executeJob(jobId, "executeJob", new JobExecuteRequest()));
         assertEquals(405, exception.getStatus());
     }
 
@@ -133,7 +133,7 @@ public class InstanceModeIntegrationTest {
     public void testRunSchedulerJobWorks_WhenBatchOnly() {
         // when
         executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().executeJob(jobId, "executeJob",
-                new ExecuteJobRequest()));
+                new JobExecuteRequest()));
         // then no exception thrown
     }
 }

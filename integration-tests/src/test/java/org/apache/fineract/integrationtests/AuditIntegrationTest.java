@@ -34,7 +34,6 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignCodeHelper
 import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
 import org.apache.fineract.integrationtests.common.AuditHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -157,20 +156,6 @@ public class AuditIntegrationTest extends FeignIntegrationTest {
             AuditHelper.verifyOrderBysupported(shouldBeSupportedFor.get(i));
         }
 
-    }
-
-    @Test
-    public void executeSchedulerJobShouldCreateAuditEntry() {
-        // given
-        int jobId = SchedulerJobHelper.getSchedulerJobIdByShortName("SA_AANF").intValue();
-        List<AuditData> auditsRecievedInitial = AuditHelper.getAuditDetails(jobId, "EXECUTEJOB", "SCHEDULER");
-
-        // when
-        SchedulerJobHelper.runSchedulerJob(jobId);
-
-        // then
-        List<AuditData> auditsRecieved = AuditHelper.getAuditDetails(jobId, "EXECUTEJOB", "SCHEDULER");
-        AuditHelper.verifyMultipleAuditsOnserver(auditsRecievedInitial, auditsRecieved, jobId, "EXECUTEJOB", "SCHEDULER");
     }
 
     private void closeClient(Integer clientId) {

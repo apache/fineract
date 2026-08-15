@@ -94,9 +94,6 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     private JobStarter jobStarter;
 
     @Autowired
-    private JobParameterDataParser dataParser;
-
-    @Autowired
     private JobNameService jobNameService;
 
     private static final String JOB_STARTER_METHOD_NAME = "run";
@@ -258,8 +255,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
     }
 
     @Override
-    public void executeJobWithParameters(final Long jobId, String jobParametersJson) {
-        Set<JobParameterDTO> jobParameterDTOSet = dataParser.parseExecution(jobParametersJson);
+    public void executeJobWithParameters(final Long jobId, Set<JobParameterDTO> jobParameterDTOSet) {
         final ScheduledJobDetail scheduledJobDetail = this.schedularWritePlatformService.findByJobId(jobId);
         if (scheduledJobDetail == null) {
             throw new JobNotFoundException(String.valueOf(jobId));
