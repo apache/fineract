@@ -275,6 +275,14 @@ public class ClientHelper {
         return GSON.fromJson(response, PostClientClientIdAddressesResponse.class);
     }
 
+    public static void updateClientAddress(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, long clientId,
+            ClientAddressRequest request) {
+        final String UPDATE_CLIENT_ADDRESS_URL = "/fineract-provider/api/v1/client/" + clientId + "/addresses?" + Utils.TENANT_IDENTIFIER;
+        log.info("---------------------------------UPDATING A CLIENT ADDRESS ---------------------------------------------");
+        String requestBody = GSON.toJson(request);
+        Utils.performServerPut(requestSpec, responseSpec, UPDATE_CLIENT_ADDRESS_URL, requestBody);
+    }
+
     // TODO: Rewrite to use fineract-client instead!
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
