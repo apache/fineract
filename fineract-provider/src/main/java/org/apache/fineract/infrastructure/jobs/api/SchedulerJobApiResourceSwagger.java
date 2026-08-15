@@ -106,10 +106,10 @@ final class SchedulerJobApiResourceSwagger {
 
     }
 
-    @Schema(description = "ExecuteJobRequest")
-    public static final class ExecuteJobRequest {
+    @Schema(description = "JobExecuteRequest")
+    public static final class JobExecuteRequest {
 
-        private ExecuteJobRequest() {
+        private JobExecuteRequest() {
 
         }
 

@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -63,11 +64,13 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.jobs.command.JobExecuteCommand;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailData;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
+import org.apache.fineract.infrastructure.jobs.data.JobExecuteRequest;
+import org.apache.fineract.infrastructure.jobs.data.JobExecuteResponse;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
 import org.apache.fineract.infrastructure.jobs.service.SchedulerJobRunnerReadService;
-import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.springframework.stereotype.Component;
@@ -88,6 +91,7 @@ public class SchedulerJobApiResource {
     private final PlatformSecurityContext context;
     private final FineractProperties fineractProperties;
     private final SqlValidator sqlValidator;
+    private final CommandDispatcher dispatcher;
 
     @GET
     @Operation(summary = "Retrieve Scheduler Jobs", operationId = "retrieveAllSchedulerJobs", description = "Returns the list of jobs.\n"
@@ -154,25 +158,36 @@ public class SchedulerJobApiResource {
     @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Run a Job", description = "Manually Execute Specific Job.")
-    @RequestBody(content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.ExecuteJobRequest.class)))
-    @ApiResponse(responseCode = "200", description = "POST: jobs/1?command=executeJob")
-    public Response executeJob(@PathParam(SchedulerJobApiConstants.JOB_ID) @Parameter(description = "jobId") final Long jobId,
-            @QueryParam(SchedulerJobApiConstants.COMMAND) @Parameter(description = "command") final String commandParam,
-            @Parameter(hidden = true) final String jsonRequestBody) {
-        return executeJob(IdTypeResolver.resolveDefault(), Objects.toString(jobId, null), commandParam, jsonRequestBody);
+    public Response executeJob(@PathParam(SchedulerJobApiConstants.JOB_ID) final Long jobId,
+            @QueryParam(SchedulerJobApiConstants.COMMAND) final String commandParam, JobExecuteRequest request) {
+        return dispatchExecuteJob(jobId, commandParam, request);
     }
 
     @POST
     @Path(SHORT_NAME_PARAM + "/{shortName}")
     @Consumes({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Run a Job", description = "Manually Execute Specific Job.")
-    @RequestBody(content = @Content(schema = @Schema(implementation = SchedulerJobApiResourceSwagger.ExecuteJobRequest.class)))
-    @ApiResponse(responseCode = "200", description = "POST: jobs/short-name/SA_PINT?command=executeJob")
-    public Response executeJobByShortName(
-            @PathParam("shortName") @Parameter(required = true, description = SchedulerJobApiConstants.SHORT_NAME_PARAM) final String shortName,
-            @QueryParam(SchedulerJobApiConstants.COMMAND) @Parameter(description = "command") final String commandParam,
-            @Parameter(hidden = true) final String jsonRequestBody) {
-        return executeJob(IdTypeResolver.resolve(SHORT_NAME_PARAM), shortName, commandParam, jsonRequestBody);
+    @Operation(summary = "Run a Job", description = "Manually Execute Specific Job (by short name).")
+    public Response executeJobByShortName(@PathParam("shortName") final String shortName,
+            @QueryParam(SchedulerJobApiConstants.COMMAND) final String commandParam, JobExecuteRequest request) {
+        final Long jobId = schedulerJobRunnerReadService.retrieveId(IdTypeResolver.IdType.SHORT_NAME, shortName);
+        return dispatchExecuteJob(jobId, commandParam, request);
+    }
+
+    private Response dispatchExecuteJob(Long jobId, String commandParam, JobExecuteRequest request) {
+        if (!fineractProperties.getMode().isBatchManagerEnabled()) {
+            return Response.status(Status.METHOD_NOT_ALLOWED).entity(ApiGlobalErrorResponse.invalidInstanceTypeMethod("Batch")).build();
+        }
+        if (!is(commandParam, SchedulerJobApiConstants.COMMAND_EXECUTE_JOB)) {
+            throw new UnrecognizedQueryParamException(SchedulerJobApiConstants.COMMAND, commandParam);
+        }
+        if (request == null) {
+            request = JobExecuteRequest.builder().build();
+        }
+        request.setJobId(jobId);
+        var command = new JobExecuteCommand();
+        command.setPayload(request);
+        dispatcher.<JobExecuteRequest, JobExecuteResponse>dispatch(command).get();
+        return Response.status(202).build();
     }
 
     @PUT
@@ -221,34 +236,6 @@ public class SchedulerJobApiResource {
                 searchParameters);
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return jobHistoryToApiJsonSerializer.serialize(settings, jobHistoryData, JOB_HISTORY_RESPONSE_DATA_PARAMETERS);
-    }
-
-    private Response executeJob(@NotNull IdTypeResolver.IdType idType, String identifier, String commandParam, String jsonRequestBody) {
-        // check the logged-in user have permissions to execute scheduler jobs
-        Response response;
-        if (fineractProperties.getMode().isBatchManagerEnabled()) {
-            final boolean hasNotPermission = context.authenticatedUser().hasNotPermissionForAnyOf("ALL_FUNCTIONS", "EXECUTEJOB_SCHEDULER");
-            if (hasNotPermission) {
-                final String authorizationMessage = "User has no authority to execute scheduler jobs";
-                throw new NoAuthorizationException(authorizationMessage);
-            }
-            response = Response.status(400).build();
-            if (is(commandParam, SchedulerJobApiConstants.COMMAND_EXECUTE_JOB)) {
-                Long jobId = schedulerJobRunnerReadService.retrieveId(idType, identifier);
-                final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                        .executeSchedulerJob(jobId) //
-                        .withJson(jsonRequestBody) //
-                        .build();
-                commandsSourceWritePlatformService.logCommandSource(commandRequest);
-                response = Response.status(202).build();
-            } else {
-                throw new UnrecognizedQueryParamException(SchedulerJobApiConstants.COMMAND, commandParam);
-            }
-        } else {
-            ApiGlobalErrorResponse errorResponse = ApiGlobalErrorResponse.invalidInstanceTypeMethod("Batch");
-            response = Response.status(Status.METHOD_NOT_ALLOWED).entity(errorResponse).build();
-        }
-        return response;
     }
 
     private CommandProcessingResult updateJobDetail(@NotNull IdTypeResolver.IdType idType, String identifier, String jsonRequestBody) {

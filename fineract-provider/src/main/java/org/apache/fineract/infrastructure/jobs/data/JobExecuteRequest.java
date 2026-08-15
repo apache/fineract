@@ -16,28 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.jobs.service;
 
-import java.util.Set;
-import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
-import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
+package org.apache.fineract.infrastructure.jobs.data;
 
-public interface JobRegisterService {
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 
-    void rescheduleJob(Long jobId);
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldNameConstants
+public class JobExecuteRequest implements Serializable {
 
-    void pauseScheduler();
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    void startScheduler();
+    private Long jobId;
 
-    boolean isSchedulerRunning();
-
-    void stopScheduler(String name);
-
-    void scheduleJob(ScheduledJobDetail scheduledJobDetails);
-
-    void stopAllSchedulers();
-
-    void executeJobWithParameters(Long jobId, Set<JobParameterDTO> parameters);
-
+    private List<JobParameterDTO> jobParameters;
 }

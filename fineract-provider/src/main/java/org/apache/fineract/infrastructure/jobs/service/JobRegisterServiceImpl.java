@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -51,7 +52,6 @@ import org.quartz.TriggerListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.configuration.JobLocator;
 import org.springframework.batch.core.launch.NoSuchJobException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
@@ -65,37 +65,37 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class JobRegisterServiceImpl implements JobRegisterService, ApplicationListener<ContextClosedEvent> {
 
-    private static final String JOB_EXECUTION_FAILED_MESSAGE = "Job execution failed for job with name: ";
-
-    @Autowired
-    private SchedularWritePlatformService schedularWritePlatformService;
-
-    @Autowired
-    private SchedulerJobListener schedulerJobListener;
-
-    @Autowired
-    private SchedulerTriggerListener globalSchedulerTriggerListener;
-
     private static final HashMap<String, Scheduler> SCHEDULERS = new HashMap<>(4);
-
-    @Autowired
-    private FineractProperties fineractProperties;
-
-    @Autowired
-    private JobLocator jobLocator;
-
-    @Autowired
-    private JobStarter jobStarter;
-
-    @Autowired
-    private JobParameterDataParser dataParser;
-
-    @Autowired
-    private JobNameService jobNameService;
-
     private static final String JOB_STARTER_METHOD_NAME = "run";
+
+    private final SchedularWritePlatformService schedularWritePlatformService;
+    private final SchedulerJobListener schedulerJobListener;
+    private final SchedulerTriggerListener globalSchedulerTriggerListener;
+    private final FineractProperties fineractProperties;
+    private final JobLocator jobLocator;
+    private final JobStarter jobStarter;
+    private final JobNameService jobNameService;
+
+    @Override
+    public void executeJobWithParameters(final Long jobId, Set<JobParameterDTO> jobParameterDTOSet) {
+        // after jobs - pr1 gets merged
+        // final ScheduledJobDetail scheduledJobDetail = this.schedulerJobRunnerReadService.findByJobId(jobId);
+        final ScheduledJobDetail scheduledJobDetail = this.schedularWritePlatformService.findByJobId(jobId);
+        if (scheduledJobDetail == null) {
+            throw new JobNotFoundException(String.valueOf(jobId));
+        }
+        final String nodeIdStored = scheduledJobDetail.getNodeId().toString();
+        if (nodeIdStored.equals(fineractProperties.getNodeId()) || nodeIdStored.equals("0")) {
+            executeJob(scheduledJobDetail, null, jobParameterDTOSet);
+        } else {
+            scheduledJobDetail.setMismatchedJob(true);
+            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
+            throw new JobNodeIdMismatchingException(nodeIdStored, fineractProperties.getNodeId());
+        }
+    }
 
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
     public void executeJob(final ScheduledJobDetail scheduledJobDetail, String triggerType, Set<JobParameterDTO> jobParameterDTOSet) {
@@ -206,24 +206,6 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
         final String nodeIdStored = scheduledJobDetail.getNodeId().toString();
         if (nodeIdStored.equals(fineractProperties.getNodeId()) || nodeIdStored.equals("0")) {
             rescheduleJob(scheduledJobDetail);
-        } else {
-            scheduledJobDetail.setMismatchedJob(true);
-            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
-            throw new JobNodeIdMismatchingException(nodeIdStored, fineractProperties.getNodeId());
-        }
-    }
-
-    @Override
-    public void executeJobWithParameters(final Long jobId, String jobParametersJson) {
-        Set<JobParameterDTO> jobParameterDTOSet = dataParser.parseExecution(jobParametersJson);
-        final ScheduledJobDetail scheduledJobDetail = this.schedularWritePlatformService.findByJobId(jobId);
-        if (scheduledJobDetail == null) {
-            throw new JobNotFoundException(String.valueOf(jobId));
-        }
-        final String nodeIdStored = scheduledJobDetail.getNodeId().toString();
-
-        if (nodeIdStored.equals(fineractProperties.getNodeId()) || nodeIdStored.equals("0")) {
-            executeJob(scheduledJobDetail, null, jobParameterDTOSet);
         } else {
             scheduledJobDetail.setMismatchedJob(true);
             this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetail);
