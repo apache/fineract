@@ -299,8 +299,16 @@ final class SavingsAccountsApiResourceSwagger {
 
         @Schema(example = "en")
         public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
         @Schema(example = "5.9999999999")
         public Double nominalAnnualInterestRate;
+        @Schema(example = "1")
+        public Long clientId;
+        @Schema(example = "1")
+        public Long productId;
+        @Schema(example = "01 March 2011")
+        public String submittedOnDate;
     }
 
     @Schema(description = "PutSavingsAccountsAccountIdResponse")
@@ -316,6 +324,8 @@ final class SavingsAccountsApiResourceSwagger {
             public Double nominalAnnualInterestRate;
             @Schema(example = "en")
             public String locale;
+            @Schema(example = "01 March 2011")
+            public String submittedOnDate;
         }
 
         @Schema(example = "2")

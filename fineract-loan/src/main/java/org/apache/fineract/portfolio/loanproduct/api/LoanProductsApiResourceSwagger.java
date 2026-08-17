@@ -54,6 +54,10 @@ public final class LoanProductsApiResourceSwagger {
 
         public LoanProductChargeData charge;
         public GLAccountData incomeAccount;
+        @Schema(example = "1")
+        public Long chargeId;
+        @Schema(example = "1")
+        public Long incomeAccountId;
 
     }
 
@@ -236,6 +240,12 @@ public final class LoanProductsApiResourceSwagger {
         public Integer recalculationCompoundingFrequencyInterval;
         @Schema(example = "1")
         public Integer recalculationCompoundingFrequencyOnDayType;
+        @Schema(example = "1")
+        public Integer recalculationCompoundingFrequencyDayOfWeekType;
+        @Schema(example = "1")
+        public Integer recalculationRestFrequencyOnDayType;
+        @Schema(example = "1")
+        public Integer recalculationRestFrequencyDayOfWeekType;
         @Schema(example = "false")
         public Boolean isArrearsBasedOnOriginalSchedule;
         @Schema(example = "false")
@@ -1509,6 +1519,12 @@ public final class LoanProductsApiResourceSwagger {
         public Integer overDueDaysForRepaymentEvent;
         @Schema(example = "3")
         public Integer inArrearsTolerance;
+        @Schema(example = "1")
+        public Integer graceOnPrincipalPayment;
+        @Schema(example = "1")
+        public Integer graceOnInterestPayment;
+        @Schema(example = "1")
+        public Integer graceOnArrearsAgeing;
         @Schema(example = "false")
         public Boolean enableDownPayment;
         @Schema(example = "5.5")

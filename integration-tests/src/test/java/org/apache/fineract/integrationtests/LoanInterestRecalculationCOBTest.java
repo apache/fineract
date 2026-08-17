@@ -18,66 +18,45 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.integrationtests.BaseLoanIntegrationTest.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD;
-import static org.apache.fineract.integrationtests.BaseLoanIntegrationTest.RepaymentFrequencyType.DAYS;
-import static org.apache.fineract.integrationtests.BaseLoanIntegrationTest.RepaymentFrequencyType.MONTHS;
+import static org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD;
+import static org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RepaymentFrequencyType.DAYS;
+import static org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RepaymentFrequencyType.MONTHS;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.integrationtests.common.BusinessStepHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RecalculationRestFrequencyType;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
+public class LoanInterestRecalculationCOBTest extends FeignLoanTestBase {
 
-    private static ResponseSpecification responseSpec;
-    private static RequestSpecification requestSpec;
-    private static LoanTransactionHelper loanTransactionHelper;
     private static PostClientsResponse client;
-    private static InlineLoanCOBHelper inlineLoanCOBHelper;
-    private static BusinessStepHelper businessStepHelper;
 
     @BeforeAll
     public static void setup() {
-        Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        requestSpec.header("Fineract-Platform-TenantId", Utils.DEFAULT_TENANT);
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
         client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
-        businessStepHelper = new BusinessStepHelper();
         // setup COB Business Steps to prevent test failing due other integration test configurations
-        businessStepHelper.updateSteps("LOAN_CLOSE_OF_BUSINESS", "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION",
-                "CHECK_LOAN_REPAYMENT_DUE", "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
+        new FeignBusinessStepHelper(FineractFeignClientHelper.getFineractFeignClient()).updateSteps("LOAN_CLOSE_OF_BUSINESS",
+                "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION", "CHECK_LOAN_REPAYMENT_DUE",
+                "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
                 "EXTERNAL_ASSET_OWNER_TRANSFER", "CHECK_DUE_INSTALLMENTS", "ACCRUAL_ACTIVITY_POSTING", "LOAN_INTEREST_RECALCULATION");
     }
 
@@ -95,37 +74,36 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void testInterestRecalculationInCaseOfTinyAmountOfRepaymentsEveryRepaymentPeriodForProgressiveLoanSameAsRepaymentPeriod() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive() //
+            Long loanProduct = createLoanProduct(create4IProgressive() //
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD) //
             );//
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 10000.0,
-                    86.42, 6, null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct, "1 January 2023", 10000.0, 86.42, 6, null);
             loanIdRef.set(loanId);
             disburseLoan(loanId, BigDecimal.valueOf(8000), "1 January 2023");
         });
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
-            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 February 2023", 0.01);
+            makeLoanRepayment(loanId, "Repayment", "1 February 2023", 0.01);
         });
         runAt("1 March 2023", () -> {
             Long loanId = loanIdRef.get();
-            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 March 2023", 0.01);
+            makeLoanRepayment(loanId, "Repayment", "1 March 2023", 0.01);
         });
         runAt("1 April 2023", () -> {
             Long loanId = loanIdRef.get();
-            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 April 2023", 0.01);
+            makeLoanRepayment(loanId, "Repayment", "1 April 2023", 0.01);
         });
         runAt("1 May 2023", () -> {
             Long loanId = loanIdRef.get();
-            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 May 2023", 0.01);
+            makeLoanRepayment(loanId, "Repayment", "1 May 2023", 0.01);
         });
         runAt("1 June 2023", () -> {
             Long loanId = loanIdRef.get();
-            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 June 2023", 0.01);
+            makeLoanRepayment(loanId, "Repayment", "1 June 2023", 0.01);
         });
         runAt("17 June 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
             verifyRepaymentSchedule(loanId, //
                     installment(8000.0, null, "01 January 2023"), //
                     installment(1112.7, 576.13, 1688.78, false, "01 February 2023"), //
@@ -142,17 +120,15 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOn4IProgressiveLoanCOBStepDaily() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper
-                    .createLoanProduct(create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
+            Long loanProduct = createLoanProduct(create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
             );
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 10.0,
-                    4, null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct, "1 January 2023", 8000.0, 10.0, 4, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(8000), "1 January 2023");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -165,9 +141,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -178,9 +154,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -191,9 +167,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("1 March 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -207,12 +183,12 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
 
     private void payoffOnDateAndVerifyStatus(final String date, final Long loanId) {
         runAt(date, () -> {
-            HashMap prepayAmount = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, loanId.intValue());
+            GetLoansLoanIdTransactionsTemplateResponse prepayAmount = getPrepayAmount(loanId, date);
             Assertions.assertNotNull(prepayAmount);
-            Float amount = (Float) prepayAmount.get("amount");
-            PostLoansLoanIdTransactionsResponse response = loanTransactionHelper.makeLoanRepayment(date, amount, loanId.intValue());
+            Double amount = prepayAmount.getAmount();
+            PostLoansLoanIdTransactionsResponse response = makeLoanRepayment(loanId, "Repayment", date, amount);
             Assertions.assertNotNull(response);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             Assertions.assertNotNull(loanDetails);
             Assertions.assertNotNull(loanDetails.getStatus());
             log.info("Loan status {}", loanDetails.getStatus().getId());
@@ -221,25 +197,23 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     }
 
     private void executeInterestRecalculationJobs() {
-        SchedulerJobHelper.executeAndAwaitJob("Update Loan Arrears Ageing");
-        SchedulerJobHelper.executeAndAwaitJob("Recalculate Interest For Loans");
+        schedulerHelper.executeAndAwaitJob("Update Loan Arrears Ageing");
+        schedulerHelper.executeAndAwaitJob("Recalculate Interest For Loans");
     }
 
     @Test
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOn4IProgressiveLoanCOBStepLatePayPayOnDuePayLatePayOnDateDaily() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper
-                    .createLoanProduct(create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
+            Long loanProduct = createLoanProduct(create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
             );
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 10.0,
-                    4, null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct, "1 January 2023", 8000.0, 10.0, 4, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(8000), "1 January 2023");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -251,9 +225,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("20 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -265,9 +239,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("1 March 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -275,10 +249,10 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2023", 2008.09, 0.0, 0.0, 33.75);
             validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2023", 2041.57, 0.0, 0.0, 17.01);
 
-            loanTransactionHelper.makeLoanRepayment("20 February 2023", 2041.84f, loanId.intValue());
-            loanTransactionHelper.makeLoanRepayment("01 March 2023", 2041.84f, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "20 February 2023", 2041.84);
+            makeLoanRepayment(loanId, "repayment", "01 March 2023", 2041.84);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67, 2041.84);
@@ -289,9 +263,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("10 April 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67, 2041.84);
@@ -299,9 +273,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2023", 2008.14, 0.0, 0.0, 33.7);
             validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2023", 2036.23, 0.0, 0.0, 21.99);
 
-            loanTransactionHelper.makeLoanRepayment("10 April 2023", 2041.84f, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "10 April 2023", 2041.84);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67, 2041.84);
@@ -316,17 +290,15 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOn4IProgressiveLoanCOBStepLatePartialRepaymentDailyInterestCalculation() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper
-                    .createLoanProduct(create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
+            Long loanProduct = createLoanProduct(create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
             );
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 10.0,
-                    4, null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct, "1 January 2023", 8000.0, 10.0, 4, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(8000), "1 January 2023");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -338,11 +310,11 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            loanTransactionHelper.makeLoanRepayment("01 February 2023", 2041.84f, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "01 February 2023", 2041.84);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -354,9 +326,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("10 March 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -364,9 +336,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2023", 2003.41, 0.0, 0.0, 38.43);
             validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2023", 2029.79, 0.0, 0.0, 16.91);
 
-            loanTransactionHelper.makeLoanRepayment("10 March 2023", 500.00f, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "10 March 2023", 500.00);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -375,9 +347,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2023", 2003.41, 0.0, 0.0, 38.43);
             validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2023", 2029.79, 0.0, 0.0, 16.91);
 
-            loanTransactionHelper.makeLoanRepayment("10 March 2023", 541.84f, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "10 March 2023", 541.84);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -389,9 +361,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("20 March 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -400,9 +372,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2023", 2000.86, 0.0, 0.0, 40.98);
             validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2023", 2032.34, 0.0, 0.0, 16.94);
 
-            loanTransactionHelper.makeLoanRepayment("20 March 2023", 1000f, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "20 March 2023", 1000d);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -417,16 +389,15 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOn4IProgressiveLoanCOBStep() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(
+            Long loanProduct = createLoanProduct(
                     create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD));
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 10.0,
-                    4, null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct, "1 January 2023", 8000.0, 10.0, 4, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(8000), "1 January 2023");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -439,9 +410,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -452,9 +423,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -465,9 +436,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("2 March 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -482,16 +453,15 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOn4IProgressiveLoanCOBStepLatePaidPaidOnTimeLatePaidPayoffOnTime() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(
+            Long loanProduct = createLoanProduct(
                     create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD));
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 10.0,
-                    4, null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct, "1 January 2023", 8000.0, 10.0, 4, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(8000), "1 January 2023");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -504,9 +474,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -516,8 +486,8 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         });
         runAt("15 February 2023", () -> {
             Long loanId = loanIdRef.get();
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            executeInlineCOB(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -525,9 +495,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2023", 2008.16, 0.0, 0.0, 33.68);
             validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2023", 2033.27, 0.0, 0.0, 16.94);
 
-            loanTransactionHelper.makeLoanRepayment("15 February 2023", 500.0F, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "15 February 2023", 500.0d);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 2, 1), 1975.17, 500, 1475.17, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 66.67, 0,
@@ -536,9 +506,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             validateFullyUnpaidRepaymentPeriod(loanDetails, 3, "01 April 2023", 2008.16, 0.0, 0.0, 33.68);
             validateFullyUnpaidRepaymentPeriod(loanDetails, 4, "01 May 2023", 2033.27, 0.0, 0.0, 16.94);
 
-            loanTransactionHelper.makeLoanRepayment("15 February 2023", 500f, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "15 February 2023", 500d);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 2, 1), 1975.17, 1000, 975.17, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 66.67, 0,
@@ -551,9 +521,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("20 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            loanTransactionHelper.makeLoanRepayment("20 February 2023", 1041.84f, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "20 February 2023", 1041.84);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67, 2041.84);
@@ -565,11 +535,11 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("1 March 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            loanTransactionHelper.makeLoanRepayment("01 March 2023", 2041.84f, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "01 March 2023", 2041.84);
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67, 2041.84);
@@ -580,9 +550,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("2 April 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 2, 1), 1975.17, 1975.17, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 66.67,
@@ -594,12 +564,12 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("1 May 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            loanTransactionHelper.makeLoanRepayment("15 April 2023", 2041.84f, loanId.intValue());
-            loanTransactionHelper.makeLoanRepayment("01 May 2023", 2075.32f, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "15 April 2023", 2041.84);
+            makeLoanRepayment(loanId, "repayment", "01 May 2023", 2075.32);
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 2, 1), 1975.17, 1975.17, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 66.67,
@@ -615,17 +585,16 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyEarlyLateRepaymentOnProgressiveLoanNextInstallmentAllocationRepayLessThenEmi() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2024", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive() //
+            Long loanProduct = createLoanProduct(create4IProgressive() //
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
             );
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2024", 100.0, 7.0, 6,
-                    null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct, "1 January 2024", 100.0, 7.0, 6, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58);
@@ -639,11 +608,11 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("15 February 2024", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            loanTransactionHelper.makeLoanRepayment("15 February 2024", 15.0F, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "15 February 2024", 15.0d);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 16.43, 15.0, 1.43, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.58, 0,
@@ -660,17 +629,16 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyChargeCreationAfterMaturityDateOnInterestBearingProgressiveLoan() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2024", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive() //
+            Long loanProduct = createLoanProduct(create4IProgressive() //
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
                     .currencyCode("USD"));
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2024", 100.0, 7.0, 6,
-                    null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct, "1 January 2024", 100.0, 7.0, 6, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58);
@@ -684,7 +652,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("10 July 2024", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
             // create charge
             PostChargesResponse chargeResult = createCharge(10.0);
@@ -697,7 +665,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             Assertions.assertNotNull(loanChargeResult.getResourceId());
 
             // verify N+1 installment in schedule
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58);
@@ -714,8 +682,8 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("15 July 2024", () -> {
             Long loanId = loanIdRef.get();
 
-            loanTransactionHelper.makeLoanRepayment("15 July 2024", 113.48F, loanId.intValue());
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            makeLoanRepayment(loanId, "repayment", "15 July 2024", 113.48d);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
@@ -743,7 +711,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             Assertions.assertNotNull(loanChargeResult.getResourceId());
 
             // verify N+1 installment in schedule
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
@@ -761,8 +729,8 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("20 July 2024", () -> {
             Long loanId = loanIdRef.get();
 
-            loanTransactionHelper.makeLoanRepayment("20 July 2024", 15.0F, loanId.intValue());
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            makeLoanRepayment(loanId, "repayment", "20 July 2024", 15.0d);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
@@ -782,17 +750,16 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyEarlyLateRepaymentOnProgressiveLoanNextInstallmentAllocationRepayEmi() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2024", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive() //
+            Long loanProduct = createLoanProduct(create4IProgressive() //
                     .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
             );
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2024", 100.0, 7.0, 6,
-                    null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct, "1 January 2024", 100.0, 7.0, 6, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58);
@@ -806,11 +773,11 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("15 February 2024", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            loanTransactionHelper.makeLoanRepayment("15 February 2024", 17.01F, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "15 February 2024", 17.01d);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58, 17.01);
@@ -826,16 +793,15 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOn4IProgressiveLoanCOBStepOnePaid() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(
+            Long loanProduct = createLoanProduct(
                     create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD));
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 10.0,
-                    4, null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct, "1 January 2023", 8000.0, 10.0, 4, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(8000), "1 January 2023");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -848,11 +814,11 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("1 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            loanTransactionHelper.makeLoanRepayment("01 February 2023", 2041.84f, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "01 February 2023", 2041.84);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -863,9 +829,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("1 March 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -876,9 +842,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("2 March 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -893,13 +859,12 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOnCumulativeLoanCOBStep() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(createOnePeriod30DaysPeriodicAccrualProduct(10.0)
-                    .isInterestRecalculationEnabled(true)//
+            Long loanProduct = createLoanProduct(createOnePeriod30DaysPeriodicAccrualProduct(10.0).isInterestRecalculationEnabled(true)//
                     .maxPrincipal(10000.0).minNumberOfRepayments(1).rescheduleStrategyMethod(1).recalculationRestFrequencyType(MONTHS)
                     .recalculationRestFrequencyInterval(1).recalculationCompoundingFrequencyType(MONTHS)
                     .recalculationCompoundingFrequencyInterval(30).interestRecalculationCompoundingMethod(1));
 
-            Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 2,
+            Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct, "1 January 2023", 8000.0, 2,
                     postLoansRequest -> postLoansRequest.loanTermFrequency(2)//
                             .loanTermFrequencyType(MONTHS)//
                             .interestRatePerPeriod(BigDecimal.valueOf(10.0)).interestCalculationPeriodType(DAYS)//
@@ -910,7 +875,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
 
             disburseLoan(loanId, BigDecimal.valueOf(8000), "1 January 2023");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 2, 1), 3783.06, 0.0, 3783.06, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 817.94,
                     0.0, 817.94, 0.0, 0.0);
@@ -920,9 +885,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("2 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 2, 1), 3783.06, 0.0, 3783.06, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 817.94,
                     0.0, 817.94, 0.0, 0.0);
@@ -936,11 +901,10 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOnProgressiveLoanJob() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(
+            Long loanProduct = createLoanProduct(
                     create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.SAME_AS_REPAYMENT_PERIOD));
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 10.0,
-                    4, null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct, "1 January 2023", 8000.0, 10.0, 4, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(8000), "1 January 2023");
@@ -952,7 +916,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
 
             executeInterestRecalculationJobs();
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -967,18 +931,17 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOnCumulativeLoanJob() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper
-                    .createLoanProduct(createOnePeriod30DaysPeriodicAccrualProduct(10.0).isInterestRecalculationEnabled(true)//
-                            .maxPrincipal(10000.0) //
-                            .minNumberOfRepayments(1) //
-                            .rescheduleStrategyMethod(1) //
-                            .recalculationRestFrequencyType(MONTHS) //
-                            .recalculationRestFrequencyInterval(1) //
-                            .recalculationCompoundingFrequencyType(MONTHS) //
-                            .recalculationCompoundingFrequencyInterval(30) //
-                            .interestRecalculationCompoundingMethod(1)); //
+            Long loanProduct = createLoanProduct(createOnePeriod30DaysPeriodicAccrualProduct(10.0).isInterestRecalculationEnabled(true)//
+                    .maxPrincipal(10000.0) //
+                    .minNumberOfRepayments(1) //
+                    .rescheduleStrategyMethod(1) //
+                    .recalculationRestFrequencyType(MONTHS) //
+                    .recalculationRestFrequencyInterval(1) //
+                    .recalculationCompoundingFrequencyType(MONTHS) //
+                    .recalculationCompoundingFrequencyInterval(30) //
+                    .interestRecalculationCompoundingMethod(1)); //
 
-            Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 2,
+            Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct, "1 January 2023", 8000.0, 2,
                     postLoansRequest -> postLoansRequest.loanTermFrequency(2)//
                             .loanTermFrequencyType(MONTHS)//
                             .interestRatePerPeriod(BigDecimal.valueOf(10.0)).interestCalculationPeriodType(DAYS)//
@@ -995,7 +958,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
 
             executeInterestRecalculationJobs();
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2023, 2, 1), 3783.06, 0.0, 3783.06, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 817.94,
                     0.0, 817.94, 0.0, 0.0);
@@ -1010,15 +973,14 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOn4IProgressiveLoanMultiOverdueSingleRepayment() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive());
+            Long loanProduct = createLoanProduct(create4IProgressive());
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 10.0,
-                    4, null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct, "1 January 2023", 8000.0, 10.0, 4, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(8000), "1 January 2023");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67);
@@ -1030,9 +992,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("1 March 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            loanTransactionHelper.makeLoanRepayment("01 March 2023", 4083.68f, loanId.intValue());
+            makeLoanRepayment(loanId, "repayment", "01 March 2023", 4083.68);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyPaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1975.17, 0.0, 0.0, 66.67, 2041.84);
@@ -1048,21 +1010,20 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOnCumulativeLoanJobSameAsRepaymentPeriod() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper
-                    .createLoanProduct(createOnePeriod30DaysPeriodicAccrualProduct(10.0).isInterestRecalculationEnabled(true)//
-                            .maxPrincipal(10000.0) //
-                            .minNumberOfRepayments(1) //
-                            .maxNumberOfRepayments(10) //
-                            .rescheduleStrategyMethod(1) //
-                            .daysInYearType(360) //
-                            .daysInMonthType(30) //
-                            .recalculationRestFrequencyType(SAME_AS_REPAYMENT_PERIOD) //
-                            .recalculationRestFrequencyInterval(1) //
-                            .recalculationCompoundingFrequencyType(1) //
-                            .recalculationCompoundingFrequencyInterval(1) //
-                            .interestRecalculationCompoundingMethod(0)); //
+            Long loanProduct = createLoanProduct(createOnePeriod30DaysPeriodicAccrualProduct(10.0).isInterestRecalculationEnabled(true)//
+                    .maxPrincipal(10000.0) //
+                    .minNumberOfRepayments(1) //
+                    .maxNumberOfRepayments(10) //
+                    .rescheduleStrategyMethod(1) //
+                    .daysInYearType(360) //
+                    .daysInMonthType(30) //
+                    .recalculationRestFrequencyType(SAME_AS_REPAYMENT_PERIOD) //
+                    .recalculationRestFrequencyInterval(1) //
+                    .recalculationCompoundingFrequencyType(1) //
+                    .recalculationCompoundingFrequencyInterval(1) //
+                    .interestRecalculationCompoundingMethod(0)); //
 
-            Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 2,
+            Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct, "1 January 2023", 8000.0, 2,
                     postLoansRequest -> postLoansRequest.loanTermFrequency(4)//
                             .loanTermFrequencyType(MONTHS)//
                             .numberOfRepayments(4).interestRatePerPeriod(BigDecimal.valueOf(10.0)).interestCalculationPeriodType(DAYS)//
@@ -1073,7 +1034,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
 
             disburseLoan(loanId, BigDecimal.valueOf(8000), "1 January 2023");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1724.0, 0.0, 0.0, 800.0);
@@ -1086,7 +1047,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
 
             executeInterestRecalculationJobs();
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1724.0, 0.0, 0.0, 800.0);
@@ -1101,21 +1062,20 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyLoanInstallmentRecalculatedIfThereIsOverdueInstallmentOnCumulativeLoanCOBSameAsRepaymentPeriod() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2023", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper
-                    .createLoanProduct(createOnePeriod30DaysPeriodicAccrualProduct(10.0).isInterestRecalculationEnabled(true)//
-                            .maxPrincipal(10000.0) //
-                            .minNumberOfRepayments(1) //
-                            .maxNumberOfRepayments(10) //
-                            .rescheduleStrategyMethod(1) //
-                            .daysInYearType(360) //
-                            .daysInMonthType(30) //
-                            .recalculationRestFrequencyType(SAME_AS_REPAYMENT_PERIOD) //
-                            .recalculationRestFrequencyInterval(1) //
-                            .recalculationCompoundingFrequencyType(1) //
-                            .recalculationCompoundingFrequencyInterval(1) //
-                            .interestRecalculationCompoundingMethod(0)); //
+            Long loanProduct = createLoanProduct(createOnePeriod30DaysPeriodicAccrualProduct(10.0).isInterestRecalculationEnabled(true)//
+                    .maxPrincipal(10000.0) //
+                    .minNumberOfRepayments(1) //
+                    .maxNumberOfRepayments(10) //
+                    .rescheduleStrategyMethod(1) //
+                    .daysInYearType(360) //
+                    .daysInMonthType(30) //
+                    .recalculationRestFrequencyType(SAME_AS_REPAYMENT_PERIOD) //
+                    .recalculationRestFrequencyInterval(1) //
+                    .recalculationCompoundingFrequencyType(1) //
+                    .recalculationCompoundingFrequencyInterval(1) //
+                    .interestRecalculationCompoundingMethod(0)); //
 
-            Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2023", 8000.0, 2,
+            Long loanId = applyAndApproveLoan(client.getClientId(), loanProduct, "1 January 2023", 8000.0, 2,
                     postLoansRequest -> postLoansRequest.loanTermFrequency(4)//
                             .loanTermFrequencyType(MONTHS)//
                             .numberOfRepayments(4).interestRatePerPeriod(BigDecimal.valueOf(10.0)).interestCalculationPeriodType(DAYS)//
@@ -1126,7 +1086,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
 
             disburseLoan(loanId, BigDecimal.valueOf(8000), "1 January 2023");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1724.0, 0.0, 0.0, 800.0);
@@ -1137,9 +1097,9 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("8 February 2023", () -> {
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
+            executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2023", 1724.0, 0.0, 0.0, 800.0);
@@ -1154,19 +1114,17 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
     public void verifyEarlyLateRepaymentOnProgressiveLoanThePastDueHasNoEffect() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
         runAt("1 January 2024", () -> {
-            PostLoanProductsResponse loanProduct = loanProductHelper //
-                    .createLoanProduct(create4IProgressive() //
-                            .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
-                            .disallowInterestCalculationOnPastDue(true) //
+            Long loanProduct = createLoanProduct(create4IProgressive() //
+                    .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY) //
+                    .disallowInterestCalculationOnPastDue(true) //
             );
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "1 January 2024", 100.0, 7.0, 6,
-                    null);
+            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct, "1 January 2024", 100.0, 7.0, 6, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateFullyUnpaidRepaymentPeriod(loanDetails, 1, "01 February 2024", 16.43, 0.0, 0.0, 0.58);
@@ -1180,10 +1138,10 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("15 February 2024", () -> { // we have past due and should not count extra interest
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
-            loanTransactionHelper.makeLoanRepayment("15 February 2024", 15.0F, loanId.intValue());
+            executeInlineCOB(loanId);
+            makeLoanRepayment(loanId, "repayment", "15 February 2024", 15.0d);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 16.43, 15.0, 1.43, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.58, 0,
@@ -1197,10 +1155,10 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
         runAt("15 February 2024", () -> { // we turn from past due into early repayment and should have less interest
             Long loanId = loanIdRef.get();
 
-            inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
-            loanTransactionHelper.makeLoanRepayment("15 February 2024", 19.02F, loanId.intValue());
+            executeInlineCOB(loanId);
+            makeLoanRepayment(loanId, "repayment", "15 February 2024", 19.02d);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logLoanDetails(loanDetails);
 
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 16.43, 16.43, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.58, 0.58,

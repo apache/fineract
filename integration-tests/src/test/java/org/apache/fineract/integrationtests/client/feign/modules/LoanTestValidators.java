@@ -87,6 +87,7 @@ public final class LoanTestValidators {
                 return;
             }
 
+            // The API omits manuallyReversed for non-reversed transactions, so null and false are the same state.
             boolean found = transactionsByDate.stream()
                     .anyMatch(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), tr.amount)
                             && Objects.equals(item.getType().getValue(), tr.type)
@@ -97,7 +98,7 @@ public final class LoanTestValidators {
                             && Objects.equals(Utils.getDoubleValue(item.getPenaltyChargesPortion()), tr.penaltyPortion)
                             && Objects.equals(Utils.getDoubleValue(item.getOverpaymentPortion()), tr.overpaymentPortion)
                             && Objects.equals(Utils.getDoubleValue(item.getUnrecognizedIncomePortion()), tr.unrecognizedPortion)
-                            && (tr.reversed == null || Objects.equals(item.getManuallyReversed(), tr.reversed)));
+                            && Boolean.TRUE.equals(item.getManuallyReversed()) == Boolean.TRUE.equals(tr.reversed));
 
             if (!found) {
                 StringBuilder errorMessage = new StringBuilder();

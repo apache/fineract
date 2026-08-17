@@ -35,6 +35,7 @@ import org.apache.fineract.client.models.PostClientsClientIdChargesRequest;
 import org.apache.fineract.client.models.PostClientsClientIdChargesResponse;
 import org.apache.fineract.client.models.PutChargesChargeIdResponse;
 import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 
 public class FeignChargesHelper {
 
@@ -82,8 +83,35 @@ public class FeignChargesHelper {
         return createCharge(ChargeRequestBuilders.loanSpecifiedDueDatePenalty(amount));
     }
 
-    public PostChargesResponse createLoanSpecifiedDueDatePercentageAmountAndInterestFee(double amount) {
-        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDatePercentageAmountAndInterestFee(amount));
+    public PostChargesResponse createLoanSpecifiedDueDatePercentageOfInterestFee(double percentage) {
+        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDatePercentageOfInterestFee(percentage));
+    }
+
+    public PostChargesResponse createLoanOverdueFeePercentageOfAmountAndInterest(double percentage) {
+        return createCharge(ChargeRequestBuilders.loanOverdueFeePercentageOfAmountAndInterest(percentage));
+    }
+
+    public PostChargesResponse createLoanDisbursementCharge(ChargeCalculationType chargeCalculationType, double amount) {
+        return createCharge(ChargeRequestBuilders.loanDisbursementCharge(chargeCalculationType, amount));
+    }
+
+    public PostChargesResponse createLoanSpecifiedDueDateCharge(ChargeCalculationType chargeCalculationType, double amount,
+            boolean penalty) {
+        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDateCharge(chargeCalculationType, amount, penalty));
+    }
+
+    public PostChargesResponse createLoanInstallmentCharge(ChargeCalculationType chargeCalculationType, double amount, boolean penalty) {
+        return createCharge(ChargeRequestBuilders.loanInstallmentCharge(chargeCalculationType, amount, penalty));
+    }
+
+    public PostChargesResponse createLoanSpecifiedDueDateAccountTransferCharge(ChargeCalculationType chargeCalculationType, double amount,
+            boolean penalty) {
+        return createCharge(ChargeRequestBuilders.loanSpecifiedDueDateAccountTransferCharge(chargeCalculationType, amount, penalty));
+    }
+
+    public PostChargesResponse createLoanInstallmentAccountTransferCharge(ChargeCalculationType chargeCalculationType, double amount,
+            boolean penalty) {
+        return createCharge(ChargeRequestBuilders.loanInstallmentAccountTransferCharge(chargeCalculationType, amount, penalty));
     }
 
     public PostChargesResponse createClientSpecifiedDueDateCharge(double amount) {

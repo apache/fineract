@@ -20,7 +20,9 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.DeleteDelinquencyBucketResponse;
 import org.apache.fineract.client.models.DeleteDelinquencyRangeResponse;
@@ -32,6 +34,8 @@ import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PutDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PutDelinquencyRangeResponse;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.Utils;
 
 public class FeignDelinquencyHelper {
 
@@ -63,6 +67,25 @@ public class FeignDelinquencyHelper {
 
     public PostDelinquencyBucketResponse createBucket(DelinquencyBucketRequest request) {
         return ok(() -> fineractClient.delinquencyRangeAndBucketsManagement().createBucket(request));
+    }
+
+    public Long createBucket(List<Pair<Integer, Integer>> rangesDef) {
+        List<Long> rangeIds = new ArrayList<>();
+        rangesDef.forEach(
+                range -> rangeIds.add(createRange(new DelinquencyRangeRequest().classification(Utils.randomStringGenerator("DLQ_R_", 10))
+                        .minimumAgeDays(range.getLeft()).maximumAgeDays(range.getRight()).locale(LoanTestData.LOCALE)).getResourceId()));
+        return createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(rangeIds))
+                .getResourceId();
+    }
+
+    public Long createDefaultBucket() {
+        Long range1Id = createRange(new DelinquencyRangeRequest().classification(Utils.randomStringGenerator("DLQ_R_", 10))
+                .minimumAgeDays(1).maximumAgeDays(3).locale(LoanTestData.LOCALE)).getResourceId();
+        Long range2Id = createRange(new DelinquencyRangeRequest().classification(Utils.randomStringGenerator("DLQ_R_", 10))
+                .minimumAgeDays(4).maximumAgeDays(60).locale(LoanTestData.LOCALE)).getResourceId();
+        return createBucket(
+                new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(List.of(range1Id, range2Id)))
+                .getResourceId();
     }
 
     public DelinquencyBucketResponse getBucket(Long bucketId) {

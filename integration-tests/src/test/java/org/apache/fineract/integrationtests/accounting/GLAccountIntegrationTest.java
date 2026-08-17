@@ -24,8 +24,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.Calendar;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetGLAccountsResponse;
 import org.apache.fineract.client.models.JournalEntryCommand;
 import org.apache.fineract.client.models.PostGLAccountsRequest;
@@ -33,75 +35,71 @@ import org.apache.fineract.client.models.PostGLAccountsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PutGLAccountsRequest;
 import org.apache.fineract.client.models.SingleDebitOrCreditEntryCommand;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class GLAccountIntegrationTest extends BaseLoanIntegrationTest {
+public class GLAccountIntegrationTest extends FeignLoanTestBase {
 
     @Test
     public void createUpdateDeleteGLAccountTest() {
         // CREATE
         String uniqueString = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5);
         final PostGLAccountsResponse newAccount = createGLAccount(uniqueString);
-        GetGLAccountsResponse accountDetails = AccountHelper.getGLAccount(newAccount.getResourceId());
-        Assertions.assertEquals(uniqueString, accountDetails.getGlCode());
-        Assertions.assertEquals(uniqueString, accountDetails.getName());
-        Assertions.assertEquals(true, accountDetails.getManualEntriesAllowed());
-        Assertions.assertEquals((long) GLAccountType.INCOME.getValue(), accountDetails.getType().getId());
-        Assertions.assertEquals(1L, accountDetails.getUsage().getId());
-        Assertions.assertEquals(uniqueString, accountDetails.getDescription());
+        GetGLAccountsResponse accountDetails = accountHelper.getGLAccount(newAccount.getResourceId());
+        assertEquals(uniqueString, accountDetails.getGlCode());
+        assertEquals(uniqueString, accountDetails.getName());
+        assertEquals(true, accountDetails.getManualEntriesAllowed());
+        assertEquals((long) GLAccountType.INCOME.getValue(), accountDetails.getType().getId());
+        assertEquals(1L, accountDetails.getUsage().getId());
+        assertEquals(uniqueString, accountDetails.getDescription());
         // UPDATE
-        AccountHelper.updateGLAccount(newAccount.getResourceId(), new PutGLAccountsRequest().description("newDescription").name("newName")
+        accountHelper.updateGLAccount(newAccount.getResourceId(), new PutGLAccountsRequest().description("newDescription").name("newName")
                 .glCode("newGLCode").type(GLAccountType.ASSET.getValue()).manualEntriesAllowed(false).usage(2));
-        accountDetails = AccountHelper.getGLAccount(newAccount.getResourceId());
-        Assertions.assertEquals("newDescription", accountDetails.getDescription());
-        Assertions.assertEquals("newName", accountDetails.getName());
-        Assertions.assertEquals("newGLCode", accountDetails.getGlCode());
-        Assertions.assertEquals((long) GLAccountType.ASSET.getValue(), accountDetails.getType().getId());
-        Assertions.assertEquals(2L, accountDetails.getUsage().getId());
+        accountDetails = accountHelper.getGLAccount(newAccount.getResourceId());
+        assertEquals("newDescription", accountDetails.getDescription());
+        assertEquals("newName", accountDetails.getName());
+        assertEquals("newGLCode", accountDetails.getGlCode());
+        assertEquals((long) GLAccountType.ASSET.getValue(), accountDetails.getType().getId());
+        assertEquals(2L, accountDetails.getUsage().getId());
         // DELETE
-        AccountHelper.deleteGLAccount(newAccount.getResourceId());
+        accountHelper.deleteGLAccount(newAccount.getResourceId());
     }
 
     @Test
     public void testDeleteGLAccountWhileThereAreChildren() {
         String uniqueNameForParent = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5);
-        final PostGLAccountsResponse newParentAccount = AccountHelper
+        final PostGLAccountsResponse newParentAccount = accountHelper
                 .createGLAccount(new PostGLAccountsRequest().type(GLAccountType.INCOME.getValue()).glCode(uniqueNameForParent)
                         .manualEntriesAllowed(true).usage(2).description(uniqueNameForParent).name(uniqueNameForParent));
         String uniqueNameForChild = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5);
-        final PostGLAccountsResponse newChildAccount = AccountHelper.createGLAccount(
+        final PostGLAccountsResponse newChildAccount = accountHelper.createGLAccount(
                 new PostGLAccountsRequest().type(GLAccountType.INCOME.getValue()).glCode(uniqueNameForChild).manualEntriesAllowed(true)
                         .usage(1).parentId(newParentAccount.getResourceId()).description(uniqueNameForChild).name(uniqueNameForChild));
         // DELETE
         CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                () -> AccountHelper.deleteGLAccount(newParentAccount.getResourceId()));
-        assertEquals(403, exception.getResponse().code());
+                () -> accountHelper.deleteGLAccount(newParentAccount.getResourceId()));
+        assertEquals(403, exception.getStatus());
         assertTrue(exception.getMessage().contains("error.msg.glaccount.glcode.invalid.delete.has.children"));
-        AccountHelper.deleteGLAccount(newChildAccount.getResourceId());
-        AccountHelper.deleteGLAccount(newParentAccount.getResourceId());
+        accountHelper.deleteGLAccount(newChildAccount.getResourceId());
+        accountHelper.deleteGLAccount(newParentAccount.getResourceId());
     }
 
     @Test
     public void testDeleteGLAccountWhileMappedToProduct() {
         String uniqueString = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5);
         final PostGLAccountsResponse newAccount = createGLAccount(uniqueString);
-        loanProductHelper.createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+        createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
                 .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
                 .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
+                .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount().getAccountID().longValue())
                 .incomeFromCapitalizationAccountId(newAccount.getResourceId())
                 .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         // DELETE
         CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                () -> AccountHelper.deleteGLAccount(newAccount.getResourceId()));
-        assertEquals(403, exception.getResponse().code());
+                () -> accountHelper.deleteGLAccount(newAccount.getResourceId()));
+        assertEquals(403, exception.getStatus());
         assertTrue(exception.getMessage().contains("error.msg.glaccount.glcode.invalid.delete.product.mapping"));
     }
 
@@ -112,21 +110,20 @@ public class GLAccountIntegrationTest extends BaseLoanIntegrationTest {
             final PostGLAccountsResponse newAccount = createGLAccount(uniqueString);
             uniqueString = Utils.uniqueRandomStringGenerator("UNIQUE_FEE_INCOME" + Calendar.getInstance().getTimeInMillis(), 5);
             final PostGLAccountsResponse newAccount2 = createGLAccount(uniqueString);
-            JournalEntryHelper.createJournalEntry("", new JournalEntryCommand().amount(BigDecimal.TEN).officeId(1L).currencyCode("USD")
-                    .locale("en").dateFormat("uuuu-MM-dd").transactionDate(LocalDate.of(2024, 1, 1))
+            journalHelper.createJournalEntry(new JournalEntryCommand().amount(BigDecimal.TEN).officeId(1L).currencyCode("USD").locale("en")
+                    .dateFormat("uuuu-MM-dd").transactionDate(LocalDate.of(2024, Month.JANUARY, 1))
                     .addCreditsItem(new SingleDebitOrCreditEntryCommand().glAccountId(newAccount.getResourceId()).amount(BigDecimal.TEN))
                     .addDebitsItem(new SingleDebitOrCreditEntryCommand().glAccountId(newAccount2.getResourceId()).amount(BigDecimal.TEN)));
             // DELETE
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> AccountHelper.deleteGLAccount(newAccount.getResourceId()));
-            assertEquals(403, exception.getResponse().code());
+                    () -> accountHelper.deleteGLAccount(newAccount.getResourceId()));
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage().contains("error.msg.glaccount.glcode.invalid.delete.transactions.logged"));
         });
     }
 
     private PostGLAccountsResponse createGLAccount(String uniqueString) {
-        return AccountHelper.createGLAccount(new PostGLAccountsRequest().type(GLAccountType.INCOME.getValue()).glCode(uniqueString)
+        return accountHelper.createGLAccount(new PostGLAccountsRequest().type(GLAccountType.INCOME.getValue()).glCode(uniqueString)
                 .manualEntriesAllowed(true).usage(1).description(uniqueString).name(uniqueString));
     }
-
 }

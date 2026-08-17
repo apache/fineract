@@ -22,6 +22,7 @@ import feign.Param;
 import feign.QueryMap;
 import feign.RequestLine;
 import feign.Response;
+import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.models.RunReportsResponse;
 
@@ -63,4 +64,23 @@ public interface RunReportsApi {
      */
     @RequestLine("GET /v1/runreports/{reportName}")
     Response runReportGetFile(@Param("reportName") String reportName, @QueryMap Map<String, String> parameters);
+
+    /**
+     * Run Report with {@code genericResultSet=false}, which serialises the result set as a plain array of rows instead
+     * of the {@link RunReportsResponse} "Generic Resultset" shape. One operation cannot declare both response shapes,
+     * so {@link #runReportGetData} cannot decode this variant - keep both methods rather than "simplifying" them into
+     * one.
+     *
+     * <p>
+     * The row values are inherently dynamic: the keys are whatever columns the stored SQL of the report selects, so
+     * there is no generated model to bind them to.
+     *
+     * @param reportName
+     *            reportName (required)
+     * @param parameters
+     *            Dynamic query parameters for the report, including {@code genericResultSet=false} (required)
+     * @return the report rows, one map of column name to value per row
+     */
+    @RequestLine("GET /v1/runreports/{reportName}")
+    List<Map<String, Object>> runReportGetRows(@Param("reportName") String reportName, @QueryMap Map<String, String> parameters);
 }

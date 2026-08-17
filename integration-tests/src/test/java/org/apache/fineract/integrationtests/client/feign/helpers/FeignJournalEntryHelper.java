@@ -31,7 +31,9 @@ import java.util.Map;
 import java.util.Objects;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
+import org.apache.fineract.client.models.JournalEntryCommand;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
+import org.apache.fineract.client.models.PostJournalEntriesResponse;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 
@@ -41,6 +43,10 @@ public class FeignJournalEntryHelper {
 
     public FeignJournalEntryHelper(FineractFeignClient fineractClient) {
         this.fineractClient = fineractClient;
+    }
+
+    public PostJournalEntriesResponse createJournalEntry(JournalEntryCommand command) {
+        return ok(() -> fineractClient.journalEntries().createGLJournalEntry("", command));
     }
 
     public GetJournalEntriesTransactionIdResponse getJournalEntriesForLoan(Long loanId) {

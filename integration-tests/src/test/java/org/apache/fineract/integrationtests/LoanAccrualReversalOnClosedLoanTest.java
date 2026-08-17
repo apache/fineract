@@ -31,12 +31,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
-import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +45,7 @@ import org.junit.jupiter.api.Test;
  * reversing existing ACCRUAL transactions. Reversing accruals breaks downstream event reconciliation.
  */
 @Slf4j
-public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest {
+public class LoanAccrualReversalOnClosedLoanTest extends FeignLoanTestBase {
 
     private static final String LOCALE = "en";
 
@@ -63,10 +61,10 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
 
         // Step 1: Create loan product with interest refund support and accrual activity posting
         runAt("01 November 2024", () -> {
-            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-            clientIdRef.set(client.getClientId());
+            final Long clientId = createClient();
+            clientIdRef.set(clientId);
 
-            final PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive()//
+            final Long loanProductId = createLoanProduct(create4IProgressive()//
                     .currencyCode("USD")//
                     .principal(220.0).minPrincipal(100.0).maxPrincipal(1000.0)//
                     .numberOfRepayments(4).repaymentEvery(1)//
@@ -80,8 +78,7 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
             ))//
             );
 
-            Long loanId = applyAndApproveProgressiveLoan(clientIdRef.get(), loanProduct.getResourceId(), "01 November 2024", 220.0, 12.0, 4,
-                    null);
+            Long loanId = applyAndApproveProgressiveLoan(clientIdRef.get(), loanProductId, "01 November 2024", 220.0, 12.0, 4, null);
             loanIdRef.set(loanId);
             disburseLoan(loanId, BigDecimal.valueOf(220.0), "01 November 2024");
             log.info("Loan disbursed: id={}, amount=220.0", loanId);
@@ -105,13 +102,13 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         // Step 3: Final repayment closes the loan
         runAt("01 March 2025", () -> {
             executeInlineCOB(loanId);
-            GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse details = getLoanDetails(loanId);
             var installment = details.getRepaymentSchedule().getPeriods().stream().filter(p -> p.getPeriod() != null && p.getPeriod() == 4)
                     .findFirst().orElseThrow();
             double amount = Utils.getDoubleValue(installment.getTotalDueForPeriod());
             addRepaymentForLoan(loanId, amount, "01 March 2025");
 
-            GetLoansLoanIdResponse loanAfterClose = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanAfterClose = getLoanDetails(loanId);
             assertTrue(loanAfterClose.getStatus().getClosedObligationsMet(),
                     "Loan should be CLOSED but is: " + loanAfterClose.getStatus().getCode());
             log.info("Loan closed on 01 March 2025");
@@ -121,12 +118,11 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
 
         // Step 4: Goodwill credit (backdated) makes loan overpaid — mirrors production 10/29 goodwill credit
         runAt("15 March 2025", () -> {
-            PostLoansLoanIdTransactionsResponse gwcResponse = loanTransactionHelper.makeGoodwillCredit(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("15 March 2025").locale(LOCALE)
-                            .transactionAmount(0.5));
+            PostLoansLoanIdTransactionsResponse gwcResponse = makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("15 March 2025").locale(LOCALE).transactionAmount(0.5));
             assertNotNull(gwcResponse.getResourceId());
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getOverpaid(),
                     "Loan should be OVERPAID after goodwill credit but is: " + loanDetails.getStatus().getCode());
             log.info("Goodwill credit of 0.50 applied → loan OVERPAID");
@@ -134,12 +130,11 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
 
         // Step 5: Merchant issued refund with automatic interest refund — mirrors production merchant refunds
         runAt("16 March 2025", () -> {
-            PostLoansLoanIdTransactionsResponse mirResponse = loanTransactionHelper.makeMerchantIssuedRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("16 March 2025").locale(LOCALE)
-                            .transactionAmount(100.0));
+            PostLoansLoanIdTransactionsResponse mirResponse = makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 March 2025").locale(LOCALE).transactionAmount(100.0));
             assertNotNull(mirResponse.getResourceId());
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getOverpaid(), "Loan should still be OVERPAID but is: " + loanDetails.getStatus().getCode());
             log.info("Merchant issued refund of 100.0 → loan still OVERPAID");
 
@@ -153,14 +148,13 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
             executeInlineCOB(loanId);
 
             // Get the overpayment amount
-            GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse details = getLoanDetails(loanId);
             double overpayment = Utils.getDoubleValue(details.getTotalOverpaid());
             log.info("Total overpaid: {}", overpayment);
             assertTrue(overpayment > 0, "Should have overpayment");
 
-            PostLoansLoanIdTransactionsResponse cbrResponse = loanTransactionHelper.makeCreditBalanceRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("17 March 2025").locale(LOCALE)
-                            .transactionAmount(overpayment));
+            PostLoansLoanIdTransactionsResponse cbrResponse = makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("17 March 2025").locale(LOCALE).transactionAmount(overpayment));
             assertNotNull(cbrResponse.getResourceId());
             cbrTxnIdRef.set(cbrResponse.getResourceId());
             log.info("CBR created for {} → txn id: {}", overpayment, cbrResponse.getResourceId());
@@ -180,10 +174,10 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
             Long cbrTxnId = cbrTxnIdRef.get();
             log.info("=== Reversing CBR transaction: {} ===", cbrTxnId);
 
-            loanTransactionHelper.reverseLoanTransaction(loanId, cbrTxnId, new PostLoansLoanIdTransactionsTransactionIdRequest()
-                    .dateFormat(DATETIME_PATTERN).transactionDate("20 March 2025").transactionAmount(0.0).locale(LOCALE));
+            reverseLoanTransaction(loanId, cbrTxnId, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN)
+                    .transactionDate("20 March 2025").transactionAmount(0.0).locale(LOCALE));
 
-            GetLoansLoanIdResponse afterReversal = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse afterReversal = getLoanDetails(loanId);
             log.info("Status after CBR reversal: {}", afterReversal.getStatus().getCode());
             logAccrualState(loanId, "After CBR reversal (before re-create)");
 
@@ -191,9 +185,8 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
             double overpayment = Utils.getDoubleValue(afterReversal.getTotalOverpaid());
             log.info("Overpayment after CBR reversal: {}", overpayment);
             if (overpayment > 0) {
-                PostLoansLoanIdTransactionsResponse newCbr = loanTransactionHelper.makeCreditBalanceRefund(loanId,
-                        new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("20 March 2025")
-                                .locale(LOCALE).transactionAmount(overpayment));
+                PostLoansLoanIdTransactionsResponse newCbr = makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest()
+                        .dateFormat(DATETIME_PATTERN).transactionDate("20 March 2025").locale(LOCALE).transactionAmount(overpayment));
                 assertNotNull(newCbr.getResourceId());
                 newCbrTxnIdRef.set(newCbr.getResourceId());
                 log.info("New CBR created: {}", newCbr.getResourceId());
@@ -208,14 +201,14 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
             if (newCbrId != null) {
                 log.info("=== Second CBR reversal cycle: {} ===", newCbrId);
 
-                loanTransactionHelper.reverseLoanTransaction(loanId, newCbrId, new PostLoansLoanIdTransactionsTransactionIdRequest()
-                        .dateFormat(DATETIME_PATTERN).transactionDate("25 March 2025").transactionAmount(0.0).locale(LOCALE));
+                reverseLoanTransaction(loanId, newCbrId, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN)
+                        .transactionDate("25 March 2025").transactionAmount(0.0).locale(LOCALE));
 
-                GetLoansLoanIdResponse afterReversal = loanTransactionHelper.getLoanDetails(loanId);
+                GetLoansLoanIdResponse afterReversal = getLoanDetails(loanId);
                 double overpayment = Utils.getDoubleValue(afterReversal.getTotalOverpaid());
                 if (overpayment > 0) {
-                    loanTransactionHelper.makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest()
-                            .dateFormat(DATETIME_PATTERN).transactionDate("25 March 2025").locale(LOCALE).transactionAmount(overpayment));
+                    makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                            .transactionDate("25 March 2025").locale(LOCALE).transactionAmount(overpayment));
                 }
                 logAccrualState(loanId, "After second CBR reversal cycle");
             }
@@ -225,7 +218,7 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         runAt("26 March 2025", () -> {
             executeInlineCOB(loanId);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertNotNull(loanDetails.getTransactions());
 
             logAllTransactions(loanId, "Final state");
@@ -246,15 +239,14 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         AtomicLong loanIdRef = new AtomicLong();
 
         runAt("01 November 2024", () -> {
-            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            final Long clientId = createClient();
 
-            final PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive()//
+            final Long loanProductId = createLoanProduct(create4IProgressive()//
                     .currencyCode("USD").principal(220.0).minPrincipal(100.0).maxPrincipal(1000.0)//
                     .numberOfRepayments(4).repaymentEvery(1).interestRatePerPeriod(12.0).interestRateFrequencyType(3)//
                     .enableAccrualActivityPosting(true));
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "01 November 2024", 220.0, 12.0,
-                    4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "01 November 2024", 220.0, 12.0, 4, null);
             loanIdRef.set(loanId);
             disburseLoan(loanId, BigDecimal.valueOf(220.0), "01 November 2024");
         });
@@ -273,45 +265,44 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
 
         runAt("01 March 2025", () -> {
             executeInlineCOB(loanId);
-            GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse details = getLoanDetails(loanId);
             var installment = details.getRepaymentSchedule().getPeriods().stream().filter(p -> p.getPeriod() != null && p.getPeriod() == 4)
                     .findFirst().orElseThrow();
             addRepaymentForLoan(loanId, Utils.getDoubleValue(installment.getTotalDueForPeriod()), "01 March 2025");
-            assertTrue(loanTransactionHelper.getLoanDetails(loanId).getStatus().getClosedObligationsMet());
+            assertTrue(getLoanDetails(loanId).getStatus().getClosedObligationsMet());
         });
 
         // Merchant refund → CBR → reverse CBR → new CBR
         AtomicReference<Long> cbrIdRef = new AtomicReference<>();
         runAt("15 March 2025", () -> {
-            loanTransactionHelper.makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+            makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
                     .transactionDate("15 March 2025").locale(LOCALE).transactionAmount(50.0));
         });
 
         runAt("16 March 2025", () -> {
             executeInlineCOB(loanId);
-            GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse details = getLoanDetails(loanId);
             double overpayment = Utils.getDoubleValue(details.getTotalOverpaid());
-            PostLoansLoanIdTransactionsResponse cbr = loanTransactionHelper.makeCreditBalanceRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("16 March 2025").locale(LOCALE)
-                            .transactionAmount(overpayment));
+            PostLoansLoanIdTransactionsResponse cbr = makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 March 2025").locale(LOCALE).transactionAmount(overpayment));
             cbrIdRef.set(cbr.getResourceId());
         });
 
         runAt("20 March 2025", () -> {
-            loanTransactionHelper.reverseLoanTransaction(loanId, cbrIdRef.get(), new PostLoansLoanIdTransactionsTransactionIdRequest()
+            reverseLoanTransaction(loanId, cbrIdRef.get(), new PostLoansLoanIdTransactionsTransactionIdRequest()
                     .dateFormat(DATETIME_PATTERN).transactionDate("20 March 2025").transactionAmount(0.0).locale(LOCALE));
 
-            GetLoansLoanIdResponse afterReversal = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse afterReversal = getLoanDetails(loanId);
             double overpayment = Utils.getDoubleValue(afterReversal.getTotalOverpaid());
             if (overpayment > 0) {
-                loanTransactionHelper.makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+                makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
                         .transactionDate("20 March 2025").locale(LOCALE).transactionAmount(overpayment));
             }
         });
 
         runAt("21 March 2025", () -> {
             executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertNoReversedAccruals(loanDetails);
         });
     }
@@ -325,9 +316,9 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         AtomicLong loanIdRef = new AtomicLong();
 
         runAt("01 November 2024", () -> {
-            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            final Long clientId = createClient();
 
-            final PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4IProgressive()//
+            final Long loanProductId = createLoanProduct(create4IProgressive()//
                     .currencyCode("USD").principal(220.0).minPrincipal(100.0).maxPrincipal(1000.0)//
                     .numberOfRepayments(4).repaymentEvery(1).interestRatePerPeriod(12.0).interestRateFrequencyType(3)//
                     .enableAccrualActivityPosting(true)//
@@ -339,8 +330,7 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
             ))//
             );
 
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), "01 November 2024", 220.0, 12.0,
-                    4, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, "01 November 2024", 220.0, 12.0, 4, null);
             loanIdRef.set(loanId);
             disburseLoan(loanId, BigDecimal.valueOf(220.0), "01 November 2024");
             log.info("[Backdated CBR] Loan disbursed: id={}", loanId);
@@ -360,11 +350,11 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
 
         runAt("01 March 2025", () -> {
             executeInlineCOB(loanId);
-            GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse details = getLoanDetails(loanId);
             var installment = details.getRepaymentSchedule().getPeriods().stream().filter(p -> p.getPeriod() != null && p.getPeriod() == 4)
                     .findFirst().orElseThrow();
             addRepaymentForLoan(loanId, Utils.getDoubleValue(installment.getTotalDueForPeriod()), "01 March 2025");
-            assertTrue(loanTransactionHelper.getLoanDetails(loanId).getStatus().getClosedObligationsMet());
+            assertTrue(getLoanDetails(loanId).getStatus().getClosedObligationsMet());
             log.info("[Backdated CBR] Loan closed on 01 March 2025");
         });
 
@@ -372,22 +362,21 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
 
         // Goodwill credit + merchant refund → overpaid
         runAt("15 March 2025", () -> {
-            loanTransactionHelper.makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+            makeGoodwillCredit(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
                     .transactionDate("15 March 2025").locale(LOCALE).transactionAmount(0.5));
-            loanTransactionHelper.makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+            makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
                     .transactionDate("15 March 2025").locale(LOCALE).transactionAmount(100.0));
-            assertTrue(loanTransactionHelper.getLoanDetails(loanId).getStatus().getOverpaid());
+            assertTrue(getLoanDetails(loanId).getStatus().getOverpaid());
         });
 
         // CBR on March 16
         AtomicReference<Long> cbrIdRef = new AtomicReference<>();
         runAt("16 March 2025", () -> {
             executeInlineCOB(loanId);
-            GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse details = getLoanDetails(loanId);
             double overpayment = Utils.getDoubleValue(details.getTotalOverpaid());
-            PostLoansLoanIdTransactionsResponse cbr = loanTransactionHelper.makeCreditBalanceRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("16 March 2025").locale(LOCALE)
-                            .transactionAmount(overpayment));
+            PostLoansLoanIdTransactionsResponse cbr = makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 March 2025").locale(LOCALE).transactionAmount(overpayment));
             cbrIdRef.set(cbr.getResourceId());
             logAccrualState(loanId, "After first CBR on March 16");
         });
@@ -398,16 +387,16 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         runAt("15 April 2025", () -> {
             log.info("[Backdated CBR] Reversing CBR {} and re-creating backdated to 16 March 2025", cbrIdRef.get());
 
-            loanTransactionHelper.reverseLoanTransaction(loanId, cbrIdRef.get(), new PostLoansLoanIdTransactionsTransactionIdRequest()
+            reverseLoanTransaction(loanId, cbrIdRef.get(), new PostLoansLoanIdTransactionsTransactionIdRequest()
                     .dateFormat(DATETIME_PATTERN).transactionDate("15 April 2025").transactionAmount(0.0).locale(LOCALE));
 
             logAccrualState(loanId, "After CBR reversal on April 15");
 
-            GetLoansLoanIdResponse afterReversal = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse afterReversal = getLoanDetails(loanId);
             double overpayment = Utils.getDoubleValue(afterReversal.getTotalOverpaid());
             if (overpayment > 0) {
                 // Re-create CBR backdated to original date — this is the production pattern
-                loanTransactionHelper.makeCreditBalanceRefund(loanId,
+                makeCreditBalanceRefund(loanId,
                         new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("16 March 2025") // BACKDATED
                                 .locale(LOCALE).transactionAmount(overpayment));
                 log.info("[Backdated CBR] New CBR created backdated to 16 March 2025");
@@ -418,7 +407,7 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
 
         runAt("16 April 2025", () -> {
             executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logAllTransactions(loanId, "Final backdated CBR");
             assertNoReversedAccruals(loanDetails);
         });
@@ -433,16 +422,15 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         AtomicLong loanIdRef = new AtomicLong();
 
         runAt("01 November 2024", () -> {
-            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            final Long clientId = createClient();
 
-            final PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4ICumulative()//
+            final Long loanProductId = createLoanProduct(create4ICumulative()//
                     .currencyCode("USD").principal(220.0).minPrincipal(100.0).maxPrincipal(1000.0)//
                     .numberOfRepayments(4).repaymentEvery(1).interestRatePerPeriod(12.0).interestRateFrequencyType(3)//
                     .enableAccrualActivityPosting(true)//
             );
 
-            Long loanId = applyAndApproveCumulativeLoan(client.getClientId(), loanProduct.getResourceId(), "01 November 2024", 220.0, 12.0,
-                    4, null);
+            Long loanId = applyAndApproveCumulativeLoan(clientId, loanProductId, "01 November 2024", 220.0, 12.0, 4, null);
             loanIdRef.set(loanId);
             disburseLoan(loanId, BigDecimal.valueOf(220.0), "01 November 2024");
             log.info("[Cumulative+Backdated] Loan disbursed: id={}", loanId);
@@ -461,11 +449,11 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
 
         runAt("01 March 2025", () -> {
             executeInlineCOB(loanId);
-            GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse details = getLoanDetails(loanId);
             var installment = details.getRepaymentSchedule().getPeriods().stream().filter(p -> p.getPeriod() != null && p.getPeriod() == 4)
                     .findFirst().orElseThrow();
             addRepaymentForLoan(loanId, Utils.getDoubleValue(installment.getTotalDueForPeriod()), "01 March 2025");
-            assertTrue(loanTransactionHelper.getLoanDetails(loanId).getStatus().getClosedObligationsMet());
+            assertTrue(getLoanDetails(loanId).getStatus().getClosedObligationsMet());
             log.info("[Cumulative+Backdated] Loan closed");
         });
 
@@ -474,19 +462,18 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         // Merchant refund → overpaid
         AtomicReference<Long> cbrIdRef = new AtomicReference<>();
         runAt("15 March 2025", () -> {
-            loanTransactionHelper.makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+            makeMerchantIssuedRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
                     .transactionDate("15 March 2025").locale(LOCALE).transactionAmount(50.0));
-            assertTrue(loanTransactionHelper.getLoanDetails(loanId).getStatus().getOverpaid());
+            assertTrue(getLoanDetails(loanId).getStatus().getOverpaid());
         });
 
         // CBR
         runAt("16 March 2025", () -> {
             executeInlineCOB(loanId);
-            GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse details = getLoanDetails(loanId);
             double overpayment = Utils.getDoubleValue(details.getTotalOverpaid());
-            PostLoansLoanIdTransactionsResponse cbr = loanTransactionHelper.makeCreditBalanceRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("16 March 2025").locale(LOCALE)
-                            .transactionAmount(overpayment));
+            PostLoansLoanIdTransactionsResponse cbr = makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("16 March 2025").locale(LOCALE).transactionAmount(overpayment));
             cbrIdRef.set(cbr.getResourceId());
             logAccrualState(loanId, "After CBR");
         });
@@ -496,15 +483,15 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         // Reverse and re-create backdated
         runAt("15 April 2025", () -> {
             log.info("[Cumulative+Backdated] Reversing CBR and re-creating backdated");
-            loanTransactionHelper.reverseLoanTransaction(loanId, cbrIdRef.get(), new PostLoansLoanIdTransactionsTransactionIdRequest()
+            reverseLoanTransaction(loanId, cbrIdRef.get(), new PostLoansLoanIdTransactionsTransactionIdRequest()
                     .dateFormat(DATETIME_PATTERN).transactionDate("15 April 2025").transactionAmount(0.0).locale(LOCALE));
 
             logAccrualState(loanId, "After CBR reversal");
 
-            GetLoansLoanIdResponse afterReversal = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse afterReversal = getLoanDetails(loanId);
             double overpayment = Utils.getDoubleValue(afterReversal.getTotalOverpaid());
             if (overpayment > 0) {
-                loanTransactionHelper.makeCreditBalanceRefund(loanId,
+                makeCreditBalanceRefund(loanId,
                         new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("16 March 2025") // BACKDATED
                                 .locale(LOCALE).transactionAmount(overpayment));
             }
@@ -513,7 +500,7 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
 
         runAt("16 April 2025", () -> {
             executeInlineCOB(loanId);
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             logAllTransactions(loanId, "Final cumulative+backdated");
             assertNoReversedAccruals(loanDetails);
         });
@@ -533,16 +520,15 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         AtomicLong loanIdRef = new AtomicLong();
 
         runAt("01 November 2024", () -> {
-            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            final Long clientId = createClient();
 
-            final PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4ICumulative()//
+            final Long loanProductId = createLoanProduct(create4ICumulative()//
                     .currencyCode("USD").principal(220.0).minPrincipal(100.0).maxPrincipal(1000.0)//
                     .numberOfRepayments(4).repaymentEvery(1).interestRatePerPeriod(12.0).interestRateFrequencyType(3)//
                     .enableAccrualActivityPosting(true)//
             );
 
-            Long loanId = applyAndApproveCumulativeLoan(client.getClientId(), loanProduct.getResourceId(), "01 November 2024", 220.0, 12.0,
-                    4, null);
+            Long loanId = applyAndApproveCumulativeLoan(clientId, loanProductId, "01 November 2024", 220.0, 12.0, 4, null);
             loanIdRef.set(loanId);
             disburseLoan(loanId, BigDecimal.valueOf(220.0), "01 November 2024");
             log.info("[AccrualFix] Loan disbursed: id={}", loanId);
@@ -569,7 +555,7 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         // Since installment 4 interest is unaccrued, the final accrual will have non-zero amount
         // and will be placed at overpaidOnDate (after lastDueDate) → POST-DUE-DATE ACCRUAL
         runAt("05 March 2025", () -> {
-            GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse details = getLoanDetails(loanId);
             var installment = details.getRepaymentSchedule().getPeriods().stream().filter(p -> p.getPeriod() != null && p.getPeriod() == 4)
                     .findFirst().orElseThrow();
             double installmentAmount = Utils.getDoubleValue(installment.getTotalDueForPeriod());
@@ -580,7 +566,7 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
 
             addRepaymentForLoan(loanId, overpayAmount, "05 March 2025");
 
-            GetLoansLoanIdResponse afterPay = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse afterPay = getLoanDetails(loanId);
             log.info("[AccrualFix] Status after overpayment: {}", afterPay.getStatus().getCode());
             assertTrue(afterPay.getStatus().getOverpaid(), "Loan should be OVERPAID but is: " + afterPay.getStatus().getCode());
 
@@ -590,13 +576,12 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         // CBR to refund overpayment
         AtomicReference<Long> cbrIdRef = new AtomicReference<>();
         runAt("15 March 2025", () -> {
-            GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse details = getLoanDetails(loanId);
             double overpayment = Utils.getDoubleValue(details.getTotalOverpaid());
             log.info("[AccrualFix] Overpayment: {}, creating CBR", overpayment);
             assertTrue(overpayment > 0, "Should have overpayment");
-            PostLoansLoanIdTransactionsResponse cbr = loanTransactionHelper.makeCreditBalanceRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("15 March 2025").locale(LOCALE)
-                            .transactionAmount(overpayment));
+            PostLoansLoanIdTransactionsResponse cbr = makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("15 March 2025").locale(LOCALE).transactionAmount(overpayment));
             cbrIdRef.set(cbr.getResourceId());
             logAccrualState(loanId, "After CBR");
         });
@@ -606,13 +591,13 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         runAt("20 March 2025", () -> {
             log.info("[AccrualFix] === Undoing CBR {} ===", cbrIdRef.get());
 
-            loanTransactionHelper.reverseLoanTransaction(loanId, cbrIdRef.get(), new PostLoansLoanIdTransactionsTransactionIdRequest()
+            reverseLoanTransaction(loanId, cbrIdRef.get(), new PostLoansLoanIdTransactionsTransactionIdRequest()
                     .dateFormat(DATETIME_PATTERN).transactionDate("20 March 2025").transactionAmount(0.0).locale(LOCALE));
 
             logAccrualState(loanId, "After CBR undo — checking for accrual reversal");
             logAllTransactions(loanId, "After CBR undo");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             // This assertion should FAIL if the bug exists — accruals should NOT be reversed
             assertNoReversedAccruals(loanDetails);
@@ -630,17 +615,16 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         AtomicLong loanIdRef = new AtomicLong();
 
         runAt("01 November 2024", () -> {
-            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            final Long clientId = createClient();
 
             // Cumulative loan WITH interest recalculation — matches production scenario
-            final PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(create4ICumulative()//
+            final Long loanProductId = createLoanProduct(create4ICumulative()//
                     .currencyCode("USD").principal(220.0).minPrincipal(100.0).maxPrincipal(1000.0)//
                     .numberOfRepayments(4).repaymentEvery(1).interestRatePerPeriod(12.0).interestRateFrequencyType(3)//
                     .enableAccrualActivityPosting(true)//
             );
 
-            Long loanId = applyAndApproveCumulativeLoan(client.getClientId(), loanProduct.getResourceId(), "01 November 2024", 220.0, 12.0,
-                    4, null);
+            Long loanId = applyAndApproveCumulativeLoan(clientId, loanProductId, "01 November 2024", 220.0, 12.0, 4, null);
             loanIdRef.set(loanId);
             disburseLoan(loanId, BigDecimal.valueOf(220.0), "01 November 2024");
             log.info("[AccrualFix] Loan disbursed: id={}", loanId);
@@ -662,7 +646,7 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
 
         // Overpay to create post-due-date accrual and move loan to OVERPAID
         runAt("05 March 2025", () -> {
-            GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse details = getLoanDetails(loanId);
             var installment = details.getRepaymentSchedule().getPeriods().stream().filter(p -> p.getPeriod() != null && p.getPeriod() == 4)
                     .findFirst().orElseThrow();
             double installmentAmount = Utils.getDoubleValue(installment.getTotalDueForPeriod());
@@ -671,7 +655,7 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
 
             addRepaymentForLoan(loanId, overpayAmount, "05 March 2025");
 
-            GetLoansLoanIdResponse afterPay = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse afterPay = getLoanDetails(loanId);
             log.info("[AccrualFix] Status after overpayment: {}", afterPay.getStatus().getCode());
             assertTrue(afterPay.getStatus().getOverpaid(), "Loan should be OVERPAID but is: " + afterPay.getStatus().getCode());
             logAccrualState(loanId, "After overpayment");
@@ -680,13 +664,12 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         // CBR to refund overpayment
         AtomicReference<Long> cbrIdRef = new AtomicReference<>();
         runAt("15 March 2025", () -> {
-            GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse details = getLoanDetails(loanId);
             double overpayment = Utils.getDoubleValue(details.getTotalOverpaid());
             log.info("[AccrualFix] Overpayment: {}, creating CBR", overpayment);
             assertTrue(overpayment > 0, "Should have overpayment");
-            PostLoansLoanIdTransactionsResponse cbr = loanTransactionHelper.makeCreditBalanceRefund(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("15 March 2025").locale(LOCALE)
-                            .transactionAmount(overpayment));
+            PostLoansLoanIdTransactionsResponse cbr = makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(DATETIME_PATTERN).transactionDate("15 March 2025").locale(LOCALE).transactionAmount(overpayment));
             cbrIdRef.set(cbr.getResourceId());
             logAccrualState(loanId, "After CBR");
         });
@@ -696,13 +679,13 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
         runAt("20 March 2025", () -> {
             log.info("[AccrualFix] === Undoing CBR {} ===", cbrIdRef.get());
 
-            loanTransactionHelper.reverseLoanTransaction(loanId, cbrIdRef.get(), new PostLoansLoanIdTransactionsTransactionIdRequest()
+            reverseLoanTransaction(loanId, cbrIdRef.get(), new PostLoansLoanIdTransactionsTransactionIdRequest()
                     .dateFormat(DATETIME_PATTERN).transactionDate("20 March 2025").transactionAmount(0.0).locale(LOCALE));
 
             logAccrualState(loanId, "After CBR undo");
             logAllTransactions(loanId, "After CBR undo");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             // Accruals must never be reversed — check via assertNoReversedAccruals
             assertNoReversedAccruals(loanDetails);
@@ -721,7 +704,7 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
     private void payInstallment(Long loanId, int installmentNumber, String date) {
         runAt(date, () -> {
             executeInlineCOB(loanId);
-            GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse details = getLoanDetails(loanId);
             var installment = details.getRepaymentSchedule().getPeriods().stream()
                     .filter(p -> p.getPeriod() != null && p.getPeriod() == installmentNumber).findFirst().orElseThrow();
             double amount = Utils.getDoubleValue(installment.getTotalDueForPeriod());
@@ -766,7 +749,7 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
     }
 
     private void logAccrualState(Long loanId, String label) {
-        GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+        GetLoansLoanIdResponse details = getLoanDetails(loanId);
         List<GetLoansLoanIdTransactions> accruals = details.getTransactions().stream()
                 .filter(tx -> "loanTransactionType.accrual".equals(tx.getType().getCode())
                         || "loanTransactionType.accrualAdjustment".equals(tx.getType().getCode()))
@@ -779,7 +762,7 @@ public class LoanAccrualReversalOnClosedLoanTest extends BaseLoanIntegrationTest
     }
 
     private void logAllTransactions(Long loanId, String label) {
-        GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails(loanId);
+        GetLoansLoanIdResponse details = getLoanDetails(loanId);
         log.info("=== All transactions [{}] ===", label);
         for (GetLoansLoanIdTransactions tx : details.getTransactions()) {
             log.info("  {}: id={}, date={}, amount={}, reversed={}", tx.getType().getValue(), tx.getId(), tx.getDate(), tx.getAmount(),

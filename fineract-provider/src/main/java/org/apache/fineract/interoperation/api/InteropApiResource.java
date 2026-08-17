@@ -70,6 +70,7 @@ import org.apache.fineract.interoperation.data.InteropTransferResponseData;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
 import org.apache.fineract.interoperation.domain.InteropTransferActionType;
 import org.apache.fineract.interoperation.service.InteropService;
+import org.apache.fineract.portfolio.loanaccount.api.LoanTransactionsApiResourceSwagger;
 import org.springframework.stereotype.Component;
 
 @Path("/v1/interoperation") // api/v1/
@@ -377,7 +378,8 @@ public class InteropApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     @Path("transactions/{accountId}/loanrepayment")
-    @Operation(summary = "Disburse Loan by Account Id", description = "")
+    @Operation(summary = "Loan Repayment by Account Id", description = "")
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanTransactionsApiResourceSwagger.PostLoansLoanIdTransactionsRequest.class)))
     public String loanRepayment(@PathParam("accountId") @Parameter(description = "accountId") String accountId,
             @Parameter(hidden = true) final String apiRequestBodyAsJson, @Context UriInfo uriInfo) {
         return interopService.loanRepayment(accountId, apiRequestBodyAsJson);

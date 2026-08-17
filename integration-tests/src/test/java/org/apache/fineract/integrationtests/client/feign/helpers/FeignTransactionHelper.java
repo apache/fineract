@@ -27,10 +27,13 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.BuyDownFeeAmortizationDetails;
+import org.apache.fineract.client.models.CapitalizedIncomeDetails;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.InlineJobRequest;
+import org.apache.fineract.client.models.LoanCapitalizedIncomeData;
 import org.apache.fineract.client.models.LoanScheduleData;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
@@ -61,6 +64,55 @@ public class FeignTransactionHelper {
                         .handleCommandsLoanTransaction(loanId, new PostLoansLoanIdTransactionsRequest().transactionAmount(amount)
                                 .transactionDate(transactionDate).dateFormat("dd MMMM yyyy").locale("en"),
                                 Map.of("command", "capitalizedIncome")));
+    }
+
+    public PostLoansLoanIdTransactionsResponse addCapitalizedIncome(Long loanId, String transactionDate, double amount,
+            Long classificationId) {
+        return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId,
+                new PostLoansLoanIdTransactionsRequest().transactionAmount(amount).transactionDate(transactionDate)
+                        .dateFormat("dd MMMM yyyy").locale("en").classificationId(classificationId),
+                Map.of("command", "capitalizedIncome")));
+    }
+
+    public PostLoansLoanIdTransactionsResponse capitalizedIncomeAdjustment(Long loanId, Long capitalizedIncomeTransactionId,
+            String transactionDate, double amount) {
+        PostLoansLoanIdTransactionsTransactionIdRequest request = new PostLoansLoanIdTransactionsTransactionIdRequest()
+                .transactionAmount(amount).transactionDate(transactionDate).dateFormat("dd MMMM yyyy").locale("en");
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId, capitalizedIncomeTransactionId, request,
+                "capitalizedIncomeAdjustment"));
+    }
+
+    public List<CapitalizedIncomeDetails> fetchCapitalizedIncomeDetails(Long loanId) {
+        return ok(() -> fineractClient.loanCapitalizedIncome().fetchCapitalizedIncomeDetails(loanId));
+    }
+
+    public LoanCapitalizedIncomeData fetchLoanCapitalizedIncomeData(Long loanId) {
+        return ok(() -> fineractClient.loanCapitalizedIncome().fetchLoanCapitalizedIncomeData(loanId));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeLoanBuyDownFee(Long loanId, PostLoansLoanIdTransactionsRequest request) {
+        return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request, Map.of("command", "buyDownFee")));
+    }
+
+    public PostLoansLoanIdTransactionsResponse makeLoanBuyDownFee(Long loanId, String date, double amount) {
+        return makeLoanBuyDownFee(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate(date)
+                .locale("en").transactionAmount(amount));
+    }
+
+    public PostLoansLoanIdTransactionsResponse buyDownFeeAdjustment(Long loanId, Long buyDownFeeTransactionId, String transactionDate,
+            double amount) {
+        return buyDownFeeAdjustment(loanId, buyDownFeeTransactionId, new PostLoansLoanIdTransactionsTransactionIdRequest()
+                .transactionAmount(amount).transactionDate(transactionDate).dateFormat("dd MMMM yyyy").locale("en"));
+    }
+
+    public PostLoansLoanIdTransactionsResponse buyDownFeeAdjustment(Long loanId, Long buyDownFeeTransactionId,
+            PostLoansLoanIdTransactionsTransactionIdRequest request) {
+        return ok(() -> fineractClient.loanTransactions().adjustLoanTransaction(loanId, buyDownFeeTransactionId, request,
+                "buyDownFeeAdjustment"));
+    }
+
+    public List<BuyDownFeeAmortizationDetails> fetchBuyDownFeeAmortizationDetails(Long loanId) {
+        return ok(() -> fineractClient.loanBuyDownFees().retrieveLoanBuyDownFeeAmortizationDetails(loanId));
     }
 
     public GetLoansLoanIdTransactionsTemplateResponse getPrepaymentAmount(Long loanId, String transactionDate, String dateFormat) {

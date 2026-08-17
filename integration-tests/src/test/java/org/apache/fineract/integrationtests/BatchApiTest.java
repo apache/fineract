@@ -18,86 +18,108 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
+import static org.apache.http.HttpStatus.SC_CONFLICT;
 import static org.apache.http.HttpStatus.SC_FORBIDDEN;
-import static org.hamcrest.Matchers.containsString;
+import static org.apache.http.HttpStatus.SC_NOT_IMPLEMENTED;
+import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import com.google.gson.JsonParser;
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.fineract.batch.command.internal.AdjustLoanTransactionCommandStrategy;
-import org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy;
-import org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdAndDataTableIdCommandStrategy;
-import org.apache.fineract.batch.domain.BatchRequest;
-import org.apache.fineract.batch.domain.BatchResponse;
+import org.apache.fineract.client.models.BatchRequest;
+import org.apache.fineract.client.models.BatchResponse;
+import org.apache.fineract.client.models.PostColumnHeaderData;
+import org.apache.fineract.client.models.PostDataTablesRequest;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.client.models.SavingsAccountTransactionData;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.apache.fineract.integrationtests.common.BatchHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBatchHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDatatableHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.BatchRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.AmortizationType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInMonthType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInYearType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestCalculationPeriodType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestRateFrequencyType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.InterestType;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RepaymentFrequencyType;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData.InterestPostingPeriodType;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.error.ErrorResponse;
-import org.apache.fineract.integrationtests.common.loans.LoanAccountLockHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
-import org.apache.fineract.integrationtests.common.system.CodeHelper;
-import org.apache.fineract.integrationtests.common.system.DatatableHelper;
-import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
-import org.apache.http.HttpStatus;
-import org.hamcrest.MatcherAssert;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class BatchApiTest extends BaseLoanIntegrationTest {
+/**
+ * Integration tests for the Batch API, exercised through the typed Feign client.
+ *
+ * @see org.apache.fineract.batch.api.BatchApiResource
+ */
+public class BatchApiTest extends FeignLoanTestBase {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BatchApiTest.class);
-
-    /**
-     * The response specification
-     */
-    private ResponseSpecification responseSpec;
-
-    /**
-     * The request specification
-     */
-    private RequestSpecification requestSpec;
-
-    /**
-     * The datatable helper
-     */
-    private DatatableHelper datatableHelper;
-
-    /**
-     * Loan app datatable
-     */
+    /** Application table the datatables in this test are attached to. */
     private static final String LOAN_APP_TABLE_NAME = "m_loan";
+    private static final String LOAN_RESCHEDULE_REASON_CODE_NAME = "LoanRescheduleReason";
+    private static final String PERSON_ENTITY_SUB_TYPE = "PERSON";
+
+    private static final double SMALL_PRINCIPAL = 1000.00;
+    private static final double LARGE_PRINCIPAL = 10000000.00;
+    private static final double SPECIFIED_DUE_DATE_CHARGE_AMOUNT = 100.0;
+
+    /** Column width of the datatables whose values are short random strings. */
+    private static final long SHORT_COLUMN_LENGTH = 10;
+    /** Column width of the datatable queried by the literal {@code columnValue1} / {@code columnValue2} filters. */
+    private static final long LONG_COLUMN_LENGTH = 15;
+
+    private static final String SAVINGS_SUBMITTED_ON_DATE = "08 January 2013";
+    private static final String SAVINGS_APPROVED_ON_DATE = "09 January 2013";
+    private static final String SAVINGS_ACTIVATED_ON_DATE = "01 March 2013";
+
+    /**
+     * Batch request ids of the datatable requests. Their only requirement is to be unique within a batch and to match
+     * the {@code reference} of any request that resolves an id from their response.
+     */
+    private static final Long GET_LOAN_REQUEST_ID = 4567L;
+    private static final Long CREATE_DATATABLE_ENTRY_REQUEST_ID = 4569L;
+    private static final Long UPDATE_DATATABLE_ENTRY_REQUEST_ID = 4570L;
+    private static final Long GET_DATATABLE_ENTRIES_REQUEST_ID = 4571L;
+    private static final Long GET_DATATABLE_ENTRY_REQUEST_ID = 4572L;
+    private static final Long QUERY_DATATABLE_ENTRIES_REQUEST_ID = 1L;
+    private static final Long UPDATE_QUERIED_DATATABLE_ENTRY_REQUEST_ID = 2L;
+
+    private static final Gson GSON = new Gson();
+
+    private final FeignBatchHelper batchHelper = new FeignBatchHelper(FineractFeignClientHelper.getFineractFeignClient());
+    private final FeignDatatableHelper datatableHelper = new FeignDatatableHelper(FineractFeignClientHelper.getFineractFeignClient());
+    private final FeignCollateralHelper collateralHelper = new FeignCollateralHelper(FineractFeignClientHelper.getFineractFeignClient());
+    private final FeignSavingsHelper savingsHelper = new FeignSavingsHelper(FineractFeignClientHelper.getFineractFeignClient());
+    private final FeignSavingsProductHelper savingsProductHelper = new FeignSavingsProductHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
 
     /**
      * Sets up the essential settings for the TEST like contentType, expectedStatusCode. It uses the '@BeforeEach'
@@ -105,16 +127,10 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
      */
     @BeforeEach
     public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID,
                 new PutGlobalConfigurationsRequest().enabled(true));
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ALLOW_CASH_AND_NON_CASH_ACCRUAL,
                 new PutGlobalConfigurationsRequest().enabled(false));
-
     }
 
     @AfterEach
@@ -123,7 +139,6 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
                 new PutGlobalConfigurationsRequest().enabled(false));
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ALLOW_CASH_AND_NON_CASH_ACCRUAL,
                 new PutGlobalConfigurationsRequest().enabled(true));
-
     }
 
     /**
@@ -134,18 +149,13 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
      */
     @Test
     public void shouldReturnStatusNotImplementedUnknownCommand() {
+        final BatchRequest unknownCommandRequest = new BatchRequest().requestId(4711L).relativeUrl("/nirvana").method("POST");
 
-        final BatchRequest br = new BatchRequest();
-        br.setRequestId(4711L);
-        br.setRelativeUrl("/nirvana");
-        br.setMethod("POST");
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(List.of(unknownCommandRequest));
 
-        final List<BatchResponse> response = BatchHelper.postWithSingleRequest(this.requestSpec, this.responseSpec, br);
-
+        assertEquals(1, responses.size());
         // Verify that only 501 is returned as the status code
-        for (BatchResponse resp : response) {
-            Assertions.assertEquals((long) 501, (long) resp.getStatusCode(), "Verify Status code 501");
-        }
+        assertEquals(SC_NOT_IMPLEMENTED, responses.get(0).getStatusCode(), "Verify Status code 501");
     }
 
     /**
@@ -156,19 +166,17 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
      */
     @Test
     public void shouldReturnOkStatusForCreateClientCommand() {
+        final BatchRequest createClientRequest = BatchRequestBuilders.createClient(4712L, "");
 
-        final BatchRequest br = BatchHelper.createClientRequest(4712L, "");
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(List.of(createClientRequest));
 
-        final List<BatchResponse> response = BatchHelper.postWithSingleRequest(this.requestSpec, this.responseSpec, br);
-
+        assertEquals(1, responses.size());
         // Verify that a 200 response is returned as the status code
-        for (BatchResponse resp : response) {
-            Assertions.assertEquals((long) 200, (long) resp.getStatusCode(), "Verify Status code 200");
-        }
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status code 200");
     }
 
     /**
-     * Tests for an erroneous response with statusCode '501' if transaction fails. If Query Parameter
+     * Tests for an erroneous response with statusCode '403' if transaction fails. If Query Parameter
      * 'enclosingTransaction' is set to 'true' and if one of the request in BatchRequest fails then all transactions are
      * rolled back.
      *
@@ -178,32 +186,27 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
      */
     @Test
     public void shouldRollBackAllTransactionsOnFailure() {
+        final String firstExternalId = UUID.randomUUID().toString();
         // Create first client request
-        final BatchRequest br1 = BatchHelper.createClientRequest(4713L, "TestExtId11");
+        final String secondExternalId = UUID.randomUUID().toString();
 
         // Create second client request
-        final BatchRequest br2 = BatchHelper.createClientRequest(4714L, "TestExtId12");
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createClient(4713L, firstExternalId),
+                BatchRequestBuilders.createClient(4714L, secondExternalId),
+                // Duplicates the first external id, which is what makes the batch fail
+                BatchRequestBuilders.createClient(4715L, firstExternalId));
 
         // Create third client request, having same externalID as second client, hence cause of error
-        final BatchRequest br3 = BatchHelper.createClientRequest(4715L, "TestExtId11");
+        final List<BatchResponse> responses = batchHelper.executeEnclosingTransaction(batchRequests);
 
-        final List<BatchRequest> batchRequests = new ArrayList<>();
+        // Verifies that none of the clients in the batch was created on the server
+        assertEquals(0, clientHelper.countClientsByExternalId(firstExternalId), "No records found with given externalId");
+        assertEquals(0, clientHelper.countClientsByExternalId(secondExternalId), "No records found with given externalId");
 
-        batchRequests.add(br1);
-        batchRequests.add(br2);
-        batchRequests.add(br3);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
+        assertEquals(1, responses.size());
         // Verifies that none of the client in BatchRequest is created on the server
-        BatchHelper.verifyClientNotCreatedOnServer(this.requestSpec, this.responseSpec, "TestExtId11");
-        BatchHelper.verifyClientNotCreatedOnServer(this.requestSpec, this.responseSpec, "TestExtId12");
-
         // Asserts that all the transactions have been successfully rolled back
-        Assertions.assertEquals(1, response.size());
-        Assertions.assertEquals(SC_FORBIDDEN, response.get(0).getStatusCode(), "Verify Status code 403");
+        assertEquals(SC_FORBIDDEN, responses.get(0).getStatusCode(), "Verify Status code 403");
     }
 
     /**
@@ -214,29 +217,21 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
      */
     @Test
     public void shouldReflectChangesOnClientUpdate() {
+        final Long createClientRequestId = 4716L;
+        final Long updateClientRequestId = 4717L;
 
         // Create a createClient Request
-        final BatchRequest br1 = BatchHelper.createClientRequest(4716L, "");
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createClient(createClientRequestId, ""),
+                // Get the changes parameter from updateClient Response
+                BatchRequestBuilders.updateClient(updateClientRequestId, createClientRequestId));
 
         // Create a clientUpdate Request
-        final BatchRequest br2 = BatchHelper.updateClientRequest(4717L, 4716L);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        final List<BatchRequest> batchRequests = new ArrayList<>();
-
-        batchRequests.add(br1);
-        batchRequests.add(br2);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        // Get the changes parameter from updateClient Response
-        final JsonObject changes = new FromJsonHelper().parse(response.get(1).getBody()).getAsJsonObject().get("changes").getAsJsonObject();
-
+        final JsonObject changes = bodyAsObject(responses.get(1)).getAsJsonObject("changes");
+        assertEquals("TestFirstName", changes.get("firstname").getAsString());
         // Asserts the client information is successfully updated
-        Assertions.assertEquals("TestFirstName", changes.get("firstname").getAsString());
-        Assertions.assertEquals("TestLastName", changes.get("lastname").getAsString());
+        assertEquals("TestLastName", changes.get("lastname").getAsString());
     }
 
     /**
@@ -247,54 +242,26 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
      */
     @Test
     public void shouldReturnOkStatusForApplyLoanCommand() {
+        // Create product
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        final Long clientCollateralId = createClientCollateral();
 
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                String.valueOf(clientID), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Long createClientRequestId = 4718L;
+        final Long activateClientRequestId = 4719L;
+        final Long applyLoanRequestId = 4720L;
 
         // Create a createClient Request
-        final BatchRequest br1 = BatchHelper.createClientRequest(4718L, "");
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createClient(createClientRequestId, ""),
+                // Create a activateClient Request
+                BatchRequestBuilders.activateClient(activateClientRequestId, createClientRequestId),
+                // Create a ApplyLoan Request
+                BatchRequestBuilders.applyLoan(applyLoanRequestId, activateClientRequestId, productId, clientCollateralId));
 
-        // Create a activateClient Request
-        final BatchRequest br2 = BatchHelper.activateClientRequest(4719L, 4718L);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        // Create a ApplyLoan Request
-        final BatchRequest br3 = BatchHelper.applyLoanRequest(4720L, 4719L, productId, clientCollateralId);
-
-        final List<BatchRequest> batchRequests = new ArrayList<>();
-
-        batchRequests.add(br1);
-        batchRequests.add(br2);
-        batchRequests.add(br3);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        // Get the clientId parameter from createClient Response
-        final JsonElement clientId = new FromJsonHelper().parse(response.get(0).getBody()).getAsJsonObject().get("clientId");
-
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(1).getStatusCode(),
-                "Verify Status Code 200" + clientId.getAsString());
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Create Client");
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Activate Client");
+        assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Apply Loan");
     }
 
     /**
@@ -305,37 +272,25 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
      */
     @Test
     public void shouldReturnOkStatusForApplySavingsCommand() {
+        final PostSavingsProductsRequest savingsProduct = SavingsRequestBuilders.defaultSavingsProduct()
+                .minRequiredOpeningBalance(BigDecimal.valueOf(5000));
+        final Long productId = savingsProductHelper.createSavingsProduct(savingsProduct).getResourceId();
 
-        final SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-        final String savingsProductJSON = savingsProductHelper //
-                .withInterestCompoundingPeriodTypeAsDaily() //
-                .withInterestPostingPeriodTypeAsMonthly() //
-                .withInterestCalculationPeriodTypeAsDailyBalance() //
-                .withMinimumOpenningBalance("5000").build();
-
-        final Integer productId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, this.requestSpec, this.responseSpec);
+        final Long createClientRequestId = 4720L;
+        final Long activateClientRequestId = 4721L;
+        final Long applySavingsRequestId = 4722L;
 
         // Create a createClient Request
-        final BatchRequest br1 = BatchHelper.createClientRequest(4720L, "");
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createClient(createClientRequestId, ""),
+                // Create a activateClient Request
+                BatchRequestBuilders.activateClient(activateClientRequestId, createClientRequestId),
+                // Create a applySavings Request
+                BatchRequestBuilders.applySavings(applySavingsRequestId, activateClientRequestId, productId));
 
-        // Create a activateClient Request
-        final BatchRequest br2 = BatchHelper.activateClientRequest(4721L, 4720L);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        // Create a applySavings Request
-        final BatchRequest br3 = BatchHelper.applySavingsRequest(4722L, 4721L, productId);
-
-        final List<BatchRequest> batchRequests = new ArrayList<>();
-
-        batchRequests.add(br1);
-        batchRequests.add(br2);
-        batchRequests.add(br3);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(1).getStatusCode(), "Verify Status Code 200");
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Create Client");
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Activate Client");
     }
 
     /**
@@ -348,139 +303,82 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
      */
     @Test
     public void shouldReturnOkStatusForCollectChargesCommand() {
+        // Create product
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        final Long clientCollateralId = createClientCollateral();
 
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                String.valueOf(clientID), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Long createClientRequestId = 4722L;
+        final Long activateClientRequestId = 4723L;
+        final Long applyLoanRequestId = 4724L;
+        final Long collectChargesRequestId = 4725L;
 
         // Create a createClient Request
-        final BatchRequest br1 = BatchHelper.createClientRequest(4722L, "");
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createClient(createClientRequestId, ""),
+                // Create a activateClient Request
+                BatchRequestBuilders.activateClient(activateClientRequestId, createClientRequestId),
+                // Create a ApplyLoan Request
+                BatchRequestBuilders.applyLoan(applyLoanRequestId, activateClientRequestId, productId, clientCollateralId),
+                BatchRequestBuilders.collectChargesByLoanId(collectChargesRequestId, applyLoanRequestId));
 
-        // Create a activateClient Request
-        final BatchRequest br2 = BatchHelper.activateClientRequest(4723L, 4722L);
-
-        // Create a ApplyLoan Request
-        final BatchRequest br3 = BatchHelper.applyLoanRequest(4724L, 4723L, productId, clientCollateralId);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
         // Create a Collect Charges Request
-        final BatchRequest br4 = BatchHelper.collectChargesByLoanIdRequest(4725L, 4724L);
-
-        final List<BatchRequest> batchRequests = new ArrayList<>();
-
-        batchRequests.add(br1);
-        batchRequests.add(br2);
-        batchRequests.add(br3);
-        batchRequests.add(br4);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(3).getStatusCode(), "Verify Status Code 200 for Create Loan Charge");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Collect Charges");
     }
 
     /**
-     * Tests that a new charge was added to a newly created loan and charges are Collected properly 200(OK) status was
-     * returned for successful responses. It first creates a new client and apply a loan, then creates a new charge for
-     * the create loan and then fetches all the applied charges
+     * Tests that a new charge was added to a newly created loan and can be read back by its id.
      *
-     * @see org.apache.fineract.batch.command.internal.CollectChargesCommandStrategy
      * @see org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.GetChargeByIdCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForCreateAndGetChargeByIdCommand() {
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("1000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
+        // Create product
+        final Long productId = createBatchLoanProduct(SMALL_PRINCIPAL);
+        // Create client
+        final Long clientId = createClient();
+        final Long chargeId = chargesHelper.createLoanSpecifiedDueDatePenalty(SPECIFIED_DUE_DATE_CHARGE_AMOUNT).getResourceId();
 
-        final Long applyLoanRequestId = ThreadLocalRandom.current().nextLong(1000, 10_000);
+        final Long applyLoanRequestId = randomRequestId();
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long createChargeRequestId = disburseLoanRequestId + 1;
         final Long getChargeByIdRequestId = createChargeRequestId + 1;
 
-        // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
-
-        // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
-
-        // Create charge object and get id
-        final Integer chargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON());
-
-        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
-
-        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
-
-        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
-
-        final BatchRequest createChargeRequest = BatchHelper.createChargeByLoanIdRequest(createChargeRequestId, disburseLoanRequestId,
-                chargeId);
-
-        final BatchRequest getChargeByIdRequest = BatchHelper.getChargeByLoanIdChargeId(getChargeByIdRequestId, createChargeRequestId);
-
         // Create batch requests list
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest,
-                createChargeRequest, getChargeByIdRequest);
+        final List<BatchRequest> batchRequests = List.of(
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId),
+                // Create charge object and get id
+                BatchRequestBuilders.createChargeByLoanId(createChargeRequestId, disburseLoanRequestId, chargeId),
+                BatchRequestBuilders.getChargeByLoanIdChargeId(getChargeByIdRequestId, createChargeRequestId));
 
         // Create batch responses list
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Create Charge");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for Get Charge By Id");
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Create Charge");
+        assertEquals(SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for Get Charge By Id");
     }
 
     /**
      * Test for a successful charge adjustment. A '200' status code is expected on successful responses.
      *
-     * @see AdjustLoanTransactionCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulChargeAdjustment() {
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("1000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
+        // Create product
+        final Long productId = createBatchLoanProduct(SMALL_PRINCIPAL);
+        // Create client
+        final Long clientId = createClient();
+        final Long chargeId = chargesHelper.createLoanSpecifiedDueDatePenalty(SPECIFIED_DUE_DATE_CHARGE_AMOUNT).getResourceId();
 
-        final Long applyLoanRequestId = ThreadLocalRandom.current().nextLong(1000, 10_000);
+        final Long applyLoanRequestId = randomRequestId();
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long createChargeRequestId = disburseLoanRequestId + 1;
@@ -488,260 +386,151 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
         final Long getTransactionRequestId = adjustChargeRequestId + 1;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final List<BatchRequest> batchRequests = List.of(
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId),
+                BatchRequestBuilders.createChargeByLoanId(createChargeRequestId, disburseLoanRequestId, chargeId),
+                BatchRequestBuilders.adjustCharge(adjustChargeRequestId, createChargeRequestId),
+                BatchRequestBuilders.getTransactionById(getTransactionRequestId, adjustChargeRequestId, true));
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
         // Create charge object and get id
-        final Integer chargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON());
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Create Charge");
+        assertEquals(SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for Adjust Charge");
+        assertEquals(SC_OK, responses.get(5).getStatusCode(), "Verify Status Code 200 for Get Transaction By Id");
 
-        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
-
-        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
-
-        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
-
-        final BatchRequest createChargeRequest = BatchHelper.createChargeByLoanIdRequest(createChargeRequestId, disburseLoanRequestId,
-                chargeId);
-
-        final BatchRequest adjustChargeRequest = BatchHelper.adjustChargeRequest(adjustChargeRequestId, createChargeRequestId);
-
-        final BatchRequest getTransactionRequest = BatchHelper.getTransactionByIdRequest(getTransactionRequestId, adjustChargeRequestId,
-                true);
-
-        // Create batch requests list
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest,
-                createChargeRequest, adjustChargeRequest, getTransactionRequest);
-
-        // Create batch responses list
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
-
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Create Charge");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for Adjust Charge");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(5).getStatusCode(), "Verify Status Code 200 for Get Transaction By Id");
-
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final JsonObject chargeAdjustment = jsonHelper.parse(responses.get(5).getBody()).getAsJsonObject().get("type").getAsJsonObject();
-
-        Assertions.assertEquals("Charge Adjustment", chargeAdjustment.get("value").getAsString());
-        Assertions.assertTrue(chargeAdjustment.get("chargeAdjustment").getAsBoolean());
+        final JsonObject chargeAdjustment = bodyAsObject(responses.get(5)).getAsJsonObject("type");
+        assertEquals("Charge Adjustment", chargeAdjustment.get("value").getAsString());
+        assertTrue(chargeAdjustment.get("chargeAdjustment").getAsBoolean());
     }
 
     /**
-     * Tests that a new charge was added to a newly created loan and charges are Collected properly 200(OK) status was
-     * returned for successful responses. It first creates a new client and apply a loan, then creates a new charge for
-     * the create loan and then fetches all the applied charges using external id
+     * Tests that a charge can be created, collected, adjusted and read back through the loan and charge external ids.
      *
-     * @see org.apache.fineract.batch.command.internal.CollectChargesCommandStrategy
-     * @see org.apache.fineract.batch.command.internal.CreateChargeCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.CollectChargesByLoanExternalIdCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.CreateChargeByLoanExternalIdCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForCreateAndGetChargeByExternalIdCommand() {
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("1000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
+        // Create product
+        final Long productId = createBatchLoanProduct(SMALL_PRINCIPAL);
+        // Create client
+        final Long clientId = createClient();
+        final Long chargeId = chargesHelper.createLoanSpecifiedDueDatePenalty(SPECIFIED_DUE_DATE_CHARGE_AMOUNT).getResourceId();
 
-        final Long applyLoanRequestId = Long.valueOf(RandomStringUtils.randomNumeric(4));
+        final Long applyLoanRequestId = randomRequestId();
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long getLoanRequestId = disburseLoanRequestId + 1;
         final Long createChargeRequestId = getLoanRequestId + 1;
         final Long collectChargesRequestId = createChargeRequestId + 1;
+
+        // Create batch requests list
+        final List<BatchRequest> batchRequests = List.of(
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                BatchRequestBuilders.transitionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId, today().minusDays(10),
+                        "approve"),
+                BatchRequestBuilders.transitionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId, today().minusDays(8),
+                        "disburse"),
+                BatchRequestBuilders.getLoanByExternalIdReference(getLoanRequestId, approveLoanRequestId, "associations=all"),
+                BatchRequestBuilders.createChargeByLoanExternalId(createChargeRequestId, getLoanRequestId, chargeId),
+                BatchRequestBuilders.collectChargesByLoanExternalId(collectChargesRequestId, getLoanRequestId));
+
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
+
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Get Loan");
+        assertEquals(SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for Create Charge");
+        assertEquals(SC_OK, responses.get(5).getStatusCode(), "Verify Status Code 200 for Collect charges");
+
+        final String loanExternalId = bodyAsObject(responses.get(3)).get("externalId").getAsString();
+        final String chargeExternalId = bodyAsObject(responses.get(4)).get("resourceExternalId").getAsString();
+
+        // The loan and charge external ids come from two different responses, so the adjustment and the reads that
+        // depend on both have to be posted as a second batch.
         final Long adjustChargeRequestId = createChargeRequestId + 1;
         final Long getTransactionByExternalIdRequestId = adjustChargeRequestId + 1;
         final Long getChargeByIdRequestId = getTransactionByExternalIdRequestId + 1;
 
-        // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
-
-        // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
-
-        // Create charge object and get id
-        final Integer chargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON());
-
-        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
-
-        final BatchRequest approveLoanRequest = BatchHelper.transitionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
-                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10), "approve");
-
-        final BatchRequest disburseLoanRequest = BatchHelper.transitionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
-                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(8), "disburse");
-
-        final BatchRequest getLoanRequest = BatchHelper.getLoanByExternalIdRequest(getLoanRequestId, approveLoanRequestId,
-                "associations=all");
-
-        final BatchRequest createChargeRequest = BatchHelper.createChargeByLoanExternalIdRequest(createChargeRequestId, getLoanRequestId,
-                chargeId);
-
-        final BatchRequest collectChargesRequest = BatchHelper.collectChargesByLoanExternalIdRequest(collectChargesRequestId,
-                getLoanRequestId);
-
         // Create batch requests list
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest, getLoanRequest,
-                createChargeRequest, collectChargesRequest);
+        final List<BatchRequest> adjustChargeRequests = List.of(
+                BatchRequestBuilders.adjustChargeByExternalId(adjustChargeRequestId, null, loanExternalId, chargeExternalId),
+                BatchRequestBuilders.getTransactionByExternalId(getTransactionByExternalIdRequestId, adjustChargeRequestId, loanExternalId,
+                        true),
+                BatchRequestBuilders.getChargeByLoanExternalIdChargeExternalId(getChargeByIdRequestId, getTransactionByExternalIdRequestId,
+                        loanExternalId, chargeExternalId));
 
         // Create batch responses list
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
+        final List<BatchResponse> adjustChargeResponses = batchHelper.executeWithoutEnclosingTransaction(adjustChargeRequests);
 
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Get Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for Create Charge");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(5).getStatusCode(), "Verify Status Code 200 for Collect charges");
+        assertEquals(SC_OK, adjustChargeResponses.get(0).getStatusCode(), "Verify Status Code 200 for Adjust Charge By External Id");
+        // Create charge object and get id
+        assertEquals(SC_OK, adjustChargeResponses.get(1).getStatusCode(), "Verify Status Code 200 for Get Transaction By Id");
+        assertEquals(SC_OK, adjustChargeResponses.get(2).getStatusCode(), "Verify Status Code 200 for Get Charge By Id");
 
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final String loanExternalId = jsonHelper.parse(responses.get(3).getBody()).getAsJsonObject().get("externalId").getAsString();
-        final String chargeExternalId = jsonHelper.parse(responses.get(4).getBody()).getAsJsonObject().get("resourceExternalId")
-                .getAsString();
-
-        final BatchRequest adjustChargeByExternalId = BatchHelper.adjustChargeByExternalIdRequest(adjustChargeRequestId, null,
-                loanExternalId, chargeExternalId);
-        final BatchRequest getTransactionByExternalIdRequest = BatchHelper
-                .getTransactionByExternalIdRequest(getTransactionByExternalIdRequestId, adjustChargeRequestId, loanExternalId, true);
-        final BatchRequest getChargeByIdRequest = BatchHelper.getChargeByLoanExternalIdChargeExternalId(getChargeByIdRequestId,
-                getTransactionByExternalIdRequestId, loanExternalId, chargeExternalId);
-
-        // Create batch responses list
-        final List<BatchResponse> adjustChargeAndGetResponses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
-                this.responseSpec,
-                BatchHelper.toJsonString(Arrays.asList(adjustChargeByExternalId, getTransactionByExternalIdRequest, getChargeByIdRequest)));
-
-        Assertions.assertEquals(HttpStatus.SC_OK, adjustChargeAndGetResponses.get(0).getStatusCode(),
-                "Verify Status Code 200 for Adjust Charge By External Id");
-        Assertions.assertEquals(HttpStatus.SC_OK, adjustChargeAndGetResponses.get(1).getStatusCode(),
-                "Verify Status Code 200 for Get Transaction By Id");
-        Assertions.assertEquals(HttpStatus.SC_OK, adjustChargeAndGetResponses.get(2).getStatusCode(),
-                "Verify Status Code 200 for Get Charge By Id");
-
-        final JsonObject chargeAdjustment = jsonHelper.parse(adjustChargeAndGetResponses.get(1).getBody()).getAsJsonObject().get("type")
-                .getAsJsonObject();
-
-        Assertions.assertEquals("Charge Adjustment", chargeAdjustment.get("value").getAsString());
-        Assertions.assertTrue(chargeAdjustment.get("chargeAdjustment").getAsBoolean());
+        final JsonObject chargeAdjustment = bodyAsObject(adjustChargeResponses.get(1)).getAsJsonObject("type");
+        assertEquals("Charge Adjustment", chargeAdjustment.get("value").getAsString());
+        assertTrue(chargeAdjustment.get("chargeAdjustment").getAsBoolean());
     }
 
     /**
-     * Tests that batch repayment for loans is happening properly. Collected properly 200(OK) status was returned for
-     * successful responses. It first creates a new loan and then makes two repayments for it and then verifies that
-     * 200(OK) is returned for the repayment requests.
+     * Tests that batch repayment for loans is happening properly. It first creates a new loan and then makes two
+     * repayments for it and then verifies that 200(OK) is returned for the repayment requests.
      *
-     * @see CreateTransactionLoanCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchRepayment() {
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        final Long clientCollateralId = createClientCollateral();
 
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Long createClientRequestId = 4730L;
+        final Long activateClientRequestId = 4731L;
+        final Long applyLoanRequestId = 4732L;
+        final Long approveLoanRequestId = 4733L;
+        final Long disburseLoanRequestId = 4734L;
+        final Long firstRepaymentRequestId = 4735L;
+        final Long secondRepaymentRequestId = 4736L;
 
         // Create a createClient Request
-        final BatchRequest br1 = BatchHelper.createClientRequest(4730L, "");
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createClient(createClientRequestId, ""),
+                // Create a activateClient Request
+                BatchRequestBuilders.activateClient(activateClientRequestId, createClientRequestId),
+                // Create a ApplyLoan Request
+                BatchRequestBuilders.applyLoan(applyLoanRequestId, activateClientRequestId, productId, clientCollateralId),
+                // Create a approveLoan Request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                // Create a disburseLoan Request
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId),
+                // Create a loanRepay Request
+                BatchRequestBuilders.repayLoan(firstRepaymentRequestId, disburseLoanRequestId, "500"),
+                // Create a loanRepay Request
+                BatchRequestBuilders.repayLoan(secondRepaymentRequestId, disburseLoanRequestId, "500"));
 
-        // Create a activateClient Request
-        final BatchRequest br2 = BatchHelper.activateClientRequest(4731L, 4730L);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        // Create a ApplyLoan Request
-        final BatchRequest br3 = BatchHelper.applyLoanRequest(4732L, 4731L, productId, clientCollateralId);
-
-        // Create a approveLoan Request
-        final BatchRequest br4 = BatchHelper.approveLoanRequest(4733L, 4732L);
-
-        // Create a disburseLoan Request
-        final BatchRequest br5 = BatchHelper.disburseLoanRequest(4734L, 4733L);
-
-        // Create a loanRepay Request
-        final BatchRequest br6 = BatchHelper.repayLoanRequest(4735L, 4734L, "500");
-
-        // Create a loanRepay Request
-        final BatchRequest br7 = BatchHelper.repayLoanRequest(4736L, 4734L, "500");
-
-        final List<BatchRequest> batchRequests = new ArrayList<>();
-
-        batchRequests.add(br1);
-        batchRequests.add(br2);
-        batchRequests.add(br3);
-        batchRequests.add(br4);
-        batchRequests.add(br5);
-        batchRequests.add(br6);
-        batchRequests.add(br7);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(5).getStatusCode(), "Verify Status Code 200 for Repayment");
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(6).getStatusCode(), "Verify Status Code 200 for Repayment");
+        assertEquals(SC_OK, responses.get(5).getStatusCode(), "Verify Status Code 200 for Repayment");
+        assertEquals(SC_OK, responses.get(6).getStatusCode(), "Verify Status Code 200 for Repayment");
     }
 
     /**
-     * Tests that batch credit balance refund for loans is happening properly. Collected properly 200(OK) status was
-     * returned for successful responses. It first creates a new loan and then makes an overpayment, before creating a
-     * credit balance refund to refund a portion of the over-payment.
+     * Tests that batch credit balance refund for loans is happening properly. It first creates a new loan and then
+     * makes an overpayment, before creating a credit balance refund to refund a portion of the over-payment.
      *
-     * @see CreateTransactionLoanCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchCreditBalanceRefund() {
-
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("1000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Long productId = createBatchLoanProduct(SMALL_PRINCIPAL);
+        final Long clientCollateralId = createClientCollateral();
 
         final Long createActiveClientRequestId = 4730L;
         final Long applyLoanRequestId = createActiveClientRequestId + 1;
@@ -751,134 +540,63 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
         final Long creditBalanceRefundRequestId = repayLoanRequestId + 1;
 
         // Create a createClient Request
-        final BatchRequest br1 = BatchHelper.createActiveClientRequest(createActiveClientRequestId, "");
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createActiveClient(createActiveClientRequestId, ""),
+                // Create a ApplyLoan Request
+                BatchRequestBuilders.applyLoan(applyLoanRequestId, createActiveClientRequestId, productId, clientCollateralId),
+                // Create a approveLoan Request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                // Create a disburseLoan Request
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId),
+                // Repays more than the outstanding balance, leaving the loan overpaid
+                BatchRequestBuilders.repayLoan(repayLoanRequestId, disburseLoanRequestId, "20000"),
+                // Create a credit balance refund request
+                BatchRequestBuilders.creditBalanceRefund(creditBalanceRefundRequestId, repayLoanRequestId, "500"));
 
-        // Create a ApplyLoan Request
-        final BatchRequest br2 = BatchHelper.applyLoanRequest(applyLoanRequestId, createActiveClientRequestId, productId,
-                clientCollateralId);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        // Create a approveLoan Request
-        final BatchRequest br3 = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
-
-        // Create a disburseLoan Request
-        final BatchRequest br4 = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
-
+        assertEquals(SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for Repayment");
         // Create a loanRepay Request which will result in an overpay.
-        final BatchRequest br5 = BatchHelper.repayLoanRequest(repayLoanRequestId, disburseLoanRequestId, "20000");
-
-        // Create a credit balance refund request
-        final BatchRequest br6 = BatchHelper.creditBalanceRefundRequest(creditBalanceRefundRequestId, repayLoanRequestId, "500");
-
-        final List<BatchRequest> batchRequests = new ArrayList<>();
-
-        batchRequests.add(br1);
-        batchRequests.add(br2);
-        batchRequests.add(br3);
-        batchRequests.add(br4);
-        batchRequests.add(br5);
-        batchRequests.add(br6);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(4).getStatusCode(), "Verify Status Code 200 for Repayment");
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(5).getStatusCode(),
-                "Verify Status Code 200 for Credit Balance Refund");
+        assertEquals(SC_OK, responses.get(5).getStatusCode(), "Verify Status Code 200 for Credit Balance Refund");
     }
 
+    /**
+     * Tests that a failing request in a non-enclosing-transaction batch does not abort the requests after it.
+     */
     @Test
     public void partialFailTestForBatchRequest() {
-
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("1000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Long productId = createBatchLoanProduct(SMALL_PRINCIPAL);
+        final Long clientCollateralId = createClientCollateral();
 
         final Long createActiveClientRequestId = 4730L;
         final Long applyLoanRequestId = createActiveClientRequestId + 1;
         final Long approveLoanRequestId = applyLoanRequestId + 1;
-        final Long disburseLoanRequestId = approveLoanRequestId + 1;
-        final Long fetchLoanInfoRequestId = disburseLoanRequestId + 1;
+        final Long fetchLoanInfoRequestId = approveLoanRequestId + 1;
 
         // Create a createClient Request
-        final BatchRequest br1 = BatchHelper.createActiveClientRequest(createActiveClientRequestId, "");
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createActiveClient(createActiveClientRequestId, ""),
+                // Create a ApplyLoan Request
+                BatchRequestBuilders.applyLoan(applyLoanRequestId, createActiveClientRequestId, productId, clientCollateralId),
+                // Create a wrong approveLoan Request
+                BatchRequestBuilders.approveLoanWithUnknownCommand(approveLoanRequestId, applyLoanRequestId),
+                // Fetch loan info
+                BatchRequestBuilders.getLoanByReference(fetchLoanInfoRequestId, applyLoanRequestId, null));
 
-        // Create a ApplyLoan Request
-        final BatchRequest br2 = BatchHelper.applyLoanRequest(applyLoanRequestId, createActiveClientRequestId, productId,
-                clientCollateralId);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        // Create a wrong approveLoan Request
-        final BatchRequest br3 = BatchHelper.approveLoanWrongRequest(approveLoanRequestId, applyLoanRequestId);
-
-        // Fetch loan info
-        final BatchRequest br4 = BatchHelper.getLoanByIdRequest(fetchLoanInfoRequestId, applyLoanRequestId, null);
-
-        final List<BatchRequest> batchRequests = new ArrayList<>();
-
-        batchRequests.add(br1);
-        batchRequests.add(br2);
-        batchRequests.add(br3);
-        batchRequests.add(br4);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_NOT_IMPLEMENTED, (long) response.get(2).getStatusCode(), "Resource doesn not exists");
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(3).getStatusCode(),
-                "Verify Status Code 200 for fetch data after the error");
+        assertEquals(SC_NOT_IMPLEMENTED, responses.get(2).getStatusCode(), "Resource does not exist");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for fetch data after the error");
     }
 
     /**
-     * Tests successful run of batch goodwill credit for loans. 200(OK) status is returned for successful responses. It
-     * first creates a new loan, approves and disburses the loan. Then a goodwill credit request is made
+     * Tests successful run of batch goodwill credit for loans. It first creates a new loan, approves and disburses the
+     * loan. Then a goodwill credit request is made.
      *
-     * @see CreateTransactionLoanCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchGoodwillCredit() {
-
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("1000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Long productId = createBatchLoanProduct(SMALL_PRINCIPAL);
+        final Long clientCollateralId = createClientCollateral();
 
         final Long createActiveClientRequestId = 4730L;
         final Long applyLoanRequestId = createActiveClientRequestId + 1;
@@ -887,203 +605,121 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
         final Long goodwillCreditRequestId = disburseLoanRequestId + 1;
 
         // Create a createClient Request
-        final BatchRequest br1 = BatchHelper.createActiveClientRequest(createActiveClientRequestId, "");
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createActiveClient(createActiveClientRequestId, ""),
+                // Create a ApplyLoan Request
+                BatchRequestBuilders.applyLoan(applyLoanRequestId, createActiveClientRequestId, productId, clientCollateralId),
+                // Create a approveLoan Request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                // Create a disburseLoan Request
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId),
+                // Create a good will credit request.
+                BatchRequestBuilders.goodwillCredit(goodwillCreditRequestId, disburseLoanRequestId, "500"));
 
-        // Create a ApplyLoan Request
-        final BatchRequest br2 = BatchHelper.applyLoanRequest(applyLoanRequestId, createActiveClientRequestId, productId,
-                clientCollateralId);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        // Create a approveLoan Request
-        final BatchRequest br3 = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
-
-        // Create a disburseLoan Request
-        final BatchRequest br4 = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
-
-        // Create a good will credit request.
-        final BatchRequest br5 = BatchHelper.goodwillCreditRequest(goodwillCreditRequestId, disburseLoanRequestId, "500");
-
-        final List<BatchRequest> batchRequests = new ArrayList<>();
-
-        batchRequests.add(br1);
-        batchRequests.add(br2);
-        batchRequests.add(br3);
-        batchRequests.add(br4);
-        batchRequests.add(br5);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(4).getStatusCode(), "Verify Status Code 200 for Goodwill credit");
+        assertEquals(SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for Goodwill credit");
     }
 
     /**
-     * Test for the successful activation of a pending client using 'ActivateClientCommandStrategy'. A '200' status code
-     * is expected on successful activation.
+     * Test for the successful activation of a pending client using 'ActivateClientCommandStrategy'.
      *
      * @see org.apache.fineract.batch.command.internal.ActivateClientCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulClientActivation() {
+        final Long createClientRequestId = 4726L;
+        final Long activateClientRequestId = 4727L;
 
         // Create a createClient Request
-        final BatchRequest br1 = BatchHelper.createClientRequest(4726L, "");
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createClient(createClientRequestId, ""),
+                // Create an activateClient Request
+                BatchRequestBuilders.activateClient(activateClientRequestId, createClientRequestId));
 
-        // Create an activateClient Request
-        final BatchRequest br2 = BatchHelper.activateClientRequest(4727L, 4726L);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        final List<BatchRequest> batchRequests = new ArrayList<>();
-
-        batchRequests.add(br1);
-        batchRequests.add(br2);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(0).getStatusCode(), "Verify Status Code 200 for Create Client");
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(1).getStatusCode(), "Verify Status Code 200 for Activate Client");
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Create Client");
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Activate Client");
     }
 
     /**
-     * Test for the successful approval and disbursal of a loan using 'ApproveLoanCommandStrategy' and
-     * 'DisburseLoanCommandStrategy'. A '200' status code is expected on successful activation.
+     * Test for the successful approval and disbursal of a loan.
      *
      * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
      * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulLoanApprovalAndDisburse() {
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        final Long clientCollateralId = createClientCollateral();
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                String.valueOf(clientID), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Long createClientRequestId = 4730L;
+        final Long activateClientRequestId = 4731L;
+        final Long applyLoanRequestId = 4732L;
+        final Long approveLoanRequestId = 4733L;
+        final Long disburseLoanRequestId = 4734L;
 
         // Create a createClient Request
-        final BatchRequest br1 = BatchHelper.createClientRequest(4730L, "");
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createClient(createClientRequestId, ""),
+                // Create a activateClient Request
+                BatchRequestBuilders.activateClient(activateClientRequestId, createClientRequestId),
+                // Create an ApplyLoan Request
+                BatchRequestBuilders.applyLoan(applyLoanRequestId, activateClientRequestId, productId, clientCollateralId),
+                // Create an approveLoan Request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                // Create an disburseLoan Request
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId));
 
-        // Create a activateClient Request
-        final BatchRequest br2 = BatchHelper.activateClientRequest(4731L, 4730L);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        // Create an ApplyLoan Request
-        final BatchRequest br3 = BatchHelper.applyLoanRequest(4732L, 4731L, productId, clientCollateralId);
-
-        // Create an approveLoan Request
-        final BatchRequest br4 = BatchHelper.approveLoanRequest(4733L, 4732L);
-
-        // Create an disburseLoan Request
-        final BatchRequest br5 = BatchHelper.disburseLoanRequest(4734L, 4733L);
-
-        final List<BatchRequest> batchRequests = new ArrayList<>();
-
-        batchRequests.add(br1);
-        batchRequests.add(br2);
-        batchRequests.add(br3);
-        batchRequests.add(br4);
-        batchRequests.add(br5);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(3).getStatusCode(), "Verify Status Code 200 for Approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(4).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        assertEquals(SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
     }
 
     /**
-     * Test for the successful create client, apply loan,approval and disbursal of a loan using Batch API with
-     * enclosingTransaction. A '200' status code is expected on successful activation.
+     * Test for the successful create client, apply loan, approval and disbursal of a loan using Batch API with
+     * enclosingTransaction.
      *
      * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
      * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulLoanApprovalAndDisburseWithTransaction() {
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        final Long clientCollateralId = createClientCollateral();
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Long createActiveClientRequestId = 4740L;
+        final Long applyLoanRequestId = 4742L;
+        final Long approveLoanRequestId = 4743L;
+        final Long disburseLoanRequestId = 4744L;
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                String.valueOf(clientID), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createActiveClient(createActiveClientRequestId, ""),
+                // Create an ApplyLoan Request
+                BatchRequestBuilders.applyLoan(applyLoanRequestId, createActiveClientRequestId, productId, clientCollateralId),
+                // Create an approveLoan Request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                // Create a disburseLoan Request
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId));
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final List<BatchResponse> responses = batchHelper.executeEnclosingTransaction(batchRequests);
 
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for create client");
         // Create a createClient Request
-        final BatchRequest br1 = BatchHelper.createActiveClientRequest(4740L, "");
-
-        // Create an ApplyLoan Request
-        final BatchRequest br2 = BatchHelper.applyLoanRequest(4742L, 4740L, productId, clientCollateralId);
-
-        // Create an approveLoan Request
-        final BatchRequest br3 = BatchHelper.approveLoanRequest(4743L, 4742L);
-
-        // Create a disburseLoan Request
-        final BatchRequest br4 = BatchHelper.disburseLoanRequest(4744L, 4743L);
-
-        final List<BatchRequest> batchRequests = Arrays.asList(br1, br2, br3, br4);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(0).getStatusCode(), "Verify Status Code 200 for create client");
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(1).getStatusCode(), "Verify Status Code 200 for apply Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(2).getStatusCode(), "Verify Status Code 200 for approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(3).getStatusCode(), "Verify Status Code 200 for disburse Loan");
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for apply Loan");
+        assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for approve Loan");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for disburse Loan");
     }
 
     /**
-     * Test for the successful disbursement and get loan. A '200' status code is expected on successful responses.
+     * Test for the successful disbursement and get loan transaction.
      *
      * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
-     * @see org.apache.fineract.batch.command.internal.GetLoanTransactionByIdCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.GetTransactionByIdCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulDisbursementAndGetTransaction() {
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        // Create client
+        final Long clientId = createClient();
 
         final Long applyLoanRequestId = 6730L;
         final Long approveLoanRequestId = 6731L;
@@ -1091,131 +727,77 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
         final Long getTransactionRequestId = 6733L;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final List<BatchRequest> batchRequests = List.of(
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                // Create an approveLoan Request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                // Create a disbursement Request
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId),
+                BatchRequestBuilders.getTransactionById(getTransactionRequestId, disburseLoanRequestId, true));
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
         // Create an ApplyLoan Request
-        final BatchRequest batchRequest1 = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
-
-        // Create an approveLoan Request
-        final BatchRequest batchRequest2 = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
-
-        // Create a disbursement Request
-        final BatchRequest batchRequest3 = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
-
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
         // Create a getTransaction Request
-        final BatchRequest batchRequest4 = BatchHelper.getTransactionByIdRequest(getTransactionRequestId, disburseLoanRequestId, true);
-
-        final List<BatchRequest> batchRequests = Arrays.asList(batchRequest1, batchRequest2, batchRequest3, batchRequest4);
-
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
-
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Get Transaction By Id");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Get Transaction By Id");
     }
 
     /**
-     * Test for the successful new loan reschedule request and approval for the same. A '200' status code is expected on
-     * successful responses.
+     * Test for the successful new loan reschedule request and approval for the same.
      *
      * @see org.apache.fineract.batch.command.internal.CreateLoanRescheduleRequestCommandStrategy
      * @see org.apache.fineract.batch.command.internal.ApproveLoanRescheduleCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulDisbursementAndRescheduleLoan() {
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        // Create client
+        final Long clientId = createClient();
+        final Long rescheduleReasonId = codeHelper.retrieveOrCreateCodeValueId(LOAN_RESCHEDULE_REASON_CODE_NAME);
 
-        final Long createActiveClientRequestId = 8462L;
-        final Long applyLoanRequestId = createActiveClientRequestId + 1;
+        final Long applyLoanRequestId = 8463L;
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long rescheduleLoanRequestId = disburseLoanRequestId + 1;
         final Long approveRescheduleLoanRequestId = rescheduleLoanRequestId + 1;
 
-        // Create product
-        LOG.info("LoanProduct {}", loanProductJSON);
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final LocalDate disburseLoanDate = today().minusDays(1);
+        final LocalDate adjustedDueDate = today().plusDays(40);
 
-        // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final List<BatchRequest> batchRequests = List.of(
+                // Create an ApplyLoan request
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                // Create an approveLoan request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                // Create a disbursement request
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId, disburseLoanDate),
+                // Create a reschedule loan request
+                BatchRequestBuilders.createRescheduleLoan(rescheduleLoanRequestId, disburseLoanRequestId, disburseLoanDate.plusMonths(1),
+                        rescheduleReasonId, adjustedDueDate),
+                // Approve reschedule loan request
+                BatchRequestBuilders.approveRescheduleLoan(approveRescheduleLoanRequestId, rescheduleLoanRequestId));
 
-        /* Retrieve/Create Code Values for the Code "LoanRescheduleReason = 23" */
-        final HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(23, this.requestSpec, this.responseSpec);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        final Integer codeValueId = (Integer) codeValue.get("id");
-
-        // Create an ApplyLoan request
-        final BatchRequest applyLoanRequestWithClientId = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
-
-        // Create an approveLoan request
-        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
-
-        // Create a disbursement request
-        final LocalDate disburseLoanDate = LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(1);
-        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId,
-                disburseLoanDate);
-
-        // Create a reschedule loan request
-        final BatchRequest rescheduleLoanRequest = BatchHelper.createRescheduleLoanRequest(rescheduleLoanRequestId, disburseLoanRequestId,
-                disburseLoanDate.plusMonths(1), codeValueId);
-
-        // Approve reschedule loan request
-        final BatchRequest approveRescheduleLoanRequest = BatchHelper.approveRescheduleLoanRequest(approveRescheduleLoanRequestId,
-                rescheduleLoanRequestId);
-
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequestWithClientId, approveLoanRequest, disburseLoanRequest,
-                rescheduleLoanRequest, approveRescheduleLoanRequest);
-
-        LOG.info("shouldReturnOkStatusOnSuccessfulDisbursementAndRescheduleLoan Request - {}", BatchHelper.toJsonString(batchRequests));
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
-
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(),
-                "Verify Status Code 200 for Create Reschedule Loan request");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(4).getStatusCode(),
-                "Verify Status Code 200 for Approve Reschedule Loan request");
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Create Reschedule Loan request");
+        assertEquals(SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for Approve Reschedule Loan request");
     }
 
     /**
-     * Test for the successful create client, create, approve and get loan. A '200' status code is expected on
-     * successful responses.
+     * Test for the successful create client, create, approve and get loan.
      *
-     * @see org.apache.fineract.batch.command.internal.CreateClientCommandStrategy
-     * @see org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy
-     * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
      * @see org.apache.fineract.batch.command.internal.GetLoanByIdCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulCreateClientCreateApproveAndGetLoan() {
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
 
         final Long createActiveClientRequestId = 4730L;
         final Long applyLoanRequestId = 4731L;
@@ -1223,60 +805,41 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
         final Long getLoanByIdRequestId = 4733L;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createActiveClient(createActiveClientRequestId, ""),
+                // Create an ApplyLoan Request
+                BatchRequestBuilders.applyLoan(applyLoanRequestId, createActiveClientRequestId, productId, null),
+                // Create an approveLoan Request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                BatchRequestBuilders.getLoanByReference(getLoanByIdRequestId, applyLoanRequestId, null));
 
         // Create createClient Request
-        final BatchRequest batchRequest1 = BatchHelper.createActiveClientRequest(createActiveClientRequestId, "");
+        final List<BatchResponse> responses = batchHelper.executeEnclosingTransaction(batchRequests);
 
-        // Create an ApplyLoan Request
-        final BatchRequest batchRequest2 = BatchHelper.applyLoanRequest(applyLoanRequestId, createActiveClientRequestId, productId, null);
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Create Client");
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Apply Loan");
+        assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Get Loan By Id");
 
-        // Create an approveLoan Request
-        final BatchRequest batchRequest3 = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+        final Long loanId = bodyAsObject(responses.get(1)).get("loanId").getAsLong();
+        final JsonObject getLoanResponse = bodyAsObject(responses.get(3));
+        final JsonObject status = getLoanResponse.getAsJsonObject("status");
 
+        assertEquals(loanId, getLoanResponse.get("id").getAsLong());
         // Get loan by id Request
-        final BatchRequest batchRequest4 = BatchHelper.getLoanByIdRequest(getLoanByIdRequestId, applyLoanRequestId, null);
-
-        final List<BatchRequest> batchRequests = Arrays.asList(batchRequest1, batchRequest2, batchRequest3, batchRequest4);
-
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
-
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Create Client");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Apply Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Get Loan By Id");
-
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final Long loanId = jsonHelper.extractLongNamed("loanId", jsonHelper.parse(responses.get(1).getBody()).getAsJsonObject());
-        final Long loanIdInGetResponse = jsonHelper.extractLongNamed("id", jsonHelper.parse(responses.get(3).getBody()).getAsJsonObject());
-        final JsonObject statusInGetResponse = jsonHelper.parse(responses.get(3).getBody()).getAsJsonObject().get("status")
-                .getAsJsonObject();
-
-        Assertions.assertEquals(loanId, loanIdInGetResponse);
-        Assertions.assertEquals(LoanStatus.APPROVED.getCode(), jsonHelper.extractStringNamed("code", statusInGetResponse));
-        Assertions.assertEquals("Approved", jsonHelper.extractStringNamed("value", statusInGetResponse));
+        assertEquals(LoanStatus.APPROVED.getCode(), status.get("code").getAsString());
+        assertEquals("Approved", status.get("value").getAsString());
     }
 
     /**
-     * Test for the successful creat, approve and get loan. A '200' status code is expected on successful responses.
+     * Test for the successful create, approve and get loan, with and without a query parameter.
      *
-     * @see org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy
-     * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
      * @see org.apache.fineract.batch.command.internal.GetLoanByIdCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulCreateApproveAndGetLoan() {
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        // Create client
+        final Long clientId = createClient();
 
         final Long applyLoanRequestId = 5730L;
         final Long approveLoanRequestId = 5731L;
@@ -1284,260 +847,173 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
         final Long getLoanByIdWithQueryParametersRequestId = 5733L;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final List<BatchRequest> batchRequests = List.of(
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                // Create an approveLoan Request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                BatchRequestBuilders.getLoanByReference(getLoanByIdRequestId, applyLoanRequestId, null),
+                BatchRequestBuilders.getLoanByReference(getLoanByIdWithQueryParametersRequestId, applyLoanRequestId,
+                        "associations=repaymentSchedule,transactions"));
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final List<BatchResponse> responses = batchHelper.executeEnclosingTransaction(batchRequests);
 
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
         // Create an ApplyLoan Request
-        final BatchRequest batchRequest1 = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Get Loan By Id without query parameter");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Get Loan By Id with query parameter");
 
-        // Create an approveLoan Request
-        final BatchRequest batchRequest2 = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+        final Long loanId = bodyAsObject(responses.get(0)).get("loanId").getAsLong();
+        final JsonObject getLoanResponse = bodyAsObject(responses.get(2));
+        final JsonObject status = getLoanResponse.getAsJsonObject("status");
 
+        assertEquals(loanId, getLoanResponse.get("id").getAsLong());
         // Get loan by id Request without query param
-        final BatchRequest batchRequest3 = BatchHelper.getLoanByIdRequest(getLoanByIdRequestId, applyLoanRequestId, null);
-
+        assertEquals(LoanStatus.APPROVED.getCode(), status.get("code").getAsString());
         // Get loan by id Request with query param
-        final BatchRequest batchRequest4 = BatchHelper.getLoanByIdRequest(getLoanByIdWithQueryParametersRequestId, applyLoanRequestId,
-                "associations=repaymentSchedule,transactions");
-
-        final List<BatchRequest> batchRequests = Arrays.asList(batchRequest1, batchRequest2, batchRequest3, batchRequest4);
-
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
-
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(),
-                "Verify Status Code 200 for Get Loan By Id without query parameter");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(),
-                "Verify Status Code 200 for Get Loan By Id with query parameter");
-
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final Long loanId = jsonHelper.extractLongNamed("loanId", jsonHelper.parse(responses.get(0).getBody()).getAsJsonObject());
-        final Long loanIdInGetResponse = jsonHelper.extractLongNamed("id", jsonHelper.parse(responses.get(2).getBody()).getAsJsonObject());
-        final JsonObject statusInGetResponse = jsonHelper.parse(responses.get(2).getBody()).getAsJsonObject().get("status")
-                .getAsJsonObject();
-
-        Assertions.assertEquals(loanId, loanIdInGetResponse);
-        Assertions.assertEquals(LoanStatus.APPROVED.getCode(), jsonHelper.extractStringNamed("code", statusInGetResponse));
-        Assertions.assertEquals("Approved", jsonHelper.extractStringNamed("value", statusInGetResponse));
+        assertEquals("Approved", status.get("value").getAsString());
 
         // Repayment schedule will not be available in the response
-        Assertions.assertFalse(responses.get(2).getBody().contains("repaymentSchedule"));
+        assertFalse(responses.get(2).getBody().contains("repaymentSchedule"));
 
         // Repayment schedule information will be available in the response based on the query parameter
-        Assertions.assertTrue(responses.get(3).getBody().contains("repaymentSchedule"));
+        assertTrue(responses.get(3).getBody().contains("repaymentSchedule"));
     }
 
     /**
-     * Test for the successful get loan and get datatable entry. A '200' status code is expected on successful
-     * responses.
+     * Test for the successful get loan and get datatable entry.
      *
-     * @see org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy
-     * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
-     * @see org.apache.fineract.batch.command.internal.GetLoanByIdCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulGetDataTableEntry() {
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final Long loanId = jsonHelper.extractLongNamed("loanId", jsonHelper.parse(setupAccount()).getAsJsonObject());
-        final String datatableName = this.datatableHelper.createDatatable(LOAN_APP_TABLE_NAME, false);
+        final Long loanId = setupLoanAccount();
+        // creating datatable with m_loan association
+        final String datatableName = createLoanDatatable();
         try {
+            final List<BatchRequest> batchRequests = List.of(
+                    BatchRequestBuilders.getLoanByLoanId(GET_LOAN_REQUEST_ID, null, loanId, "associations=repaymentSchedule,transactions"),
+                    BatchRequestBuilders.getDatatableEntries(GET_DATATABLE_ENTRIES_REQUEST_ID, null, datatableName, loanId,
+                            "genericResultSet=true"));
 
             // Get loan by id Request with query param
-            final BatchRequest getLoanBatchRequest = BatchHelper.getLoanByIdRequest(loanId, "associations=repaymentSchedule,transactions");
+            final List<BatchResponse> responses = batchHelper.executeEnclosingTransaction(batchRequests);
 
+            assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for get loan");
             // Get datatable batch request
-            final BatchRequest getDatatableBatchRequest = BatchHelper.getDatatableByIdRequest(loanId, datatableName,
-                    "genericResultSet=true", null);
+            assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for datatable");
 
-            final List<BatchRequest> batchRequestsGetLoan = Arrays.asList(getLoanBatchRequest, getDatatableBatchRequest);
+            final String getLoanResponse = responses.get(0).getBody();
+            final String getDatatableResponse = responses.get(1).getBody();
 
-            final List<BatchResponse> responsesGetLoan = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec,
-                    this.responseSpec, BatchHelper.toJsonString(batchRequestsGetLoan));
+            assertEquals(loanId, bodyAsObject(responses.get(0)).get("id").getAsLong());
 
-            final String getLoanResponse = responsesGetLoan.get(0).getBody();
-            final String getDatatableResponse = responsesGetLoan.get(1).getBody();
+            // Repayment schedule and transactions are available in the response based on the query parameter
+            assertTrue(getLoanResponse.contains("repaymentSchedule"));
+            assertTrue(getLoanResponse.contains("transactions"));
 
-            Assertions.assertEquals(HttpStatus.SC_OK, responsesGetLoan.get(0).getStatusCode(), "Verify Status Code 200 for get loan");
-            Assertions.assertEquals(HttpStatus.SC_OK, responsesGetLoan.get(1).getStatusCode(), "Verify Status Code 200 for datatable");
-
-            final Long loanIdInGetResponse = jsonHelper.extractLongNamed("id", jsonHelper.parse(getLoanResponse).getAsJsonObject());
-            Assertions.assertEquals(loanId, loanIdInGetResponse);
-
-            // Repayment schedule information will be available in the response based on the query parameter
-            Assertions.assertTrue(getLoanResponse.contains("repaymentSchedule"));
-
-            // Transaction will be available in the response based on the query parameter
-            Assertions.assertTrue(getLoanResponse.contains("transactions"));
-
+            // The generic result set carries the column headers along with the data
+            assertTrue(getDatatableResponse.contains("columnHeaders"));
             // datatable info will be available in the response based on the query parameter
-            Assertions.assertTrue(getDatatableResponse.contains("columnHeaders"));
-
-            // datatable info will be available in the response based on the query parameter
-            Assertions.assertTrue(getDatatableResponse.contains("data"));
+            assertTrue(getDatatableResponse.contains("data"));
         } finally {
             deleteDatatable(datatableName);
         }
     }
 
     /**
-     * Test for the successful create and update datatable entry. A '200' status code is expected on successful
-     * responses.
+     * Test for the successful create and update datatable entry.
      *
      * @see org.apache.fineract.batch.command.internal.CreateDatatableEntryCommandStrategy
      * @see org.apache.fineract.batch.command.internal.UpdateDatatableEntryOneToManyCommandStrategy
      * @see org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdCommandStrategy
-     * @see GetDatatableEntryByAppTableIdAndDataTableIdCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdAndDataTableIdCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulCreateDataTableEntry() {
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final Long loanId = jsonHelper.extractLongNamed("loanId", jsonHelper.parse(setupAccount()).getAsJsonObject());
         // creating datatable with m_loan association
-        final Map<String, Object> columnMap = new HashMap<>();
-        final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
+        final Long loanId = setupLoanAccount();
         final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5);
         final String columnName1 = Utils.randomStringGenerator("COL1_", 5);
         final String columnName2 = Utils.randomStringGenerator("COL2_", 5);
-        columnMap.put("datatableName", datatableName);
-        columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
-        columnMap.put("entitySubType", "PERSON");
-        columnMap.put("multiRow", true);
-        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName1, "String", true, 10, null);
-        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName2, "String", false, 10, null);
-        columnMap.put("columns", datatableColumnsList);
-        final String datatableRequestJsonString = new Gson().toJson(columnMap);
-        LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
+        createTwoStringColumnDatatable(datatableName, columnName1, columnName2, true, SHORT_COLUMN_LENGTH);
+        try {
+            final Long existingEntryId = createDatatableEntry(datatableName, loanId, columnName1, Utils.randomStringGenerator("VAL1_", 3),
+                    columnName2, Utils.randomStringGenerator("VAL2_", 3));
 
-        this.datatableHelper.createDatatable(datatableRequestJsonString, "");
+            final List<BatchRequest> batchRequests = List.of(
+                    BatchRequestBuilders.createDatatableEntry(CREATE_DATATABLE_ENTRY_REQUEST_ID, datatableName, loanId,
+                            List.of(columnName1, columnName2)),
+                    BatchRequestBuilders.updateDatatableEntryByEntryId(UPDATE_DATATABLE_ENTRY_REQUEST_ID, CREATE_DATATABLE_ENTRY_REQUEST_ID,
+                            datatableName, loanId, existingEntryId, List.of(columnName1)),
+                    BatchRequestBuilders.getDatatableEntries(GET_DATATABLE_ENTRIES_REQUEST_ID, CREATE_DATATABLE_ENTRY_REQUEST_ID,
+                            datatableName, loanId, null),
+                    BatchRequestBuilders.getDatatableEntryByAppTableId(GET_DATATABLE_ENTRY_REQUEST_ID, CREATE_DATATABLE_ENTRY_REQUEST_ID,
+                            datatableName, loanId, "$.resourceId", null));
 
-        // Create a datatable entry so that it can be updated using BatchApi
-        final Map<String, Object> datatableEntryMap = new HashMap<>();
-        datatableEntryMap.put(columnName1, Utils.randomStringGenerator("VAL1_", 3));
-        datatableEntryMap.put(columnName2, Utils.randomStringGenerator("VAL2_", 3));
-        final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
-        LOG.info("CreateDataTableEntry map : {}", datatableEntryRequestJsonString);
+            // Create a datatable entry so that it can be updated using BatchApi
+            final List<BatchResponse> responses = batchHelper.executeEnclosingTransaction(batchRequests);
 
-        final Map<String, Object> datatableEntryResponse = this.datatableHelper.createDatatableEntry(datatableName, loanId.intValue(),
-                false, datatableEntryRequestJsonString);
-        final Integer datatableEntryResourceId = (Integer) datatableEntryResponse.get("resourceId");
-        assertNotNull(datatableEntryResourceId, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
+            assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for create datatable entry");
+            assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for update datatable entry");
+            assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for get datatable entries");
+            assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for get datatable entry by id");
 
-        // Create datatable entry batch request
-        final BatchRequest createDatatableEntryRequest = BatchHelper.createDatatableEntryRequest(loanId.toString(), datatableName,
-                Arrays.asList(columnName1, columnName2));
+            final Long createdEntryId = bodyAsObject(responses.get(0)).get("resourceId").getAsLong();
+            // Create datatable entry batch request
+            final String getDatatableEntriesResponse = responses.get(2).getBody();
+            final JsonArray datatableEntries = JsonParser.parseString(getDatatableEntriesResponse).getAsJsonArray();
+            assertEquals(2, datatableEntries.size());
 
-        // Update datatable entry batch request
-        final BatchRequest updateDatatableEntryByEntryIdRequest = BatchHelper.updateDatatableEntryByEntryIdRequest(loanId, datatableName,
-                Long.valueOf(datatableEntryResourceId), Arrays.asList(columnName1));
-
-        // Get datatable entries batch request
-        final BatchRequest getDatatableEntriesRequest = BatchHelper.getDatatableByIdRequest(loanId, datatableName, null,
-                updateDatatableEntryByEntryIdRequest.getReference());
-
-        // Get datatable entry by app table id batch request
-        final BatchRequest getDatatableEntryByIdRequest = BatchHelper.getDatatableEntryByIdRequest(loanId, datatableName, "$.resourceId",
-                null, updateDatatableEntryByEntryIdRequest.getReference());
-
-        final List<BatchRequest> batchRequestsDatatableEntries = Arrays.asList(createDatatableEntryRequest,
-                updateDatatableEntryByEntryIdRequest, getDatatableEntriesRequest, getDatatableEntryByIdRequest);
-        LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsDatatableEntries));
-
-        final List<BatchResponse> responseDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec,
-                this.responseSpec, BatchHelper.toJsonString(batchRequestsDatatableEntries));
-
-        LOG.info("Batch Response : {}", new Gson().toJson(responseDatatableBatch));
-
-        final BatchResponse batchResponse1 = responseDatatableBatch.get(0);
-        final BatchResponse batchResponse2 = responseDatatableBatch.get(1);
-        final BatchResponse batchResponse3 = responseDatatableBatch.get(2);
-        final BatchResponse batchResponse4 = responseDatatableBatch.get(3);
-
-        Assertions.assertEquals(HttpStatus.SC_OK, batchResponse1.getStatusCode(), "Verify Status Code 200 for create datatable entry");
-        Assertions.assertEquals(HttpStatus.SC_OK, batchResponse2.getStatusCode(), "Verify Status Code 200 for update datatable entry");
-        Assertions.assertEquals(HttpStatus.SC_OK, batchResponse3.getStatusCode(), "Verify Status Code 200 for get datatable entries");
-        Assertions.assertEquals(HttpStatus.SC_OK, batchResponse4.getStatusCode(), "Verify Status Code 200 for get datatable entry by id");
-
-        final String getDatatableEntriesResponse = batchResponse3.getBody();
-
-        final Long createDatatableEntryId = jsonHelper.extractLongNamed("resourceId",
-                jsonHelper.parse(batchResponse1.getBody()).getAsJsonObject());
-
-        final JsonArray datatableEntries = jsonHelper.parse(getDatatableEntriesResponse).getAsJsonArray();
-        Assertions.assertEquals(2, datatableEntries.size());
-
-        // Ensure both resourceIds are available in response
-        Assertions.assertTrue(getDatatableEntriesResponse.contains(String.format("\"id\": %d", createDatatableEntryId)));
-        Assertions.assertTrue(getDatatableEntriesResponse.contains(String.format("\"id\": %d", datatableEntryResourceId)));
+            // Ensure both resourceIds are available in response
+            assertTrue(getDatatableEntriesResponse.contains("\"id\": %d".formatted(createdEntryId)));
+            assertTrue(getDatatableEntriesResponse.contains("\"id\": %d".formatted(existingEntryId)));
+        } finally {
+            deleteDatatableWithEntriesOf(datatableName, loanId);
+        }
     }
 
     /**
-     * Test for the successful get loan and get datatable entry where get datatable request have no query param. A '200'
-     * status code is expected on successful responses.
+     * Test for the successful get loan and get datatable entry where get datatable request has no query param.
      *
-     * @see org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy
-     * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
-     * @see org.apache.fineract.batch.command.internal.GetLoanByIdCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.GetDatatableEntryByAppTableIdCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulGetDatatableEntryWithNoQueryParam() {
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final Long loanId = jsonHelper.extractLongNamed("loanId", jsonHelper.parse(setupAccount()).getAsJsonObject());
-        final String datatableName = this.datatableHelper.createDatatable(LOAN_APP_TABLE_NAME, false);
+        final Long loanId = setupLoanAccount();
+        // creating datatable with m_loan association
+        final String datatableName = createLoanDatatable();
         try {
             // Get loan by id Request with query param
-            final BatchRequest getLoanBatchRequest = BatchHelper.getLoanByIdRequest(loanId, "associations=repaymentSchedule,transactions");
+            final List<BatchRequest> batchRequests = List.of(
+                    BatchRequestBuilders.getLoanByLoanId(GET_LOAN_REQUEST_ID, null, loanId, "associations=repaymentSchedule,transactions"),
+                    BatchRequestBuilders.getDatatableEntries(GET_DATATABLE_ENTRIES_REQUEST_ID, null, datatableName, loanId, null));
 
             // Get datatable batch request
-            final BatchRequest getDatatableBatchRequest = BatchHelper.getDatatableByIdRequest(loanId, datatableName, null, null);
+            final List<BatchResponse> responses = batchHelper.executeEnclosingTransaction(batchRequests);
 
-            final List<BatchRequest> batchRequestsGetLoan = Arrays.asList(getLoanBatchRequest, getDatatableBatchRequest);
+            assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Get Loan");
+            assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Get Datatable");
 
-            final List<BatchResponse> responsesGetLoan = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec,
-                    this.responseSpec, BatchHelper.toJsonString(batchRequestsGetLoan));
-
-            final String getLoanResponse = responsesGetLoan.get(0).getBody();
-
-            Assertions.assertEquals(HttpStatus.SC_OK, responsesGetLoan.get(0).getStatusCode(), "Verify Status Code 200 for Get Loan");
-            Assertions.assertEquals(HttpStatus.SC_OK, responsesGetLoan.get(1).getStatusCode(), "Verify Status Code 200 for Get Datatable");
-
-            final Long loanIdInGetResponse = jsonHelper.extractLongNamed("id", jsonHelper.parse(getLoanResponse).getAsJsonObject());
-            Assertions.assertEquals(loanId, loanIdInGetResponse);
-
-            Assertions.assertTrue(getLoanResponse.contains("repaymentSchedule"));
-
-            Assertions.assertTrue(getLoanResponse.contains("transactions"));
+            final String getLoanResponse = responses.get(0).getBody();
+            assertEquals(loanId, bodyAsObject(responses.get(0)).get("id").getAsLong());
+            assertTrue(getLoanResponse.contains("repaymentSchedule"));
+            assertTrue(getLoanResponse.contains("transactions"));
         } finally {
             deleteDatatable(datatableName);
         }
-
     }
 
     /**
-     * Test for the successful merchant issued and payout refund transaction. A '200' status code is expected on
-     * successful responses.
+     * Test for the successful merchant issued and payout refund transaction.
      *
-     * @see org.apache.fineract.batch.command.internal.ApplyLoanCommandStrategy
-     * @see org.apache.fineract.batch.command.internal.ApproveLoanCommandStrategy
-     * @see org.apache.fineract.batch.command.internal.DisburseLoanCommandStrategy
      * @see org.apache.fineract.batch.command.internal.CreateTransactionLoanCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulTransactionMerchantIssuedAndPayoutRefund() {
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        final Long clientId = createClient();
 
         final Long applyLoanRequestId = 5730L;
         final Long approveLoanRequestId = 5731L;
@@ -1546,64 +1022,40 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
         final Long payoutRefundRequestId = 5734L;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final List<BatchRequest> batchRequests = List.of(
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                // Create an approveLoan Request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                // Create a disbursement request
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId, today().minusDays(1)),
+                // Create a merchant issued refund request
+                BatchRequestBuilders.merchantIssuedRefund(merchantIssuedRefundRequestId, applyLoanRequestId, "10"),
+                // Create a payout refund request
+                BatchRequestBuilders.payoutRefund(payoutRefundRequestId, applyLoanRequestId, "10"));
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final List<BatchResponse> responses = batchHelper.executeEnclosingTransaction(batchRequests);
 
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
         // Create an ApplyLoan Request
-        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
-
-        // Create an approveLoan Request
-        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
-
-        // Create a disbursement request
-        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId,
-                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(1));
-
-        // Create a merchant issued refund request
-        final BatchRequest merchantIssuedRefundRequest = BatchHelper.merchantIssuedRefundRequest(merchantIssuedRefundRequestId,
-                applyLoanRequestId, "10");
-
-        // Create a payout refund request
-        final BatchRequest payoutRefundRequest = BatchHelper.payoutRefundRequest(payoutRefundRequestId, applyLoanRequestId, "10");
-
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest,
-                merchantIssuedRefundRequest, payoutRefundRequest);
-
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
-
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for merchant issued refund");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for payout refund");
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse loan");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for merchant issued refund");
+        assertEquals(SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for payout refund");
     }
 
     /**
-     * Test for the successful repayment reversal transaction. A '200' status code is expected on successful responses.
+     * Test for the successful repayment reversal transaction.
      *
-     * @see AdjustLoanTransactionCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchRepaymentReversal() {
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        // Create client
+        final Long clientId = createClient();
+        final LocalDate reversalDate = today();
 
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
-
-        final LocalDate date = LocalDate.now(Utils.getZoneIdOfTenant());
         final Long applyLoanRequestId = 5730L;
         final Long approveLoanRequestId = 5731L;
         final Long disburseLoanRequestId = 5732L;
@@ -1611,248 +1063,149 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
         final Long repayReversalRequestId = 5734L;
         final Long getLoanRequestId = 5735L;
 
-        // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final List<BatchRequest> batchRequests = List.of(
+                // Create an apply loan request
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                // Create an approve loan request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                // Create a disburse loan request
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId),
+                // Create a repayment request.
+                BatchRequestBuilders.repayLoan(repayLoanRequestId, disburseLoanRequestId, "500"),
+                // Create a repayment reversal request
+                BatchRequestBuilders.adjustTransaction(repayReversalRequestId, repayLoanRequestId, "0", reversalDate),
+                // Get loan transactions request
+                BatchRequestBuilders.getLoanByReference(getLoanRequestId, applyLoanRequestId, "associations=transactions"));
 
-        // Create an apply loan request
-        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        // Create an approve loan request
-        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+        assertEquals(SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for repayment reversal");
 
-        // Create a disburse loan request
-        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
-
-        // Create a repayment request.
-        final BatchRequest repaymentRequest = BatchHelper.repayLoanRequest(repayLoanRequestId, disburseLoanRequestId, "500");
-
-        // Create a repayment reversal request
-        final BatchRequest repaymentReversalRequest = BatchHelper.createAdjustTransactionRequest(repayReversalRequestId, repayLoanRequestId,
-                "0", date);
-
-        // Get loan transactions request
-        final BatchRequest getLoanTransactionsRequest = BatchHelper.getLoanByIdRequest(getLoanRequestId, applyLoanRequestId,
-                "associations=transactions");
-
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest, repaymentRequest,
-                repaymentReversalRequest, getLoanTransactionsRequest);
-
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
-
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final JsonObject repayment = jsonHelper.parse(responses.get(5).getBody()).getAsJsonObject().get("transactions").getAsJsonArray()
-                .get(1).getAsJsonObject();
-        final JsonArray dateArray = repayment.get("reversedOnDate").getAsJsonArray();
-        final LocalDate reversedOnDate = LocalDate.of(dateArray.get(0).getAsInt(), dateArray.get(1).getAsInt(),
-                dateArray.get(2).getAsInt());
-
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) responses.get(4).getStatusCode(), "Verify Status Code 200 for repayment reversal");
-        Assertions.assertEquals("Repayment", repayment.get("type").getAsJsonObject().get("value").getAsString());
-        Assertions.assertTrue(repayment.get("manuallyReversed").getAsBoolean());
-        Assertions.assertEquals(date, reversedOnDate);
+        final JsonObject repayment = transactionAt(responses.get(5), 1);
+        assertEquals("Repayment", repayment.getAsJsonObject("type").get("value").getAsString());
+        assertTrue(repayment.get("manuallyReversed").getAsBoolean());
+        assertEquals(reversalDate, asLocalDate(repayment.getAsJsonArray("reversedOnDate")));
     }
 
     /**
-     * Test for the successful repayment reversal transaction using loan external id and transaction external id. A
-     * '200' status code is expected on successful responses.
+     * Test for the successful repayment reversal transaction using loan external id and transaction external id.
      *
-     * @see AdjustLoanTransactionCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchRepaymentReversalUsingExternalId() {
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        // Create client
+        final Long clientId = createClient();
+        final LocalDate reversalDate = today();
+        final String loanExternalId = UUID.randomUUID().toString();
 
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
-
-        final LocalDate date = LocalDate.now(Utils.getZoneIdOfTenant());
-        final Long applyLoanRequestId = ThreadLocalRandom.current().nextLong(1000, 10_000);
+        final Long applyLoanRequestId = randomRequestId();
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long getLoanBeforeTxnRequestId = disburseLoanRequestId + 1;
         final Long repayLoanRequestId = getLoanBeforeTxnRequestId + 1;
         final Long getLoanAfterTxnRequestId = repayLoanRequestId + 1;
         final Long repayReversalRequestId = getLoanAfterTxnRequestId + 1;
-        final Long getLoanAfterReversal = repayReversalRequestId + 1;
+        final Long getLoanAfterReversalRequestId = repayReversalRequestId + 1;
 
-        // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
-        final String loanExternalId = UUID.randomUUID().toString();
-
-        // Create an apply loan request
-        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientIdAndExternalId(applyLoanRequestId, clientId, productId,
-                loanExternalId);
-
-        // Create an approve loan request
-        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
-
-        // Create a disburse loan request
-        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
-
-        // Get loan transactions request
-        final BatchRequest getLoanTransactionsRequestBeforeTxn = BatchHelper.getLoanByIdRequest(getLoanBeforeTxnRequestId,
-                disburseLoanRequestId, "associations=transactions");
-
-        // Create a repayment request by external id
-        final BatchRequest repaymentRequest = BatchHelper.createTransactionRequestByLoanExternalId(repayLoanRequestId,
-                getLoanBeforeTxnRequestId, "repayment", "500", LocalDate.now(Utils.getZoneIdOfTenant()));
-
-        // Get loan transactions request
-        final BatchRequest getLoanTransactionsRequestAfterTxn = BatchHelper.getLoanByIdRequest(getLoanAfterTxnRequestId, repayLoanRequestId,
-                "associations=transactions");
-
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest,
-                getLoanTransactionsRequestBeforeTxn, repaymentRequest, getLoanTransactionsRequestAfterTxn);
+        final List<BatchRequest> batchRequests = List.of(
+                // Create an apply loan request
+                BatchRequestBuilders.applyLoanWithClientIdAndExternalId(applyLoanRequestId, clientId, productId, loanExternalId),
+                // Create an approve loan request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                // Create a disburse loan request
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId),
+                // Get loan transactions request
+                BatchRequestBuilders.getLoanByReference(getLoanBeforeTxnRequestId, disburseLoanRequestId, "associations=transactions"),
+                // Create a repayment request by external id
+                BatchRequestBuilders.createTransactionByLoanExternalId(repayLoanRequestId, getLoanBeforeTxnRequestId, "repayment", "500",
+                        today()),
+                // Get loan transactions request
+                BatchRequestBuilders.getLoanByReference(getLoanAfterTxnRequestId, repayLoanRequestId, "associations=transactions"));
 
         // Because loanExternalId & transactionExternalId are coming from 2 different responses, there is no easy way to
         // use them as reference in 1 batch api call.
         // So we are splitting repayment & reversal into 2 different batch api invocations
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final String loanExternalIdDisburseLoanResponse = jsonHelper.parse(responses.get(3).getBody()).getAsJsonObject().get("externalId")
-                .getAsString();
-        final Long loanId = jsonHelper.parse(responses.get(3).getBody()).getAsJsonObject().get("id").getAsLong();
-        final String transactionExternalId = jsonHelper.parse(responses.get(4).getBody()).getAsJsonObject().get("resourceExternalId")
-                .getAsString();
-        Assertions.assertNotNull(loanExternalIdDisburseLoanResponse);
-        Assertions.assertEquals(loanExternalId, loanExternalIdDisburseLoanResponse);
-        Assertions.assertNotNull(transactionExternalId);
+        final JsonObject loanBeforeTransaction = bodyAsObject(responses.get(3));
+        final String loanExternalIdInResponse = loanBeforeTransaction.get("externalId").getAsString();
+        final Long loanId = loanBeforeTransaction.get("id").getAsLong();
+        final String transactionExternalId = bodyAsObject(responses.get(4)).get("resourceExternalId").getAsString();
 
-        // Create a repayment reversal request by external id
-        final BatchRequest repaymentReversalRequest = BatchHelper.createAdjustTransactionByExternalIdRequest(repayReversalRequestId, null,
-                loanExternalIdDisburseLoanResponse, transactionExternalId, "0", date);
+        assertEquals(loanExternalId, loanExternalIdInResponse);
+        assertNotNull(transactionExternalId);
 
-        final BatchRequest getLoanByIdWithTransactions = BatchHelper.getLoanByIdRequest(loanId, getLoanAfterReversal,
-                repayReversalRequestId, "associations=transactions");
+        final List<BatchRequest> reversalRequests = List.of(
+                // Create a repayment reversal request by external id
+                BatchRequestBuilders.adjustTransactionByExternalId(repayReversalRequestId, null, loanExternalIdInResponse,
+                        transactionExternalId, "0", reversalDate),
+                // Get loan transactions request
+                BatchRequestBuilders.getLoanByLoanId(getLoanAfterReversalRequestId, repayReversalRequestId, loanId,
+                        "associations=transactions"));
 
-        final List<BatchRequest> reversalAndGetBatchRequest = Arrays.asList(repaymentReversalRequest, getLoanByIdWithTransactions);
+        final List<BatchResponse> reversalResponses = batchHelper.executeWithoutEnclosingTransaction(reversalRequests);
 
-        final List<BatchResponse> reversalResponses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
-                this.responseSpec, BatchHelper.toJsonString(reversalAndGetBatchRequest));
+        assertEquals(SC_OK, reversalResponses.get(0).getStatusCode(), "Verify Status Code 200 for repayment reversal");
 
-        final JsonObject repayment = jsonHelper.parse(reversalResponses.get(1).getBody()).getAsJsonObject().get("transactions")
-                .getAsJsonArray().get(1).getAsJsonObject();
-
-        final JsonArray dateArray = repayment.get("reversedOnDate").getAsJsonArray();
-        final LocalDate reversedOnDate = LocalDate.of(dateArray.get(0).getAsInt(), dateArray.get(1).getAsInt(),
-                dateArray.get(2).getAsInt());
-
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) reversalResponses.get(0).getStatusCode(),
-                "Verify Status Code 200 for repayment reversal");
-        Assertions.assertEquals("Repayment", repayment.get("type").getAsJsonObject().get("value").getAsString());
-
-        Assertions.assertTrue(repayment.get("manuallyReversed").getAsBoolean());
-        Assertions.assertEquals(date, reversedOnDate);
+        final JsonObject repayment = transactionAt(reversalResponses.get(1), 1);
+        assertEquals("Repayment", repayment.getAsJsonObject("type").get("value").getAsString());
+        assertTrue(repayment.get("manuallyReversed").getAsBoolean());
+        assertEquals(reversalDate, asLocalDate(repayment.getAsJsonArray("reversedOnDate")));
     }
 
     /**
-     * Test for the successful repayment chargeback transaction. A '200' status code is expected on successful
-     * responses.
+     * Test for the successful repayment chargeback transaction.
      *
-     * @see AdjustLoanTransactionCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchRepaymentChargeback() {
-
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        final Long clientId = createClient();
 
         final Long applyLoanRequestId = 5730L;
         final Long approveLoanRequestId = 5731L;
         final Long disburseLoanRequestId = 5732L;
         final Long repayLoanRequestId = 5733L;
-        final Long repayReversalRequestId = 5734L;
+        final Long chargebackRequestId = 5734L;
         final Long getLoanRequestId = 5735L;
 
-        // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final List<BatchRequest> batchRequests = List.of(
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId),
+                // Create a repayment request
+                BatchRequestBuilders.repayLoan(repayLoanRequestId, disburseLoanRequestId, "500"),
+                // Create a repayment chargeback request
+                BatchRequestBuilders.chargebackTransaction(chargebackRequestId, repayLoanRequestId, "500"),
+                // Get loan transactions request
+                BatchRequestBuilders.getLoanByReference(getLoanRequestId, applyLoanRequestId, "associations=transactions"));
 
-        // Create an apply loan request
-        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        // Create an approve loan request
-        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+        assertEquals(SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for repayment chargeback");
 
-        // Create a disburse loan request
-        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
+        final JsonObject repayment = transactionAt(responses.get(5), 1);
+        assertEquals("Repayment", repayment.getAsJsonObject("type").get("value").getAsString());
 
-        // Create a repayment request
-        final BatchRequest repaymentRequest = BatchHelper.repayLoanRequest(repayLoanRequestId, disburseLoanRequestId, "500");
-
-        // Create a repayment chargeback request
-        final BatchRequest repaymentChargebackRequest = BatchHelper.createChargebackTransactionRequest(repayReversalRequestId,
-                repayLoanRequestId, "500");
-
-        // Get loan transactions request
-        final BatchRequest getLoanTransactionsRequest = BatchHelper.getLoanByIdRequest(getLoanRequestId, applyLoanRequestId,
-                "associations=transactions");
-
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest, repaymentRequest,
-                repaymentChargebackRequest, getLoanTransactionsRequest);
-
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
-
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final JsonObject repayment = jsonHelper.parse(responses.get(5).getBody()).getAsJsonObject().get("transactions").getAsJsonArray()
-                .get(1).getAsJsonObject();
-
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) responses.get(4).getStatusCode(),
-                "Verify Status Code 200 for repayment chargeback");
-        Assertions.assertEquals("Repayment", repayment.get("type").getAsJsonObject().get("value").getAsString());
-        final JsonArray transactionRelations = repayment.get("transactionRelations").getAsJsonArray();
-        Assertions.assertEquals(1, transactionRelations.size());
-        Assertions.assertEquals("CHARGEBACK", transactionRelations.get(0).getAsJsonObject().get("relationType").getAsString());
+        final JsonArray transactionRelations = repayment.getAsJsonArray("transactionRelations");
+        assertEquals(1, transactionRelations.size());
+        assertEquals("CHARGEBACK", transactionRelations.get(0).getAsJsonObject().get("relationType").getAsString());
     }
 
     /**
-     * Tests successful run of batch goodwill credit reversal for loans. A '200' status code is expected on successful
-     * responses.
+     * Tests successful run of batch goodwill credit reversal for loans.
      *
-     * @see AdjustLoanTransactionCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusForBatchGoodwillCreditReversal() {
+        final Long productId = createBatchLoanProduct(SMALL_PRINCIPAL);
+        final Long clientId = createClient();
+        final LocalDate reversalDate = today();
 
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("1000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
-
-        final LocalDate date = LocalDate.now(Utils.getZoneIdOfTenant());
         final Long applyLoanRequestId = 5730L;
         final Long approveLoanRequestId = 5731L;
         final Long disburseLoanRequestId = 5732L;
@@ -1861,69 +1214,39 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
         final Long getLoanRequestId = 5735L;
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final List<BatchRequest> batchRequests = List.of(
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId),
+                // Create a good will credit request
+                BatchRequestBuilders.goodwillCredit(goodwillCreditRequestId, disburseLoanRequestId, "500"),
+                // Create a good will credit reversal request
+                BatchRequestBuilders.adjustTransaction(goodwillCreditReversalRequestId, goodwillCreditRequestId, "0", reversalDate),
+                BatchRequestBuilders.getLoanByReference(getLoanRequestId, applyLoanRequestId, "associations=transactions"));
 
-        // Create an apply loan request
-        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        // Create an approve loan request
-        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+        assertEquals(SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for goodwill credit reversal");
 
+        final JsonObject goodwillCredit = transactionAt(responses.get(5), 1);
         // Create a disburse loan request
-        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
-
-        // Create a good will credit request
-        final BatchRequest goodwillCreditRequest = BatchHelper.goodwillCreditRequest(goodwillCreditRequestId, disburseLoanRequestId, "500");
-
-        // Create a good will credit reversal request
-        final BatchRequest goodwillCreditReversalRequest = BatchHelper.createAdjustTransactionRequest(goodwillCreditReversalRequestId,
-                goodwillCreditRequestId, "0", date);
-
+        assertEquals("Goodwill Credit", goodwillCredit.getAsJsonObject("type").get("value").getAsString());
+        assertTrue(goodwillCredit.get("manuallyReversed").getAsBoolean());
         // Get loan transactions request
-        final BatchRequest getLoanTransactionsRequest = BatchHelper.getLoanByIdRequest(getLoanRequestId, applyLoanRequestId,
-                "associations=transactions");
-
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest,
-                goodwillCreditRequest, goodwillCreditReversalRequest, getLoanTransactionsRequest);
-
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
-
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final JsonObject goodWillCredit = jsonHelper.parse(responses.get(5).getBody()).getAsJsonObject().get("transactions")
-                .getAsJsonArray().get(1).getAsJsonObject();
-        final JsonArray dateArray = goodWillCredit.get("reversedOnDate").getAsJsonArray();
-        final LocalDate reversedOnDate = LocalDate.of(dateArray.get(0).getAsInt(), dateArray.get(1).getAsInt(),
-                dateArray.get(2).getAsInt());
-
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) responses.get(4).getStatusCode(),
-                "Verify Status Code 200 for goodwill credit reversal");
-        Assertions.assertEquals("Goodwill Credit", goodWillCredit.get("type").getAsJsonObject().get("value").getAsString());
-        Assertions.assertTrue(goodWillCredit.get("manuallyReversed").getAsBoolean());
-        Assertions.assertEquals(date, reversedOnDate);
+        assertEquals(reversalDate, asLocalDate(goodwillCredit.getAsJsonArray("reversedOnDate")));
     }
 
     /**
-     * Test for the successful merchant issued refund and payout refund reversal transaction. A '200' status code is
-     * expected on successful responses.
+     * Test for the successful merchant issued refund and payout refund reversal transaction.
      *
-     * @see AdjustLoanTransactionCommandStrategy
+     * @see org.apache.fineract.batch.command.internal.AdjustLoanTransactionCommandStrategy
      */
     @Test
     public void shouldReturnOkStatusOnSuccessfulTransactionMerchantIssuedAndPayoutRefundReversal() {
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        final Long clientId = createClient();
+        final LocalDate reversalDate = today();
 
-        final LocalDate date = LocalDate.now(Utils.getZoneIdOfTenant());
         final Long applyLoanRequestId = 5730L;
         final Long approveLoanRequestId = 5731L;
         final Long disburseLoanRequestId = 5732L;
@@ -1934,752 +1257,532 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
         final Long getLoanRequestId = 5737L;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final List<BatchRequest> batchRequests = List.of(
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId, reversalDate.minusDays(1)),
+                // Create a merchant issued refund request
+                BatchRequestBuilders.merchantIssuedRefund(merchantIssuedRefundRequestId, applyLoanRequestId, "10"),
+                // Create a payout refund request
+                BatchRequestBuilders.payoutRefund(payoutRefundRequestId, applyLoanRequestId, "10"),
+                // Create a merchant issued refund reversal request
+                BatchRequestBuilders.adjustTransaction(merchantIssuedRefundReversalRequestId, merchantIssuedRefundRequestId, "0",
+                        reversalDate),
+                // Create a payout refund reversal request
+                BatchRequestBuilders.adjustTransaction(payoutRefundReversalRequestId, payoutRefundRequestId, "0", reversalDate),
+                BatchRequestBuilders.getLoanByReference(getLoanRequestId, applyLoanRequestId, "associations=transactions"));
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final List<BatchResponse> responses = batchHelper.executeEnclosingTransaction(batchRequests);
 
+        assertEquals(SC_OK, responses.get(5).getStatusCode(), "Verify Status Code 200 for merchant issued refund reversal");
         // Create an apply loan request
-        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
+        assertEquals(SC_OK, responses.get(6).getStatusCode(), "Verify Status Code 200 for payout refund reversal");
 
+        final JsonObject merchantIssuedRefund = transactionAt(responses.get(7), 1);
         // Create an approve loan request
-        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+        final JsonObject payoutRefund = transactionAt(responses.get(7), 2);
 
+        assertEquals("Merchant Issued Refund", merchantIssuedRefund.getAsJsonObject("type").get("value").getAsString());
         // Create a disburse loan request
-        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId,
-                date.minusDays(1));
-
-        // Create a merchant issued refund request
-        final BatchRequest merchantIssuedRefundRequest = BatchHelper.merchantIssuedRefundRequest(merchantIssuedRefundRequestId,
-                applyLoanRequestId, "10");
-
-        // Create a payout refund request
-        final BatchRequest payoutRefundRequest = BatchHelper.payoutRefundRequest(payoutRefundRequestId, applyLoanRequestId, "10");
-
-        // Create a merchant issued refund reversal request
-        final BatchRequest merchantIssuedRefundReversalRequest = BatchHelper
-                .createAdjustTransactionRequest(merchantIssuedRefundReversalRequestId, merchantIssuedRefundRequestId, "0", date);
-
-        // Create a payout refund reversal request
-        final BatchRequest payoutRefundReversalRequest = BatchHelper.createAdjustTransactionRequest(payoutRefundReversalRequestId,
-                payoutRefundRequestId, "0", date);
-
+        assertEquals("Payout Refund", payoutRefund.getAsJsonObject("type").get("value").getAsString());
+        assertTrue(merchantIssuedRefund.get("manuallyReversed").getAsBoolean());
+        assertTrue(payoutRefund.get("manuallyReversed").getAsBoolean());
+        assertEquals(reversalDate, asLocalDate(merchantIssuedRefund.getAsJsonArray("reversedOnDate")));
         // Get loan transactions request
-        final BatchRequest getLoanTransactionsRequest = BatchHelper.getLoanByIdRequest(getLoanRequestId, applyLoanRequestId,
-                "associations=transactions");
-
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest,
-                merchantIssuedRefundRequest, payoutRefundRequest, merchantIssuedRefundReversalRequest, payoutRefundReversalRequest,
-                getLoanTransactionsRequest);
-
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
-
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final JsonObject merchantIssuedRefund = jsonHelper.parse(responses.get(7).getBody()).getAsJsonObject().get("transactions")
-                .getAsJsonArray().get(1).getAsJsonObject();
-        final JsonObject payoutRefund = jsonHelper.parse(responses.get(7).getBody()).getAsJsonObject().get("transactions").getAsJsonArray()
-                .get(2).getAsJsonObject();
-        final JsonArray merchantIssuedDateArray = merchantIssuedRefund.get("reversedOnDate").getAsJsonArray();
-        final LocalDate merchantIssuedDate = LocalDate.of(merchantIssuedDateArray.get(0).getAsInt(),
-                merchantIssuedDateArray.get(1).getAsInt(), merchantIssuedDateArray.get(2).getAsInt());
-        final JsonArray payoutRefundDateArray = payoutRefund.getAsJsonObject().get("reversedOnDate").getAsJsonArray();
-        final LocalDate payoutRefundDate = LocalDate.of(payoutRefundDateArray.get(0).getAsInt(), payoutRefundDateArray.get(1).getAsInt(),
-                payoutRefundDateArray.get(2).getAsInt());
-
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(5).getStatusCode(),
-                "Verify Status Code 200 for merchant issued refund reversal");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(6).getStatusCode(), "Verify Status Code 200 for payout refund reversal");
-        Assertions.assertEquals("Merchant Issued Refund", merchantIssuedRefund.get("type").getAsJsonObject().get("value").getAsString());
-        Assertions.assertEquals("Payout Refund", payoutRefund.get("type").getAsJsonObject().get("value").getAsString());
-        Assertions.assertTrue(merchantIssuedRefund.get("manuallyReversed").getAsBoolean());
-        Assertions.assertTrue(payoutRefund.get("manuallyReversed").getAsBoolean());
-        Assertions.assertEquals(date, merchantIssuedDate);
-        Assertions.assertEquals(date, payoutRefundDate);
+        assertEquals(reversalDate, asLocalDate(payoutRefund.getAsJsonArray("reversedOnDate")));
     }
 
     @Test
     public void shouldReturnOkStatusOnModifyingSavingAccount() {
         final String startDate = "10 April 2022";
-        final SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-        final SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
-        Assertions.assertNotNull(clientID);
-        final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance().build();
-        final Integer savingsProductID = SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
-        Assertions.assertNotNull(savingsProductID);
-        final Integer savingsId = savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID, "INDIVIDUAL",
-                startDate);
-        Assertions.assertNotNull(savingsId);
-        HashMap savingsStatusHashMap = savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-        savingsStatusHashMap = savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        final Long clientId = createClient(startDate);
+        final Long savingsId = createActiveSavingsAccount(clientId, startDate, startDate, startDate);
 
-        final BatchRequest getSavingAccountRequest = BatchHelper.getSavingAccount(1L, Long.valueOf(savingsId), "chargeStatus=all", null);
-        final BatchRequest depositSavingAccountRequest = BatchHelper.depositSavingAccount(2L, 1L, 100F);
-        final BatchRequest holdAmountOnSavingAccountRequest = BatchHelper.holdAmountOnSavingAccount(3L, 1L, 10F);
+        final Long getSavingsAccountRequestId = 1L;
+        final Long depositRequestId = 2L;
+        final Long holdAmountRequestId = 3L;
 
-        final List<BatchRequest> batchRequests1 = Arrays.asList(getSavingAccountRequest, depositSavingAccountRequest,
-                holdAmountOnSavingAccountRequest);
-        final List<BatchResponse> responses1 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests1));
+        final BatchRequest getSavingsAccountRequest = BatchRequestBuilders.getSavingsAccount(getSavingsAccountRequestId, null, savingsId,
+                "chargeStatus=all");
 
-        Assertions.assertEquals(HttpStatus.SC_OK, responses1.get(1).getStatusCode(), "Verify Status Code 200 for deposit saving account");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses1.get(2).getStatusCode(),
-                "Verify Status Code 200 for hold amount on saving account");
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final Long holdAmountTransactionId = jsonHelper.parse(responses1.get(2).getBody()).getAsJsonObject().get("resourceId").getAsLong();
+        final List<BatchRequest> depositRequests = List.of(getSavingsAccountRequest,
+                BatchRequestBuilders.depositSavingsAccount(depositRequestId, getSavingsAccountRequestId, 100F),
+                BatchRequestBuilders.holdAmountOnSavingsAccount(holdAmountRequestId, getSavingsAccountRequestId, 10F));
 
-        final BatchRequest releaseAmountOnSavingAccountRequest = BatchHelper.releaseAmountOnSavingAccount(2L, 1L, holdAmountTransactionId);
-        final BatchRequest withdrawSavingAccountRequest = BatchHelper.withdrawSavingAccount(3L, 1L, 80F);
+        final List<BatchResponse> depositResponses = batchHelper.executeEnclosingTransaction(depositRequests);
 
-        final List<BatchRequest> batchRequests2 = Arrays.asList(getSavingAccountRequest, releaseAmountOnSavingAccountRequest,
-                withdrawSavingAccountRequest);
-        final List<BatchResponse> responses2 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests2));
+        assertEquals(SC_OK, depositResponses.get(1).getStatusCode(), "Verify Status Code 200 for deposit saving account");
+        assertEquals(SC_OK, depositResponses.get(2).getStatusCode(), "Verify Status Code 200 for hold amount on saving account");
 
-        Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(1).getStatusCode(),
-                "Verify Status Code 200 for release amount on saving account");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(2).getStatusCode(), "Verify Status Code 200 for withdraw saving account");
+        final Long holdAmountTransactionId = bodyAsObject(depositResponses.get(2)).get("resourceId").getAsLong();
+
+        final Long releaseAmountRequestId = 2L;
+        final Long withdrawRequestId = 3L;
+
+        final List<BatchRequest> withdrawRequests = List.of(getSavingsAccountRequest,
+                BatchRequestBuilders.releaseAmountOnSavingsAccount(releaseAmountRequestId, getSavingsAccountRequestId,
+                        holdAmountTransactionId),
+                BatchRequestBuilders.withdrawSavingsAccount(withdrawRequestId, getSavingsAccountRequestId, 80F));
+
+        final List<BatchResponse> withdrawResponses = batchHelper.executeEnclosingTransaction(withdrawRequests);
+
+        assertEquals(SC_OK, withdrawResponses.get(1).getStatusCode(), "Verify Status Code 200 for release amount on saving account");
+        assertEquals(SC_OK, withdrawResponses.get(2).getStatusCode(), "Verify Status Code 200 for withdraw saving account");
     }
 
     /**
-     * Test for finding datatable entry by the query API and update its value
+     * Test for finding a one-to-one datatable entry by the query API and updating one of its columns.
      */
     @Test
     public void shouldFindOneToOneDatatableEntryByQueryAPIAndUpdateOneOfItsColumn() {
+        final Long loanId = setupLoanAccount();
         final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
-
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final Long loanId = jsonHelper.extractLongNamed("loanId", jsonHelper.parse(setupAccount()).getAsJsonObject());
-        // creating datatable with m_loan association
-        final Map<String, Object> columnMap = new HashMap<>();
-        final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
-
         final String columnName1 = Utils.randomStringGenerator("COL1_", 5).toLowerCase();
         final String columnName2 = Utils.randomStringGenerator("COL2_", 5).toLowerCase();
-        columnMap.put("datatableName", datatableName);
-        columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
-        columnMap.put("entitySubType", "PERSON");
-        columnMap.put("multiRow", false);
-        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName1, "String", true, 10, null);
-        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName2, "String", false, 10, null);
-        columnMap.put("columns", datatableColumnsList);
-        final String datatableRequestJsonString = new Gson().toJson(columnMap);
-        LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
+        createTwoStringColumnDatatable(datatableName, columnName1, columnName2, false, SHORT_COLUMN_LENGTH);
+        try {
+            final String columnValue1 = Utils.randomStringGenerator("VAL1_", 3);
+            final String columnValue2 = Utils.randomStringGenerator("VAL2_", 3);
+            createDatatableEntry(datatableName, loanId, columnName1, columnValue1, columnName2, columnValue2);
 
-        this.datatableHelper.createDatatable(datatableRequestJsonString, "");
+            final String updatedColumnValue2 = columnValue2 + "1";
+            final List<BatchRequest> batchRequests = List.of(
+                    BatchRequestBuilders.queryDatatableEntries(QUERY_DATATABLE_ENTRIES_REQUEST_ID, datatableName, columnName1, columnValue1,
+                            "loan_id"),
+                    BatchRequestBuilders.updateDatatableEntry(UPDATE_QUERIED_DATATABLE_ENTRY_REQUEST_ID, QUERY_DATATABLE_ENTRIES_REQUEST_ID,
+                            datatableName, "$.[0].loan_id", columnName2, updatedColumnValue2));
 
-        // Create a datatable entry so that it can be updated using BatchApi
-        final Map<String, Object> datatableEntryMap = new HashMap<>();
-        String columnValue1 = Utils.randomStringGenerator("VAL1_", 3);
-        String columnValue2 = Utils.randomStringGenerator("VAL2_", 3);
-        datatableEntryMap.put(columnName1, columnValue1);
-        datatableEntryMap.put(columnName2, columnValue2);
-        final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
-        LOG.info("CreateDataTableEntry map : {}", datatableEntryRequestJsonString);
+            // Create a datatable entry so that it can be updated using BatchApi
+            final List<BatchResponse> responses = batchHelper.executeEnclosingTransaction(batchRequests);
 
-        final Map<String, Object> datatableEntryResponse = this.datatableHelper.createDatatableEntry(datatableName, loanId.intValue(),
-                false, datatableEntryRequestJsonString);
-        final Integer datatableEntryResourceId = (Integer) datatableEntryResponse.get("resourceId");
-        assertNotNull(datatableEntryResourceId, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
+            assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for query datatable entries");
+            assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for update datatable entry");
 
-        final BatchRequest queryDatatableEntriesRequest = BatchHelper.queryDatatableEntries(datatableName, columnName1, columnValue1,
-                "loan_id");
-        final BatchRequest updateDatatableEntry = BatchHelper.updateDatatableEntry(datatableName, "$.[0].loan_id", columnName2,
-                columnValue2 + "1");
-
-        final List<BatchRequest> batchRequestsToQueryAndUpdateDatatableEntries = Arrays.asList(queryDatatableEntriesRequest,
-                updateDatatableEntry);
-        LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
-
-        final List<BatchResponse> responseOfQuertAndUpdateDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(
-                this.requestSpec, this.responseSpec, BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
-
-        LOG.info("Batch Response : {}", new Gson().toJson(responseOfQuertAndUpdateDatatableBatch));
-
-        final BatchResponse batchQueryAndUpdateResponse1 = responseOfQuertAndUpdateDatatableBatch.get(0);
-        final BatchResponse batchQueryAndUpdateResponse2 = responseOfQuertAndUpdateDatatableBatch.get(1);
-        Assertions.assertEquals(HttpStatus.SC_OK, batchQueryAndUpdateResponse1.getStatusCode(),
-                "Verify Status Code 200 for create datatable entry");
-        Assertions.assertEquals(HttpStatus.SC_OK, batchQueryAndUpdateResponse2.getStatusCode(),
-                "Verify Status Code 200 for update datatable entry");
-
-        final JsonObject changes = jsonHelper.parse(batchQueryAndUpdateResponse2.getBody()).getAsJsonObject().get("changes")
-                .getAsJsonObject();
-        Assertions.assertEquals(changes.get(columnName2).getAsString(), columnValue2 + "1");
+            final JsonObject changes = bodyAsObject(responses.get(1)).getAsJsonObject("changes");
+            assertEquals(updatedColumnValue2, changes.get(columnName2).getAsString());
+        } finally {
+            deleteDatatableWithEntriesOf(datatableName, loanId);
+        }
     }
 
     /**
-     * Test when datatable entry was not found by the query API, and the update fails
+     * Test when a datatable entry was not found by the query API, and the update consequently fails.
      */
     @Test
     public void shouldNotFindAnyDatatableEntryByQueryAPIAndFailsToUpdateItsColumn() {
         final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
-
-        // creating datatable with m_loan association
-        final Map<String, Object> columnMap = new HashMap<>();
-        final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
-
         final String columnName1 = Utils.randomStringGenerator("COL1_", 5).toLowerCase();
         final String columnName2 = Utils.randomStringGenerator("COL2_", 5).toLowerCase();
-        columnMap.put("datatableName", datatableName);
-        columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
-        columnMap.put("entitySubType", "PERSON");
-        columnMap.put("multiRow", false);
-        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName1, "String", true, 15, null);
-        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName2, "String", false, 15, null);
-        columnMap.put("columns", datatableColumnsList);
-        final String datatableRequestJsonString = new Gson().toJson(columnMap);
-        LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
+        createTwoStringColumnDatatable(datatableName, columnName1, columnName2, false, LONG_COLUMN_LENGTH);
+        try {
+            final List<BatchRequest> batchRequests = List.of(
+                    BatchRequestBuilders.queryDatatableEntries(QUERY_DATATABLE_ENTRIES_REQUEST_ID, datatableName, columnName1,
+                            "columnValue1", "loan_id"),
+                    BatchRequestBuilders.updateDatatableEntry(UPDATE_QUERIED_DATATABLE_ENTRY_REQUEST_ID, QUERY_DATATABLE_ENTRIES_REQUEST_ID,
+                            datatableName, "$.[0].loan_id", columnName2, "columnValue2"));
 
-        this.datatableHelper.createDatatable(datatableRequestJsonString, "");
+            final List<BatchResponse> responses = batchHelper.executeEnclosingTransaction(batchRequests);
 
-        final BatchRequest queryDatatableEntriesRequest = BatchHelper.queryDatatableEntries(datatableName, columnName1, "columnValue1",
-                "loan_id");
-        final BatchRequest updateDatatableEntry = BatchHelper.updateDatatableEntry(datatableName, "$.[0].loan_id", columnName2,
-                "columnValue2");
-
-        final List<BatchRequest> batchRequestsToQueryAndUpdateDatatableEntries = Arrays.asList(queryDatatableEntriesRequest,
-                updateDatatableEntry);
-        LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
-
-        final List<BatchResponse> responseOfQueryAndUpdateDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(
-                this.requestSpec, this.responseSpec, BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
-
-        LOG.info("Batch Response : {}", new Gson().toJson(responseOfQueryAndUpdateDatatableBatch));
-
-        final BatchResponse updateResponse = responseOfQueryAndUpdateDatatableBatch.get(0);
-
-        Assertions.assertEquals(2L, updateResponse.getRequestId());
-        Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, updateResponse.getStatusCode(),
-                "Verify Status Code 400 for update datatable entry");
-        MatcherAssert.assertThat(updateResponse.getBody(), containsString("The referenced JSON path is invalid"));
+            final BatchResponse updateResponse = responses.get(0);
+            assertEquals(UPDATE_QUERIED_DATATABLE_ENTRY_REQUEST_ID, updateResponse.getRequestId());
+            assertEquals(SC_BAD_REQUEST, updateResponse.getStatusCode(), "Verify Status Code 400 for update datatable entry");
+            assertTrue(updateResponse.getBody().contains("The referenced JSON path is invalid"),
+                    "Expected an invalid JSON path error but was: " + updateResponse.getBody());
+        } finally {
+            deleteDatatable(datatableName);
+        }
     }
 
     /**
-     * Test for finding datatable entry by the query API and update its value
+     * Test for finding a one-to-many datatable entry by the query API and updating one of its columns.
      */
     @Test
     public void shouldFindOneToManyDatatableEntryByQueryAPIAndUpdateOneOfItsColumn() {
+        final Long loanId = setupLoanAccount();
         final String datatableName = Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5).toLowerCase();
-
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final Long loanId = jsonHelper.extractLongNamed("loanId", jsonHelper.parse(setupAccount()).getAsJsonObject());
-        // creating datatable with m_loan association
-        final Map<String, Object> columnMap = new HashMap<>();
-        final List<HashMap<String, Object>> datatableColumnsList = new ArrayList<>();
-
         final String columnName1 = Utils.randomStringGenerator("COL1_", 5).toLowerCase();
         final String columnName2 = Utils.randomStringGenerator("COL2_", 5).toLowerCase();
-        columnMap.put("datatableName", datatableName);
-        columnMap.put("apptableName", LOAN_APP_TABLE_NAME);
-        columnMap.put("entitySubType", "PERSON");
-        columnMap.put("multiRow", true);
-        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName1, "String", true, 10, null);
-        DatatableHelper.addDatatableColumn(datatableColumnsList, columnName2, "String", false, 10, null);
-        columnMap.put("columns", datatableColumnsList);
-        final String datatableRequestJsonString = new Gson().toJson(columnMap);
-        LOG.info("CreateDataTable map : {}", datatableRequestJsonString);
+        createTwoStringColumnDatatable(datatableName, columnName1, columnName2, true, SHORT_COLUMN_LENGTH);
+        try {
+            final String columnValue1 = Utils.randomStringGenerator("VAL1_", 3);
+            final String columnValue2 = Utils.randomStringGenerator("VAL2_", 3);
+            final Long existingEntryId = createDatatableEntry(datatableName, loanId, columnName1, columnValue1, columnName2, columnValue2);
 
-        this.datatableHelper.createDatatable(datatableRequestJsonString, "");
+            final List<BatchRequest> createAndReadRequests = List.of(
+                    BatchRequestBuilders.createDatatableEntry(CREATE_DATATABLE_ENTRY_REQUEST_ID, datatableName, loanId,
+                            List.of(columnName1, columnName2)),
+                    BatchRequestBuilders.getDatatableEntries(GET_DATATABLE_ENTRIES_REQUEST_ID, CREATE_DATATABLE_ENTRY_REQUEST_ID,
+                            datatableName, loanId, null));
 
-        // Create a datatable entry so that it can be updated using BatchApi
-        final Map<String, Object> datatableEntryMap = new HashMap<>();
-        String columnValue1 = Utils.randomStringGenerator("VAL1_", 3);
-        String columnValue2 = Utils.randomStringGenerator("VAL2_", 3);
-        datatableEntryMap.put(columnName1, columnValue1);
-        datatableEntryMap.put(columnName2, columnValue2);
-        final String datatableEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
-        LOG.info("CreateDataTableEntry map : {}", datatableEntryRequestJsonString);
+            // Create a datatable entry so that it can be updated using BatchApi
+            final List<BatchResponse> createAndReadResponses = batchHelper.executeEnclosingTransaction(createAndReadRequests);
 
-        final Map<String, Object> datatableEntryResponse = this.datatableHelper.createDatatableEntry(datatableName, loanId.intValue(),
-                false, datatableEntryRequestJsonString);
-        final Integer datatableEntryResourceId = (Integer) datatableEntryResponse.get("resourceId");
-        assertNotNull(datatableEntryResourceId, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
+            assertEquals(SC_OK, createAndReadResponses.get(0).getStatusCode(), "Verify Status Code 200 for create datatable entry");
+            assertEquals(SC_OK, createAndReadResponses.get(1).getStatusCode(), "Verify Status Code 200 for get datatable entries");
 
-        // Create datatable entry batch request
-        final BatchRequest createDatatableEntryRequest = BatchHelper.createDatatableEntryRequest(loanId.toString(), datatableName,
-                Arrays.asList(columnName1, columnName2));
+            final Long createdEntryId = bodyAsObject(createAndReadResponses.get(0)).get("resourceId").getAsLong();
+            // Create datatable entry batch request
+            final String getDatatableEntriesResponse = createAndReadResponses.get(1).getBody();
+            final JsonArray datatableEntries = JsonParser.parseString(getDatatableEntriesResponse).getAsJsonArray();
+            assertEquals(2, datatableEntries.size());
 
-        // Get datatable entries batch request
-        final BatchRequest getDatatableEntriesRequest = BatchHelper.getDatatableByIdRequest(loanId, datatableName, null,
-                createDatatableEntryRequest.getReference());
+            // Ensure both resourceIds are available in response
+            assertTrue(getDatatableEntriesResponse.contains("\"id\": %d".formatted(createdEntryId)));
+            assertTrue(getDatatableEntriesResponse.contains("\"id\": %d".formatted(existingEntryId)));
 
-        final List<BatchRequest> batchRequestsDatatableEntries = Arrays.asList(createDatatableEntryRequest, getDatatableEntriesRequest);
-        LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsDatatableEntries));
+            final String updatedColumnValue2 = columnValue2 + "1";
+            final List<BatchRequest> queryAndUpdateRequests = List.of(
+                    BatchRequestBuilders.queryDatatableEntries(QUERY_DATATABLE_ENTRIES_REQUEST_ID, datatableName, columnName1, columnValue1,
+                            "id,loan_id"),
+                    BatchRequestBuilders.updateDatatableEntry(UPDATE_QUERIED_DATATABLE_ENTRY_REQUEST_ID, QUERY_DATATABLE_ENTRIES_REQUEST_ID,
+                            datatableName, "$.[0].loan_id", "$.[0].id", columnName2, updatedColumnValue2));
 
-        final List<BatchResponse> responseDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec,
-                this.responseSpec, BatchHelper.toJsonString(batchRequestsDatatableEntries));
+            final List<BatchResponse> queryAndUpdateResponses = batchHelper.executeEnclosingTransaction(queryAndUpdateRequests);
 
-        LOG.info("Batch Response : {}", new Gson().toJson(responseDatatableBatch));
+            assertEquals(SC_OK, queryAndUpdateResponses.get(0).getStatusCode(), "Verify Status Code 200 for query datatable entries");
+            assertEquals(SC_OK, queryAndUpdateResponses.get(1).getStatusCode(), "Verify Status Code 200 for update datatable entry");
 
-        final BatchResponse batchResponse1 = responseDatatableBatch.get(0);
-        final BatchResponse batchResponse2 = responseDatatableBatch.get(1);
-        Assertions.assertEquals(HttpStatus.SC_OK, batchResponse1.getStatusCode(), "Verify Status Code 200 for create datatable entry");
-        Assertions.assertEquals(HttpStatus.SC_OK, batchResponse2.getStatusCode(), "Verify Status Code 200 for update datatable entry");
-
-        final String getDatatableEntriesResponse = batchResponse2.getBody();
-
-        final Long createDatatableEntryId = jsonHelper.extractLongNamed("resourceId",
-                jsonHelper.parse(batchResponse1.getBody()).getAsJsonObject());
-
-        final JsonArray datatableEntries = jsonHelper.parse(getDatatableEntriesResponse).getAsJsonArray();
-        Assertions.assertEquals(2, datatableEntries.size());
-
-        // Ensure both resourceIds are available in response
-        Assertions.assertTrue(getDatatableEntriesResponse.contains(String.format("\"id\": %d", createDatatableEntryId)));
-        Assertions.assertTrue(getDatatableEntriesResponse.contains(String.format("\"id\": %d", datatableEntryResourceId)));
-
-        final BatchRequest queryDatatableEntriesRequest = BatchHelper.queryDatatableEntries(datatableName, columnName1, columnValue1,
-                "id,loan_id");
-        final BatchRequest updateDatatableEntry = BatchHelper.updateDatatableEntry(datatableName, "$.[0].loan_id", "$.[0].id", columnName2,
-                columnValue2 + "1");
-
-        final List<BatchRequest> batchRequestsToQueryAndUpdateDatatableEntries = Arrays.asList(queryDatatableEntriesRequest,
-                updateDatatableEntry);
-        LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
-
-        final List<BatchResponse> responseOfQuertAndUpdateDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(
-                this.requestSpec, this.responseSpec, BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
-
-        LOG.info("Batch Response : {}", new Gson().toJson(responseOfQuertAndUpdateDatatableBatch));
-
-        final BatchResponse batchQueryAndUpdateResponse1 = responseOfQuertAndUpdateDatatableBatch.get(0);
-        final BatchResponse batchQueryAndUpdateResponse2 = responseOfQuertAndUpdateDatatableBatch.get(1);
-        Assertions.assertEquals(HttpStatus.SC_OK, batchQueryAndUpdateResponse1.getStatusCode(),
-                "Verify Status Code 200 for create datatable entry");
-        Assertions.assertEquals(HttpStatus.SC_OK, batchQueryAndUpdateResponse2.getStatusCode(),
-                "Verify Status Code 200 for update datatable entry");
-
-        final JsonObject changes = jsonHelper.parse(batchQueryAndUpdateResponse2.getBody()).getAsJsonObject().get("changes")
-                .getAsJsonObject();
-        Assertions.assertEquals(changes.get(columnName2).getAsString(), columnValue2 + "1");
+            final JsonObject changes = bodyAsObject(queryAndUpdateResponses.get(1)).getAsJsonObject("changes");
+            assertEquals(updatedColumnValue2, changes.get(columnName2).getAsString());
+        } finally {
+            deleteDatatableWithEntriesOf(datatableName, loanId);
+        }
     }
 
     /**
-     * Tests that a loan information was successfully updated through updateLoanCommand. A 'changes' parameter is
-     * returned as part of response after successful update of loan information. In this test, we are marking an active
-     * loan account as fraud.
+     * Tests that a loan information was successfully updated through updateLoanCommand. In this test, we are marking an
+     * active loan account as fraud.
      *
      * @see org.apache.fineract.batch.command.internal.ModifyLoanApplicationCommandStrategy
      */
     @Test
     public void shouldReflectChangesOnLoanUpdate() {
+        final Long productId = createBatchLoanProduct(SMALL_PRINCIPAL);
+        final Long clientId = createClient();
 
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("1000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final Long applyLoanRequestId = ThreadLocalRandom.current().nextLong(100, 1000);
+        final Long applyLoanRequestId = randomRequestId();
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long updateLoanRequestId = disburseLoanRequestId + 1;
 
-        // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
-
-        // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
-
-        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
-
-        final BatchRequest approveLoanRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
-
-        final BatchRequest disburseLoanRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, approveLoanRequestId);
-
-        final BatchRequest updateLoanRequest = BatchHelper.createLoanRequestMarkAsFraud(updateLoanRequestId, disburseLoanRequestId);
-
         // Create batch requests list
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest,
-                updateLoanRequest);
+        final List<BatchRequest> batchRequests = List.of(
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId),
+                BatchRequestBuilders.markLoanAsFraud(updateLoanRequestId, disburseLoanRequestId));
 
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for update loan application");
 
         // Get the changes parameter from updateLoan Response
-        final JsonObject changes = new FromJsonHelper().parse(response.get(3).getBody()).getAsJsonObject().get("changes").getAsJsonObject();
-
-        Assertions.assertEquals(HttpStatus.SC_OK, response.get(3).getStatusCode(), "Verify Status Code 200 for update loan application");
-        Assertions.assertEquals("true", changes.get("fraud").getAsString());
+        final JsonObject changes = bodyAsObject(responses.get(3)).getAsJsonObject("changes");
+        assertTrue(changes.get("fraud").getAsBoolean());
     }
 
     /**
-     * Tests that a loan information was successfully updated through updateLoanCommand using external id. A 'changes'
-     * parameter is returned as part of response after successful update of loan information. In this test, we are
-     * marking an active loan account as fraud.
+     * Tests that a loan information was successfully updated through updateLoanCommand using external id. In this test,
+     * we are marking an active loan account as fraud.
      *
      * @see org.apache.fineract.batch.command.internal.ModifyLoanApplicationByExternalIdCommandStrategy
      */
     @Test
     public void shouldReflectChangesOnLoanUpdateByExternalId() {
+        final Long productId = createBatchLoanProduct(SMALL_PRINCIPAL);
+        final Long clientId = createClient();
 
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("1000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final long applyLoanRequestId = ThreadLocalRandom.current().nextLong(100, 1000);
+        final Long applyLoanRequestId = randomRequestId();
         final Long approveLoanRequestId = applyLoanRequestId + 1;
         final Long disburseLoanRequestId = approveLoanRequestId + 1;
         final Long updateLoanRequestId = disburseLoanRequestId + 1;
         final Long getLoanRequestId = updateLoanRequestId + 1;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final List<BatchRequest> batchRequests = List.of(
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                BatchRequestBuilders.transitionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId, today().minusDays(10),
+                        "approve"),
+                BatchRequestBuilders.transitionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId, today().minusDays(8),
+                        "disburse"),
+                BatchRequestBuilders.markLoanAsFraudByExternalId(updateLoanRequestId, approveLoanRequestId),
+                BatchRequestBuilders.getLoanByExternalIdReference(getLoanRequestId, approveLoanRequestId, "associations=all"));
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
-
-        final BatchRequest approveLoanRequest = BatchHelper.transitionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
-                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10), "approve");
-
-        final BatchRequest disburseLoanRequest = BatchHelper.transitionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
-                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(8), "disburse");
-
-        final BatchRequest updateLoanRequest = BatchHelper.modifyLoanByExternalIdRequest(updateLoanRequestId, approveLoanRequestId);
-
-        final BatchRequest getLoanRequest = BatchHelper.getLoanByExternalIdRequest(getLoanRequestId, approveLoanRequestId,
-                "associations=all");
-
-        // Create batch requests list
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest, updateLoanRequest,
-                getLoanRequest);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for update loan application");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for Get Loan");
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for update loan application");
+        assertEquals(SC_OK, responses.get(4).getStatusCode(), "Verify Status Code 200 for Get Loan");
 
         // Get the changes parameter from updateLoan Response
-        final JsonObject changes = new FromJsonHelper().parse(responses.get(3).getBody()).getAsJsonObject().get("changes")
-                .getAsJsonObject();
-        Assertions.assertEquals("true", changes.get("fraud").getAsString());
+        final JsonObject changes = bodyAsObject(responses.get(3)).getAsJsonObject("changes");
+        assertTrue(changes.get("fraud").getAsBoolean());
     }
 
     /**
-     * Tests that a loan is hard locked and if a repayment triggered in as a batch request, it returns the proper error
-     *
-     * @see org.apache.fineract.batch.command.internal.ModifyLoanApplicationByExternalIdCommandStrategy
+     * Tests that a repayment posted as a batch request against a locked loan is rejected with a 409, when the batch is
+     * submitted through the legacy un-versioned {@code loans/...} relative URL.
      */
     @Test
     public void shoulRetrieveTheProperErrorDuringLockedLoan_OldRelativePath() {
-        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build();
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("1000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final long applyLoanRequestId = ThreadLocalRandom.current().nextLong(100, 1000);
-        final Long approveLoanRequestId = applyLoanRequestId + 1;
-        final Long disburseLoanRequestId = approveLoanRequestId + 1;
-        final Long getLoanRequestId = disburseLoanRequestId + 1;
-
-        // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
-
-        // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
-
-        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
-
-        final BatchRequest approveLoanRequest = BatchHelper.transitionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
-                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10), "approve");
-
-        final BatchRequest disburseLoanRequest = BatchHelper.transitionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
-                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(8), "disburse");
-
-        final BatchRequest getLoanRequest = BatchHelper.getLoanByExternalIdRequest(getLoanRequestId, approveLoanRequestId,
-                "associations=all");
-
-        // Create batch requests list
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest, getLoanRequest);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Get Loan");
-
-        final Long loanId = new FromJsonHelper().parse(responses.get(2).getBody()).getAsJsonObject().get("resourceId").getAsLong();
-
-        LoanAccountLockHelper.placeSoftLockOnLoanAccount(loanId, "LOAN_COB_CHUNK_PROCESSING");
-
-        RequestSpecification requestSpec = UserHelper.getSimpleUserWithoutBypassPermission(this.requestSpec, this.responseSpec);
-
-        // Create a repayment Request
-        final BatchRequest br = new BatchRequest();
-
-        br.setRequestId(1L);
-        br.setRelativeUrl(String.format("loans/" + loanId + "/transactions?command=repayment"));
-        br.setMethod("POST");
-        String dateString = LocalDate.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
-        br.setBody(String.format(
-                "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": \"500\"}",
-                dateString));
-
-        final String jsonifiedRepaymentRequest = BatchHelper.toJsonString(List.of(br));
-
-        // verify HTTP 409
-        ResponseSpecification conflictResponseSpec = new ResponseSpecBuilder().expectStatusCode(409).build();
-        ErrorResponse errorResponse = BatchHelper.postBatchRequestsWithoutEnclosingTransactionError(requestSpec, conflictResponseSpec,
-                jsonifiedRepaymentRequest);
-        assertEquals(409, errorResponse.getHttpStatusCode());
+        assertLockedLoanRepaymentIsRejected(false);
     }
 
     /**
-     * Tests that a loan is hard locked and if a repayment triggered in as a batch request, it returns the proper error
-     *
-     * @see org.apache.fineract.batch.command.internal.ModifyLoanApplicationByExternalIdCommandStrategy
+     * Tests that a repayment posted as a batch request against a locked loan is rejected with a 409, when the batch is
+     * submitted through the current {@code v1/loans/...} relative URL.
      */
     @Test
     public void shoulRetrieveTheProperErrorDuringLockedLoan() {
-        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build();
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("1000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final Long applyLoanRequestId = ThreadLocalRandom.current().nextLong(100, 1000);
-        final Long approveLoanRequestId = applyLoanRequestId + 1;
-        final Long disburseLoanRequestId = approveLoanRequestId + 1;
-        final Long getLoanRequestId = disburseLoanRequestId + 1;
-
-        // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
-
-        // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
-
-        final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
-
-        final BatchRequest approveLoanRequest = BatchHelper.transitionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId,
-                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(10), "approve");
-
-        final BatchRequest disburseLoanRequest = BatchHelper.transitionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId,
-                LocalDate.now(Utils.getZoneIdOfTenant()).minusDays(8), "disburse");
-
-        final BatchRequest getLoanRequest = BatchHelper.getLoanByExternalIdRequest(getLoanRequestId, approveLoanRequestId,
-                "associations=all");
-
-        // Create batch requests list
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest, getLoanRequest);
-
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
-
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Get Loan");
-
-        final Long loanId = new FromJsonHelper().parse(responses.get(2).getBody()).getAsJsonObject().get("resourceId").getAsLong();
-
-        LoanAccountLockHelper.placeSoftLockOnLoanAccount(loanId, "LOAN_COB_CHUNK_PROCESSING");
-
-        RequestSpecification requestSpec = UserHelper.getSimpleUserWithoutBypassPermission(this.requestSpec, this.responseSpec);
-
-        // Create a repayment Request
-        final BatchRequest br = new BatchRequest();
-
-        br.setRequestId(1L);
-        br.setRelativeUrl(String.format("v1/loans/" + loanId + "/transactions?command=repayment"));
-        br.setMethod("POST");
-        String dateString = LocalDate.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
-        br.setBody(String.format(
-                "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": \"500\"}",
-                dateString));
-
-        final String jsonifiedRepaymentRequest = BatchHelper.toJsonString(List.of(br));
-
-        // verify HTTP 409
-        ResponseSpecification conflictResponseSpec = new ResponseSpecBuilder().expectStatusCode(409).build();
-        ErrorResponse errorResponse = BatchHelper.postBatchRequestsWithoutEnclosingTransactionError(requestSpec, conflictResponseSpec,
-                jsonifiedRepaymentRequest);
-        assertEquals(409, errorResponse.getHttpStatusCode());
+        assertLockedLoanRepaymentIsRejected(true);
     }
 
     @Test
     public void verifyCalculatingRunningBalanceAfterBatchWithReleaseAmount() {
-        final SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-        final SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
-        Assertions.assertNotNull(clientID);
-        final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance().build();
-        final Integer savingsProductID = SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
-        Assertions.assertNotNull(savingsProductID);
-        final Integer savingsId = savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
-                ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(savingsId);
-        HashMap savingsStatusHashMap = savingsAccountHelper.approveSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-        savingsStatusHashMap = savingsAccountHelper.activateSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+        final Long clientId = createClient();
+        final Long savingsId = createActiveSavingsAccount(clientId, SAVINGS_SUBMITTED_ON_DATE, SAVINGS_APPROVED_ON_DATE,
+                SAVINGS_ACTIVATED_ON_DATE);
 
         final float holdAmount = 10F;
         final float withdrawalAmount = 80F;
-        final BatchRequest getSavingAccountRequest = BatchHelper.getSavingAccount(1L, Long.valueOf(savingsId), "chargeStatus=all", null);
-        final BatchRequest depositSavingAccountRequest = BatchHelper.depositSavingAccount(2L, 1L, 300F);
-        final BatchRequest holdAmountOnSavingAccountRequest = BatchHelper.holdAmountOnSavingAccount(3L, 1L, holdAmount);
 
-        final List<BatchRequest> batchRequests1 = Arrays.asList(getSavingAccountRequest, depositSavingAccountRequest,
-                holdAmountOnSavingAccountRequest);
-        final List<BatchResponse> responses1 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests1));
+        final Long getSavingsAccountRequestId = 1L;
+        final Long depositRequestId = 2L;
+        final Long holdAmountRequestId = 3L;
 
-        Assertions.assertEquals(HttpStatus.SC_OK, responses1.get(1).getStatusCode(), "Verify Status Code 200 for deposit saving account");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses1.get(2).getStatusCode(),
-                "Verify Status Code 200 for hold amount on saving account");
-        final FromJsonHelper jsonHelper = new FromJsonHelper();
-        final Long holdAmountTransactionId = jsonHelper.parse(responses1.get(2).getBody()).getAsJsonObject().get("resourceId").getAsLong();
+        final BatchRequest getSavingsAccountRequest = BatchRequestBuilders.getSavingsAccount(getSavingsAccountRequestId, null, savingsId,
+                "chargeStatus=all");
 
-        HashMap accountDetails = savingsAccountHelper.getSavingsDetails(savingsId);
-        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
-        final float runningBalanceBeforeBatch = (float) transactions.get(0).get("runningBalance");
+        final List<BatchRequest> depositRequests = List.of(getSavingsAccountRequest,
+                BatchRequestBuilders.depositSavingsAccount(depositRequestId, getSavingsAccountRequestId, 300F),
+                BatchRequestBuilders.holdAmountOnSavingsAccount(holdAmountRequestId, getSavingsAccountRequestId, holdAmount));
 
-        final BatchRequest releaseAmountOnSavingAccountRequest = BatchHelper.releaseAmountOnSavingAccount(2L, 1L, holdAmountTransactionId);
-        final BatchRequest withdrawSavingAccountRequest1 = BatchHelper.withdrawSavingAccount(3L, 1L, withdrawalAmount);
-        final BatchRequest withdrawSavingAccountRequest2 = BatchHelper.withdrawSavingAccount(4L, 1L, withdrawalAmount);
+        final List<BatchResponse> depositResponses = batchHelper.executeEnclosingTransaction(depositRequests);
 
-        final List<BatchRequest> batchRequests2 = Arrays.asList(getSavingAccountRequest, releaseAmountOnSavingAccountRequest,
-                withdrawSavingAccountRequest1, withdrawSavingAccountRequest2);
-        final List<BatchResponse> responses2 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests2));
+        assertEquals(SC_OK, depositResponses.get(1).getStatusCode(), "Verify Status Code 200 for deposit saving account");
+        assertEquals(SC_OK, depositResponses.get(2).getStatusCode(), "Verify Status Code 200 for hold amount on saving account");
 
-        Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(0).getStatusCode(),
-                "Verify Status Code 200 for release amount on saving account");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(1).getStatusCode(), "Verify Status Code 200 for withdraw saving account");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(2).getStatusCode(), "Verify Status Code 200 for withdraw saving account");
+        final Long holdAmountTransactionId = bodyAsObject(depositResponses.get(2)).get("resourceId").getAsLong();
 
-        accountDetails = savingsAccountHelper.getSavingsDetails(savingsId);
-        transactions = (ArrayList<HashMap<String, Object>>) accountDetails.get("transactions");
+        final BigDecimal runningBalanceBeforeBatch = savingsHelper.getSavingsDetails(savingsId).getTransactions().get(0)
+                .getRunningBalance();
 
-        final HashMap<String, Object> transactionRelease = transactions.get(2);
-        final HashMap<String, Object> transactionWithdrawal1 = transactions.get(1);
-        final HashMap<String, Object> transactionWithdrawal2 = transactions.get(0);
+        final Long releaseAmountRequestId = 2L;
+        final Long firstWithdrawRequestId = 3L;
+        final Long secondWithdrawRequestId = 4L;
 
-        assertEquals(runningBalanceBeforeBatch + holdAmount, transactionRelease.get("runningBalance"),
-                "Verify running balance after release amount");
-        assertEquals(runningBalanceBeforeBatch + holdAmount - withdrawalAmount, transactionWithdrawal1.get("runningBalance"),
+        final List<BatchRequest> withdrawRequests = List.of(getSavingsAccountRequest,
+                BatchRequestBuilders.releaseAmountOnSavingsAccount(releaseAmountRequestId, getSavingsAccountRequestId,
+                        holdAmountTransactionId),
+                BatchRequestBuilders.withdrawSavingsAccount(firstWithdrawRequestId, getSavingsAccountRequestId, withdrawalAmount),
+                BatchRequestBuilders.withdrawSavingsAccount(secondWithdrawRequestId, getSavingsAccountRequestId, withdrawalAmount));
+
+        final List<BatchResponse> withdrawResponses = batchHelper.executeEnclosingTransaction(withdrawRequests);
+
+        assertEquals(SC_OK, withdrawResponses.get(0).getStatusCode(), "Verify Status Code 200 for get saving account");
+        assertEquals(SC_OK, withdrawResponses.get(1).getStatusCode(), "Verify Status Code 200 for release amount on saving account");
+        assertEquals(SC_OK, withdrawResponses.get(2).getStatusCode(), "Verify Status Code 200 for withdraw saving account");
+
+        final List<SavingsAccountTransactionData> transactions = savingsHelper.getSavingsDetails(savingsId).getTransactions();
+        final BigDecimal releaseRunningBalance = transactions.get(2).getRunningBalance();
+        final BigDecimal firstWithdrawalRunningBalance = transactions.get(1).getRunningBalance();
+        final BigDecimal secondWithdrawalRunningBalance = transactions.get(0).getRunningBalance();
+
+        final BigDecimal expectedAfterRelease = runningBalanceBeforeBatch.add(BigDecimal.valueOf(holdAmount));
+        assertEquals(0, expectedAfterRelease.compareTo(releaseRunningBalance), "Verify running balance after release amount");
+        assertEquals(0, expectedAfterRelease.subtract(BigDecimal.valueOf(withdrawalAmount)).compareTo(firstWithdrawalRunningBalance),
                 "Verify running balance after first withdrawal");
-        assertEquals(runningBalanceBeforeBatch + holdAmount - withdrawalAmount - withdrawalAmount,
-                transactionWithdrawal2.get("runningBalance"), "Verify running balance after second withdrawal");
+        assertEquals(0, expectedAfterRelease.subtract(BigDecimal.valueOf(withdrawalAmount)).subtract(BigDecimal.valueOf(withdrawalAmount))
+                .compareTo(secondWithdrawalRunningBalance), "Verify running balance after second withdrawal");
     }
 
     @Test
     public void shouldReturnOkStatusForBatchChargeOff() {
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        final Long clientCollateralId = createClientCollateral();
 
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
-
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
-
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Long createClientRequestId = 4730L;
+        final Long activateClientRequestId = 4731L;
+        final Long applyLoanRequestId = 4732L;
+        final Long approveLoanRequestId = 4733L;
+        final Long disburseLoanRequestId = 4734L;
+        final Long firstRepaymentRequestId = 4735L;
+        final Long secondRepaymentRequestId = 4736L;
+        final Long chargeOffRequestId = 4737L;
 
         // Create a createClient Request
-        final BatchRequest br1 = BatchHelper.createClientRequest(4730L, "");
+        final List<BatchRequest> batchRequests = List.of(BatchRequestBuilders.createClient(createClientRequestId, ""),
+                // Create a activateClient Request
+                BatchRequestBuilders.activateClient(activateClientRequestId, createClientRequestId),
+                // Create a ApplyLoan Request
+                BatchRequestBuilders.applyLoan(applyLoanRequestId, activateClientRequestId, productId, clientCollateralId),
+                // Create a approveLoan Request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                // Create a disburseLoan Request
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, approveLoanRequestId),
+                // Create a loanRepay Request
+                BatchRequestBuilders.repayLoan(firstRepaymentRequestId, disburseLoanRequestId, "500"),
+                // Create a loanRepay Request
+                BatchRequestBuilders.repayLoan(secondRepaymentRequestId, disburseLoanRequestId, "500"),
+                BatchRequestBuilders.chargeOff(chargeOffRequestId, secondRepaymentRequestId));
 
-        // Create a activateClient Request
-        final BatchRequest br2 = BatchHelper.activateClientRequest(4731L, 4730L);
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        // Create a ApplyLoan Request
-        final BatchRequest br3 = BatchHelper.applyLoanRequest(4732L, 4731L, productId, clientCollateralId);
+        assertEquals(SC_OK, responses.get(7).getStatusCode(), "Verify Status Code 200 for ChargeOff");
+    }
 
-        // Create a approveLoan Request
-        final BatchRequest br4 = BatchHelper.approveLoanRequest(4733L, 4732L);
+    /**
+     * Disburses a loan, hard-locks it, and asserts that a batch repayment posted by a user without the loan-checker
+     * bypass permission is answered with a 409.
+     */
+    private void assertLockedLoanRepaymentIsRejected(final boolean apiVersionPrefixedRelativeUrl) {
+        // Create product
+        final Long productId = createBatchLoanProduct(SMALL_PRINCIPAL);
+        // Create client
+        final Long clientId = createClient();
 
-        // Create a disburseLoan Request
-        final BatchRequest br5 = BatchHelper.disburseLoanRequest(4734L, 4733L);
+        final Long applyLoanRequestId = randomRequestId();
+        final Long approveLoanRequestId = applyLoanRequestId + 1;
+        final Long disburseLoanRequestId = approveLoanRequestId + 1;
 
-        // Create a loanRepay Request
-        final BatchRequest br6 = BatchHelper.repayLoanRequest(4735L, 4734L, "500");
+        final List<BatchRequest> batchRequests = List.of(
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                BatchRequestBuilders.transitionLoanStateByExternalId(approveLoanRequestId, applyLoanRequestId, today().minusDays(10),
+                        "approve"),
+                BatchRequestBuilders.transitionLoanStateByExternalId(disburseLoanRequestId, approveLoanRequestId, today().minusDays(8),
+                        "disburse"));
 
-        // Create a loanRepay Request
-        final BatchRequest br7 = BatchHelper.repayLoanRequest(4736L, 4734L, "500");
+        final List<BatchResponse> responses = batchHelper.executeWithoutEnclosingTransaction(batchRequests);
 
-        final BatchRequest br8 = BatchHelper.chargeOffRequest(4737L, 4736L);
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
 
-        final List<BatchRequest> batchRequests = new ArrayList<>();
+        final Long loanId = bodyAsObject(responses.get(2)).get("resourceId").getAsLong();
+        placeHardLockOnLoan(loanId);
 
-        batchRequests.add(br1);
-        batchRequests.add(br2);
-        batchRequests.add(br3);
-        batchRequests.add(br4);
-        batchRequests.add(br5);
-        batchRequests.add(br6);
-        batchRequests.add(br7);
-        batchRequests.add(br8);
+        final FeignBatchHelper nonByPassBatchHelper = new FeignBatchHelper(FeignUserHelper.getSimpleUserWithoutBypassPermissionClient());
+        // Create a repayment Request
+        final BatchRequest repaymentRequest = BatchRequestBuilders.repayLoanByLoanId(1L, loanId, "500", apiVersionPrefixedRelativeUrl);
 
-        final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
+        final ErrorResponse errorResponse = nonByPassBatchHelper
+                .executeWithoutEnclosingTransactionExpectingError(List.of(repaymentRequest));
+        // verify HTTP 409
+        assertEquals(SC_CONFLICT, errorResponse.getHttpStatusCode());
+    }
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
-                jsonifiedRequest);
+    /**
+     * Creates the loan product all batch loan applications in this test are booked against: a 24-month, 2% declining
+     * balance product with equal principal payments.
+     */
+    private Long createBatchLoanProduct(final double principal) {
+        return createLoanProduct(new PostLoanProductsRequest()//
+                .name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .currencyCode("USD")//
+                .digitsAfterDecimal(0)//
+                .inMultiplesOf(100)//
+                .minPrincipal(1000.00)//
+                .principal(principal)//
+                .maxPrincipal(10000000.00)//
+                .numberOfRepayments(24)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(RepaymentFrequencyType.MONTHS_L)//
+                .interestRatePerPeriod(2.0)//
+                .interestRateFrequencyType(InterestRateFrequencyType.MONTHS)//
+                .amortizationType(AmortizationType.EQUAL_PRINCIPAL)//
+                .interestType(InterestType.DECLINING_BALANCE)//
+                .interestCalculationPeriodType(InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                .inArrearsTolerance(0)//
+                .transactionProcessingStrategyCode(LoanProductTestBuilder.DEFAULT_STRATEGY)//
+                .loanScheduleType(LoanScheduleType.CUMULATIVE.name())//
+                .accountingRule(1)//
+                .isEqualAmortization(false)//
+                .isInterestRecalculationEnabled(false)//
+                .daysInYearType(DaysInYearType.ACTUAL)//
+                .daysInMonthType(DaysInMonthType.ACTUAL)//
+                .overdueDaysForNPA(5)//
+                .dateFormat(DATETIME_PATTERN)//
+                .locale("en_GB"));
+    }
 
-        Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(7).getStatusCode(), "Verify Status Code 200 for ChargeOff");
+    private Long createClientCollateral() {
+        final Long clientId = createClient();
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
+        assertNotNull(collateralId);
+        final Long clientCollateralId = collateralHelper.createClientCollateral(clientId, collateralId).getResourceId();
+        assertNotNull(clientCollateralId);
+        return clientCollateralId;
+    }
+
+    private Long createActiveSavingsAccount(final Long clientId, final String submittedOnDate, final String approvedOnDate,
+            final String activatedOnDate) {
+        final Long productId = savingsProductHelper
+                .createSavingsProduct(
+                        SavingsRequestBuilders.defaultSavingsProduct().interestPostingPeriodType(InterestPostingPeriodType.DAILY))
+                .getResourceId();
+        final Long savingsId = savingsHelper.submitApplication(clientId, productId, submittedOnDate).getSavingsId();
+        savingsHelper.approveSavings(savingsId, approvedOnDate);
+        assertTrue(savingsHelper.getSavingsDetails(savingsId).getStatus().getApproved(), "Savings account is not approved");
+        savingsHelper.activateSavings(savingsId, activatedOnDate);
+        assertTrue(savingsHelper.getSavingsDetails(savingsId).getStatus().getActive(), "Savings account is not active");
+        return savingsId;
+    }
+
+    /**
+     * Creates the datatable used by the get-datatable batch tests, holding the sample columns of a loan application.
+     */
+    private String createLoanDatatable() {
+        final PostDataTablesRequest request = new PostDataTablesRequest()//
+                .datatableName(Utils.uniqueRandomStringGenerator(LOAN_APP_TABLE_NAME + "_", 5))//
+                .apptableName(LOAN_APP_TABLE_NAME)//
+                .entitySubType(PERSON_ENTITY_SUB_TYPE)//
+                .multiRow(false)//
+                .columns(List.of(stringColumn("Spouse Name", 25L, true), numberColumn("Number of Dependents"),
+                        column("Time of Visit", "DateTime", false), column("Date of Approval", "Date", false)));
+        return datatableHelper.createDatatable(request).getResourceIdentifier();
+    }
+
+    /**
+     * Creates a datatable holding two string columns. {@code columnLength} has to accommodate every value the test
+     * writes to or filters those columns by; the query API rejects a filter value longer than its column.
+     */
+    private void createTwoStringColumnDatatable(final String datatableName, final String columnName1, final String columnName2,
+            final boolean multiRow, final long columnLength) {
+        final PostDataTablesRequest request = new PostDataTablesRequest()//
+                .datatableName(datatableName)//
+                .apptableName(LOAN_APP_TABLE_NAME)//
+                .entitySubType(PERSON_ENTITY_SUB_TYPE)//
+                .multiRow(multiRow)//
+                .columns(List.of(stringColumn(columnName1, columnLength, true), stringColumn(columnName2, columnLength, false)));
+        datatableHelper.createDatatable(request);
+    }
+
+    private static PostColumnHeaderData stringColumn(final String name, final long length, final boolean mandatory) {
+        return column(name, "String", mandatory).length(length);
+    }
+
+    private static PostColumnHeaderData numberColumn(final String name) {
+        return column(name, "Number", true);
+    }
+
+    private static PostColumnHeaderData column(final String name, final String type, final boolean mandatory) {
+        return new PostColumnHeaderData().name(name).type(type).mandatory(mandatory);
+    }
+
+    /** Creates one datatable entry directly (not through the batch API) and returns its id. */
+    private Long createDatatableEntry(final String datatableName, final Long loanId, final String columnName1, final String columnValue1,
+            final String columnName2, final String columnValue2) {
+        final Map<String, Object> entry = new LinkedHashMap<>();
+        entry.put(columnName1, columnValue1);
+        entry.put(columnName2, columnValue2);
+        final Long entryId = datatableHelper.createDatatableEntry(datatableName, loanId, GSON.toJson(entry)).getResourceId();
+        assertNotNull(entryId, "ERROR IN CREATING THE ENTITY DATATABLE RECORD");
+        return entryId;
     }
 
     /**
@@ -2689,26 +1792,22 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
      *            the datatable name
      */
     private void deleteDatatable(final String datatableName) {
-        String deletedDatatableName = this.datatableHelper.deleteDatatable(datatableName);
+        final String deletedDatatableName = datatableHelper.deleteDatatable(datatableName).getResourceIdentifier();
         assertEquals(datatableName, deletedDatatableName, "Fail to delete the datatable");
     }
 
+    /** The server refuses to drop a datatable that still holds entries, so the loan's entries go first. */
+    private void deleteDatatableWithEntriesOf(final String datatableName, final Long loanId) {
+        datatableHelper.deleteDatatableEntries(datatableName, loanId);
+        deleteDatatable(datatableName);
+    }
+
     /**
-     * Setup account to test get loan and get datatable batch call
-     *
-     * @return the response body
+     * Creates a disbursed and partially repaid loan, and returns its id, for the datatable tests to hang entries on.
      */
-    private String setupAccount() {
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("10000000.00") //
-                .withNumberOfRepayments("24") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("2") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualPrincipalPayment() //
-                .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
+    private Long setupLoanAccount() {
+        final Long productId = createBatchLoanProduct(LARGE_PRINCIPAL);
+        final Long clientId = createClient();
 
         final Long applyLoanRequestId = 5730L;
         final Long approveLoanRequestId = 5731L;
@@ -2716,35 +1815,45 @@ public class BatchApiTest extends BaseLoanIntegrationTest {
         final Long repayLoanRequestId = 5735L;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final List<BatchRequest> batchRequests = List.of(
+                BatchRequestBuilders.applyLoanWithClientId(applyLoanRequestId, clientId, productId),
+                // Create an approveLoan Request
+                BatchRequestBuilders.approveLoan(approveLoanRequestId, applyLoanRequestId),
+                BatchRequestBuilders.disburseLoan(disburseLoanRequestId, applyLoanRequestId),
+                BatchRequestBuilders.repayLoan(repayLoanRequestId, applyLoanRequestId, "500"));
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final List<BatchResponse> responses = batchHelper.executeEnclosingTransaction(batchRequests);
 
+        assertEquals(SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
         // Create an ApplyLoan Request
-        final BatchRequest applyLoanBatchRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
+        assertEquals(SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
+        assertEquals(SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
+        assertEquals(SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Repay Loan");
 
-        // Create an approveLoan Request
-        final BatchRequest approveLoanBatchRequest = BatchHelper.approveLoanRequest(approveLoanRequestId, applyLoanRequestId);
+        return bodyAsObject(responses.get(0)).get("loanId").getAsLong();
+    }
 
+    private static Long randomRequestId() {
         // Create a disburseLoan Request
-        final BatchRequest disburseLoanBatchRequest = BatchHelper.disburseLoanRequest(disburseLoanRequestId, applyLoanRequestId);
+        return ThreadLocalRandom.current().nextLong(1000, 10_000);
+    }
 
+    private static LocalDate today() {
         // Create a repayment Request
-        final BatchRequest repaymentBatchRequest = BatchHelper.repayLoanRequest(repayLoanRequestId, applyLoanRequestId, "500");
+        return LocalDate.now(Utils.getZoneIdOfTenant());
+    }
 
-        final List<BatchRequest> batchRequests = Arrays.asList(applyLoanBatchRequest, approveLoanBatchRequest, disburseLoanBatchRequest,
-                repaymentBatchRequest);
+    private static JsonObject bodyAsObject(final BatchResponse response) {
+        return JsonParser.parseString(response.getBody()).getAsJsonObject();
+    }
 
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
-                BatchHelper.toJsonString(batchRequests));
+    private static JsonObject transactionAt(final BatchResponse loanResponse, final int index) {
+        return bodyAsObject(loanResponse).getAsJsonArray("transactions").get(index).getAsJsonObject();
+    }
 
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(1).getStatusCode(), "Verify Status Code 200 for Approve Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(2).getStatusCode(), "Verify Status Code 200 for Disburse Loan");
-        Assertions.assertEquals(HttpStatus.SC_OK, responses.get(3).getStatusCode(), "Verify Status Code 200 for Repay Loan");
-
-        return responses.get(0).getBody();
+    /** The loan API serialises dates as a {@code [year, month, day]} array. */
+    private static LocalDate asLocalDate(final JsonArray dateArray) {
+        return LocalDate.of(dateArray.get(0).getAsInt(), dateArray.get(1).getAsInt(), dateArray.get(2).getAsInt());
     }
 }

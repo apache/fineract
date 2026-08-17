@@ -91,6 +91,8 @@ final class ReportsApiResourceSwagger {
         public String description;
         @Schema(example = "select 'very good sql' as AComment")
         public String reportSql;
+        @Schema(example = "true")
+        public Boolean useReport;
         public Collection<ReportParameterData> reportParameters;
     }
 

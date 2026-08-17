@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.CapitalizedIncomeDetails;
 import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.GetCodesResponse;
@@ -39,23 +40,18 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.LoanCapitalizedIncomeData;
 import org.apache.fineract.client.models.PostClassificationToIncomeAccountMappings;
-import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostCodeValueDataResponse;
 import org.apache.fineract.client.models.PostCodeValuesDataRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.integrationtests.common.BusinessStepHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.ExternalAssetOwnerHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalAssetOwnerHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.common.externalevents.LoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.LoanBusinessEvent;
 import org.apache.fineract.integrationtests.common.externalevents.LoanTransactionBusinessEvent;
@@ -64,37 +60,36 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
+public class LoanCapitalizedIncomeTest extends FeignLoanTestBase {
 
     @BeforeAll
     public void setup() {
-        new BusinessStepHelper().updateSteps("LOAN_CLOSE_OF_BUSINESS", "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION",
-                "CHECK_LOAN_REPAYMENT_DUE", "CHECK_LOAN_REPAYMENT_OVERDUE", "CHECK_DUE_INSTALLMENTS", "UPDATE_LOAN_ARREARS_AGING",
-                "ADD_PERIODIC_ACCRUAL_ENTRIES", "ACCRUAL_ACTIVITY_POSTING", "CAPITALIZED_INCOME_AMORTIZATION",
-                "LOAN_INTEREST_RECALCULATION", "EXTERNAL_ASSET_OWNER_TRANSFER");
+        new FeignBusinessStepHelper(FineractFeignClientHelper.getFineractFeignClient()).updateSteps("LOAN_CLOSE_OF_BUSINESS",
+                "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION", "CHECK_LOAN_REPAYMENT_DUE",
+                "CHECK_LOAN_REPAYMENT_OVERDUE", "CHECK_DUE_INSTALLMENTS", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
+                "ACCRUAL_ACTIVITY_POSTING", "CAPITALIZED_INCOME_AMORTIZATION", "LOAN_INTEREST_RECALCULATION",
+                "EXTERNAL_ASSET_OWNER_TRANSFER");
     }
 
     @Test
     public void testLoanCapitalizedIncomeAmortization() {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
-            loanTransactionHelper.addCapitalizedIncome(loanId, "1 January 2024", 50.0);
+            addCapitalizedIncomeTransaction(loanId, "1 January 2024", 50.0);
         });
         runAt("2 January 2024", () -> {
             Long loanId = loanIdRef.get();
@@ -105,13 +100,13 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     transaction(50.0, "Capitalized Income", "01 January 2024"), //
                     transaction(0.55, "Capitalized Income Amortization", "01 January 2024") //
             );
-            final LoanCapitalizedIncomeData loanCapitalizedIncomeData = loanTransactionHelper.fetchLoanCapitalizedIncomeData(loanId);
+            final LoanCapitalizedIncomeData loanCapitalizedIncomeData = fetchLoanCapitalizedIncomeData(loanId);
             assertTrue(loanCapitalizedIncomeData.getCapitalizedIncomeData().size() > 0);
             CapitalizedIncomeDetails capitalizedIncomeData = loanCapitalizedIncomeData.getCapitalizedIncomeData().get(0);
             assertNotNull(capitalizedIncomeData);
             assertEquals(50.0, Utils.getDoubleValue(capitalizedIncomeData.getAmount()));
             assertEquals(0.55, Utils.getDoubleValue(capitalizedIncomeData.getAmortizedAmount()));
-            final List<CapitalizedIncomeDetails> capitalizedIncomeDetails = loanTransactionHelper.fetchCapitalizedIncomeDetails(loanId);
+            final List<CapitalizedIncomeDetails> capitalizedIncomeDetails = fetchCapitalizedIncomeDetails(loanId);
             assertNotNull(capitalizedIncomeDetails);
             assertTrue(loanCapitalizedIncomeData.getCapitalizedIncomeData().size() == capitalizedIncomeDetails.size());
             capitalizedIncomeData = capitalizedIncomeDetails.get(0);
@@ -130,7 +125,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     transaction(0.03, "Accrual", "02 January 2024"), //
                     transaction(0.55, "Capitalized Income Amortization", "02 January 2024") //
             );
-            final List<CapitalizedIncomeDetails> capitalizedIncomeDetails = loanTransactionHelper.fetchCapitalizedIncomeDetails(loanId);
+            final List<CapitalizedIncomeDetails> capitalizedIncomeDetails = fetchCapitalizedIncomeDetails(loanId);
             assertTrue(capitalizedIncomeDetails.size() > 0);
             final CapitalizedIncomeDetails capitalizedIncomeData = capitalizedIncomeDetails.get(0);
             assertNotNull(capitalizedIncomeData);
@@ -139,16 +134,16 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             assertEquals(48.90, Utils.getDoubleValue(capitalizedIncomeData.getUnrecognizedAmount()));
 
             verifyJournalEntries(loanId, //
-                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100, fundSource, "CREDIT"), //
-                    journalEntry(50, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT"), //
-                    journalEntry(0.55, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(0.55, feeIncomeAccount, "CREDIT"), //
-                    journalEntry(0.03, interestReceivableAccount, "DEBIT"), //
-                    journalEntry(0.03, interestIncomeAccount, "CREDIT"), //
-                    journalEntry(0.55, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(0.55, feeIncomeAccount, "CREDIT") //
+                    journalEntry(100, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(100, getAccounts().getFundSource(), "CREDIT"), //
+                    journalEntry(50, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(50, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT"), //
+                    journalEntry(0.55, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(0.55, getAccounts().getFeeIncomeAccount(), "CREDIT"), //
+                    journalEntry(0.03, getAccounts().getInterestReceivableAccount(), "DEBIT"), //
+                    journalEntry(0.03, getAccounts().getInterestIncomeAccount(), "CREDIT"), //
+                    journalEntry(0.55, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(0.55, getAccounts().getFeeIncomeAccount(), "CREDIT") //
             );
         });
     }
@@ -158,24 +153,21 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE).overAppliedNumber(3));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE).overAppliedNumber(3));
 
         runAt("1 April 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(300), "1 January 2024");
-            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
-                    "1 January 2024", 50.0);
+            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = addCapitalizedIncomeTransaction(loanId, "1 January 2024", 50.0);
 
             CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
                     () -> disburseLoan(loanId, BigDecimal.valueOf(200), "1 February 2024"));
@@ -190,15 +182,14 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         final GetCodesResponse code = codeHelper.retrieveCodeByName(LoanTransactionApiConstants.CAPITALIZED_INCOME_CLASSIFICATION_CODE);
         final PostCodeValueDataResponse classificationCode = codeHelper.createCodeValue(code.getId(),
@@ -206,23 +197,22 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final Long classificationId = classificationCode.getSubResourceId();
 
         runAt("1 April 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
-            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
-                    "1 January 2024", 50.0, classificationId);
+            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = addCapitalizedIncomeTransaction(loanId, "1 January 2024", 50.0,
+                    classificationId);
             capitalizedIncomeIdRef.set(capitalizedIncomeResponse.getResourceId());
 
             // Validate Loan Transaction classification set value
-            GetLoansLoanIdTransactionsTransactionIdResponse transactionDetails = loanTransactionHelper.getLoanTransactionDetails(loanId,
+            GetLoansLoanIdTransactionsTransactionIdResponse transactionDetails = getLoanTransactionDetails(loanId,
                     capitalizedIncomeIdRef.get());
             assertNotNull(transactionDetails.getClassification());
             assertEquals(classificationId, transactionDetails.getClassification().getId());
 
-            PostLoansLoanIdTransactionsResponse capitalizedIncomeAdjustmentResponse = loanTransactionHelper
-                    .capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "1 April 2024", 50.0);
+            PostLoansLoanIdTransactionsResponse capitalizedIncomeAdjustmentResponse = capitalizedIncomeAdjustment(loanId,
+                    capitalizedIncomeIdRef.get(), "1 April 2024", 50.0);
             assertNotNull(capitalizedIncomeAdjustmentResponse.getLoanId());
             assertNotNull(capitalizedIncomeAdjustmentResponse.getClientId());
             assertNotNull(capitalizedIncomeAdjustmentResponse.getOfficeId());
@@ -232,7 +222,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     transaction(50.0, "Capitalized Income", "01 January 2024"), //
                     transaction(50.0, "Capitalized Income Adjustment", "01 April 2024") //
             );
-            final List<CapitalizedIncomeDetails> capitalizedIncomeDetails = loanTransactionHelper.fetchCapitalizedIncomeDetails(loanId);
+            final List<CapitalizedIncomeDetails> capitalizedIncomeDetails = fetchCapitalizedIncomeDetails(loanId);
             assertTrue(capitalizedIncomeDetails.size() > 0);
             final CapitalizedIncomeDetails capitalizedIncomeData = capitalizedIncomeDetails.get(0);
             assertNotNull(capitalizedIncomeData);
@@ -240,18 +230,17 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             assertEquals(50.0, Utils.getDoubleValue(capitalizedIncomeData.getAmountAdjustment()));
 
             verifyJournalEntries(loanId, //
-                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100, fundSource, "CREDIT"), //
-                    journalEntry(50, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT"), //
-                    journalEntry(50.0, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(49.71, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(0.29, interestReceivableAccount, "CREDIT") //
+                    journalEntry(100, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(100, getAccounts().getFundSource(), "CREDIT"), //
+                    journalEntry(50, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(50, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT"), //
+                    journalEntry(50.0, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(49.71, getAccounts().getLoansReceivableAccount(), "CREDIT"), //
+                    journalEntry(0.29, getAccounts().getInterestReceivableAccount(), "CREDIT") //
             );
 
             // Validate Loan Transaction classification Inherit
-            transactionDetails = loanTransactionHelper.getLoanTransactionDetails(loanId,
-                    capitalizedIncomeAdjustmentResponse.getResourceId());
+            transactionDetails = getLoanTransactionDetails(loanId, capitalizedIncomeAdjustmentResponse.getResourceId());
             assertNotNull(transactionDetails.getClassification());
             assertEquals(classificationId, transactionDetails.getClassification().getId());
         });
@@ -262,41 +251,37 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("3 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
-            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
-                    "3 January 2024", 50.0);
+            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = addCapitalizedIncomeTransaction(loanId, "3 January 2024", 50.0);
             capitalizedIncomeIdRef.set(capitalizedIncomeResponse.getResourceId());
 
             // Amount more than remaining
             Assertions.assertThrows(RuntimeException.class,
-                    () -> loanTransactionHelper.capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "3 January 2024", 60.0));
+                    () -> capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "3 January 2024", 60.0));
 
-            loanTransactionHelper.capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "3 January 2024", 30.0);
+            capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "3 January 2024", 30.0);
             Assertions.assertThrows(RuntimeException.class,
-                    () -> loanTransactionHelper.capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "3 January 2024", 30.0));
+                    () -> capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "3 January 2024", 30.0));
 
             // Capitalized income transaction with given id doesn't exist for this loan
-            Assertions.assertThrows(RuntimeException.class,
-                    () -> loanTransactionHelper.capitalizedIncomeAdjustment(loanId, 1L, "3 January 2024", 30.0));
+            Assertions.assertThrows(RuntimeException.class, () -> capitalizedIncomeAdjustment(loanId, 1L, "3 January 2024", 30.0));
 
             // Cannot be earlier than capitalized income transaction
             Assertions.assertThrows(RuntimeException.class,
-                    () -> loanTransactionHelper.capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "2 January 2024", 30.0));
+                    () -> capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "2 January 2024", 30.0));
         });
     }
 
@@ -306,24 +291,22 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> capitalizedIncomeIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeAdjustmentTransactionIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
-            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
-                    "1 January 2024", 100.0);
+            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = addCapitalizedIncomeTransaction(loanId, "1 January 2024",
+                    100.0);
             capitalizedIncomeIdRef.set(capitalizedIncomeResponse.getResourceId());
         });
         runAt("2 January 2024", () -> {
@@ -349,20 +332,20 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             );
 
             verifyJournalEntries(loanId, //
-                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100, fundSource, "CREDIT"), //
-                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100, deferredIncomeLiabilityAccount, "CREDIT"), //
-                    journalEntry(1.10, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(1.10, feeIncomeAccount, "CREDIT"), //
-                    journalEntry(0.04, interestReceivableAccount, "DEBIT"), //
-                    journalEntry(0.04, interestIncomeAccount, "CREDIT"), //
-                    journalEntry(1.10, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(1.10, feeIncomeAccount, "CREDIT") //
+                    journalEntry(100, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(100, getAccounts().getFundSource(), "CREDIT"), //
+                    journalEntry(100, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(100, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT"), //
+                    journalEntry(1.10, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(1.10, getAccounts().getFeeIncomeAccount(), "CREDIT"), //
+                    journalEntry(0.04, getAccounts().getInterestReceivableAccount(), "DEBIT"), //
+                    journalEntry(0.04, getAccounts().getInterestIncomeAccount(), "CREDIT"), //
+                    journalEntry(1.10, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(1.10, getAccounts().getFeeIncomeAccount(), "CREDIT") //
             );
 
-            Long capitalizedIncomeAdjustmentTransactionId = loanTransactionHelper
-                    .capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "3 January 2024", 100.0).getResourceId();
+            Long capitalizedIncomeAdjustmentTransactionId = capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(),
+                    "3 January 2024", 100.0).getResourceId();
             capitalizedIncomeAdjustmentTransactionIdRef.set(capitalizedIncomeAdjustmentTransactionId);
         });
         runAt("4 January 2024", () -> {
@@ -381,29 +364,29 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             );
 
             verifyJournalEntries(loanId, //
-                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100, fundSource, "CREDIT"), //
-                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100, deferredIncomeLiabilityAccount, "CREDIT"), //
-                    journalEntry(1.10, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(1.10, feeIncomeAccount, "CREDIT"), //
-                    journalEntry(0.04, interestReceivableAccount, "DEBIT"), //
-                    journalEntry(0.04, interestIncomeAccount, "CREDIT"), //
-                    journalEntry(1.10, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(1.10, feeIncomeAccount, "CREDIT"), //
-                    journalEntry(99.92, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(0.08, interestReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(0.04, interestReceivableAccount, "DEBIT"), //
-                    journalEntry(0.04, interestIncomeAccount, "CREDIT"), //
-                    journalEntry(2.20, feeIncomeAccount, "DEBIT"), //
-                    journalEntry(2.20, deferredIncomeLiabilityAccount, "CREDIT") //
+                    journalEntry(100, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(100, getAccounts().getFundSource(), "CREDIT"), //
+                    journalEntry(100, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(100, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT"), //
+                    journalEntry(1.10, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(1.10, getAccounts().getFeeIncomeAccount(), "CREDIT"), //
+                    journalEntry(0.04, getAccounts().getInterestReceivableAccount(), "DEBIT"), //
+                    journalEntry(0.04, getAccounts().getInterestIncomeAccount(), "CREDIT"), //
+                    journalEntry(1.10, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(1.10, getAccounts().getFeeIncomeAccount(), "CREDIT"), //
+                    journalEntry(99.92, getAccounts().getLoansReceivableAccount(), "CREDIT"), //
+                    journalEntry(0.08, getAccounts().getInterestReceivableAccount(), "CREDIT"), //
+                    journalEntry(100.0, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(0.04, getAccounts().getInterestReceivableAccount(), "DEBIT"), //
+                    journalEntry(0.04, getAccounts().getInterestIncomeAccount(), "CREDIT"), //
+                    journalEntry(2.20, getAccounts().getFeeIncomeAccount(), "DEBIT"), //
+                    journalEntry(2.20, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT") //
             );
 
             // Reverse-replay
             addRepaymentForLoan(loanId, 67.45, "2 January 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertNotNull(loanDetails.getSummary().getTotalCapitalizedIncomeAdjustment());
             assertEquals(BigDecimal.valueOf(100.0).stripTrailingZeros(),
                     loanDetails.getSummary().getTotalCapitalizedIncomeAdjustment().stripTrailingZeros());
@@ -413,18 +396,18 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             Assertions.assertTrue(replayedCapitalizedIncomeAdjustmentOpt.isPresent(), "Capitalized income adjustment not found");
 
             verifyTRJournalEntries(replayedCapitalizedIncomeAdjustmentOpt.get().getId(), //
-                    journalEntry(99.98, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(0.02, interestReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, deferredIncomeLiabilityAccount, "DEBIT") //
+                    journalEntry(99.98, getAccounts().getLoansReceivableAccount(), "CREDIT"), //
+                    journalEntry(0.02, getAccounts().getInterestReceivableAccount(), "CREDIT"), //
+                    journalEntry(100.0, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT") //
             );
 
             verifyTRJournalEntries(capitalizedIncomeAdjustmentTransactionIdRef.get(), //
-                    journalEntry(99.92, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(0.08, interestReceivableAccount, "CREDIT"), //
-                    journalEntry(100.0, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(99.92, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(0.08, interestReceivableAccount, "DEBIT"), //
-                    journalEntry(100.0, deferredIncomeLiabilityAccount, "CREDIT") //
+                    journalEntry(99.92, getAccounts().getLoansReceivableAccount(), "CREDIT"), //
+                    journalEntry(0.08, getAccounts().getInterestReceivableAccount(), "CREDIT"), //
+                    journalEntry(100.0, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(99.92, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(0.08, getAccounts().getInterestReceivableAccount(), "DEBIT"), //
+                    journalEntry(100.0, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT") //
             );
         });
     }
@@ -433,32 +416,29 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
     public void testCapitalizedIncomeTransactionsNotInFuture() {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
 
             // Capitalized income cannot be in the future
-            Assertions.assertThrows(RuntimeException.class,
-                    () -> loanTransactionHelper.addCapitalizedIncome(loanId, "1 February 2024", 100.0));
+            Assertions.assertThrows(RuntimeException.class, () -> addCapitalizedIncomeTransaction(loanId, "1 February 2024", 100.0));
 
-            Long capitalizedIncomeId = loanTransactionHelper.addCapitalizedIncome(loanId, "1 January 2024", 100.0).getResourceId();
+            Long capitalizedIncomeId = addCapitalizedIncomeTransaction(loanId, "1 January 2024", 100.0).getResourceId();
 
             // Capitalized income adjustment cannot be in the future
             Assertions.assertThrows(RuntimeException.class,
-                    () -> loanTransactionHelper.capitalizedIncomeAdjustment(loanId, capitalizedIncomeId, "1 February 2024", 10.0));
+                    () -> capitalizedIncomeAdjustment(loanId, capitalizedIncomeId, "1 February 2024", 10.0));
         });
     }
 
@@ -467,24 +447,22 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
-            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
-                    "1 January 2024", 100.0);
+            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = addCapitalizedIncomeTransaction(loanId, "1 January 2024",
+                    100.0);
             assertNotNull(capitalizedIncomeResponse.getLoanId());
             assertNotNull(capitalizedIncomeResponse.getClientId());
             assertNotNull(capitalizedIncomeResponse.getOfficeId());
@@ -516,24 +494,21 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeTransactionIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
-            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "1 January 2024", 50.0)
-                    .getResourceId();
+            Long capitalizedIncomeTransactionId = addCapitalizedIncomeTransaction(loanId, "1 January 2024", 50.0).getResourceId();
             capitalizedIncomeTransactionIdRef.set(capitalizedIncomeTransactionId);
         });
         runAt("2 January 2024", () -> {
@@ -559,19 +534,19 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             );
 
             verifyJournalEntries(loanId, //
-                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100, fundSource, "CREDIT"), //
-                    journalEntry(50, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT"), //
-                    journalEntry(0.55, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(0.55, feeIncomeAccount, "CREDIT"), //
-                    journalEntry(0.03, interestReceivableAccount, "DEBIT"), //
-                    journalEntry(0.03, interestIncomeAccount, "CREDIT"), //
-                    journalEntry(0.55, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(0.55, feeIncomeAccount, "CREDIT") //
+                    journalEntry(100, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(100, getAccounts().getFundSource(), "CREDIT"), //
+                    journalEntry(50, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(50, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT"), //
+                    journalEntry(0.55, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(0.55, getAccounts().getFeeIncomeAccount(), "CREDIT"), //
+                    journalEntry(0.03, getAccounts().getInterestReceivableAccount(), "DEBIT"), //
+                    journalEntry(0.03, getAccounts().getInterestIncomeAccount(), "CREDIT"), //
+                    journalEntry(0.55, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(0.55, getAccounts().getFeeIncomeAccount(), "CREDIT") //
             );
 
-            loanTransactionHelper.reverseLoanTransaction(loanId, capitalizedIncomeTransactionIdRef.get(), "3 January 2024");
+            reverseLoanTransaction(loanId, capitalizedIncomeTransactionIdRef.get(), "3 January 2024");
 
         });
         runAt("4 January 2024", () -> {
@@ -589,22 +564,22 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             );
 
             verifyJournalEntries(loanId, //
-                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100, fundSource, "CREDIT"), //
-                    journalEntry(50, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT"), //
-                    journalEntry(0.55, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(0.55, feeIncomeAccount, "CREDIT"), //
-                    journalEntry(0.03, interestReceivableAccount, "DEBIT"), //
-                    journalEntry(0.03, interestIncomeAccount, "CREDIT"), //
-                    journalEntry(0.55, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(0.55, feeIncomeAccount, "CREDIT"), //
-                    journalEntry(50, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(50, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(0.01, interestReceivableAccount, "DEBIT"), //
-                    journalEntry(0.01, interestIncomeAccount, "CREDIT"), //
-                    journalEntry(1.10, feeIncomeAccount, "DEBIT"), //
-                    journalEntry(1.10, deferredIncomeLiabilityAccount, "CREDIT") //
+                    journalEntry(100, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(100, getAccounts().getFundSource(), "CREDIT"), //
+                    journalEntry(50, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(50, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT"), //
+                    journalEntry(0.55, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(0.55, getAccounts().getFeeIncomeAccount(), "CREDIT"), //
+                    journalEntry(0.03, getAccounts().getInterestReceivableAccount(), "DEBIT"), //
+                    journalEntry(0.03, getAccounts().getInterestIncomeAccount(), "CREDIT"), //
+                    journalEntry(0.55, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(0.55, getAccounts().getFeeIncomeAccount(), "CREDIT"), //
+                    journalEntry(50, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(50, getAccounts().getLoansReceivableAccount(), "CREDIT"), //
+                    journalEntry(0.01, getAccounts().getInterestReceivableAccount(), "DEBIT"), //
+                    journalEntry(0.01, getAccounts().getInterestIncomeAccount(), "CREDIT"), //
+                    journalEntry(1.10, getAccounts().getFeeIncomeAccount(), "DEBIT"), //
+                    journalEntry(1.10, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT") //
             );
         });
     }
@@ -614,28 +589,25 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("1 April 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
-            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
-                    "1 January 2024", 50.0);
+            PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = addCapitalizedIncomeTransaction(loanId, "1 January 2024", 50.0);
             capitalizedIncomeIdRef.set(capitalizedIncomeResponse.getResourceId());
 
-            final PostLoansLoanIdTransactionsResponse capitalizedIncomeAdjustmentResponse = loanTransactionHelper
-                    .capitalizedIncomeAdjustment(loanId, capitalizedIncomeIdRef.get(), "1 April 2024", 50.0);
+            final PostLoansLoanIdTransactionsResponse capitalizedIncomeAdjustmentResponse = capitalizedIncomeAdjustment(loanId,
+                    capitalizedIncomeIdRef.get(), "1 April 2024", 50.0);
             final Long capitalizedIncomeAdjustmentTransactionId = capitalizedIncomeAdjustmentResponse.getResourceId();
 
             verifyTransactions(loanId, //
@@ -645,28 +617,28 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             );
 
             verifyJournalEntries(loanId, //
-                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100, fundSource, "CREDIT"), //
-                    journalEntry(50, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT"), //
-                    journalEntry(50.0, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(49.71, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(0.29, interestReceivableAccount, "CREDIT") //
+                    journalEntry(100, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(100, getAccounts().getFundSource(), "CREDIT"), //
+                    journalEntry(50, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(50, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT"), //
+                    journalEntry(50.0, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(49.71, getAccounts().getLoansReceivableAccount(), "CREDIT"), //
+                    journalEntry(0.29, getAccounts().getInterestReceivableAccount(), "CREDIT") //
             );
 
-            loanTransactionHelper.reverseLoanTransaction(loanId, capitalizedIncomeAdjustmentTransactionId, "1 April 2024");
+            reverseLoanTransaction(loanId, capitalizedIncomeAdjustmentTransactionId, "1 April 2024");
 
             verifyJournalEntries(loanId, //
-                    journalEntry(100, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(100, fundSource, "CREDIT"), //
-                    journalEntry(50, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT"), //
-                    journalEntry(50.0, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(49.71, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(0.29, interestReceivableAccount, "CREDIT"), //
-                    journalEntry(50.0, deferredIncomeLiabilityAccount, "CREDIT"), //
-                    journalEntry(49.71, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(0.29, interestReceivableAccount, "DEBIT") //
+                    journalEntry(100, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(100, getAccounts().getFundSource(), "CREDIT"), //
+                    journalEntry(50, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(50, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT"), //
+                    journalEntry(50.0, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(49.71, getAccounts().getLoansReceivableAccount(), "CREDIT"), //
+                    journalEntry(0.29, getAccounts().getInterestReceivableAccount(), "CREDIT"), //
+                    journalEntry(50.0, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT"), //
+                    journalEntry(49.71, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(0.29, getAccounts().getInterestReceivableAccount(), "DEBIT") //
             );
         });
     }
@@ -676,24 +648,21 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeTransactionIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
-            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "1 January 2024", 50.0)
-                    .getResourceId();
+            Long capitalizedIncomeTransactionId = addCapitalizedIncomeTransaction(loanId, "1 January 2024", 50.0).getResourceId();
             capitalizedIncomeTransactionIdRef.set(capitalizedIncomeTransactionId);
         });
         runAt("2 January 2024", () -> {
@@ -710,10 +679,10 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
 
-            loanTransactionHelper.capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(), "3 January 2024", 40.0);
+            capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(), "3 January 2024", 40.0);
 
             Assertions.assertThrows(RuntimeException.class, () -> {
-                loanTransactionHelper.reverseLoanTransaction(loanId, capitalizedIncomeTransactionIdRef.get(), "3 January 2024");
+                reverseLoanTransaction(loanId, capitalizedIncomeTransactionIdRef.get(), "3 January 2024");
             });
         });
     }
@@ -723,24 +692,21 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeTransactionIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
-            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "1 January 2024", 50.0)
-                    .getResourceId();
+            Long capitalizedIncomeTransactionId = addCapitalizedIncomeTransaction(loanId, "1 January 2024", 50.0).getResourceId();
             capitalizedIncomeTransactionIdRef.set(capitalizedIncomeTransactionId);
         });
         runAt("1 February 2024", () -> {
@@ -761,14 +727,14 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
 
             addRepaymentForLoan(loanId, 50.58, "15 March 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 151.59, 0.0, 150.0, 0.15);
 
-            loanTransactionHelper.makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+            makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
                     .transactionDate("15 March 2024").locale("en").transactionAmount(0.15));
 
             // Validate Loan is Closed
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 151.59, 0.0, 150.0, null);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 49.71, 49.71, 0.0, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 49.99, 49.99, 0.0, 0.0, 0.0);
@@ -780,13 +746,13 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
 
-            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "16 March 2024", 50.0).getResourceId();
+            Long capitalizedIncomeTransactionId = addCapitalizedIncomeTransaction(loanId, "16 March 2024", 50.0).getResourceId();
 
-            verifyTRJournalEntries(capitalizedIncomeTransactionId, journalEntry(50, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT") //
+            verifyTRJournalEntries(capitalizedIncomeTransactionId, journalEntry(50, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(50, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT") //
             );
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 50.15, 151.59, 50.00, 150.00, null);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 49.71, 49.71, 0.0, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 49.99, 49.99, 0.0, 0.0, 0.0);
@@ -801,24 +767,21 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeTransactionIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
-            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "1 January 2024", 50.0)
-                    .getResourceId();
+            Long capitalizedIncomeTransactionId = addCapitalizedIncomeTransaction(loanId, "1 January 2024", 50.0).getResourceId();
             capitalizedIncomeTransactionIdRef.set(capitalizedIncomeTransactionId);
         });
         runAt("1 February 2024", () -> {
@@ -839,7 +802,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
 
             addRepaymentForLoan(loanId, 50.58, "15 March 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 151.59, 0.0, 150.0, 0.15);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 49.71, 49.71, 0.0, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 49.99, 49.99, 0.0, 0.0, 0.0);
@@ -851,13 +814,13 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
 
-            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "16 March 2024", 50.0).getResourceId();
+            Long capitalizedIncomeTransactionId = addCapitalizedIncomeTransaction(loanId, "16 March 2024", 50.0).getResourceId();
 
-            verifyTRJournalEntries(capitalizedIncomeTransactionId, journalEntry(50, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(50, deferredIncomeLiabilityAccount, "CREDIT") //
+            verifyTRJournalEntries(capitalizedIncomeTransactionId, journalEntry(50, getAccounts().getLoansReceivableAccount(), "DEBIT"), //
+                    journalEntry(50, getAccounts().getDeferredIncomeLiabilityAccount(), "CREDIT") //
             );
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 50.0, 151.74, 49.85, 150.15, null);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 1), 49.71, 49.71, 0.0, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 49.99, 49.99, 0.0, 0.0, 0.0);
@@ -872,24 +835,21 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeTransactionIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
-            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "1 January 2024", 50.0)
-                    .getResourceId();
+            Long capitalizedIncomeTransactionId = addCapitalizedIncomeTransaction(loanId, "1 January 2024", 50.0).getResourceId();
             capitalizedIncomeTransactionIdRef.set(capitalizedIncomeTransactionId);
         });
         runAt("1 February 2024", () -> {
@@ -910,7 +870,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
 
             addRepaymentForLoan(loanId, 60.6, "1 April 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             // Validate Loan is Overpaid
             assertTrue(loanDetails.getStatus().getOverpaid());
         });
@@ -918,10 +878,10 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
 
-            loanTransactionHelper.makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+            makeCreditBalanceRefund(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
                     .transactionDate("5 April 2024").locale("en").transactionAmount(10.00));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             // Validate Loan remains Overpaid
             assertTrue(loanDetails.getStatus().getOverpaid());
         });
@@ -929,13 +889,14 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
 
-            Long capitalizedIncomeAdjustmentTransactionId = loanTransactionHelper
-                    .capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(), "15 April 2024", 15.0).getResourceId();
-            verifyTRJournalEntries(capitalizedIncomeAdjustmentTransactionId, journalEntry(15, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(15, overpaymentAccount, "CREDIT") //
+            Long capitalizedIncomeAdjustmentTransactionId = capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(),
+                    "15 April 2024", 15.0).getResourceId();
+            verifyTRJournalEntries(capitalizedIncomeAdjustmentTransactionId,
+                    journalEntry(15, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(15, getAccounts().getOverpaymentAccount(), "CREDIT") //
             );
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             // Validate Loan remains Overpaid
             assertTrue(loanDetails.getStatus().getOverpaid());
             validateLoanSummaryBalances(loanDetails, 0.0, 151.75, 0.0, 150.00, 15.01);
@@ -947,24 +908,21 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeTransactionIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
-            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "1 January 2024", 50.0)
-                    .getResourceId();
+            Long capitalizedIncomeTransactionId = addCapitalizedIncomeTransaction(loanId, "1 January 2024", 50.0).getResourceId();
             capitalizedIncomeTransactionIdRef.set(capitalizedIncomeTransactionId);
         });
         runAt("1 February 2024", () -> {
@@ -985,20 +943,21 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
 
             addRepaymentForLoan(loanId, 50.59, "1 April 2024");
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 151.75, 0.0, 150.00, null);
             // Validate Loan goes to Closed
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
         });
         runAt("15 April 2024", () -> {
             Long loanId = loanIdRef.get();
-            Long capitalizedIncomeAdjustmentTransactionId = loanTransactionHelper
-                    .capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(), "15 April 2024", 15.0).getResourceId();
-            verifyTRJournalEntries(capitalizedIncomeAdjustmentTransactionId, journalEntry(15, deferredIncomeLiabilityAccount, "DEBIT"), //
-                    journalEntry(15.00, overpaymentAccount, "CREDIT") //
+            Long capitalizedIncomeAdjustmentTransactionId = capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(),
+                    "15 April 2024", 15.0).getResourceId();
+            verifyTRJournalEntries(capitalizedIncomeAdjustmentTransactionId,
+                    journalEntry(15, getAccounts().getDeferredIncomeLiabilityAccount(), "DEBIT"), //
+                    journalEntry(15.00, getAccounts().getOverpaymentAccount(), "CREDIT") //
             );
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             validateLoanSummaryBalances(loanDetails, 0.0, 151.75, 0.0, 150.00, 15.0);
             assertNotNull(loanDetails.getSummary().getTotalCapitalizedIncomeAdjustment());
             assertEquals(BigDecimal.valueOf(15.0).stripTrailingZeros(),
@@ -1011,24 +970,21 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
     @Test
     public void testOverpaymentAmountWhenCapitalizedIncomeTransactionsAreReversed() {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
         runAt("01 March 2023", () -> {
-            final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                    .createLoanProduct(create4IProgressiveWithCapitalizedIncome());
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
-                    loanProductsResponse.getResourceId(), "01 March 2023", 10000.00, 12.00, 4, null));
-            Long loanId = postLoansResponse.getLoanId();
+            final Long loanProductsResponse = createLoanProduct(create4IProgressiveWithCapitalizedIncome());
+            Long loanId = applyForLoan(
+                    applyLP2ProgressiveLoanRequest(clientId, loanProductsResponse, "01 March 2023", 10000.00, 12.00, 4, null));
             loanIdRef.set(loanId);
 
-            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(10000.00, "01 March 2023"));
+            approveLoan(loanId, approveLoanRequest(10000.00, "01 March 2023"));
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 March 2023");
 
-            loanTransactionHelper.addCapitalizedIncome(loanId, "01 March 2023", 500.00);
-            PostLoansLoanIdTransactionsResponse transactionsResponse = loanTransactionHelper.addCapitalizedIncome(loanId, "01 March 2023",
-                    500.00);
+            addCapitalizedIncomeTransaction(loanId, "01 March 2023", 500.00);
+            PostLoansLoanIdTransactionsResponse transactionsResponse = addCapitalizedIncomeTransaction(loanId, "01 March 2023", 500.00);
 
-            loanTransactionHelper.makeLoanRepayment(loanId, "Repayment", "1 March 2023", 2000.00);
-            loanTransactionHelper.reverseLoanTransaction(loanId, transactionsResponse.getResourceId(), "1 March 2023");
+            makeLoanRepayment(loanId, "Repayment", "1 March 2023", 2000.00);
+            reverseLoanTransaction(loanId, transactionsResponse.getResourceId(), "1 March 2023");
         });
 
         BigDecimal zero = BigDecimal.ZERO;
@@ -1036,7 +992,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         BigDecimal fiveHundred = BigDecimal.valueOf(500.0);
         BigDecimal thousandFiveHundred = BigDecimal.valueOf(1500.0);
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanIdRef.get());
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanIdRef.get());
         Assertions.assertEquals(thousand, loanDetails.getPrincipal().setScale(1, RoundingMode.HALF_UP));
         Assertions.assertEquals(thousand, loanDetails.getSummary().getPrincipalDisbursed().setScale(1, RoundingMode.HALF_UP));
         Assertions.assertEquals(fiveHundred, loanDetails.getSummary().getTotalCapitalizedIncome().setScale(1, RoundingMode.HALF_UP));
@@ -1049,22 +1005,20 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
     @Test
     public void testOverpaymentAmountCorrectlyCalculatedWhenBackdatedRepaymentIsMade() {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
         runAt("01 March 2023", () -> {
-            final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                    .createLoanProduct(create4IProgressiveWithCapitalizedIncome());
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
-                    loanProductsResponse.getResourceId(), "01 March 2023", 10000.00, 12.00, 4, null));
-            Long loanId = postLoansResponse.getLoanId();
+            final Long loanProductsResponse = createLoanProduct(create4IProgressiveWithCapitalizedIncome());
+            Long loanId = applyForLoan(
+                    applyLP2ProgressiveLoanRequest(clientId, loanProductsResponse, "01 March 2023", 10000.00, 12.00, 4, null));
             loanIdRef.set(loanId);
 
-            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(10000.00, "01 March 2023"));
+            approveLoan(loanId, approveLoanRequest(10000.00, "01 March 2023"));
             disburseLoan(loanId, BigDecimal.valueOf(1000.00), "01 March 2023");
         });
 
         runAt("15 March 2023", () -> {
-            loanTransactionHelper.addCapitalizedIncome(loanIdRef.get(), "15 March 2023", 500.00);
-            loanTransactionHelper.makeLoanRepayment(loanIdRef.get(), "Repayment", "1 March 2023", 1500.00);
+            addCapitalizedIncomeTransaction(loanIdRef.get(), "15 March 2023", 500.00);
+            makeLoanRepayment(loanIdRef.get(), "Repayment", "1 March 2023", 1500.00);
         });
 
         BigDecimal zero = BigDecimal.ZERO;
@@ -1072,7 +1026,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         BigDecimal fiveHundred = BigDecimal.valueOf(500.0);
         BigDecimal thousandFiveHundred = BigDecimal.valueOf(1500.0);
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanIdRef.get());
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanIdRef.get());
         Assertions.assertEquals(thousand, loanDetails.getPrincipal().setScale(1, RoundingMode.HALF_UP));
         Assertions.assertEquals(thousand, loanDetails.getSummary().getPrincipalDisbursed().setScale(1, RoundingMode.HALF_UP));
         Assertions.assertEquals(fiveHundred, loanDetails.getSummary().getTotalCapitalizedIncome().setScale(1, RoundingMode.HALF_UP));
@@ -1092,27 +1046,24 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeTransactionIdRef = new AtomicReference<>();
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+        final Long clientId = createClient();
 
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("1 January 2024", () -> {
-            Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "1 January 2024",
-                    500.0, 7.0, 3, null);
+            Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "1 January 2024", 500.0, 7.0, 3, null);
             loanIdRef.set(loanId);
 
             disburseLoan(loanId, BigDecimal.valueOf(100), "1 January 2024");
 
             deleteAllExternalEvents();
 
-            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "1 January 2024", 100.0)
-                    .getResourceId();
+            Long capitalizedIncomeTransactionId = addCapitalizedIncomeTransaction(loanId, "1 January 2024", 100.0).getResourceId();
             capitalizedIncomeTransactionIdRef.set(capitalizedIncomeTransactionId);
 
             verifyBusinessEvents(
@@ -1141,8 +1092,8 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
 
             deleteAllExternalEvents();
 
-            Long capitalizedIncomeAdjustmentTransactionId = loanTransactionHelper
-                    .capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(), "3 January 2024", 50.0).getResourceId();
+            Long capitalizedIncomeAdjustmentTransactionId = capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(),
+                    "3 January 2024", 50.0).getResourceId();
 
             verifyTransactions(loanId, //
                     transaction(100.0, "Disbursement", "01 January 2024"), //
@@ -1160,7 +1111,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
 
             deleteAllExternalEvents();
 
-            loanTransactionHelper.reverseLoanTransaction(loanId, capitalizedIncomeAdjustmentTransactionId, "3 January 2024");
+            reverseLoanTransaction(loanId, capitalizedIncomeAdjustmentTransactionId, "3 January 2024");
 
             verifyBusinessEvents(new LoanAdjustTransactionBusinessEvent("LoanAdjustTransactionBusinessEvent", "03 January 2024",
                     "loanTransactionType.capitalizedIncomeAdjustment", "2024-01-03"));
@@ -1171,7 +1122,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
 
             deleteAllExternalEvents();
 
-            loanTransactionHelper.reverseLoanTransaction(loanId, capitalizedIncomeTransactionIdRef.get(), "3 January 2024");
+            reverseLoanTransaction(loanId, capitalizedIncomeTransactionIdRef.get(), "3 January 2024");
 
             verifyTransactions(loanId, //
                     transaction(100.0, "Disbursement", "01 January 2024"), //
@@ -1195,27 +1146,25 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Long> loanIdRef = new AtomicReference<>();
         final AtomicReference<Long> capitalizedIncomeTransactionIdRef = new AtomicReference<>();
         final Account transferAccount = accountHelper.createAssetAccount("transferInSuspense");
-        final FinancialActivityAccountHelper financialActivityAccountHelper = new FinancialActivityAccountHelper(requestSpec);
-        final ExternalAssetOwnerHelper externalAssetOwnerHelper = new ExternalAssetOwnerHelper();
-        externalAssetOwnerHelper.setProperFinancialActivity(financialActivityAccountHelper, transferAccount);
+        final FeignExternalAssetOwnerHelper externalAssetOwnerHelper = new FeignExternalAssetOwnerHelper(
+                FineractFeignClientHelper.getFineractFeignClient());
+        externalAssetOwnerHelper.setProperFinancialActivity(transferAccount);
 
-        final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                        .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                        .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                        .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                        .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                        .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
+        final Long clientId = createClient();
+        final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE));
 
         runAt("01 July 2026", () -> {
-            final Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProductsResponse.getResourceId(), "01 July 2026",
-                    1000.0, 10.0, 6, null);
+            final Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductsResponse, "01 July 2026", 1000.0, 10.0, 6, null);
             loanIdRef.set(loanId);
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), "01 July 2026");
 
-            final PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = loanTransactionHelper.addCapitalizedIncome(loanId,
-                    "01 July 2026", 50.0);
+            final PostLoansLoanIdTransactionsResponse capitalizedIncomeResponse = addCapitalizedIncomeTransaction(loanId, "01 July 2026",
+                    50.0);
             capitalizedIncomeTransactionIdRef.set(capitalizedIncomeResponse.getResourceId());
 
             externalAssetOwnerHelper.initiateTransferByLoanId(loanId, "sale",
@@ -1228,7 +1177,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             final Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
 
-            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            final GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertNotNull(loanDetails.getTransactions());
 
             final BigDecimal totalAmortized = loanDetails.getTransactions().stream()
@@ -1238,14 +1187,14 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             assertEquals(0, BigDecimal.valueOf(50.0).compareTo(totalAmortized),
                     "Capitalized income should be fully amortized after investor sale COB");
 
-            loanTransactionHelper.capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(), "02 July 2026", 20.0);
+            capitalizedIncomeAdjustment(loanId, capitalizedIncomeTransactionIdRef.get(), "02 July 2026", 20.0);
         });
 
         runAt("03 July 2026", () -> {
             final Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
 
-            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            final GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertNotNull(loanDetails.getTransactions());
 
             final BigDecimal amortizationAdjustmentAmount = loanDetails.getTransactions().stream()
@@ -1260,7 +1209,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             final Long loanId = loanIdRef.get();
             executeInlineCOB(loanId);
 
-            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            final GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertNotNull(loanDetails.getTransactions());
 
             final BigDecimal amortizationAdjustmentAmount = loanDetails.getTransactions().stream()
@@ -1279,9 +1228,8 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
         final AtomicReference<Account> classificationIncomeAccountRef = new AtomicReference<>();
         runAt("10 September 2024", () -> {
             deleteAllExternalEvents();
-            final PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            final Long clientId = createClient();
 
-            final AccountHelper accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
             final Account classificationIncomeAccount = accountHelper
                     .createIncomeAccount(Utils.uniqueRandomStringGenerator("capitalizedincome_class_income_", 6));
             classificationIncomeAccountRef.set(classificationIncomeAccount);
@@ -1296,17 +1244,15 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     .classificationCodeValueId(classificationIdRef.get())
                     .incomeAccountId(classificationIncomeAccount.getAccountID().longValue());
 
-            final PostLoanProductsResponse loanProductsResponse = loanProductHelper
-                    .createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
-                            .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
-                            .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
-                            .deferredIncomeLiabilityAccountId(deferredIncomeLiabilityAccount.getAccountID().longValue())
-                            .incomeFromCapitalizationAccountId(feeIncomeAccount.getAccountID().longValue())
-                            .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE)
-                            .addCapitalizedIncomeClassificationToIncomeAccountMappingsItem(classificationToIncomeMapping));
+            final Long loanProductsResponse = createLoanProduct(create4IProgressive().enableIncomeCapitalization(true)
+                    .capitalizedIncomeCalculationType(PostLoanProductsRequest.CapitalizedIncomeCalculationTypeEnum.FLAT)
+                    .capitalizedIncomeStrategy(PostLoanProductsRequest.CapitalizedIncomeStrategyEnum.EQUAL_AMORTIZATION)
+                    .deferredIncomeLiabilityAccountId(getAccounts().getDeferredIncomeLiabilityAccount().getAccountID().longValue())
+                    .incomeFromCapitalizationAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                    .capitalizedIncomeType(PostLoanProductsRequest.CapitalizedIncomeTypeEnum.FEE)
+                    .addCapitalizedIncomeClassificationToIncomeAccountMappingsItem(classificationToIncomeMapping));
 
-            GetLoanProductsProductIdResponse getLoanProductResponse = loanProductHelper
-                    .retrieveLoanProductById(loanProductsResponse.getResourceId());
+            GetLoanProductsProductIdResponse getLoanProductResponse = retrieveLoanProduct(loanProductsResponse);
             assertNotNull(getLoanProductResponse);
             assertNotNull(getLoanProductResponse.getCapitalizedIncomeClassificationToIncomeAccountMappings());
             Assertions.assertEquals(1, getLoanProductResponse.getCapitalizedIncomeClassificationToIncomeAccountMappings().size());
@@ -1323,23 +1269,22 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
                     new PostClassificationToIncomeAccountMappings().classificationCodeValueId(classificationIdRef.get())
                             .incomeAccountId(classificationIncomeAccount.getAccountID().longValue()));
 
-            loanProductHelper.updateLoanProductById(loanProductsResponse.getResourceId(), putLoanProductRequest);
-            getLoanProductResponse = loanProductHelper.retrieveLoanProductById(loanProductsResponse.getResourceId());
+            updateLoanProduct(loanProductsResponse, putLoanProductRequest);
+            getLoanProductResponse = retrieveLoanProduct(loanProductsResponse);
             assertNotNull(getLoanProductResponse);
             assertNotNull(getLoanProductResponse.getCapitalizedIncomeClassificationToIncomeAccountMappings());
             Assertions.assertEquals(1, getLoanProductResponse.getCapitalizedIncomeClassificationToIncomeAccountMappings().size());
             Assertions.assertEquals(classificationIdRef.get(), getLoanProductResponse
                     .getCapitalizedIncomeClassificationToIncomeAccountMappings().get(0).getClassificationCodeValue().getId());
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applyLP2ProgressiveLoanRequest(client.getClientId(),
-                    loanProductsResponse.getResourceId(), "10 September 2024", 1000.0, 10.0, 12, null));
-            Long loanId = postLoansResponse.getLoanId();
+            Long loanId = applyForLoan(
+                    applyLP2ProgressiveLoanRequest(clientId, loanProductsResponse, "10 September 2024", 1000.0, 10.0, 12, null));
             loanIdRef.set(loanId);
-            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(1000.0, "10 September 2024"));
+            approveLoan(loanId, approveLoanRequest(1000.0, "10 September 2024"));
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), "10 September 2024");
 
-            Long capitalizedIncomeTransactionId = loanTransactionHelper
-                    .addCapitalizedIncome(loanId, "10 September 2024", 100.0, classificationIdRef.get()).getResourceId();
+            Long capitalizedIncomeTransactionId = addCapitalizedIncomeTransaction(loanId, "10 September 2024", 100.0,
+                    classificationIdRef.get()).getResourceId();
             assertNotNull(capitalizedIncomeTransactionId);
         });
 
@@ -1348,8 +1293,7 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             deleteAllExternalEvents();
             executeInlineCOB(loanId);
 
-            Long capitalizedIncomeTransactionId = loanTransactionHelper.addCapitalizedIncome(loanId, "20 September 2024", 20.0)
-                    .getResourceId();
+            Long capitalizedIncomeTransactionId = addCapitalizedIncomeTransaction(loanId, "20 September 2024", 20.0).getResourceId();
             assertNotNull(capitalizedIncomeTransactionId);
         });
 
@@ -1358,14 +1302,15 @@ public class LoanCapitalizedIncomeTest extends BaseLoanIntegrationTest {
             deleteAllExternalEvents();
             executeInlineCOB(loanId);
 
-            final GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            final GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             final Optional<GetLoansLoanIdTransactions> optTx = loanDetails.getTransactions().stream()
                     .filter(item -> Objects.equals(Utils.getDoubleValue(item.getAmount()), 0.33)
                             && Objects.equals(item.getType().getValue(), "Capitalized Income Amortization"))
                     .findFirst();
-            verifyTRJournalEntries(optTx.get().getId(), debit(deferredIncomeLiabilityAccount, 0.33),
+            verifyTRJournalEntries(optTx.get().getId(), debit(getAccounts().getDeferredIncomeLiabilityAccount(), 0.33),
                     credit(classificationIncomeAccountRef.get(), 0.27), // First Capitalized Income With classification
-                    credit(feeIncomeAccount, 0.06)); // Second Capitalized Income Without classification
+                    credit(getAccounts().getFeeIncomeAccount(), 0.06)); // Second Capitalized Income Without
+                                                                        // classification
 
         });
     }

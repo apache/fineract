@@ -20,10 +20,13 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.GetCodeValuesDataResponse;
 import org.apache.fineract.client.models.GetCodesResponse;
 import org.apache.fineract.client.models.PostCodeValueDataResponse;
 import org.apache.fineract.client.models.PostCodeValuesDataRequest;
+import org.apache.fineract.integrationtests.common.Utils;
 
 public class FeignCodeHelper {
 
@@ -56,5 +59,24 @@ public class FeignCodeHelper {
 
     public PostCodeValueDataResponse createCodeValue(Long codeId, PostCodeValuesDataRequest request) {
         return ok(() -> fineractClient.codeValues().createCodeValue(codeId, request));
+    }
+
+    public List<GetCodeValuesDataResponse> retrieveAllCodeValues(Long codeId) {
+        return ok(() -> fineractClient.codeValues().retrieveAllCodeValues(codeId));
+    }
+
+    /**
+     * Returns the id of the first code value of the named code, creating one when the code has none yet. System codes
+     * such as {@code LoanRescheduleReason} ship without values, so a test that needs a reason id has to seed one.
+     */
+    public Long retrieveOrCreateCodeValueId(String codeName) {
+        GetCodesResponse code = retrieveCodeByName(codeName);
+        List<GetCodeValuesDataResponse> codeValues = retrieveAllCodeValues(code.getId());
+        if (!codeValues.isEmpty()) {
+            return codeValues.get(0).getId();
+        }
+        String value = Utils.randomStringGenerator("", 3);
+        return createCodeValue(code.getId(), new PostCodeValuesDataRequest().name(value).position(0).description(value).isActive(true))
+                .getSubResourceId();
     }
 }

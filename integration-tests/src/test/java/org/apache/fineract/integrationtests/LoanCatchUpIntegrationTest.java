@@ -18,177 +18,92 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.batch.domain.BatchRequest;
-import org.apache.fineract.batch.domain.BatchResponse;
-import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.fineract.client.models.BatchResponse;
+import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.LoanProductChargeData;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.common.BatchHelper;
-import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanCOBCatchUpHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanAccountLockHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanCOBCatchUpHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 @Order(1)
-public class LoanCatchUpIntegrationTest extends BaseLoanIntegrationTest {
+public class LoanCatchUpIntegrationTest extends FeignLoanTestBase {
 
-    private static final String REPAYMENT_LOAN_PERMISSION = "REPAYMENT_LOAN";
-    private static final String READ_LOAN_PERMISSION = "READ_LOAN";
-
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanCOBCatchUpHelper loanCOBCatchUpHelper;
-    private LoanTransactionHelper loanTransactionHelper;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        loanCOBCatchUpHelper = new LoanCOBCatchUpHelper();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        requestSpec.header("Fineract-Platform-TenantId", "default");
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-    }
+    private static final String CUMULATIVE_STRATEGY = "mifos-standard-strategy";
+    private static final String INLINE_COB_LOCK_OWNER = "LOAN_INLINE_COB_PROCESSING";
+    private static final Long REPAYMENT_BATCH_REQUEST_ID = 4730L;
 
     @Test
     public void testCatchUpInLockedInstance() {
+        FeignLoanCOBCatchUpHelper loanCOBCatchUpHelper = new FeignLoanCOBCatchUpHelper(FineractFeignClientHelper.getFineractFeignClient());
         try {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 2));
+            updateBusinessDate(BusinessDateType.BUSINESS_DATE.name(), "02 March 2020");
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.PENALTY_WAIT_PERIOD,
                     new PutGlobalConfigurationsRequest().value(0L));
-            loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
-            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
-            Assertions.assertNotNull(clientID);
+            Long clientId = createClient();
 
-            Integer overdueFeeChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                    ChargesHelper.getLoanOverdueFeeJSONWithCalculationTypePercentage("1"));
-            Assertions.assertNotNull(overdueFeeChargeId);
+            ChargeRequest overdueFeeCharge = ChargeRequestBuilders.loanOverdueFee(1.0)
+                    .chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue());
+            Long overdueFeeChargeId = chargesHelper.createCharge(overdueFeeCharge).getResourceId();
 
-            final Integer loanProductID = createLoanProduct(overdueFeeChargeId.toString());
-            Assertions.assertNotNull(loanProductID);
-            HashMap loanStatusHashMap;
-            final Integer loanID = applyForLoanApplication(clientID.toString(), loanProductID.toString(), null, "1 March 2020");
+            PostLoanProductsRequest product = create4Period1MonthLongWithoutInterestProduct(CUMULATIVE_STRATEGY).principal(15000.0)
+                    .charges(List.of(new LoanProductChargeData().id(overdueFeeChargeId)));
+            Long loanProductId = createLoanProduct(product);
 
-            Assertions.assertNotNull(loanID);
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 March 2020", 15000.0, 4)//
+                    .repaymentEvery(1)//
+                    .loanTermFrequency(4)//
+                    .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                    .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS);
+            Long loanId = applyForLoan(applicationRequest);
+            verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
+            approveLoan(loanId, approveLoanRequest(15000.0, "01 March 2020"));
+            verifyLoanStatus(loanId, LoanStatus.APPROVED);
+            disburseLoan(loanId, BigDecimal.valueOf(15000.0), "02 March 2020");
+            verifyLoanStatus(loanId, LoanStatus.ACTIVE);
 
-            loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
-            LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+            updateBusinessDate(BusinessDateType.COB_DATE.name(), "02 March 2020");
+            LoanAccountLockHelper.placeSoftLockOnLoanAccount(loanId, INLINE_COB_LOCK_OWNER, "Sample error");
 
-            loanStatusHashMap = loanTransactionHelper.approveLoan("01 March 2020", loanID);
-            LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
+            updateBusinessDate(BusinessDateType.BUSINESS_DATE.name(), "05 March 2020");
 
-            String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
-            loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount("02 March 2020", loanID,
-                    JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-            LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.COB_DATE, LocalDate.of(2020, 3, 2));
-            LoanAccountLockHelper.placeSoftLockOnLoanAccount(loanID.longValue(), "LOAN_INLINE_COB_PROCESSING", "Sample error");
-
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 5));
-
-            loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
             loanCOBCatchUpHelper.executeLoanCOBCatchUp();
+            Utils.conditionalSleepWithMaxWait(30, 5, loanCOBCatchUpHelper::isLoanCOBCatchUpRunning);
 
-            Utils.conditionalSleepWithMaxWait(30, 5, () -> loanCOBCatchUpHelper.isLoanCOBCatchUpRunning());
+            verifyLastClosedBusinessDate(loanId, "04 March 2020");
 
-            GetLoansLoanIdResponse loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
-            Assertions.assertEquals(LocalDate.of(2020, 3, 4), loan.getLastClosedBusinessDate());
+            AtomicReference<List<BatchResponse>> responseRef = new AtomicReference<>();
+            runAsNonByPass(() -> responseRef.set(batchRequest().repayLoan(REPAYMENT_BATCH_REQUEST_ID, loanId, "10", "05 March 2020")
+                    .executeWithoutEnclosingTransaction()));
+            assertEquals(HttpStatus.SC_OK, responseRef.get().get(0).getStatusCode().intValue(), "Verify Status Code 200 for Repayment");
 
-            requestSpec = UserHelper.getSimpleUserWithoutBypassPermission(requestSpec, responseSpec);
-
-            final BatchRequest br1 = BatchHelper.repayLoanRequestWithGivenLoanId(4730L, loanID, "10", LocalDate.of(2020, 3, 5));
-
-            final List<BatchRequest> batchRequests = new ArrayList<>();
-
-            batchRequests.add(br1);
-
-            final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-
-            final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
-                    this.responseSpec, jsonifiedRequest);
-            Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(0).getStatusCode(), "Verify Status Code 200 for Repayment");
-
-            loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
-            Assertions.assertEquals(LocalDate.of(2020, 3, 4), loan.getLastClosedBusinessDate());
+            verifyLastClosedBusinessDate(loanId, "04 March 2020");
         } finally {
-            requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-            requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-            requestSpec.header("Fineract-Platform-TenantId", "default");
-            responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.PENALTY_WAIT_PERIOD,
                     new PutGlobalConfigurationsRequest().value(2L));
         }
     }
-
-    private Integer createLoanProduct(final String chargeId) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
-                .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
-                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
-                .withLoanScheduleType(LoanScheduleType.CUMULATIVE).build(chargeId);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
-    }
-
-    private Integer applyForLoanApplication(final String clientID, final String loanProductID, final String savingsID, final String date) {
-
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec, clientID,
-                collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("15,000.00").withLoanTermFrequency("4")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("4").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withAmortizationTypeAsEqualInstallments()
-                .withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate(date).withSubmittedOnDate(date).withCollaterals(collaterals)
-                .build(clientID, loanProductID, savingsID);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
-    }
-
-    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
-        collaterals.add(collaterals(collateralId, quantity));
-    }
-
-    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
-        HashMap<String, String> collateral = new HashMap<>(2);
-        collateral.put("clientCollateralId", collateralId.toString());
-        collateral.put("quantity", quantity.toString());
-        return collateral;
-    }
-
 }

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
 import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
@@ -41,19 +42,26 @@ import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.DeleteLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.DeleteLoansLoanIdResponse;
 import org.apache.fineract.client.models.DisbursementDetail;
+import org.apache.fineract.client.models.GetDelinquencyActionsResponse;
 import org.apache.fineract.client.models.GetDelinquencyTagHistoryResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
+import org.apache.fineract.client.models.GetLoanProductsTemplateResponse;
 import org.apache.fineract.client.models.GetLoanRescheduleRequestResponse;
 import org.apache.fineract.client.models.GetLoansApprovalTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansResponse;
+import org.apache.fineract.client.models.InterestPauseRequestDto;
+import org.apache.fineract.client.models.InterestPauseResponseDto;
 import org.apache.fineract.client.models.LoanApprovedAmountHistoryData;
 import org.apache.fineract.client.models.PostAddAndDeleteDisbursementDetailRequest;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
+import org.apache.fineract.client.models.PostLoansDelinquencyActionRequest;
+import org.apache.fineract.client.models.PostLoansDelinquencyActionResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
@@ -94,6 +102,39 @@ public class FeignLoanHelper {
 
     public FeignLoanHelper(FineractFeignClient fineractClient) {
         this.fineractClient = fineractClient;
+    }
+
+    public CommandProcessingResult createInterestPause(Long loanId, InterestPauseRequestDto request) {
+        return ok(() -> fineractClient.loanInterestPause().createLoanInterestPause(loanId, request));
+    }
+
+    public CommandProcessingResult createInterestPauseByExternalId(String loanExternalId, InterestPauseRequestDto request) {
+        return ok(() -> fineractClient.loanInterestPause().createLoanInterestPauseByExternalId(loanExternalId, request));
+    }
+
+    public List<InterestPauseResponseDto> retrieveInterestPauses(Long loanId) {
+        return ok(() -> fineractClient.loanInterestPause().retrieveAllLoanInterestPauses(loanId));
+    }
+
+    public List<InterestPauseResponseDto> retrieveInterestPausesByExternalId(String loanExternalId) {
+        return ok(() -> fineractClient.loanInterestPause().retrieveAllLoanInterestPausesByExternalId(loanExternalId));
+    }
+
+    public CommandProcessingResult updateInterestPause(Long loanId, Long variationId, InterestPauseRequestDto request) {
+        return ok(() -> fineractClient.loanInterestPause().updateLoanInterestPause(loanId, variationId, request));
+    }
+
+    public CommandProcessingResult updateInterestPauseByExternalId(String loanExternalId, Long variationId,
+            InterestPauseRequestDto request) {
+        return ok(() -> fineractClient.loanInterestPause().updateLoanInterestPauseByExternalId(loanExternalId, variationId, request));
+    }
+
+    public void deleteInterestPause(Long loanId, Long variationId) {
+        executeVoid(() -> fineractClient.loanInterestPause().deleteLoanInterestPause(loanId, variationId));
+    }
+
+    public void deleteInterestPauseByExternalId(String loanExternalId, Long variationId) {
+        executeVoid(() -> fineractClient.loanInterestPause().deleteLoanInterestPauseByExternalId(loanExternalId, variationId));
     }
 
     public PostLoanProductsResponse createSimpleLoanProduct() {
@@ -187,12 +228,45 @@ public class FeignLoanHelper {
         return ok(() -> fineractClient.loanProducts().updateLoanProduct(productId, request));
     }
 
+    public GetLoanProductsTemplateResponse getLoanProductTemplate(Boolean isProductMixTemplate) {
+        return ok(() -> fineractClient.loanProducts().retrieveTemplateLoanProduct(isProductMixTemplate));
+    }
+
     public PostLoansResponse applyForLoan(PostLoansRequest request) {
         return ok(() -> fineractClient.loans().calculateOrSubmitLoanApplication(request, (String) null));
     }
 
+    public PostLoansResponse calculateLoanSchedule(PostLoansRequest request) {
+        return ok(() -> fineractClient.loans().calculateOrSubmitLoanApplication(request, "calculateLoanSchedule"));
+    }
+
+    public GetLoansResponse retrieveAllLoans(String accountNumber, String associations, Long clientId) {
+        return ok(() -> fineractClient.loans().retrieveAllLoans(null, 0, 10, null, null, accountNumber, associations, clientId, null));
+    }
+
     public PostLoansLoanIdResponse approveLoan(Long loanId, PostLoansLoanIdRequest request) {
         return ok(() -> fineractClient.loans().handleCommandsLoan(loanId, request, Map.of("command", "approve")));
+    }
+
+    public PostLoansDelinquencyActionResponse createLoanDelinquencyAction(Long loanId, String action, String startDate, String endDate) {
+        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest().action(action).startDate(startDate)
+                .endDate(endDate).locale("en").dateFormat("dd MMMM yyyy");
+        return ok(() -> fineractClient.loans().createDelinquencyActionLoan(loanId, request));
+    }
+
+    public PostLoansDelinquencyActionResponse createLoanDelinquencyAction(String loanExternalId, String action, String startDate,
+            String endDate) {
+        PostLoansDelinquencyActionRequest request = new PostLoansDelinquencyActionRequest().action(action).startDate(startDate)
+                .endDate(endDate).locale("en").dateFormat("dd MMMM yyyy");
+        return ok(() -> fineractClient.loans().createDelinquencyActionLoanByExternalId(loanExternalId, request));
+    }
+
+    public List<GetDelinquencyActionsResponse> getLoanDelinquencyActions(Long loanId) {
+        return ok(() -> fineractClient.loans().retrieveDelinquencyActionsLoan(loanId));
+    }
+
+    public List<GetDelinquencyActionsResponse> getLoanDelinquencyActions(String loanExternalId) {
+        return ok(() -> fineractClient.loans().retrieveDelinquencyActionsLoanByExternalId(loanExternalId));
     }
 
     // TODO: Rewrite to use fineract-client instead!
@@ -240,6 +314,10 @@ public class FeignLoanHelper {
                 Map.of("command", "markAsFraud")));
     }
 
+    public PutLoansLoanIdResponse modifyLoanApplication(Long loanId, String command, PutLoansLoanIdRequest request) {
+        return ok(() -> fineractClient.loans().updateLoanApplication(loanId, request, command));
+    }
+
     public PostLoansLoanIdTransactionsResponse closeLoan(Long loanId, PostLoansLoanIdTransactionsRequest request) {
         return ok(() -> fineractClient.loanTransactions().handleCommandsLoanTransaction(loanId, request, Map.of("command", "close")));
     }
@@ -267,6 +345,11 @@ public class FeignLoanHelper {
     public GetLoansLoanIdResponse getLoanDetails(Long loanId) {
         return ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
                 Map.of("associations", "all", "exclude", "guarantors,futureSchedule")));
+    }
+
+    /** Retrieves the loan with an explicit {@code associations} list, e.g. to include {@code futureSchedule}. */
+    public GetLoansLoanIdResponse getLoanDetails(Long loanId, String associations) {
+        return ok(() -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("associations", associations)));
     }
 
     public GetLoansLoanIdResponse getLoanDetailsByExternalId(String loanExternalId) {
@@ -368,6 +451,12 @@ public class FeignLoanHelper {
 
     public PostLoansLoanIdChargesResponse addLoanCharge(Long loanId, PostLoansLoanIdChargesRequest request) {
         return ok(() -> fineractClient.loanCharges().createOrPayLoanCharge(loanId, request, (String) null));
+    }
+
+    public PostLoansLoanIdChargesResponse deactivateOverdueLoanCharges(Long loanId, String fromDueDate) {
+        PostLoansLoanIdChargesRequest request = new PostLoansLoanIdChargesRequest().dueDate(fromDueDate).dateFormat("dd MMMM yyyy")
+                .locale("en");
+        return ok(() -> fineractClient.loanCharges().createOrPayLoanCharge(loanId, request, "deactivateOverdue"));
     }
 
     public List<GetLoansLoanIdChargesChargeIdResponse> getLoanCharges(Long loanId) {
@@ -636,6 +725,10 @@ public class FeignLoanHelper {
 
     public List<GetDelinquencyTagHistoryResponse> getLoanDelinquencyTags(String loanExternalId) {
         return ok(() -> fineractClient.loans().retrieveDelinquencyTagHistoryLoanByExternalId(loanExternalId));
+    }
+
+    public List<GetDelinquencyTagHistoryResponse> getLoanDelinquencyTags(Long loanId) {
+        return ok(() -> fineractClient.loans().retrieveDelinquencyTagHistoryLoan(loanId));
     }
 
     public PostLoansLoanIdChargesResponse addLoanCharge(String loanExternalId, PostLoansLoanIdChargesRequest request) {
