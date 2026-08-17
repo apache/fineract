@@ -98,6 +98,7 @@ public interface WorkingCapitalLoanMapper {
     @Mapping(target = "originators", ignore = true)
     @Mapping(target = "fraud", source = "fraud")
     @Mapping(target = "chargeOffReason", source = "chargeOffReason", qualifiedByName = "chargeOffReasonData")
+    @Mapping(target = "writeOffReason", source = "writeOffReason", qualifiedByName = "writeOffReasonData")
     WorkingCapitalLoanData toData(WorkingCapitalLoan loan);
 
     List<WorkingCapitalLoanData> toDataList(List<WorkingCapitalLoan> loans);
@@ -110,6 +111,11 @@ public interface WorkingCapitalLoanMapper {
     @Named("chargeOffReasonData")
     default CodeValueData chargeOffReasonData(final CodeValue chargeOffReason) {
         return chargeOffReason != null ? chargeOffReason.toData() : null;
+    }
+
+    @Named("writeOffReasonData")
+    default CodeValueData writeOffReasonData(final CodeValue writeOffReason) {
+        return writeOffReason != null ? writeOffReason.toData() : null;
     }
 
     @Named("monetaryCurrencyToCurrencyData")

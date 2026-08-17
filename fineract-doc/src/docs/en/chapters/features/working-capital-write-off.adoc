@@ -1,0 +1,255 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+= Working Capital Loan — Write-Off Transaction
+
+== Purpose
+
+The Write-Off transaction closes a Working Capital Loan that is deemed uncollectible. It recognizes the remaining outstanding as a loss, so the receivable no longer inflates the portfolio.
+
+It ensures:
+
+* Controlled *closure of uncollectible accounts*
+* Recognition of the outstanding balance as a *written-off loss*
+* A reversible action, so a write-off applied in error can be *undone*
+
+== Functionality
+
+* Write-Off is a *terminal* action (unlike Charge-Off, which is a non-monetary tag that keeps the loan `ACTIVE`).
+* It is recorded as a `WRITEOFF` transaction whose amount is the outstanding balance at the write-off date.
+* It results in:
+** Zeroing of all outstanding balances (principal, fees, penalty)
+** Moving the loan to status `CLOSED_WRITTEN_OFF`
+** Triggering of accounting entries for accrual with deferred revenue amortization accounting products
+* Incoming parameters follow the progressive-loan shape.
+
+== Write-Off Handling
+
+* Outstanding is zeroed by moving each portion into a *written-off bucket* (`principalWrittenOff` / `feeWrittenOff` / `penaltyWrittenOff`) on the loan balance. The paid columns are untouched, so the original outstanding can be restored by an undo.
+* Each active loan charge has its unpaid remainder marked as `amountWrittenOff`, so the charge view reports a zero `amountOutstanding` consistent with the zeroed balance. The charge is *not* marked paid.
+* The loan status transitions `ACTIVE -> CLOSED_WRITTEN_OFF`.
+* Audit fields are recorded on the loan: `writtenOffOnDate`, `closedOnDate`, `closedBy`, and the optional `writeOffReason`.
+
+== Undo Write-Off
+
+Reverses a write-off applied in error:
+
+* Reverses the `WRITEOFF` transaction (kept in the ledger, flagged reversed).
+* Transitions the loan back `CLOSED_WRITTEN_OFF -> ACTIVE`.
+* Restores the outstanding balance (clears the written-off buckets, on the loan balance and on each charge).
+* Clears the write-off audit fields.
+
+== Validation Rules
+
+Write-off can be applied only if:
+
+* Loan status is *Active*.
+
+Undo write-off can be applied only if:
+
+* Loan status is *Closed (written-off)*.
+
+=== Write-Off Date
+
+`transactionDate` is *required*. It may be backdated, but the write-off must remain the *latest transaction
+on the loan account*, so two bounds apply:
+
+* It must not be in the future.
+* It must not be earlier than the last user transaction date. System-generated postings (accrual and
+discount-fee amortization) are ignored, so a Close of Business run cannot push the floor forward when there
+was no user activity.
+
+Because the disbursement itself is a user transaction, that lower bound also prevents a write-off from being
+backdated before the loan was disbursed — no separate disbursement-date check is needed.
+
+This matches the date rule already applied to Charge-Off, so both operations behave the same way for the
+same input.
+
+[cols="1,3,2"]
+|===
+|*Operation* |*Rule* |*Error code*
+
+|Write-off |The loan must be active. |`error.msg.wc.loan.is.not.active`
+|Write-off |The write-off date is required. |`validation.msg.WORKINGCAPITALLOAN.transactionDate.cannot.be.blank`
+|Write-off |The write-off date must not be in the future. |`cannot.be.a.future.date`
+|Write-off |The write-off date must not be earlier than the last user transaction date. |`cannot.be.before.last.transaction.date`
+|Undo write-off |The loan must be written off. |`error.msg.wc.loan.is.not.written.off`
+|===
+
+=== Post-write-off lock
+
+A written-off loan is locked: no new transaction can be posted on it and no existing transaction can be undone
+while it stays in `CLOSED_WRITTEN_OFF`. This is stricter than term and progressive loans, which reopen the loan
+on adjustment. The only way out is the undo write-off, which reopens the loan to `ACTIVE` and restores the
+balance; from there the account behaves normally again.
+
+The lock is not a check of its own — it falls out of the status gates each operation already applies, none of
+which admit `CLOSED_WRITTEN_OFF`:
+
+[cols="2,2,2"]
+|===
+|*Operation* |*Allowed statuses* |*Error code*
+
+|Repayment, goodwill credit, payout refund
+|`ACTIVE`, `CLOSED_OBLIGATIONS_MET`, `OVERPAID`
+|`validation.msg.wc.loan.transition.not.allowed`
+
+|Undo transaction
+|`ACTIVE`, `CLOSED_OBLIGATIONS_MET`, `OVERPAID`
+|`undo.transaction.not.allowed.for.loan.status`
+
+|Charge adjustment
+|`ACTIVE`, `CLOSED_OBLIGATIONS_MET`, `OVERPAID`
+|`wc.loan.charge.adjustment.invalid.status`
+
+|Charge-off
+|`ACTIVE`
+|`error.msg.wc.loan.is.not.active`
+
+|Period payment rate change
+|`ACTIVE`
+|`rate.change.not.allowed.for.non.active.loan`
+|===
+
+== API
+
+[source]
+----
+POST /v1/working-capital-loans/{loanId}/transactions?command=writeOff
+POST /v1/working-capital-loans/{loanId}/transactions?command=undoWriteOff
+----
+
+.Write-off request
+[source,json]
+----
+{
+  "transactionDate": "15 January 2026",
+  "writeoffReasonId": 1,
+  "externalId": "WC-WO-001",
+  "dateFormat": "dd MMMM yyyy",
+  "locale": "en",
+  "note": "Uncollectible"
+}
+----
+
+.Undo write-off request
+[source,json]
+----
+{
+  "reversalExternalId": "WC-WO-REV-001",
+  "note": "Written off in error",
+  "locale": "en"
+}
+----
+
+The write-off amount is not supplied by the caller: it is the outstanding balance computed as of the write-off date.
+
+== Read Model
+
+The Working Capital Loan resource exposes the written-off state:
+
+[cols="1,3"]
+|===
+|*Field* |*Description*
+
+|`status`
+|`CLOSED_WRITTEN_OFF` (code `loanStatusType.closed.written.off`) while written off; `ACTIVE` again after an undo.
+
+|`writtenOffOnDate`
+|The write-off date. Cleared by an undo.
+
+|`writeOffReason`
+|The `WriteOffReasons` code value selected at write-off time, when one was provided.
+|===
+
+== Accounting Treatment
+
+Write-Off triggers Journal Entries (JE) when the Working Capital Loan product uses accrual with deferred revenue amortization accounting. Working Capital Loans have no interest concept, so there is no interest leg.
+
+=== Write-Off
+
+[cols="1,2,1,2"]
+|===
+|*Type* |*WCP mapping name* |*GL type* |*Allocation*
+
+|Dr |Losses Written-off |Expense |Principal + Fees + Penalty
+|Cr |Loan Portfolio |Asset |Principal
+|Cr |Fees Receivable |Asset |Fees
+|Cr |Penalties Receivable |Asset |Penalty
+|===
+
+=== Write-Off when the Loan is Charged-Off
+
+When the loan was already charged off, the portfolio and receivable accounts were credited out at charge-off time, so the write-off does not touch them again. Instead it reclassifies the loss out of the charge-off accounts — crediting exactly what the charge-off debited — into Losses Written-off. The net P&L effect is zero; only the presentation of the loss changes:
+
+[cols="1,2,1,2"]
+|===
+|*Type* |*WCP mapping name* |*GL type* |*Allocation*
+
+|Dr |Losses Written-off |Expense |Principal + Fees + Penalty
+|Cr |Charge-off Expense (or Charge-off Fraud Expense when the loan is flagged fraud) |Expense |Principal
+|Cr |Income from Charge-off Fees |Income |Fees
+|Cr |Income from Charge-off Penalties |Income |Penalty
+|===
+
+=== Undo Write-Off
+
+Undo posts an offsetting mirror for each entry above (the ledger stays append-only), which nets the write-off to zero. For a loan that was not charged off:
+
+[cols="1,2,1,2"]
+|===
+|*Type* |*WCP mapping name* |*GL type* |*Allocation*
+
+|Dr |Loan Portfolio |Asset |Principal
+|Dr |Fees Receivable |Asset |Fees
+|Dr |Penalties Receivable |Asset |Penalty
+|Cr |Losses Written-off |Expense |Principal + Fees + Penalty
+|===
+
+For a loan that was charged off, the mirrors flip the reclassification instead: debit the charge-off accounts, credit Losses Written-off.
+
+== Business Events
+
+* `WorkingCapitalLoanWrittenOffBusinessEvent` — emitted after a write-off.
+* `WorkingCapitalLoanUndoWrittenOffBusinessEvent` — emitted after an undo write-off.
+* `WorkingCapitalLoanBalanceChangedBusinessEvent` — emitted by both operations, since the write-off zeroes the
+outstanding balance and the undo restores it.
+* `WorkingCapitalLoanStatusChangedBusinessEvent` — emitted by both operations, for the transition to
+`CLOSED_WRITTEN_OFF` and back to `ACTIVE`.
+* `WorkingCapitalLoanDelinquencyRangeChangeBusinessEvent` — emitted indirectly when the delinquency reprocess
+that follows either operation changes the loan's classification tag.
+
+=== Delinquency
+
+Both operations reprocess the delinquency range schedule. A write-off zeroes the outstanding balance, so every
+open period is capped to what the customer can still owe and the loan classifies as not delinquent, lifting any
+active tag; the undo replays the repayment history against the restored balance and re-derives the
+classification. This is not optional housekeeping: a `CLOSED_WRITTEN_OFF` loan is excluded from the Close of
+Business scope, so without the reprocess a loan that was delinquent at write-off time would stay tagged
+delinquent indefinitely.
+
+== Permissions
+
+[cols="1,1,1"]
+|===
+|*Permission* |*Grouping* |*Action*
+
+|`WRITEOFF_WORKINGCAPITALLOAN` |`WORKINGCAPITALLOAN` |`WRITEOFF`
+|`UNDOWRITEOFF_WORKINGCAPITALLOAN` |`WORKINGCAPITALLOAN` |`UNDOWRITEOFF`
+|===

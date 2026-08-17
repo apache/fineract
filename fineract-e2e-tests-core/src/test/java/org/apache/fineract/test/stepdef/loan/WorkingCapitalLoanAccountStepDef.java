@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -94,6 +95,9 @@ import org.apache.fineract.test.data.FundId;
 import org.apache.fineract.test.data.LoanStatus;
 import org.apache.fineract.test.data.TransactionType;
 import org.apache.fineract.test.data.codevalue.CodeNames;
+import org.apache.fineract.test.data.codevalue.CodeValue;
+import org.apache.fineract.test.data.codevalue.CodeValueResolver;
+import org.apache.fineract.test.data.codevalue.DefaultCodeValue;
 import org.apache.fineract.test.data.paymenttype.DefaultPaymentType;
 import org.apache.fineract.test.data.paymenttype.PaymentTypeResolver;
 import org.apache.fineract.test.data.workingcapitalproduct.DefaultWorkingCapitalLoanProduct;
@@ -140,6 +144,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     private final BusinessDateHelper businessDateHelper;
     private final JournalEntriesStepDef journalEntriesStepDef;
     private final ClientRequestFactory clientRequestFactory;
+    private final CodeValueResolver codeValueResolver;
 
     @Given("Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:")
     public void createClientAndDisburseWorkingCapitalLoanWithData(final DataTable table) {
@@ -1193,6 +1198,81 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertThat(loanStatusActualValue)
                 .as(ErrorMessageHelper.wrongLoanStatus(resourceId, loanStatusActualValue.intValue(), loanStatusExpectedValue.intValue()))
                 .isEqualTo(loanStatusExpectedValue);
+    }
+
+    @When("Admin writes off the Working Capital loan on {string}")
+    public void writeOffWorkingCapitalLoan(final String transactionDate) {
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate);
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "writeOff",
+                request));
+    }
+
+    @And("Admin does write-off the Working Capital loan on {string} with write off reason: {string}")
+    public void writeOffWorkingCapitalLoanWithReason(String transactionDate, String writeOffReason) {
+        final Long writeOffReasonCodeId = codeHelper.retrieveCodeByName("WriteOffReasons").getId();
+        final CodeValue writeOffReasonCodeValueBadDebt = DefaultCodeValue.valueOf(writeOffReason);
+        long writeOffReasonId = codeValueResolver.resolve(writeOffReasonCodeId, writeOffReasonCodeValueBadDebt);
+
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate).writeoffReasonId(writeOffReasonId);
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "writeOff",
+                request));
+    }
+
+    @When("Admin writes off the Working Capital loan on {string} with external-id")
+    public void writeOffWorkingCapitalLoanExternalId(final String transactionDate) {
+        final Long loanId = getCreatedLoanId();
+        final String loanExternalId = retrieveLoanExternalId(loanId);
+
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate).externalId(UUID.randomUUID().toString());
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionByExternalId(loanExternalId,
+                "writeOff", request));
+    }
+
+    @Then("Initiating a write-off the Working Capital loan on {string} results an error with the following data:")
+    public void initiateWriteOffWorkingCapitalError(final String transactionDate, final DataTable table) {
+        final Long loanId = getCreatedLoanId();
+
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate);
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "writeOff", request));
+        if (table != null) {
+            verifyErrorResponse(exception, table);
+        }
+    }
+
+    @When("Admin undoes the write-off on the Working Capital loan")
+    public void undoWriteOffWorkingCapitalLoan() {
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest();
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(getCreatedLoanId(),
+                "undoWriteOff", request));
+    }
+
+    @When("Admin undoes the write-off on the Working Capital loan with external-id")
+    public void undoWriteOffWorkingCapitalLoanExternalId() {
+        final Long loanId = getCreatedLoanId();
+        final String externalId = Utils.randomStringGenerator("TestUndoWriteOffExtId_", 10);
+
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().reversalExternalId(externalId);
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId, "undoWriteOff", request));
+    }
+
+    @Then("Initiating write-off undo of the Working Capital loan results an error with the following data:")
+    public void initiateWriteOffUndoWorkingCapitalError(final DataTable table) {
+        final Long loanId = getCreatedLoanId();
+
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest();
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "undoWriteOff", request));
+        if (table != null) {
+            verifyErrorResponse(exception, table);
+        }
     }
 
     @And("Admin successfully disburse the Working Capital loan on {string} with {string} EUR transaction amount")
@@ -2938,6 +3018,18 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final PostWorkingCapitalLoanTransactionsResponse response = executeRepaymentLikeById(loanId, "repayment", repaymentRequest);
         Assertions.assertNotNull(loanDetails.getBalance());
         validateRepaymentResponse(response, totalOutstanding.doubleValue(), transactionDate, loanId);
+    }
+
+    @Then("Customer fails to make repayment on {string} with {double} EUR transaction amount outcomes with error message")
+    public void repaymentWCLoanFailure(final String transactionDate, final double transactionAmount) {
+        final Long loanId = getCreatedLoanId();
+        final PostWorkingCapitalLoanTransactionsRequest repaymentRequest = buildRepaymentRequest(transactionDate, transactionAmount, null);
+
+        String errorMessage = "Repayment is allowed only for active/closed obligations met/overpaid loans";
+        CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "repayment", repaymentRequest));
+        assertThat(exception.getStatus()).as(errorMessage).isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).contains(errorMessage);
     }
 
     @Then("Customer makes credit balance refund on {string} with {double} transaction amount on Working Capital loan")

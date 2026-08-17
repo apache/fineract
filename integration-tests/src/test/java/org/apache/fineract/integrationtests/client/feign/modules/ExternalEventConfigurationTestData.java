@@ -175,7 +175,9 @@ public final class ExternalEventConfigurationTestData {
             "WorkingCapitalLoanUndoDisbursalBusinessEvent", //
             "WorkingCapitalLoanStatusChangedBusinessEvent", //
             "WorkingCapitalLoanBalanceChangedBusinessEvent", //
-            "WorkingCapitalLoanDelinquencyRangeChangeBusinessEvent"//
+            "WorkingCapitalLoanDelinquencyRangeChangeBusinessEvent", //
+            "WorkingCapitalLoanWrittenOffBusinessEvent", //
+            "WorkingCapitalLoanUndoWrittenOffBusinessEvent"//
     );
 
     private ExternalEventConfigurationTestData() {}

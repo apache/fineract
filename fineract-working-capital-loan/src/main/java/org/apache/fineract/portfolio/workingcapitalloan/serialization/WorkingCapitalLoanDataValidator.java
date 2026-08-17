@@ -116,6 +116,12 @@ public class WorkingCapitalLoanDataValidator {
                     WorkingCapitalLoanConstants.relatedResourceIdParamName, WorkingCapitalLoanConstants.paymentDetailsParamName,
                     WorkingCapitalLoanConstants.externalIdParameterName, WorkingCapitalLoanConstants.transactionDateParamName));
     private static final Set<String> CREDIT_BALANCE_REFUND_SUPPORTED_PARAMETERS = new HashSet<>(REPAYMENT_SUPPORTED_PARAMETERS);
+    // Incoming write-off parameters follow the progressive-loan shape.
+    private static final Set<String> WRITE_OFF_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
+            WorkingCapitalLoanConstants.transactionDateParamName, WorkingCapitalLoanConstants.writeoffReasonIdParamName,
+            WorkingCapitalLoanConstants.noteParamName, WorkingCapitalLoanConstants.externalIdParameterName));
+    private static final Set<String> UNDO_WRITE_OFF_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
+            WorkingCapitalLoanConstants.reversalExternalIdParamName, WorkingCapitalLoanConstants.noteParamName));
 
     private static final Set<String> CHARGE_OFF_SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("locale", "dateFormat",
             WorkingCapitalLoanConstants.transactionDateParamName, WorkingCapitalLoanConstants.chargeOffReasonIdParamName,
@@ -735,6 +741,81 @@ public class WorkingCapitalLoanDataValidator {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed", errorMessage,
                     WorkingCapitalLoanConstants.loanStatusParamName);
         }
+    }
+
+    public void validateWriteOff(final JsonCommand command, final WorkingCapitalLoan loan) {
+        final String json = command.json();
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, WRITE_OFF_SUPPORTED_PARAMETERS);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
+
+        if (loan.getLoanStatus() == null || !loan.getLoanStatus().isActive()) {
+            baseDataValidator.reset().parameter("loanStatus").failWithCode("error.msg.wc.loan.is.not.active");
+        }
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.transactionDateParamName,
+                element);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate).notNull();
+        if (transactionDate != null) {
+            // Write-off can be backdated, but not into the future nor before the last transaction: it must remain the
+            // latest transaction on the loan account.
+            if (DateUtils.isDateInTheFuture(transactionDate)) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate)
+                        .failWithCode("cannot.be.a.future.date");
+            }
+            final LocalDate lastUserTransactionDate = this.transactionFinder.getLastUserTransactionDate(loan).orElse(null);
+            if (lastUserTransactionDate != null && DateUtils.isBefore(transactionDate, lastUserTransactionDate)) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName).value(transactionDate)
+                        .failWithCode("cannot.be.before.last.transaction.date");
+            }
+        }
+
+        final Long writeOffReasonId = this.fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanConstants.writeoffReasonIdParamName,
+                element);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.writeoffReasonIdParamName).value(writeOffReasonId).ignoreIfNull()
+                .integerGreaterThanZero();
+
+        final String note = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.noteParamName, element);
+        baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.noteParamName).value(note).ignoreIfNull()
+                .notExceedingLengthOf(NOTE_MAX_LENGTH);
+
+        validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.externalIdParameterName);
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateUndoWriteOff(final JsonCommand command, final WorkingCapitalLoan loan) {
+        final String json = command.json();
+        final boolean hasBody = StringUtils.isNotBlank(json);
+        if (hasBody) {
+            final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+            this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, UNDO_WRITE_OFF_SUPPORTED_PARAMETERS);
+        }
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
+
+        if (loan.getLoanStatus() == null || !loan.getLoanStatus().isClosedWrittenOff()) {
+            baseDataValidator.reset().parameter("loanStatus").failWithCode("error.msg.wc.loan.is.not.written.off");
+        }
+
+        if (hasBody) {
+            final JsonElement element = this.fromApiJsonHelper.parse(json);
+            validateTransactionExternalId(baseDataValidator, element, WorkingCapitalLoanConstants.reversalExternalIdParamName);
+            final String note = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.noteParamName, element);
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.noteParamName).value(note).ignoreIfNull()
+                    .notExceedingLengthOf(NOTE_MAX_LENGTH);
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     public void validateCreditBalanceRefund(final String json, final WorkingCapitalLoan loan) {

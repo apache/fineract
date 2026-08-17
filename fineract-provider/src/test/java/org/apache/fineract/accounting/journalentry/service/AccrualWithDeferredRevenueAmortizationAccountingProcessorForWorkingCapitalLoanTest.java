@@ -34,6 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,9 +47,13 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
+import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
+import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -139,9 +144,19 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
     private GLAccount chargeOffExpenseGLAccount;
     @Mock
     private GLAccount chargeOffFraudExpenseGLAccount;
+    @Mock
+    private GLAccount lossesWrittenOffGLAccount;
+    @Mock
+    private GLAccount writeOffReasonExpenseGLAccount;
+    @Mock
+    private CodeValue writeOffReason;
+    @Mock
+    private ProductToGLAccountMapping writeOffReasonMapping;
 
     @BeforeEach
     void setUp() {
+        ThreadLocalContextUtil.setTenant(new FineractPlatformTenant(1L, "default", "Default", "Asia/Kolkata", null));
+        MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(
                 Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.of(2026, 5, 1), BusinessDateType.COB_DATE, LocalDate.of(2026, 4, 30))));
 
@@ -181,6 +196,8 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
                 .when(helper.getLinkedGLAccountForWorkingCapitalLoanProduct(eq(PRODUCT_ID),
                         eq(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES.getValue()), any()))
                 .thenReturn(incomeFromChargeOffFeesGLAccount);
+        lenient().when(helper.getLinkedGLAccountForWorkingCapitalLoanProduct(eq(PRODUCT_ID),
+                eq(CashAccountsForLoan.LOSSES_WRITTEN_OFF.getValue()), any())).thenReturn(lossesWrittenOffGLAccount);
     }
 
     private void mockChargeAdjustmentRelation(final boolean penaltyCharge) {
@@ -194,6 +211,7 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
 
     @AfterEach
     void tearDown() {
+        MoneyHelper.clearCacheForTenant("default");
         ThreadLocalContextUtil.reset();
     }
 
@@ -292,6 +310,65 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
                 any(), eq(new BigDecimal("1000")), isNull());
         verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(fundSourceGLAccount), eq(LOAN_ID), eq(TXN_ID),
                 any(), eq(new BigDecimal("6000")), isNull());
+    }
+
+    @Test
+    void testWriteOffDebitsReasonMappedExpenseAccount() {
+        when(txn.getTypeOf()).thenReturn(LoanTransactionType.WRITEOFF);
+        when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("1000"));
+        when(allocation.getFeeChargesPortion()).thenReturn(new BigDecimal("300"));
+        when(allocation.getPenaltyChargesPortion()).thenReturn(new BigDecimal("200"));
+        when(loan.getWriteOffReason()).thenReturn(writeOffReason);
+        when(writeOffReason.getId()).thenReturn(55L);
+        when(helper.getWriteOffMappingByCodeValue(PRODUCT_ID, PortfolioProductType.WORKING_CAPITAL_LOAN, 55L))
+                .thenReturn(writeOffReasonMapping);
+        when(writeOffReasonMapping.getGlAccount()).thenReturn(writeOffReasonExpenseGLAccount);
+
+        processor.postJournalEntries(loan, txn, allocation, false);
+
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(writeOffReasonExpenseGLAccount),
+                eq(LOAN_ID), eq(TXN_ID), any(), eq(new BigDecimal("1500")), isNull());
+        verify(helper, never()).createDebitJournalEntryForWorkingCapitalLoan(any(), any(), eq(lossesWrittenOffGLAccount), any(), any(),
+                any(), any(), any());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(loanPortfolioGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("1000")), isNull());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(feesReceivableGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("300")), isNull());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(penaltiesReceivableGLAccount),
+                eq(LOAN_ID), eq(TXN_ID), any(), eq(new BigDecimal("200")), isNull());
+    }
+
+    @Test
+    void testWriteOffWithUnmappedReasonFallsBackToLossesWrittenOff() {
+        when(txn.getTypeOf()).thenReturn(LoanTransactionType.WRITEOFF);
+        when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("1000"));
+        when(allocation.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(loan.getWriteOffReason()).thenReturn(writeOffReason);
+        when(writeOffReason.getId()).thenReturn(55L);
+        when(helper.getWriteOffMappingByCodeValue(PRODUCT_ID, PortfolioProductType.WORKING_CAPITAL_LOAN, 55L)).thenReturn(null);
+
+        processor.postJournalEntries(loan, txn, allocation, false);
+
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(lossesWrittenOffGLAccount),
+                eq(LOAN_ID), eq(TXN_ID), any(), eq(new BigDecimal("1000")), isNull());
+        verify(helper).createCreditJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(loanPortfolioGLAccount), eq(LOAN_ID),
+                eq(TXN_ID), any(), eq(new BigDecimal("1000")), isNull());
+    }
+
+    @Test
+    void testWriteOffWithoutReasonDebitsLossesWrittenOff() {
+        when(txn.getTypeOf()).thenReturn(LoanTransactionType.WRITEOFF);
+        when(allocation.getPrincipalPortion()).thenReturn(new BigDecimal("1000"));
+        when(allocation.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(allocation.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
+        when(loan.getWriteOffReason()).thenReturn(null);
+
+        processor.postJournalEntries(loan, txn, allocation, false);
+
+        verify(helper, never()).getWriteOffMappingByCodeValue(any(), any(), any());
+        verify(helper).createDebitJournalEntryForWorkingCapitalLoan(eq(office), eq(CURRENCY_CODE), eq(lossesWrittenOffGLAccount),
+                eq(LOAN_ID), eq(TXN_ID), any(), eq(new BigDecimal("1000")), isNull());
     }
 
     @Test

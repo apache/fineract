@@ -28,6 +28,7 @@ import org.apache.fineract.client.models.PostCodeValuesDataRequest;
 public class FeignCodeHelper {
 
     private static final String CHARGE_OFF_REASONS_CODE_NAME = "ChargeOffReasons";
+    private static final String WRITE_OFF_REASONS_CODE_NAME = "WriteOffReasons";
 
     private final FineractFeignClient fineractClient;
 
@@ -37,6 +38,13 @@ public class FeignCodeHelper {
 
     public Long createChargeOffCodeValue(String value, Integer position) {
         GetCodesResponse code = ok(() -> fineractClient.codes().retrieveOneCodeByName(CHARGE_OFF_REASONS_CODE_NAME));
+        PostCodeValueDataResponse response = ok(() -> fineractClient.codeValues().createCodeValue(code.getId(),
+                new PostCodeValuesDataRequest().name(value).position(position).description(value).isActive(true)));
+        return response.getSubResourceId();
+    }
+
+    public Long createWriteOffCodeValue(String value, Integer position) {
+        GetCodesResponse code = ok(() -> fineractClient.codes().retrieveOneCodeByName(WRITE_OFF_REASONS_CODE_NAME));
         PostCodeValueDataResponse response = ok(() -> fineractClient.codeValues().createCodeValue(code.getId(),
                 new PostCodeValuesDataRequest().name(value).position(position).description(value).isActive(true)));
         return response.getSubResourceId();

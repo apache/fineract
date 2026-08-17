@@ -81,6 +81,9 @@ public class WorkingCapitalLoanCharge extends AbstractAuditableWithUTCDateTimeCu
     @Column(name = "amount_paid", scale = 6, precision = 19)
     private BigDecimal amountPaid;
 
+    @Column(name = "amount_written_off", scale = 6, precision = 19, nullable = false)
+    private BigDecimal amountWrittenOff = BigDecimal.ZERO;
+
     @Column(name = "is_penalty", nullable = false)
     private boolean penaltyCharge = false;
 
@@ -102,7 +105,7 @@ public class WorkingCapitalLoanCharge extends AbstractAuditableWithUTCDateTimeCu
                 getChargePaymentMode().getCode(), String.valueOf(getChargePaymentMode().getValue()));
 
         return WorkingCapitalLoanChargeData.builder().id(getId()).chargeId(getCharge().getId()).name(getCharge().getName())
-                .currency(getCharge().toData().getCurrency()).amount(amount).amountPaid(amountPaid)
+                .currency(getCharge().toData().getCurrency()).amount(amount).amountPaid(amountPaid).amountWrittenOff(amountWrittenOff)
                 .amountOutstanding(getAmountOutstanding()).chargeTimeType(chargeTimeTypeData).submittedOnDate(submittedOnDate)
                 .dueDate(dueDate).chargeCalculationType(chargeCalculationTypeData).penalty(penaltyCharge)
                 .chargePaymentMode(chargePaymentModeData).paid(paid).loanId(loan.getId()).externalId(externalId)
@@ -110,7 +113,7 @@ public class WorkingCapitalLoanCharge extends AbstractAuditableWithUTCDateTimeCu
     }
 
     public BigDecimal getAmountOutstanding() {
-        return MathUtil.subtract(getAmount(), getAmountPaid());
+        return MathUtil.subtract(getAmount(), getAmountPaid(), getAmountWrittenOff());
     }
 
     public static WorkingCapitalLoanCharge build(WorkingCapitalLoan loan, ExternalId externalId, Charge charge, BigDecimal amount,
@@ -129,6 +132,7 @@ public class WorkingCapitalLoanCharge extends AbstractAuditableWithUTCDateTimeCu
         res.setSubmittedOnDate(submittedOnDate);
         res.setAmount(amount);
         res.setAmountPaid(BigDecimal.ZERO);
+        res.setAmountWrittenOff(BigDecimal.ZERO);
         return res;
     }
 }

@@ -188,7 +188,8 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String name;
     }
 
-    @Schema(description = "Request for transaction command: repayment, creditBalanceRefund, discountFee, or discountFeeAdjustment")
+    @Schema(description = "Request for transaction command: repayment, creditBalanceRefund, discountFee, discountFeeAdjustment, "
+            + "chargeOff, undoChargeOff, writeOff or undoWriteOff")
     public static final class PostWorkingCapitalLoanTransactionsRequest {
 
         private PostWorkingCapitalLoanTransactionsRequest() {}
@@ -207,6 +208,10 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public Long classificationId;
         @Schema(example = "7", description = "Optional charge-off reason code value id (command=chargeOff)")
         public Long chargeOffReasonId;
+        @Schema(example = "3", description = "Optional write-off reason code value id (command=writeOff)")
+        public Long writeoffReasonId;
+        @Schema(example = "undo-write-off-ext-001", description = "Optional external id for the reversal (command=undoChargeOff, undoWriteOff)")
+        public String reversalExternalId;
         @Schema(example = "Repayment note")
         public String note;
         @Schema(example = "repayment-ext-001")

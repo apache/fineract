@@ -16,19 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.workingcapitalloan.domain;
+package org.apache.fineract.portfolio.workingcapitalloan.service;
 
-public enum WorkingCapitalLoanEvent {
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 
-    LOAN_APPROVED, //
-    LOAN_APPROVAL_UNDO, //
-    LOAN_REJECTED, //
-    LOAN_DISBURSED, //
-    LOAN_DISBURSAL_UNDO, //
-    LOAN_REPAID_IN_FULL, //
-    LOAN_OVERPAID, //
-    LOAN_REOPENED, //
-    LOAN_CREDIT_BALANCE_REFUND_IN_FULL, //
-    LOAN_WRITTEN_OFF, //
-    LOAN_WRITTEN_OFF_UNDO //
+/**
+ * Write-off is terminal: it zeroes the outstanding balance, closes the loan as {@code CLOSED_WRITTEN_OFF}, and posts
+ * the write-off journal entries. It can be undone, which reopens the loan and restores the balance.
+ */
+public interface WorkingCapitalLoanWriteOffWriteService {
+
+    CommandProcessingResult writeOff(Long loanId, JsonCommand command);
+
+    CommandProcessingResult undoWriteOff(Long loanId, JsonCommand command);
 }

@@ -236,6 +236,10 @@ public class WorkingCapitalLoanTransactionsApiResource {
             commandRequest = builder.chargeOffWorkingCapitalLoanTransaction(resolvedLoanId).build();
         } else if (CommandParameterUtil.is(commandParam, WorkingCapitalLoanConstants.UNDO_CHARGE_OFF_LOAN_COMMAND)) {
             commandRequest = builder.undoChargeOffWorkingCapitalLoanTransaction(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, WorkingCapitalLoanConstants.WRITE_OFF_LOAN_COMMAND)) {
+            commandRequest = builder.writeOffWorkingCapitalLoanTransaction(resolvedLoanId).build();
+        } else if (CommandParameterUtil.is(commandParam, WorkingCapitalLoanConstants.UNDO_WRITE_OFF_LOAN_COMMAND)) {
+            commandRequest = builder.undoWriteOffWorkingCapitalLoanTransaction(resolvedLoanId).build();
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }

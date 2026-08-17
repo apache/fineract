@@ -41,12 +41,12 @@ public interface WorkingCapitalLoanChargeRepository
 
     @Query("select new org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanChargeData("
             + "lc.id, c.id, c.name, lc.chargeTimeType, lc.submittedOnDate, lc.dueDate, lc.chargeCalculationType, oc.code, oc.name, oc.decimalPlaces, oc.inMultiplesOf, oc.displaySymbol,"
-            + " oc.nameCode, lc.amount, lc.amountPaid, lc.penaltyCharge, lc.chargePaymentMode, lc.paid, l.id, lc.externalId, l.externalId) from WorkingCapitalLoanCharge lc join fetch lc.charge c join OrganisationCurrency oc on c.currencyCode = oc.code join fetch lc.loan l where l.id = :loanId and lc.id = :id")
+            + " oc.nameCode, lc.amount, lc.amountPaid, lc.amountWrittenOff, lc.penaltyCharge, lc.chargePaymentMode, lc.paid, l.id, lc.externalId, l.externalId) from WorkingCapitalLoanCharge lc join fetch lc.charge c join OrganisationCurrency oc on c.currencyCode = oc.code join fetch lc.loan l where l.id = :loanId and lc.id = :id")
     WorkingCapitalLoanChargeData retrieveLoanChargeDetails(@Param("id") Long id, @Param("loanId") Long loanId);
 
     @Query("select new org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanChargeData("
             + "lc.id, c.id, c.name, lc.chargeTimeType, lc.submittedOnDate, lc.dueDate, lc.chargeCalculationType, oc.code, oc.name, oc.decimalPlaces, oc.inMultiplesOf, oc.displaySymbol,"
-            + " oc.nameCode, lc.amount, lc.amountPaid, lc.penaltyCharge, lc.chargePaymentMode, lc.paid, l.id, lc.externalId, l.externalId) from WorkingCapitalLoanCharge lc join fetch lc.charge c join OrganisationCurrency oc on c.currencyCode = oc.code join fetch lc.loan l where l.id = :loanId and lc.active = true order by lc.chargeTimeType asc, lc.dueDate asc, lc.penaltyCharge asc")
+            + " oc.nameCode, lc.amount, lc.amountPaid, lc.amountWrittenOff, lc.penaltyCharge, lc.chargePaymentMode, lc.paid, l.id, lc.externalId, l.externalId) from WorkingCapitalLoanCharge lc join fetch lc.charge c join OrganisationCurrency oc on c.currencyCode = oc.code join fetch lc.loan l where l.id = :loanId and lc.active = true order by lc.chargeTimeType asc, lc.dueDate asc, lc.penaltyCharge asc")
     List<WorkingCapitalLoanChargeData> retrieveLoanCharges(@Param("loanId") Long loanId);
 
     /**
