@@ -29,6 +29,7 @@ import org.apache.fineract.infrastructure.core.service.PaginationHelper;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksWritePlatformService;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.apache.fineract.infrastructure.security.service.InputValidator;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
 import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
@@ -73,10 +74,10 @@ public class GroupConfiguration {
     public CenterReadPlatformService centerReadPlatformService(JdbcTemplate jdbcTemplate, PlatformSecurityContext context,
             ClientReadPlatformService clientReadPlatformService, OfficeReadPlatformService officeReadPlatformService,
             StaffReadService staffReadPlatformService, CodeValueReadPlatformService codeValueReadPlatformService,
-            ConfigurationDomainService configurationDomainService, ColumnValidator columnValidator, PaginationHelper paginationHelper,
+            ConfigurationDomainService configurationDomainService, InputValidator inputValidator, PaginationHelper paginationHelper,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationParametersDataValidator paginationParametersDataValidator) {
         return new CenterReadPlatformServiceImpl(jdbcTemplate, context, clientReadPlatformService, officeReadPlatformService,
-                staffReadPlatformService, codeValueReadPlatformService, configurationDomainService, columnValidator, paginationHelper,
+                staffReadPlatformService, codeValueReadPlatformService, configurationDomainService, inputValidator, paginationHelper,
                 sqlGenerator, paginationParametersDataValidator);
     }
 
