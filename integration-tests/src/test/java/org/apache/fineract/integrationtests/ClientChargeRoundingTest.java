@@ -31,12 +31,12 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.CurrencyConfigurationData;
 import org.apache.fineract.client.models.CurrencyUpdateRequest;
 import org.apache.fineract.client.models.GetClientsChargesPageItems;
 import org.apache.fineract.client.models.GetClientsClientIdChargesResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -60,7 +60,7 @@ public class ClientChargeRoundingTest extends BaseLoanIntegrationTest {
 
     @Test
     public void shouldRoundUsdClientChargeTo_TwoDecimalPlaces() throws Exception {
-        PostChargesResponse chargesResponse = createFlatClientCharge(19.876, "USD");
+        ChargeCreateResponse chargesResponse = createFlatClientCharge(19.876, "USD");
 
         Integer appliedChargeId = applyChargeToClient(clientId, chargesResponse.getResourceId(), new BigDecimal("19.876"));
 
@@ -74,7 +74,7 @@ public class ClientChargeRoundingTest extends BaseLoanIntegrationTest {
 
     @Test
     public void shouldRoundJpyClientChargeTo_ZeroDecimalPlaces() throws Exception {
-        PostChargesResponse chargesResponse = createFlatClientCharge(19.8, "JPY");
+        ChargeCreateResponse chargesResponse = createFlatClientCharge(19.8, "JPY");
 
         Integer appliedChargeId = applyChargeToClient(clientId, chargesResponse.getResourceId(), new BigDecimal("19.8"));
 
@@ -88,7 +88,7 @@ public class ClientChargeRoundingTest extends BaseLoanIntegrationTest {
 
     @Test
     public void shouldRoundUpJpyClientCharge_whenValueIsAboveHalfTo_ZeroDecimalPlaces() throws Exception {
-        PostChargesResponse chargesResponse = createFlatClientCharge(0.55, "JPY");
+        ChargeCreateResponse chargesResponse = createFlatClientCharge(0.55, "JPY");
 
         Integer appliedChargeId = applyChargeToClient(clientId, chargesResponse.getResourceId(), new BigDecimal("0.55"));
 
@@ -102,7 +102,7 @@ public class ClientChargeRoundingTest extends BaseLoanIntegrationTest {
 
     @Test
     public void shouldFailToAddJpyClientCharge_whenRoundedToZero() throws Exception {
-        PostChargesResponse chargesResponse = createFlatClientCharge(0.5, "JPY");
+        ChargeCreateResponse chargesResponse = createFlatClientCharge(0.5, "JPY");
 
         Response response = applyChargeToClientRaw(clientId, chargesResponse.getResourceId(), new BigDecimal("0.5"));
 
@@ -116,9 +116,9 @@ public class ClientChargeRoundingTest extends BaseLoanIntegrationTest {
     // HELPERS
     // -----------------------------
 
-    private PostChargesResponse createFlatClientCharge(double amount, String currencyCode) {
+    private ChargeCreateResponse createFlatClientCharge(double amount, String currencyCode) {
         String uniqueChargeName = "Client Charge Flat " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(3) // CLIENT
+        return chargesHelper.createCharges(new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(3) // CLIENT
                 .chargeTimeType(2).chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode(currencyCode).locale("en").active(true).penalty(false));
     }

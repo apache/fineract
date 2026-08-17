@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
@@ -1503,7 +1503,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest extends FeignLoanTestBas
     }
 
     private Long createSpecifiedDueDateCharge(double amount, boolean penalty) {
-        ChargeRequest request = ChargeRequestBuilders.loanSpecifiedDueDateFee(amount);
+        ChargeCreateRequest request = ChargeRequestBuilders.loanSpecifiedDueDateFee(amount);
         if (penalty) {
             request.penalty(true);
         }

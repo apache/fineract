@@ -37,8 +37,8 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
@@ -687,7 +687,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             inlineLoanCOBHelper.executeInlineCOB(List.of(loanId));
 
             // create charge
-            PostChargesResponse chargeResult = createCharge(10.0);
+            ChargeCreateResponse chargeResult = createCharge(10.0);
             Assertions.assertNotNull(chargeResult);
             Long chargeId = chargeResult.getResourceId();
             Assertions.assertNotNull(chargeId);
@@ -733,7 +733,7 @@ public class LoanInterestRecalculationCOBTest extends BaseLoanIntegrationTest {
             Long loanId = loanIdRef.get();
 
             // create charge
-            PostChargesResponse chargeResult = createCharge(10.0);
+            ChargeCreateResponse chargeResult = createCharge(10.0);
             Assertions.assertNotNull(chargeResult);
             Long chargeId = chargeResult.getResourceId();
             Assertions.assertNotNull(chargeId);

@@ -60,6 +60,7 @@ import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.BusinessDateUpdateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
@@ -71,7 +72,6 @@ import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.LoanApprovedAmountHistoryData;
 import org.apache.fineract.client.models.LoanPointInTimeData;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
@@ -1489,12 +1489,12 @@ public abstract class BaseLoanIntegrationTest extends IntegrationTest {
         return response.getResourceId();
     }
 
-    protected PostChargesResponse createCharge(Double amount) {
+    protected ChargeCreateResponse createCharge(Double amount) {
         String payload = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, amount.toString(), false);
         return ChargesHelper.createLoanCharge(requestSpec, responseSpec, payload);
     }
 
-    protected PostChargesResponse createCharge(Double amount, String currencyCode) {
+    protected ChargeCreateResponse createCharge(Double amount, String currencyCode) {
         String payload = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, amount.toString(), false,
                 currencyCode);
         return ChargesHelper.createLoanCharge(requestSpec, responseSpec, payload);

@@ -29,9 +29,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.GetChargesResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
+import org.apache.fineract.client.models.ChargeData;
 import org.apache.fineract.client.models.PostTaxesComponentsRequest;
 import org.apache.fineract.client.models.PostTaxesComponentsResponse;
 import org.apache.fineract.client.models.PostTaxesGroupRequest;
@@ -345,17 +345,17 @@ public class ChargesTest {
         final BigDecimal minCapVal = BigDecimal.valueOf(23);
         final BigDecimal maxCapVal = BigDecimal.valueOf(45);
 
-        final PostChargesResponse feeCharge = chargesHelper.createCharges(
-                new ChargeRequest().penalty(false).amount(9.0).chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())
-                        .chargeTimeType(ChargeTimeType.DISBURSEMENT.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
-                        .currencyCode("USD").name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5))
-                        .chargeAppliesTo(1).locale("en").active(true).minCap(minCapVal).maxCap(maxCapVal));
+        final ChargeCreateResponse feeCharge = chargesHelper.createCharges(new ChargeCreateRequest().penalty(false).amount(9.0)
+                .chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())
+                .chargeTimeType(ChargeTimeType.DISBURSEMENT.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
+                .currencyCode("USD").name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5))
+                .chargeAppliesTo(1).locale("en").active(true).minCap(minCapVal).maxCap(maxCapVal));
 
         Assertions.assertNotNull(feeCharge);
         final Long chargeId = feeCharge.getResourceId();
         Assertions.assertNotNull(chargeId);
 
-        final GetChargesResponse chargeResponseData = chargesHelper.retrieveCharge(chargeId);
+        final ChargeData chargeResponseData = chargesHelper.retrieveCharge(chargeId);
         Assertions.assertNotNull(chargeResponseData);
         Assertions.assertEquals(minCapVal.stripTrailingZeros(), chargeResponseData.getMinCap().stripTrailingZeros());
         Assertions.assertEquals(maxCapVal.stripTrailingZeros(), chargeResponseData.getMaxCap().stripTrailingZeros());
@@ -380,17 +380,17 @@ public class ChargesTest {
         final PostTaxesGroupResponse taxGroupResponse = TaxGroupHelper.createTaxGroup(taxGroupRequest);
         Assertions.assertNotNull(taxGroupResponse);
 
-        final PostChargesResponse feeCharge = chargesHelper.createCharges(
-                new ChargeRequest().penalty(false).amount(9.0).chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())
-                        .chargeTimeType(ChargeTimeType.DISBURSEMENT.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
-                        .currencyCode("USD").name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5))
-                        .chargeAppliesTo(1).locale("en").active(true).taxGroupId(taxGroupResponse.getResourceId()));
+        final ChargeCreateResponse feeCharge = chargesHelper.createCharges(new ChargeCreateRequest().penalty(false).amount(9.0)
+                .chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue())
+                .chargeTimeType(ChargeTimeType.DISBURSEMENT.getValue()).chargePaymentMode(ChargePaymentMode.REGULAR.getValue())
+                .currencyCode("USD").name(Utils.randomStringGenerator("FEE_" + Calendar.getInstance().getTimeInMillis(), 5))
+                .chargeAppliesTo(1).locale("en").active(true).taxGroupId(taxGroupResponse.getResourceId()));
 
         Assertions.assertNotNull(feeCharge);
         final Long chargeId = feeCharge.getResourceId();
         Assertions.assertNotNull(chargeId);
 
-        final GetChargesResponse chargeResponseData = chargesHelper.retrieveCharge(chargeId);
+        final ChargeData chargeResponseData = chargesHelper.retrieveCharge(chargeId);
         Assertions.assertNotNull(chargeResponseData);
         Assertions.assertNotNull(chargeResponseData.getTaxGroup());
         Assertions.assertEquals(chargeResponseData.getTaxGroup().getId(), taxGroupResponse.getResourceId());

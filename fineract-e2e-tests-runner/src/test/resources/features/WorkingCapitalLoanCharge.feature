@@ -35,20 +35,20 @@ Feature: WorkingCapitalLoanChargesFeature
   @TestRailId:C80959
   Scenario: Verify Working Capital Charge product - UC6: invalid chargeTimeType Disbursement fails (Negative)
     Then Creating working capital loan charge with "DISBURSEMENT" chargeTimeType and "FLAT" chargeCalculationType results an error with the following data:
-      | httpCode | errorMessage                                          |
-      | 400      | The parameter `chargeTimeType` must be one of [ 2 ] . |
+      | httpCode | errorMessage                                                                                 |
+      | 400      | The parameter 'chargeTimeType' is not one of the values supported for this 'chargeAppliesTo' |
 
   @TestRailId:C80960
   Scenario: Verify Working Capital Charge product - UC7: invalid chargeCalculationType Percentage Amount fails (Negative)
     Then Creating working capital loan charge with "SPECIFIED_DUE_DATE" chargeTimeType and "PERCENTAGE_AMOUNT" chargeCalculationType results an error with the following data:
-      | httpCode | errorMessage                                                 |
-      | 400      | The parameter `chargeCalculationType` must be one of [ 1 ] . |
+      | httpCode | errorMessage                                                                                        |
+      | 400      | The parameter 'chargeCalculationType' is not one of the values supported for this 'chargeAppliesTo' |
 
   @TestRailId:C80961
   Scenario: Verify Working Capital Charge product - UC8: invalid chargeTimeType Instalment Fee fails (Negative)
     Then Creating working capital loan charge with "INSTALLMENT_FEE" chargeTimeType and "FLAT" chargeCalculationType results an error with the following data:
-      | httpCode | errorMessage                                          |
-      | 400      | The parameter `chargeTimeType` must be one of [ 2 ] . |
+      | httpCode | errorMessage                                                                                 |
+      | 400      | The parameter 'chargeTimeType' is not one of the values supported for this 'chargeAppliesTo' |
 
 #    #############################################
 #    --- Loan Account level ---

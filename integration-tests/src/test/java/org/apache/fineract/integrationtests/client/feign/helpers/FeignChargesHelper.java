@@ -23,17 +23,18 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
-import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.DeleteChargesChargeIdResponse;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
+import org.apache.fineract.client.models.ChargeData;
+import org.apache.fineract.client.models.ChargeDeleteResponse;
+import org.apache.fineract.client.models.ChargeUpdateRequest;
+import org.apache.fineract.client.models.ChargeUpdateResponse;
 import org.apache.fineract.client.models.DeleteClientsClientIdChargesChargeIdResponse;
-import org.apache.fineract.client.models.GetChargesResponse;
 import org.apache.fineract.client.models.GetClientsClientIdChargesResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostClientsClientIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostClientsClientIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostClientsClientIdChargesRequest;
 import org.apache.fineract.client.models.PostClientsClientIdChargesResponse;
-import org.apache.fineract.client.models.PutChargesChargeIdResponse;
 import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
 
 public class FeignChargesHelper {
@@ -46,47 +47,47 @@ public class FeignChargesHelper {
         this.fineractClient = fineractClient;
     }
 
-    public PostChargesResponse createCharge(ChargeRequest request) {
+    public ChargeCreateResponse createCharge(ChargeCreateRequest request) {
         return ok(() -> fineractClient.charges().createCharge(request));
     }
 
-    public GetChargesResponse getCharge(Long chargeId) {
-        return ok(() -> fineractClient.charges().retrieveOneCharge(chargeId));
+    public ChargeData getCharge(Long chargeId) {
+        return ok(() -> fineractClient.charges().retrieveOneCharge(chargeId, (Boolean) null));
     }
 
-    public PutChargesChargeIdResponse updateCharge(Long chargeId, ChargeRequest request) {
+    public ChargeUpdateResponse updateCharge(Long chargeId, ChargeUpdateRequest request) {
         return ok(() -> fineractClient.charges().updateCharge(chargeId, request));
     }
 
-    public DeleteChargesChargeIdResponse deleteCharge(Long chargeId) {
+    public ChargeDeleteResponse deleteCharge(Long chargeId) {
         return ok(() -> fineractClient.charges().deleteCharge(chargeId));
     }
 
     public CallFailedRuntimeException getChargeExpectingError(Long chargeId) {
-        return fail(() -> fineractClient.charges().retrieveOneCharge(chargeId));
+        return fail(() -> fineractClient.charges().retrieveOneCharge(chargeId, (Boolean) null));
     }
 
-    public PostChargesResponse createLoanSpecifiedDueDateCharge(double amount) {
+    public ChargeCreateResponse createLoanSpecifiedDueDateCharge(double amount) {
         return createCharge(ChargeRequestBuilders.loanSpecifiedDueDateFee(amount));
     }
 
-    public PostChargesResponse createLoanSpecifiedDueDateCharge(double amount, String currencyCode) {
+    public ChargeCreateResponse createLoanSpecifiedDueDateCharge(double amount, String currencyCode) {
         return createCharge(ChargeRequestBuilders.loanSpecifiedDueDateFee(amount, currencyCode));
     }
 
-    public PostChargesResponse createLoanDisbursementCharge(double amount) {
+    public ChargeCreateResponse createLoanDisbursementCharge(double amount) {
         return createCharge(ChargeRequestBuilders.loanDisbursementFee(amount));
     }
 
-    public PostChargesResponse createLoanSpecifiedDueDatePenalty(double amount) {
+    public ChargeCreateResponse createLoanSpecifiedDueDatePenalty(double amount) {
         return createCharge(ChargeRequestBuilders.loanSpecifiedDueDatePenalty(amount));
     }
 
-    public PostChargesResponse createLoanSpecifiedDueDatePercentageAmountAndInterestFee(double amount) {
+    public ChargeCreateResponse createLoanSpecifiedDueDatePercentageAmountAndInterestFee(double amount) {
         return createCharge(ChargeRequestBuilders.loanSpecifiedDueDatePercentageAmountAndInterestFee(amount));
     }
 
-    public PostChargesResponse createClientSpecifiedDueDateCharge(double amount) {
+    public ChargeCreateResponse createClientSpecifiedDueDateCharge(double amount) {
         return createCharge(ChargeRequestBuilders.clientSpecifiedDueDateFee(amount));
     }
 

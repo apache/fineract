@@ -59,7 +59,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService {
+public class ChargeReadServiceImpl implements ChargeReadService {
 
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;

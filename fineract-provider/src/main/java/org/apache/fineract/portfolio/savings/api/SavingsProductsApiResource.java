@@ -63,7 +63,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.paymenttype.service.PaymentTypeReadService;
 import org.apache.fineract.portfolio.savings.SavingsApiConstants;
@@ -96,7 +96,7 @@ public class SavingsProductsApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
-    private final ChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadService chargeReadService;
     private final PaymentTypeReadService paymentTypeReadPlatformService;
     private final TaxReadPlatformService taxReadPlatformService;
     private final ConfigurationDomainService configurationDomainService;
@@ -171,7 +171,7 @@ public class SavingsProductsApiResource {
 
         SavingsProductData savingProductData = this.savingProductReadPlatformService.retrieveOne(productId);
 
-        final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId);
+        final Collection<ChargeData> charges = this.chargeReadService.retrieveSavingsProductCharges(productId);
 
         savingProductData = SavingsProductData.withCharges(savingProductData, charges);
 
@@ -266,10 +266,10 @@ public class SavingsProductsApiResource {
 
         // charges
         final boolean feeChargesOnly = false;
-        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSavingsProductApplicableCharges(feeChargesOnly);
+        Collection<ChargeData> chargeOptions = this.chargeReadService.retrieveSavingsProductApplicableCharges(feeChargesOnly);
         chargeOptions = CollectionUtils.isEmpty(chargeOptions) ? null : chargeOptions;
 
-        Collection<ChargeData> penaltyOptions = this.chargeReadPlatformService.retrieveSavingsApplicablePenalties();
+        Collection<ChargeData> penaltyOptions = this.chargeReadService.retrieveSavingsApplicablePenalties();
         penaltyOptions = CollectionUtils.isEmpty(penaltyOptions) ? null : penaltyOptions;
         final Collection<TaxGroupData> taxGroupOptions = this.taxReadPlatformService.retrieveTaxGroupsForLookUp();
         SavingsProductData savingsProductToReturn = null;

@@ -19,7 +19,7 @@
 package org.apache.fineract.integrationtests.client.feign.modules;
 
 import java.math.BigDecimal;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
 import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
@@ -112,8 +112,8 @@ public final class WorkingCapitalLoanRequestBuilders {
         return new ExecuteWorkingCapitalLoanTransactionCommandRequest();
     }
 
-    public static ChargeRequest specifiedDueDateCharge(boolean penalty, double amount) {
-        return new ChargeRequest().chargeAppliesTo(CHARGE_APPLIES_TO_WORKING_CAPITAL_LOAN)
+    public static ChargeCreateRequest specifiedDueDateCharge(boolean penalty, double amount) {
+        return new ChargeCreateRequest().chargeAppliesTo(CHARGE_APPLIES_TO_WORKING_CAPITAL_LOAN)
                 .chargeTimeType(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE).chargeCalculationType(CHARGE_CALCULATION_TYPE_FLAT)
                 .name(Utils.uniqueRandomStringGenerator("WCL_CHARGE_", 8)).amount(amount).active(true).currencyCode(CHARGE_CURRENCY_CODE)
                 .locale(LOCALE).penalty(penalty);

@@ -59,7 +59,7 @@ import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSeria
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeData;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.springframework.stereotype.Component;
@@ -73,7 +73,7 @@ import org.springframework.stereotype.Component;
 public class SavingsAccountChargesApiResource {
 
     private final PlatformSecurityContext context;
-    private final ChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadService chargeReadService;
     private final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
     private final DefaultToApiJsonSerializer<SavingsAccountChargeData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
@@ -124,8 +124,7 @@ public class SavingsAccountChargesApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME);
 
-        final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService
-                .retrieveSavingsAccountApplicableCharges(savingsAccountId);
+        final Collection<ChargeData> chargeOptions = this.chargeReadService.retrieveSavingsAccountApplicableCharges(savingsAccountId);
         final SavingsAccountChargeData savingsAccountChargeTemplate = SavingsAccountChargeData.template(chargeOptions);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());

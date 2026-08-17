@@ -75,7 +75,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
 import org.apache.fineract.portfolio.charge.data.ChargeData;
-import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
+import org.apache.fineract.portfolio.charge.service.ChargeReadService;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
@@ -154,7 +154,7 @@ public class LoanProductsApiResource {
 
     private final PlatformSecurityContext context;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
-    private final ChargeReadPlatformService chargeReadPlatformService;
+    private final ChargeReadService chargeReadService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final FundReadPlatformService fundReadPlatformService;
     private final DefaultToApiJsonSerializer<LoanProductData> toApiJsonSerializer;
@@ -391,12 +391,12 @@ public class LoanProductsApiResource {
 
     private LoanProductData handleTemplate(final LoanProductData productData) {
 
-        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableFees();
+        Collection<ChargeData> chargeOptions = this.chargeReadService.retrieveLoanApplicableFees();
         if (chargeOptions.isEmpty()) {
             chargeOptions = null;
         }
 
-        Collection<ChargeData> penaltyOptions = this.chargeReadPlatformService.retrieveLoanApplicablePenalties();
+        Collection<ChargeData> penaltyOptions = this.chargeReadService.retrieveLoanApplicablePenalties();
         if (penaltyOptions.isEmpty()) {
             penaltyOptions = null;
         }

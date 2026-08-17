@@ -36,16 +36,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.ChargeData;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeUpdateRequest;
 import org.apache.fineract.client.models.EnumOptionData;
 import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
 import org.apache.fineract.client.models.GetBalance;
-import org.apache.fineract.client.models.GetChargesResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesChargeIdRequest;
@@ -107,7 +107,8 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     @When("Admin updates working capital loan charge")
     public void updateWorkingCapitalLoanCharge() {
         final Long id = getChargeId();
-        final ChargeRequest request = chargeRequestFactory.defaultWorkingCapitalChargeRequest().amount(30.0D).penalty(true);
+        final ChargeUpdateRequest request = new ChargeUpdateRequest().amount(30.0D).penalty(true)
+                .locale(WorkingCapitalChargeRequestFactory.DEFAULT_LOCALE);
         ok(() -> fineractClient.charges().updateCharge(id, request));
     }
 
@@ -126,7 +127,7 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     @Then("Admin retrieves working capital loan charge and verifies it is a penalty")
     public void retrieveAndVerifyPenalty() {
         final Long id = getChargeId();
-        final GetChargesResponse chargeData = retrieveCharge(id);
+        final ChargeData chargeData = retrieveCharge(id);
         assertThat(chargeData.getPenalty()).as("Charge should be a penalty").isTrue();
         assertThat(chargeData.getActive()).as("Charge should be active").isTrue();
         log.info("Verified WCL charge ID {} is a penalty", id);
@@ -135,7 +136,7 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     @Then("Admin retrieves working capital loan charge and verifies payment mode is Regular")
     public void retrieveAndVerifyPaymentModeRegular() {
         final Long id = getChargeId();
-        final GetChargesResponse chargeData = retrieveCharge(id);
+        final ChargeData chargeData = retrieveCharge(id);
         assertThat(chargeData.getChargePaymentMode()).as("Charge payment mode should not be null").isNotNull();
         assertThat(chargeData.getChargePaymentMode().getId()).as("Payment mode should be Regular (0)").isEqualTo(REGULAR_PAYMENT_MODE_ID);
         log.info("Verified WCL charge ID {} has Regular payment mode", id);
@@ -401,7 +402,7 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     public void createWclChargeWithInvalidParamsFails(String chargeTimeTypeName, String chargeCalcTypeName, DataTable table) {
         final ChargeTimeType timeType = ChargeTimeType.valueOf(chargeTimeTypeName);
         final ChargeCalculationType calcType = ChargeCalculationType.valueOf(chargeCalcTypeName);
-        final ChargeRequest request = chargeRequestFactory.defaultWorkingCapitalChargeRequest() //
+        final ChargeCreateRequest request = chargeRequestFactory.defaultWorkingCapitalChargeRequest() //
                 .chargeTimeType(timeType.value) //
                 .chargeCalculationType(calcType.value);
 
@@ -557,14 +558,14 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     }
 
     // Charge API Helpers
-    private void createChargeAndStore(final ChargeRequest request) {
-        final PostChargesResponse response = ok(() -> fineractClient.charges().createCharge(request));
+    private void createChargeAndStore(final ChargeCreateRequest request) {
+        final ChargeCreateResponse response = ok(() -> fineractClient.charges().createCharge(request));
         testContext().set(TestContextKey.WORKING_CAPITAL_CHARGE_ID, response.getResourceId());
         log.info("Created WCL charge with ID: {}", response.getResourceId());
     }
 
-    private GetChargesResponse retrieveCharge(final Long chargeId) {
-        final GetChargesResponse chargeData = ok(() -> fineractClient.charges().retrieveOneCharge(chargeId));
+    private ChargeData retrieveCharge(final Long chargeId) {
+        final ChargeData chargeData = ok(() -> fineractClient.charges().retrieveOneCharge(chargeId, (Boolean) null));
         assertThat(chargeData).as("Charge data should not be null").isNotNull();
         return chargeData;
     }

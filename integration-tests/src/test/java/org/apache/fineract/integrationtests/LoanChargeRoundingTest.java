@@ -34,10 +34,10 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.ChargeRequest;
+import org.apache.fineract.client.models.ChargeCreateRequest;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanChargeData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
@@ -72,7 +72,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             Long loanId = applyAndApproveLoan(productId, 10000.0, 1);
 
-            PostChargesResponse chargeResponse = createFlatCharge(19.8);
+            ChargeCreateResponse chargeResponse = createFlatCharge(19.8);
 
             assertNotNull(chargeResponse.getResourceId());
             addLoanCharge(loanId, chargeResponse.getResourceId(), DATE, 19.8);
@@ -93,7 +93,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             Long loanId = applyAndApproveLoan(productId, 10000.0, 1);
 
-            PostChargesResponse chargeResponse = createFlatCharge(0.6);
+            ChargeCreateResponse chargeResponse = createFlatCharge(0.6);
 
             assertNotNull(chargeResponse.getResourceId());
             addLoanCharge(loanId, chargeResponse.getResourceId(), DATE, 0.6);
@@ -115,7 +115,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             Long loanId = applyAndApproveLoan(productId, 10000.0, 1);
 
-            PostChargesResponse chargeResponse = createFlatCharge(0.5);
+            ChargeCreateResponse chargeResponse = createFlatCharge(0.5);
             assertNotNull(chargeResponse.getResourceId());
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 0.5);
@@ -139,7 +139,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             Long loanId = applyAndApproveLoan(productId, 10000.0, 1);
 
-            PostChargesResponse chargeResponse = createPercentageOfAmountCharge(2.5067);
+            ChargeCreateResponse chargeResponse = createPercentageOfAmountCharge(2.5067);
 
             assertNotNull(chargeResponse.getResourceId());
             addLoanCharge(loanId, chargeResponse.getResourceId(), DATE, 2.5067);
@@ -163,7 +163,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             Long loanId = applyAndApproveLoan(productId, 10000.0, 1);
 
-            PostChargesResponse chargeResponse = createPercentageOfAmountCharge(0.006);
+            ChargeCreateResponse chargeResponse = createPercentageOfAmountCharge(0.006);
 
             assertNotNull(chargeResponse.getResourceId());
             addLoanCharge(loanId, chargeResponse.getResourceId(), DATE, 0.006);
@@ -186,7 +186,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             Long loanId = applyAndApproveLoan(productId, 10000.0, 1);
 
-            PostChargesResponse chargeResponse = createPercentageOfAmountCharge(0.005);
+            ChargeCreateResponse chargeResponse = createPercentageOfAmountCharge(0.005);
             assertNotNull(chargeResponse.getResourceId());
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 0.005);
@@ -210,7 +210,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             Long loanId = applyAndApproveLoan(productId, 10000.0, 1);
 
-            PostChargesResponse chargeResponse = createPercentageOfAmountPlusInterestCharge(2.536);
+            ChargeCreateResponse chargeResponse = createPercentageOfAmountPlusInterestCharge(2.536);
 
             assertNotNull(chargeResponse.getResourceId());
             addLoanCharge(loanId, chargeResponse.getResourceId(), DATE, 2.536);
@@ -239,7 +239,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             BigDecimal totalInterest = executeCobAndGetTotalInterest(loanId);
 
-            PostChargesResponse chargeResponse = createPercentageOfAmountPlusInterestCharge(2.536);
+            ChargeCreateResponse chargeResponse = createPercentageOfAmountPlusInterestCharge(2.536);
 
             assertNotNull(chargeResponse.getResourceId());
             addLoanCharge(loanId, chargeResponse.getResourceId(), LATER_DATE, 2.536);
@@ -268,7 +268,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             BigDecimal totalInterest = executeCobAndGetTotalInterest(loanId);
 
-            PostChargesResponse chargeResponse = createPercentageOfAmountPlusInterestCharge(0.56);
+            ChargeCreateResponse chargeResponse = createPercentageOfAmountPlusInterestCharge(0.56);
 
             assertNotNull(chargeResponse.getResourceId());
             addLoanCharge(loanId, chargeResponse.getResourceId(), LATER_DATE, 0.56);
@@ -298,7 +298,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             executeCobAndGetTotalInterest(loanId);
 
-            PostChargesResponse chargeResponse = createPercentageOfAmountPlusInterestCharge(0.38);
+            ChargeCreateResponse chargeResponse = createPercentageOfAmountPlusInterestCharge(0.38);
             assertNotNull(chargeResponse.getResourceId());
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 0.38);
@@ -328,7 +328,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             BigDecimal totalInterest = executeCobAndGetTotalInterest(loanId);
 
-            PostChargesResponse chargeResponse = createPercentageOfInterestCharge(2.536);
+            ChargeCreateResponse chargeResponse = createPercentageOfInterestCharge(2.536);
 
             assertNotNull(chargeResponse.getResourceId());
             addLoanCharge(loanId, chargeResponse.getResourceId(), LATER_DATE, 2.536);
@@ -355,7 +355,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             BigDecimal totalInterest = executeCobAndGetTotalInterest(loanId);
 
-            PostChargesResponse chargeResponse = createPercentageOfInterestCharge(2.068);
+            ChargeCreateResponse chargeResponse = createPercentageOfInterestCharge(2.068);
 
             assertNotNull(chargeResponse.getResourceId());
             addLoanCharge(loanId, chargeResponse.getResourceId(), LATER_DATE, 2.068);
@@ -383,7 +383,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             executeCobAndGetTotalInterest(loanId);
 
-            PostChargesResponse chargeResponse = createPercentageOfInterestCharge(1.68);
+            ChargeCreateResponse chargeResponse = createPercentageOfInterestCharge(1.68);
             assertNotNull(chargeResponse.getResourceId());
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 1.68);
@@ -411,7 +411,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             Long loanId = applyAndApproveMultiTrancheLoan(productId, disbursements);
 
-            PostChargesResponse chargeResponse = createPercentageOfTrancheDisbursementCharge(0.5);
+            ChargeCreateResponse chargeResponse = createPercentageOfTrancheDisbursementCharge(0.5);
             assertNotNull(chargeResponse.getResourceId());
 
             addLoanCharge(loanId, chargeResponse.getResourceId(), DATE, 0.5);
@@ -443,7 +443,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             Long loanId = applyAndApproveMultiTrancheLoan(productId, disbursements);
 
-            PostChargesResponse chargeResponse = createPercentageOfTrancheDisbursementCharge(0.09);
+            ChargeCreateResponse chargeResponse = createPercentageOfTrancheDisbursementCharge(0.09);
             assertNotNull(chargeResponse.getResourceId());
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 0.09);
@@ -473,7 +473,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             Long loanId = applyAndApproveMultiTrancheLoan(productId, disbursements);
 
-            PostChargesResponse chargeResponse = createPercentageOfTrancheDisbursementCharge(0.04);
+            ChargeCreateResponse chargeResponse = createPercentageOfTrancheDisbursementCharge(0.04);
             assertNotNull(chargeResponse.getResourceId());
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 0.04);
@@ -504,7 +504,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             Long loanId = applyAndApproveMultiTrancheLoan(productId, disbursements);
 
-            PostChargesResponse chargeResponse = createPercentageOfDisbursementCharge(0.5);
+            ChargeCreateResponse chargeResponse = createPercentageOfDisbursementCharge(0.5);
 
             assertNotNull(chargeResponse.getResourceId());
             addLoanCharge(loanId, chargeResponse.getResourceId(), DATE, 0.5);
@@ -534,7 +534,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             Long loanId = applyAndApproveMultiTrancheLoan(productId, disbursements);
 
-            PostChargesResponse chargeResponse = createPercentageOfDisbursementCharge(0.09);
+            ChargeCreateResponse chargeResponse = createPercentageOfDisbursementCharge(0.09);
             assertNotNull(chargeResponse.getResourceId());
 
             addLoanCharge(loanId, chargeResponse.getResourceId(), DATE, 0.09);
@@ -565,7 +565,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             Long loanId = applyAndApproveMultiTrancheLoan(productId, disbursements);
 
-            PostChargesResponse chargeResponse = createPercentageOfDisbursementCharge(0.04);
+            ChargeCreateResponse chargeResponse = createPercentageOfDisbursementCharge(0.04);
             assertNotNull(chargeResponse.getResourceId());
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 0.04);
@@ -643,44 +643,44 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
         return loanId;
     }
 
-    private PostChargesResponse createFlatCharge(double amount) {
+    private ChargeCreateResponse createFlatCharge(double amount) {
         String uniqueChargeName = "Loan Flat Charge" + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2)
+        return chargesHelper.createCharges(new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2)
                 .chargeCalculationType(1).amount(amount).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));
     }
 
-    private PostChargesResponse createPercentageOfAmountCharge(double percentage) {
+    private ChargeCreateResponse createPercentageOfAmountCharge(double percentage) {
         String uniqueChargeName = "Loan Percentage of Amount Charge" + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper
-                .createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2).chargeCalculationType(2)
+        return chargesHelper.createCharges(
+                new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2).chargeCalculationType(2)
                         .amount(percentage).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));
     }
 
-    private PostChargesResponse createPercentageOfAmountPlusInterestCharge(double percentage) {
+    private ChargeCreateResponse createPercentageOfAmountPlusInterestCharge(double percentage) {
         String uniqueChargeName = "Loan Percentage of Amount Plus Interest Charge" + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper
-                .createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2).chargeCalculationType(3)
+        return chargesHelper.createCharges(
+                new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2).chargeCalculationType(3)
                         .amount(percentage).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));
     }
 
-    private PostChargesResponse createPercentageOfInterestCharge(double percentage) {
+    private ChargeCreateResponse createPercentageOfInterestCharge(double percentage) {
         String uniqueChargeName = "Loan Percentage of Interest Charge" + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper
-                .createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2).chargeCalculationType(4)
+        return chargesHelper.createCharges(
+                new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2).chargeCalculationType(4)
                         .amount(percentage).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));
     }
 
-    private PostChargesResponse createPercentageOfTrancheDisbursementCharge(double percentage) {
+    private ChargeCreateResponse createPercentageOfTrancheDisbursementCharge(double percentage) {
         String uniqueChargeName = "Loan Tranche Charge" + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper
-                .createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(12).chargeCalculationType(5)
+        return chargesHelper.createCharges(
+                new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(12).chargeCalculationType(5)
                         .amount(percentage).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));
     }
 
-    private PostChargesResponse createPercentageOfDisbursementCharge(double percentage) {
+    private ChargeCreateResponse createPercentageOfDisbursementCharge(double percentage) {
         String uniqueChargeName = "Loan Disbursement Charge" + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper
-                .createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(1).chargeCalculationType(2)
+        return chargesHelper.createCharges(
+                new ChargeCreateRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(1).chargeCalculationType(2)
                         .amount(percentage).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));
     }
 

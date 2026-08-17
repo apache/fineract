@@ -29,9 +29,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import org.apache.fineract.client.models.ChargeCreateResponse;
 import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
-import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
@@ -92,9 +92,9 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             assertNotNull(loanProductId);
 
             // Create charges with different amounts to test aggregation
-            PostChargesResponse charge1 = createCharge(100.0);
-            PostChargesResponse charge2 = createCharge(200.0);
-            PostChargesResponse charge3 = createCharge(150.0);
+            ChargeCreateResponse charge1 = createCharge(100.0);
+            ChargeCreateResponse charge2 = createCharge(200.0);
+            ChargeCreateResponse charge3 = createCharge(150.0);
             assertNotNull(charge1);
             assertNotNull(charge2);
             assertNotNull(charge3);
@@ -157,9 +157,9 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             Long loanProductId = loanProductResponse.getResourceId();
 
             // Create multiple charges that would map to same GL account type
-            PostChargesResponse charge1 = createCharge(75.0);
-            PostChargesResponse charge2 = createCharge(125.0);
-            PostChargesResponse charge3 = createCharge(50.0);
+            ChargeCreateResponse charge1 = createCharge(75.0);
+            ChargeCreateResponse charge2 = createCharge(125.0);
+            ChargeCreateResponse charge3 = createCharge(50.0);
 
             Long clientId = clientHelper.createClient(clientHelper.defaultClientCreationRequest()).getClientId();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "15 January 2023", 5000.0, 2);
@@ -197,7 +197,7 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProduct);
             Long loanProductId = loanProductResponse.getResourceId();
 
-            PostChargesResponse charge = createCharge(300.0);
+            ChargeCreateResponse charge = createCharge(300.0);
 
             Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "10 January 2023", 8000.0, 3);
@@ -228,7 +228,7 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProduct);
             Long loanProductId = loanProductResponse.getResourceId();
 
-            PostChargesResponse charge = createCharge(500.0);
+            ChargeCreateResponse charge = createCharge(500.0);
 
             Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "20 January 2023", 12000.0, 4);
@@ -261,9 +261,9 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             assertNotNull(loanProductId, "Loan product should be created successfully");
 
             // Create three different charges to test individual GL account mapping
-            PostChargesResponse processingFeeCharge = createCharge(250.0);
-            PostChargesResponse penaltyCharge = createCharge(175.0);
-            PostChargesResponse documentationFeeCharge = createCharge(325.0);
+            ChargeCreateResponse processingFeeCharge = createCharge(250.0);
+            ChargeCreateResponse penaltyCharge = createCharge(175.0);
+            ChargeCreateResponse documentationFeeCharge = createCharge(325.0);
             assertNotNull(processingFeeCharge, "Processing fee charge should be created");
             assertNotNull(penaltyCharge, "Penalty charge should be created");
             assertNotNull(documentationFeeCharge, "Documentation fee charge should be created");
@@ -326,9 +326,9 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             Long loanProductId = loanProductResponse.getResourceId();
 
             // Create charges with specific amounts to test proportional distribution
-            PostChargesResponse charge1 = createCharge(400.0); // 40% of 1000
-            PostChargesResponse charge2 = createCharge(300.0); // 30% of 1000
-            PostChargesResponse charge3 = createCharge(300.0); // 30% of 1000
+            ChargeCreateResponse charge1 = createCharge(400.0); // 40% of 1000
+            ChargeCreateResponse charge2 = createCharge(300.0); // 30% of 1000
+            ChargeCreateResponse charge3 = createCharge(300.0); // 30% of 1000
 
             Long clientId = clientHelper.createClient(clientHelper.defaultClientCreationRequest()).getClientId();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "10 February 2023", 20000.0, 6);
@@ -375,7 +375,7 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProduct);
             Long loanProductId = loanProductResponse.getResourceId();
 
-            PostChargesResponse charge = createCharge(500.0);
+            ChargeCreateResponse charge = createCharge(500.0);
 
             Long clientId = clientHelper.createClient(clientHelper.defaultClientCreationRequest()).getClientId();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "15 February 2023", 10000.0, 3);
@@ -413,7 +413,7 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProduct);
             Long loanProductId = loanProductResponse.getResourceId();
 
-            PostChargesResponse charge = createCharge(300.0);
+            ChargeCreateResponse charge = createCharge(300.0);
 
             Long clientId = clientHelper.createClient(clientHelper.defaultClientCreationRequest()).getClientId();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "20 February 2023", 8000.0, 2);
@@ -451,8 +451,8 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             Long loanProductId = loanProductResponse.getResourceId();
 
             // Create charges - use minimum valid amounts instead of zero
-            PostChargesResponse regularCharge = createCharge(200.0);
-            PostChargesResponse smallCharge = createCharge(0.01); // Minimum valid amount instead of zero
+            ChargeCreateResponse regularCharge = createCharge(200.0);
+            ChargeCreateResponse smallCharge = createCharge(0.01); // Minimum valid amount instead of zero
 
             Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "25 February 2023", 5000.0, 2);
@@ -489,9 +489,9 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             Long loanProductId = loanProductResponse.getResourceId();
 
             // Create different types of charges
-            PostChargesResponse flatFeeCharge = createCharge(150.0);
-            PostChargesResponse percentageCharge = createCharge(200.0);
-            PostChargesResponse penaltyCharge = createCharge(100.0);
+            ChargeCreateResponse flatFeeCharge = createCharge(150.0);
+            ChargeCreateResponse percentageCharge = createCharge(200.0);
+            ChargeCreateResponse penaltyCharge = createCharge(100.0);
 
             Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "05 March 2023", 18000.0, 5);
@@ -541,8 +541,8 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             assertNotNull(loanProductId, "Loan product should be created successfully");
 
             // Create multiple charges with different IDs to test charge-specific GL account mapping
-            PostChargesResponse primaryCharge = createCharge(250.0);
-            PostChargesResponse secondaryCharge = createCharge(350.0);
+            ChargeCreateResponse primaryCharge = createCharge(250.0);
+            ChargeCreateResponse secondaryCharge = createCharge(350.0);
             assertNotNull(primaryCharge, "Primary charge should be created");
             assertNotNull(secondaryCharge, "Secondary charge should be created");
 
@@ -604,7 +604,7 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             assertNotNull(loanProductId, "Loan product should be created successfully");
 
             // Create charge that will test advanced accounting rules override
-            PostChargesResponse feeCharge = createCharge(400.0);
+            ChargeCreateResponse feeCharge = createCharge(400.0);
             assertNotNull(feeCharge, "Fee charge should be created");
 
             // Create additional GL accounts for advanced accounting rules override
@@ -681,8 +681,8 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             assertNotNull(loanProductId, "Loan product should be created successfully");
 
             // Create charges that will be removed to test accrual adjustment
-            PostChargesResponse feeCharge = createCharge(300.0);
-            PostChargesResponse penaltyCharge = createCharge(200.0);
+            ChargeCreateResponse feeCharge = createCharge(300.0);
+            ChargeCreateResponse penaltyCharge = createCharge(200.0);
             assertNotNull(feeCharge, "Fee charge should be created");
             assertNotNull(penaltyCharge, "Penalty charge should be created");
 
@@ -764,9 +764,9 @@ public class LoanChargesMultipleDebitAccountsTest extends BaseLoanIntegrationTes
             assertNotNull(loanProductId, "Loan product should be created successfully");
 
             // Create multiple charges that could use different debit GL accounts
-            PostChargesResponse processingFeeCharge = createCharge(500.0);
-            PostChargesResponse serviceFeeCharge = createCharge(300.0);
-            PostChargesResponse lateFeeCharge = createCharge(150.0);
+            ChargeCreateResponse processingFeeCharge = createCharge(500.0);
+            ChargeCreateResponse serviceFeeCharge = createCharge(300.0);
+            ChargeCreateResponse lateFeeCharge = createCharge(150.0);
             assertNotNull(processingFeeCharge, "Processing fee charge should be created");
             assertNotNull(serviceFeeCharge, "Service fee charge should be created");
             assertNotNull(lateFeeCharge, "Late fee charge should be created");
