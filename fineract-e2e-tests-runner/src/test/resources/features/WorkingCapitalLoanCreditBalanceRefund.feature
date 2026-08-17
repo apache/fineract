@@ -609,22 +609,24 @@ Feature: Working Capital Loan Credit Balance Refund
       | 02 January 2026 | Repayment             | 200.0             | 200.0            | 0.0               | 0.0                   | true     |
       | 05 January 2026 | Repayment             | 9100.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Credit Balance Refund | 300.0             | 200.0            | 0.0               | 0.0                   | false    |
-    # The original 9000 amortization is untouched (base stays 9000, every period keeps its 50). The over-refunded
-    # excess (200) is due principal, not amortized: it surfaces only on the CBR transaction date (10 January), where
-    # the period's expected payment becomes 50 + 200 = 250. The 9000 repayment settles the projection from 06 January
-    # on, so those periods would end the schedule early; 10 January still carries its due principal and keeps them.
+    # 02-04 January elapsed with nothing paid once the 200 repayment was undone, so each of those periods settles at
+    # the balance really outstanding and re-bases the projection from 9000 - the 8950 repeats rather than stepping
+    # down. The 9000 on 05 January then clears the loan, leaving 06-09 January with nothing expected. The
+    # over-refunded excess (200) is due principal, not amortized, and surfaces on the CBR date alone (10 January);
+    # with the base schedule already exhausted there is no 50 instalment left to add to it. That period keeps the
+    # schedule at 10 rows.
     Then Working Capital loan amortization schedule has 10 periods, with the following data for periods:
       | paymentNo | paymentDate     | expectedPaymentAmount | actualPaymentAmount | expectedBalance | expectedAmortizationAmount | actualAmortizationAmount | expectedDiscountFeeBalance |
       | 0         | 01 January 2026 | -9000.00              |                     | 9000.00         |                            |                          | 0.00                       |
       | 1         | 02 January 2026 | 50.00                 | 0.00                | 8950.00         | 0.00                       | 0.00                     | 0.00                       |
-      | 2         | 03 January 2026 | 50.00                 | 0.00                | 8900.00         | 0.00                       | 0.00                     | 0.00                       |
-      | 3         | 04 January 2026 | 50.00                 | 0.00                | 8850.00         | 0.00                       | 0.00                     | 0.00                       |
-      | 4         | 05 January 2026 | 50.00                 | 9000.00             | 8800.00         | 0.00                       | 0.00                     | 0.00                       |
-      | 5         | 06 January 2026 | 50.00                 |                     | 8750.00         | 0.00                       |                          | 0.00                       |
-      | 6         | 07 January 2026 | 50.00                 |                     | 8700.00         | 0.00                       |                          | 0.00                       |
-      | 7         | 08 January 2026 | 50.00                 |                     | 8650.00         | 0.00                       |                          | 0.00                       |
-      | 8         | 09 January 2026 | 50.00                 |                     | 8600.00         | 0.00                       |                          | 0.00                       |
-      | 9         | 10 January 2026 | 250.00                |                     | 8550.00         | 0.00                       |                          | 0.00                       |
+      | 2         | 03 January 2026 | 50.00                 | 0.00                | 8950.00         | 0.00                       | 0.00                     | 0.00                       |
+      | 3         | 04 January 2026 | 50.00                 | 0.00                | 8950.00         | 0.00                       | 0.00                     | 0.00                       |
+      | 4         | 05 January 2026 | 50.00                 | 9000.00             | 8950.00         | 0.00                       | 0.00                     | 0.00                       |
+      | 5         | 06 January 2026 | 0.00                  |                     | 0.00            | 0.00                       |                          | 0.00                       |
+      | 6         | 07 January 2026 | 0.00                  |                     | 0.00            | 0.00                       |                          | 0.00                       |
+      | 7         | 08 January 2026 | 0.00                  |                     | 0.00            | 0.00                       |                          | 0.00                       |
+      | 8         | 09 January 2026 | 0.00                  |                     | 0.00            | 0.00                       |                          | 0.00                       |
+      | 9         | 10 January 2026 | 200.00                |                     | 0.00            | 0.00                       |                          | 0.00                       |
 
   @TestRailId:C85507
   Scenario: Verify working capital loan credit balance refund with backdated repayment to make loan overpaid - UC4

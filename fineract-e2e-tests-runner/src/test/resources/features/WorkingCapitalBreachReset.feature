@@ -484,10 +484,9 @@ Feature: Working Capital Breach Reset and Undo Reset
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
       | 01 January 2026 | 01 January 2026          | 800             | 10000              | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
-    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
+    # The loan is deliberately left undisbursed: disbursement now generates the breach schedule, so an
+    # approved-only loan is the remaining state in which no breach schedule exists.
     Then Admin fails to create WC breach reset action with error containing "Breach action requires an existing breach schedule."
-    And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"
 
   @TestRailId:C85442
   Scenario Outline: Verify breach <action> fails when loan product has no breach configuration

@@ -42,7 +42,6 @@ import org.apache.fineract.client.models.BusinessDateResponse;
 import org.apache.fineract.client.models.InlineJobRequest;
 import org.apache.fineract.client.models.IsCatchUpRunningDTO;
 import org.apache.fineract.client.models.LockRequest;
-import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
@@ -75,7 +74,7 @@ public class WorkingCapitalLoanCobStepDef extends AbstractStepDef {
             log.debug("After hook: cleaning up {} WC loan(s)", loanIds.size());
             for (Long loanId : loanIds) {
                 try {
-                    // wcLoanHelper.deleteById(loanId);
+                    wcLoanHelper.deleteById(loanId);
                     log.debug("After hook: deleted WC loan id={}", loanId);
                 } catch (Exception e) {
                     log.warn("After hook: failed to delete WC loan id={}: {}", loanId, e.getMessage());
@@ -330,15 +329,35 @@ public class WorkingCapitalLoanCobStepDef extends AbstractStepDef {
 
     @When("Admin runs Working Capital COB catch up")
     public void runWorkingCapitalLoanCOBCatchUp() {
+        // Catch-up is a tenant-wide singleton, so a run still in flight from an earlier scenario rejects this one.
+        // Firing regardless and swallowing the rejection leaves the scenario waiting on a catch-up that was never
+        // accepted.
+        await() //
+                .atMost(Duration.ofMinutes(2)) //
+                .pollInterval(Duration.ofSeconds(2)) //
+                .pollDelay(Duration.ZERO) //
+                .until(() -> Boolean.FALSE
+                        .equals(ok(() -> fineractClient.workingCapitalLoanCobCatchUpApi().isCatchUpRunning1()).getCatchUpRunning()));
+
         try {
             executeVoid(() -> fineractClient.workingCapitalLoanCobCatchUpApi().executeLoanCOBCatchUp1());
         } catch (CallFailedRuntimeException e) {
-            if (e.getStatus() == 400) {
-                log.info("COB catch-up is already running (400 response), continuing with test");
-            } else {
-                throw e;
-            }
+            rethrowUnlessCatchUpUnavailable(e.getStatus(), e);
+        } catch (feign.FeignException e) {
+            // A 400 carrying no body never reaches the decoder that produces CallFailedRuntimeException, so it arrives
+            // as a raw Feign exception and slips past the catch above. Same meaning, so handle it the same way.
+            rethrowUnlessCatchUpUnavailable(e.status(), e);
         }
+    }
+
+    /**
+     * A 400 means catch-up would not start - already running, or nothing left to catch up. Neither is a test failure.
+     */
+    private void rethrowUnlessCatchUpUnavailable(final int status, final RuntimeException e) {
+        if (status != 400) {
+            throw e;
+        }
+        log.info("WC COB catch-up was not started (400 response), continuing with test");
     }
 
     @When("Admin checks that WC Loan COB is running until the current business date")
@@ -356,6 +375,14 @@ public class WorkingCapitalLoanCobStepDef extends AbstractStepDef {
         // too quickly for the poll to catch isCatchUpRunning = true.
         // Bug fix #2: use cobProcessedDate (oldest loan's lastClosedBusinessDate) instead of
         // cobBusinessDate (which is always == current COB date, making the check vacuous).
+        // Bug fix #3: Scoped to the loans this scenario created, not to the tenant. The catch-up API reports the oldest
+        // lastClosedBusinessDate across every eligible loan, and this same feature deliberately leaves loans locked
+        // with an error message - a lock COB is designed never to clear, so those loans never advance again. Once one
+        // exists, a tenant-wide reading of "caught up" is pinned to its date forever and this step can only time out,
+        // however long it waits. The tracked loans still make the check meaningful: catch-up has to walk them across
+        // the skipped business dates to satisfy it.
+        final List<Long> loanIds = getTrackedLoanIds();
+        assertThat(loanIds).as("No WC loan IDs tracked in test context").isNotEmpty();
         await() //
                 .atMost(Duration.ofMinutes(4)) //
                 .pollInterval(Duration.ofSeconds(5)) //
@@ -368,16 +395,15 @@ public class WorkingCapitalLoanCobStepDef extends AbstractStepDef {
                         return false;
                     }
 
-                    // Catch-up not running — check whether it processed all days up to the expected date.
-                    // cobProcessedDate = the oldest loan's lastClosedBusinessDate after the last COB run.
-                    OldestCOBProcessedLoanDTO catchUpStatus = ok(
-                            () -> fineractClient.workingCapitalLoanCobCatchUpApi().getOldestCOBProcessedLoan1());
-                    LocalDate cobProcessedDate = catchUpStatus.getCobProcessedDate();
-
-                    boolean catchUpComplete = !cobProcessedDate.isBefore(expectedCompletionDate);
-                    log.debug("WC COB catch-up complete check: cobProcessedDate={}, expectedCompletionDate={}, complete={}",
-                            cobProcessedDate, expectedCompletionDate, catchUpComplete);
-                    return catchUpComplete;
+                    for (final Long loanId : loanIds) {
+                        final LocalDate lastClosed = wcLoanHelper.getLastClosedBusinessDate(loanId);
+                        if (lastClosed == null || lastClosed.isBefore(expectedCompletionDate)) {
+                            log.debug("WC COB catch-up incomplete: loan {} lastClosedBusinessDate={}, expected at least {}", loanId,
+                                    lastClosed, expectedCompletionDate);
+                            return false;
+                        }
+                    }
+                    return true;
                 });
     }
 

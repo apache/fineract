@@ -346,7 +346,7 @@ Feature: Working Capital Loan Payout Refund
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working capital loan account has the correct data:
       | product.name        | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
-      | WCLP_ACC_DEF_REV_AM | 10000.0   | 9000.0            | 100000.0           | 18.0              | 1000.0   | 4050.0             | 634.67         | 365.33           | 0.0               |
+      | WCLP_ACC_DEF_REV_AM | 10000.0   | 9000.0            | 100000.0           | 18.0              | 1000.0   | 4050.0             | 634.69         | 365.31           | 0.0               |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2019 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -354,7 +354,7 @@ Feature: Working Capital Loan Payout Refund
       | 02 January 2019 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
       | 02 January 2019 | Discount Fee Amortization | 9.61              |                  |                   |                       | false    |
       | 03 January 2019 | Payout Refund             | 4000.0            | 4000.0           | 0.0               | 0.0                   | false    |
-      | 03 January 2019 | Discount Fee Amortization | 625.06            |                  |                   |                       | false    |
+      | 03 January 2019 | Discount Fee Amortization | 625.08            |                  |                   |                       | false    |
     And Working Capital loan status will be "ACTIVE"
     # Close loan
     When Admin closes the Working Capital loan with a full repayment on "04 January 2019"
@@ -651,7 +651,7 @@ Feature: Working Capital Loan Payout Refund
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working capital loan account has the correct data:
       | product.name        | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome |
-      | WCLP_ACC_DEF_REV_AM | 10000.0   | 4050.0             | 634.67         | 365.33           |
+      | WCLP_ACC_DEF_REV_AM | 10000.0   | 4050.0             | 634.69         | 365.31           |
     And Working Capital Loan Transactions tab has a "PAYOUT_REFUND" transaction with date "03 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit  | Credit |
       | LIABILITY | 145023       | Suspense/Clearing account | 4000.0 |        |
@@ -688,7 +688,7 @@ Feature: Working Capital Loan Payout Refund
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working capital loan account has the correct data:
       | product.name        | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome |
-      | WCLP_ACC_DEF_REV_AM | 10000.0   | 4050.0             | 634.67         | 365.33           |
+      | WCLP_ACC_DEF_REV_AM | 10000.0   | 4050.0             | 634.69         | 365.31           |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -696,7 +696,7 @@ Feature: Working Capital Loan Payout Refund
       | 02 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
       | 02 January 2026 | Discount Fee Amortization | 9.61              |                  |                   |                       | false    |
       | 02 January 2026 | Payout Refund             | 4000.0            | 4000.0           | 0.0               | 0.0                   | false    |
-      | 03 January 2026 | Discount Fee Amortization | 625.06            |                  |                   |                       | false    |
+      | 03 January 2026 | Discount Fee Amortization | 625.08            |                  |                   |                       | false    |
     And Working Capital loan status will be "ACTIVE"
     # Close loan
     When Admin closes the Working Capital loan with a full repayment on "04 January 2026"

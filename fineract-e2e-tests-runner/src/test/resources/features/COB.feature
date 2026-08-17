@@ -1,4 +1,5 @@
 @COBFeature
+@Order(1)
 Feature: COBFeature
 
   @TestRailId:C2501

@@ -73,7 +73,7 @@ The COB step that drives EIR income recognition is registered as:
 | Column Name | Type | Constraints | Description
 | job_name | VARCHAR | not null | `WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS`
 | step_name | VARCHAR | not null | `WC_DISCOUNT_FEE_AMORTIZATION`
-| step_order | INT | not null | `6`
+| step_order | INT | not null | `7`
 |===
 
 == Configuration
@@ -120,7 +120,7 @@ GET /v1/working-capital-loans/external-id/{loanExternalId}/transactions/external
 
 === Discount Fee Amortization Business Step
 
-The `DiscountFeeAmortizationBusinessStep` (COB step `WC_DISCOUNT_FEE_AMORTIZATION`, order 6) runs at end of day. It skips the loan when both of the following are true:
+The `DiscountFeeAmortizationBusinessStep` (COB step `WC_DISCOUNT_FEE_AMORTIZATION`, order 7) runs at end of day. It skips the loan when both of the following are true:
 
 * `loanProductRelatedDetails.discount` is zero or null, AND
 * `loanBalance.realizedIncomeFromDiscountFee` is zero or null
