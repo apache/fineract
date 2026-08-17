@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetOfficesResponse;
+import org.apache.fineract.client.models.JobExecuteRequest;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.common.ClientHelper;
@@ -109,21 +110,23 @@ public class InstanceModeIntegrationTest {
     @Test
     public void testRunSchedulerJobDoesntWork_WhenReadOnly() {
         // when/then
-        assertThrows(RuntimeException.class, () -> Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob(jobId, "executeJob")));
+        assertThrows(RuntimeException.class,
+                () -> Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob(jobId, "executeJob", new JobExecuteRequest())));
     }
 
     @ConfigureInstanceMode(readEnabled = false, writeEnabled = true, batchWorkerEnabled = false, batchManagerEnabled = false)
     @Test
     public void testRunSchedulerJobDoesntWork_WhenWriteOnly() {
         // when/then
-        assertThrows(RuntimeException.class, () -> Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob(jobId, "executeJob")));
+        assertThrows(RuntimeException.class,
+                () -> Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob(jobId, "executeJob", new JobExecuteRequest())));
     }
 
     @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchWorkerEnabled = true, batchManagerEnabled = true)
     @Test
     public void testRunSchedulerJobWorks_WhenBatchOnly() {
         // when
-        Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob(jobId, "executeJob"));
+        Calls.ok(FineractClientHelper.getFineractClient().jobs.executeJob(jobId, "executeJob", new JobExecuteRequest()));
         // then no exception thrown
     }
 }

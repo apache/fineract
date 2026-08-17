@@ -21,14 +21,13 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.feign.services.SchedulerJobApi.RetrieveHistoryQueryParams;
 import org.apache.fineract.client.feign.util.FeignCalls;
-import org.apache.fineract.client.models.ExecuteJobRequest;
-import org.apache.fineract.client.models.GetJobsJobIDJobRunHistoryResponse;
 import org.apache.fineract.client.models.GetJobsResponse;
-import org.apache.fineract.client.models.JobDetailHistoryDataSwagger;
+import org.apache.fineract.client.models.JobDetailHistoryData;
+import org.apache.fineract.client.models.JobExecuteRequest;
 import org.awaitility.Awaitility;
 
 public class FeignSchedulerHelper {
@@ -55,33 +54,28 @@ public class FeignSchedulerHelper {
                 .orElseThrow(() -> new RuntimeException("Job not found: " + jobDisplayName));
         Long jobId = targetJob.getJobId();
 
-        Long previousRunHistoryId = getRunHistoryId(getLatestJobRunHistory(jobId));
-        FeignCalls.executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, "executeJob", new ExecuteJobRequest()));
+        // Capture the last completed run's end time BEFORE triggering execution.
+        // Note: GetJobsResponse.lastRunHistory.id is never populated (the read query behind
+        // retrieveOneSchedulerJob doesn't select jh.id), so completion must be detected via
+        // jobRunEndTime advancing rather than the run history id.
+        OffsetDateTime previousRunEndTime = getLastRunEndTime(jobId);
 
-        Awaitility.await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1)).pollDelay(Duration.ofSeconds(1))
-                .until(() -> isNewCompletedRunHistory(jobId, previousRunHistoryId));
+        FeignCalls.executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, "executeJob", new JobExecuteRequest()));
+
+        Awaitility.await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1)).pollDelay(Duration.ofSeconds(1)).until(() -> {
+            GetJobsResponse job = ok(() -> fineractClient.schedulerJob().retrieveOneSchedulerJob(jobId));
+            JobDetailHistoryData history = job.getLastRunHistory();
+            if (history == null || history.getJobRunEndTime() == null) {
+                return false;
+            }
+            OffsetDateTime endTime = history.getJobRunEndTime();
+            return previousRunEndTime == null || endTime.isAfter(previousRunEndTime);
+        });
     }
 
-    private boolean isNewCompletedRunHistory(Long jobId, Long previousRunHistoryId) {
-        JobDetailHistoryDataSwagger latestRunHistory = getLatestJobRunHistory(jobId);
-        if (latestRunHistory == null || latestRunHistory.getJobRunEndTime() == null) {
-            return false;
-        }
-        Long runHistoryId = latestRunHistory.getId();
-        return runHistoryId != null && (previousRunHistoryId == null || runHistoryId > previousRunHistoryId);
-    }
-
-    private Long getRunHistoryId(JobDetailHistoryDataSwagger runHistory) {
-        return runHistory == null ? null : runHistory.getId();
-    }
-
-    private JobDetailHistoryDataSwagger getLatestJobRunHistory(Long jobId) {
-        RetrieveHistoryQueryParams queryParams = new RetrieveHistoryQueryParams().offset(0).limit(1).orderBy("id").sortOrder("DESC");
-        GetJobsJobIDJobRunHistoryResponse response = ok(() -> fineractClient.schedulerJob().retrieveHistory(jobId, queryParams));
-        List<JobDetailHistoryDataSwagger> pageItems = response.getPageItems();
-        if (pageItems == null || pageItems.isEmpty()) {
-            return null;
-        }
-        return pageItems.get(0);
+    private OffsetDateTime getLastRunEndTime(Long jobId) {
+        GetJobsResponse job = ok(() -> fineractClient.schedulerJob().retrieveOneSchedulerJob(jobId));
+        JobDetailHistoryData history = job.getLastRunHistory();
+        return history == null ? null : history.getJobRunEndTime();
     }
 }

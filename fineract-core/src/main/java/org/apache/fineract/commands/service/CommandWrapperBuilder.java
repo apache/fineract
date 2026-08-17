@@ -79,7 +79,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_DOWNPAYMENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_ENABLE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_EXECUTE;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_EXECUTEJOB;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_FORCE_WITHDRAWAL;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_FORECLOSURE;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION_GET;
@@ -2626,14 +2625,6 @@ public class CommandWrapperBuilder {
         this.entityName = ENTITY_SCHEDULER;
         this.entityId = jobId;
         this.href = "/updateJobDetail/" + jobId + "/updateJobDetail";
-        return this;
-    }
-
-    public CommandWrapperBuilder executeSchedulerJob(final Long jobId) {
-        this.actionName = ACTION_EXECUTEJOB;
-        this.entityName = ENTITY_SCHEDULER;
-        this.entityId = jobId;
-        this.href = "/jobs/" + jobId + "?command=executeJob";
         return this;
     }
 

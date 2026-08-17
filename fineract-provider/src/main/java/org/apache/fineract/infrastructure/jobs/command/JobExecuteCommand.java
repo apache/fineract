@@ -16,28 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.jobs.service;
 
-import java.util.Set;
-import org.apache.fineract.infrastructure.jobs.data.JobParameterDTO;
-import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetail;
+package org.apache.fineract.infrastructure.jobs.command;
 
-public interface JobRegisterService {
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.infrastructure.jobs.data.JobExecuteRequest;
 
-    void rescheduleJob(Long jobId);
-
-    void pauseScheduler();
-
-    void startScheduler();
-
-    boolean isSchedulerRunning();
-
-    void stopScheduler(String name);
-
-    void scheduleJob(ScheduledJobDetail scheduledJobDetails);
-
-    void stopAllSchedulers();
-
-    void executeJobWithParameters(Long jobId, Set<JobParameterDTO> parameters);
-
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class JobExecuteCommand extends Command<JobExecuteRequest> {}
