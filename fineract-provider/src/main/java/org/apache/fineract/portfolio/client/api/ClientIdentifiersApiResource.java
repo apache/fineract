@@ -68,8 +68,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ClientIdentifiersApiResource {
 
-    private static final Set<String> CLIENT_IDENTIFIER_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList("id", "clientId", "documentType", "documentKey", "description", "allowedDocumentTypes"));
+    private static final Set<String> CLIENT_IDENTIFIER_DATA_PARAMETERS = new HashSet<>(Arrays.asList("id", "clientId", "documentType",
+            "documentKey", "description", "issuanceDate", "expiryDate", "allowedDocumentTypes"));
 
     private static final String RESOURCE_NAME_FOR_PERMISSIONS = "CLIENTIDENTIFIER";
 
@@ -117,11 +117,11 @@ public class ClientIdentifiersApiResource {
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.PostClientsClientIdIdentifiersRequest.class)))
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.PostClientsClientIdIdentifiersResponse.class)))
     public CommandProcessingResult createClientIdentifier(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
-            @Parameter(hidden = true) final ClientIdentifierRequest clientIdentifierRequest) {
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         try {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().createClientIdentifier(clientId)
-                    .withJson(toApiJsonSerializer.serialize(clientIdentifierRequest)).build();
+                    .withJson(apiRequestBodyAsJson).build();
 
             return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } catch (final DuplicateClientIdentifierException e) {
@@ -173,11 +173,11 @@ public class ClientIdentifiersApiResource {
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ClientIdentifiersApiResourceSwagger.PutClientsClientIdIdentifiersIdentifierIdResponse.class)))
     public CommandProcessingResult updateClientIdentifer(@PathParam("clientId") @Parameter(description = "clientId") final Long clientId,
             @PathParam("identifierId") @Parameter(description = "identifierId") final Long clientIdentifierId,
-            @Parameter(hidden = true) final ClientIdentifierRequest clientIdentifierRequest) {
+            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         try {
             final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClientIdentifier(clientId, clientIdentifierId)
-                    .withJson(toApiJsonSerializer.serialize(clientIdentifierRequest)).build();
+                    .withJson(apiRequestBodyAsJson).build();
 
             return this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

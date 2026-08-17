@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.client.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
 import org.apache.fineract.portfolio.client.data.ClientIdentifierRequest;
 
 /**
@@ -52,6 +53,10 @@ final class ClientIdentifiersApiResourceSwagger {
         public String documentKey;
         @Schema(example = "Issued in the year 2--7")
         public String description;
+        @Schema(example = "01 January 2024")
+        public LocalDate issuanceDate;
+        @Schema(example = "01 January 2034")
+        public LocalDate expiryDate;
     }
 
     @Schema(description = "PostClientsClientIdIdentifiersRequest")
@@ -67,6 +72,14 @@ final class ClientIdentifiersApiResourceSwagger {
         public String description;
         @Schema(example = "Active")
         public String status;
+        @Schema(example = "01 January 2024")
+        public String issuanceDate;
+        @Schema(example = "01 January 2034")
+        public String expiryDate;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "en")
+        public String locale;
     }
 
     @Schema(description = "PutClientsClientIdIdentifiersIdentifierIdResponse")

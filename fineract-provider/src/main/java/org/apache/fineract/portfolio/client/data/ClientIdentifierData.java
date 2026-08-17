@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.client.data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Collection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,20 +42,23 @@ public class ClientIdentifierData implements Serializable {
     private final String documentKey;
     private final String description;
     private final String status;
+    private final LocalDate issuanceDate;
+    private final LocalDate expiryDate;
     @SuppressWarnings("unused")
     private final Collection<CodeValueData> allowedDocumentTypes;
 
     public static ClientIdentifierData singleItem(final Long id, final Long clientId, final CodeValueData documentType,
-            final String documentKey, final String status, final String description) {
-        return new ClientIdentifierData(id, clientId, documentType, documentKey, description, status, null);
+            final String documentKey, final String status, final String description, final LocalDate issuanceDate,
+            final LocalDate expiryDate) {
+        return new ClientIdentifierData(id, clientId, documentType, documentKey, description, status, issuanceDate, expiryDate, null);
     }
 
     public static ClientIdentifierData template(final Collection<CodeValueData> codeValues) {
-        return new ClientIdentifierData(null, null, null, null, null, null, codeValues);
+        return new ClientIdentifierData(null, null, null, null, null, null, null, null, codeValues);
     }
 
     public static ClientIdentifierData template(final ClientIdentifierData data, final Collection<CodeValueData> codeValues) {
         return new ClientIdentifierData(data.id, data.clientId, data.documentType, data.documentKey, data.description, data.status,
-                codeValues);
+                data.issuanceDate, data.expiryDate, codeValues);
     }
 }
