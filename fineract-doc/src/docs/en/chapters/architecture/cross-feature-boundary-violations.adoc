@@ -1,0 +1,689 @@
+= Cross-Feature Boundary Violations
+
+Fineract is built from more than thirty Gradle modules, but the feature code inside
+them still behaves largely as a single unit. A class in the accounting feature holds
+a direct reference to a charge entity; a client service imports types from loan,
+savings, collateral and holidays. The module structure describes an intent that the
+code does not yet honour.
+
+This chapter measures how far the code is from that intent, explains which parts of
+the gap are worth closing, and sets out the criteria used to decide which packages to
+decouple first.
+
+== Introduction
+
+=== What a Feature Boundary Means in Fineract
+
+A *feature* is a business capability that owns its own data and rules — loan, savings,
+charge, accounting, client, group. In the target architecture each feature is a Gradle
+module (`fineract-loan`, `fineract-savings`, `fineract-charge`) that publishes a small,
+deliberate set of types and keeps everything else to itself.
+
+A feature's *boundary* is that published set. Code inside the feature may use anything
+it owns. Code outside it may use only what the feature publishes, and only through
+contracts rather than concrete implementations.
+
+Two shared modules sit beneath every feature and are deliberately outside this rule:
+
+* `fineract-core` — shared domain primitives, contracts and abstractions that any
+  feature may depend on.
+* `fineract-command` — the command/handler infrastructure through which state changes flow.
+
+A dependency on either is not a violation. It is the mechanism by which features are
+meant to reach one another.
+
+One complication has to be stated up front, because it shapes everything that follows.
+Fineract's features are Gradle modules, but Java code is organised by *package*, and the
+two do not line up: 159 of 1023 main-source packages are split across two to four
+modules. `org.apache.fineract.portfolio.loanaccount.service`, for example, has classes
+in `fineract-loan`, `fineract-provider`, `fineract-progressive-loan` and `fineract-core`
+simultaneously. A boundary is therefore a property of *modules*, not of package names,
+and any measurement keyed on package names alone will misattribute code.
+
+=== What Counts as a Boundary Violation
+
+A *cross-feature violation* (CFV) is a compile-time reference from a class owned by one
+feature to an implementation type owned by another feature.
+
+Counted as a violation:
+
+* Importing a concrete class, entity or service implementation from another feature.
+* A JPA association that maps directly onto another feature's entity — for example
+  `ProductToGLAccountMapping` in the accounting module holding a `Charge` field
+  (see `ProductToGLAccountMapping.java`), which binds the accounting object model to
+  the charge object model at compile time.
+* Injecting another feature's `…ReadPlatformService` implementation rather than a
+  contract published for the purpose.
+* Reading another feature's tables directly in hand-written SQL.
+
+Not counted as a violation:
+
+* Any dependency on `fineract-core` or `fineract-command`.
+* A feature *implementing* a contract that another feature owns. This is the inversion
+  that fixes a violation rather than an instance of one, and it is the shape every fix in
+  <<_how_a_violation_is_fixed>> takes.
+* Dependencies on platform infrastructure — security, event framework, jobs, Liquibase.
+
+The distinction between the second and third bullets of the two lists matters more than
+it may appear. Accounting depending on charge is a violation. Charge implementing an
+interface that accounting owns is not — the compile-time arrow now points from charge
+into accounting-owned contracts, and accounting no longer needs to know charge exists.
+That single reversal is the core move used throughout this chapter.
+
+=== What Kind of Entanglement Are We Trying to Solve
+
+"Coupling" covers several distinct problems in Fineract, and they do not have the same
+cost, the same fix, or the same urgency. Separating them prevents both overstating the
+problem and fixing the wrong layer.
+
+==== Compile-Time Entanglement
+
+One feature's classes refer to another feature's classes, so the two cannot be compiled,
+tested or released apart. This is the entanglement this chapter measures and the one the
+CFV count describes.
+
+It is also the only one of the four that can be fixed purely by moving and re-shaping
+Java code, which is why it is addressed first.
+
+==== Database Entanglement
+
+All features share a single tenant schema, and that schema contains foreign keys that
+cross feature lines. The accounting-to-charge relationship again serves as the example:
+
+[source,xml]
+----
+<addForeignKeyConstraint baseColumnNames="charge_id" baseTableName="acc_product_mapping"
+                         constraintName="FK_acc_product_mapping_m_charge"
+                         onDelete="RESTRICT" onUpdate="RESTRICT"
+                         referencedColumnNames="id" referencedTableName="m_charge"/>
+----
+
+`acc_product_mapping` is an accounting table. `m_charge` is a charge table. The database
+enforces a hard reference between them independently of anything the Java code does.
+
+This is the single most important qualification in the chapter: *removing a compile-time
+dependency does not remove the corresponding data dependency.* Replacing the `Charge`
+association with a `Long chargeId` decouples the object model while the foreign key
+constraint remains exactly as it was. That is a real and worthwhile gain — the modules
+compile apart — but it is not database separation, and the chapter does not claim it as
+such.
+
+==== Infrastructure Entanglement
+
+Every feature uses the same command bus, event framework, security context, tenant
+resolution and Liquibase master changelog. Features are entangled through this shared
+substrate in the sense that they all depend on it.
+
+This is by design and is not a target. Shared infrastructure is what makes features
+interoperable at all; the aim is for it to be the *only* thing they share.
+
+==== Runtime and Transactional Entanglement
+
+Cross-feature calls run in-process and typically inside one database transaction, so a
+failure in one feature can roll back work in another. Decoupling at compile time does
+not change this, and this chapter does not attempt to.
+
+It is recorded here because it is the boundary of what the work achieves: the outcome is
+modules that build and test independently, not services that fail independently.
+
+=== Why Cross-Feature Dependencies Matter
+
+The measured position — 115 cross-feature dependency pairs across 13,887 class-level
+edges, with only 2 of 20 features clean — has concrete consequences:
+
+* *Change amplification.* A change to a charge entity can force recompilation and
+  retesting of accounting, loan, savings and shareaccounts, because all four reference it
+  directly.
+* *No independent testing.* A feature cannot be exercised without standing up most of the
+  platform, which pushes work into slow integration tests.
+* *Dependency cycles.* Mutual dependencies between features mean there is no ordering in
+  which they can be built or reasoned about separately.
+* *Onboarding cost.* A contributor cannot form a working mental model of one feature
+  without also learning several others.
+* *Modularisation is blocked.* Extracting any feature into its own module is impossible
+  while its compile-time reach is unbounded, so the module structure cannot advance.
+
+=== Scope of This Analysis
+
+Twenty feature packages were analysed, covering the portfolio and accounting features
+that make up the functional core of the platform. The unit of measurement is the
+feature-to-feature dependency pair; supporting evidence is drawn from class-level
+metrics because package-level metrics cannot be attributed reliably (see
+<<_what_a_feature_boundary_means_in_fineract>>).
+
+==== Which Database
+
+Fineract runs on MariaDB and PostgreSQL, and the analysis is *engine-independent* — no
+measurement in this chapter varies by database vendor.
+
+What matters is the schema layout, which is identical on both engines:
+
+* A single *tenant schema* holds the tables of every feature. There is no per-feature
+  schema, and no per-feature database.
+* Schema evolution is driven by one Liquibase master changelog, with the bulk of the
+  feature tables created in `0001_initial_schema.xml`. Some newer modules
+  (`fineract-savings`, `fineract-progressive-loan`, `fineract-rates`,
+  `fineract-working-capital-loan`) carry their own changelog directories, so migration
+  ownership is partially distributed already.
+* Cross-feature foreign keys exist throughout that shared schema.
+
+In scope: identifying the foreign keys and shared tables that constrain a proposed
+extraction, and reporting them as part of each case study's impact assessment.
+
+Out of scope: splitting the schema, removing cross-feature foreign keys, or introducing
+per-feature datasources. Those are separate pieces of work with their own migration and
+operational risk, and none of the changes proposed here depend on them.
+
+==== Infrastructure in Scope
+
+The build, test and enforcement infrastructure is in scope, because decoupling that is
+not enforced regresses:
+
+* Gradle module structure and inter-module dependency declarations.
+* The contract-hosting role of `fineract-core`.
+* Automated boundary verification in the test suite.
+
+Application runtime infrastructure — deployment topology, messaging, caching, connection
+pooling — is not in scope and is unaffected by this work.
+
+==== What This Chapter Does Not Cover
+
+* *Microservice extraction.* The target is a modular monolith. Nothing here proposes
+  separate deployables.
+* *Runtime or transactional isolation*, as set out above.
+* *A complete directed dependency graph from MetricsTree alone.* MetricsTree measures
+  coupling magnitude, never direction: `Ce = 11` says a package reaches out to eleven
+  outside classes, never which ones. Directed feature-to-feature edges are derived from
+  the import graph; MetricsTree supplies magnitude and feature-envy evidence.
+
+=== How to Read This Chapter
+
+<<_measuring_boundary_violations>> covers tooling, metric definitions and the measured
+baseline. Readers who want to know *what to do* rather than *how it was measured* can
+begin at <<_deciding_whether_a_package_is_worth_decoupling>>, which sets out the
+selection criteria, and then read the three case studies.
+
+Each case study follows the same six-part structure — the package, its metric profile,
+the violation, the proposed fix, the estimated effort, and the impact on the source code
+— so that the same slot can be compared across all three severities in
+<<_comparative_analysis>>.
+
+== Complexity
+
+=== What Complexity We Are Solving
+
+The complexity being removed is *accidental*, not *essential*.
+
+Essential complexity is inherent in the domain and will survive any refactoring. A loan
+genuinely has charges. Posting a repayment genuinely produces accounting entries. A
+client genuinely has loans, savings accounts and collateral. No amount of module
+restructuring makes these relationships go away, and none of the work proposed here
+attempts to.
+
+Accidental complexity is how those relationships are currently *expressed in code*:
+
+* Accounting knows the `Charge` *class* when all it requires is a charge *identifier*
+  and a small amount of charge metadata.
+* The client feature imports concrete types from loan, savings, charge, collateral,
+  note, accounting, staff, working days, holidays and data queries in order to assemble
+  what is ultimately a read-only view.
+* A feature that needs one field from a neighbour takes a compile-time dependency on
+  that neighbour's entire object graph.
+
+In each case the *dependency is real* but the *coupling is far stronger than the
+dependency requires*. That gap — between what a feature genuinely needs and what it
+currently imports — is the complexity this work removes.
+
+=== Where the Complexity Shows Up
+
+* *Build and test cycles.* Touching a widely-referenced entity triggers rebuilds far
+  beyond the feature that owns it.
+* *Cyclic reasoning.* With 115 cross-feature pairs among 20 features, dependency cycles
+  are the norm rather than the exception, and no feature can be understood in isolation.
+* *Misleading module structure.* Gradle modules imply boundaries that the code does not
+  respect, so the build files actively mislead newcomers.
+* *Hidden coupling.* Because 159 packages are split across modules, some cross-module
+  dependencies appear as ordinary intra-package references and are invisible to
+  package-level metrics — the coupling is worse than a naive `Ce` reading suggests.
+
+=== What Decoupling Will Not Simplify
+
+Stated plainly, so the expected benefit is not oversold:
+
+* *Domain complexity is unchanged.* The same business rules, in the same number, after
+  the work as before.
+* *Class count rises.* Interfaces and DTOs in `fineract-core` are added, not removed.
+  Decoupling trades a smaller number of tightly-bound types for a larger number of
+  loosely-bound ones.
+* *Indirection increases.* Navigating from a caller to the implementation now passes
+  through a contract, which is a real cost to readability at the call site.
+* *The database is untouched.* Cross-feature foreign keys remain.
+* *Runtime behaviour is unchanged.* The same calls happen in the same order in the same
+  transaction.
+
+The trade is deliberate: more types, more indirection, and in exchange a module
+structure that can be enforced automatically and evolved independently.
+
+== Measuring Boundary Violations
+
+=== Tooling and Method
+
+==== MetricsTree Setup
+
+==== How Measurements Were Collected
+
+==== Reproducing These Results
+
+=== Metrics Used
+
+==== Afferent Coupling (Ca)
+
+==== Efferent Coupling (Ce)
+
+==== Instability (I)
+
+==== Abstractness (A)
+
+==== Distance from the Main Sequence (D)
+
+=== Interpreting the Numbers
+
+=== Baseline Measurements Across Modules
+
+=== Classifying Violations by Severity
+
+==== Severity Criteria
+
+==== Summary of Classified Packages
+
+== Deciding Whether a Package Is Worth Decoupling
+
+=== Why a Criterion Is Needed
+
+Twelve of the twenty features measured are CRITICAL, and 115 cross-feature pairs connect
+them. Attacking that list in metric order alone would begin with the two hardest
+packages in the platform — loan and savings, each with `Ce = 11` — and would likely stall
+before delivering anything reviewable.
+
+A criterion is needed that ranks candidates by *value delivered per unit of risk*, not by
+severity alone. The measured data supports the ranking; it does not by itself determine
+it.
+
+=== The Criteria
+
+A package is worth decoupling when it satisfies most of the following. They are listed
+in the order they should be applied.
+
+*1. It is genuinely a violation.*
+The first check is whether the dependency is real. `F15 report` measures `CFV = 0`: it
+is `infrastructure.report`, already extracted into `fineract-report`, and needs no work
+at all despite earlier estimates to the contrary. Verify before planning.
+
+*2. The contract surface is small and stable.*
+The decisive practical criterion. If the depending feature needs an identifier and two
+or three fields, a contract is small, reviewable and unlikely to churn. The
+accounting-to-charge case qualifies: accounting needs a charge id and limited metadata,
+not charge behaviour. If a feature needs a neighbour's *behaviour* rather than its
+*data*, the contract will be large and the case is weaker.
+
+*3. Blast radius justifies the work (`Ca`).*
+High afferent coupling means many features are exposed to changes in this one, so
+stabilising its boundary pays off repeatedly. `F13 organisation` (`Ca = 14`) and
+`F2 client` (`Ca = 14`) score highly here.
+
+*4. It breaks a cycle.*
+A change that converts a mutual dependency into a one-directional one is worth more than
+its raw CFV reduction suggests, because it makes the two features independently
+buildable rather than merely less coupled.
+
+*5. Database entanglement does not block it.*
+Where the corresponding data can stay in place behind an identifier — as with
+`FK_acc_product_mapping_m_charge` — the code change stands alone. Where the fix would
+require splitting a table or removing a foreign key, cost rises sharply and the package
+should be deferred.
+
+*6. It establishes a repeatable pattern.*
+Early candidates should be chosen partly for what they teach. A first decoupling that
+produces a reviewable, imitable pattern is worth more than one that removes more edges
+by a route nobody can repeat.
+
+A package failing criteria 1 or 5 should not be scheduled regardless of how it scores
+elsewhere.
+
+=== Applying the Criteria to the Measured Data
+
+Applying the criteria to the twenty measured features produces three groups:
+
+* *Strong candidates* — a small contract surface and high blast radius. Charge and
+  organisation lead here: both are depended upon widely, and much of what their
+  dependants need is data rather than behaviour.
+* *High value, high cost* — loan and savings (`Ce = 11`, `CFV = 11` each). The largest
+  contributors to the total, but the broadest contract surface and the deepest database
+  entanglement. These need the pattern proven elsewhere first.
+* *Not candidates* — features that are already clean, or whose coupling runs inward
+  rather than outward. See below.
+
+=== Correcting the Earlier Estimates
+
+The measured data contradicts the earlier modularisation assessment in ways that change
+which packages should be scheduled, so the corrections are recorded here rather than
+left implicit.
+
+[cols="2,2,2,4", options="header"]
+|===
+| Package | Earlier estimate | Measured | Reality
+
+| `F9 charge`
+| 0 — "fully independent"
+| 6
+| Depends on accounting, organisation, useradministration, loan, savings, shareaccounts
+
+| `F13 organisation`
+| 0 — "fully independent"
+| 7
+| Depends on accounting, calendar, useradministration, client, loan, savings, charge
+
+| `F19 notifications`
+| 0 — "fully independent"
+| 8
+| Depends on eight features
+
+| `F10 calendar`
+| 0 — "fully independent"
+| 5
+| Not independent
+
+| `F11 rate`
+| 0 — "fully independent"
+| 2
+| Not independent
+
+| `F15 report`
+| 5
+| 0
+| Already compliant — `infrastructure.report`, extracted into `fineract-report`
+|===
+
+Two conclusions follow. First, the earlier assessment identified six packages as needing
+no work, and four of those six are among the worst offenders — so a plan based on it
+would have skipped the highest-value targets. Second, its platform total of 44–65 CFV
+understates the measured 115 by roughly half. Planning should use the measured figures.
+
+=== Packages That Are Not Worth Decoupling Yet
+
+* `F15 report` (`CFV = 0`) and `F20 template` (`CFV = 0`) — already compliant. No work.
+* `F17 mix` (`CFV = 1`) — a single edge; the contract would cost more than the coupling.
+* `F16 useradministration` (`Ce = 2`, `Ca = 15`) — the clearest case of coupling that
+  should *not* be attacked. Fifteen features depend on it while it depends on almost
+  nothing, which is exactly the shape a shared foundation should have. Its low
+  instability (`I = 0.12`) reflects a stable dependency, not a violation. The correct
+  treatment is to keep it stable, and possibly to formalise it as core.
+* `F11 rate` (`CFV = 2`) — genuinely coupled, but too little to prioritise.
+
+The general rule: *high `Ca` with low `Ce` is a foundation, not a problem.* Only
+outward reach — high `Ce` and high CFV — indicates a feature that has escaped its
+boundary.
+
+== Case Study: Low Severity
+
+=== Package Under Review
+
+=== Metric Profile
+
+=== The Violation
+
+==== Offending Dependencies
+
+==== Why This Boundary Was Crossed
+
+=== Proposed Fix
+
+==== Target Design
+
+==== Refactoring Steps
+
+=== Estimated Effort
+
+=== Impact on the Source Code
+
+==== Affected Classes and Packages
+
+==== API and Database Compatibility
+
+==== Test and Migration Impact
+
+=== Risks and Trade-offs
+
+== Case Study: Medium Severity
+
+=== Package Under Review
+
+=== Metric Profile
+
+=== The Violation
+
+==== Offending Dependencies
+
+==== Why This Boundary Was Crossed
+
+=== Proposed Fix
+
+==== Target Design
+
+==== Refactoring Steps
+
+=== Estimated Effort
+
+=== Impact on the Source Code
+
+==== Affected Classes and Packages
+
+==== API and Database Compatibility
+
+==== Test and Migration Impact
+
+=== Risks and Trade-offs
+
+== Case Study: High Severity
+
+=== Package Under Review
+
+=== Metric Profile
+
+=== The Violation
+
+==== Offending Dependencies
+
+==== Why This Boundary Was Crossed
+
+=== Proposed Fix
+
+==== Target Design
+
+==== Refactoring Steps
+
+==== Incremental Migration Path
+
+=== Estimated Effort
+
+=== Impact on the Source Code
+
+==== Affected Classes and Packages
+
+==== API and Database Compatibility
+
+==== Test and Migration Impact
+
+=== Risks and Trade-offs
+
+== Comparative Analysis
+
+=== Effort Against Benefit
+
+The three case studies are chosen to span the cost range rather than to be equally
+valuable. Read together they show that cost is driven by *contract surface*, not by the
+number of edges removed: a package with several dependants that each need the same small
+slice of data is cheaper to decouple than a package with two dependants that each need a
+different part of its behaviour.
+
+This is why raw CFV is a poor scheduling key on its own, and why criterion 2 in
+<<_the_criteria>> carries more weight than criterion 3.
+
+=== Expected Metric Improvements
+
+Each case study reports its own before-and-after figures. At platform level the relevant
+measures are the total cross-feature pair count against the measured baseline of 115, the
+number of features at `CFV = 0` against the current 2 of 20, and the removal of cycles.
+
+The last of these is the one to weight most heavily. Reducing an edge count improves a
+number; breaking a cycle changes what is structurally possible, because it makes a
+feature independently buildable for the first time.
+
+=== Recommended Order of Work
+
+. *Prove the pattern on a small, well-bounded case* — a package whose dependants need
+  data rather than behaviour, where a contract in `fineract-core` and an identifier
+  reference are sufficient.
+. *Repeat it on a widely-depended-upon feature* to confirm the pattern holds as blast
+  radius grows.
+. *Apply it to the largest offenders* — loan and savings — only once the pattern is
+  established and enforcement is in place.
+
+Sequencing matters more than it might appear. Loan and savings account for the largest
+share of the total and will attract attention first, but attempting them before the
+pattern is proven risks a large, hard-to-review change that stalls, discouraging further
+work.
+
+=== How a Violation Is Fixed
+
+Every violation in this chapter is fixed by the same five-step move, regardless of
+severity. The case studies differ in how much work each step involves, not in what the
+steps are.
+
+. *Identify the minimum the depending feature actually needs.* Almost always an
+  identifier plus a few fields, not the neighbour's behaviour. This step determines the
+  cost of the whole change, so it is worth doing carefully before any code moves.
+. *Define a contract for exactly that, owned by the depending feature*, and place it in
+  `fineract-core` so both sides can see it.
+. *Have the owning feature implement the contract.* This is the step that reverses the
+  compile-time arrow: the owning feature now points at a contract belonging to the
+  feature that used to depend on it.
+. *Replace direct object associations with identifier references.* A JPA association onto
+  a foreign entity becomes a plain `Long` id, and reads go through the contract.
+. *Add a boundary test* so the build fails if the dependency returns.
+
+==== Replacing an Association with an Identifier
+
+The narrowest form of the fix, and the right one when a feature holds a foreign entity
+purely to reach its key or a little metadata.
+
+An entity field such as `private Charge charge` in an accounting mapping table becomes
+`private Long chargeId`. Queries that navigated the association are rewritten to join on
+the identifier, and any charge metadata the accounting code still needs is served by a
+narrow read contract that accounting owns and the charge feature implements.
+
+The result is that accounting no longer references charge types at compile time, and the
+two modules build independently.
+
+This form also shows the database qualification from <<_database_entanglement>> at its
+sharpest: the Java association disappears, but `FK_acc_product_mapping_m_charge` remains
+in the schema exactly as before. The modules decouple; the data does not. That is an
+acceptable and expected outcome, not a shortfall in the fix.
+
+==== Extracting Contracts for a Broad Dependant
+
+The same move applied where a feature depends on many neighbours at once — the shape seen
+in features that assemble read-only views across the platform, reaching into loan,
+savings, charge, collateral, note, accounting, staff, working days and holidays.
+
+Here the fix is applied once per neighbour rather than once in total: a set of read and
+write contracts plus minimal DTOs move into `fineract-core`, and each neighbouring
+feature implements the contracts relevant to it. The dependant is left depending on
+`fineract-core` and `fineract-command` only.
+
+The individual steps are unchanged; what grows is the number of contracts to design and
+the size of the review. This is why contract surface, not edge count, is the criterion
+that drives scheduling.
+
+==== Choosing Between the Two Forms
+
+Prefer the identifier form wherever the dependency is on *data*. Reach for contract
+extraction only where the dependant genuinely needs the neighbour's *behaviour*, since
+every contract added is a type that must be designed, reviewed and kept stable.
+
+Where a feature holds a foreign entity but uses only its identifier, the identifier form
+removes the coupling at a fraction of the cost — and it composes, so a broad dependant is
+often best handled as several small identifier fixes plus a small number of genuine
+behavioural contracts.
+
+== Preventing Regression
+
+=== Enforcing Boundaries in the Build
+
+A decoupled boundary that is not enforced will be crossed again by the next contributor
+who needs a field, and will be crossed innocently, because nothing signals that it is a
+boundary.
+
+The mechanism is a declared module structure plus an automated check: Spring Modulith
+describes which features exist and what each is permitted to depend on, and a
+per-feature boundary test fails the build when a feature acquires a dependency it is not
+allowed to have.
+
+Two properties make this work as an enforcement strategy:
+
+* *It is incremental.* A test is added per feature as that feature is cleaned up, so
+  enforcement grows with the work instead of requiring the whole platform to be correct
+  before anything can be enforced.
+* *It fails at build time*, where the cost of the mistake is a red build rather than a
+  merged regression.
+
+Every case study in this chapter should therefore end with a boundary test, and no
+decoupling should be considered complete without one.
+
+=== Tracking Metrics Over Time
+
+Enforcement prevents regression on features already cleaned; it does not show progress
+across the platform. The measurement described in
+<<_measuring_boundary_violations>> should be repeated at intervals and its headline
+figures tracked: total cross-feature pairs against the 115 baseline, features at
+`CFV = 0` against 2 of 20, and the count of remaining cycles.
+
+Two cautions apply when re-measuring. Metrics must be gathered the same way each time or
+the series is not comparable; and the split-package effect means package-level `Ce` will
+*understate* coupling where features share a namespace, so class-level attribution
+remains the reliable source.
+
+== Conclusion
+
+=== Summary of Findings
+
+* Fineract's module structure states an intent the code does not yet honour. Only 2 of
+  20 features are free of cross-feature dependencies.
+* The measured position is 115 cross-feature dependency pairs across 13,887 class-level
+  edges, with 12 of 20 features classified CRITICAL.
+* The earlier assessment was materially wrong in both directions: four of the six
+  packages it called independent are among the worst offenders, one package it scheduled
+  for work is already compliant, and its total understates the measured figure by roughly
+  half.
+* Coupling is not uniform, and the direction matters. High `Ca` with low `Ce`
+  — `useradministration` — is a stable foundation and should be left alone. Only outward
+  reach indicates a feature that has escaped its boundary.
+* The binding constraint on cost is contract surface, not edge count: features whose
+  dependants need *data* are far cheaper to decouple than those whose dependants need
+  *behaviour*.
+* Every violation is fixed by the same move — invert the dependency through a contract in
+  `fineract-core`, replace object associations with identifier references, and enforce
+  the result with a boundary test. Severity changes the size of the change, not its shape.
+* Compile-time decoupling is achievable now and independent of the database. The shared
+  tenant schema and its cross-feature foreign keys remain, and separating them is
+  separate work.
+
+=== Next Steps
+
+. Apply the criteria in <<_the_criteria>> to the full measured set and publish a ranked
+  candidate list.
+. Land the low-severity case study to establish the pattern end to end, boundary test
+  included.
+. Extend Spring Modulith coverage feature by feature as each is cleaned.
+. Re-measure and publish the trend, so the direction of travel is visible.
+. Revisit loan and savings once the pattern is proven and enforcement is in place.
