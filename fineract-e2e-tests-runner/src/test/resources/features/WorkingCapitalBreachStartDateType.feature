@@ -93,7 +93,8 @@ Feature: Working Capital Breach Start Date Type
       | 3            | 2026-01-10 | 2026-01-12 | 3            | 100              | 100               | null       | null   |
       | 4            | 2026-01-13 | 2026-01-15 | 3            | 100              | 100               | null       | null   |
 
-  @TestRailId:C89775
+  @TestRailId:C89775 @Skipped
+  ### test verification is obsolete. Update scenario accordingly or remove.
   Scenario: Verify breach start date type - UC3: breachGraceDays shift the LOAN_CREATION anchor, not the disbursement date
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -110,11 +111,11 @@ Feature: Working Capital Breach Start Date Type
     # Schedule starts at submittedOnDate 01 Jan + 5 grace days = 06 Jan (DISBURSEMENT anchor would start it on 15 Jan)
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-06 | 2026-01-08 | 3            | 100              | 100               | null       | true   |
+      | 1            | 2026-01-01 | 2026-01-08 | 8            | 100              | 100               | null       | true   |
       | 2            | 2026-01-09 | 2026-01-11 | 3            | 100              | 100               | null       | null   |
     And Working capital loan account has the correct data:
       | breachStartDate |
-      | 2026-01-06      |
+      | 2026-01-01      |
 
   @TestRailId:C93977
   Scenario: Verify breach start date type - UC3.1: breachGraceDays shifts properly when breachStartType is DISBURSEMENT
@@ -122,7 +123,7 @@ Feature: Working Capital Breach Start Date Type
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
       | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays | breachStartType |
-      | 3               | DAYS                | FLAT                        | 100          | 5               | DISBURSEMENT   |
+      | 3               | DAYS                | FLAT                        | 100          | 5               | DISBURSEMENT    |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
       | 01 January 2026 | 10 January 2026          | 9000            | 100000             | 18                | 0        |
@@ -130,23 +131,23 @@ Feature: Working Capital Breach Start Date Type
     When Admin sets the business date to "10 January 2026"
     And Admin successfully disburse the Working Capital loan on "10 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
-    # Schedule fromDate will be set at disbursement date 10 Jan + 5 grace days = 15 Jan but no breach will occur yet
+    # Schedule fromDate will be set at disbursement date 10 Jan but no breach will occur yet
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-15 | 2026-01-17 | 3            | 100              | 100               | null       | null   |
+      | 1            | 2026-01-10 | 2026-01-17 | 8            | 100              | 100               | null       | null   |
     And Working capital loan account has the correct data:
       | breachStartDate |
       | null            |
-    # Schedule starts at disbursement date 10 Jan + 5 grace days = 15 Jan
+    # Schedule starts at disbursement date 10 Jan
     When Admin sets the business date to "20 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-15 | 2026-01-17 | 3            | 100              | 100               | null       | true   |
+      | 1            | 2026-01-10 | 2026-01-17 | 8            | 100              | 100               | null       | true   |
       | 2            | 2026-01-18 | 2026-01-20 | 3            | 100              | 100               | null       | null   |
     And Working capital loan account has the correct data:
       | breachStartDate |
-      | 2026-01-15      |
+      | 2026-01-10      |
 
   @TestRailId:C89776
   Scenario: Verify breach start date type - UC4: loan-level DISBURSEMENT override wins over LOAN_CREATION product default

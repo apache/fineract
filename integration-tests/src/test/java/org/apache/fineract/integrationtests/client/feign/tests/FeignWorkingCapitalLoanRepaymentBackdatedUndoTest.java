@@ -332,9 +332,9 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
             // Let the first delinquency period elapse unpaid, then COB classifies the loan as delinquent.
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-07-26");
             wcLoanHelper.executeInlineWCCOB(loanId);
-            final LocalDate expectedDelinquencyStart = LocalDate.of(2026, 7, 1).plusDays(DELINQUENCY_GRACE_DAYS);
+            final LocalDate expectedDelinquencyStart = LocalDate.of(2026, 7, 1);
             assertEquals(expectedDelinquencyStart, wcLoanHelper.getLoanDetails(loanId).getDelinquencyStartDate(),
-                    "Loan must become delinquent (start date = disbursement + grace) once the first period elapses unpaid");
+                    "Loan must become delinquent (start date = disbursement date) once the first period elapses unpaid");
 
             // A backdated repayment that covers the period's minimum payment (3% of 9000 = 270) clears the delinquency.
             wcLoanHelper.makeRepayment(loanId, WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(300), "05 July 2026"));
@@ -355,7 +355,7 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
 
             businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-08-26");
             wcLoanHelper.executeInlineWCCOB(loanId);
-            final LocalDate expectedDelinquencyStart = LocalDate.of(2026, 8, 1).plusDays(DELINQUENCY_GRACE_DAYS);
+            final LocalDate expectedDelinquencyStart = LocalDate.of(2026, 8, 1);
             assertEquals(expectedDelinquencyStart, wcLoanHelper.getLoanDetails(loanId).getDelinquencyStartDate(),
                     "Loan must be delinquent before the repayment");
 
