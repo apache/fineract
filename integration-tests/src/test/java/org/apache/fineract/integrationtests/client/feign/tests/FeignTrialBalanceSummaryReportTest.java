@@ -68,6 +68,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 
 @Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Order(1)
 public class FeignTrialBalanceSummaryReportTest extends FeignIntegrationTest {
 
     private static final String REPORT_NAME = "Trial Balance Summary Report with Asset Owner";

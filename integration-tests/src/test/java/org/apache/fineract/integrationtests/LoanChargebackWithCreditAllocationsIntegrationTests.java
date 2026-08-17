@@ -40,10 +40,12 @@ import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.lang.Nullable;
 
 @Slf4j
+@Order(2)
 public class LoanChargebackWithCreditAllocationsIntegrationTests extends FeignLoanTestBase {
 
     @Test

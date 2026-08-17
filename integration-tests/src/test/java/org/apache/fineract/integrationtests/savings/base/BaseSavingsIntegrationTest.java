@@ -53,12 +53,15 @@ import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
+import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @Slf4j
+@ExtendWith({ SavingsTestLifecycleExtension.class })
 public class BaseSavingsIntegrationTest extends IntegrationTest {
 
     protected static final String DATETIME_PATTERN = "dd MMMM yyyy";

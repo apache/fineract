@@ -108,6 +108,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.lang.NonNull;
@@ -115,6 +116,7 @@ import retrofit2.Response;
 
 @SuppressWarnings("rawtypes")
 @ExtendWith({ ExternalEventsExtension.class })
+@Order(1)
 public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
 
     private static ResponseSpecification RESPONSE_SPEC;

@@ -6209,99 +6209,105 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends BaseLoan
     // UC157: Progressive loan with Accrual Activity reverse-replay
     @Test
     public void uc157() {
-        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID,
-                new PutGlobalConfigurationsRequest().enabled(true));
-        final String operationDate = "13 September 2025";
-        AtomicLong createdLoanId = new AtomicLong();
-        GetLoansLoanIdTransactions[] accrualActivityId = new GetLoansLoanIdTransactions[1];
-        final BigDecimal interestRatePerPeriod = BigDecimal.valueOf(11.32);
-        final BigDecimal principalAmount = BigDecimal.valueOf(135.94);
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
-                Pair.of(1, 10), //
-                Pair.of(11, 30), //
-                Pair.of(31, 60), //
-                Pair.of(61, null)//
-        ));
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            final String operationDate = "13 September 2025";
+            AtomicLong createdLoanId = new AtomicLong();
+            GetLoansLoanIdTransactions[] accrualActivityId = new GetLoansLoanIdTransactions[1];
+            final BigDecimal interestRatePerPeriod = BigDecimal.valueOf(11.32);
+            final BigDecimal principalAmount = BigDecimal.valueOf(135.94);
+            final Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+                    Pair.of(1, 10), //
+                    Pair.of(11, 30), //
+                    Pair.of(31, 60), //
+                    Pair.of(61, null)//
+            ));
 
-        runAt(operationDate, () -> {
-            final ArrayList<String> interestRefundTypes = new ArrayList<String>();
-            interestRefundTypes.add("PAYOUT_REFUND");
-            interestRefundTypes.add("MERCHANT_ISSUED_REFUND");
-            Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
-                    .interestRatePerPeriod(interestRatePerPeriod.doubleValue()).interestRateFrequencyType(YEARS)//
-                    .daysInMonthType(DaysInMonthType.DAYS_30)//
-                    .daysInYearType(DaysInYearType.DAYS_360)//
-                    .numberOfRepayments(6)//
-                    .repaymentEvery(1)//
-                    .repaymentFrequencyType(2L)//
-                    .chargeOffBehaviour("ZERO_INTEREST")//
-                    .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
-                    .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
-                    .enableDownPayment(false)//
-                    .enableAccrualActivityPosting(true)//
-                    .allowPartialPeriodInterestCalculation(null)//
-                    .enableAutoRepaymentForDownPayment(null)//
-                    .isInterestRecalculationEnabled(true)//
-                    .delinquencyBucketId(delinquencyBucketId.longValue())//
-                    .enableInstallmentLevelDelinquency(true)//
-                    .interestRecalculationCompoundingMethod(0)//
-                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY)//
-                    .installmentAmountInMultiplesOf(null)//
-                    .supportedInterestRefundTypes(interestRefundTypes) //
-                    .rescheduleStrategyMethod(LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD.getValue())//
-                    .recalculationRestFrequencyType(2)//
-                    .recalculationRestFrequencyInterval(1)//
-                    .enableAccrualActivityPosting(true);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate,
-                    principalAmount.doubleValue(), 6).interestCalculationPeriodType(DAYS)//
-                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
-                    .interestRatePerPeriod(interestRatePerPeriod)//
-                    .repaymentEvery(1)//
-                    .repaymentFrequencyType(MONTHS)//
-                    .loanTermFrequency(6)//
-                    .loanTermFrequencyType(MONTHS);
+            runAt(operationDate, () -> {
+                final ArrayList<String> interestRefundTypes = new ArrayList<String>();
+                interestRefundTypes.add("PAYOUT_REFUND");
+                interestRefundTypes.add("MERCHANT_ISSUED_REFUND");
+                Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+                PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
+                        .interestRatePerPeriod(interestRatePerPeriod.doubleValue()).interestRateFrequencyType(YEARS)//
+                        .daysInMonthType(DaysInMonthType.DAYS_30)//
+                        .daysInYearType(DaysInYearType.DAYS_360)//
+                        .numberOfRepayments(6)//
+                        .repaymentEvery(1)//
+                        .repaymentFrequencyType(2L)//
+                        .chargeOffBehaviour("ZERO_INTEREST")//
+                        .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue())//
+                        .repaymentStartDateType(LoanProduct.RepaymentStartDateTypeEnum.SUBMITTED_ON_DATE.ordinal())//
+                        .enableDownPayment(false)//
+                        .enableAccrualActivityPosting(true)//
+                        .allowPartialPeriodInterestCalculation(null)//
+                        .enableAutoRepaymentForDownPayment(null)//
+                        .isInterestRecalculationEnabled(true)//
+                        .delinquencyBucketId(delinquencyBucketId.longValue())//
+                        .enableInstallmentLevelDelinquency(true)//
+                        .interestRecalculationCompoundingMethod(0)//
+                        .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY)//
+                        .installmentAmountInMultiplesOf(null)//
+                        .supportedInterestRefundTypes(interestRefundTypes) //
+                        .rescheduleStrategyMethod(LoanRescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD.getValue())//
+                        .recalculationRestFrequencyType(2)//
+                        .recalculationRestFrequencyInterval(1)//
+                        .enableAccrualActivityPosting(true);
+                PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+                PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), operationDate,
+                        principalAmount.doubleValue(), 6).interestCalculationPeriodType(DAYS)//
+                        .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                        .interestRatePerPeriod(interestRatePerPeriod)//
+                        .repaymentEvery(1)//
+                        .repaymentFrequencyType(MONTHS)//
+                        .loanTermFrequency(6)//
+                        .loanTermFrequencyType(MONTHS);
 
-            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
-            createdLoanId.set(loanResponse.getLoanId());
+                PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+                createdLoanId.set(loanResponse.getLoanId());
 
-            loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().approvedLoanAmount(principalAmount)
-                    .dateFormat(DATETIME_PATTERN).approvedOnDate(operationDate).locale("en"));
+                loanTransactionHelper.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().approvedLoanAmount(principalAmount)
+                        .dateFormat(DATETIME_PATTERN).approvedOnDate(operationDate).locale("en"));
 
-            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest().actualDisbursementDate(operationDate)
-                    .dateFormat(DATETIME_PATTERN).locale("en").transactionAmount(principalAmount));
+                loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
+                        new PostLoansLoanIdRequest().actualDisbursementDate(operationDate).dateFormat(DATETIME_PATTERN).locale("en")
+                                .transactionAmount(principalAmount));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
-            assertTrue(loanDetails.getStatus().getActive());
-        });
+                GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+                assertTrue(loanDetails.getStatus().getActive());
+            });
 
-        runAt("22 October 2025", () -> {
+            runAt("22 October 2025", () -> {
 
-            executeInlineCOB(createdLoanId.get());
-            verifyTransactions(createdLoanId.get(), //
-                    transaction(135.94, "Disbursement", "13 September 2025", 135.94, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-                    transaction(1.28, "Accrual Activity", "13 October 2025", 0.0, 0.0, 1.28, 0.0, 0.0, 0.0, 0.0),
-                    transaction(1.61, "Accrual", "21 October 2025", 0.0, 0.0, 1.61, 0.0, 0.0, 0.0, 0.0));
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
-            loanDetails.getTransactions().stream().filter(t -> "loanTransactionType.accrualActivity".equals(t.getType().getCode()))
-                    .findFirst().ifPresent(t -> {
-                        accrualActivityId[0] = t;
-                    });
-            assertNotNull(accrualActivityId[0]);
-            assertNotNull(accrualActivityId[0].getExternalId());
+                executeInlineCOB(createdLoanId.get());
+                verifyTransactions(createdLoanId.get(), //
+                        transaction(135.94, "Disbursement", "13 September 2025", 135.94, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                        transaction(1.28, "Accrual Activity", "13 October 2025", 0.0, 0.0, 1.28, 0.0, 0.0, 0.0, 0.0),
+                        transaction(1.61, "Accrual", "21 October 2025", 0.0, 0.0, 1.61, 0.0, 0.0, 0.0, 0.0));
+                GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(createdLoanId.get());
+                loanDetails.getTransactions().stream().filter(t -> "loanTransactionType.accrualActivity".equals(t.getType().getCode()))
+                        .findFirst().ifPresent(t -> {
+                            accrualActivityId[0] = t;
+                        });
+                assertNotNull(accrualActivityId[0]);
+                assertNotNull(accrualActivityId[0].getExternalId());
 
-            loanTransactionHelper.makeLoanRepayment(createdLoanId.get(), new PostLoansLoanIdTransactionsRequest() //
-                    .transactionDate("13 September 2025") //
-                    .transactionAmount(135.94) //
-                    .locale("en") //
-                    .dateFormat(DATETIME_PATTERN)); //
+                loanTransactionHelper.makeLoanRepayment(createdLoanId.get(), new PostLoansLoanIdTransactionsRequest() //
+                        .transactionDate("13 September 2025") //
+                        .transactionAmount(135.94) //
+                        .locale("en") //
+                        .dateFormat(DATETIME_PATTERN)); //
 
-            GetLoansLoanIdTransactionsTransactionIdResponse loanTransactionDetails = loanTransactionHelper
-                    .getLoanTransactionDetails(createdLoanId.get(), accrualActivityId[0].getId());
-            assertNotNull(loanTransactionDetails.getExternalId());
-            assertEquals(LocalDate.of(2025, 10, 22), loanTransactionDetails.getReversedOnDate());
-        });
+                GetLoansLoanIdTransactionsTransactionIdResponse loanTransactionDetails = loanTransactionHelper
+                        .getLoanTransactionDetails(createdLoanId.get(), accrualActivityId[0].getId());
+                assertNotNull(loanTransactionDetails.getExternalId());
+                assertEquals(LocalDate.of(2025, 10, 22), loanTransactionDetails.getReversedOnDate());
+            });
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
     }
 
     // UC158: Repayment schedule handling for flat cumulative multi-disbursement

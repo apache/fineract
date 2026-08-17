@@ -31,6 +31,8 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.DaysInMonthType;
@@ -59,8 +61,9 @@ public class LoanManualInterestRefundResponseStructureTest extends FeignLoanTest
     @Test
     public void testManualInterestRefundResponseStructureWithoutExternalIds() {
         AtomicReference<Long> loanIdRef = new AtomicReference<>();
-        AtomicReference<Long> targetTransactionIdRef = new AtomicReference<>();
 
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID,
+                new PutGlobalConfigurationsRequest().enabled(false));
         runAt("01 January 2024", () -> {
             Long loanProductId = createLoanProduct(
                     create4IProgressive().daysInMonthType(DaysInMonthType.ACTUAL).daysInYearType(DaysInYearType.ACTUAL)
@@ -80,7 +83,6 @@ public class LoanManualInterestRefundResponseStructureTest extends FeignLoanTest
             PostLoansLoanIdTransactionsResponse refundResponse = makeLoanMerchantIssuedRefund(loanId, "15 January 2024", 100.0);
             assertNotNull(refundResponse);
             assertNotNull(refundResponse.getResourceId());
-            targetTransactionIdRef.set(refundResponse.getResourceId());
 
             PostLoansLoanIdTransactionsResponse interestRefundResponse = createManualInterestRefund(loanId, refundResponse.getResourceId(),
                     "15 January 2024", 5.0, null);

@@ -88,6 +88,8 @@ public class RepaymentReverseExternalIdTest extends FeignLoanTestBase {
 
             assertTrue(allAccrualTransactionsHaveExternalId);
         });
+        globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID,
+                new PutGlobalConfigurationsRequest().enabled(false));
     }
 
     private PostLoanProductsRequest loanProductsRequest(String loanExternalId) {

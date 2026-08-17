@@ -35,11 +35,13 @@ import org.apache.fineract.integrationtests.common.externalevents.ExternalEventH
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventsExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @Slf4j
 @ExtendWith({ LoanTestLifecycleExtension.class, ExternalEventsExtension.class })
+@Order(1)
 public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest {
 
     @Test

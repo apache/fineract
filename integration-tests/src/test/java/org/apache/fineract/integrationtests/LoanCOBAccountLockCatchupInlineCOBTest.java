@@ -50,8 +50,10 @@ import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
+@Order(1)
 public class LoanCOBAccountLockCatchupInlineCOBTest extends BaseLoanIntegrationTest {
 
     private ResponseSpecification responseSpec;

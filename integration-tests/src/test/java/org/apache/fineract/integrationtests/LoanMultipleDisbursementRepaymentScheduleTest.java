@@ -54,8 +54,10 @@ import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuil
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
+@Order(1)
 public class LoanMultipleDisbursementRepaymentScheduleTest extends BaseLoanIntegrationTest {
 
     private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
