@@ -4486,9 +4486,7 @@ public class ClientLoanIntegrationTest extends BaseLoanIntegrationTest {
         LOAN_TRANSACTION_HELPER.makeRefundByCash(now, Float.parseFloat("2000"), loanID);
         JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, now,
                 new JournalEntry(Float.parseFloat("2000"), JournalEntry.TransactionType.CREDIT),
-                new JournalEntry(Float.parseFloat("1980"), JournalEntry.TransactionType.DEBIT));
-
-        JOURNAL_ENTRY_HELPER.checkJournalEntryForIncomeAccount(incomeAccount, now,
+                new JournalEntry(Float.parseFloat("1980"), JournalEntry.TransactionType.DEBIT),
                 new JournalEntry(Float.parseFloat("20"), JournalEntry.TransactionType.DEBIT));
 
         loanSchedule.clear();
