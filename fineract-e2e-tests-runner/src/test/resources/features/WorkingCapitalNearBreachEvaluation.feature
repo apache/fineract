@@ -110,8 +110,8 @@ Feature: Working Capital Near Breach Evaluation
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
-    # freq=60d -> 1 eval at 03-02. COB on 01 Mar -> evalDate not yet passed -> nearBreach stays null
-    When Admin sets the business date to "01 March 2026"
+    # freq=60d -> 1 eval at 03-01. COB on 28 Feb -> evalDate not yet passed -> nearBreach stays null
+    When Admin sets the business date to "28 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
@@ -263,7 +263,7 @@ Feature: Working Capital Near Breach Evaluation
     And Admin creates a client with random data
     And Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:
       | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | nearBreachFrequency | nearBreachFrequencyType | nearBreachThreshold | delinquencyGraceDays |
-      | 2               | MONTHS              | FLAT                        | 500          | 58                  | DAYS                    | 50                  |                      |
+      | 2               | MONTHS              | FLAT                        | 500          | 59                  | DAYS                    | 50                  |                      |
     And Admin creates a working capital loan using created product with the following data:
       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
       | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
@@ -565,9 +565,8 @@ Feature: Working Capital Near Breach Evaluation
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-09 | 90.00            | 40.00             | true       | null   |
 
-  @TestRailId:C80953 @Skip
-  ### Breach start date is no longer shifted for the first period.
-  ### TODO alter test scenario to check 2nd period
+  @TestRailId:C80953
+  ### Breach start date is no longer shifted for the first period, but near-breach evaluation should still consider grace days
   Scenario: Verify that grace days shift breach period start and near breach is evaluated at shifted eval dates - UC4
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -580,19 +579,19 @@ Feature: Working Capital Near Breach Evaluation
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
-    # Grace=3 -> P1: 01-01 -> 01-12 (9d from 01-04 minus 1 day). minPayment = 50% of 800 = 400.
-    # near-breach freq=3 -> evals: 01-07 (#1), 01-10 (#2). step required = 33% of 400 = 132.
-    # Pay 100 on 05 Jan -> cumulative paid by eval#1 is 100.
+    # Grace=3 -> P1: 01-01 -> 01-12 (9d from 01-01 minus 1 day + 3 grace days). minPayment = 50% of 800 = 400.
+    # near-breach freq=3 -> without grace the first eval is 01-03; grace=3 shifts evals to 01-06 (#1), 01-09 (#2).
+    # step required = 33% of 400 = 132. Pay 100 on 05 Jan -> cumulative paid by eval#1 is 100.
     When Admin sets the business date to "05 January 2026"
     And Customer makes repayment on "05 January 2026" with 100.0 transaction amount on Working Capital loan
-    # Phase A: current date 06 Jan (BEFORE eval#1 at 01-07) -> nearBreach=null.
+    # Phase A: current date 05 Jan (ON eval#1 at 01-06) -> nearBreach=null.
     When Admin sets the business date to "06 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-12 | 400.00           | 300.00            | null       | null   |
-    # Phase B: advance past eval#1 (01-07) -> cumulative paid by 01-07 = 100 < 132 -> trigger Y at eval#1.
-    When Admin sets the business date to "08 January 2026"
+    # Phase B: advance past eval#1 (01-06) -> cumulative paid by 01-06 = 100 < 132 -> trigger Y at eval#1.
+    When Admin sets the business date to "07 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan breach schedule has the following data:
       | periodNumber | fromDate   | toDate     | minPaymentAmount | outstandingAmount | nearBreach | breach |

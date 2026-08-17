@@ -159,7 +159,7 @@ Feature: Working Capital Loan Charge After Maturity
       | 2            | 2026-03-01 | 2026-04-30 | 61           | 12.30            | 12.30             | null       | true   |
       | 3            | 2026-05-01 | 2026-06-30 | 61           | 12.30            | 12.30             | null       | true   |
       | 4            | 2026-07-01 | 2026-08-31 | 62           | 12.30            | 12.30             | null       | true   |
-      | 5            | 2026-09-01 | 2026-10-31 | 61           | 12.30            | 12.30             | null       | null   |
+      | 5            | 2026-09-01 | 2026-10-31 | 61           | 12.30            | 12.30             | true       | null   |
     Then Admin closes the Working Capital loan with a full repayment on "01 October 2026"
     And Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
