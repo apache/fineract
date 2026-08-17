@@ -28,12 +28,17 @@ dependencies {
     implementation(project(path: ':fineract-cob'))
     implementation(project(path: ':fineract-accounting'))
     implementation(project(path: ':fineract-charge'))
+    // required by the interest rate chart command handlers, which use the typed command framework
+    implementation(project(path: ':fineract-command'))
     implementation(project(path: ':fineract-rates'))
     implementation(project(path: ':fineract-tax'))
 
     implementation(
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-security',
+            // required by the savings scheduled jobs (Spring Batch tasklets/configs), as in fineract-loan
+            'org.springframework.boot:spring-boot-starter-batch',
+            'org.springframework.batch:spring-batch-integration',
             'jakarta.ws.rs:jakarta.ws.rs-api',
             'org.glassfish.jersey.media:jersey-media-multipart',
 
