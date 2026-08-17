@@ -20,6 +20,7 @@ package org.apache.fineract.interoperation.api;
 
 import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_QUOTE;
 import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_REQUEST;
+import static org.apache.fineract.interoperation.util.InteropUtil.ENTITY_NAME_TRANSFER;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -312,9 +313,10 @@ public class InteropApiResource {
     @Path("transactions/{transactionCode}/transfers/{transferCode}")
     @Operation(summary = "Query Interoperation Transfer", description = "")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = InteropTransferResponseData.class)))
+    @ApiResponse(responseCode = "404", description = "Transfer not found")
     public String getTransfer(@PathParam("transactionCode") @Parameter(description = "transactionCode") String transactionCode,
             @PathParam("transferCode") @Parameter(description = "transferCode") String transferCode, @Context UriInfo uriInfo) {
-        context.authenticatedUser().validateHasReadPermission(ENTITY_NAME_QUOTE);
+        context.authenticatedUser().validateHasReadPermission(ENTITY_NAME_TRANSFER);
 
         InteropTransferResponseData result = interopService.getTransfer(transactionCode, transferCode);
         ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());

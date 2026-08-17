@@ -75,12 +75,15 @@ import org.apache.fineract.interoperation.domain.InteropActionState;
 import org.apache.fineract.interoperation.domain.InteropIdentifier;
 import org.apache.fineract.interoperation.domain.InteropIdentifierRepository;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
+import org.apache.fineract.interoperation.domain.InteropTransfer;
+import org.apache.fineract.interoperation.domain.InteropTransferRepository;
 import org.apache.fineract.interoperation.exception.InteropAccountNotFoundException;
 import org.apache.fineract.interoperation.exception.InteropAccountTransactionNotAllowedException;
 import org.apache.fineract.interoperation.exception.InteropKycDataNotFoundException;
 import org.apache.fineract.interoperation.exception.InteropTransferAlreadyCommittedException;
 import org.apache.fineract.interoperation.exception.InteropTransferAlreadyOnHoldException;
 import org.apache.fineract.interoperation.exception.InteropTransferMissingException;
+import org.apache.fineract.interoperation.exception.InteropTransferNotFoundException;
 import org.apache.fineract.interoperation.serialization.InteropDataValidator;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrency;
 import org.apache.fineract.organisation.monetary.domain.ApplicationCurrencyRepository;
@@ -129,6 +132,7 @@ public class InteropServiceImpl implements InteropService {
     private final NoteRepository noteRepository;
     private final PaymentTypeRepository paymentTypeRepository;
     private final InteropIdentifierRepository identifierRepository;
+    private final InteropTransferRepository transferRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
 
     private final SavingsHelper savingsHelper;
@@ -363,8 +367,12 @@ public class InteropServiceImpl implements InteropService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public InteropTransferResponseData getTransfer(@NonNull String transactionCode, @NonNull String transferCode) {
-        return null;
+        InteropTransfer transfer = transferRepository.findByTransactionCodeAndTransferCode(transactionCode, transferCode)
+                .orElseThrow(() -> new InteropTransferNotFoundException(transactionCode, transferCode));
+        return InteropTransferResponseData.build(transfer.getTransactionCode(), transfer.getState(), null, transfer.getTransferCode(),
+                transfer.getCompletedTimestamp());
     }
 
     @Override
@@ -406,8 +414,11 @@ public class InteropServiceImpl implements InteropService {
             savingsAccountRepository.save(savingsAccount);
         }
 
-        return InteropTransferResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,
-                request.getExpiration(), request.getExtensionList(), transferCode, DateUtils.getLocalDateTimeOfTenant());
+        LocalDateTime completedTimestamp = DateUtils.getLocalDateTimeOfTenant();
+        InteropTransferResponseData response = InteropTransferResponseData.build(command.commandId(), request.getTransactionCode(),
+                InteropActionState.ACCEPTED, request.getExpiration(), request.getExtensionList(), transferCode, completedTimestamp);
+        recordTransfer(request.getTransactionCode(), transferCode, completedTimestamp);
+        return response;
     }
 
     @Override
@@ -470,8 +481,11 @@ public class InteropServiceImpl implements InteropService {
             noteRepository.save(Note.savingsTransactionNote(savingsAccount, transaction, note));
         }
 
-        return InteropTransferResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,
-                request.getExpiration(), request.getExtensionList(), request.getTransferCode(), transactionDateTime);
+        InteropTransferResponseData response = InteropTransferResponseData.build(command.commandId(), request.getTransactionCode(),
+                InteropActionState.ACCEPTED, request.getExpiration(), request.getExtensionList(), request.getTransferCode(),
+                transactionDateTime);
+        recordTransfer(request.getTransactionCode(), request.getTransferCode(), transactionDateTime);
+        return response;
     }
 
     @Override
@@ -501,8 +515,18 @@ public class InteropServiceImpl implements InteropService {
             throw new InteropTransferMissingException(savingsAccount.getExternalId().getValue(), request.getTransferCode());
         }
 
-        return InteropTransferResponseData.build(command.commandId(), request.getTransactionCode(), InteropActionState.ACCEPTED,
-                request.getExpiration(), request.getExtensionList(), request.getTransferCode(), transactionDateTime);
+        InteropTransferResponseData response = InteropTransferResponseData.build(command.commandId(), request.getTransactionCode(),
+                InteropActionState.ACCEPTED, request.getExpiration(), request.getExtensionList(), request.getTransferCode(),
+                transactionDateTime);
+        recordTransfer(request.getTransactionCode(), request.getTransferCode(), transactionDateTime);
+        return response;
+    }
+
+    private void recordTransfer(String transactionCode, String transferCode, LocalDateTime completedTimestamp) {
+        InteropTransfer transfer = transferRepository.findByTransactionCodeAndTransferCode(transactionCode, transferCode)
+                .orElseGet(() -> new InteropTransfer(transactionCode, transferCode, InteropActionState.ACCEPTED, completedTimestamp));
+        transfer.update(InteropActionState.ACCEPTED, completedTimestamp);
+        transferRepository.save(transfer);
     }
 
     @Override

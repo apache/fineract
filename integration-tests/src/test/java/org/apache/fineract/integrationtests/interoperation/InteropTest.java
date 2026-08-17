@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.interoperation;
 
 import static org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper.ACCOUNT_TYPE_INDIVIDUAL;
 import static org.apache.fineract.integrationtests.interoperation.InteropHelper.PARAM_ACCOUNT_BALANCE;
+import static org.apache.fineract.interoperation.data.InteropResponseData.ISO_DATE_TIME_FORMATTER;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -31,6 +32,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -121,6 +123,30 @@ public class InteropTest {
         testRequests();
         testQuotes();
         testTransfers();
+    }
+
+    @Test
+    public void testReleaseTransferQuery() {
+        createClient();
+        createSavingsProduct();
+        createCharge();
+        openSavingsAccount();
+
+        String releaseTransferCode = UUID.randomUUID().toString();
+        interopHelper.prepareTransfer(releaseTransferCode);
+
+        String response = interopHelper.releaseTransfer(releaseTransferCode);
+        JsonPath json = JsonPath.from(response);
+        Assertions.assertEquals(releaseTransferCode, json.getString(InteropUtil.PARAM_TRANSFER_CODE));
+        Assertions.assertEquals(InteropActionState.ACCEPTED.toString(), json.getString(InteropHelper.PARAM_ACTION_STATE));
+        LocalDateTime completedTimestamp = completedTimestamp(json);
+
+        String transfer = interopHelper.getTransfer(interopHelper.getTransactionCode(), releaseTransferCode);
+        json = JsonPath.from(transfer);
+        Assertions.assertEquals(interopHelper.getTransactionCode(), json.getString(InteropUtil.PARAM_TRANSACTION_CODE));
+        Assertions.assertEquals(releaseTransferCode, json.getString(InteropUtil.PARAM_TRANSFER_CODE));
+        Assertions.assertEquals(InteropActionState.ACCEPTED.toString(), json.getString(InteropHelper.PARAM_ACTION_STATE));
+        Assertions.assertEquals(completedTimestamp, completedTimestamp(json));
     }
 
     private void createClient() {
@@ -248,6 +274,20 @@ public class InteropTest {
         JsonPath json = JsonPath.from(response);
         Assertions.assertEquals(transferCode, json.getString(InteropUtil.PARAM_TRANSFER_CODE));
         Assertions.assertEquals(InteropActionState.ACCEPTED.toString(), json.getString(InteropHelper.PARAM_ACTION_STATE));
+        LocalDateTime prepareCompletedTimestamp = completedTimestamp(json);
+
+        String transfer = interopHelper.getTransfer(interopHelper.getTransactionCode(), transferCode);
+        json = JsonPath.from(transfer);
+        Assertions.assertEquals(interopHelper.getTransactionCode(), json.getString(InteropUtil.PARAM_TRANSACTION_CODE));
+        Assertions.assertEquals(transferCode, json.getString(InteropUtil.PARAM_TRANSFER_CODE));
+        Assertions.assertEquals(InteropActionState.ACCEPTED.toString(), json.getString(InteropHelper.PARAM_ACTION_STATE));
+        Assertions.assertEquals(prepareCompletedTimestamp, completedTimestamp(json));
+
+        interopHelper.setResponseSpec(responseNotFoundErrorSpec);
+        interopHelper.getTransfer(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        interopHelper.getTransfer(UUID.randomUUID().toString(), transferCode);
+        interopHelper.getTransfer(interopHelper.getTransactionCode(), UUID.randomUUID().toString());
+        interopHelper.setResponseSpec(responseSpec);
 
         // prepare
         savings = (String) savingsAccountHelper.getSavingsAccountDetail(savingsId, null);
@@ -269,6 +309,14 @@ public class InteropTest {
         json = JsonPath.from(response);
         Assertions.assertEquals(transferCode, json.getString(InteropUtil.PARAM_TRANSFER_CODE));
         Assertions.assertEquals(InteropActionState.ACCEPTED.toString(), json.getString(InteropHelper.PARAM_ACTION_STATE));
+        LocalDateTime completedTimestamp = completedTimestamp(json);
+
+        transfer = interopHelper.getTransfer(interopHelper.getTransactionCode(), transferCode);
+        json = JsonPath.from(transfer);
+        Assertions.assertEquals(interopHelper.getTransactionCode(), json.getString(InteropUtil.PARAM_TRANSACTION_CODE));
+        Assertions.assertEquals(transferCode, json.getString(InteropUtil.PARAM_TRANSFER_CODE));
+        Assertions.assertEquals(InteropActionState.ACCEPTED.toString(), json.getString(InteropHelper.PARAM_ACTION_STATE));
+        Assertions.assertEquals(completedTimestamp, completedTimestamp(json));
 
         savings = (String) savingsAccountHelper.getSavingsAccountDetail(savingsId, null);
         LOG.debug("Response Interoperable GET Saving: {}", savings);
@@ -294,5 +342,9 @@ public class InteropTest {
         Assertions.assertTrue(MathUtil.isEqualTo(onHold, onHold4), "On hold amount expected: " + onHold + ", actual: " + onHold4);
         Assertions.assertTrue(MathUtil.isEqualTo(balance, balance4),
                 "Balance amount expected: " + expectedBalance + ", actual: " + balance4);
+    }
+
+    private LocalDateTime completedTimestamp(JsonPath json) {
+        return LocalDateTime.parse(json.getString("completedTimestamp"), ISO_DATE_TIME_FORMATTER);
     }
 }

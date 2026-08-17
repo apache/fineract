@@ -360,12 +360,23 @@ public class InteropHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public String getTransfer(String transferCode) {
+        return getJsonAttribute(getTransfer(transactionCode, transferCode), InteropUtil.PARAM_TRANSFER_CODE);
+    }
+
+    /**
+     * @return response json
+     */
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public String getTransfer(String transactionCode, String transferCode) {
         String url = buildUrl(TRANSACTIONS_URL + '/' + transactionCode + '/' + TRANSFERS_URL_PARAM + '/' + transferCode);
         LOG.debug("Calling Interoperable GET Transfer: {}", url);
 
         String response = Utils.performServerGet(requestSpec, responseSpec, url, null);
         LOG.debug("Response Interoperable GET Transfer: {}", response);
-        return getJsonAttribute(response, InteropUtil.PARAM_TRANSFER_CODE);
+        return response;
     }
 
     /**
@@ -388,6 +399,17 @@ public class InteropHelper {
     @Deprecated(forRemoval = true)
     public String createTransfer(String transferCode, InteropTransactionRole role) {
         return postTransfer(transferCode, InteropTransferActionType.CREATE, role);
+    }
+
+    /**
+     * @return response json
+     */
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public String releaseTransfer(String transferCode) {
+        return postTransfer(transferCode, InteropTransferActionType.RELEASE, InteropTransactionRole.PAYER);
     }
 
     /**
