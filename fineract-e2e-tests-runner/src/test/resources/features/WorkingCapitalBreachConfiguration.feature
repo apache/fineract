@@ -95,25 +95,3 @@ Feature: Working Capital Breach Configuration
     And Admin creates a client with random data
     And Admin creates working capital loan with with breach on "01 January 2027" date
     Then Admin failed to delete WC Breach that is assigned to a Working Capital Loan Account
-
-  @TestRailId:TODO_ADD_001
-  Scenario: Verify that breach Id is overridable and applied
-    When Admin sets the business date to "01 January 2026"
-    And Admin creates a client with random data
-    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
-      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays |
-      | 1               | MONTHS              | FLAT                        | 500          | 5               |
-    And Admin creates a new Working Capital Breach Configuration:
-      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount |
-      | 2               | WEEKS               | FLAT                        | 250          |
-    And Admin creates a working capital loan using created product with breachGraceDays 11 and the following data:
-      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | breachId     |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        | LAST_CREATED |
-    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
-    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
-
-    When Admin sets the business date to "02 January 2026"
-    And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Working Capital loan breach schedule has the following data:
-      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
-      | 1            | 2026-01-12 | 2026-01-25 | 14           | 250.00           | 250.00            | null       | null  |

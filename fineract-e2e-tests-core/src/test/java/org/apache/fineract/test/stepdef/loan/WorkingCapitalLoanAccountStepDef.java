@@ -246,6 +246,8 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final String discount = rawData.get("discount");
         final String breachId = rawData.get("breachId");
         final String delinquencyBucketId = rawData.get("delinquencyBucketId");
+        final String nearBreachId = rawData.get("nearBreachId");
+        Long breachIdLong = null;
 
         final PostWorkingCapitalLoansRequest loansRequest = workingCapitalLoanRequestFactory.defaultWorkingCapitalLoansRequest(clientId)
                 .productId(loanProductId).submittedOnDate(submittedOnDate).expectedDisbursementDate(expectedDisbursementDate)
@@ -256,9 +258,19 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
             loansRequest.breachGraceDays(breachGraceDays);
         }
         if (breachId != null) {
-            Long breactIdLong = "LAST_CREATED".equals(breachId) ? testContext().get(TestContextKey.WORKING_CAPITAL_BREACH_ID)
+            breachIdLong = "LAST_CREATED".equals(breachId) ? testContext().get(TestContextKey.WORKING_CAPITAL_BREACH_ID)
                     : Long.parseLong(breachId);
-            loansRequest.breachId(breactIdLong);
+            loansRequest.breachId(breachIdLong);
+        }
+        if (nearBreachId != null) {
+            Long nearBreachIdLong = "LAST_CREATED".equals(nearBreachId) ? testContext().get(TestContextKey.WORKING_CAPITAL_NEAR_BREACH_ID)
+                    : Long.parseLong(nearBreachId);
+            loansRequest.nearBreachId(nearBreachIdLong);
+            if (breachId != null) {
+                loansRequest.breachId(breachIdLong);
+            } else {
+                loansRequest.breachId(testContext().get(TestContextKey.WORKING_CAPITAL_BREACH_ID));
+            }
         }
         if (delinquencyBucketId != null) {
             Long delinquencyIdLong = "LAST_CREATED".equals(delinquencyBucketId) ? testContext().get(TestContextKey.DELINQUENCY_BUCKET_ID)
@@ -3064,6 +3076,12 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .executeWorkingCapitalLoanTransactionById(loanId, "repayment", repaymentRequest));
         assertThat(exception.getStatus()).as(errorMessage).isEqualTo(400);
         assertThat(exception.getDeveloperMessage()).contains(errorMessage);
+    }
+
+    @Then("Admin closes the Working Capital loan with all obligations met with a full repayment on {string}")
+    public void closeObligationsMetWorkingCapitalLoanWithFullRepayment(final String transactionDate) {
+        closeWorkingCapitalLoanWithFullRepayment(transactionDate);
+        loanWCStatus("CLOSED_OBLIGATIONS_MET");
     }
 
     @Then("Customer makes credit balance refund on {string} with {double} transaction amount on Working Capital loan")

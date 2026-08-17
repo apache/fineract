@@ -340,6 +340,21 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         return breachId;
     }
 
+    @When("Admin creates a new Working Capital Near Breach Configuration:")
+    public Long createNearBreach(final DataTable table) {
+        final Map<String, String> data = table.asMaps().getFirst();
+        final WorkingCapitalNearBreachRequest nearBreachRequest = new WorkingCapitalNearBreachRequest()
+                .nearBreachName("WC Near Breach " + Utils.randomStringGenerator("", 10))
+                .nearBreachFrequency(Integer.valueOf(data.get("nearBreachFrequency")))
+                .nearBreachFrequencyType(data.get("nearBreachFrequencyType"))
+                .nearBreachThreshold(new BigDecimal(data.get("nearBreachThreshold")));
+        final CommandProcessingResult nearBreachCreateResponse = ok(
+                () -> fineractFeignClient.workingCapitalNearBreaches().createWorkingCapitalNearBreach(nearBreachRequest));
+        final Long nearBreachId = nearBreachCreateResponse.getResourceId();
+        testContext().set(TestContextKey.WORKING_CAPITAL_NEAR_BREACH_ID, nearBreachId);
+        return nearBreachId;
+    }
+
     @When("Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:")
     public void createWorkingCapitalLoanProductWithCustomBreachConfig(final DataTable table) {
         final Map<String, String> data = table.asMaps().getFirst();

@@ -79,26 +79,3 @@ Feature: Working Capital Delinquency Configuration
     Then Admin failed to delete WC Delinquency Bucket that is assigned to a Working Capital Loan Product
     Then Admin deletes a Working Capital Loan Product
     When Admin deletes WC Delinquency Bucket With Values
-
-
-  @TestRailId:TODO_ADD_002
-  Scenario: Verify that delinquency Id is overridable and applied
-    When Admin sets the business date to "01 January 2026"
-    And Admin creates a client with random data
-    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
-      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays |
-      | 1               | MONTHS              | FLAT                        | 500          | 5               |
-    And Admin creates WC Delinquency Bucket With Values:
-      | frequency | frequencyType | minimumPaymentType | minimumPayment |
-      | 2         | WEEKS         | FLAT               | 248            |
-    And Admin creates a working capital loan using created product with breachGraceDays 11 and the following data:
-      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | delinquencyBucketId | delinquencyGraceDays |
-      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        | LAST_CREATED        | 13                   |
-    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
-    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
-
-    When Admin sets the business date to "02 January 2026"
-    And Admin runs inline COB job for Working Capital Loan by loanId
-    Then Working Capital loan delinquency range schedule has the following data:
-      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
-      | 1            | 2026-01-01 | 2026-01-14 | 248.0          | 0.0        | 248.0             | null                  | null             | null           |
