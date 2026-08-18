@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import java.util.List;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
 
@@ -25,6 +26,7 @@ public interface WorkingCapitalLoanBreachResetService {
 
     void resetBreach(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction resetAction);
 
-    void undoResetBreach(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction undoResetAction);
+    void undoResetBreach(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction undoResetAction,
+            List<WorkingCapitalLoanBreachAction> priorActions);
 
 }

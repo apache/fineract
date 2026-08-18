@@ -54,7 +54,14 @@ public interface WorkingCapitalLoanBreachScheduleService {
 
     void recalculatePeriodsForPauses(WorkingCapitalLoan loan);
 
+    void splitPeriodAtReset(WorkingCapitalLoan loan, LocalDate resetDate);
+
+    void restoreSplitPeriod(WorkingCapitalLoan loan, WorkingCapitalLoanBreachAction undoneReset);
+
     void recalculatePastDueAmount(WorkingCapitalLoan loan);
+
+    /** Derives the reset flags from the persisted breach actions, so a new RESET or UNDO_RESET must be saved first. */
+    void applyActiveResetFlags(WorkingCapitalLoan loan);
 
     void reprocessBreachSchedule(WorkingCapitalLoan loan);
 }
