@@ -350,3 +350,24 @@ Feature: Working Capital Breach Evaluation
       | 1            | 2026-01-01 | 2026-02-03 | 34           | 270.000000       | 270.000000        | null       | true   |
       | 2            | 2026-02-04 | 2026-03-03 | 28           | 270.000000       | 270.000000        | null       | null   |
 
+  @TestRailId:C98173
+  Scenario: Verify that breach Id is overridable and applied
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | breachGraceDays |
+      | 1               | MONTHS              | FLAT                        | 500          | 5               |
+    And Admin creates a new Working Capital Breach Configuration:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount |
+      | 2               | WEEKS               | FLAT                        | 250          |
+    And Admin creates a working capital loan using created product with breachGraceDays 11 and the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount | breachId     |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        | LAST_CREATED |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan breach schedule has the following data:
+      | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
+      | 1            | 2026-01-01 | 2026-01-25 | 25           | 250.00           | 250.00            | null       | null   |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
