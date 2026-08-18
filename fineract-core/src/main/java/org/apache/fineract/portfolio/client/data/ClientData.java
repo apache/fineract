@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.fineract.commands.data.PendingMakerCheckerData;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -114,6 +115,8 @@ public final class ClientData implements Comparable<ClientData>, Serializable {
     private Boolean isAddressEnabled;
 
     private List<DatatableData> datatables;
+
+    private List<PendingMakerCheckerData> pendingMakerCheckerApprovals;
 
     // import fields
     private transient Integer rowIndex;
