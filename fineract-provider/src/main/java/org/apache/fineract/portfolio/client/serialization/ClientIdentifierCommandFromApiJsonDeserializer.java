@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.client.serialization;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -45,11 +46,15 @@ public final class ClientIdentifierCommandFromApiJsonDeserializer extends Abstra
     public static final String STATUS = "status";
     public static final String DESCRIPTION = "description";
     public static final String DOCUMENT_DESCRIPTION = "documentDescription";
+    public static final String ISSUANCE_DATE = "issuanceDate";
+    public static final String EXPIRY_DATE = "expiryDate";
+    public static final String LOCALE = "locale";
+    public static final String DATE_FORMAT = "dateFormat";
     /**
      * The parameters supported for this command.
      */
     private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(
-            Arrays.asList(DOCUMENT_TYPE_ID, DOCUMENT_KEY, STATUS, DESCRIPTION));
+            Arrays.asList(DOCUMENT_TYPE_ID, DOCUMENT_KEY, STATUS, DESCRIPTION, ISSUANCE_DATE, EXPIRY_DATE, LOCALE, DATE_FORMAT));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -74,6 +79,11 @@ public final class ClientIdentifierCommandFromApiJsonDeserializer extends Abstra
         final String documentKey = this.fromApiJsonHelper.extractStringNamed(DOCUMENT_KEY, element);
         final String documentDescription = this.fromApiJsonHelper.extractStringNamed(DOCUMENT_DESCRIPTION, element);
         final String statusString = this.fromApiJsonHelper.extractStringNamed(STATUS, element);
-        return new ClientIdentifierCommand(documentTypeId, documentKey, statusString, documentDescription);
+        final LocalDate issuanceDate = this.fromApiJsonHelper.extractLocalDateNamed(ISSUANCE_DATE, element);
+        final LocalDate expiryDate = this.fromApiJsonHelper.extractLocalDateNamed(EXPIRY_DATE, element);
+        final boolean issuanceDateParameterProvided = this.fromApiJsonHelper.parameterExists(ISSUANCE_DATE, element);
+        final boolean expiryDateParameterProvided = this.fromApiJsonHelper.parameterExists(EXPIRY_DATE, element);
+        return new ClientIdentifierCommand(documentTypeId, documentKey, statusString, documentDescription, issuanceDate, expiryDate,
+                issuanceDateParameterProvided, expiryDateParameterProvided);
     }
 }
