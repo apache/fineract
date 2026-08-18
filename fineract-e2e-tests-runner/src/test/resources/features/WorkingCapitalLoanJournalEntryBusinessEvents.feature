@@ -3,6 +3,7 @@
 @WorkingCapitalLoanJournalEntryBusinessEventsFeature
 Feature: Working Capital Loan Journal Entry Business Events
 
+  @TestRailId:C94066
   Scenario: Working Capital loan payout refund raises a Journal Entry Created business event per ledger line
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -14,6 +15,7 @@ Feature: Working Capital Loan Journal Entry Business Events
     Then Working Capital Loan Journal Entry Created business events are raised with balanced debits and credits
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
+  @TestRailId:C94067
   Scenario: Working Capital loan charge-off raises a Journal Entry Created business event per ledger line
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -25,6 +27,7 @@ Feature: Working Capital Loan Journal Entry Business Events
     Then Working Capital Loan Journal Entry Created business events are raised with balanced debits and credits
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
+  @TestRailId:C94068
   Scenario: Working Capital loan repayment raises a Journal Entry Created business event per ledger line
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:

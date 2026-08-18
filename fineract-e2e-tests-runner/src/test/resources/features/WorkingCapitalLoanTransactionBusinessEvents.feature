@@ -2,6 +2,7 @@
 @WorkingCapitalLoanTransactionBusinessEventsFeature
 Feature: Working Capital Loan Transaction Business Events
 
+  @TestRailId:C94074
   Scenario: Working Capital loan raises Payout Refund and Goodwill Credit transaction business events
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -23,6 +24,7 @@ Feature: Working Capital Loan Transaction Business Events
     And a Working Capital Loan Balance Changed business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "02 January 2026"
 
+  @TestRailId:C94075
   Scenario: Working Capital loan raises Transaction Reversed business event when a repayment and a payout refund are undone
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -50,6 +52,7 @@ Feature: Working Capital Loan Transaction Business Events
     And a Working Capital Loan Balance Changed business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "03 January 2026"
 
+  @TestRailId:C98191
   Scenario: Working Capital loan raises Transaction Reversed business event when a discount fee adjustment is undone
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -75,6 +78,7 @@ Feature: Working Capital Loan Transaction Business Events
     When Admin sets the business date to "02 January 2026"
     Then Admin closes the Working Capital loan with a full repayment on "02 January 2026"
 
+  @TestRailId:C94076
   Scenario: Working Capital loan raises Add Charge business event when a charge is added
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data

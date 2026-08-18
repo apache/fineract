@@ -377,6 +377,7 @@ Feature: Working Capital Loan Charge-off
       | httpCode | message                                                       |
       | 403      | error.msg.wc.loan.charge.off.is.not.the.last.user.transaction |
 
+  @TestRailId:C94064
   Scenario: Working Capital loan raises Charge Off account and transaction business events on charge-off
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -395,6 +396,7 @@ Feature: Working Capital Loan Charge-off
     And a Working Capital Loan Charge Off transaction business event is raised with "100.0" EUR amount
     Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
+  @TestRailId:C98192
   Scenario: Working Capital loan raises an Undo Charge Off business event when the charge-off is reverted
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -415,6 +417,7 @@ Feature: Working Capital Loan Charge-off
     And a Working Capital Loan Transaction Reversed business event is raised for the "chargeOff" transaction
     Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
+  @TestRailId:C98193
   Scenario: Working Capital loan raises an Undo Charge Off business event when a backdated repayment lifts the charge-off
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data

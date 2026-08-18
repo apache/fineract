@@ -396,6 +396,7 @@ Feature: Working Capital Loan Account Business Events
     And a Working Capital Loan Status Changed business event is raised
     And a Working Capital Loan Balance Changed business event is raised
 
+  @TestRailId:C94063
   Scenario: Working Capital loan raises Balance Changed business event on approval
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data

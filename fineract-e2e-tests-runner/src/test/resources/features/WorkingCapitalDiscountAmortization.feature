@@ -1073,6 +1073,7 @@ Feature: WorkingCapitalDiscountFeeAmortization
       | INCOME    | 404000       | Interest Income           |       | 5.14   |
       | LIABILITY | 240005       | Deferred Interest Revenue | 5.14  |        |
 
+  @TestRailId:C94061
   Scenario: Working Capital loan raises Discount Fee Amortization transaction business event from the COB run
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data

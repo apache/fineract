@@ -1203,6 +1203,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 03 January 2026 | Discount Fee Amortization Adjustment | 499.84            |                  |                   |                       | false    |
       | 04 January 2026 | Credit Balance Refund                | 400.0             | 0.0              | 0.0               | 0.0                   | false    |
 
+  @TestRailId:C94062
   Scenario: Working Capital loan raises Discount Fee Amortization Adjustment transaction business event when the amortization runs backwards
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data

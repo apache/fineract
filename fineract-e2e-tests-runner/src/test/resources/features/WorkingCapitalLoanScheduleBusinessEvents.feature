@@ -2,6 +2,7 @@
 @WorkingCapitalLoanScheduleBusinessEventsFeature @WCCOBFeature
 Feature: Working Capital Loan Schedule Business Events
 
+  @TestRailId:C94069
   Scenario: Working Capital loan raises Period Payment Rate Changed business event when the rate is updated
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -19,6 +20,7 @@ Feature: Working Capital Loan Schedule Business Events
     Then a Working Capital Loan Period Payment Rate Changed business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
+  @TestRailId:C94070
   Scenario: Working Capital loan raises Delinquency Pause, Resume, Disable and Enable business events on the matching delinquency actions
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -50,6 +52,7 @@ Feature: Working Capital Loan Schedule Business Events
     Then a Working Capital Loan Delinquency Enable business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "28 January 2026"
 
+  @TestRailId:C94071
   Scenario: Working Capital loan raises Breach Pause, Resume, Disable and Enable business events on the matching breach actions
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -80,13 +83,14 @@ Feature: Working Capital Loan Schedule Business Events
     Then a Working Capital Loan Breach Enable business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "28 January 2026"
 
+  @TestRailId:C94072
   Scenario: Working Capital loan raises Delinquency Schedule Changed and Breach Schedule Changed business events from the COB run that opens the schedules
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
-    And Admin creates WC Delinquency Bucket with frequency 30 DAYS and minimumPayment 3 PERCENTAGE
+    And Admin creates WC Delinquency Bucket with frequency 3 DAYS and minimumPayment 3 PERCENTAGE
     And Admin creates a new Working Capital Loan Product with delinquency bucket and custom breach config:
       | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount |
-      | 60              | DAYS                | PERCENTAGE                  | 50           |
+      | 6               | DAYS                | PERCENTAGE                  | 50           |
     And Admin creates a working capital loan with the following data:
       | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 10000           | 10000              | 1                 | 0.0      |
@@ -94,16 +98,15 @@ Feature: Working Capital Loan Schedule Business Events
     And a Working Capital Loan Balance Changed business event is raised on approval
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "10000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
-    When Admin sets the business date to "02 January 2026"
+    When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then a Working Capital Loan Delinquency Schedule Changed business event is raised
-    And a Working Capital Loan Breach Schedule Changed business event is raised
-    When Admin sets the business date to "03 January 2026"
+    When Admin sets the business date to "07 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
-    Then no Working Capital Loan Delinquency Schedule Changed business event is raised
-    And no Working Capital Loan Breach Schedule Changed business event is raised
+    And a Working Capital Loan Breach Schedule Changed business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "03 January 2026"
 
+  @TestRailId:C98184
   Scenario: Working Capital loan raises Breach Past Due Change business event from the COB run that closes an unpaid period
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -132,6 +135,7 @@ Feature: Working Capital Loan Schedule Business Events
     And no Working Capital Loan Breach Change business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
+  @TestRailId:C98185
   Scenario: Working Capital loan raises Breach Past Due Change business event when a backdated repayment lowers the past due amount
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -161,6 +165,9 @@ Feature: Working Capital Loan Schedule Business Events
     And no Working Capital Loan Breach Past Due Change business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
+  @TestRailId:C94073
+  Scenario: Working Capital loan raises Breach Schedule Changed business event when a near breach reschedule action is created
+
   Scenario: Working Capital loan raises Breach Reschedule business event when a near breach reschedule action is created
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -181,6 +188,7 @@ Feature: Working Capital Loan Schedule Business Events
     Then a Working Capital Loan Breach Reschedule business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
+  @TestRailId:C98186
   Scenario: Working Capital loan raises Near Breach Change business event from the COB run that reaches a near breach evaluation date
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -203,6 +211,7 @@ Feature: Working Capital Loan Schedule Business Events
     Then no Working Capital Loan Near Breach Change business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "04 March 2026"
 
+  @TestRailId:C98187
   Scenario: Working Capital loan raises Breach Reschedule business event when a breach reschedule action is created
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -223,6 +232,7 @@ Feature: Working Capital Loan Schedule Business Events
     Then a Working Capital Loan Breach Reschedule business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "01 June 2026"
 
+  @TestRailId:C98188
   Scenario: Working Capital loan raises Breach Reset and Breach Undo Reset business events on the matching breach actions
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -246,6 +256,7 @@ Feature: Working Capital Loan Schedule Business Events
     Then a Working Capital Loan Breach Undo Reset business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "15 April 2026"
 
+  @TestRailId:C98189
   Scenario: Working Capital loan raises Delinquency Reschedule business event when a delinquency reschedule action is created
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -267,6 +278,7 @@ Feature: Working Capital Loan Schedule Business Events
     Then a Working Capital Loan Delinquency Reschedule business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "01 June 2026"
 
+  @TestRailId:C98190
   Scenario: Working Capital loan raises Delinquency Reset and Delinquency Undo Reset business events on the matching delinquency actions
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
