@@ -24,6 +24,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,7 +38,7 @@ import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
 import org.apache.fineract.portfolio.tax.exception.TaxMappingNotFoundException;
 
 @Entity
-@Table(name = "m_tax_group")
+@Table(name = "m_tax_group", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "uq_m_tax_group_name") })
 public class TaxGroup extends AbstractAuditableCustom {
 
     @Column(name = "name", length = 100)
