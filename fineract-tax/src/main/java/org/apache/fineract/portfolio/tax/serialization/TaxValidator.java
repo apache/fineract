@@ -192,6 +192,10 @@ public class TaxValidator {
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
         if (topLevelJsonElement.get(TaxApiConstants.taxComponentsParamName).isJsonArray()) {
             final JsonArray array = topLevelJsonElement.get(TaxApiConstants.taxComponentsParamName).getAsJsonArray();
+            if (array.isEmpty()) {
+                dataValidationErrors.add(ApiParameterError.parameterError("validation.msg.at.least.one.tax.component.required",
+                        "Please add at least one Tax Component before submitting the Tax Group.", TaxApiConstants.taxComponentsParamName));
+            }
             baseDataValidator.reset().parameter(TaxApiConstants.taxComponentsParamName).value(array.size()).integerGreaterThanZero();
             for (int i = 1; i <= array.size(); i++) {
                 final JsonObject taxComponent = array.get(i - 1).getAsJsonObject();

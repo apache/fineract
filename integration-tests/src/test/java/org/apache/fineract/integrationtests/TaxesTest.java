@@ -151,4 +151,18 @@ public class TaxesTest {
                 "Response should contain the error code for tax component not found");
     }
 
+    @Test
+    void createTaxGroupWithoutTaxComponent_shouldReturnValidationError() {
+        final PostTaxesGroupRequest taxGroupRequest = new PostTaxesGroupRequest().name(Utils.randomStringGenerator("TAX_GRP_", 4))
+                .taxComponents(new HashSet<>()).dateFormat("dd MMMM yyyy").locale("en");
+
+        CallFailedRuntimeException exception = taxGroupHelper.createTaxGroupExpectingError(taxGroupRequest);
+
+        assertEquals(400, exception.getStatus());
+        assertTrue(exception.getMessage().contains("validation.msg.at.least.one.tax.component.required"),
+                "Response should contain the error code requiring at least one tax component");
+        assertTrue(exception.getMessage().contains("Please add at least one Tax Component before submitting the Tax Group."),
+                "Response should contain the user friendly validation message");
+    }
+
 }
