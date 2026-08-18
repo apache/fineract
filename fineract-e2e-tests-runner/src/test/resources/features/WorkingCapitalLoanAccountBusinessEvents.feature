@@ -20,11 +20,12 @@ Feature: Working Capital Loan Account Business Events
     When Admin successfully approves the working capital loan on "01 January 2026" with "80" amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
     And a Working Capital Loan Approved business event is raised
+    And a Working Capital Loan Balance Changed business event is raised on approval
     And a Working Capital Loan Status Changed business event is raised
-    And no Working Capital Loan Balance Changed business event is raised
     When Admin makes undo approval on the working capital loan
     Then Working capital loan undo approval was successful
     And a Working Capital Loan Undo Approval business event is raised
+    And a Working Capital Loan Balance Changed business event is raised on undo approval
     And a Working Capital Loan Status Changed business event is raised
     When Admin successfully approves the working capital loan on "01 January 2026" with "80" amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
@@ -59,6 +60,7 @@ Feature: Working Capital Loan Account Business Events
       | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     Then Working capital loan creation was successful
     When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And a Working Capital Loan Balance Changed business event is raised on approval
     Then a Working Capital Loan Status Changed business event is raised
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
@@ -87,6 +89,7 @@ Feature: Working Capital Loan Account Business Events
       | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     Then Working capital loan creation was successful
     When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And a Working Capital Loan Balance Changed business event is raised on approval
     Then a Working Capital Loan Status Changed business event is raised
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
@@ -102,8 +105,8 @@ Feature: Working Capital Loan Account Business Events
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
     And a Working Capital Loan Status Changed business event is raised
     And a Working Capital Loan Balance Changed business event is raised with transaction type totals:
-      | totalRepaymentTransaction | totalCreditBalanceRefund | totalCreditBalanceRefundReversed |
-      | 9200.0                    | 200.0                    | 0.0                              |
+      | totalRepaymentTransaction | totalCreditBalanceRefund | totalCreditBalanceRefundReversed | totalPayment | totalPaymentReversed |
+      | 9200.0                    | 200.0                    | 0.0                              | 9200.0       | 0.0                  |
 
   @TestRailId:C89795
   Scenario: Delinquent Working Capital loan raises a Delinquency Range Change business event
@@ -138,6 +141,7 @@ Feature: Working Capital Loan Account Business Events
       | WCLP        | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 |          |
     Then Working capital loan creation was successful
     When Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    And a Working Capital Loan Balance Changed business event is raised on approval
     Then a Working Capital Loan Status Changed business event is raised
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
@@ -156,9 +160,15 @@ Feature: Working Capital Loan Account Business Events
   @TestRailId:C89797
   Scenario: Working Capital loan Balance Changed event exposes charge amountAccrued and amountUnrecognized before and after accrual
     Given Admin sets the business date to "01 January 2028"
-    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
-      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
-      | WCLP_ACC_DEF_REV_AM | 01 January 2028 | 01 January 2028          | 9000            | 100000       | 18                | 0        |
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2028 | 01 January 2028          | 9000            | 100000             | 18                | 0        |
+    Then Working capital loan creation was successful
+    When Admin successfully approves the working capital loan on "01 January 2028" with "9000" amount and expected disbursement date on "01 January 2028"
+    And a Working Capital Loan Balance Changed business event is raised on approval
+    And Admin successfully disburse the Working Capital loan on "01 January 2028" with "9000" EUR transaction amount
+    Then Working Capital loan status will be "ACTIVE"
     And a Working Capital Loan Balance Changed business event is raised
     When Global config "charge-accrual-date" value set to "due-date"
     And Admin sets the business date to "05 January 2028"
@@ -186,22 +196,23 @@ Feature: Working Capital Loan Account Business Events
       | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     Then Working capital loan creation was successful
     When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And a Working Capital Loan Balance Changed business event is raised on approval
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And a Working Capital Loan Balance Changed business event is raised
     When Admin sets the business date to "05 January 2026"
     And Customer makes "PAYOUT_REFUND" transaction on "05 January 2026" with 1000.0 transaction amount on Working Capital loan
     Then a Working Capital Loan Balance Changed business event is raised with transaction type totals:
-      | totalPayoutRefund | totalPayoutRefundReversed | totalGoodwillCredit | totalRepaymentTransaction |
-      | 1000.0            | 0.0                       | 0.0                 | 0.0                       |
+      | totalPayoutRefund | totalPayoutRefundReversed | totalGoodwillCredit | totalRepaymentTransaction | totalPayment | totalPaymentReversed |
+      | 1000.0            | 0.0                       | 0.0                 | 0.0                       | 1000.0       | 0.0                  |
     When Customer makes "GOODWILL_CREDIT" transaction on "05 January 2026" with 500.0 transaction amount on Working Capital loan
     Then a Working Capital Loan Balance Changed business event is raised with transaction type totals:
-      | totalPayoutRefund | totalGoodwillCredit | totalGoodwillCreditReversed |
-      | 1000.0            | 500.0               | 0.0                         |
+      | totalPayoutRefund | totalGoodwillCredit | totalGoodwillCreditReversed | totalPayment | totalPaymentReversed |
+      | 1000.0            | 500.0               | 0.0                         | 1500.0       | 0.0                  |
     When Customer undo "1"th "PAYOUT_REFUND" transaction made on "05 January 2026" on Working Capital loan
     Then a Working Capital Loan Balance Changed business event is raised with transaction type totals:
-      | totalPayoutRefund | totalPayoutRefundReversed | totalGoodwillCredit |
-      | 0.0               | 1000.0                    | 500.0               |
+      | totalPayoutRefund | totalPayoutRefundReversed | totalGoodwillCredit | totalPayment | totalPaymentReversed |
+      | 0.0               | 1000.0                    | 500.0               | 500.0        | 1000.0               |
     When Admin closes the Working Capital loan with a full repayment on "05 January 2026"
 
   @TestRailId:C89799
@@ -213,6 +224,7 @@ Feature: Working Capital Loan Account Business Events
       | WCLP        | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 | 0        |
     Then Working capital loan creation was successful
     When Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    And a Working Capital Loan Balance Changed business event is raised on approval
     Then a Working Capital Loan Status Changed business event is raised
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
@@ -242,6 +254,7 @@ Feature: Working Capital Loan Account Business Events
       | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     Then Working capital loan creation was successful
     When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And a Working Capital Loan Balance Changed business event is raised on approval
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And a Working Capital Loan Balance Changed business event is raised
@@ -261,6 +274,7 @@ Feature: Working Capital Loan Account Business Events
       | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     Then Working capital loan creation was successful
     When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And a Working Capital Loan Balance Changed business event is raised on approval
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And a Working Capital Loan Balance Changed business event is raised
@@ -279,6 +293,7 @@ Feature: Working Capital Loan Account Business Events
       | WCLP        | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 | 0        |
     Then Working capital loan creation was successful
     When Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    And a Working Capital Loan Balance Changed business event is raised on approval
     Then a Working Capital Loan Status Changed business event is raised
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
@@ -305,6 +320,7 @@ Feature: Working Capital Loan Account Business Events
       | WCLP        | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 | 0        |
     Then Working capital loan creation was successful
     When Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    And a Working Capital Loan Balance Changed business event is raised on approval
     Then a Working Capital Loan Status Changed business event is raised
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
@@ -334,6 +350,7 @@ Feature: Working Capital Loan Account Business Events
       | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     Then Working capital loan creation was successful
     When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And a Working Capital Loan Balance Changed business event is raised on approval
     Then a Working Capital Loan Status Changed business event is raised
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
@@ -358,6 +375,7 @@ Feature: Working Capital Loan Account Business Events
       | WCLP        | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 |          |
     Then Working capital loan creation was successful
     When Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    And a Working Capital Loan Balance Changed business event is raised on approval
     Then a Working Capital Loan Status Changed business event is raised
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
@@ -377,3 +395,20 @@ Feature: Working Capital Loan Account Business Events
     Then Working Capital loan status will be "ACTIVE"
     And a Working Capital Loan Status Changed business event is raised
     And a Working Capital Loan Balance Changed business event is raised
+
+  @TestRailId:C94063
+  Scenario: Working Capital loan raises Balance Changed business event on approval
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100.0           | 100.0              | 1.0               | 0.0      |
+    Then Working capital loan creation was successful
+    And a Working Capital Loan Created business event is raised
+    When Admin successfully approves the working capital loan on "01 January 2026" with "80" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    And a Working Capital Loan Approved business event is raised
+    And a Working Capital Loan Balance Changed business event is raised on approval
+    And a Working Capital Loan Status Changed business event is raised
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "80" EUR transaction amount
+    Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"

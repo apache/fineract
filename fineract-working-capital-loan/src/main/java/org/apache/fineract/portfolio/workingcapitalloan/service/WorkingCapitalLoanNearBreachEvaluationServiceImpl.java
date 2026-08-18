@@ -46,21 +46,21 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImpl implements Workin
     private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
 
     @Override
-    public void evaluateNearBreach(final WorkingCapitalLoan loan, final WorkingCapitalLoanNearBreachAction latestAction,
+    public boolean evaluateNearBreach(final WorkingCapitalLoan loan, final WorkingCapitalLoanNearBreachAction latestAction,
             final LocalDate effectiveDate) {
         final Optional<WorkingCapitalLoanBreachSchedule> relevantPeriod = breachScheduleRepository
                 .findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(loan.getId(), effectiveDate, effectiveDate);
         if (relevantPeriod.isEmpty()) {
-            return;
+            return false;
         }
         final WorkingCapitalLoanBreachSchedule period = relevantPeriod.get();
         if (period.getNearBreach() != null) {
-            return;
+            return false;
         }
         if (isBreachEvaluationDisabled(loan.getId(), effectiveDate)) {
             log.debug("Skipping near breach evaluation for WC loan {} - breach evaluation is disabled as of {}", loan.getId(),
                     effectiveDate);
-            return;
+            return false;
         }
         final WorkingCapitalNearBreach config = loan.getLoanProductRelatedDetails().getNearBreach();
 
@@ -80,7 +80,9 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImpl implements Workin
         if (evaluatePeriod(loan.getId(), period, effectiveThreshold, effectiveFrequency, effectiveFrequencyType, breachGraceDays,
                 effectiveDate)) {
             breachScheduleRepository.saveAndFlush(period);
+            return true;
         }
+        return false;
     }
 
     private boolean evaluatePeriod(final Long loanId, final WorkingCapitalLoanBreachSchedule period, final BigDecimal threshold,

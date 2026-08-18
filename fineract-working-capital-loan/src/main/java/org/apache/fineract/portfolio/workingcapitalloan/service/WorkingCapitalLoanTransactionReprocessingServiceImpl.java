@@ -30,6 +30,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanUndoChargeOffBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanTransactionReversedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
@@ -67,6 +70,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
     private final WorkingCapitalLoanChargePaidByRepository chargePaidByRepository;
     private final WorkingCapitalLoanAmortizationScheduleWriteService amortizationScheduleWriteService;
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     public void reprocessTransactions(final WorkingCapitalLoan loan) {
@@ -146,6 +150,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         final boolean chargeOffInSuffix = replaySet.stream().anyMatch(this::isChargeOff);
         boolean afterChargeOff = loan.isChargedOff() && !chargeOffInSuffix;
         boolean afterLiftedChargeOff = false;
+        WorkingCapitalLoanTransaction liftedChargeOffTransaction = null;
         final Map<Long, WorkingCapitalLoanCharge> chargesById = Map.of();
         final List<WorkingCapitalLoanTransactionAllocation> updatedAllocations = new ArrayList<>();
         for (final WorkingCapitalLoanTransaction txn : replaySet) {
@@ -153,6 +158,9 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
                 final boolean stillChargedOff = replayChargeOff(loan, balance, txn, accountingEnabled, updatedAllocations);
                 afterChargeOff = stillChargedOff;
                 afterLiftedChargeOff = !stillChargedOff;
+                if (afterLiftedChargeOff) {
+                    liftedChargeOffTransaction = txn;
+                }
                 continue;
             }
 
@@ -181,6 +189,8 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
 
         allocationRepository.saveAll(updatedAllocations);
         balanceRepository.saveAndFlush(balance);
+
+        notifyChargeOffLifted(loan, liftedChargeOffTransaction);
     }
 
     /**
@@ -245,11 +255,15 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         final List<WorkingCapitalLoanTransactionAllocation> updatedAllocations = new ArrayList<>();
         boolean afterChargeOff = false;
         boolean afterLiftedChargeOff = false;
+        WorkingCapitalLoanTransaction liftedChargeOffTransaction = null;
         for (final WorkingCapitalLoanTransaction txn : replayable) {
             if (isChargeOff(txn)) {
                 final boolean stillChargedOff = replayChargeOff(loan, balance, txn, accountingEnabled, updatedAllocations);
                 afterChargeOff = stillChargedOff;
                 afterLiftedChargeOff = !stillChargedOff;
+                if (afterLiftedChargeOff) {
+                    liftedChargeOffTransaction = txn;
+                }
                 continue;
             }
 
@@ -302,6 +316,17 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         // are re-allocated; rebuild it from the recomputed portions, then re-inject the over-refunded principal on the
         // date of the refund that created it.
         amortizationScheduleWriteService.rebuildScheduleFromPrincipalPayments(loan, principalPayments, principalAdjustments);
+
+        notifyChargeOffLifted(loan, liftedChargeOffTransaction);
+    }
+
+    private void notifyChargeOffLifted(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction liftedChargeOffTransaction) {
+        if (liftedChargeOffTransaction == null) {
+            return;
+        }
+        businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanUndoChargeOffBusinessEvent(loan));
+        businessEventNotifierService
+                .notifyPostBusinessEvent(new WorkingCapitalLoanTransactionReversedBusinessEvent(liftedChargeOffTransaction, loan.getId()));
     }
 
     private boolean isCreditBalanceRefund(final WorkingCapitalLoanTransaction txn) {

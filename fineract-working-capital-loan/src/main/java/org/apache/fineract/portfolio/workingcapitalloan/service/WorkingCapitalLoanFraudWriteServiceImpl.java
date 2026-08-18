@@ -34,6 +34,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanFraudChangedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
@@ -48,6 +50,7 @@ public class WorkingCapitalLoanFraudWriteServiceImpl implements WorkingCapitalLo
 
     private final WorkingCapitalLoanRepository loanRepository;
     private final FromJsonHelper fromApiJsonHelper;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Transactional
     @Override
@@ -70,6 +73,7 @@ public class WorkingCapitalLoanFraudWriteServiceImpl implements WorkingCapitalLo
             loan.setFraud(fraud);
             this.loanRepository.saveAndFlush(loan);
             changes.put(WorkingCapitalLoanConstants.fraudParamName, fraud);
+            this.businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanFraudChangedBusinessEvent(loan));
         }
 
         return new CommandProcessingResultBuilder() //

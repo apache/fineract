@@ -1608,6 +1608,176 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         eventCheckHelper.workingCapitalLoanBalanceChangedEventChargesCheck(getCreatedLoanId(), table.asMaps());
     }
 
+    @Then("a Working Capital Loan Balance Changed business event is raised on approval")
+    public void aWorkingCapitalLoanBalanceChangedBusinessEventIsRaisedOnApproval() {
+        eventCheckHelper.workingCapitalLoanBalanceChangedOnApprovalEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Balance Changed business event is raised on undo approval")
+    public void aWorkingCapitalLoanBalanceChangedBusinessEventIsRaisedOnUndoApproval() {
+        eventCheckHelper.workingCapitalLoanBalanceChangedOnUndoApprovalEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Period Payment Rate Changed business event is raised")
+    public void aWorkingCapitalLoanPeriodPaymentRateChangedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanPeriodPaymentRateChangedEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Delinquency Schedule Changed business event is raised")
+    public void aWorkingCapitalLoanDelinquencyScheduleChangedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanDelinquencyScheduleChangedEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Breach Schedule Changed business event is raised")
+    public void aWorkingCapitalLoanBreachScheduleChangedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanBreachScheduleChangedEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Breach Past Due Change business event is raised with {string} past due amount")
+    public void aWorkingCapitalLoanBreachPastDueChangeBusinessEventIsRaised(final String pastDueAmount) {
+        eventCheckHelper.workingCapitalLoanBreachPastDueChangeEventCheck(getCreatedLoanId(), new BigDecimal(pastDueAmount));
+    }
+
+    @Then("a Working Capital Loan Breach Change business event is raised with breach flag {string}")
+    public void aWorkingCapitalLoanBreachChangeBusinessEventIsRaised(final String breachFlag) {
+        eventCheckHelper.workingCapitalLoanBreachChangeEventCheck(getCreatedLoanId(), Boolean.valueOf(breachFlag));
+    }
+
+    @Then("a Working Capital Loan Near Breach Change business event is raised with near breach flag {string}")
+    public void aWorkingCapitalLoanNearBreachChangeBusinessEventIsRaised(final String nearBreachFlag) {
+        eventCheckHelper.workingCapitalLoanNearBreachChangeEventCheck(getCreatedLoanId(), Boolean.valueOf(nearBreachFlag));
+    }
+
+    @Then("a Working Capital Loan Delinquency Disable business event is raised")
+    public void aWorkingCapitalLoanDelinquencyDisableBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanDelinquencyDisableEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Delinquency Enable business event is raised")
+    public void aWorkingCapitalLoanDelinquencyEnableBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanDelinquencyEnableEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Breach Disable business event is raised")
+    public void aWorkingCapitalLoanBreachDisableBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanBreachDisableEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Breach Enable business event is raised")
+    public void aWorkingCapitalLoanBreachEnableBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanBreachEnableEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Breach Pause business event is raised")
+    public void aWorkingCapitalLoanBreachPauseBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanBreachPauseEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Breach Resume business event is raised")
+    public void aWorkingCapitalLoanBreachResumeBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanBreachResumeEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Breach Reschedule business event is raised")
+    public void aWorkingCapitalLoanBreachRescheduleBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanBreachRescheduleEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Breach Reset business event is raised")
+    public void aWorkingCapitalLoanBreachResetBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanBreachResetEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Breach Undo Reset business event is raised")
+    public void aWorkingCapitalLoanBreachUndoResetBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanBreachUndoResetEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Delinquency Pause business event is raised")
+    public void aWorkingCapitalLoanDelinquencyPauseBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanDelinquencyPauseEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Delinquency Resume business event is raised")
+    public void aWorkingCapitalLoanDelinquencyResumeBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanDelinquencyResumeEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Delinquency Reschedule business event is raised")
+    public void aWorkingCapitalLoanDelinquencyRescheduleBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanDelinquencyRescheduleEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Delinquency Reset business event is raised")
+    public void aWorkingCapitalLoanDelinquencyResetBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanDelinquencyResetEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Delinquency Undo Reset business event is raised")
+    public void aWorkingCapitalLoanDelinquencyUndoResetBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanDelinquencyUndoResetEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Charge Off business event is raised with {string} charge off date")
+    public void aWorkingCapitalLoanChargeOffBusinessEventIsRaised(final String chargedOffOnDate) {
+        eventCheckHelper.workingCapitalLoanChargeOffEventCheck(getCreatedLoanId(), chargedOffOnDate);
+    }
+
+    @Then("a Working Capital Loan Undo Charge Off business event is raised")
+    public void aWorkingCapitalLoanUndoChargeOffBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanUndoChargeOffEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Fraud Changed business event is raised")
+    public void aWorkingCapitalLoanFraudChangedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanFraudChangedEventCheck(getCreatedLoanId());
+    }
+
+    @Then("a Working Capital Loan Payout Refund transaction business event is raised with {string} EUR amount")
+    public void aWorkingCapitalLoanPayoutRefundTransactionBusinessEventIsRaised(final String amount) {
+        eventCheckHelper.workingCapitalLoanPayoutRefundTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
+    }
+
+    @Then("a Working Capital Loan Repayment transaction business event is raised with {string} EUR amount")
+    public void aWorkingCapitalLoanRepaymentTransactionBusinessEventIsRaised(final String amount) {
+        eventCheckHelper.workingCapitalLoanRepaymentTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
+    }
+
+    @Then("a Working Capital Loan Goodwill Credit transaction business event is raised with {string} EUR amount")
+    public void aWorkingCapitalLoanGoodwillCreditTransactionBusinessEventIsRaised(final String amount) {
+        eventCheckHelper.workingCapitalLoanGoodwillCreditTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
+    }
+
+    @Then("a Working Capital Loan Transaction Reversed business event is raised for the {string} transaction")
+    public void aWorkingCapitalLoanTransactionReversedBusinessEventIsRaised(final String transactionType) {
+        eventCheckHelper.workingCapitalLoanTransactionReversedEventCheck(getCreatedLoanId(), transactionType);
+    }
+
+    @Then("a Working Capital Loan Charge Off transaction business event is raised with {string} EUR amount")
+    public void aWorkingCapitalLoanChargeOffTransactionBusinessEventIsRaised(final String amount) {
+        eventCheckHelper.workingCapitalLoanChargeOffTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
+    }
+
+    @Then("a Working Capital Loan Discount Fee Amortization transaction business event is raised on {string}")
+    public void aWorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEventIsRaised(final String transactionDate) {
+        eventCheckHelper.workingCapitalLoanDiscountFeeAmortizationTransactionEventCheck(getCreatedLoanId(), transactionDate);
+    }
+
+    @Then("a Working Capital Loan Discount Fee Amortization Adjustment transaction business event is raised on {string}")
+    public void aWorkingCapitalLoanDiscountFeeAmortizationAdjustmentTransactionBusinessEventIsRaised(final String transactionDate) {
+        eventCheckHelper.workingCapitalLoanDiscountFeeAmortizationAdjustmentTransactionEventCheck(getCreatedLoanId(), transactionDate);
+    }
+
+    @Then("a Working Capital Loan Add Charge business event is raised for charge {string} with {string} EUR amount")
+    public void aWorkingCapitalLoanAddChargeBusinessEventIsRaised(final String chargeName, final String amount) {
+        eventCheckHelper.workingCapitalLoanAddChargeEventCheck(getCreatedLoanId(), chargeName, new BigDecimal(amount));
+    }
+
+    @Then("Working Capital Loan Journal Entry Created business events are raised with balanced debits and credits")
+    public void workingCapitalLoanJournalEntryCreatedBusinessEventsAreRaised() {
+        eventCheckHelper.workingCapitalLoanJournalEntriesEventCheck(getCreatedLoanId());
+    }
+
     @Then("a Working Capital Loan Delinquency Range Change business event is raised")
     public void aWorkingCapitalLoanDelinquencyRangeChangeBusinessEventIsRaised() {
         eventCheckHelper.workingCapitalLoanDelinquencyRangeChangeEventCheck(getCreatedLoanId());
@@ -1648,9 +1818,29 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         eventCheckHelper.workingCapitalLoanStatusChangedEventNotRaisedCheck(getCreatedLoanId());
     }
 
-    @Then("no Working Capital Loan Balance Changed business event is raised")
-    public void noWorkingCapitalLoanBalanceChangedBusinessEventIsRaised() {
-        eventCheckHelper.workingCapitalLoanBalanceChangedEventNotRaisedCheck(getCreatedLoanId());
+    @Then("no Working Capital Loan Delinquency Schedule Changed business event is raised")
+    public void noWorkingCapitalLoanDelinquencyScheduleChangedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanDelinquencyScheduleChangedEventNotRaisedCheck(getCreatedLoanId());
+    }
+
+    @Then("no Working Capital Loan Breach Schedule Changed business event is raised")
+    public void noWorkingCapitalLoanBreachScheduleChangedBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanBreachScheduleChangedEventNotRaisedCheck(getCreatedLoanId());
+    }
+
+    @Then("no Working Capital Loan Breach Past Due Change business event is raised")
+    public void noWorkingCapitalLoanBreachPastDueChangeBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanBreachPastDueChangeEventNotRaisedCheck(getCreatedLoanId());
+    }
+
+    @Then("no Working Capital Loan Breach Change business event is raised")
+    public void noWorkingCapitalLoanBreachChangeBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanBreachChangeEventNotRaisedCheck(getCreatedLoanId());
+    }
+
+    @Then("no Working Capital Loan Near Breach Change business event is raised")
+    public void noWorkingCapitalLoanNearBreachChangeBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanNearBreachChangeEventNotRaisedCheck(getCreatedLoanId());
     }
 
     @Then("Admin fails to disburse the Working Capital loan on {string} with {string} EUR transaction amount because of not approved")

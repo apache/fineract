@@ -174,17 +174,23 @@ public interface WorkingCapitalLoanMapper {
             timelineData.setDisbursedByLastname(firstDisbursement.getDisbursedBy().getLastname());
             timelineData.setActualDisbursementDate(firstDisbursement.getActualDisbursementDate());
         }
+        timelineData.setClosedOnDate(loan.getClosedOnDate());
         if (loan.getClosedBy() != null) {
             timelineData.setClosedByUsername(loan.getClosedBy().getUsername());
             timelineData.setClosedByFirstname(loan.getClosedBy().getFirstname());
             timelineData.setClosedByLastname(loan.getClosedBy().getLastname());
-            timelineData.setClosedOnDate(loan.getClosedOnDate());
         }
         if (loan.getRejectedBy() != null) {
             timelineData.setRejectedByUsername(loan.getRejectedBy().getUsername());
             timelineData.setRejectedByFirstname(loan.getRejectedBy().getFirstname());
             timelineData.setRejectedByLastname(loan.getRejectedBy().getLastname());
             timelineData.setRejectedOnDate(loan.getRejectedOnDate());
+        }
+        if (loan.getChargedOffBy() != null) {
+            timelineData.setChargedOffByUsername(loan.getChargedOffBy().getUsername());
+            timelineData.setChargedOffByFirstname(loan.getChargedOffBy().getFirstname());
+            timelineData.setChargedOffByLastname(loan.getChargedOffBy().getLastname());
+            timelineData.setChargedOffOnDate(loan.getChargedOffOnDate());
         }
         return timelineData;
     }

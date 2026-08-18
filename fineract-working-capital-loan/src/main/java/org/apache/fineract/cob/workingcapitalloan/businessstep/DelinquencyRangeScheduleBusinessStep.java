@@ -23,6 +23,8 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanDelinquencyScheduleChangedBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanDelinquencyRangeScheduleService;
@@ -34,6 +36,7 @@ import org.springframework.stereotype.Component;
 public class DelinquencyRangeScheduleBusinessStep extends WorkingCapitalLoanCOBBusinessStep {
 
     private final WorkingCapitalLoanDelinquencyRangeScheduleService rangeScheduleService;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Override
     public WorkingCapitalLoan execute(WorkingCapitalLoan input) {
@@ -46,12 +49,17 @@ public class DelinquencyRangeScheduleBusinessStep extends WorkingCapitalLoanCOBB
 
         LocalDate businessDate = DateUtils.getBusinessLocalDate();
 
+        boolean scheduleChanged = false;
         if (!rangeScheduleService.hasSchedule(input.getId())) {
-            rangeScheduleService.generateInitialPeriod(input);
+            scheduleChanged = rangeScheduleService.generateInitialPeriod(input);
         }
 
-        rangeScheduleService.generateNextPeriodIfNeeded(input, businessDate);
-        rangeScheduleService.evaluateExpiredPeriods(input, businessDate);
+        scheduleChanged |= !rangeScheduleService.generateNextPeriodIfNeeded(input, businessDate).isEmpty();
+        scheduleChanged |= rangeScheduleService.evaluateExpiredPeriods(input, businessDate);
+
+        if (scheduleChanged) {
+            businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanDelinquencyScheduleChangedBusinessEvent(input));
+        }
 
         return input;
     }

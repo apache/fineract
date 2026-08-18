@@ -90,4 +90,5 @@
   <include relativeToChangelogFile="true" file="parts/0066_wc_loan_breach_reset_restart_period.xml"/>
   <include relativeToChangelogFile="true" file="parts/0067_wc_loan_write_off.xml"/>
   <include relativeToChangelogFile="true" file="parts/0068_wc_missed_payment_acknowledgement_business_step.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0069_wc_business_events_extension.xml"/>
 </databaseChangeLog>

@@ -28,7 +28,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 
 public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
 
-    void generateInitialPeriod(WorkingCapitalLoan loan);
+    boolean generateInitialPeriod(WorkingCapitalLoan loan);
 
     List<WorkingCapitalLoanDelinquencyRangeSchedule> generateNextPeriodIfNeeded(WorkingCapitalLoan loan, LocalDate businessDate);
 
@@ -38,7 +38,7 @@ public interface WorkingCapitalLoanDelinquencyRangeScheduleService {
 
     void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate businessDate, BigDecimal amount);
 
-    void evaluateExpiredPeriods(WorkingCapitalLoan loan, LocalDate businessDate);
+    boolean evaluateExpiredPeriods(WorkingCapitalLoan loan, LocalDate businessDate);
 
     List<WorkingCapitalLoanDelinquencyRangeScheduleData> retrieveRangeSchedule(Long loanId);
 

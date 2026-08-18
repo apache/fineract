@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.charge.WorkingCapitalLoanAddChargeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanStatusChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentPostBusinessEvent;
@@ -155,6 +156,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
 
         chargeAccrualService.processOnChargeAdded(loan, loanCharge);
 
+        businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanAddChargeBusinessEvent(loanCharge));
         notifyBalanceChanged(loan);
         notifyStatusChanged(loan, statusBeforeCharge);
 
@@ -299,13 +301,13 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         if (MathUtil.isGreaterThanZero(balance.getTotalOutstanding())) {
             // An outstanding obligation appeared: a closed / overpaid loan reopens; an active loan stays active.
             if (statusBeforeCharge.isClosedObligationsMet() || statusBeforeCharge.isOverpaid()) {
-                stateMachine.transition(WorkingCapitalLoanEvent.LOAN_REOPENED, loan);
+                stateMachine.transition(WorkingCapitalLoanEvent.LOAN_REOPENED, loan, chargeDueDate);
             }
             loan.setMaturedOnDate(chargeDueDate);
             generateDelinquencyAndBreachPeriods(loan, chargeDueDate);
         } else if (statusBeforeCharge.isOverpaid()) {
             // The overpayment exactly settled the charge: the loan closes with obligations met.
-            stateMachine.transition(WorkingCapitalLoanEvent.LOAN_CREDIT_BALANCE_REFUND_IN_FULL, loan);
+            stateMachine.transition(WorkingCapitalLoanEvent.LOAN_CREDIT_BALANCE_REFUND_IN_FULL, loan, chargeDueDate);
             loan.setMaturedOnDate(chargeDueDate);
         }
     }

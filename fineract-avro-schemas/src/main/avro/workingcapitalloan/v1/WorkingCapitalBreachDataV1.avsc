@@ -86,6 +86,15 @@
                     "items": "org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanBreachSchedulePeriodDataV1"
                 }
             ]
+        },
+        {
+            "default": null,
+            "name": "breachPastDueAmount",
+            "doc": "Minimum payment amounts of the already breached periods that are still unpaid.",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
         }
     ]
 }
