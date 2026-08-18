@@ -26,6 +26,7 @@ import jakarta.validation.constraints.Size;
 import java.io.InputStream;
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -55,6 +56,8 @@ public class DocumentCreateRequest implements Serializable {
     @Min(value = 1, message = "{org.apache.fineract.document.size.min}")
     private Long size;
     private String type;
+    private LocalDate issuanceDate;
+    private LocalDate expiryDate;
     @Hidden
     @JsonIgnore
     private InputStream stream;

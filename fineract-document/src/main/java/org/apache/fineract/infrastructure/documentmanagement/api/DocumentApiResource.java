@@ -172,7 +172,8 @@ public class DocumentApiResource {
             @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataContentDisposition fileDetails,
             @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataBodyPart filePart,
             @FormDataParam(DOCUMENT_API_PARAM_NAME) final String name,
-            @FormDataParam(DOCUMENT_API_PARAM_DESCRIPTION) final String description) {
+            @FormDataParam(DOCUMENT_API_PARAM_DESCRIPTION) final String description,
+            @FormDataParam("issuanceDate") final String issuanceDate, @FormDataParam("expiryDate") final String expiryDate) {
 
         fileUploadValidator.validate(fileSize, is, fileDetails, filePart);
 
@@ -184,8 +185,9 @@ public class DocumentApiResource {
                 .orElse(APPLICATION_OCTET_STREAM_VALUE);
 
         command.setPayload(DocumentCreateRequest.builder().entityId(entityId).entityType(entityType).name(name).description(description)
-                .fileName(fileDetails.getFileName()).size(fileSize).type(type).stream(is).build());
-
+                .fileName(fileDetails.getFileName()).size(fileSize).type(type).stream(is)
+                .issuanceDate(issuanceDate != null ? java.time.LocalDate.parse(issuanceDate) : null)
+                .expiryDate(expiryDate != null ? java.time.LocalDate.parse(expiryDate) : null).build());
         final Supplier<DocumentCreateResponse> response = dispatcher.dispatch(command);
 
         return response.get();
@@ -212,19 +214,22 @@ public class DocumentApiResource {
             @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataContentDisposition fileDetails,
             @FormDataParam(DOCUMENT_API_PARAM_FILE) final FormDataBodyPart filePart,
             @FormDataParam(DOCUMENT_API_PARAM_NAME) final String name,
-            @FormDataParam(DOCUMENT_API_PARAM_DESCRIPTION) final String description) {
+            @FormDataParam(DOCUMENT_API_PARAM_DESCRIPTION) final String description,
+            @FormDataParam("issuanceDate") final String issuanceDate, @FormDataParam("expiryDate") final String expiryDate) {
 
         final var command = new DocumentUpdateCommand();
 
         final var request = DocumentUpdateRequest.builder().id(documentId).entityId(entityId).entityType(entityType).name(name)
-                .description(description).stream(is);
+                .description(description).stream(is).issuanceDate(issuanceDate != null ? java.time.LocalDate.parse(issuanceDate) : null)
+                .expiryDate(expiryDate != null ? java.time.LocalDate.parse(expiryDate) : null);
 
         if (fileDetails != null) {
             request.fileName(fileDetails.getFileName()).type(fileDetails.getType()).size(fileSize);
         }
 
         command.setPayload(DocumentUpdateRequest.builder().id(documentId).entityId(entityId).entityType(entityType).name(name)
-                .description(description).stream(is).build());
+                .description(description).stream(is).issuanceDate(issuanceDate != null ? java.time.LocalDate.parse(issuanceDate) : null)
+                .expiryDate(expiryDate != null ? java.time.LocalDate.parse(expiryDate) : null).build());
 
         final Supplier<DocumentUpdateResponse> response = dispatcher.dispatch(command);
 
