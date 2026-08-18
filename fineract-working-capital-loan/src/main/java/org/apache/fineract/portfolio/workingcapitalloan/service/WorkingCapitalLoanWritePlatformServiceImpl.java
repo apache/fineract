@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -614,6 +615,16 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 .localDateValueOfParameterNamed(WorkingCapitalLoanConstants.transactionDateParamName);
         final LocalDate transactionDate = requestedTransactionDate != null ? requestedTransactionDate
                 : relatedDiscountTransaction.getTransactionDate();
+        // Charge-off is a terminal write-off: a discount-fee adjustment dated on or after the charge-off date is
+        // rejected. Only a backdated adjustment (before the charge-off date) is allowed, since it corrects something
+        // that happened before the loan was written off -- the charge-off's final amortization is restated below to
+        // account for it.
+        if (loan.isChargedOff() && loan.getChargedOffOnDate() != null && !transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.wc.loan.is.charged.off",
+                    "Discount fee adjustment on Working Capital Loan " + loanId
+                            + " is not allowed on or after the charge-off date. The loan is charged off.",
+                    loanId);
+        }
         validator.validateDiscountAdjustmentTransaction(loan, command.json(), amount, relatedDiscountTransaction, remainingDiscountAmount,
                 transactionDate);
         final Long classificationId = command.longValueOfParameterNamed(WorkingCapitalLoanConstants.classificationIdParamName);
@@ -648,6 +659,13 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         updateBalanceForDiscountChange(loan, amount, true);
         // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived.
         delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+
+        // Backdated adjustment on an already charged-off loan (validated above to predate the charge-off): reprocess
+        // to replay the charge-off's final lump-sum amortization against the reduced discount pool, the same way a
+        // backdated repayment reprocess replays the charge-off transaction itself.
+        if (loan.isChargedOff()) {
+            transactionReprocessingService.reprocessTransactions(loan);
+        }
 
         final LoanStatus oldStatus = loan.getLoanStatus();
 
@@ -709,6 +727,13 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         updateBalanceForDiscountChange(loan, adjustmentTransaction.getTransactionAmount().negate(), true);
         // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived.
         delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
+
+        // Mirrors makeDiscountFeeAdjustment: undoing a backdated adjustment on an already charged-off loan must also
+        // reprocess, so the charge-off's final lump-sum amortization is replayed back up against the restored
+        // discount pool instead of being left stranded at the smaller, adjusted amount.
+        if (loan.isChargedOff()) {
+            transactionReprocessingService.reprocessTransactions(loan);
+        }
 
         // Restoring the outstanding can reopen a loan the adjustment had closed, so re-run the status transition.
         final LocalDate reversedOnDate = adjustmentTransaction.getReversedOnDate();

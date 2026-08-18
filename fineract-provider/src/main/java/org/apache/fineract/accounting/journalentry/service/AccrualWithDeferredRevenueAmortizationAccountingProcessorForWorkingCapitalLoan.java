@@ -471,6 +471,47 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     }
 
     @Override
+    public void restateJournalEntriesForDiscountFeeAmortization(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final boolean isChargedOff) {
+        final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
+        if (!discountFeeAmortizationSplitDiffersFromLedger(loan, txn, effectiveEntries, isChargedOff)) {
+            // The ledger already reflects the recomputed amount; re-posting would only add cancelling noise.
+            return;
+        }
+        reverseExistingEntries(loan, txn, true);
+        postJournalEntriesForDiscountFeeAmortization(loan, txn, isChargedOff);
+    }
+
+    /**
+     * {@link #splitDiffersFromLedger}'s counterpart for the fixed debit/credit pair a discount-fee-amortization posts.
+     */
+    private boolean discountFeeAmortizationSplitDiffersFromLedger(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final List<JournalEntry> effectiveEntries, final boolean isChargedOff) {
+        if (effectiveEntries.isEmpty()) {
+            return true;
+        }
+        final Long productId = loan.getLoanProduct().getId();
+        final BigDecimal amount = txn.getTransactionAmount();
+
+        final Map<PostingKey, BigDecimal> planned = new HashMap<>();
+        if (MathUtil.isGreaterThanZero(amount)) {
+            final GLAccount deferredIncomeAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId,
+                    CashAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), null);
+            final CashAccountsForLoan creditAccountType = resolveChargeOffExpenseAccount(loan, isChargedOff);
+            final GLAccount creditAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, creditAccountType.getValue(),
+                    null);
+            planned.merge(new PostingKey(deferredIncomeAccount.getId(), true), amount, BigDecimal::add);
+            planned.merge(new PostingKey(creditAccount.getId(), false), amount, BigDecimal::add);
+        }
+
+        final Map<PostingKey, BigDecimal> posted = postedAmountsByPosition(effectiveEntries);
+        if (!planned.keySet().equals(posted.keySet())) {
+            return true;
+        }
+        return planned.entrySet().stream().anyMatch(entry -> entry.getValue().compareTo(posted.get(entry.getKey())) != 0);
+    }
+
+    @Override
     public void postJournalEntriesForDiscountFeeAmortizationAdjustment(final WorkingCapitalLoan loan,
             final WorkingCapitalLoanTransaction txn, final boolean isChargedOff) {
         final Office office = loan.getClient().getOffice();

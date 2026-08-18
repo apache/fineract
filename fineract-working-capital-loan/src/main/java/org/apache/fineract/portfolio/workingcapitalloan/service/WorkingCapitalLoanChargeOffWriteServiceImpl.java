@@ -75,6 +75,7 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
     private final ExternalIdFactory externalIdFactory;
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     private final WorkingCapitalLoanAdjustTransactionEventPublisher adjustTransactionEventPublisher;
 
     @Transactional
@@ -130,6 +131,8 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
             this.accountingProcessor.postJournalEntries(loan, chargeOffTransaction, allocation, loan.isChargedOff());
         }
 
+        this.discountFeeAmortizationService.processFinalDiscountFeeAmortizationOnChargeOff(loan, chargeOffTransaction);
+
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(WorkingCapitalLoanConstants.transactionDateParamName, transactionDate);
         if (chargeOffReasonId != null) {
@@ -160,6 +163,8 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
         final WorkingCapitalLoanTransaction chargeOffTransaction = this.transactionFinder.findChargedOffTransaction(loan)
                 .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.wc.loan.charge.off.transaction.not.found",
                         "No active charge-off transaction found for loan " + loanId, loanId));
+
+        this.discountFeeAmortizationService.undoDiscountFeeAmortizationOnChargeOff(loan, chargeOffTransaction);
 
         final ExternalId reversalExternalId = this.externalIdFactory
                 .create(command.stringValueOfParameterNamedAllowingNull(WorkingCapitalLoanConstants.reversalExternalIdParamName));
