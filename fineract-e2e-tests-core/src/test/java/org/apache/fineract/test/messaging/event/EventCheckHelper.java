@@ -57,6 +57,7 @@ import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinque
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencyScheduleTagDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanJournalEntryDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanSummaryDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanTransactionAdjustmentDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanTransactionDataV1;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.ExternalTransferData;
@@ -149,7 +150,10 @@ import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingC
 import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanUndoChargeOffEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanUndoDisbursalEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.AbstractWorkingCapitalLoanTransactionEvent;
-import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentPostBusinessEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanAccrualTransactionBusinessEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanAdjustTransactionBusinessEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanChargeOffTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanDisbursalTransactionBusinessEvent;
@@ -160,10 +164,9 @@ import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.W
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanGoodwillCreditTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanPayoutRefundTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanRepaymentTransactionBusinessEvent;
-import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanTransactionReversedBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent;
-import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanUndoWrittenOffBusinessEvent;
-import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanWrittenOffBusinessEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanWriteOffTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.store.EventStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -443,6 +446,7 @@ public class EventCheckHelper {
                 .extractingData(WorkingCapitalLoanTransactionDataV1::getWcLoanId).isEqualTo(loanId)//
                 .extractingBigDecimal(WorkingCapitalLoanTransactionDataV1::getTransactionAmount)
                 .isEqualTo(expectedAmount == null ? transaction.getTransactionAmount() : expectedAmount)//
+                .extractingData(data -> data.getType().getCode()).isEqualTo(transaction.getType().getCode())//
                 .extractingData(WorkingCapitalLoanTransactionDataV1::getReversed).isEqualTo(expectedReversed);
     }
 
@@ -1190,11 +1194,70 @@ public class EventCheckHelper {
                 expectedAmount, false);
     }
 
-    public void workingCapitalLoanTransactionReversedEventCheck(final Long loanId, final String transactionType) {
+    public void workingCapitalLoanAdjustTransactionReversalEventCheck(final Long loanId, final String transactionType) {
         waitForTransactionCommit();
         final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, transactionType, true,
                 "Reversed " + transactionType + " transaction not found");
-        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanTransactionReversedBusinessEvent.class, loanId, transaction, null, true);
+        eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transaction.getId())//
+                .extractingData(data -> data.getTransactionToAdjust().getWcLoanId()).isEqualTo(loanId)//
+                .extractingBigDecimal(data -> data.getTransactionToAdjust().getTransactionAmount())
+                .isEqualTo(transaction.getTransactionAmount())//
+                .extractingData(data -> data.getTransactionToAdjust().getType().getCode()).isEqualTo(transaction.getType().getCode())//
+                .extractingData(data -> data.getTransactionToAdjust().getReversed()).isEqualTo(true)//
+                .extractingData(WorkingCapitalLoanTransactionAdjustmentDataV1::getNewTransactionDetail).isEqualTo(null);
+    }
+
+    public void workingCapitalLoanAdjustTransactionReprocessEventCheck(final Long loanId, final String transactionType,
+            final String transactionDate, final BigDecimal previousPrincipalPortion, final BigDecimal newPrincipalPortion,
+            final BigDecimal previousFeeChargesPortion, final BigDecimal newFeeChargesPortion) {
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = workingCapitalLoanTransactionDetails(loanId, transactionType,
+                transactionDate);
+        eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, transaction.getId())//
+                .extractingData(data -> data.getTransactionToAdjust().getWcLoanId()).isEqualTo(loanId)//
+                .extractingBigDecimal(data -> data.getTransactionToAdjust().getPrincipalPortion()).isEqualTo(previousPrincipalPortion)//
+                .extractingBigDecimal(data -> data.getTransactionToAdjust().getFeeChargesPortion()).isEqualTo(previousFeeChargesPortion)//
+                .extractingBigDecimal(data -> data.getNewTransactionDetail().getPrincipalPortion()).isEqualTo(newPrincipalPortion)//
+                .extractingBigDecimal(data -> data.getNewTransactionDetail().getFeeChargesPortion()).isEqualTo(newFeeChargesPortion);
+    }
+
+    public void workingCapitalLoanAccrualTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "accrual", false,
+                "Accrual transaction not found");
+        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanAccrualTransactionBusinessEvent.class, loanId, transaction,
+                expectedAmount, false);
+    }
+
+    public void workingCapitalLoanAccrualAdjustmentTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "accrual", true,
+                "Reversed accrual transaction not found");
+        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent.class, loanId, transaction,
+                expectedAmount, true);
+    }
+
+    public void workingCapitalLoanWriteOffTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "writeOff", false,
+                "Write-off transaction not found");
+        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanWriteOffTransactionBusinessEvent.class, loanId, transaction,
+                expectedAmount, false);
+    }
+
+    public void workingCapitalLoanUndoWriteOffTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "writeOff", true,
+                "Reversed write-off transaction not found");
+        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent.class, loanId, transaction,
+                expectedAmount, true);
+    }
+
+    public void workingCapitalLoanChargeAdjustmentTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "chargeAdjustment",
+                false, "Charge adjustment transaction not found");
+        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent.class, loanId, transaction,
+                expectedAmount, false);
     }
 
     public void workingCapitalLoanChargeOffTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
@@ -1203,29 +1266,6 @@ public class EventCheckHelper {
                 "Charge-off transaction not found");
         workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanChargeOffTransactionBusinessEvent.class, loanId, transaction,
                 expectedAmount, false);
-    }
-
-    public void workingCapitalLoanChargeAdjustmentTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
-        waitForTransactionCommit();
-        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "chargeAdjustment",
-                false, "Charge adjustment transaction not found");
-        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanChargeAdjustmentPostBusinessEvent.class, loanId, transaction,
-                expectedAmount, false);
-    }
-
-    public void workingCapitalLoanWrittenOffTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
-        waitForTransactionCommit();
-        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "writeOff", false,
-                "Write-off transaction not found");
-        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanWrittenOffBusinessEvent.class, loanId, transaction, expectedAmount,
-                false);
-    }
-
-    public void workingCapitalLoanUndoWrittenOffTransactionEventCheck(final Long loanId) {
-        waitForTransactionCommit();
-        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "writeOff", true,
-                "Reversed write-off transaction not found");
-        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanUndoWrittenOffBusinessEvent.class, loanId, transaction, null, true);
     }
 
     public void workingCapitalLoanDiscountFeeAmortizationTransactionEventCheck(final Long loanId, final String transactionDate) {

@@ -45,6 +45,14 @@
         },
         {
             "default": null,
+            "name": "currency",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.CurrencyDataV1"
+            ]
+        },
+        {
+            "default": null,
             "name": "transactionAmount",
             "type": [
                 "null",
@@ -118,6 +126,14 @@
         {
             "default": null,
             "name": "penaltyChargesPortion",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "overpaymentPortion",
             "type": [
                 "null",
                 "bigdecimal"

@@ -46,8 +46,8 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanStatusChangedBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanUndoWrittenOffBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanWrittenOffBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanWriteOffTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -166,7 +166,7 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
 
         verify(delinquencyRangeScheduleService).reprocessDelinquencySchedule(loan);
         final List<BusinessEvent<?>> events = publishedEvents(3);
-        assertThat(events.get(0)).isInstanceOf(WorkingCapitalLoanWrittenOffBusinessEvent.class);
+        assertThat(events.get(0)).isInstanceOf(WorkingCapitalLoanWriteOffTransactionBusinessEvent.class);
         assertThat(events.get(1)).isInstanceOf(WorkingCapitalLoanBalanceChangedBusinessEvent.class);
         assertThat(events.get(2)).isInstanceOf(WorkingCapitalLoanStatusChangedBusinessEvent.class);
     }
@@ -181,7 +181,7 @@ class WorkingCapitalLoanWriteOffWriteServiceTest {
 
         verify(delinquencyRangeScheduleService).reprocessDelinquencySchedule(loan);
         final List<BusinessEvent<?>> events = publishedEvents(3);
-        assertThat(events.get(0)).isInstanceOf(WorkingCapitalLoanUndoWrittenOffBusinessEvent.class);
+        assertThat(events.get(0)).isInstanceOf(WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent.class);
         assertThat(events.get(1)).isInstanceOf(WorkingCapitalLoanBalanceChangedBusinessEvent.class);
         assertThat(events.get(2)).isInstanceOf(WorkingCapitalLoanStatusChangedBusinessEvent.class);
     }

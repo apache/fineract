@@ -20,15 +20,15 @@ package org.apache.fineract.infrastructure.event.business.domain.workingcapitall
 
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 
-public class WorkingCapitalLoanUndoWrittenOffBusinessEvent extends WorkingCapitalLoanTransactionBusinessEvent {
+public class WorkingCapitalLoanAccrualTransactionBusinessEvent extends WorkingCapitalLoanTransactionBusinessEvent {
 
-    private static final String TYPE = "WorkingCapitalLoanUndoWrittenOffBusinessEvent";
+    private static final String TYPE = "WorkingCapitalLoanAccrualTransactionBusinessEvent";
 
-    public WorkingCapitalLoanUndoWrittenOffBusinessEvent(final WorkingCapitalLoanTransaction value) {
+    public WorkingCapitalLoanAccrualTransactionBusinessEvent(final WorkingCapitalLoanTransaction value) {
         super(value);
     }
 
-    public WorkingCapitalLoanUndoWrittenOffBusinessEvent(final WorkingCapitalLoanTransaction value, final Long aggregateRootId) {
+    public WorkingCapitalLoanAccrualTransactionBusinessEvent(final WorkingCapitalLoanTransaction value, final Long aggregateRootId) {
         super(value, aggregateRootId);
     }
 

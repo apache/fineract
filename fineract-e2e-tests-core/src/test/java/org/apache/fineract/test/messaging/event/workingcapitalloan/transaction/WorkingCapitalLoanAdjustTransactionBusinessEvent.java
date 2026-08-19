@@ -16,24 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction;
+package org.apache.fineract.test.messaging.event.workingcapitalloan.transaction;
 
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
+import java.util.function.Function;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanTransactionAdjustmentDataV1;
+import org.apache.fineract.test.messaging.event.Event;
 
-public class WorkingCapitalLoanChargeAdjustmentPreBusinessEvent extends WorkingCapitalLoanTransactionBusinessEvent {
+public class WorkingCapitalLoanAdjustTransactionBusinessEvent implements Event<WorkingCapitalLoanTransactionAdjustmentDataV1> {
 
-    private static final String TYPE = "WorkingCapitalLoanChargeAdjustmentPreBusinessEvent";
-
-    public WorkingCapitalLoanChargeAdjustmentPreBusinessEvent(final WorkingCapitalLoanTransaction value) {
-        super(value);
-    }
-
-    public WorkingCapitalLoanChargeAdjustmentPreBusinessEvent(final WorkingCapitalLoanTransaction value, final Long aggregateRootId) {
-        super(value, aggregateRootId);
+    @Override
+    public Class<WorkingCapitalLoanTransactionAdjustmentDataV1> getDataClass() {
+        return WorkingCapitalLoanTransactionAdjustmentDataV1.class;
     }
 
     @Override
-    public String getType() {
-        return TYPE;
+    public Function<WorkingCapitalLoanTransactionAdjustmentDataV1, Long> getIdExtractor() {
+        return data -> data.getTransactionToAdjust().getId();
+    }
+
+    @Override
+    public String getEventName() {
+        return "WorkingCapitalLoanAdjustTransactionBusinessEvent";
     }
 }

@@ -25,6 +25,8 @@ import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationC
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanAccrualTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
@@ -55,6 +57,7 @@ public class WorkingCapitalLoanChargeAccrualService {
     private final WorkingCapitalLoanTransactionRelationRepository relationRepository;
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
     private final WorkingCapitalLoanTransactionFinder transactionFinder;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     public void processOnChargeAdded(final WorkingCapitalLoan loan, final WorkingCapitalLoanCharge charge) {
         if (isAccrualPostingDisabled(loan)) {
@@ -134,6 +137,9 @@ public class WorkingCapitalLoanChargeAccrualService {
         allocationRepository.saveAndFlush(allocation);
         accountingProcessor.postJournalEntries(loan, accrualTransaction, allocation,
                 transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, accrualTransaction));
+
+        businessEventNotifierService
+                .notifyPostBusinessEvent(new WorkingCapitalLoanAccrualTransactionBusinessEvent(accrualTransaction, loan.getId()));
     }
 
     private boolean isAlreadyAccrued(final WorkingCapitalLoanCharge charge) {

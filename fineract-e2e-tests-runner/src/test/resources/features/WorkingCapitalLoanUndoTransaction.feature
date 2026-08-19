@@ -234,7 +234,8 @@ Feature: Working Capital Loan Undo Transaction
       | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 270.0      | 0.0               | true                  | 0.0              | 0              |
     # Undo the goodwill credit: transaction is reversed, mirror GL entries created
     When Customer undo "1"th "GOODWILL_CREDIT" transaction made on "10 January 2026" on Working Capital loan
-    Then Working Capital Loan Transactions tab has a reversed "GOODWILL_CREDIT" transaction with date "10 January 2026" which has the following Journal entries:
+    Then a Working Capital Loan Adjust Transaction business event is raised for the reversed "goodwillCredit" transaction
+    And Working Capital Loan Transactions tab has a reversed "GOODWILL_CREDIT" transaction with date "10 January 2026" which has the following Journal entries:
       | Type    | Account code | Account name             | Debit | Credit |
       | EXPENSE | 744003       | Goodwill Expense Account | 270.0 |        |
       | ASSET   | 112601       | Loans Receivable         |       | 270.0  |
@@ -347,7 +348,9 @@ Feature: Working Capital Loan Undo Transaction
     # 9000 + overpayment 200; the 100 already refunded must stay subtracted: overpayment = 100, not 200.
     When Admin sets the business date to "09 January 2026"
     And Customer undo "1"th "REPAYMENT" transaction made on "06 January 2026" on Working Capital loan
-    Then Working Capital Loan has transactions:
+    Then a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "07 January 2026" with principal portion changed from "9000.0" to "9000.0" and fee portion changed from "0.0" to "100.0"
+    And a Working Capital Loan Adjust Transaction business event is raised for the reversed "repayment" transaction
+    And Working Capital Loan has transactions:
       | transactionDate | type                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 06 January 2026 | Repayment             | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
@@ -381,7 +384,9 @@ Feature: Working Capital Loan Undo Transaction
     # Undo the day-5 repayment: the remaining day-10 repayment alone covers 6500 principal (no overpayment)
     When Admin sets the business date to "12 January 2026"
     And Customer undo "1"th "REPAYMENT" transaction made on "05 January 2026" on Working Capital loan
-    Then Working Capital loan status will be "ACTIVE"
+    Then a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "10 January 2026" with principal portion changed from "6000.0" to "6500.0" and fee portion changed from "0.0" to "0.0"
+    And a Working Capital Loan Adjust Transaction business event is raised for the reversed "repayment" transaction
+    And Working Capital loan status will be "ACTIVE"
     And Working Capital loan balance payload contains the following fields:
       | field                | value  |
       | principalOutstanding | 2500.0 |
