@@ -23,11 +23,14 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.commands.domain.CommandProcessingResultType;
 import org.apache.fineract.commands.domain.CommandSource;
 import org.apache.fineract.commands.domain.CommandSourceRepository;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.exception.CommandNotAwaitingApprovalException;
 import org.apache.fineract.commands.exception.CommandNotFoundException;
+import org.apache.fineract.commands.exception.MakerCheckerCheckerOnlyInitiationException;
+import org.apache.fineract.commands.exception.MakerCheckerDuplicatePendingSubmissionException;
 import org.apache.fineract.commands.exception.UnsupportedCommandException;
 import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
@@ -56,18 +59,45 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     @Override
     public CommandProcessingResult logCommandSource(final CommandWrapper wrapper) {
         boolean isApprovedByChecker = false;
+        final AppUser currentUser = this.context.authenticatedUser(wrapper);
 
         // check if is update of own account details
-        if (wrapper.isChangeOfOwnUserDetails(this.context.authenticatedUser(wrapper).getId())) {
+        if (wrapper.isChangeOfOwnUserDetails(currentUser.getId())) {
             // then allow this operation to proceed.
             // maker checker doesnt mean anything here.
             isApprovedByChecker = true; // set to true in case permissions have
                                         // been maker-checker enabled by
                                         // accident.
         } else {
-            // if not user changing their own details - check user has
-            // permission to perform specific task.
-            this.context.authenticatedUser(wrapper).validateHasPermissionTo(wrapper.getTaskPermissionName());
+            final String taskPermission = wrapper.getTaskPermissionName();
+            final boolean hasBasePermission = !currentUser.hasNotPermissionForAnyOf(taskPermission);
+            final boolean hasCheckerPermission = !currentUser.hasNotPermissionForAnyOf("CHECKER_SUPER_USER", taskPermission + "_CHECKER");
+
+            if (!hasBasePermission && hasCheckerPermission) {
+                // Checker-only user: find and approve the pending entry for this action+entity+resource
+                final Long resourceId = resolveResourceId(wrapper);
+                final List<Long> pendingIds = findPendingCommandIdsByResource(wrapper, resourceId);
+                if (!pendingIds.isEmpty()) {
+                    final Long pendingCommandId = pendingIds.get(0);
+                    log.debug("Checker-only user {} auto-approving pending command id={} for {}/{}", currentUser.getUsername(),
+                            pendingCommandId, wrapper.entityName(), wrapper.actionName());
+                    return approveEntry(pendingCommandId);
+                } else {
+                    throw new MakerCheckerCheckerOnlyInitiationException(taskPermission);
+                }
+            } else {
+                currentUser.validateHasPermissionTo(taskPermission);
+
+                if (!hasCheckerPermission && configurationService.isMakerCheckerEnabledForTask(taskPermission)) {
+                    final Long resourceId = resolveResourceId(wrapper);
+                    final List<Long> pendingIds = findPendingCommandIdsByResource(wrapper, resourceId);
+                    if (!pendingIds.isEmpty()) {
+                        log.warn("Maker {} attempted duplicate submission for {}/{} - pending id={}", currentUser.getUsername(),
+                                wrapper.entityName(), wrapper.actionName(), pendingIds.get(0));
+                        throw new MakerCheckerDuplicatePendingSubmissionException(wrapper.actionName(), wrapper.entityName());
+                    }
+                }
+            }
         }
         validateIsUpdateAllowed();
 
@@ -140,6 +170,33 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
     private void validateIsUpdateAllowed() {
         this.schedulerJobRunnerReadService.isUpdatesAllowed();
+    }
+
+    private List<Long> findPendingCommandIdsByResource(final CommandWrapper wrapper, final Long resourceId) {
+        if (resourceId == null) {
+            return List.of();
+        }
+        return this.commandSourceRepository.findPendingIdsByActionAndEntityAndResource(wrapper.actionName(), wrapper.entityName(),
+                resourceId, CommandProcessingResultType.AWAITING_APPROVAL.getValue());
+    }
+
+    private Long resolveResourceId(final CommandWrapper wrapper) {
+        if (wrapper.getEntityId() != null) {
+            return wrapper.getEntityId();
+        }
+        if (wrapper.getLoanId() != null) {
+            return wrapper.getLoanId();
+        }
+        if (wrapper.getSavingsId() != null) {
+            return wrapper.getSavingsId();
+        }
+        if (wrapper.getClientId() != null) {
+            return wrapper.getClientId();
+        }
+        if (wrapper.getGroupId() != null) {
+            return wrapper.getGroupId();
+        }
+        return null;
     }
 
     @Override
