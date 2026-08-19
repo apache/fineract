@@ -16,40 +16,41 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.data;
+package org.apache.fineract.accounting.journalentry.data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.apache.fineract.accounting.journalentry.data.AdvancedMappingtDTO;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountingBridgeDataDTO {
+public class AccountingBridgeLoanTransactionDTO {
 
-    private Long loanId;
-    private Long loanProductId;
+    private Long id;
     private Long officeId;
+    private LoanTransactionTypeDTO type;
+    private boolean reversed;
+    private LocalDate date;
     private String currencyCode;
-    private BigDecimal calculatedInterest;
-    private boolean cashBasedAccountingEnabled;
-    private boolean upfrontAccrualBasedAccountingEnabled;
-    private boolean periodicAccrualBasedAccountingEnabled;
-    private boolean isAccountTransfer;
-    private boolean isChargeOff;
-    private boolean isFraud;
-    private Long chargeOffReasonCodeValue;
-    private boolean isWrittenOff;
-    private List<AccountingBridgeLoanTransactionDTO> newLoanTransactions = new ArrayList<>();
-    private boolean merchantBuyDownFee;
-    private List<AdvancedMappingtDTO> buydownFeeClassificationCodeValue;
-    private List<AdvancedMappingtDTO> capitalizedIncomeClassificationCodeValue;
-    private AdvancedMappingtDTO writeOffReasonCodeValue;
+    private BigDecimal amount;
+    private BigDecimal netDisbursalAmount;
+    private BigDecimal principalPortion;
+    private BigDecimal interestPortion;
+    private BigDecimal feeChargesPortion;
+    private BigDecimal penaltyChargesPortion;
+    private BigDecimal overPaymentPortion;
+    private String chargeRefundChargeType;
+    private Long paymentTypeId;
+    private List<LoanChargePaidByDTO> loanChargesPaid = new ArrayList<>();
+    private BigDecimal principalPaid;
+    private BigDecimal feePaid;
+    private BigDecimal penaltyPaid;
+    private LoanChargeDTO loanChargeDTO;
+    private boolean loanToLoanTransfer;
 
 }

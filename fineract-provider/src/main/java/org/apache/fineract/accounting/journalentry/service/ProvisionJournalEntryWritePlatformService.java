@@ -16,25 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.loanaccount.data;
+package org.apache.fineract.accounting.journalentry.service;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.LocalDate;
+import org.apache.fineract.accounting.provisioning.domain.ProvisioningEntry;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class LoanChargePaidByDTO {
+public interface ProvisionJournalEntryWritePlatformService {
 
-    private Long chargeId;
-    private Boolean isPenalty;
-    private Long loanChargeId;
-    private BigDecimal amount;
-    private Integer installmentNumber;
-    private List<ChargeTaxDetailDTO> taxDetails = new ArrayList<>();
+    String revertProvisioningJournalEntries(LocalDate reversalTransactionDate, Long entityId, Integer entityType);
 
+    String createProvisioningJournalEntries(ProvisioningEntry entry);
 }

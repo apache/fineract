@@ -47,7 +47,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class AccountingProcessorHelperTest {
+class AccountingProcessorHelperImplTest {
 
     @Mock
     private JournalEntryRepository glJournalEntryRepository;
@@ -69,7 +69,7 @@ class AccountingProcessorHelperTest {
     private BusinessEventNotifierService businessEventNotifierService;
 
     @InjectMocks
-    private AccountingProcessorHelper helper;
+    private AccountingProcessorHelperImpl helper;
 
     @Test
     void classifyReplacedTransferTransactionsWithoutLeakingToRegularTransactions() {
