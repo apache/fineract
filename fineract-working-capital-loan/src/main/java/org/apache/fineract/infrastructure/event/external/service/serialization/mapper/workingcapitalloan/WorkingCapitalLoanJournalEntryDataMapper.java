@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.workingcapitalloan;
 
-import static org.apache.fineract.accounting.journalentry.service.AccountingProcessorHelper.WORKING_CAPITAL_LOAN_TRANSACTION_IDENTIFIER;
+import static org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants.WORKING_CAPITAL_LOAN_TRANSACTION_IDENTIFIER;
 
 import org.apache.fineract.accounting.common.AccountingEnumerations;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
