@@ -24,27 +24,35 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityRelationData;
 import org.apache.fineract.infrastructure.entityaccess.data.FineractEntityToEntityMappingData;
+import org.apache.fineract.infrastructure.entityaccess.data.FineractOfficeEntityAccessData;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelation;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepository;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityRelationRepositoryWrapper;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEntityMappingRepository;
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityMappingConfigurationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.office.domain.OfficeRepository;
+import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class FineractEntityAccessReadServiceImpl implements FineractEntityAccessReadService {
+
+    public static final String OFFICE_ENTITY_ACCESS_CACHE_NAME = "officeEntityAccess";
 
     private final PlatformSecurityContext context;
     private final JdbcTemplate jdbcTemplate;
@@ -54,17 +62,23 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
             FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES.getStr());
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository;
     private final FineractEntityRelationRepository entityRelationRepository;
+    private final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository;
     private final OfficeRepository officeRepository;
+    private final OfficeRepositoryWrapper officeRepositoryWrapper;
 
     @Autowired
     public FineractEntityAccessReadServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepository,
-            final FineractEntityRelationRepository entityRelationRepository, final OfficeRepository officeRepository) {
+            final FineractEntityRelationRepository entityRelationRepository,
+            final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository, final OfficeRepository officeRepository,
+            final OfficeRepositoryWrapper officeRepositoryWrapper) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;
         this.fineractEntityRelationRepository = fineractEntityRelationRepository;
         this.entityRelationRepository = entityRelationRepository;
+        this.fineractEntityToEntityMappingRepository = fineractEntityToEntityMappingRepository;
         this.officeRepository = officeRepository;
+        this.officeRepositoryWrapper = officeRepositoryWrapper;
     }
 
     /*
@@ -340,4 +354,24 @@ public class FineractEntityAccessReadServiceImpl implements FineractEntityAccess
         }
     }
 
+    @Override
+    @Cacheable(value = OFFICE_ENTITY_ACCESS_CACHE_NAME, key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#accessType.str + '_' + #officeId + '_' + #includeSubOffices)")
+    public FineractOfficeEntityAccessData retrieveOfficeEntityAccess(final FineractEntityAccessType accessType, final Long officeId,
+            final boolean includeSubOffices) {
+        final FineractEntityRelation relation = fineractEntityRelationRepository.findOneByCodeName(accessType.getStr());
+        final String hierarchy = officeRepositoryWrapper.findOneWithNotFoundDetection(officeId).getHierarchy();
+        final Set<Long> officeIds = new HashSet<>(officeRepository.findIdsByHierarchyIn(hierarchyWithAncestors(hierarchy)));
+        if (includeSubOffices) {
+            officeIds.addAll(officeRepository.findIdsByHierarchyLike(hierarchy + "%"));
+        }
+        return FineractOfficeEntityAccessData.from(fineractEntityToEntityMappingRepository.findByRelationId(relation), officeIds);
+    }
+
+    static Set<String> hierarchyWithAncestors(final String hierarchy) {
+        final Set<String> hierarchies = new LinkedHashSet<>();
+        for (int i = hierarchy.indexOf('.'); i >= 0; i = hierarchy.indexOf('.', i + 1)) {
+            hierarchies.add(hierarchy.substring(0, i + 1));
+        }
+        return hierarchies;
+    }
 }

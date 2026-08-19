@@ -33,7 +33,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
+import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityAccessType;
 import org.apache.fineract.infrastructure.entityaccess.service.FineractEntityAccessUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
@@ -43,7 +43,9 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
 import org.apache.fineract.portfolio.common.service.CommonEnumerations;
 import org.apache.fineract.portfolio.common.service.DropdownReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepository;
 import org.apache.fineract.portfolio.tax.data.TaxGroupData;
 import org.apache.fineract.portfolio.tax.service.TaxReadPlatformService;
 import org.springframework.cache.annotation.Cacheable;
@@ -70,19 +72,16 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     private final TaxReadPlatformService taxReadPlatformService;
     private final ConfigurationDomainServiceJpa configurationDomainServiceJpa;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final LoanRepository loanRepository;
+    private final SavingsAccountRepository savingsAccountRepository;
 
     @Override
     @Cacheable(value = "charges", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('ch')")
     public List<ChargeData> retrieveAllCharges() {
         final ChargeMapper rm = new ChargeMapper();
 
-        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false ";
-
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
-
-        sql += " order by c.name ";
-
-        return this.jdbcTemplate.query(sql, rm); // NOSONAR
+        final String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false order by c.name ";
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm), null); // NOSONAR
     }
 
     @Override
@@ -90,23 +89,16 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         final ChargeMapper rm = new ChargeMapper();
 
         String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.currency_code= ? ";
-
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { currencyCode }); // NOSONAR
+        return this.jdbcTemplate.query(sql, rm, currencyCode); // NOSONAR
     }
 
     @Override
     public ChargeData retrieveCharge(final Long chargeId) {
         try {
             final ChargeMapper rm = new ChargeMapper();
-
-            String sql = "select " + rm.chargeSchema() + " where c.id = ? and c.is_deleted=false ";
-
-            sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
-
-            sql = sql + " ;";
+            String sql = "select " + rm.chargeSchema() + " where c.id = ? and c.is_deleted=false ;";
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { chargeId }); // NOSONAR
         } catch (final EmptyResultDataAccessException e) {
             throw new ChargeNotFoundException(chargeId, e);
@@ -178,37 +170,41 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Override
     public List<ChargeData> retrieveLoanProductCharges(final Long loanProductId) {
+        return retrieveLoanProductCharges(loanProductId, (Long) null);
+    }
+
+    @Override
+    public List<ChargeData> retrieveLoanProductCharges(final Long loanProductId, final Long officeId) {
         final ChargeMapper rm = new ChargeMapper();
-
-        String sql = "select " + rm.loanProductChargeSchema() + " where c.is_deleted=false and c.is_active=true and plc.product_loan_id=? ";
-
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId }); // NOSONAR
+        final String sql = "select " + rm.loanProductChargeSchema()
+                + " where c.is_deleted=false and c.is_active=true and plc.product_loan_id=? ";
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, loanProductId), officeId); // NOSONAR
     }
 
     @Override
     public List<ChargeData> retrieveLoanProductCharges(final Long loanProductId, final ChargeTimeType chargeTime) {
+        return retrieveLoanProductCharges(loanProductId, chargeTime, null);
+    }
 
+    @Override
+    public List<ChargeData> retrieveLoanProductCharges(final Long loanProductId, final ChargeTimeType chargeTime, final Long officeId) {
         final ChargeMapper rm = new ChargeMapper();
-
-        String sql = "select " + rm.loanProductChargeSchema()
+        final String sql = "select " + rm.loanProductChargeSchema()
                 + " where c.is_deleted=false and c.is_active=true and plc.product_loan_id=? and c.charge_time_enum=? ";
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId, chargeTime.getValue() }); // NOSONAR
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, loanProductId, chargeTime.getValue()), officeId); // NOSONAR
     }
 
     @Override
     public List<ChargeData> retrieveLoanApplicableFees() {
-        final ChargeMapper rm = new ChargeMapper();
-        Object[] params = new Object[] { ChargeAppliesTo.LOAN.getValue() };
-        String sql = "select " + rm.chargeSchema()
-                + " where c.is_deleted=false and c.is_active=true and c.is_penalty=false and c.charge_applies_to_enum=? ";
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
-        sql += " order by c.name ";
+        return retrieveLoanApplicableFees(null);
+    }
 
-        return this.jdbcTemplate.query(sql, rm, params); // NOSONAR
+    @Override
+    public List<ChargeData> retrieveLoanApplicableFees(final Long officeId) {
+        final ChargeMapper rm = new ChargeMapper();
+        final String sql = "select " + rm.chargeSchema()
+                + " where c.is_deleted=false and c.is_active=true and c.is_penalty=false and c.charge_applies_to_enum=? order by c.name ";
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, ChargeAppliesTo.LOAN.getValue()), officeId); // NOSONAR
     }
 
     @Override
@@ -221,9 +217,8 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         processChargeExclusionsForLoans(excludeChargeTimes, excludeClause);
         String sql = "select " + rm.chargeSchema() + " join m_loan la on la.currency_code = c.currency_code" + " where la.id=:loanId"
                 + " and c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=:chargeAppliesTo" + excludeClause + " ";
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
-        return this.namedParameterJdbcTemplate.query(sql, paramMap, rm);
+        return visibleToOffice(this.namedParameterJdbcTemplate.query(sql, paramMap, rm), this.loanRepository.findOfficeIdByLoanId(loanId));
     }
 
     /**
@@ -246,6 +241,12 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
     @Override
     public List<ChargeData> retrieveLoanProductApplicableCharges(final Long loanProductId, ChargeTimeType[] excludeChargeTimes) {
+        return retrieveLoanProductApplicableCharges(loanProductId, excludeChargeTimes, null);
+    }
+
+    @Override
+    public List<ChargeData> retrieveLoanProductApplicableCharges(final Long loanProductId, ChargeTimeType[] excludeChargeTimes,
+            final Long officeId) {
         final ChargeMapper rm = new ChargeMapper();
         StringBuilder excludeClause = new StringBuilder("");
         Map<String, Object> paramMap = new HashMap<>();
@@ -255,36 +256,26 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         String sql = "select " + rm.chargeSchema() + " join m_product_loan lp on lp.currency_code = c.currency_code"
                 + " where lp.id=:productId" + " and c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=:chargeAppliesTo"
                 + excludeClause + " ";
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
-
-        return this.namedParameterJdbcTemplate.query(sql, paramMap, rm);
+        return visibleToOffice(this.namedParameterJdbcTemplate.query(sql, paramMap, rm), officeId);
     }
 
     @Override
     public List<ChargeData> retrieveLoanApplicablePenalties() {
-        final ChargeMapper rm = new ChargeMapper();
-
-        String sql = "select " + rm.chargeSchema()
-                + " where c.is_deleted=false and c.is_active=true and c.is_penalty=true and c.charge_applies_to_enum=? ";
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
-        sql += " order by c.name ";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.LOAN.getValue() }); // NOSONAR
+        return retrieveLoanApplicablePenalties(null);
     }
 
-    private String addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled() {
+    @Override
+    public List<ChargeData> retrieveLoanApplicablePenalties(final Long officeId) {
+        final ChargeMapper rm = new ChargeMapper();
+        final String sql = "select " + rm.chargeSchema()
+                + " where c.is_deleted=false and c.is_active=true and c.is_penalty=true and c.charge_applies_to_enum=? order by c.name ";
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, ChargeAppliesTo.LOAN.getValue()), officeId); // NOSONAR
+    }
 
-        String sql = "";
-
-        // Check if branch specific products are enabled. If yes, fetch only
-        // charges mapped to current user's office
-        String inClause = fineractEntityAccessUtil
-                .getSQLWhereClauseForProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.CHARGE);
-        if ((inClause != null) && !inClause.trim().isEmpty()) {
-            sql += " and c.id in ( " + inClause + " ) ";
-        }
-
-        return sql;
+    private List<ChargeData> visibleToOffice(final List<ChargeData> charges, final Long officeId) {
+        return this.fineractEntityAccessUtil.filterVisibleToOffice_ifGlobalConfigEnabled(FineractEntityAccessType.OFFICE_ACCESS_TO_CHARGES,
+                officeId, charges, ChargeData::getId);
     }
 
     private static final class ChargeMapper implements RowMapper<ChargeData> {
@@ -406,50 +397,85 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    public List<ChargeData> retrieveSavingsProductApplicableCharges(final boolean feeChargesOnly) {
-        final ChargeMapper rm = new ChargeMapper();
+    public List<ChargeData> retrieveAllChargesApplicableToClients() {
+        return retrieveAllChargesApplicableToClients(null);
+    }
 
-        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? ";
+    @Override
+    public List<ChargeData> retrieveAllChargesApplicableToClients(final Long officeId) {
+        final ChargeMapper rm = new ChargeMapper();
+        final String sql = "select " + rm.chargeSchema()
+                + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? order by c.name ";
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, ChargeAppliesTo.CLIENT.getValue()), officeId); // NOSONAR
+    }
+
+    @Override
+    public List<ChargeData> retrieveSavingsProductApplicableCharges(final boolean feeChargesOnly) {
+        return retrieveSavingsProductApplicableCharges(feeChargesOnly, null);
+    }
+
+    @Override
+    public List<ChargeData> retrieveSavingsProductApplicableCharges(final boolean feeChargesOnly, final Long officeId) {
+        final ChargeMapper rm = new ChargeMapper();
+        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.charge_applies_to_enum=? ";
         if (feeChargesOnly) {
             sql = "select " + rm.chargeSchema()
                     + " where c.is_deleted=false and c.is_active=true and c.is_penalty=false and c.charge_applies_to_enum=? ";
         }
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue() }); // NOSONAR
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, ChargeAppliesTo.SAVINGS.getValue()), officeId); // NOSONAR
     }
 
     @Override
     public List<ChargeData> retrieveSavingsApplicablePenalties() {
-        final ChargeMapper rm = new ChargeMapper();
+        return retrieveSavingsApplicablePenalties(null);
+    }
 
-        String sql = "select " + rm.chargeSchema()
-                + " where c.is_deleted=false and c.is_active=true and c.is_penalty=true and c.charge_applies_to_enum=? ";
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
-        sql += " order by c.name ";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue() }); // NOSONAR
+    @Override
+    public List<ChargeData> retrieveSavingsApplicablePenalties(final Long officeId) {
+        final ChargeMapper rm = new ChargeMapper();
+        final String sql = "select " + rm.chargeSchema()
+                + " where c.is_deleted=false and c.is_active=true and c.is_penalty=true and c.charge_applies_to_enum=? order by c.name ";
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, ChargeAppliesTo.SAVINGS.getValue()), officeId); // NOSONAR
     }
 
     @Override
     public List<ChargeData> retrieveSavingsProductCharges(final Long savingsProductId) {
+        return retrieveSavingsProductCharges(savingsProductId, null);
+    }
+
+    @Override
+    public List<ChargeData> retrieveSavingsProductCharges(final Long savingsProductId, final Long officeId) {
         final ChargeMapper rm = new ChargeMapper();
-
-        String sql = "select " + rm.savingsProductChargeSchema()
+        final String sql = "select " + rm.savingsProductChargeSchema()
                 + " where c.is_deleted=false and c.is_active=true and spc.savings_product_id=? ";
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, savingsProductId), officeId); // NOSONAR
+    }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { savingsProductId }); // NOSONAR
+    @Override
+    public List<ChargeData> retrieveSharesApplicableCharges() {
+        return retrieveSharesApplicableCharges(null);
+    }
+
+    @Override
+    public List<ChargeData> retrieveSharesApplicableCharges(final Long officeId) {
+        final ChargeMapper rm = new ChargeMapper();
+        final String sql = "select " + rm.chargeSchema()
+                + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? order by c.name ";
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, ChargeAppliesTo.SHARES.getValue()), officeId); // NOSONAR
     }
 
     @Override
     public List<ChargeData> retrieveShareProductCharges(final Long shareProductId) {
+        return retrieveShareProductCharges(shareProductId, null);
+    }
+
+    @Override
+    public List<ChargeData> retrieveShareProductCharges(final Long shareProductId, final Long officeId) {
         final ChargeMapper rm = new ChargeMapper();
-
-        String sql = "select " + rm.shareProductChargeSchema() + " where c.is_deleted=false and c.is_active=true and mspc.product_id=? ";
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] { shareProductId }); // NOSONAR
+        final String sql = "select " + rm.shareProductChargeSchema()
+                + " where c.is_deleted=false and c.is_active=true and mspc.product_id=? ";
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, shareProductId), officeId); // NOSONAR
     }
 
     @Override
@@ -462,41 +488,16 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         String sql = "select " + rm.chargeSchema() + " join m_wc_loan la on la.currency_code = c.currency_code" + " where la.id=:loanId"
                 + " and c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=:chargeAppliesTo"
                 + " and c.charge_time_enum in (:chargeTimeTypes) ";
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
-        return this.namedParameterJdbcTemplate.query(sql, paramMap, rm);
+        return visibleToOffice(this.namedParameterJdbcTemplate.query(sql, paramMap, rm), null);
     }
 
     @Override
     public List<ChargeData> retrieveSavingsAccountApplicableCharges(Long savingsAccountId) {
-
         final ChargeMapper rm = new ChargeMapper();
-
-        String sql = "select " + rm.chargeSchema() + " join m_savings_account sa on sa.currency_code = c.currency_code"
+        final String sql = "select " + rm.chargeSchema() + " join m_savings_account sa on sa.currency_code = c.currency_code"
                 + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? " + " and sa.id = ?";
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue(), savingsAccountId }); // NOSONAR
-
-    }
-
-    @Override
-    public List<ChargeData> retrieveAllChargesApplicableToClients() {
-        final ChargeMapper rm = new ChargeMapper();
-        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? ";
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
-        sql += " order by c.name ";
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.CLIENT.getValue() }); // NOSONAR
-    }
-
-    @Override
-    public List<ChargeData> retrieveSharesApplicableCharges() {
-        final ChargeMapper rm = new ChargeMapper();
-        String sql = "select " + rm.chargeSchema() + " where c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=? ";
-        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
-        sql += " order by c.name ";
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SHARES.getValue() }); // NOSONAR
+        return visibleToOffice(this.jdbcTemplate.query(sql, rm, ChargeAppliesTo.SAVINGS.getValue(), savingsAccountId), // NOSONAR
+                this.savingsAccountRepository.findOfficeIdBySavingsAccountId(savingsAccountId));
     }
 }

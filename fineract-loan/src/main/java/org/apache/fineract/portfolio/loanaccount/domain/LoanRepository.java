@@ -291,4 +291,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     @Query("SELECT MAX(lt.dateOf) FROM LoanTransaction lt, Loan l WHERE lt.loan=l AND l.loanStatus = org.apache.fineract.portfolio.loanaccount.domain.LoanStatus.ACTIVE")
     LocalDate findMaxTransactionDateOfActiveLoans();
+
+    @Query("select coalesce(co.id, go.id) from Loan loan left join loan.client c left join c.office co left join loan.group g left join g.office go where loan.id = :loanId")
+    Long findOfficeIdByLoanId(@Param("loanId") Long loanId);
 }

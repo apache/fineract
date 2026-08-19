@@ -406,7 +406,7 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     }
 
     private List<LoanProductData> fetchLoanProducts() {
-        return (List<LoanProductData>) this.loanProductReadPlatformService.retrieveAllLoanProducts();
+        return (List<LoanProductData>) this.loanProductReadPlatformService.retrieveAllLoanProductsV2();
     }
 
     private List<GroupGeneralData> fetchGroups(Long officeId) {
