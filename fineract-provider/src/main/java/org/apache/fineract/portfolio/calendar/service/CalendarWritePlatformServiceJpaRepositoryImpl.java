@@ -42,6 +42,8 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.CalendarConstants.CalendarSupportedParameters;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateResponse;
+import org.apache.fineract.portfolio.calendar.data.CalendarDeleteRequest;
+import org.apache.fineract.portfolio.calendar.data.CalendarDeleteResponse;
 import org.apache.fineract.portfolio.calendar.data.CalendarUpdateRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarUpdateResponse;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
@@ -54,6 +56,7 @@ import org.apache.fineract.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarRepository;
 import org.apache.fineract.portfolio.calendar.domain.CalendarType;
 import org.apache.fineract.portfolio.calendar.domain.CalendarWeekDaysType;
+import org.apache.fineract.portfolio.calendar.exception.CalendarDeleteNotAllowedException;
 import org.apache.fineract.portfolio.calendar.exception.CalendarEntityTypeNotSupportedException;
 import org.apache.fineract.portfolio.calendar.exception.CalendarNotFoundException;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -64,6 +67,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.service.LoanWritePlatformService;
+import org.apache.fineract.portfolio.meeting.domain.MeetingRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -78,6 +82,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
     private final GroupRepositoryWrapper groupRepository;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final ClientRepositoryWrapper clientRepository;
+    private final MeetingRepository meetingRepository;
 
     @Transactional
     @Override
@@ -424,16 +429,34 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         }
     }
 
+    @Transactional
     @Override
-    public CommandProcessingResult deleteCalendar(final Long calendarId) {
+    public CalendarDeleteResponse deleteCalendar(final CalendarDeleteRequest request) {
+        final Long calendarId = request.getCalendarId();
         final Calendar calendarForDelete = this.calendarRepository.findById(calendarId)
                 .orElseThrow(() -> new CalendarNotFoundException(calendarId));
 
+        final List<CalendarInstance> calendarInstances = this.calendarInstanceRepository.findByCalendarId(calendarId);
+        final boolean linkedToAccount = calendarInstances.stream().map(CalendarInstance::getEntityTypeId)
+                .anyMatch(entityTypeId -> !isCalendarOwnerEntityType(entityTypeId));
+        if (linkedToAccount) {
+            throw new CalendarDeleteNotAllowedException("linked.to.account",
+                    "Calendar with identifier " + calendarId + " is linked to a loan or savings account and cannot be deleted", calendarId);
+        }
+        if (!calendarInstances.isEmpty()
+                && this.meetingRepository.existsByCalendarInstanceIdIn(calendarInstances.stream().map(CalendarInstance::getId).toList())) {
+            throw new CalendarDeleteNotAllowedException("has.meetings",
+                    "Calendar with identifier " + calendarId + " has meetings recorded and cannot be deleted", calendarId);
+        }
+
+        this.calendarInstanceRepository.deleteAll(calendarInstances);
         this.calendarRepository.delete(calendarForDelete);
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(null) //
-                .withEntityId(calendarId) //
-                .build();
+        return CalendarDeleteResponse.builder().resourceId(calendarId).build();
+    }
+
+    private static boolean isCalendarOwnerEntityType(final Integer entityTypeId) {
+        return CalendarEntityType.isClient(entityTypeId) || CalendarEntityType.isGroup(entityTypeId)
+                || CalendarEntityType.isCenter(entityTypeId);
     }
 
     @Override

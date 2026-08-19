@@ -42,22 +42,21 @@ import java.util.Locale;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.command.core.CommandDispatcher;
-import org.apache.fineract.commands.domain.CommandWrapper;
-import org.apache.fineract.commands.service.CommandWrapperBuilder;
-import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.apache.fineract.infrastructure.core.annotation.AlternativeOperationId;
 import org.apache.fineract.infrastructure.core.api.ApiParameterHelper;
 import org.apache.fineract.infrastructure.core.api.ApiRequestParameterHelper;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.calendar.command.CalendarCreateCommand;
+import org.apache.fineract.portfolio.calendar.command.CalendarDeleteCommand;
 import org.apache.fineract.portfolio.calendar.command.CalendarUpdateCommand;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateResponse;
 import org.apache.fineract.portfolio.calendar.data.CalendarData;
+import org.apache.fineract.portfolio.calendar.data.CalendarDeleteRequest;
+import org.apache.fineract.portfolio.calendar.data.CalendarDeleteResponse;
 import org.apache.fineract.portfolio.calendar.data.CalendarUpdateRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarUpdateResponse;
 import org.apache.fineract.portfolio.calendar.domain.CalendarEntityType;
@@ -78,7 +77,6 @@ public class CalendarsApiResource {
     private final CalendarReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<CalendarData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CalendarDropdownReadPlatformService dropdownReadPlatformService;
     private final CommandDispatcher dispatcher;
 
@@ -181,12 +179,11 @@ public class CalendarsApiResource {
     @Path("{calendarId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Delete a Calendar", operationId = "deleteCalendar")
-    public CommandProcessingResult deleteCalendar(@PathParam("entityType") final String entityType,
+    public CalendarDeleteResponse deleteCalendar(@PathParam("entityType") final String entityType,
             @PathParam("entityId") final Long entityId, @PathParam("calendarId") final Long calendarId) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCalendar(entityType, entityId, calendarId).build();
-
-        return commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final CalendarDeleteCommand command = new CalendarDeleteCommand();
+        command.setPayload(CalendarDeleteRequest.builder().calendarId(calendarId).build());
+        return dispatcher.<CalendarDeleteRequest, CalendarDeleteResponse>dispatch(command).get();
     }
 
     private CalendarData handleTemplate(final CalendarData calendarData) {

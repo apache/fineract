@@ -482,6 +482,8 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CALENDAR")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/*/*/calendars/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CALENDAR")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/*/*/calendars/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CALENDAR")
 
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
