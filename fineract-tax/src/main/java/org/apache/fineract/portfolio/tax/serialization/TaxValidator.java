@@ -65,8 +65,10 @@ public class TaxValidator {
             Arrays.asList(DATE_FORMAT, LOCALE, TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName,
                     TaxApiConstants.startDateParamName, TaxApiConstants.debitAccountTypeParamName, TaxApiConstants.debitAccountIdParamName,
                     TaxApiConstants.creditAccountTypeParamName, TaxApiConstants.creditAccountIdParamName));
-    private static final Set<String> SUPPORTED_TAX_COMPONENT_UPDATE_PARAMETERS = new HashSet<>(Arrays.asList(DATE_FORMAT, LOCALE,
-            TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName, TaxApiConstants.startDateParamName));
+    private static final Set<String> SUPPORTED_TAX_COMPONENT_UPDATE_PARAMETERS = new HashSet<>(
+            Arrays.asList(DATE_FORMAT, LOCALE, TaxApiConstants.nameParamName, TaxApiConstants.percentageParamName,
+                    TaxApiConstants.startDateParamName, TaxApiConstants.debitAccountTypeParamName, TaxApiConstants.debitAccountIdParamName,
+                    TaxApiConstants.creditAccountTypeParamName, TaxApiConstants.creditAccountIdParamName));
     private static final Set<String> SUPPORTED_TAX_GROUP_PARAMETERS = new HashSet<>(
             Arrays.asList(DATE_FORMAT, LOCALE, TaxApiConstants.nameParamName, TaxApiConstants.taxComponentsParamName));
     private static final Set<String> SUPPORTED_TAX_GROUP_TAX_COMPONENTS_CREATE_PARAMETERS = new HashSet<>(
@@ -328,7 +330,24 @@ public class TaxValidator {
 
     private void validateStartDate(final LocalDate existingStartDate, final LocalDate startDate,
             final DataValidatorBuilder baseDataValidator) {
-        baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate).validateDateAfter(existingStartDate);
+        // New business rules for start date updates:
+        // 1. If existingStartDate is on or before today, the start date is locked and cannot be modified.
+        // In this case, any attempt to change the startDate should result in a validation error.
+        // 2. If existingStartDate is after today, startDate can be modified, but the new value
+        // must be strictly after today.
+        final LocalDate today = DateUtils.getBusinessLocalDate();
+
+        if (existingStartDate != null && !DateUtils.isAfter(existingStartDate, today)) {
+            // Start date is locked; any presence of startDate is considered an invalid modification.
+            if (startDate != null && !DateUtils.isEqual(startDate, existingStartDate)) {
+                baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName)
+                        .failWithCode("start.date.cannot.be.modified.after.activation");
+            }
+            return;
+        }
+
+        // Existing start date is in the future; allow change, but new date must be strictly after today.
+        baseDataValidator.reset().parameter(TaxApiConstants.startDateParamName).value(startDate).validateDateAfter(today);
     }
 
     private void validateOverlappingComponents(final Set<TaxGroupMappings> taxMappings, final DataValidatorBuilder baseDataValidator) {
