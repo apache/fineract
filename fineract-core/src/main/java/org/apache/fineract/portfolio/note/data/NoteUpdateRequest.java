@@ -44,7 +44,7 @@ public class NoteUpdateRequest implements Serializable {
     private Long resourceId;
     @Hidden
     private NoteType type;
-    @Size(max = 1000, message = "{org.apache.fineract.portfolio.note.note.size}")
+    @Size(max = 65535, message = "{org.apache.fineract.portfolio.note.note.size}")
     @NotNull(message = "{org.apache.fineract.portfolio.note.note.not-null}")
     private String note;
 }
