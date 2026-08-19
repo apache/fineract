@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.calendar.service;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateResponse;
+import org.apache.fineract.portfolio.calendar.data.CalendarDeleteResponse;
 import org.apache.fineract.portfolio.calendar.data.CalendarUpdateRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarUpdateResponse;
 
@@ -30,7 +31,7 @@ public interface CalendarWritePlatformService {
 
     CalendarUpdateResponse updateCalendar(CalendarUpdateRequest request);
 
-    CommandProcessingResult deleteCalendar(Long calendarId);
+    CalendarDeleteResponse deleteCalendar(Long calendarId);
 
     CommandProcessingResult createCalendarInstance(Long calendarId, Long entityId, Integer entityTypeId);
 

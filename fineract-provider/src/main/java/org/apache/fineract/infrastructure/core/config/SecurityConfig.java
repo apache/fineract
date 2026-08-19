@@ -400,6 +400,9 @@ public class SecurityConfig {
 
                     .requestMatchers(HttpMethod.PUT, "/api/*/*/*/calendars/*")
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CALENDAR")
+
+                    .requestMatchers(HttpMethod.DELETE, "/api/*/*/*/calendars/*")
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CALENDAR")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/**")).access(allOfRequestManagers(authorizationManagers));

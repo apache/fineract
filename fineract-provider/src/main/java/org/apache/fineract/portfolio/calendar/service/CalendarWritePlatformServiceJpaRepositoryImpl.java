@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.CalendarConstants.CalendarSupportedParameters;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarCreateResponse;
+import org.apache.fineract.portfolio.calendar.data.CalendarDeleteResponse;
 import org.apache.fineract.portfolio.calendar.data.CalendarUpdateRequest;
 import org.apache.fineract.portfolio.calendar.data.CalendarUpdateResponse;
 import org.apache.fineract.portfolio.calendar.domain.Calendar;
@@ -280,16 +281,14 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         return CalendarUpdateResponse.builder().resourceId(calendarForUpdate.getId()).changes(changes).build();
     }
 
+    @Transactional
     @Override
-    public CommandProcessingResult deleteCalendar(final Long calendarId) {
+    public CalendarDeleteResponse deleteCalendar(final Long calendarId) {
         final Calendar calendarForDelete = this.calendarRepository.findById(calendarId)
                 .orElseThrow(() -> new CalendarNotFoundException(calendarId));
 
         this.calendarRepository.delete(calendarForDelete);
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(null) //
-                .withEntityId(calendarId) //
-                .build();
+        return CalendarDeleteResponse.builder().resourceId(calendarId).build();
     }
 
     @Override
