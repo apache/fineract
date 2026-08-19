@@ -269,4 +269,5 @@
     <include file="parts/0247_add_payment_detail_search_indexes.xml" relativeToChangelogFile="true" />
     <include file="parts/0248_add_dates_to_client_identifier.xml" relativeToChangelogFile="true"/>
     <include file="parts/0249_add_issuance_and_expiry_dates_to_m_document.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0250_modify_note_length.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

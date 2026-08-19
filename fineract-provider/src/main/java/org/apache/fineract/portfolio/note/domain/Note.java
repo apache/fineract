@@ -55,7 +55,7 @@ public class Note extends AbstractAuditableWithUTCDateTimeCustom<Long> {
     @JoinColumn(name = "loan_transaction_id", nullable = true)
     private LoanTransaction loanTransaction;
 
-    @Column(name = "note", length = 1000)
+    @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
     @Column(name = "note_type_enum")
