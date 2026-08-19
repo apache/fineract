@@ -20,7 +20,16 @@ package org.apache.fineract.portfolio.tax.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 public interface TaxGroupRepository extends JpaRepository<TaxGroup, Long>, JpaSpecificationExecutor<TaxGroup> {
+
+    @Query(value = "select count(*) from (select tax_group_id from m_charge union all select tax_group_id from m_savings_product"
+            + " union all select tax_group_id from m_savings_account) links where links.tax_group_id = ?1", nativeQuery = true)
+    long countLinks(Long taxGroupId);
+
+    default boolean isLinked(final Long taxGroupId) {
+        return countLinks(taxGroupId) > 0;
+    }
 
 }

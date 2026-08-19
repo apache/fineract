@@ -80,7 +80,7 @@ public class TaxGroup extends AbstractAuditableCustom {
                 this.taxGroupMappings.add(groupMappings);
                 taxComponentList.add(groupMappings.getTaxComponent().getId());
             } else {
-                mappings.update(groupMappings.getEndDate(), modifications);
+                mappings.update(groupMappings.getStartDate(), groupMappings.getEndDate(), modifications);
             }
         }
 
