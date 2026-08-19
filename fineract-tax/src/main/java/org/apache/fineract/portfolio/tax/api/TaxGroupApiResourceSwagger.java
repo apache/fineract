@@ -54,6 +54,8 @@ final class TaxGroupApiResourceSwagger {
             public GetTaxesGroupTaxComponent taxComponent;
             @Schema(example = "[2016, 4, 11]")
             public LocalDate startDate;
+            @Schema(example = "[2016, 4, 11]")
+            public LocalDate endDate;
         }
 
         @Schema(example = "7")
@@ -135,8 +137,8 @@ final class TaxGroupApiResourceSwagger {
 
                 private PutTaxesGroupModifiedComponents() {}
 
-                @Schema(example = "Apr 22, 2016 12:00:00 AM")
-                public String endDate;
+                @Schema(example = "[2016, 4, 22]")
+                public LocalDate endDate;
                 @Schema(example = "7")
                 public Long taxComponentId;
             }
