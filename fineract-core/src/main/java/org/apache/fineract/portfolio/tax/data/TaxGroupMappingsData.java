@@ -38,6 +38,10 @@ public class TaxGroupMappingsData implements Serializable {
     private final LocalDate startDate;
     @SuppressWarnings("unused")
     private final LocalDate endDate;
+    // Edit control flag: true if this component's start date is in the future, false otherwise.
+    // Only meaningful when the owning TaxGroupData's groupEditable is true.
+    @SuppressWarnings("unused")
+    private Boolean componentEditable;
 
     public boolean occursOnDayFromAndUpToAndIncluding(final LocalDate target) {
         return DateUtils.isAfter(target, startDate()) && (endDate == null || !DateUtils.isAfter(target, endDate()));
