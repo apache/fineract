@@ -28,4 +28,24 @@ public interface ChargeRepository extends JpaRepository<Charge, Long>, JpaSpecif
 
     @Query("select lc.id from WorkingCapitalLoanCharge lc where lc.charge.id = :chargeId and lc.active = true")
     Optional<Long> isAnyWorkingCapitalLoansAssociateWithThisCharge(@Param("chargeId") Long chargeId);
+
+    /**
+     * Checks if any Charge exists that references a TaxGroup containing the specified TaxComponent. This is used to
+     * determine if a TaxComponent is "in use" (linked to charges via tax groups).
+     *
+     * @param taxComponentId
+     *            the ID of the TaxComponent to check
+     * @return true if at least one Charge exists with a TaxGroup that contains this TaxComponent, false otherwise
+     */
+    @Query(value = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM m_charge c
+                INNER JOIN m_tax_group_mappings tgm
+                    ON tgm.tax_group_id = c.tax_group_id
+                WHERE c.tax_group_id IS NOT NULL
+                AND tgm.tax_component_id = ?1
+            )
+            """, nativeQuery = true)
+    boolean existsByTaxGroupContainingTaxComponent(Long taxComponentId);
 }

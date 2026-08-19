@@ -37,6 +37,7 @@ public interface TaxComponentMapper {
     @Mapping(target = "glAccountOptions", ignore = true)
     @Mapping(target = "glAccountTypeOptions", ignore = true)
     @Mapping(target = "taxComponentHistories", ignore = true)
+    @Mapping(target = "accountsEditable", ignore = true)
     TaxComponentData map(TaxComponent taxComponent);
 
     List<TaxComponentData> map(List<TaxComponent> taxComponents);
