@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.documentmanagement.data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,4 +45,6 @@ public class DocumentData implements Serializable {
     private String location;
     private String description;
     private Integer storageType;
+    private LocalDateTime issuanceDate;
+    private LocalDateTime expiryDate;
 }

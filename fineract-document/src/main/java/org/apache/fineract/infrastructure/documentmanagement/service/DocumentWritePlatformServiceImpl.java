@@ -75,7 +75,8 @@ public class DocumentWritePlatformServiceImpl implements DocumentWritePlatformSe
             final var doc = new Document().setParentEntityType(request.getEntityType()).setParentEntityId(request.getEntityId())
                     .setName(Optional.ofNullable(request.getName()).orElse(request.getFileName())).setFileName(request.getFileName())
                     .setSize(request.getSize()).setType(request.getType()).setDescription(request.getDescription()).setLocation(path)
-                    .setStorageType(storeService.getType().getValue());
+                    .setStorageType(storeService.getType().getValue()).setIssuanceDate(request.getIssuanceDate())
+                    .setExpiryDate(request.getExpiryDate());
 
             documentRepository.save(doc);
 
@@ -127,6 +128,12 @@ public class DocumentWritePlatformServiceImpl implements DocumentWritePlatformSe
             }
             if (Objects.requireNonNullElse(request.getSize(), 0L) > 1L && !Objects.equals(doc.getSize(), request.getSize())) {
                 doc.setSize(request.getSize());
+            }
+            if (request.getIssuanceDate() != null && !Objects.equals(doc.getIssuanceDate(), request.getIssuanceDate())) {
+                doc.setIssuanceDate(request.getIssuanceDate());
+            }
+            if (request.getExpiryDate() != null && !Objects.equals(doc.getExpiryDate(), request.getExpiryDate())) {
+                doc.setExpiryDate(request.getExpiryDate());
             }
 
             documentRepository.save(doc);
