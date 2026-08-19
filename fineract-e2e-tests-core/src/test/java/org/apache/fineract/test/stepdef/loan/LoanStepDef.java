@@ -149,6 +149,7 @@ import org.apache.fineract.test.helper.CodeHelper;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.messaging.EventAssertion;
+import org.apache.fineract.test.messaging.EventFailureDiagnostics;
 import org.apache.fineract.test.messaging.config.EventProperties;
 import org.apache.fineract.test.messaging.config.JobPollingProperties;
 import org.apache.fineract.test.messaging.event.EventCheckHelper;
@@ -197,6 +198,7 @@ public class LoanStepDef extends AbstractStepDef {
     private final BusinessDateHelper businessDateHelper;
     private final FineractFeignClient fineractClient;
     private final EventAssertion eventAssertion;
+    private final EventFailureDiagnostics eventFailureDiagnostics;
     private final PaymentTypeResolver paymentTypeResolver;
     private final LoanProductResolver loanProductResolver;
     private final LoanRequestFactory loanRequestFactory;
@@ -5932,8 +5934,16 @@ public class LoanStepDef extends AbstractStepDef {
                 .orElseThrow(() -> new IllegalStateException(String.format("No Buy Down Fee Amortization transaction found on %s", date)));
         Long buyDownFeeAmortizationTransactionId = buyDownFeeAmortizationTransaction.getId();
 
-        eventAssertion.assertEventRaised(LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent.class,
-                buyDownFeeAmortizationTransactionId);
+        try {
+            eventAssertion.assertEventRaised(LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent.class,
+                    buyDownFeeAmortizationTransactionId);
+        } catch (AssertionError e) {
+            // This assertion fails intermittently in CI only; the diagnostics say whether the event was never
+            // persisted or merely never delivered.
+            eventFailureDiagnostics.reportMissingEvent("LoanBuyDownFeeAmortizationTransactionCreatedBusinessEvent", loanId,
+                    buyDownFeeAmortizationTransactionId);
+            throw e;
+        }
     }
 
     @Then("LoanBuyDownFeeAdjustmentTransactionCreatedBusinessEvent is created on {string}")

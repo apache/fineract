@@ -175,6 +175,7 @@ public class EventCheckHelper {
     private static final long TRANSACTION_COMMIT_DELAY_MS = 100L;
     private static final String JOURNAL_ENTRY_TYPE_DEBIT = "DEBIT";
     private static final String JOURNAL_ENTRY_TYPE_CREDIT = "CREDIT";
+    private static final int EVENT_VERIFICATION_MAX_ATTEMPTS = 3;
 
     @Autowired
     private FineractFeignClient fineractClient;
@@ -260,6 +261,27 @@ public class EventCheckHelper {
         GetLoansLoanIdResponse body = ok(() -> fineractClient.loans().retrieveOneLoan(loanId,
                 Map.of("staffInSelectedOfficeOnly", false, "associations", "all", "exclude", "", "fields", "")));
 
+        // Earlier steps may have raised events of the same type for this loan; assertEvent consumes the
+        // latest one received, which is a stale predecessor when the newest event is still in transit.
+        // Each attempt consumes one event, so retrying waits for the next one to arrive.
+        retryOnAssertionError(EVENT_VERIFICATION_MAX_ATTEMPTS, () -> verifyLoanAccountDataV1(eventClazz, loanId, body));
+    }
+
+    private void retryOnAssertionError(int maxAttempts, Runnable verification) {
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                verification.run();
+                return;
+            } catch (AssertionError e) {
+                if (attempt == maxAttempts) {
+                    throw e;
+                }
+                log.debug("Event verification attempt {} of {} failed, retrying with the next received event", attempt, maxAttempts);
+            }
+        }
+    }
+
+    private void verifyLoanAccountDataV1(Class<? extends AbstractLoanEvent> eventClazz, Long loanId, GetLoansLoanIdResponse body) {
         eventAssertion.assertEvent(eventClazz, loanId)//
                 .extractingData(loanAccountDataV1 -> {
                     assertThat(loanAccountDataV1.getId()).as("id").isEqualTo(body.getId());
