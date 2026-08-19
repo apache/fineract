@@ -58,4 +58,8 @@ public interface LoanProductReadPlatformService {
 
     LoanProductData retrieveLoanProductFloatingDetails(Long loanProductId);
 
+    Collection<LoanProductData> retrieveAllLoanProductsV2();
+
+    Collection<LoanProductData> retrieveAllLoanProductsForLookupV2(boolean activeOnly, Long officeId);
+
 }
