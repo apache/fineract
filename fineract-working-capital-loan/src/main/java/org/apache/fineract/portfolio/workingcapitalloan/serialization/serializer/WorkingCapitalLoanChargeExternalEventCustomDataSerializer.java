@@ -19,14 +19,14 @@
 package org.apache.fineract.portfolio.workingcapitalloan.serialization.serializer;
 
 import java.nio.ByteBuffer;
-import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.charge.WorkingCapitalLoanChargeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.charge.WorkingCapitalLoanAddChargeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanBusinessEvent;
 
 public interface WorkingCapitalLoanChargeExternalEventCustomDataSerializer {
 
     ByteBuffer serialize(WorkingCapitalLoanBusinessEvent event, Long chargeId);
 
-    default ByteBuffer serialize(WorkingCapitalLoanChargeBusinessEvent event, Long chargeId) {
+    default ByteBuffer serialize(WorkingCapitalLoanAddChargeBusinessEvent event, Long chargeId) {
         return null;
     }
 

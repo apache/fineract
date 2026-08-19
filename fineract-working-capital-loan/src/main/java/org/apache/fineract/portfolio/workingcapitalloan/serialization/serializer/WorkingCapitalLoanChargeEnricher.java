@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanChargeDataV1;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
-import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.charge.WorkingCapitalLoanChargeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.charge.WorkingCapitalLoanAddChargeBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanBusinessEvent;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.data.ChargeIdAndAmountHolder;
@@ -62,7 +62,7 @@ public class WorkingCapitalLoanChargeEnricher {
         return collect(serializer -> serializer.serialize(event, chargeId));
     }
 
-    public Map<String, ByteBuffer> collectCustomData(final WorkingCapitalLoanChargeBusinessEvent event, final Long chargeId) {
+    public Map<String, ByteBuffer> collectCustomData(final WorkingCapitalLoanAddChargeBusinessEvent event, final Long chargeId) {
         return collect(serializer -> serializer.serialize(event, chargeId));
     }
 
