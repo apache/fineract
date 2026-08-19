@@ -61,6 +61,8 @@ final class TaxGroupApiResourceSwagger {
         @Schema(example = "tax group 1")
         public String name;
         public Set<GetTaxesGroupTaxAssociations> taxAssociations;
+        @Schema(example = "[2016, 4, 11]")
+        public LocalDate businessDate;
     }
 
     @Schema(description = "PostTaxesGroupRequest")
@@ -135,8 +137,8 @@ final class TaxGroupApiResourceSwagger {
 
                 private PutTaxesGroupModifiedComponents() {}
 
-                @Schema(example = "Apr 22, 2016 12:00:00 AM")
-                public String endDate;
+                @Schema(example = "[2016, 4, 22]")
+                public LocalDate endDate;
                 @Schema(example = "7")
                 public Long taxComponentId;
             }
