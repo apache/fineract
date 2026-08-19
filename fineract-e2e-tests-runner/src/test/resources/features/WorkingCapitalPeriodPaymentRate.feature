@@ -371,6 +371,10 @@ Feature: Working Capital Period Payment Rate
       | Effective Date  | Previous Rate | New Rate | Reversed |
       | 10 January 2026 | 18.0          | 11.0     | false    |
       | 20 January 2026 | 11.0          | 20.0     | false    |
+    And Working capital loan account has the correct period payment rate history data:
+      | effectiveDate   | previousRate | newRate | calculatedAnnualEIR | dailyPaymentAmount | segmentTerm | reversed |
+      | 10 January 2026 | 18.0         | 11.0    | 0.265288            | 30.56              | 328         | false    |
+      | 20 January 2026 | 11.0         | 20.0    | 0.532173            | 55.56              | 180         | false    |
 # The rate in force today is the latest change effective on or before it, which the backdated one sits behind.
     And Working Capital Loan period payment rate in effect is "20"
     And Admin retrieves the projected amortization schedule
@@ -433,6 +437,7 @@ Feature: Working Capital Period Payment Rate
       | 8         | 2026-01-09 | 50.00                 | 8553.54         | 9.18                       | 896.46                     |
       | 9         | 2026-01-10 | 30.56                 | 8550.84         | 5.73                       | 899.91                     |
       | 10        | 2026-01-11 | 30.56                 | 8525.99         | 5.71                       | 894.20                     |
+    Then a Working Capital Loan Period Payment Rate Changed business event is raised
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
   @TestRailId:C93986
@@ -478,6 +483,10 @@ Feature: Working Capital Period Payment Rate
       | 32        | 2026-02-02 | 30.56                 | 8050.85         | 5.28                       | 788.04                     |
       | 308       | 2026-11-05 | 30.56                 | 402.45          | 0.28                       | 1.88                       |
       | 309       | 2026-11-06 | 30.56                 | 372.16          | 0.26                       | 1.62                       |
+    And Working capital loan account has the correct period payment rate history data:
+      | effectiveDate    | previousRate | newRate | calculatedAnnualEIR | dailyPaymentAmount | segmentTerm | reversed |
+      | 01 February 2026 | 18.0         | 11.0    | 0.265363            | 30.56              | 292         | false    |
+    Then a Working Capital Loan Period Payment Rate Changed business event is raised
 #--- the effective date arrives and the change is in force at once. The assertion sits before the COB run
 #--- deliberately: the rate in force is derived from the change history, so no job has to bring it up to date.
     When Admin sets the business date to "01 February 2026"
@@ -514,6 +523,11 @@ Feature: Working Capital Period Payment Rate
       | 10 January 2026 | 18.0          | 11.0     | true     |
       | 10 January 2026 | 18.0          | 17.0     | false    |
       | 20 January 2026 | 17.0          | 20.0     | false    |
+    And Working capital loan account has the correct period payment rate history data:
+      | effectiveDate   | previousRate | newRate | calculatedAnnualEIR | dailyPaymentAmount | segmentTerm | reversed |
+      | 10 January 2026 | 18.0         | 17.0    | 0.437562            | 47.22              | 212         | false    |
+      | 20 January 2026 | 17.0         | 20.0    | 0.532173            | 55.56              | 180         | false    |
+      | 10 January 2026 | 18.0         | 11.0    | 0.265288            | 30.56              | 328         | true     |
     And Working Capital Loan period payment rate in effect is "20"
 # The correction is scoped to 10 January onwards: period 8 is untouched, period 9 moves from the mistaken 30.56 to
 # 47.22, and the 20 January segment keeps its rate but is re-derived from the balance the corrected segment leaves.
@@ -598,6 +612,14 @@ Feature: Working Capital Period Payment Rate
       | 88        | 2026-03-30 | 55.56                 | 5725.86         | 6.85                       | 384.94                     |
       | 89        | 2026-03-31 | 69.44                 | 5664.89         | 8.47                       | 376.47                     |
       | 164       | 2026-06-14 | 69.44                 | 825.40          | 1.32                       | 7.96                       |
+    And Working capital loan account has the correct period payment rate history data:
+      | effectiveDate   | previousRate | newRate | calculatedAnnualEIR | dailyPaymentAmount | segmentTerm | reversed |
+      | 31 March 2026   | 20.0         | 25.0    | 0.702438            | 69.44              | 89          | false    |
+      | 10 January 2026 | 18.0         | 13.0    | 0.320319            | 36.11              | 277         | false    |
+      | 15 January 2026 | 13.0         | 19.0    | 0.499979            | 52.78              | 190         | false    |
+      | 31 March 2026   | 20.0         | 15.0    | 0.378165            | 41.67              | 147         | true     |
+      | 20 January 2026 | 19.0         | 20.0    | 0.532173            | 55.56              | 180         | false    |
+      | 10 January 2026 | 18.0         | 11.0    | 0.265288            | 30.56              | 328         | true     |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
   @TestRailId:C93989
@@ -631,6 +653,10 @@ Feature: Working Capital Period Payment Rate
       | 1         | 2026-01-02 | 47.22                 | 8952.91         | 0.13                       | 11.87                      |
       | 221       | 2026-08-10 | 52.78                 | 8781.12         | 0.14                       | 11.42                      |
       | 388       | 2027-01-24 | 31.06                 | 0.00            | 0.00                       | 0.00                       |
+    And Working capital loan account has the correct period payment rate history data:
+      | effectiveDate  | previousRate | newRate | calculatedAnnualEIR | dailyPaymentAmount | segmentTerm | reversed |
+      | 10 August 2026 | 15.0         | 19.0    | 0.005602            | 52.78              | 168         | false    |
+      | 01 August 2026 | 17.0         | 15.0    | 0.004426            | 41.67              | 217         | false    |
     Then Admin closes the Working Capital loan with a full repayment on "06 August 2026"
 
   @TestRailId:C93990
@@ -700,6 +726,10 @@ Feature: Working Capital Period Payment Rate
       | 185       | 2026-07-05 | 55.56                 | 671.78          | 0.86                       | 5.25                       |                     |               |                          |                          |
       | 186       | 2026-07-06 | 55.56                 | 617.02          | 0.80                       | 4.45                       |                     |               |                          |                          |
       | 198       | 2026-07-18 | 10.33                 | 0.00            | 0.00                       | 0.00                       |                     |               |                          |                          |
+    And Working capital loan account has the correct period payment rate history data:
+      | effectiveDate   | previousRate | newRate | calculatedAnnualEIR | dailyPaymentAmount | segmentTerm | reversed |
+      | 10 January 2026 | 18.0         | 11.0    | 0.265288            | 30.56              | 328         | false    |
+      | 20 January 2026 | 11.0         | 20.0    | 0.532173            | 55.56              | 180         | false    |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
   @TestRailId:C93991
@@ -750,6 +780,9 @@ Feature: Working Capital Period Payment Rate
       | 19        | 2026-01-20 | 41.67                 | 8958.33         | 0.00                       | 0.00                       |                     |               |                          |                          |
       | 20        | 2026-01-21 | 41.67                 | 8916.66         | 0.00                       | 0.00                       |                     |               |                          |                          |
       | 225       | 2026-08-14 | 41.67                 | 374.31          | 0.00                       | 0.00                       |                     |               |                          |                          |
+    And Working capital loan account has the correct period payment rate history data:
+      | effectiveDate   | previousRate | newRate | calculatedAnnualEIR | dailyPaymentAmount | segmentTerm | reversed |
+      | 20 January 2026 | 18.0         | 15.0    | 0.000000            | 41.67              | 216         | false    |
     When Admin sets the business date to "25 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Working Capital Loan period payment rate in effect is "15"
@@ -1837,6 +1870,9 @@ Feature: Working Capital Period Payment Rate
       | 04 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
       | 04 January 2026 | Discount Fee Amortization | 8.45              |                  |                   |                       | false    |
       | 21 January 2026 | Repayment                 | 55.56             | 55.56            | 0.0               | 0.0                   | false    |
+    And Working capital loan account has the correct period payment rate history data:
+      | effectiveDate   | previousRate | newRate | calculatedAnnualEIR | dailyPaymentAmount | segmentTerm | reversed |
+      | 20 January 2026 | 18.0         | 20.0    | 27.406802           | 55.56              | 19          | false    |
     Then Admin closes the Working Capital loan with a full repayment on "21 January 2026"
 
   @TestRailId:C94031
@@ -1942,6 +1978,9 @@ Feature: Working Capital Period Payment Rate
       | 01 January 2026 | Disbursement              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Discount Fee              | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
       | 21 January 2026 | Repayment                 | 55.56             | 55.56            | 0.0               | 0.0                   | false    |
+    And Working capital loan account has the correct period payment rate history data:
+      | effectiveDate   | previousRate | newRate | calculatedAnnualEIR | dailyPaymentAmount | segmentTerm | reversed |
+      | 20 January 2026 | 18.0         | 20.0    | 27.417042           | 55.56              | 20          | false    |
     Then Admin closes the Working Capital loan with a full repayment on "21 January 2026"
 
   @TestRailId:C94032

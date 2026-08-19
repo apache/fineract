@@ -107,6 +107,15 @@ jobs:
       TEST_TENANT_ID: default
       INITIALIZATION_ENABLED: true
       EVENT_VERIFICATION_ENABLED: false
+      # The PR workspace is downloaded pre-built, so every buildJavaSdk output (Avro schemas and
+      # the OpenAPI clients) is already on disk. Regenerating them also drags in
+      # :fineract-provider:resolve, which boots a second Spring context alongside the backend that
+      # is already running and exhausts the runner. Do NOT use this in the `baseline` working
+      # directory: that tree is a fresh checkout and has to generate its sources.
+      SKIP_SDK_GEN: >-
+        -x :fineract-avro-schemas:buildJavaSdk
+        -x :fineract-client:buildJavaSdk
+        -x :fineract-client-feign:buildJavaSdk
       # devRun connection args (reused across instances)
       DEVRUN_ARGS: >-
         --spring.datasource.hikari.driverClassName=org.postgresql.Driver
@@ -229,7 +238,7 @@ jobs:
           ./gradlew --no-daemon --console=plain \
             :fineract-e2e-tests-runner:cucumber \
             -Pcucumber.tags="@RegressionSafety" \
-            -x spotlessCheck
+            -x spotlessCheck $SKIP_SDK_GEN
 
       - name: "Instance #1: Stop backend"
         if: always()
@@ -262,7 +271,7 @@ jobs:
           # The liquibase-only profile sets web-application-type=none, so Spring Boot
           # exits naturally after migrations complete. The 600s timeout is a safety net
           # that FAILS the step if migrations hang — it is NOT treated as success.
-          timeout 600 ./gradlew --no-daemon :fineract-provider:bootRun --args="\
+          timeout 600 ./gradlew --no-daemon $SKIP_SDK_GEN :fineract-provider:bootRun --args="\
           --spring.profiles.active=liquibase-only \
           --spring.datasource.hikari.driverClassName=org.postgresql.Driver \
           --spring.datasource.hikari.jdbcUrl=jdbc:postgresql://localhost:5432/fineract_tenants \
@@ -324,7 +333,7 @@ jobs:
           ./gradlew --no-daemon --console=plain \
             :fineract-e2e-tests-runner:cucumber \
             -Pcucumber.tags="@RegressionSafety" \
-            -x spotlessCheck
+            -x spotlessCheck $SKIP_SDK_GEN
 
       - name: "Instance #2: Stop backend"
         if: always()
@@ -352,7 +361,7 @@ jobs:
 
       - name: "Instance #3: Start PR backend"
         run: |
-          ./gradlew :fineract-provider:devRun --args="${DEVRUN_ARGS}" &
+          ./gradlew $SKIP_SDK_GEN :fineract-provider:devRun --args="${DEVRUN_ARGS}" &
           BACKEND_PID=$!
           echo $BACKEND_PID > backend.pid
 
@@ -386,7 +395,7 @@ jobs:
           ./gradlew --no-daemon --console=plain \
             :fineract-e2e-tests-runner:cucumber \
             -Pcucumber.tags="@RegressionSafety" \
-            -x spotlessCheck
+            -x spotlessCheck $SKIP_SDK_GEN
 
       - name: "Instance #3: Stop backend"
         if: always()
