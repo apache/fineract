@@ -19,17 +19,21 @@
 package org.apache.fineract.investor.data;
 
 import java.io.Serializable;
+import java.util.List;
 import lombok.Data;
+import lombok.Getter;
 
 /**
  * Data object representing an external transfer loan product attribute
  */
 
 @Data
-public class ExternalTransferLoanProductAttributesData implements Serializable {
+@Getter
+public class ExternalTransferLoanProductAttributesTemplateData implements Serializable {
 
     private Long attributeId;
     private Long loanProductId;
     private String attributeKey;
-    private String attributeValue;
+    private List<String> attributeValues;
+    private boolean isMultiValue;
 }

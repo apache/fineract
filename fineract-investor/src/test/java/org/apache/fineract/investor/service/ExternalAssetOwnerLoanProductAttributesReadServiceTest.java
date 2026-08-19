@@ -19,6 +19,7 @@
 package org.apache.fineract.investor.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.investor.data.ExternalTransferLoanProductAttributesData;
+import org.apache.fineract.investor.data.ExternalTransferLoanProductAttributesTemplateData;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanProductAttributes;
 import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanProductAttributesRepository;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
@@ -99,6 +101,20 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceTest {
         assertEquals(data, result.getPageItems().getFirst());
         verify(loanProductRepository, times(1)).existsById(loanProductId);
         verify(mapper, times(1)).mapLoanProductAttributes(attributes);
+    }
+
+    @Test
+    public void testRetrieveExternalAssetOwnerLoanProductAttributesTemplate() {
+        // when
+        List<ExternalTransferLoanProductAttributesTemplateData> result = underTest
+                .retrieveExternalAssetOwnerLoanProductAttributesTemplate();
+
+        // then
+        ExternalTransferLoanProductAttributesTemplateData settlementModel = result.stream()
+                .filter(attribute -> "SETTLEMENT_MODEL".equals(attribute.getAttributeKey())).findFirst().orElseThrow();
+        assertEquals(1, result.size());
+        assertEquals(List.of("DEFAULT_SETTLEMENT", "DELAYED_SETTLEMENT"), settlementModel.getAttributeValues());
+        assertFalse(settlementModel.isMultiValue());
     }
 
     @Test
