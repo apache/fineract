@@ -100,6 +100,7 @@ import org.apache.fineract.portfolio.loanaccount.data.DisbursementData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanAccountData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanApprovalData;
+import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInterestRecalculationData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanRepaymentScheduleInstallmentData;
@@ -1459,7 +1460,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
     }
 
     @Override
-    public LoanAccountData retrieveLoanProductDetailsTemplate(final Long productId, final Long clientId, final Long groupId) {
+    public LoanAccountData retrieveLoanProductDetailsTemplate(final Long productId, final Long clientId, final Long groupId,
+            final Long officeId) {
 
         this.context.authenticatedUser();
 
@@ -1493,10 +1495,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
         Collection<ChargeData> chargeOptions = null;
         if (loanProduct.getMultiDisburseLoan()) {
             chargeOptions = this.chargeReadPlatformService.retrieveLoanProductApplicableCharges(productId,
-                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT });
+                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT }, officeId);
         } else {
             chargeOptions = this.chargeReadPlatformService.retrieveLoanProductApplicableCharges(productId,
-                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT });
+                    new ChargeTimeType[] { ChargeTimeType.OVERDUE_INSTALLMENT, ChargeTimeType.TRANCHE_DISBURSEMENT }, officeId);
         }
 
         Integer loanCycleCounter = null;
@@ -1515,7 +1517,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
             activeLoanOptions = this.accountDetailsReadPlatformService.retrieveGroupActiveLoanAccountSummary(groupId);
         }
 
-        return new LoanAccountData().withProductData(loanProduct, loanCycleCounter) //
+        LoanAccountData loanAccountData = new LoanAccountData().withProductData(loanProduct, loanCycleCounter) //
                 .setTermFrequencyTypeOptions(loanTermFrequencyTypeOptions) //
                 .setRepaymentFrequencyTypeOptions(repaymentFrequencyTypeOptions) //
                 .setRepaymentFrequencyNthDayTypeOptions(repaymentFrequencyNthDayTypeOptions) //
@@ -1532,6 +1534,32 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService, Loa
                 .setClientActiveLoanOptions(activeLoanOptions) //
                 .setLoanScheduleTypeOptions(LoanScheduleType.getValuesAsEnumOptionDataList()) //
                 .setLoanScheduleProcessingTypeOptions(LoanScheduleProcessingType.getValuesAsEnumOptionDataList()); //
+
+        // Bug fix: pre-selected product charges (loanProduct.charges()) were fetched using the logged-in user's office
+        // filter (Head Office sees all offices including Branch 004). When rendering a template for a client in a
+        // specific office, we must re-filter those charges by the client's officeId.
+        if (officeId != null) {
+            final List<ChargeData> officeFilteredProductCharges = this.chargeReadPlatformService.retrieveLoanProductCharges(productId,
+                    officeId);
+            final java.util.Set<Long> visibleChargeIds = officeFilteredProductCharges.stream().map(ChargeData::getId)
+                    .collect(java.util.stream.Collectors.toSet());
+            final Collection<LoanChargeData> currentCharges = loanAccountData.getCharges();
+            if (currentCharges != null && !currentCharges.isEmpty()) {
+                final Collection<LoanChargeData> filtered = currentCharges.stream()
+                        .filter(c -> c.getChargeId() != null && visibleChargeIds.contains(c.getChargeId()))
+                        .collect(java.util.stream.Collectors.toList());
+                loanAccountData.setCharges(filtered.isEmpty() ? null : filtered);
+            }
+            final Collection<ChargeData> currentOverdueCharges = loanAccountData.getOverdueCharges();
+            if (currentOverdueCharges != null && !currentOverdueCharges.isEmpty()) {
+                final Collection<ChargeData> filteredOverdue = currentOverdueCharges.stream()
+                        .filter(c -> c.getId() != null && visibleChargeIds.contains(c.getId()))
+                        .collect(java.util.stream.Collectors.toList());
+                loanAccountData.setOverdueCharges(filteredOverdue.isEmpty() ? null : filteredOverdue);
+            }
+        }
+
+        return loanAccountData;
     }
 
     @Override
