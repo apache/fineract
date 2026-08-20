@@ -1028,14 +1028,14 @@ ext.fineractComponentOf = { String packageName ->
     return 'platform'
 }
 
+// No componentOf() here on purpose: the plugin's own task keeps its default of one
+// component per Java package, so the package report makes no assumption about naming
+// depth or convention. Grouping into features is done by a separate task below.
 configure(project.fineractJavaProjects) {
     plugins.withId('io.github.usekylis.java-architecture-metrics') {
         architectureMetrics {
             sourceSet('main')
             reportFormats('json', 'csv')
-            componentOf({ classInfo ->
-                rootProject.ext.fineractComponentOf(classInfo.packageName)
-            } as io.github.usekylis.archmetrics.ComponentIdentifier)
         }
     }
 }
@@ -1055,17 +1055,49 @@ ext.archMetricsScannedProjects = {
     }
 }
 
+// Two reports are produced from the same aggregate scan.
+//
+// The PACKAGE report makes no assumptions about how packages are named or how deeply
+// they are nested: every Java package is its own component. It is the unfiltered view
+// of where the platform actually stands.
+//
+// The FEATURE report groups those packages into the features the documentation is
+// written around. It is a reading aid layered on top of the package data, not a
+// replacement for it -- where the grouping heuristic does not recognise a package, the
+// package still appears, under its own name.
 project(':fineract-provider') {
     plugins.withId('io.github.usekylis.java-architecture-metrics') {
+
+        // The plugin's own task is left at its defaults: one component per package.
         architectureMetrics {
-            reportBaseName('fineract-feature-metrics')
-            outputDirectory(rootProject.layout.buildDirectory.dir('reports/architecture'))
+            reportBaseName('fineract-package-metrics')
+            outputDirectory(rootProject.layout.buildDirectory.dir('reports/architecture/packages'))
             classesDirectories(rootProject.ext.archMetricsScannedProjects().collect { p ->
                 p.layout.buildDirectory.dir('classes/java/main')
             })
         }
+
+        // A second task of the same type, differing only in how classes are grouped.
+        tasks.register('architectureMetricsFeatures', io.github.usekylis.archmetrics.ArchitectureMetricsTask) {
+            group = 'verification'
+            description = 'Architecture metrics with packages grouped into documented features.'
+            sourceSetName.set('main')
+            reportBaseName.set('fineract-feature-metrics')
+            outputDirectory.set(rootProject.layout.buildDirectory.dir('reports/architecture/features'))
+            formats.set([
+                io.github.usekylis.archmetrics.ReportFormat.JSON,
+                io.github.usekylis.archmetrics.ReportFormat.CSV,
+            ])
+            classesDirectories.from(rootProject.ext.archMetricsScannedProjects().collect { p ->
+                p.layout.buildDirectory.dir('classes/java/main')
+            })
+            componentIdentifier.set({ classInfo ->
+                rootProject.ext.fineractComponentOf(classInfo.packageName)
+            } as io.github.usekylis.archmetrics.ComponentIdentifier)
+        }
     }
-    tasks.matching { it.name == 'architectureMetrics' }.configureEach { t ->
+
+    tasks.matching { it.name in ['architectureMetrics', 'architectureMetricsFeatures'] }.configureEach { t ->
         t.dependsOn rootProject.ext.archMetricsScannedProjects().collect { "${it.path}:classes" }
     }
 }
@@ -1083,15 +1115,51 @@ ext.archMetricsTransform = [
 
 ext.archMetricsDiagramDir = file("${rootDir}/fineract-doc/src/docs/en/diagrams")
 
+// Skeleton sections for every measured package, so that a place to write already exists
+// for packages nobody has analysed yet. Generated from the package report, which makes no
+// assumption about package naming or nesting depth.
+ext.archMetricsSkeletonFile =
+    file("${rootDir}/fineract-doc/src/docs/en/chapters/architecture/generated-package-overview.adoc")
+
+tasks.register('architectureMetricsSkeleton', Exec) {
+    group = 'verification'
+    description = 'Regenerate the per-package skeleton sections from the package-level metrics report.'
+    dependsOn ':fineract-provider:architectureMetrics'
+
+    def script = rootProject.ext.archMetricsTransform
+    def skeleton = rootProject.ext.archMetricsSkeletonFile
+    def packageJson = rootProject.layout.buildDirectory
+        .file('reports/architecture/packages/fineract-package-metrics.json').get().asFile
+
+    onlyIf {
+        if (script == null) {
+            logger.warn('architectureMetricsSkeleton: archmetrics_to_vega.py not found, skipping skeleton regeneration.')
+            return false
+        }
+        return true
+    }
+
+    inputs.file(packageJson).withPropertyName('packageReport')
+    outputs.file(skeleton).withPropertyName('skeleton')
+
+    commandLine 'python3',
+        script != null ? script.absolutePath : 'archmetrics_to_vega.py',
+        packageJson.absolutePath,
+        '--no-diagrams',
+        '--exclude', 'external',
+        '--skeleton', skeleton.absolutePath,
+        '--min-cfv', '1'
+}
+
 tasks.register('architectureMetricsDiagrams', Exec) {
     group = 'verification'
     description = 'Regenerate the Vega-Lite diagram specifications from the architecture metrics report.'
-    dependsOn ':fineract-provider:architectureMetrics'
+    dependsOn ':fineract-provider:architectureMetricsFeatures'
 
     def script = rootProject.ext.archMetricsTransform
     def diagramDir = rootProject.ext.archMetricsDiagramDir
     def reportJson = rootProject.layout.buildDirectory
-        .file('reports/architecture/fineract-feature-metrics.json').get().asFile
+        .file('reports/architecture/features/fineract-feature-metrics.json').get().asFile
 
     onlyIf {
         if (script == null) {
@@ -1117,6 +1185,6 @@ tasks.register('architectureMetricsDiagrams', Exec) {
 
 tasks.register('architectureMetricsReport') {
     group = 'verification'
-    description = 'Feature-level Robert C. Martin architecture metrics for the whole platform.'
-    dependsOn 'architectureMetricsDiagrams'
+    description = 'Robert C. Martin architecture metrics for the whole platform, at package and feature level.'
+    dependsOn 'architectureMetricsDiagrams', 'architectureMetricsSkeleton'
 }
