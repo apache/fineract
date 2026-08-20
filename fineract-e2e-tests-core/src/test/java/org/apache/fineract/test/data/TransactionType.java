@@ -43,6 +43,7 @@ public enum TransactionType {
     BUY_DOWN_FEE_AMORTIZATION("buyDownFeeAmortization"), //
     INTEREST_REFUND("interestRefund"), //
     WRITE_OFF("writeOff"), //
+    RECOVERY_REPAYMENT("recoveryRepayment"), //
     DISCOUNT_FEE("discountFee"), //
     DISCOUNT_FEE_ADJUSTMENT("discountFeeAdjustment"), //
     DISCOUNT_FEE_AMORTIZATION("discountFeeAmortization"), //

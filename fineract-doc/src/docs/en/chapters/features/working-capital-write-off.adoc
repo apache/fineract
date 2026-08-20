@@ -90,14 +90,24 @@ same input.
 |Write-off |The write-off date must not be in the future. |`cannot.be.a.future.date`
 |Write-off |The write-off date must not be earlier than the last user transaction date. |`cannot.be.before.last.transaction.date`
 |Undo write-off |The loan must be written off. |`error.msg.wc.loan.is.not.written.off`
+|Undo write-off |No recovery payment may be outstanding on the loan. |`cannot.undo.write.off.with.recovery.payments`
 |===
+
+Undoing the write-off restores the full outstanding balance, so any money already collected as recovery income
+would then also be replayed against that restored balance — the same cash both recognized as income and
+reducing the receivable. Recoveries must be reversed first; see <<_working_capital_loan_recovery_payment>>.
 
 === Post-write-off lock
 
-A written-off loan is locked: no new transaction can be posted on it and no existing transaction can be undone
-while it stays in `CLOSED_WRITTEN_OFF`. This is stricter than term and progressive loans, which reopen the loan
-on adjustment. The only way out is the undo write-off, which reopens the loan to `ACTIVE` and restores the
-balance; from there the account behaves normally again.
+A written-off loan is locked: apart from the Recovery Payment described below, no new transaction can be posted
+on it and no existing transaction can be undone while it stays in `CLOSED_WRITTEN_OFF`. This is stricter than
+term and progressive loans, which reopen the loan on adjustment. The only way out is the undo write-off, which
+reopens the loan to `ACTIVE` and restores the balance; from there the account behaves normally again.
+
+The single exception is the *Recovery Payment*, which records money collected after the write-off and is
+admitted precisely because the loan is written off. It is a typed exception — opened for the
+`RECOVERY_REPAYMENT` transaction type only — so none of the status gates listed below are relaxed. See
+<<_working_capital_loan_recovery_payment>>.
 
 The lock is not a check of its own — it falls out of the status gates each operation already applies, none of
 which admit `CLOSED_WRITTEN_OFF`:
@@ -176,6 +186,10 @@ The Working Capital Loan resource exposes the written-off state:
 
 |`writeOffReason`
 |The `WriteOffReasons` code value selected at write-off time, when one was provided.
+
+|`balance.totalWrittenOff`
+|Gross amount moved out of the outstanding by the write-off, split per portion in `principalWrittenOff`,
+`feeWrittenOff` and `penaltyWrittenOff`. Cleared by an undo.
 |===
 
 == Accounting Treatment
