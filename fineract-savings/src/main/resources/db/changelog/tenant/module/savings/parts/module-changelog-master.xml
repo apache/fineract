@@ -23,9 +23,5 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
   <!-- Sequence is starting from 2000 to make it easier to move existing liquibase changesets here -->
-  <include file="parts/2001_add_savings_accrual_job.xml" relativeToChangelogFile="true" />
-  <include file="parts/2002_add_savings_accrual_permission.xml" relativeToChangelogFile="true" />
-  <include file="parts/2003_add_accrued_till_date_to_savings_account.xml" relativeToChangelogFile="true" />
-  <include file="parts/2004_add_savings_account_cob_infrastructure.xml" relativeToChangelogFile="true" />
-  <include file="parts/2005_add_external_id_to_savings_transaction.xml" relativeToChangelogFile="true" />
+  <!-- 2001-2005 baked into baseline schema as of 1.15.0 -->
 </databaseChangeLog>

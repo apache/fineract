@@ -24,4 +24,15 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
     <include file="parts/0001_initial_schema.xml" relativeToChangelogFile="true"/>
     <include file="parts/0002_initial_data.xml" relativeToChangelogFile="true"/>
-    </databaseChangeLog>
+    <include file="parts/0003_fix_group_summary_report_parameters.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0004_update_m_tellers_unique_key.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0005_add_client_lifecycle_event_configuration.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0006_remove_mix_module.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0007_add_payment_detail_to_account_transfer_transaction.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0008_standardize_email_address_column_length.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0009_drop_request_audit_table.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0010_add_payment_detail_search_indexes.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0011_add_dates_to_client_identifier.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0012_add_issuance_and_expiry_dates_to_m_document.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0013_modify_note_length.xml" relativeToChangelogFile="true"/>
+</databaseChangeLog>

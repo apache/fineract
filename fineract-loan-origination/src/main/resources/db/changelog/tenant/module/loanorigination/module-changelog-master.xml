@@ -22,9 +22,4 @@
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
-  <include relativeToChangelogFile="true" file="parts/0001_initial_schema.xml"/>
-  <include relativeToChangelogFile="true" file="parts/0002_permissions.xml"/>
-  <include relativeToChangelogFile="true" file="parts/0003_mapping_permissions.xml"/>
-  <include relativeToChangelogFile="true" file="parts/0004_add_global_config_originator_creation.xml"/>
-  <include relativeToChangelogFile="true" file="parts/0005_wc_loan_originator_mapping.xml"/>
 </databaseChangeLog>
