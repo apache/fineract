@@ -217,6 +217,8 @@ Feature: WorkingCapitalAmortizationSchedule
       | 198       | 2019-07-18 | 50.00                 | 99.84           | 0.16                       |                     |                          | 0.17                       |               |                          |
       | 199       | 2019-07-19 | 50.00                 | 49.95           | 0.11                       |                     |                          | 0.06                       |               |                          |
       | 200       | 2019-07-20 | 50.00                 | 0.00            | 0.06                       |                     |                          | 0.00                       |               |                          |
+    When Admin rejects the working capital loan on "01 January 2026"
+    Then Working capital loan rejection was successful
 
   @TestRailId:C78826
   Scenario: Generate and retrieve a projected amortization schedule with 200 payments  with update period payment rate in a middle of loan lifecycle - UC2
@@ -683,6 +685,7 @@ Feature: WorkingCapitalAmortizationSchedule
       | 235       | 2019-08-24 | 36.58                 | 0.00            | 0.00                       |                     |                          | 0.00                       |               |                          |
     Then Admin closes the Working Capital loan with a full repayment on "25 January 2019"
 
+  @TestRailId:C98194
   Scenario: Generate a projected amortization schedule whose final payment is a smaller remainder - UC3
     When Admin sets the business date to "01 January 2019"
     And Admin creates a client with random data
@@ -705,7 +708,10 @@ Feature: WorkingCapitalAmortizationSchedule
       | 210       | 2019-07-30 | 47.22                 | 83.68           | 0.13                       | 0.06                       |
       | 211       | 2019-07-31 | 47.22                 | 36.54           | 0.06                       | 0.00                       |
       | 212       | 2019-08-01 | 36.58                 | 0.00            | 0.00                       | 0.00                       |
+    When Admin rejects the working capital loan on "01 January 2019"
+    Then Working capital loan rejection was successful
 
+  @TestRailId:C98195
   Scenario: Retrieve a projected amortization schedule frozen flat by COB across two payment rate changes without repayment
     When Admin sets the business date to "01 January 2019"
     And Admin creates a client with random data
@@ -746,6 +752,7 @@ Feature: WorkingCapitalAmortizationSchedule
       | 210       | 2019-07-30 | 54.76                 | 0.00            | 0.10                       | 0.00                       |
     Then Admin closes the Working Capital loan with a full repayment on "01 February 2019"
 
+  @TestRailId:C98196
   Scenario: Generate a projected amortization schedule matching reference - UC4
     When Admin sets the business date to "01 January 2019"
     And Admin creates a client with random data
