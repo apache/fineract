@@ -54,14 +54,8 @@ class MakerCheckerReadServiceImplTest {
         final AppUser maker = mock(AppUser.class);
         when(maker.getUsername()).thenReturn(username);
 
-        return CommandSource.builder()
-                .actionName(action)
-                .entityName(entity)
-                .maker(maker)
-                .madeOnDate(NOW)
-                .status(CommandProcessingResultType.AWAITING_APPROVAL.getValue())
-                .sanitized(false)
-                .build();
+        return CommandSource.builder().actionName(action).entityName(entity).maker(maker).madeOnDate(NOW)
+                .status(CommandProcessingResultType.AWAITING_APPROVAL.getValue()).sanitized(false).build();
     }
 
     @Test
@@ -108,14 +102,8 @@ class MakerCheckerReadServiceImplTest {
     @Test
     void retrievePendingByLoanId_withNullMaker_returnsMakerUsernameNull() {
         final Long loanId = 104L;
-        final CommandSource cs = CommandSource.builder()
-                .actionName("APPROVE")
-                .entityName("LOAN")
-                .maker(null)
-                .madeOnDate(NOW)
-                .status(CommandProcessingResultType.AWAITING_APPROVAL.getValue())
-                .sanitized(false)
-                .build();
+        final CommandSource cs = CommandSource.builder().actionName("APPROVE").entityName("LOAN").maker(null).madeOnDate(NOW)
+                .status(CommandProcessingResultType.AWAITING_APPROVAL.getValue()).sanitized(false).build();
         when(commandSourceRepository.findPendingByLoanId(loanId, AWAITING_STATUS)).thenReturn(List.of(cs));
 
         final List<PendingMakerCheckerData> result = service.retrievePendingByLoanId(loanId);

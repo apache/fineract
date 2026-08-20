@@ -36,40 +36,25 @@ public class MakerCheckerReadServiceImpl implements MakerCheckerReadService {
 
     @Override
     public List<PendingMakerCheckerData> retrievePendingByLoanId(final Long loanId) {
-        return commandSourceRepository
-                .findPendingByLoanId(loanId, CommandProcessingResultType.AWAITING_APPROVAL.getValue())
-                .stream()
-                .map(this::toData)
-                .toList();
+        return commandSourceRepository.findPendingByLoanId(loanId, CommandProcessingResultType.AWAITING_APPROVAL.getValue()).stream()
+                .map(this::toData).toList();
     }
 
     @Override
     public List<PendingMakerCheckerData> retrievePendingByClientId(final Long clientId) {
-        return commandSourceRepository
-                .findPendingByClientId(clientId, CommandProcessingResultType.AWAITING_APPROVAL.getValue())
-                .stream()
-                .map(this::toData)
-                .toList();
+        return commandSourceRepository.findPendingByClientId(clientId, CommandProcessingResultType.AWAITING_APPROVAL.getValue()).stream()
+                .map(this::toData).toList();
     }
 
     @Override
     public List<PendingMakerCheckerData> retrievePendingBySavingsId(final Long savingsId) {
-        return commandSourceRepository
-                .findPendingBySavingsId(savingsId, CommandProcessingResultType.AWAITING_APPROVAL.getValue())
-                .stream()
-                .map(this::toData)
-                .toList();
+        return commandSourceRepository.findPendingBySavingsId(savingsId, CommandProcessingResultType.AWAITING_APPROVAL.getValue()).stream()
+                .map(this::toData).toList();
     }
 
     private PendingMakerCheckerData toData(final CommandSource cs) {
         final String makerUsername = cs.getMaker() != null ? cs.getMaker().getUsername() : null;
-        return PendingMakerCheckerData.builder()
-                .id(cs.getId())
-                .actionName(cs.getActionName())
-                .entityName(cs.getEntityName())
-                .permissionCode(cs.getPermissionCode())
-                .makerUsername(makerUsername)
-                .madeOnDate(cs.getMadeOnDate())
-                .build();
+        return PendingMakerCheckerData.builder().id(cs.getId()).actionName(cs.getActionName()).entityName(cs.getEntityName())
+                .permissionCode(cs.getPermissionCode()).makerUsername(makerUsername).madeOnDate(cs.getMadeOnDate()).build();
     }
 }
