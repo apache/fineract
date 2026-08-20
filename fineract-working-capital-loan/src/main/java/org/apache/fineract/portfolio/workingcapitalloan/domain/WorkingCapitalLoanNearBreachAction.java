@@ -27,10 +27,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Getter
 @Setter
@@ -57,6 +59,9 @@ public class WorkingCapitalLoanNearBreachAction extends AbstractAuditableWithUTC
     @Column(name = "frequency_type")
     private WorkingCapitalLoanPeriodFrequencyType frequencyType;
 
+    @Column(name = "submitted_on_date")
+    private LocalDate submittedOnDate;
+
     public static WorkingCapitalLoanNearBreachAction create(final WorkingCapitalLoan loan, final NearBreachActionType action,
             final BigDecimal threshold, final Integer frequency, final WorkingCapitalLoanPeriodFrequencyType frequencyType) {
         final WorkingCapitalLoanNearBreachAction entity = new WorkingCapitalLoanNearBreachAction();
@@ -65,6 +70,7 @@ public class WorkingCapitalLoanNearBreachAction extends AbstractAuditableWithUTC
         entity.threshold = threshold;
         entity.frequency = frequency;
         entity.frequencyType = frequencyType;
+        entity.submittedOnDate = DateUtils.getBusinessLocalDate();
         return entity;
     }
 }

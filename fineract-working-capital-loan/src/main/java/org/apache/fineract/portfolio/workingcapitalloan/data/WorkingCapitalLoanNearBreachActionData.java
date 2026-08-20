@@ -18,11 +18,15 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.data;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.NearBreachActionType;
 
 public record WorkingCapitalLoanNearBreachActionData(Long id, Long loanId, NearBreachActionType action, BigDecimal threshold,
-        Integer frequency, String frequencyType, OffsetDateTime createdDate) {
+        Integer frequency, String frequencyType,
+        @Schema(deprecated = true, description = "Audit/system timestamp. Prefer submittedOnDate for the booking business/tenant date.") //
+        OffsetDateTime createdDate, LocalDate submittedOnDate) {
 
 }
