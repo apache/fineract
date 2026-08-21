@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -65,7 +66,7 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
     private static final DateTimeFormatter API_DATE = DateTimeFormatter.ofPattern("dd MMMM yyyy");
     private static final String DISCOUNT_FEE_CODE = "loanTransactionType.discountFee";
     private static final String DISCOUNT_FEE_AMORTIZATION_CODE = "loanTransactionType.discountFeeAmortization";
-    private static final String TRANSACTION_REVERSED_EVENT = "WorkingCapitalLoanTransactionReversedBusinessEvent";
+    private static final String TRANSACTION_REVERSED_EVENT = "WorkingCapitalLoanAdjustTransactionBusinessEvent";
     private static final String DISCOUNT_FEE_AMORTIZATION_EVENT = "WorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEvent";
 
     // Fixed simulated calendar used by every test in this class (never a computed "now"): loans are disbursed on
@@ -521,11 +522,12 @@ public class WorkingCapitalLoanChargeOffAccountingTest extends FeignIntegrationT
                     "Expected the final discount fee amortization to be reversed once the backdated adjustment zeroes the pool");
 
             final List<ExternalEventResponse> events = externalEventHelper.getExternalEventsByType(TRANSACTION_REVERSED_EVENT);
-            final ExternalEventResponse event = events.stream().filter(e -> amortTxnId.equals(toLong(e.getPayLoad().get("id")))).findFirst()
+            final ExternalEventResponse event = events.stream()
+                    .filter(e -> amortTxnId.equals(toLong(((HashMap) e.getPayLoad().get("transactionToAdjust")).get("id")))).findFirst()
                     .orElse(null);
             assertNotNull(event,
                     "Expected a " + TRANSACTION_REVERSED_EVENT + " for the reversed final amortization transaction " + amortTxnId);
-            assertEquals(Boolean.TRUE, event.getPayLoad().get("reversed"));
+            assertEquals(Boolean.TRUE, ((HashMap) event.getPayLoad().get("transactionToAdjust")).get("reversed"));
         } finally {
             externalEventHelper.disableBusinessEvent(TRANSACTION_REVERSED_EVENT);
         }

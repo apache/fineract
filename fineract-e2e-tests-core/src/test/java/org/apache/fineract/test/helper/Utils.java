@@ -21,6 +21,7 @@ package org.apache.fineract.test.helper;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class Utils {
@@ -95,5 +96,19 @@ public final class Utils {
             }
             return result;
         }
+    }
+
+    public static boolean isEqualLists(List a, List b) {
+        if (a.size() != b.size()) {
+            return false;
+        }
+
+        List copyB = new ArrayList(b);
+        for (Object obj : a) {
+            if (!copyB.remove(obj)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
