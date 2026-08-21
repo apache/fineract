@@ -267,5 +267,8 @@
     <include file="parts/0245_standardize_email_address_column_length.xml" relativeToChangelogFile="true" />
     <include file="parts/0246_drop_request_audit_table.xml" relativeToChangelogFile="true" />
     <include file="parts/0247_add_payment_detail_search_indexes.xml" relativeToChangelogFile="true" />
-    <include file="parts/0248_spring_batch_6_upgrade.xml" relativeToChangelogFile="true" />
+    <include file="parts/0248_add_dates_to_client_identifier.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0249_add_issuance_and_expiry_dates_to_m_document.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0250_modify_note_length.xml" relativeToChangelogFile="true" />
+    <include file="parts/0251_spring_batch_6_upgrade.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

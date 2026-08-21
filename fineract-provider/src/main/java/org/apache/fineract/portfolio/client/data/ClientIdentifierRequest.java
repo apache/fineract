@@ -43,5 +43,13 @@ public class ClientIdentifierRequest implements Serializable {
     public String description;
     @Schema(example = "Active")
     public String status;
+    @Schema(example = "01 January 2024")
+    public String issuanceDate;
+    @Schema(example = "01 January 2034")
+    public String expiryDate;
+    @Schema(example = "dd MMMM yyyy")
+    public String dateFormat;
+    @Schema(example = "en")
+    public String locale;
 
 }

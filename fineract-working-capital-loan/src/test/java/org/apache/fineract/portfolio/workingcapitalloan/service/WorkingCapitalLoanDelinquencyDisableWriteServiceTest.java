@@ -36,6 +36,7 @@ import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
@@ -73,6 +74,8 @@ class WorkingCapitalLoanDelinquencyDisableWriteServiceTest {
     private WorkingCapitalLoanDelinquencyRangeScheduleService rangeScheduleService;
     @Mock
     private WorkingCapitalLoanDelinquencyClassificationService classificationService;
+    @Mock
+    private BusinessEventNotifierService businessEventNotifierService;
     @Mock
     private WorkingCapitalLoan loan;
     @Mock

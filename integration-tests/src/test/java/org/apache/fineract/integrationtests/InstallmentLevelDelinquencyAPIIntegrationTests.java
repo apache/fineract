@@ -25,34 +25,37 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.fineract.client.models.BusinessDateUpdateRequest;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanInstallmentLevelDelinquency;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanIntegrationTest {
+@Order(1)
+public class InstallmentLevelDelinquencyAPIIntegrationTests extends FeignLoanTestBase {
+
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void testInstallmentLevelDelinquencyFourRangesInTheBucket() {
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create DelinquencyBuckets
-            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //
@@ -61,13 +64,13 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
             loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             loanProductsRequest.setDelinquencyBucketId(delinquencyBucketId.longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long productId = createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, productId, "01 January 2023", 1250.0, 4);
 
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1250), "01 January 2023");
@@ -112,23 +115,23 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
     public void testInstallmentLevelDelinquencyTwoRangesInTheBucket() {
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create DelinquencyBuckets
-            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 60), //
                     Pair.of(61, null)//
             ));
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
             loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             loanProductsRequest.setDelinquencyBucketId(delinquencyBucketId.longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long productId = createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, productId, "01 January 2023", 1250.0, 4);
 
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1250), "01 January 2023");
@@ -162,23 +165,23 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
     public void testInstallmentLevelDelinquencyIsTurnedOff() {
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create DelinquencyBuckets
-            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 60), //
                     Pair.of(61, null)//
             ));
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
             loanProductsRequest.setEnableInstallmentLevelDelinquency(false);
             loanProductsRequest.setDelinquencyBucketId(delinquencyBucketId.longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long productId = createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, productId, "01 January 2023", 1250.0, 4);
 
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1250), "01 January 2023");
@@ -201,23 +204,23 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
     public void testInstallmentLevelDelinquencyUpdatedWhenCOBIsExecuted() {
         runAt("01 February 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create DelinquencyBuckets
-            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 1), //
                     Pair.of(2, null)//
             ));
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
             loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             loanProductsRequest.setDelinquencyBucketId(delinquencyBucketId.longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long productId = createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, productId, "01 January 2023", 1250.0, 4);
 
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1250), "01 January 2023");
@@ -247,10 +250,10 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
     public void testInstallmentLevelDelinquencyTurnedOnForProductAndOffForLoan() {
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create DelinquencyBuckets
-            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //
@@ -259,14 +262,14 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
             // set installment level delinquency as true
             loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             loanProductsRequest.setDelinquencyBucketId(delinquencyBucketId.longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long productId = createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan, turn loan level installment delinquency as false
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4,
+            Long loanId = applyAndApproveLoan(clientId, productId, "01 January 2023", 1250.0, 4,
                     req -> req.setEnableInstallmentLevelDelinquency(false));
 
             // Disburse Loan
@@ -292,10 +295,10 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
     public void testInstallmentLevelDelinquencyTurnedOffForProductAndOnForLoan() {
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create DelinquencyBuckets
-            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //
@@ -304,14 +307,14 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
             // set installment level delinquency as false
             loanProductsRequest.setEnableInstallmentLevelDelinquency(false);
             loanProductsRequest.setDelinquencyBucketId(delinquencyBucketId.longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long productId = createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan, turn loan level installment delinquency as true
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4,
+            Long loanId = applyAndApproveLoan(clientId, productId, "01 January 2023", 1250.0, 4,
                     req -> req.setEnableInstallmentLevelDelinquency(true));
 
             // Disburse Loan
@@ -341,10 +344,10 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
     public void testLoanInheritsInstallmentLevelSettingFromLoanProductIfNotSet() {
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create DelinquencyBuckets
-            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //
@@ -353,14 +356,14 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
             // set installment level delinquency as true
             loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
             loanProductsRequest.setDelinquencyBucketId(delinquencyBucketId.longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long productId = createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan, do not set installment level delinquency
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, productId, "01 January 2023", 1250.0, 4);
 
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1250), "01 January 2023");
@@ -390,17 +393,17 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
+            Long productId = createLoanProduct(loanProductsRequest);
 
             // Apply For Loan with installment level delinquency setting
             CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
-                    () -> loanTransactionHelper.applyLoan(applyLoanRequest(clientId, loanProductResponse.getResourceId(), "01 January 2023",
-                            1250.0, 4, req -> req.setEnableInstallmentLevelDelinquency(true))));
+                    () -> applyForLoan(applyLoanRequest(clientId, productId, "01 January 2023", 1250.0, 4,
+                            req -> req.setEnableInstallmentLevelDelinquency(true))));
 
             Assertions.assertTrue(callFailedRuntimeException.getMessage().contains(
                     "Installment level delinquency cannot be enabled for a loan if Delinquency bucket is not configured for loan product"));
@@ -413,10 +416,10 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
     public void testLoanInstallmentLevelSettingModification() {
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create DelinquencyBuckets
-            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //
@@ -425,32 +428,30 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
 
             // set delinquency bucket
             loanProductsRequest.setDelinquencyBucketId(delinquencyBucketId.longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long productId = createLoanProduct(loanProductsRequest);
 
             // Apply for loan
-            Long loanId = loanTransactionHelper
-                    .applyLoan(applyLoanRequest(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4))
-                    .getResourceId();
+            Long loanId = applyForLoan(applyLoanRequest(clientId, productId, "01 January 2023", 1250.0, 4));
 
             // verify installment level delinquency setting for loan
-            GetLoansLoanIdResponse loanResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
+            GetLoansLoanIdResponse loanResponse = getLoanDetails(loanId);
             assertThat(loanResponse.getEnableInstallmentLevelDelinquency()).isFalse();
 
             // Modify installment level delinquency as true for loan
-            PutLoansLoanIdResponse loansModificationResponse = loanTransactionHelper.modifyApplicationForLoan(loanId, "modify",
-                    new PutLoansLoanIdRequest().clientId(clientId).productId(loanProductResponse.getResourceId()).loanType("individual")
+            PutLoansLoanIdResponse loansModificationResponse = modifyLoanApplication(loanId, "modify",
+                    new PutLoansLoanIdRequest().clientId(clientId).productId(productId).loanType("individual")
                             .enableInstallmentLevelDelinquency(true).locale("en").dateFormat(DATETIME_PATTERN));
 
             // verify installment level delinquency setting for loan
-            loanResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
+            loanResponse = getLoanDetails(loanId);
             assertThat(loanResponse.getEnableInstallmentLevelDelinquency()).isTrue();
 
             // Approve Loan
-            loanTransactionHelper.approveLoan(loanId, approveLoanRequest(1250.0, "01 January 2023"));
+            approveLoan(loanId, approveLoanRequest(1250.0, "01 January 2023"));
 
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1250), "01 January 2023");
@@ -481,24 +482,20 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product without delinquency bucket
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
+            Long productId = createLoanProduct(loanProductsRequest);
 
             // Apply for loan
-            Long loanId = loanTransactionHelper
-                    .applyLoan(applyLoanRequest(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4))
-                    .getResourceId();
+            Long loanId = applyForLoan(applyLoanRequest(clientId, productId, "01 January 2023", 1250.0, 4));
 
             // Modify Loan with installment level delinquency setting
             CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
-                    () -> loanTransactionHelper.modifyApplicationForLoan(loanId, "modify",
-                            new PutLoansLoanIdRequest().clientId(clientId).productId(loanProductResponse.getResourceId())
-                                    .loanType("individual").enableInstallmentLevelDelinquency(true).locale("en")
-                                    .dateFormat(DATETIME_PATTERN)));
+                    () -> modifyLoanApplication(loanId, "modify", new PutLoansLoanIdRequest().clientId(clientId).productId(productId)
+                            .loanType("individual").enableInstallmentLevelDelinquency(true).locale("en").dateFormat(DATETIME_PATTERN)));
 
             Assertions.assertTrue(callFailedRuntimeException.getMessage().contains(
                     "Installment level delinquency cannot be enabled for a loan if Delinquency bucket is not configured for loan product"));
@@ -510,10 +507,10 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
     public void testCalculateRepaymentScheduleWorksWithInstallmentLevelDelinquencySetting() {
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create DelinquencyBuckets
-            Long delinquencyBucketId = DelinquencyBucketsHelper.createBucket(List.of(//
+            Long delinquencyBucketId = delinquencyHelper.createBucket(List.of(//
                     Pair.of(1, 10), //
                     Pair.of(11, 30), //
                     Pair.of(31, 60), //
@@ -522,17 +519,16 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
 
             // set installment level delinquency as false
             loanProductsRequest.setEnableInstallmentLevelDelinquency(false);
             loanProductsRequest.setDelinquencyBucketId(delinquencyBucketId.longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long productId = createLoanProduct(loanProductsRequest);
 
             // run calculateLoanSchedule command works, while Applying for loan with installment level delinquency
-            PostLoansResponse loansResponse = loanTransactionHelper
-                    .calculateRepaymentScheduleForApplyLoan(applyLoanRequest(clientId, loanProductResponse.getResourceId(),
-                            "01 January 2023", 1250.0, 4, req -> req.setEnableInstallmentLevelDelinquency(true)), "calculateLoanSchedule");
+            PostLoansResponse loansResponse = calculateLoanSchedule(applyLoanRequest(clientId, productId, "01 January 2023", 1250.0, 4,
+                    req -> req.setEnableInstallmentLevelDelinquency(true)));
 
             assertThat(loansResponse).isNotNull();
             assertNotNull(loansResponse.getPeriods());
@@ -547,17 +543,17 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product without delinquency bucket
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
             // set installment level delinquency as true
             loanProductsRequest.setEnableInstallmentLevelDelinquency(true);
 
             // Create loan product with installment level delinquency setting
             CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
-                    () -> loanProductHelper.createLoanProduct(loanProductsRequest));
+                    () -> createLoanProduct(loanProductsRequest));
 
             Assertions.assertTrue(callFailedRuntimeException.getMessage()
                     .contains("Installment level delinquency cannot be enabled if Delinquency bucket is not configured for loan product"));
@@ -571,17 +567,17 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
         runAt("31 May 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product without delinquency bucket
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            Long productId = createLoanProduct(loanProductsRequest);
 
             // Update loan product with installment level delinquency setting
             CallFailedRuntimeException callFailedRuntimeException = Assertions.assertThrows(CallFailedRuntimeException.class,
-                    () -> loanProductHelper.updateLoanProductById(loanProductResponse.getResourceId(),
+                    () -> updateLoanProduct(productId,
                             new PutLoanProductsProductIdRequest().enableInstallmentLevelDelinquency(true).locale("en")));
 
             Assertions.assertTrue(callFailedRuntimeException.getMessage()
@@ -592,9 +588,8 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
     }
 
     private void updateBusinessDateAndExecuteCOBJob(String date) {
-        businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                .date(date).dateFormat(DATETIME_PATTERN).locale("en"));
-        SchedulerJobHelper.executeAndAwaitJob("Loan COB");
+        updateBusinessDate(date);
+        schedulerHelper.executeAndAwaitJob("Loan COB");
     }
 
     @AllArgsConstructor
@@ -611,7 +606,7 @@ public class InstallmentLevelDelinquencyAPIIntegrationTests extends BaseLoanInte
 
     private void verifyDelinquency(Long loanId, Integer loanLevelDelinquentDays, String loanLevelDelinquentAmount,
             DelinquencyData... expectedInstallmentLevelDelinquencyData) {
-        GetLoansLoanIdResponse loan = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
+        GetLoansLoanIdResponse loan = getLoanDetails(loanId);
         assertThat(loan.getDelinquent()).isNotNull();
         List<GetLoansLoanIdLoanInstallmentLevelDelinquency> installmentLevelDelinquency = loan.getDelinquent()
                 .getInstallmentLevelDelinquency();

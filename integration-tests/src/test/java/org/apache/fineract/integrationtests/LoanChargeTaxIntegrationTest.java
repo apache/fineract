@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.GetChargesResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
@@ -40,13 +39,13 @@ import org.apache.fineract.client.models.PostTaxesComponentsResponse;
 import org.apache.fineract.client.models.PostTaxesGroupRequest;
 import org.apache.fineract.client.models.PostTaxesGroupResponse;
 import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.TaxComponentHelper;
-import org.apache.fineract.integrationtests.common.TaxGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignTaxComponentHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignTaxGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.PeriodicAccrualAccountingHelper;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
@@ -55,14 +54,17 @@ import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-@Slf4j
 @ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
+public class LoanChargeTaxIntegrationTest extends FeignLoanTestBase {
 
     private static final String DATE_FORMAT = "dd MMMM yyyy";
     private static final String LOAN_DATE = "01 January 2023";
     private static final String DUE_DATE = "15 January 2023";
     private static final String TAX_START_DATE = "01 January 2013";
+
+    private final FeignTaxComponentHelper taxComponentHelper = new FeignTaxComponentHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
+    private final FeignTaxGroupHelper taxGroupHelper = new FeignTaxGroupHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     // -----------------------------------------------------------------------
     // 1. TaxGroup setup helpers
@@ -74,8 +76,8 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
      */
     private PostTaxesComponentsResponse createTaxComponent(float percentage) {
         PostTaxesComponentsRequest request = new PostTaxesComponentsRequest().name(Utils.uniqueRandomStringGenerator("TAX_COMP_", 6))
-                .percentage(percentage).startDate(TAX_START_DATE).dateFormat(DATE_FORMAT).locale(LOCALE);
-        PostTaxesComponentsResponse response = TaxComponentHelper.createTaxComponent(request);
+                .percentage(percentage).startDate(TAX_START_DATE).dateFormat(DATE_FORMAT).locale(LoanTestData.LOCALE);
+        PostTaxesComponentsResponse response = taxComponentHelper.createTaxComponent(request);
         assertNotNull(response);
         assertNotNull(response.getResourceId());
         return response;
@@ -90,8 +92,8 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
             components.add(new PostTaxesGroupTaxComponents().taxComponentId(id).startDate(TAX_START_DATE));
         }
         PostTaxesGroupRequest request = new PostTaxesGroupRequest().name(Utils.uniqueRandomStringGenerator("TAX_GRP_", 6))
-                .taxComponents(components).dateFormat(DATE_FORMAT).locale(LOCALE);
-        PostTaxesGroupResponse response = TaxGroupHelper.createTaxGroup(request);
+                .taxComponents(components).dateFormat(DATE_FORMAT).locale(LoanTestData.LOCALE);
+        PostTaxesGroupResponse response = taxGroupHelper.createTaxGroup(request);
         assertNotNull(response);
         assertNotNull(response.getResourceId());
         return response;
@@ -103,9 +105,9 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
      */
     private PostTaxesComponentsResponse createTaxComponent(float percentage, Long creditAccountId) {
         PostTaxesComponentsRequest request = new PostTaxesComponentsRequest().name(Utils.uniqueRandomStringGenerator("TAX_COMP_", 6))
-                .percentage(percentage).startDate(TAX_START_DATE).dateFormat(DATE_FORMAT).locale(LOCALE).creditAccountId(creditAccountId)
-                .creditAccountType(2);
-        PostTaxesComponentsResponse response = TaxComponentHelper.createTaxComponent(request);
+                .percentage(percentage).startDate(TAX_START_DATE).dateFormat(DATE_FORMAT).locale(LoanTestData.LOCALE)
+                .creditAccountId(creditAccountId).creditAccountType(2);
+        PostTaxesComponentsResponse response = taxComponentHelper.createTaxComponent(request);
         assertNotNull(response);
         assertNotNull(response.getResourceId());
         return response;
@@ -130,17 +132,17 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
                 .allowVariableInstallments(false).canUseForTopup(false).isInterestRecalculationEnabled(false).holdGuaranteeFunds(false)
                 .multiDisburseLoan(true).maxTrancheCount(10).outstandingLoanBalance(10000.0).charges(Collections.emptyList())
                 .accountingRule(2) // Cash-based
-                .fundSourceAccountId(fundSource.getAccountID().longValue())
-                .loanPortfolioAccountId(loansReceivableAccount.getAccountID().longValue())
-                .transfersInSuspenseAccountId(suspenseAccount.getAccountID().longValue())
-                .interestOnLoanAccountId(interestIncomeAccount.getAccountID().longValue())
-                .incomeFromFeeAccountId(feeIncomeAccount.getAccountID().longValue())
-                .incomeFromPenaltyAccountId(penaltyIncomeAccount.getAccountID().longValue())
-                .incomeFromRecoveryAccountId(recoveriesAccount.getAccountID().longValue())
-                .writeOffAccountId(writtenOffAccount.getAccountID().longValue())
-                .overpaymentLiabilityAccountId(overpaymentAccount.getAccountID().longValue()).dateFormat(DATETIME_PATTERN).locale("en_GB")
-                .disallowExpectedDisbursements(true).allowApprovedDisbursedAmountsOverApplied(true).overAppliedCalculationType("percentage")
-                .overAppliedNumber(50);
+                .fundSourceAccountId(getAccounts().getFundSource().getAccountID().longValue())
+                .loanPortfolioAccountId(getAccounts().getLoansReceivableAccount().getAccountID().longValue())
+                .transfersInSuspenseAccountId(getAccounts().getSuspenseAccount().getAccountID().longValue())
+                .interestOnLoanAccountId(getAccounts().getInterestIncomeAccount().getAccountID().longValue())
+                .incomeFromFeeAccountId(getAccounts().getFeeIncomeAccount().getAccountID().longValue())
+                .incomeFromPenaltyAccountId(getAccounts().getPenaltyIncomeAccount().getAccountID().longValue())
+                .incomeFromRecoveryAccountId(getAccounts().getRecoveriesAccount().getAccountID().longValue())
+                .writeOffAccountId(getAccounts().getWrittenOffAccount().getAccountID().longValue())
+                .overpaymentLiabilityAccountId(getAccounts().getOverpaymentAccount().getAccountID().longValue())
+                .dateFormat(DATETIME_PATTERN).locale("en_GB").disallowExpectedDisbursements(true)
+                .allowApprovedDisbursedAmountsOverApplied(true).overAppliedCalculationType("percentage").overAppliedNumber(50);
     }
 
     /**
@@ -148,15 +150,14 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
      * for {@code taxGroupId} creates a charge with no tax.
      */
     private PostChargesResponse createFlatLoanCharge(double baseAmount, Long taxGroupId) {
-        ChargesHelper chargesHelper = new ChargesHelper();
         ChargeRequest request = new ChargeRequest().penalty(false).amount(baseAmount)
                 .chargeCalculationType(ChargeCalculationType.FLAT.getValue()).chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE.getValue())
                 .chargePaymentMode(ChargePaymentMode.REGULAR.getValue()).currencyCode("USD")
-                .name(Utils.uniqueRandomStringGenerator("CHARGE_", 6)).chargeAppliesTo(1).locale(LOCALE).active(true);
+                .name(Utils.uniqueRandomStringGenerator("CHARGE_", 6)).chargeAppliesTo(1).locale(LoanTestData.LOCALE).active(true);
         if (taxGroupId != null) {
             request.taxGroupId(taxGroupId);
         }
-        PostChargesResponse response = chargesHelper.createCharges(request);
+        PostChargesResponse response = chargesHelper.createCharge(request);
         assertNotNull(response);
         assertNotNull(response.getResourceId());
         return response;
@@ -185,22 +186,21 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
             PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
             Long chargeDefinitionId = chargeResponse.getResourceId();
 
+            Long clientId = createClient();
             // Given – a disbursed loan
-            Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            Long loanProductId = loanProductHelper.createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct())
-                    .getResourceId();
+            Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct());
             Long loanId = applyAndApproveLoan(clientId, loanProductId, LOAN_DATE, 1000.0);
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), LOAN_DATE);
 
             // When – the taxed charge is added to the loan
-            PostLoansLoanIdChargesResponse addResult = loanTransactionHelper.addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest()
-                    .chargeId(chargeDefinitionId).amount(100.0).dueDate(DUE_DATE).dateFormat(DATE_FORMAT).locale(LOCALE));
+            PostLoansLoanIdChargesResponse addResult = addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest()
+                    .chargeId(chargeDefinitionId).amount(100.0).dueDate(DUE_DATE).dateFormat(DATE_FORMAT).locale(LoanTestData.LOCALE));
             assertNotNull(addResult);
             Long loanChargeId = addResult.getResourceId();
             assertNotNull(loanChargeId);
 
             // Then – amount stays at 100; tax (10) is stored separately as taxAmount
-            GetLoansLoanIdChargesChargeIdResponse loanCharge = loanTransactionHelper.getLoanCharge(loanId, loanChargeId);
+            GetLoansLoanIdChargesChargeIdResponse loanCharge = getLoanCharge(loanId, loanChargeId);
             assertNotNull(loanCharge);
             assertEquals(100.0, loanCharge.getAmount(), 0.01, "Charge amount must remain unchanged; tax stored separately as taxAmount=10");
             assertEquals(100.0, loanCharge.getAmountOutstanding(), 0.01,
@@ -226,19 +226,19 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
 
             PostChargesResponse chargeResponse = createFlatLoanCharge(200.0, taxGroup.getResourceId());
 
-            Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            Long loanProductId = loanProductHelper.createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct())
-                    .getResourceId();
+            Long clientId = createClient();
+            Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct());
             Long loanId = applyAndApproveLoan(clientId, loanProductId, LOAN_DATE, 1000.0);
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), LOAN_DATE);
 
             // When
-            PostLoansLoanIdChargesResponse addResult = loanTransactionHelper.addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest()
-                    .chargeId(chargeResponse.getResourceId()).amount(200.0).dueDate(DUE_DATE).dateFormat(DATE_FORMAT).locale(LOCALE));
+            PostLoansLoanIdChargesResponse addResult = addChargesForLoan(loanId,
+                    new PostLoansLoanIdChargesRequest().chargeId(chargeResponse.getResourceId()).amount(200.0).dueDate(DUE_DATE)
+                            .dateFormat(DATE_FORMAT).locale(LoanTestData.LOCALE));
             Long loanChargeId = addResult.getResourceId();
 
             // Then – amount stays 200; taxes (20+10=30) stored separately as taxAmount
-            GetLoansLoanIdChargesChargeIdResponse loanCharge = loanTransactionHelper.getLoanCharge(loanId, loanChargeId);
+            GetLoansLoanIdChargesChargeIdResponse loanCharge = getLoanCharge(loanId, loanChargeId);
             assertEquals(200.0, loanCharge.getAmount(), 0.01,
                     "Charge amount must remain 200; taxes (20+10=30) stored separately as taxAmount");
         });
@@ -257,19 +257,19 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
             // Given – charge with NO tax group
             PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, null);
 
-            Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            Long loanProductId = loanProductHelper.createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct())
-                    .getResourceId();
+            Long clientId = createClient();
+            Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct());
             Long loanId = applyAndApproveLoan(clientId, loanProductId, LOAN_DATE, 1000.0);
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), LOAN_DATE);
 
             // When
-            PostLoansLoanIdChargesResponse addResult = loanTransactionHelper.addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest()
-                    .chargeId(chargeResponse.getResourceId()).amount(100.0).dueDate(DUE_DATE).dateFormat(DATE_FORMAT).locale(LOCALE));
+            PostLoansLoanIdChargesResponse addResult = addChargesForLoan(loanId,
+                    new PostLoansLoanIdChargesRequest().chargeId(chargeResponse.getResourceId()).amount(100.0).dueDate(DUE_DATE)
+                            .dateFormat(DATE_FORMAT).locale(LoanTestData.LOCALE));
             Long loanChargeId = addResult.getResourceId();
 
             // Then – amount must stay at 100 (no tax)
-            GetLoansLoanIdChargesChargeIdResponse loanCharge = loanTransactionHelper.getLoanCharge(loanId, loanChargeId);
+            GetLoansLoanIdChargesChargeIdResponse loanCharge = getLoanCharge(loanId, loanChargeId);
             assertEquals(100.0, loanCharge.getAmount(), 0.01, "Charge without tax group must keep original amount");
         });
     }
@@ -292,8 +292,7 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
         PostChargesResponse chargeResponse = createFlatLoanCharge(50.0, taxGroup.getResourceId());
 
         // Then – retrieve and verify taxGroup is set
-        ChargesHelper chargesHelper = new ChargesHelper();
-        GetChargesResponse chargeData = chargesHelper.retrieveCharge(chargeResponse.getResourceId());
+        GetChargesResponse chargeData = chargesHelper.getCharge(chargeResponse.getResourceId());
         assertNotNull(chargeData);
         assertNotNull(chargeData.getTaxGroup(), "Charge must expose taxGroup in GET response");
         assertEquals(taxGroup.getResourceId(), chargeData.getTaxGroup().getId(),
@@ -315,7 +314,7 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
         PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
 
         // When
-        GetTaxesGroupResponse retrieved = TaxGroupHelper.retrieveTaxGroup(taxGroup.getResourceId());
+        GetTaxesGroupResponse retrieved = taxGroupHelper.retrieveTaxGroup(taxGroup.getResourceId());
 
         // Then
         assertNotNull(retrieved);
@@ -340,7 +339,7 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
         PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
 
         // When
-        List<GetTaxesGroupResponse> allGroups = TaxGroupHelper.retrieveAllTaxGroups();
+        List<GetTaxesGroupResponse> allGroups = taxGroupHelper.retrieveAllTaxGroups();
 
         // Then
         assertNotNull(allGroups);
@@ -365,10 +364,9 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
             PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
             Long chargeDefinitionId = chargeResponse.getResourceId();
 
+            Long clientId = createClient();
             // Given – two separate loans
-            Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            Long loanProductId = loanProductHelper.createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct())
-                    .getResourceId();
+            Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct());
 
             Long loanId1 = applyAndApproveLoan(clientId, loanProductId, LOAN_DATE, 1000.0);
             disburseLoan(loanId1, BigDecimal.valueOf(1000.0), LOAN_DATE);
@@ -377,14 +375,14 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
             disburseLoan(loanId2, BigDecimal.valueOf(1000.0), LOAN_DATE);
 
             // When – the same charge is added to both loans
-            PostLoansLoanIdChargesResponse add1 = loanTransactionHelper.addChargesForLoan(loanId1, new PostLoansLoanIdChargesRequest()
-                    .chargeId(chargeDefinitionId).amount(100.0).dueDate(DUE_DATE).dateFormat(DATE_FORMAT).locale(LOCALE));
-            PostLoansLoanIdChargesResponse add2 = loanTransactionHelper.addChargesForLoan(loanId2, new PostLoansLoanIdChargesRequest()
-                    .chargeId(chargeDefinitionId).amount(100.0).dueDate(DUE_DATE).dateFormat(DATE_FORMAT).locale(LOCALE));
+            PostLoansLoanIdChargesResponse add1 = addChargesForLoan(loanId1, new PostLoansLoanIdChargesRequest()
+                    .chargeId(chargeDefinitionId).amount(100.0).dueDate(DUE_DATE).dateFormat(DATE_FORMAT).locale(LoanTestData.LOCALE));
+            PostLoansLoanIdChargesResponse add2 = addChargesForLoan(loanId2, new PostLoansLoanIdChargesRequest()
+                    .chargeId(chargeDefinitionId).amount(100.0).dueDate(DUE_DATE).dateFormat(DATE_FORMAT).locale(LoanTestData.LOCALE));
 
+            GetLoansLoanIdChargesChargeIdResponse charge1 = getLoanCharge(loanId1, add1.getResourceId());
             // Then – both loan charges must independently show the original base amount (tax stored separately)
-            GetLoansLoanIdChargesChargeIdResponse charge1 = loanTransactionHelper.getLoanCharge(loanId1, add1.getResourceId());
-            GetLoansLoanIdChargesChargeIdResponse charge2 = loanTransactionHelper.getLoanCharge(loanId2, add2.getResourceId());
+            GetLoansLoanIdChargesChargeIdResponse charge2 = getLoanCharge(loanId2, add2.getResourceId());
 
             assertEquals(100.0, charge1.getAmount(), 0.01, "Loan 1 charge amount must remain 100; tax stored separately");
             assertEquals(100.0, charge2.getAmount(), 0.01, "Loan 2 charge amount must remain 100; tax stored separately");
@@ -421,17 +419,16 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
             // Given – flat charge of 100 with 10 % tax, due on the loan start date
             PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
 
+            Long clientId = createClient();
             // Given – a cash-based loan (principal = 1000, no interest)
-            Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            Long loanProductId = loanProductHelper.createLoanProduct(createCashBasedLoanProduct() //
-                    .multiDisburseLoan(false).disallowExpectedDisbursements(null) //
-            ).getResourceId();
+            Long loanProductId = createLoanProduct(
+                    createCashBasedLoanProduct().multiDisburseLoan(false).disallowExpectedDisbursements(null));
             Long loanId = applyAndApproveLoan(clientId, loanProductId, LOAN_DATE, 1000.0);
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), LOAN_DATE);
 
             // When – add the taxed charge (due on same date) and repay principal + fee in one transaction
-            loanTransactionHelper.addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeResponse.getResourceId())
-                    .amount(100.0).dueDate(LOAN_DATE).dateFormat(DATE_FORMAT).locale(LOCALE));
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeResponse.getResourceId()).amount(100.0)
+                    .dueDate(LOAN_DATE).dateFormat(DATE_FORMAT).locale(LoanTestData.LOCALE));
 
             addRepaymentForLoan(loanId, 1100.0, LOAN_DATE);
 
@@ -440,10 +437,10 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
             // Repayment: DR Fund Source 1100 / CR Loan Portfolio 1000 / CR Income from Fees 90 / CR Tax Liability 10
             verifyJournalEntries(loanId,
                     // disbursement
-                    debit(loansReceivableAccount, 1000.0), credit(fundSource, 1000.0),
+                    debit(getAccounts().getLoansReceivableAccount(), 1000.0), credit(getAccounts().getFundSource(), 1000.0),
                     // repayment
-                    debit(fundSource, 1100.0), credit(loansReceivableAccount, 1000.0), credit(feeIncomeAccount, 90.0),
-                    credit(taxLiabilityAccount, 10.0));
+                    debit(getAccounts().getFundSource(), 1100.0), credit(getAccounts().getLoansReceivableAccount(), 1000.0),
+                    credit(getAccounts().getFeeIncomeAccount(), 90.0), credit(taxLiabilityAccount, 10.0));
         });
     }
 
@@ -482,18 +479,17 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
             // Given – flat charge of 100 with 10 % tax, due on the loan start date
             PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
 
+            Long clientId = createClient();
             // Given – a periodic-accrual loan (principal = 1000, no interest)
-            Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            Long loanProductId = loanProductHelper.createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct())
-                    .getResourceId();
+            Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct());
             Long loanId = applyAndApproveLoan(clientId, loanProductId, LOAN_DATE, 1000.0);
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), LOAN_DATE);
 
             // When – add the taxed charge and run periodic accrual on the same date
-            loanTransactionHelper.addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeResponse.getResourceId())
-                    .amount(100.0).dueDate(LOAN_DATE).dateFormat(DATE_FORMAT).locale(LOCALE));
+            addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest().chargeId(chargeResponse.getResourceId()).amount(100.0)
+                    .dueDate(LOAN_DATE).dateFormat(DATE_FORMAT).locale(LoanTestData.LOCALE));
 
-            PeriodicAccrualAccountingHelper.runPeriodicAccrualAccounting(LOAN_DATE);
+            runPeriodicAccrualAccounting(LOAN_DATE);
 
             // Make a full repayment (principal 1000 + fee 100 = 1100)
             addRepaymentForLoan(loanId, 1100.0, LOAN_DATE);
@@ -504,11 +500,13 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
             // Repayment: DR Fund Source 1100 / CR Loan Portfolio 1000 / CR Fees Receivable 100
             verifyJournalEntries(loanId,
                     // disbursement
-                    debit(loansReceivableAccount, 1000.0), credit(fundSource, 1000.0),
+                    debit(getAccounts().getLoansReceivableAccount(), 1000.0), credit(getAccounts().getFundSource(), 1000.0),
                     // accrual
-                    debit(feeReceivableAccount, 100.0), credit(feeIncomeAccount, 90.0), credit(taxLiabilityAccount, 10.0),
+                    debit(getAccounts().getFeeReceivableAccount(), 100.0), credit(getAccounts().getFeeIncomeAccount(), 90.0),
+                    credit(taxLiabilityAccount, 10.0),
                     // repayment
-                    debit(fundSource, 1100.0), credit(loansReceivableAccount, 1000.0), credit(feeReceivableAccount, 100.0));
+                    debit(getAccounts().getFundSource(), 1100.0), credit(getAccounts().getLoansReceivableAccount(), 1000.0),
+                    credit(getAccounts().getFeeReceivableAccount(), 100.0));
         });
     }
 
@@ -528,18 +526,18 @@ public class LoanChargeTaxIntegrationTest extends BaseLoanIntegrationTest {
             PostTaxesGroupResponse taxGroup = createTaxGroup(taxComponent.getResourceId());
             PostChargesResponse chargeResponse = createFlatLoanCharge(100.0, taxGroup.getResourceId());
 
-            Long clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-            Long loanProductId = loanProductHelper.createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct())
-                    .getResourceId();
+            Long clientId = createClient();
+            Long loanProductId = createLoanProduct(createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct());
             Long loanId = applyAndApproveLoan(clientId, loanProductId, LOAN_DATE, 1000.0);
             disburseLoan(loanId, BigDecimal.valueOf(1000.0), LOAN_DATE);
 
-            PostLoansLoanIdChargesResponse addResult = loanTransactionHelper.addChargesForLoan(loanId, new PostLoansLoanIdChargesRequest()
-                    .chargeId(chargeResponse.getResourceId()).amount(100.0).dueDate(DUE_DATE).dateFormat(DATE_FORMAT).locale(LOCALE));
+            PostLoansLoanIdChargesResponse addResult = addChargesForLoan(loanId,
+                    new PostLoansLoanIdChargesRequest().chargeId(chargeResponse.getResourceId()).amount(100.0).dueDate(DUE_DATE)
+                            .dateFormat(DATE_FORMAT).locale(LoanTestData.LOCALE));
             Long loanChargeId = addResult.getResourceId();
 
             // When – retrieve the full charge list
-            List<GetLoansLoanIdChargesChargeIdResponse> charges = loanTransactionHelper.getLoanCharges(loanId);
+            List<GetLoansLoanIdChargesChargeIdResponse> charges = getLoanCharges(loanId);
 
             // Then – the taxed charge must appear in the list with the correct amount
             assertNotNull(charges);

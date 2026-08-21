@@ -21,20 +21,16 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanCOBCatchUpHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanCOBCatchUpHelper;
 import org.apache.fineract.integrationtests.support.instancemode.ConfigureInstanceMode;
 import org.apache.fineract.integrationtests.support.instancemode.InstanceModeSupportExtension;
 import org.junit.jupiter.api.AfterEach;
@@ -45,25 +41,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @Order(1)
 @ExtendWith(InstanceModeSupportExtension.class)
-public class LoanCOBCatchUpInstanceModeIntegrationTest extends BaseLoanIntegrationTest {
+public class LoanCOBCatchUpInstanceModeIntegrationTest extends FeignLoanTestBase {
 
-    private LoanCOBCatchUpHelper loanCOBCatchUpHelper;
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
+
+    private FeignLoanCOBCatchUpHelper loanCOBCatchUpHelper;
     private Boolean originalSchedulerStatus;
 
     @BeforeEach
-    public void setup() throws InterruptedException {
-        Utils.initializeRESTAssured();
-        loanCOBCatchUpHelper = new LoanCOBCatchUpHelper();
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        originalSchedulerStatus = SchedulerJobHelper.getSchedulerStatus();
+    public void setup() {
+        loanCOBCatchUpHelper = new FeignLoanCOBCatchUpHelper(FineractFeignClientHelper.getFineractFeignClient());
+        originalSchedulerStatus = schedulerHelper.getSchedulerStatus();
         final LocalDate todaysDate = Utils.getLocalDateOfTenant();
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                 new PutGlobalConfigurationsRequest().enabled(true));
-        BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, todaysDate);
+        updateBusinessDate(todaysDate.format(DATE_FORMATTER));
     }
 
     @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = true)
@@ -77,7 +69,7 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest extends BaseLoanIntegrati
     public void testLoanCOBCatchUpDoesNotWorksWhenNotInBatchManagerMode() {
         CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                 () -> loanCOBCatchUpHelper.executeLoanCOBCatchUp());
-        assertEquals(405, exception.getResponse().code());
+        assertEquals(405, exception.getStatus());
     }
 
     @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = true)
@@ -91,7 +83,7 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest extends BaseLoanIntegrati
     public void testLoanCOBCatchUpGetStatusDoesNotWorksWhenNotInBatchManagerMode() {
         CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                 () -> loanCOBCatchUpHelper.executeGetLoanCatchUpStatus());
-        assertEquals(405, exception.getResponse().code());
+        assertEquals(405, exception.getStatus());
     }
 
     @ConfigureInstanceMode(readEnabled = true, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = true)
@@ -109,23 +101,21 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest extends BaseLoanIntegrati
     @ConfigureInstanceMode(readEnabled = false, writeEnabled = false, batchWorkerEnabled = false, batchManagerEnabled = true)
     @Test
     public void testSchedulerWorksWhenInBatchManagerMode() {
-        SchedulerJobHelper.updateSchedulerStatus(false);
+        schedulerHelper.updateSchedulerStatus(false);
     }
 
     @ConfigureInstanceMode(readEnabled = true, writeEnabled = true, batchWorkerEnabled = true, batchManagerEnabled = false)
     @Test
     public void testSchedulerDoesNotWorksWhenNotInBatchManagerMode() {
-        org.apache.fineract.client.feign.util.CallFailedRuntimeException exception = assertThrows(
-                org.apache.fineract.client.feign.util.CallFailedRuntimeException.class,
-                () -> SchedulerJobHelper.updateSchedulerStatus(false));
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> schedulerHelper.updateSchedulerStatus(false));
         assertEquals(405, exception.getStatus());
     }
 
     @AfterEach
-    public void tearDown() throws InterruptedException {
+    public void tearDown() {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                 new PutGlobalConfigurationsRequest().enabled(false));
-        SchedulerJobHelper.updateSchedulerStatus(originalSchedulerStatus);
+        schedulerHelper.updateSchedulerStatus(originalSchedulerStatus);
     }
-
 }

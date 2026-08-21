@@ -53,6 +53,15 @@
         },
         {
             "default": null,
+            "name": "paidAmount",
+            "doc": "Amount already paid towards the minimum payment of this breach period.",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
             "name": "nearBreach",
             "type": [
                 "null",

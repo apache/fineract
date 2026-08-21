@@ -51,4 +51,8 @@ public class FeignTaxGroupHelper {
     public CallFailedRuntimeException retrieveTaxGroupExpectingError(Long taxGroupId) {
         return fail(() -> fineractClient.taxGroup().retrieveOneTaxGroup(taxGroupId));
     }
+
+    public CallFailedRuntimeException createTaxGroupExpectingError(PostTaxesGroupRequest request) {
+        return fail(() -> fineractClient.taxGroup().createTaxGroup(request));
+    }
 }

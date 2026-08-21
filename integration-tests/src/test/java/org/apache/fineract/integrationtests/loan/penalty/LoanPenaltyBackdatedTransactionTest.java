@@ -21,23 +21,26 @@ package org.apache.fineract.integrationtests.loan.penalty;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.LoanProductChargeData;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
-import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
-import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
-public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest {
+@Order(2)
+public class LoanPenaltyBackdatedTransactionTest extends FeignLoanTestBase {
+
+    // PeriodFrequencyType.DAYS
+    private static final String FEE_FREQUENCY_DAYS = "0";
 
     @BeforeEach
     public void before() {
@@ -57,62 +60,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
         AtomicReference<Long> aLoanId = new AtomicReference<>();
 
         runAt("01 January 2023", () -> {
-            // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-
-            int numberOfRepayments = 3;
-            int repaymentEvery = 4;
-
-            // Create charges
-            double chargeAmount = 1.0;
-            Long chargeId = createOverduePenaltyPercentageCharge(chargeAmount, ChargesHelper.CHARGE_FEE_FREQUENCY_DAYS, 1);
-
-            // Create Loan Product
-            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
-                    .graceOnArrearsAgeing(0).numberOfRepayments(numberOfRepayments) //
-                    .repaymentEvery(repaymentEvery) //
-                    .installmentAmountInMultiplesOf(null) //
-                    .repaymentFrequencyType(RepaymentFrequencyType.DAYS.longValue()) //
-                    .interestType(InterestType.DECLINING_BALANCE)//
-                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY)//
-                    .interestRecalculationCompoundingMethod(InterestRecalculationCompoundingMethod.NONE)//
-                    .rescheduleStrategyMethod(RescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD)//
-                    .isInterestRecalculationEnabled(true)//
-                    .recalculationRestFrequencyInterval(1)//
-                    .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
-                    .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalculation(false)//
-                    .disallowExpectedDisbursements(false)//
-                    .allowApprovedDisbursedAmountsOverApplied(false)//
-                    .overAppliedNumber(null)//
-                    .overAppliedCalculationType(null)//
-                    .multiDisburseLoan(null)//
-                    .charges(List.of(new LoanProductChargeData().id(chargeId)));//
-
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
-
-            // Apply and Approve Loan
-            double amount = 5000.0;
-
-            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
-                    .repaymentEvery(repaymentEvery)//
-                    .loanTermFrequency(numberOfRepayments * repaymentEvery)//
-                    .repaymentFrequencyType(RepaymentFrequencyType.DAYS)//
-                    .loanTermFrequencyType(RepaymentFrequencyType.DAYS)//
-                    .interestType(InterestType.DECLINING_BALANCE)//
-                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);
-
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
-
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                    approveLoanRequest(amount, "01 January 2023"));
-
-            aLoanId.getAndSet(approvedLoanResult.getLoanId());
-            Long loanId = aLoanId.get();
-
-            // disburse Loan
-            disburseLoan(loanId, BigDecimal.valueOf(5000.0), "01 January 2023");
+            Long loanId = createBackdatedPenaltyLoan();
+            aLoanId.set(loanId);
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -123,8 +72,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
         runAt("09 January 2023", () -> {
             Long loanId = aLoanId.get();
             // run accrual posting
-            SchedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
-            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            schedulerHelper.executeAndAwaitJob("Apply penalty to overdue loans");
+            schedulerHelper.executeAndAwaitJob("Add Accrual Transactions");
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -148,8 +97,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
             deactivateOverdueLoanCharges(loanId, "07 January 2023");
 
             // run accrual posting
-            SchedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
-            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            schedulerHelper.executeAndAwaitJob("Apply penalty to overdue loans");
+            schedulerHelper.executeAndAwaitJob("Add Accrual Transactions");
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -167,62 +116,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
         AtomicReference<Long> aLoanId = new AtomicReference<>();
 
         runAt("01 January 2023", () -> {
-            // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-
-            int numberOfRepayments = 3;
-            int repaymentEvery = 4;
-
-            // Create charges
-            double chargeAmount = 1.0;
-            Long chargeId = createOverduePenaltyPercentageCharge(chargeAmount, ChargesHelper.CHARGE_FEE_FREQUENCY_DAYS, 1);
-
-            // Create Loan Product
-            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
-                    .graceOnArrearsAgeing(0).numberOfRepayments(numberOfRepayments) //
-                    .repaymentEvery(repaymentEvery) //
-                    .installmentAmountInMultiplesOf(null) //
-                    .repaymentFrequencyType(RepaymentFrequencyType.DAYS.longValue()) //
-                    .interestType(InterestType.DECLINING_BALANCE)//
-                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY)//
-                    .interestRecalculationCompoundingMethod(InterestRecalculationCompoundingMethod.NONE)//
-                    .rescheduleStrategyMethod(RescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD)//
-                    .isInterestRecalculationEnabled(true)//
-                    .recalculationRestFrequencyInterval(1)//
-                    .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
-                    .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalculation(false)//
-                    .disallowExpectedDisbursements(false)//
-                    .allowApprovedDisbursedAmountsOverApplied(false)//
-                    .overAppliedNumber(null)//
-                    .overAppliedCalculationType(null)//
-                    .multiDisburseLoan(null)//
-                    .charges(List.of(new LoanProductChargeData().id(chargeId)));//
-
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
-
-            // Apply and Approve Loan
-            double amount = 5000.0;
-
-            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
-                    .repaymentEvery(repaymentEvery)//
-                    .loanTermFrequency(numberOfRepayments * repaymentEvery)//
-                    .repaymentFrequencyType(RepaymentFrequencyType.DAYS)//
-                    .loanTermFrequencyType(RepaymentFrequencyType.DAYS)//
-                    .interestType(InterestType.DECLINING_BALANCE)//
-                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);
-
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
-
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                    approveLoanRequest(amount, "01 January 2023"));
-
-            aLoanId.getAndSet(approvedLoanResult.getLoanId());
-            Long loanId = aLoanId.get();
-
-            // disburse Loan
-            disburseLoan(loanId, BigDecimal.valueOf(5000.0), "01 January 2023");
+            Long loanId = createBackdatedPenaltyLoan();
+            aLoanId.set(loanId);
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -234,8 +129,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
             Long loanId = aLoanId.get();
 
             // run accrual posting
-            SchedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
-            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            schedulerHelper.executeAndAwaitJob("Apply penalty to overdue loans");
+            schedulerHelper.executeAndAwaitJob("Add Accrual Transactions");
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -259,8 +154,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
             deactivateOverdueLoanCharges(loanId, "05 January 2023");
 
             // run accrual posting
-            SchedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
-            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            schedulerHelper.executeAndAwaitJob("Apply penalty to overdue loans");
+            schedulerHelper.executeAndAwaitJob("Add Accrual Transactions");
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -279,62 +174,9 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
         AtomicReference<Long> aLoanId = new AtomicReference<>();
 
         runAt("01 January 2023", () -> {
+            Long loanId = createBackdatedPenaltyLoan();
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-
-            int numberOfRepayments = 3;
-            int repaymentEvery = 4;
-
-            // Create charges
-            double chargeAmount = 1.0;
-            Long chargeId = createOverduePenaltyPercentageCharge(chargeAmount, ChargesHelper.CHARGE_FEE_FREQUENCY_DAYS, 1);
-
-            // Create Loan Product
-            PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
-                    .graceOnArrearsAgeing(0).numberOfRepayments(numberOfRepayments) //
-                    .repaymentEvery(repaymentEvery) //
-                    .installmentAmountInMultiplesOf(null) //
-                    .repaymentFrequencyType(RepaymentFrequencyType.DAYS.longValue()) //
-                    .interestType(InterestType.DECLINING_BALANCE)//
-                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY)//
-                    .interestRecalculationCompoundingMethod(InterestRecalculationCompoundingMethod.NONE)//
-                    .rescheduleStrategyMethod(RescheduleStrategyMethod.ADJUST_LAST_UNPAID_PERIOD)//
-                    .isInterestRecalculationEnabled(true)//
-                    .recalculationRestFrequencyInterval(1)//
-                    .recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY)//
-                    .rescheduleStrategyMethod(RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
-                    .allowPartialPeriodInterestCalculation(false)//
-                    .disallowExpectedDisbursements(false)//
-                    .allowApprovedDisbursedAmountsOverApplied(false)//
-                    .overAppliedNumber(null)//
-                    .overAppliedCalculationType(null)//
-                    .multiDisburseLoan(null)//
-                    .charges(List.of(new LoanProductChargeData().id(chargeId)));//
-
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            Long loanProductId = loanProductResponse.getResourceId();
-
-            // Apply and Approve Loan
-            double amount = 5000.0;
-
-            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
-                    .repaymentEvery(repaymentEvery)//
-                    .loanTermFrequency(numberOfRepayments * repaymentEvery)//
-                    .repaymentFrequencyType(RepaymentFrequencyType.DAYS)//
-                    .loanTermFrequencyType(RepaymentFrequencyType.DAYS)//
-                    .interestType(InterestType.DECLINING_BALANCE)//
-                    .interestCalculationPeriodType(InterestCalculationPeriodType.DAILY);
-
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
-
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                    approveLoanRequest(amount, "01 January 2023"));
-
-            aLoanId.getAndSet(approvedLoanResult.getLoanId());
-            Long loanId = aLoanId.get();
-
-            // disburse Loan
-            disburseLoan(loanId, BigDecimal.valueOf(5000.0), "01 January 2023");
+            aLoanId.set(loanId);
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -346,8 +188,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
             Long loanId = aLoanId.get();
 
             // run accrual posting
-            SchedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
-            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            schedulerHelper.executeAndAwaitJob("Apply penalty to overdue loans");
+            schedulerHelper.executeAndAwaitJob("Add Accrual Transactions");
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -371,8 +213,8 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
             deactivateOverdueLoanCharges(loanId, "07 January 2023");
 
             // run accrual posting
-            SchedulerJobHelper.executeAndAwaitJob("Apply penalty to overdue loans");
-            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            schedulerHelper.executeAndAwaitJob("Apply penalty to overdue loans");
+            schedulerHelper.executeAndAwaitJob("Add Accrual Transactions");
 
             // verify transactions
             verifyTransactions(loanId, //
@@ -400,5 +242,66 @@ public class LoanPenaltyBackdatedTransactionTest extends BaseLoanIntegrationTest
                     transaction(1000.0, "Repayment", "10 January 2023", 3047.0, 969.67, 0.0, 0.0, 30.33, 0.0, 0.0) //
             );
         });
+    }
+
+    private Long createBackdatedPenaltyLoan() {
+        // Create Client
+        Long clientId = createClient();
+
+        int numberOfRepayments = 3;
+        int repaymentEvery = 4;
+
+        // Create charges
+        double chargeAmount = 1.0;
+        Long chargeId = createOverduePenaltyPercentageCharge(chargeAmount, FEE_FREQUENCY_DAYS, 1);
+
+        // Create Loan Product
+        PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct() //
+                .graceOnArrearsAgeing(0).numberOfRepayments(numberOfRepayments) //
+                .repaymentEvery(repaymentEvery) //
+                .installmentAmountInMultiplesOf(null) //
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS_L) //
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.DAILY)//
+                .interestRecalculationCompoundingMethod(LoanTestData.InterestRecalculationCompoundingMethod.NONE)//
+                .isInterestRecalculationEnabled(true)//
+                .recalculationRestFrequencyInterval(1)//
+                .recalculationRestFrequencyType(LoanTestData.RecalculationRestFrequencyType.DAILY)//
+                .rescheduleStrategyMethod(LoanTestData.RescheduleStrategyMethod.REDUCE_EMI_AMOUNT)//
+                .allowPartialPeriodInterestCalculation(false)//
+                .disallowExpectedDisbursements(false)//
+                .allowApprovedDisbursedAmountsOverApplied(false)//
+                .overAppliedNumber(null)//
+                .overAppliedCalculationType(null)//
+                .multiDisburseLoan(null)//
+                .charges(List.of(new LoanProductChargeData().id(chargeId)));//
+
+        Long loanProductId = createLoanProduct(product);
+
+        // Apply and Approve Loan
+        double amount = 5000.0;
+
+        PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, "01 January 2023", amount, numberOfRepayments)//
+                .repaymentEvery(repaymentEvery)//
+                .loanTermFrequency(numberOfRepayments * repaymentEvery)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS)//
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS)//
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.DAILY);
+
+        Long loanId = applyForLoan(applicationRequest);
+        approveLoan(loanId, approveLoanRequest(amount, "01 January 2023"));
+
+        // disburse Loan
+        disburseLoan(loanId, BigDecimal.valueOf(5000.0), "01 January 2023");
+        return loanId;
+    }
+
+    private Long createOverduePenaltyPercentageCharge(double percentageAmount, String feeFrequency, int feeInterval) {
+        ChargeRequest chargeRequest = ChargeRequestBuilders.loanOverdueFee(percentageAmount)//
+                .chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST.getValue())//
+                .feeFrequency(feeFrequency)//
+                .feeInterval(String.valueOf(feeInterval));
+        return chargesHelper.createCharge(chargeRequest).getResourceId();
     }
 }

@@ -42,7 +42,6 @@ The scope of this document includes:
 
 *Income Modification:* The per-period difference `actualAmortization − expectedAmortization`. Positive when the borrower over-pays, negative on underpayment, `null` on no payment.
 
-*Original Projected Payments:* A snapshot list of the pure contracted schedule (`originalProjectedPayments`) that contains only planned-track fields and is not influenced by actual payments. Used internally by COB and reports that need the unmodified contracted schedule.
 
 == Design Decisions and Considerations
 

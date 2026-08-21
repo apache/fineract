@@ -198,6 +198,20 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     @Column(name = "is_fraud", nullable = false)
     private boolean fraud = false;
 
+    /**
+     * Write-off is terminal: it zeroes the outstanding balance and moves the loan to {@code CLOSED_WRITTEN_OFF}. These
+     * audit fields record when it happened and the optional reason; they are cleared by an undo. All write-off
+     * behaviour (status transition, balance zeroing, audit) lives in {@code WorkingCapitalLoanWriteOffDomainService}.
+     */
+    @Setter
+    @Column(name = "written_off_on_date")
+    private LocalDate writtenOffOnDate;
+
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "write_off_reason_cv_id")
+    private CodeValue writeOffReason;
+
     public Long getOfficeId() {
         return client != null && client.getOffice() != null ? client.getOffice().getId() : null;
     }

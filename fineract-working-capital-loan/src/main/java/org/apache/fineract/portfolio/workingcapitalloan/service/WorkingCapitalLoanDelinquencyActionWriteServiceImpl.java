@@ -26,6 +26,15 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanDelinquencyDisableBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanDelinquencyEnableBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanDelinquencyPauseBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanDelinquencyRescheduleBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanDelinquencyResetBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanDelinquencyResumeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanDelinquencyUndoResetBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
@@ -46,6 +55,7 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
     private final WorkingCapitalLoanDelinquencyActionParseAndValidator validator;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService rangeScheduleService;
     private final WorkingCapitalLoanDelinquencyClassificationService classificationService;
+    private final BusinessEventNotifierService businessEventNotifierService;
 
     @Transactional
     @Override
@@ -98,6 +108,8 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
             classificationService.liftDelinquencyClassification(workingCapitalLoan, action.getStartDate());
         }
 
+        businessEventNotifierService.notifyPostBusinessEvent(delinquencyActionEvent(action.getAction(), workingCapitalLoan));
+
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(saved.getId()) //
@@ -105,6 +117,18 @@ public class WorkingCapitalLoanDelinquencyActionWriteServiceImpl implements Work
                 .withOfficeId(workingCapitalLoan.getOfficeId()) //
                 .withClientId(workingCapitalLoan.getClientId()) //
                 .build();
+    }
+
+    private BusinessEvent<?> delinquencyActionEvent(final DelinquencyAction actionType, final WorkingCapitalLoan loan) {
+        return switch (actionType) {
+            case DISABLE -> new WorkingCapitalLoanDelinquencyDisableBusinessEvent(loan);
+            case ENABLE -> new WorkingCapitalLoanDelinquencyEnableBusinessEvent(loan);
+            case PAUSE -> new WorkingCapitalLoanDelinquencyPauseBusinessEvent(loan);
+            case RESUME -> new WorkingCapitalLoanDelinquencyResumeBusinessEvent(loan);
+            case RESCHEDULE -> new WorkingCapitalLoanDelinquencyRescheduleBusinessEvent(loan);
+            case RESET -> new WorkingCapitalLoanDelinquencyResetBusinessEvent(loan);
+            case UNDO_RESET -> new WorkingCapitalLoanDelinquencyUndoResetBusinessEvent(loan);
+        };
     }
 
 }

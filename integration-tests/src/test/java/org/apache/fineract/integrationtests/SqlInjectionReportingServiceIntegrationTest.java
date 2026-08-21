@@ -18,25 +18,22 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static io.restassured.RestAssured.given;
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -44,8 +41,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.infrastructure.security.service.SqlInjectionPreventerService;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.client.feign.services.ReportsApi;
+import org.apache.fineract.client.feign.services.RunReportsApi;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetReportsResponse;
+import org.apache.fineract.client.models.PostRepostRequest;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,38 +59,26 @@ import org.junit.jupiter.params.provider.ValueSource;
  *
  * Tests the migration from ESAPI to native database escaping and validates that CVE-2025-5878 is fixed. Covers
  * ReadReportingServiceImpl security measures through actual API endpoints.
- *
- * @see ReadReportingServiceImpl
- * @see SqlInjectionPreventerService
  */
 @Slf4j
-public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegrationTest {
+public class SqlInjectionReportingServiceIntegrationTest {
 
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
-    private ResponseSpecification createOrReadResponseSpec;
     private Long testReportId = null;
     private Long booleanReportId = null;
     private static final String TEST_REPORT_NAME = "SQL_Injection_Test_Report";
     private static final String TEST_REPORT_SQL = "SELECT 1 as test_column, 'Test Data' as test_name";
     private static final String BOOLEAN_REPORT_SQL = "SELECT (1 = 1) AS active";
+    private static final String TEST_REPORT_COLUMN = "test_column";
+    private static final String BOOLEAN_REPORT_COLUMN = "active";
+    private static final String REPORT_TYPE_TABLE = "Table";
+    private static final String REPORT_CATEGORY_CLIENT = "Client";
+    private static final String GENERIC_RESULT_SET_PARAM = "genericResultSet";
+    private static final String REPORT_TYPE_PARAM = "reportType";
     private String booleanReportName;
 
     @BeforeEach
     public void setup() {
         Locale.setDefault(Locale.ENGLISH);
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-
-        // Keep strict 200 for runreports GET assertions used in tests
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-
-        // Creation endpoints may return 201 in some environments
-        this.createOrReadResponseSpec = new ResponseSpecBuilder()
-                .expectStatusCode(org.hamcrest.Matchers.anyOf(org.hamcrest.Matchers.is(200), org.hamcrest.Matchers.is(201))).build();
-
         // Create test report for the tests
         createTestReportIfNotExists();
     }
@@ -99,7 +88,7 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
         // Clean up test report after tests
         if (testReportId != null) {
             try {
-                deleteTestReport();
+                deleteReport(testReportId);
             } catch (Exception e) {
                 log.warn("Failed to clean up test report: {}", e.getMessage());
             } finally {
@@ -108,7 +97,7 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
         }
         if (booleanReportId != null) {
             try {
-                deleteBooleanReport();
+                deleteReport(booleanReportId);
             } catch (Exception e) {
                 log.warn("Failed to clean up boolean test report: {}", e.getMessage());
             } finally {
@@ -120,64 +109,29 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
 
     private void createTestReportIfNotExists() {
         try {
+            Long existingId = findReportIdByName(TEST_REPORT_NAME);
             // First try to get the report to see if it exists - use direct RestAssured call to handle 404
-            Response response = given().spec(requestSpec).when().get("/fineract-provider/api/v1/reports");
-
-            if (response.getStatusCode() == 200) {
-                String existingReports = response.asString();
-                if (existingReports.contains("\"reportName\":\"" + TEST_REPORT_NAME + "\"")) {
-                    log.info("Test report '{}' already exists", TEST_REPORT_NAME);
-                    // Extract the ID for cleanup
-                    try {
-                        String pattern = "\"id\":(\\d+)[^}]*\"reportName\":\"" + TEST_REPORT_NAME + "\"";
-                        java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
-                        java.util.regex.Matcher m = p.matcher(existingReports);
-                        if (m.find()) {
-                            testReportId = Long.parseLong(m.group(1));
-                            log.info("Found existing test report with ID: {}", testReportId);
-                        }
-                    } catch (Exception ex) {
-                        log.debug("Could not extract existing report ID");
-                    }
-                    return;
-                }
-            } else if (response.getStatusCode() == 404) {
-                log.debug("Reports endpoint returned 404 (no reports exist yet), will create report");
-            } else {
-                log.debug("Reports endpoint returned unexpected status: {}, will try to create report", response.getStatusCode());
+            if (existingId != null) {
+                testReportId = existingId;
+                log.info("Found existing test report '{}' with ID: {}", TEST_REPORT_NAME, testReportId);
+                // Extract the ID for cleanup
+                return;
             }
-        } catch (Exception e) {
-            log.debug("Report list fetch failed, will try to create report: {}", e.getMessage());
+        } catch (CallFailedRuntimeException e) {
+            log.debug("Report list fetch failed with status {}, will try to create report: {}", e.getStatus(), e.getResponseBody());
         }
-        // Create the test report
-        String reportJson = "{" + "\"reportName\": \"" + TEST_REPORT_NAME + "\"," + "\"reportType\": \"Table\","
-                + "\"reportCategory\": \"Client\"," + "\"reportSql\": \"" + TEST_REPORT_SQL + "\","
-                + "\"description\": \"Test report for SQL injection prevention tests\"," + "\"useReport\": true" + "}";
 
         try {
             // Use direct RestAssured call to handle different response codes
-            Response postResponse = given().spec(requestSpec).contentType(ContentType.JSON).body(reportJson).when()
-                    .post("/fineract-provider/api/v1/reports");
-
-            if (postResponse.getStatusCode() == 200 || postResponse.getStatusCode() == 201) {
-                String response = postResponse.asString();
+            testReportId = ok(() -> reports()
+                    .createReport(reportRequest(TEST_REPORT_NAME, TEST_REPORT_SQL, "Test report for SQL injection prevention tests")))
+                    .getResourceId();
+            if (testReportId == null) {
                 // Extract report ID from response for cleanup
-                if (response.contains("resourceId")) {
-                    String idStr = response.replaceAll(".*\"resourceId\":(\\d+).*", "$1");
-                    testReportId = Long.parseLong(idStr);
-                    log.info("Created test report with ID: {}", testReportId);
-                } else {
-                    throw new RuntimeException("Test report creation failed - no resourceId in response: " + response);
-                }
-            } else {
-                String errorResponse = postResponse.asString();
-                log.error("Report creation failed - Status: {}, Body: {}, Headers: {}", postResponse.getStatusCode(), errorResponse,
-                        postResponse.getHeaders());
-                log.error("Sent JSON: {}", reportJson);
-                throw new RuntimeException(
-                        "Test report creation failed with status " + postResponse.getStatusCode() + ": " + errorResponse);
+                throw new RuntimeException("Test report creation failed - no resourceId in the response");
             }
-        } catch (Exception e) {
+            log.info("Created test report with ID: {}", testReportId);
+        } catch (RuntimeException e) {
             // This is a critical failure - tests cannot proceed without the test report
             throw new RuntimeException(
                     "CRITICAL: Could not create test report '" + TEST_REPORT_NAME + "'. Tests cannot proceed. Error: " + e.getMessage(), e);
@@ -185,60 +139,52 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
     }
 
     private void createBooleanReport() {
-        booleanReportName = "BOOLEAN_Runreports_Test_Report_" + java.util.UUID.randomUUID();
+        booleanReportName = "BOOLEAN_Runreports_Test_Report_" + UUID.randomUUID();
 
-        String reportJson = "{" + "\"reportName\": \"" + booleanReportName + "\"," + "\"reportType\": \"Table\","
-                + "\"reportCategory\": \"Client\"," + "\"reportSql\": \"" + BOOLEAN_REPORT_SQL + "\","
-                + "\"description\": \"Test report for BOOLEAN runreports support\"," + "\"useReport\": true" + "}";
-
-        Response postResponse = given().spec(requestSpec).contentType(ContentType.JSON).body(reportJson).when()
-                .post("/fineract-provider/api/v1/reports");
-
-        if (postResponse.getStatusCode() == 200 || postResponse.getStatusCode() == 201) {
-            String response = postResponse.asString();
-            if (response.contains("resourceId")) {
-                String idStr = response.replaceAll(".*\"resourceId\":(\\d+).*", "$1");
-                booleanReportId = Long.parseLong(idStr);
-                log.info("Created BOOLEAN test report with ID: {}, name: {}", booleanReportId, booleanReportName);
-            } else {
-                throw new RuntimeException("BOOLEAN test report creation failed - no resourceId in response: " + response);
-            }
-        } else {
-            throw new RuntimeException(
-                    "BOOLEAN test report creation failed with status " + postResponse.getStatusCode() + ": " + postResponse.asString());
-        }
-    }
-
-    private void deleteTestReport() {
-        if (testReportId == null) {
-            return;
-        }
-
-        Response deleteResponse = given().spec(requestSpec).contentType(ContentType.JSON).when()
-                .delete("/fineract-provider/api/v1/reports/" + testReportId);
-
-        if (deleteResponse.getStatusCode() == 200 || deleteResponse.getStatusCode() == 204 || deleteResponse.getStatusCode() == 404) {
-            log.info("Deleted (or already absent) test report with ID: {}", testReportId);
-        } else {
-            throw new RuntimeException("Failed deleting test report with ID " + testReportId + ", status: " + deleteResponse.getStatusCode()
-                    + ", body: " + deleteResponse.asString());
-        }
-    }
-
-    private void deleteBooleanReport() {
+        booleanReportId = ok(() -> reports()
+                .createReport(reportRequest(booleanReportName, BOOLEAN_REPORT_SQL, "Test report for BOOLEAN runreports support")))
+                .getResourceId();
         if (booleanReportId == null) {
+            throw new RuntimeException("BOOLEAN test report creation failed - no resourceId in the response");
+        }
+        log.info("Created BOOLEAN test report with ID: {}, name: {}", booleanReportId, booleanReportName);
+    }
+
+    private void deleteReport(Long reportId) {
+        if (reportId == null) {
             return;
         }
-
-        Response deleteResponse = given().spec(requestSpec).contentType(ContentType.JSON).when()
-                .delete("/fineract-provider/api/v1/reports/" + booleanReportId);
-
-        if (deleteResponse.getStatusCode() == 200 || deleteResponse.getStatusCode() == 204 || deleteResponse.getStatusCode() == 404) {
-            log.info("Deleted (or already absent) BOOLEAN test report with ID: {}", booleanReportId);
-        } else {
-            throw new RuntimeException("Failed deleting BOOLEAN test report with ID " + booleanReportId + ", status: "
-                    + deleteResponse.getStatusCode() + ", body: " + deleteResponse.asString());
+        try {
+            ok(() -> reports().deleteReport(reportId));
+            log.info("Deleted test report with ID: {}", reportId);
+        } catch (CallFailedRuntimeException e) {
+            // Treat an already-absent report as successfully cleaned up. Compare the status code itself: the message
+            // embeds the request path, so a report whose id contains "404" would match a naive substring check.
+            if (e.getStatus() == SC_NOT_FOUND) {
+                log.info("Test report with ID {} already absent", reportId);
+                return;
+            }
+            throw new RuntimeException("Failed deleting test report with ID " + reportId + ", status: " + e.getStatus(), e);
         }
+    }
+
+    /** Finds a report id by exact name, or {@code null} when no report of that name exists. */
+    private static Long findReportIdByName(String reportName) {
+        return ok(() -> reports().retrieveAllReports()).stream()//
+                .filter(report -> reportName.equals(report.getReportName()))//
+                .map(GetReportsResponse::getId)//
+                .findFirst()//
+                .orElse(null);
+    }
+
+    private static PostRepostRequest reportRequest(String reportName, String reportSql, String description) {
+        return new PostRepostRequest()//
+                .reportName(reportName)//
+                .reportType(REPORT_TYPE_TABLE)//
+                .reportCategory(REPORT_CATEGORY_CLIENT)//
+                .reportSql(reportSql)//
+                .description(description)//
+                .useReport(true);
     }
 
     /**
@@ -253,18 +199,17 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
         queryParams.put("R_officeId", "1");
 
         // Test with the test report we created in setup - this MUST succeed
-        String response = Utils.performServerGet(requestSpec, responseSpec,
-                "/fineract-provider/api/v1/runreports/" + TEST_REPORT_NAME + "?genericResultSet=false&" + toQueryString(queryParams), null);
+        List<Map<String, Object>> rows = runReport(TEST_REPORT_NAME, queryParams);
 
-        assertNotNull(response);
-        assertNotEquals("", response.trim());
+        assertNotNull(rows);
+        assertFalse(rows.isEmpty(), "The report should return at least one row");
 
         // Debug: Log actual response to understand structure
-        log.info("Response from report execution: {}", response);
+        log.info("Response from report execution: {}", rows);
 
         // Verify response is valid JSON structure
-        assertTrue(response.contains("columnHeaders") || response.contains("data") || response.contains("test_column"),
-                "Response should contain expected JSON structure, but got: " + response);
+        assertTrue(rows.stream().allMatch(row -> row.containsKey(TEST_REPORT_COLUMN)),
+                "Every row should carry the report's own column, but got: " + rows);
     }
 
     /**
@@ -284,21 +229,16 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
         // This should either succeed with empty/safe results or fail with validation error
         // but NOT with SQL syntax errors
         try {
-            Utils.performServerGet(requestSpec, responseSpec, "/fineract-provider/api/v1/runreports/" + TEST_REPORT_NAME
-                    + "?genericResultSet=false&" + toQueryString(maliciousParams), null);
-
+            runReport(TEST_REPORT_NAME, maliciousParams);
             // If we get here, the SQL injection was prevented and handled safely
             log.info("SQL injection prevented - query executed safely with malicious parameters");
-        } catch (AssertionError exception) {
+        } catch (CallFailedRuntimeException exception) {
             // The response should indicate parameter validation error or safe handling
             // NOT SQL syntax errors which would indicate successful injection
-            assertFalse(exception.getMessage().toLowerCase().contains("syntax error"),
-                    "Should not get SQL syntax error, got: " + exception.getMessage());
-            assertFalse(exception.getMessage().toLowerCase().contains("you have an error in your sql"),
-                    "Should not get SQL error, got: " + exception.getMessage());
+            assertNoSqlError(exception);
             // Should be a validation error, not a 404
-            assertFalse(exception.getMessage().contains("404"), "Should not get 404 - report should exist. Got: " + exception.getMessage());
-
+            assertNotEquals(SC_NOT_FOUND, exception.getStatus(),
+                    "Should not get 404 - report should exist. Got: " + exception.getMessage());
             log.info("Got expected validation error: {}", exception.getMessage());
         }
     }
@@ -317,12 +257,11 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
 
         // Test that valid report types work through the API
         try {
-            Utils.performServerGet(requestSpec, responseSpec,
-                    "/runreports/TestReport?reportType=" + validType + "&genericResultSet=false&" + toQueryString(queryParams), null);
+            runReport("TestReport", withReportType(queryParams, validType));
             // Should get a proper response or 404 (report not found), not validation error
-        } catch (AssertionError e) {
+        } catch (CallFailedRuntimeException e) {
             // For valid types, we expect 404 (report not found), not validation errors
-            assertTrue(e.getMessage().contains("404"));
+            assertEquals(SC_NOT_FOUND, e.getStatus(), "Expected 404 for a valid report type, got: " + e.getMessage());
         }
     }
 
@@ -338,13 +277,12 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
         queryParams.put("R_officeId", "1");
 
         // These should be rejected and result in 404 (report not found) or validation error
-        AssertionError exception = assertThrows(AssertionError.class, () -> {
-            Utils.performServerGet(requestSpec, responseSpec,
-                    "/runreports/TestReport?reportType=" + invalidType + "&genericResultSet=false&" + toQueryString(queryParams), null);
-        });
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> runReport("TestReport", withReportType(queryParams, invalidType)));
 
         // Should get 404 or validation error, not SQL execution error
-        assertTrue(exception.getMessage().contains("404") || exception.getMessage().contains("validation"));
+        assertTrue(exception.getStatus() == SC_NOT_FOUND || exception.getResponseBody().toLowerCase(Locale.ROOT).contains("validation"),
+                "Expected 404 or a validation error, got: " + exception.getMessage());
         assertFalse(exception.getMessage().toLowerCase().contains("sql syntax"));
     }
 
@@ -363,20 +301,12 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
 
         // Use the real test report to ensure SQL injection prevention works with actual queries
         try {
-            String response = Utils.performServerGet(requestSpec, responseSpec,
-                    "/fineract-provider/api/v1/runreports/" + TEST_REPORT_NAME + "?genericResultSet=false&" + toQueryString(queryParams),
-                    null);
-
+            assertNotNull(runReport(TEST_REPORT_NAME, queryParams));
             // If successful, the special characters were safely escaped
-            assertNotNull(response);
             log.info("MySQL/MariaDB special characters safely escaped");
-        } catch (AssertionError e) {
+        } catch (CallFailedRuntimeException e) {
             // Should not get SQL syntax errors - only validation errors
-            assertFalse(e.getMessage().toLowerCase().contains("syntax error"),
-                    "Should not get SQL syntax error for MySQL escaping test. Got: " + e.getMessage());
-            assertFalse(e.getMessage().toLowerCase().contains("you have an error in your sql"),
-                    "Should not get SQL error. Got: " + e.getMessage());
-
+            assertNoSqlError(e);
             log.info("MySQL/MariaDB escaping prevented SQL injection with validation error");
         }
     }
@@ -397,22 +327,14 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
 
         // Use the real test report to ensure SQL injection prevention works
         try {
-            String response = Utils.performServerGet(requestSpec, responseSpec,
-                    "/fineract-provider/api/v1/runreports/" + TEST_REPORT_NAME + "?genericResultSet=false&" + toQueryString(queryParams),
-                    null);
-
+            assertNotNull(runReport(TEST_REPORT_NAME, queryParams));
             // If successful, the PostgreSQL special syntax was safely escaped
-            assertNotNull(response);
             log.info("PostgreSQL special characters and syntax safely escaped");
-        } catch (AssertionError e) {
+        } catch (CallFailedRuntimeException e) {
             // Should not get SQL syntax errors - only validation errors
-            assertFalse(e.getMessage().toLowerCase().contains("syntax error"),
-                    "Should not get SQL syntax error for PostgreSQL escaping test. Got: " + e.getMessage());
-            assertFalse(e.getMessage().toLowerCase().contains("you have an error in your sql"),
-                    "Should not get SQL error. Got: " + e.getMessage());
+            assertNoSqlError(e);
             assertFalse(e.getMessage().toLowerCase().contains("error") && e.getMessage().toLowerCase().contains("position"),
                     "Should not get PostgreSQL position error. Got: " + e.getMessage());
-
             log.info("PostgreSQL escaping prevented SQL injection with validation error");
         }
     }
@@ -428,7 +350,7 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
         int operationsPerThread = 3;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
-        List<Future<Boolean>> futures = new java.util.ArrayList<>();
+        List<Future<Boolean>> futures = new ArrayList<>();
 
         for (int i = 0; i < threadCount; i++) {
             final int threadId = i;
@@ -443,16 +365,14 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
                             Map<String, String> queryParams = new HashMap<>();
                             queryParams.put("R_officeId", "1");
 
-                            Utils.performServerGet(requestSpec, responseSpec,
-                                    "/fineract-provider/api/v1/runreports/" + URLEncoder.encode(input, StandardCharsets.UTF_8)
-                                            + "?genericResultSet=false&" + toQueryString(queryParams),
-                                    null);
+                            runReport(input, queryParams);
                         }
                         return true;
-                    } catch (AssertionError e) {
+                    } catch (CallFailedRuntimeException e) {
                         // 404 is expected for non-existent reports
-                        return e.getMessage().contains("404");
-                    } catch (Exception e) {
+                        if (e.getStatus() == SC_NOT_FOUND) {
+                            return true;
+                        }
                         log.error("Error in thread {}: {}", threadId, e.getMessage());
                         return false;
                     }
@@ -488,15 +408,12 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
         maliciousParams.put("R_userId", "<script>alert('xss')</script>");
 
         try {
-            Utils.performServerGet(requestSpec, responseSpec, "/fineract-provider/api/v1/runreports/" + TEST_REPORT_NAME
-                    + "?genericResultSet=false&" + toQueryString(maliciousParams), null);
+            runReport(TEST_REPORT_NAME, maliciousParams);
             // If we get here without exception, the response should be safe
             log.info("Complex parameter injection prevented - query executed safely");
-        } catch (AssertionError e) {
+        } catch (CallFailedRuntimeException e) {
             // Should get parameter validation error, not SQL injection
-            assertFalse(e.getMessage().toLowerCase().contains("syntax error"), "Should not get SQL syntax error. Got: " + e.getMessage());
-            assertFalse(e.getMessage().toLowerCase().contains("you have an error in your sql"),
-                    "Should not get SQL error. Got: " + e.getMessage());
+            assertNoSqlError(e);
             assertFalse(e.getMessage().toLowerCase().contains("table") && e.getMessage().toLowerCase().contains("exist"),
                     "Should not get table exists error. Got: " + e.getMessage());
         }
@@ -515,26 +432,16 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
         queryParams.put(paramName, paramValue);
 
         try {
-            String response = Utils.performServerGet(requestSpec, responseSpec,
-                    "/fineract-provider/api/v1/runreports/" + TEST_REPORT_NAME + "?genericResultSet=false&" + toQueryString(queryParams),
-                    null);
-
+            // Valid parameters should return data successfully; a SQL error would have failed the call instead
             // Valid parameters should return data successfully
-            assertNotNull(response);
-
             // Should not contain SQL error indicators
-            assertFalse(response.toLowerCase().contains("syntax error"));
-            assertFalse(response.toLowerCase().contains("sql exception"));
+            assertNotNull(runReport(TEST_REPORT_NAME, queryParams));
 
             log.debug("Legitimate parameter '{}' = '{}' processed successfully", paramName, paramValue);
-        } catch (AssertionError e) {
+        } catch (CallFailedRuntimeException e) {
             // For legitimate parameters, we should not get errors unless it's a data issue
             // But definitely not SQL syntax errors
-            assertFalse(e.getMessage().toLowerCase().contains("syntax error"),
-                    "Should not get SQL syntax error for legitimate parameter. Got: " + e.getMessage());
-            assertFalse(e.getMessage().toLowerCase().contains("you have an error in your sql"),
-                    "Should not get SQL error for legitimate parameter. Got: " + e.getMessage());
-
+            assertNoSqlError(e);
             log.info("Parameter validation for '{}' = '{}': {}", paramName, paramValue, e.getMessage());
         }
     }
@@ -552,10 +459,9 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
         queryParams.put("R_officeId", "1");
 
         try {
-            Utils.performServerGet(requestSpec, responseSpec, "/fineract-provider/api/v1/runreports/"
-                    + URLEncoder.encode(testInput, StandardCharsets.UTF_8) + "?genericResultSet=false&" + toQueryString(queryParams), null);
-        } catch (AssertionError e) {
-            assertTrue(e.getMessage().contains("404") || e.getMessage().contains("400"),
+            runReport(testInput, queryParams);
+        } catch (CallFailedRuntimeException e) {
+            assertTrue(e.getStatus() == SC_NOT_FOUND || e.getStatus() == SC_BAD_REQUEST,
                     "Expected safe failure (404/400), but got: " + e.getMessage());
             assertFalse(e.getMessage().toLowerCase().contains("syntax error"));
             assertFalse(e.getMessage().toLowerCase().contains("sql"));
@@ -573,33 +479,48 @@ public class SqlInjectionReportingServiceIntegrationTest extends BaseLoanIntegra
         assertNotNull(booleanReportId, "BOOLEAN test report should be created before execution");
         assertNotNull(booleanReportName, "BOOLEAN test report name should be initialized");
 
+        // A successful run returns the rows; a non-2xx status throws and fails the test
         // Use direct request to avoid hidden auth mismatch and assert exact behavior
-        Response runResponse = given().spec(requestSpec).accept(ContentType.JSON).when().get("/fineract-provider/api/v1/runreports/"
-                + URLEncoder.encode(booleanReportName, StandardCharsets.UTF_8) + "?genericResultSet=false");
+        List<Map<String, Object>> rows = runReport(booleanReportName, Map.of());
 
-        String response = runResponse.asString();
-        assertTrue(runResponse.getStatusCode() == 200, "Expected status 200 but was " + runResponse.getStatusCode() + " body: " + response);
-
-        assertNotNull(response);
-        assertFalse(response.isBlank());
-        assertFalse(response.contains("Data type 'BOOLEAN' is not supported"));
-        assertTrue(response.toLowerCase().contains("active"),
-                "Response should contain boolean column alias 'active', but was: " + response);
-        assertTrue(response.toLowerCase().contains("true") || response.toLowerCase().contains("1"),
-                "Response should contain boolean value (true/1), but was: " + response);
+        assertNotNull(rows);
+        assertFalse(rows.isEmpty(), "The BOOLEAN report should return a row");
+        Map<String, Object> row = rows.get(0);
+        assertTrue(row.containsKey(BOOLEAN_REPORT_COLUMN), "Response should contain boolean column alias 'active', but was: " + rows);
+        Object active = row.get(BOOLEAN_REPORT_COLUMN);
+        assertTrue(Boolean.TRUE.equals(active) || "true".equalsIgnoreCase(String.valueOf(active)) || "1".equals(String.valueOf(active)),
+                "Response should contain boolean value (true/1), but was: " + rows);
     }
 
-    private String toQueryString(Map<String, String> params) {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            if (sb.length() > 0) {
-                sb.append("&");
-            }
-            sb.append(entry.getKey()).append("=");
-            if (entry.getValue() != null) {
-                sb.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
-            }
-        }
-        return sb.toString();
+    private void assertNoSqlError(RuntimeException exception) {
+        assertFalse(exception.getMessage().toLowerCase().contains("syntax error"),
+                "Should not get SQL syntax error, got: " + exception.getMessage());
+        assertFalse(exception.getMessage().toLowerCase().contains("you have an error in your sql"),
+                "Should not get SQL error, got: " + exception.getMessage());
+    }
+
+    /**
+     * Runs a report with {@code genericResultSet=false}, the shape the pre-migration test asserted on: the server
+     * answers a plain array of rows rather than the {@code columnHeaders}/{@code data} Generic Resultset. Both shapes
+     * come out of the same {@code retrieveGenericResultset} call the SQL-injection prevention lives in.
+     */
+    private List<Map<String, Object>> runReport(String reportName, Map<String, String> parameters) {
+        Map<String, String> queryParameters = new HashMap<>(parameters);
+        queryParameters.put(GENERIC_RESULT_SET_PARAM, "false");
+        return ok(() -> runReports().runReportGetRows(reportName, queryParameters));
+    }
+
+    private static Map<String, String> withReportType(Map<String, String> parameters, String reportType) {
+        Map<String, String> queryParameters = new HashMap<>(parameters);
+        queryParameters.put(REPORT_TYPE_PARAM, reportType);
+        return queryParameters;
+    }
+
+    private static ReportsApi reports() {
+        return FineractFeignClientHelper.getFineractFeignClient().reports();
+    }
+
+    private static RunReportsApi runReports() {
+        return FineractFeignClientHelper.getFineractFeignClient().runReports();
     }
 }

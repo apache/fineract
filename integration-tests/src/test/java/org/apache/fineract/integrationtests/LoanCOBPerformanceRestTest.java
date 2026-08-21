@@ -18,11 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,12 +27,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.fineract.client.models.PostClientsResponse;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
-import org.apache.fineract.integrationtests.common.BusinessStepHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.inlinecob.InlineLoanCOBHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RecalculationRestFrequencyType;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -56,15 +49,11 @@ import org.slf4j.LoggerFactory;
  ***/
 @Disabled("This test is disabled by default. To run it, please remove the @Disabled annotation.")
 @TestInstance(Lifecycle.PER_CLASS)
-public class LoanCOBPerformanceRestTest extends BaseLoanIntegrationTest {
+public class LoanCOBPerformanceRestTest extends FeignLoanTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanCOBPerformanceRestTest.class);
 
-    private static ResponseSpecification responseSpec;
-    private static RequestSpecification requestSpec;
-    private static PostClientsResponse client;
-    private static InlineLoanCOBHelper inlineLoanCOBHelper;
-    private static BusinessStepHelper businessStepHelper;
+    private static Long clientId;
     private Random random = new Random();
 
     // Store metrics for all test runs
@@ -72,18 +61,11 @@ public class LoanCOBPerformanceRestTest extends BaseLoanIntegrationTest {
 
     @BeforeAll
     public static void setup() {
-        Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        requestSpec.header("Fineract-Platform-TenantId", Utils.DEFAULT_TENANT);
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-        client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-        inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
-        businessStepHelper = new BusinessStepHelper();
+        clientId = clientHelper.createClient();
         // setup COB Business Steps to prevent test failing due other integration test configurations
-        businessStepHelper.updateSteps("LOAN_CLOSE_OF_BUSINESS", "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION",
-                "CHECK_LOAN_REPAYMENT_DUE", "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
+        new FeignBusinessStepHelper(FineractFeignClientHelper.getFineractFeignClient()).updateSteps("LOAN_CLOSE_OF_BUSINESS",
+                "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION", "CHECK_LOAN_REPAYMENT_DUE",
+                "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
                 "EXTERNAL_ASSET_OWNER_TRANSFER", "CHECK_DUE_INSTALLMENTS", "ACCRUAL_ACTIVITY_POSTING", "LOAN_INTEREST_RECALCULATION");
     }
 
@@ -171,12 +153,11 @@ public class LoanCOBPerformanceRestTest extends BaseLoanIntegrationTest {
         }
     }
 
-    private Long createLoanProduct(String disbursementDate, Double amount, Double interestRate, Integer numberOfInstallments) {
-        PostLoanProductsResponse loanProduct = loanProductHelper
-                .createLoanProduct(create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY));
+    private Long createLoan(String disbursementDate, Double amount, Double interestRate, Integer numberOfInstallments) {
+        Long loanProductId = createLoanProduct(create4IProgressive().recalculationRestFrequencyType(RecalculationRestFrequencyType.DAILY));
 
-        Long loanId = applyAndApproveProgressiveLoan(client.getClientId(), loanProduct.getResourceId(), disbursementDate, amount,
-                interestRate, numberOfInstallments, null);
+        Long loanId = applyAndApproveProgressiveLoan(clientId, loanProductId, disbursementDate, amount, interestRate, numberOfInstallments,
+                null);
         disburseLoan(loanId, BigDecimal.valueOf(amount), disbursementDate);
         return loanId;
     }
@@ -188,7 +169,7 @@ public class LoanCOBPerformanceRestTest extends BaseLoanIntegrationTest {
 
         List<Long> loanIds = new ArrayList<>();
         for (int i = 0; i < numberOfLoans; i++) {
-            Long loanId = createLoanProduct(disbursementDate, amount != null ? amount : getRandomAmount(),
+            Long loanId = createLoan(disbursementDate, amount != null ? amount : getRandomAmount(),
                     interestRate != null ? interestRate : getRandomInterestRate(),
                     numberOfInstallments != null ? numberOfInstallments : getRandomNumberOfInstallments());
             loanIds.add(loanId);
@@ -243,7 +224,7 @@ public class LoanCOBPerformanceRestTest extends BaseLoanIntegrationTest {
         runAt("1 February 2023", () -> {
             LOG.info("Running first COB for {} loans...", loanCount);
             long startTime = System.nanoTime();
-            inlineLoanCOBHelper.executeInlineCOB(loanIds.get());
+            executeInlineCOB(loanIds.get());
             long endTime = System.nanoTime();
             long duration = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
             metrics.put("firstCOBTimeMs", duration);
@@ -254,7 +235,7 @@ public class LoanCOBPerformanceRestTest extends BaseLoanIntegrationTest {
         runAt("1 March 2023", () -> {
             LOG.info("Running second COB for {} loans...", loanCount);
             long startTime = System.nanoTime();
-            inlineLoanCOBHelper.executeInlineCOB(loanIds.get());
+            executeInlineCOB(loanIds.get());
             long endTime = System.nanoTime();
             long duration = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
             metrics.put("secondCOBTimeMs", duration);

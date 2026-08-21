@@ -98,6 +98,7 @@ public interface WorkingCapitalLoanMapper {
     @Mapping(target = "originators", ignore = true)
     @Mapping(target = "fraud", source = "fraud")
     @Mapping(target = "chargeOffReason", source = "chargeOffReason", qualifiedByName = "chargeOffReasonData")
+    @Mapping(target = "writeOffReason", source = "writeOffReason", qualifiedByName = "writeOffReasonData")
     WorkingCapitalLoanData toData(WorkingCapitalLoan loan);
 
     List<WorkingCapitalLoanData> toDataList(List<WorkingCapitalLoan> loans);
@@ -110,6 +111,11 @@ public interface WorkingCapitalLoanMapper {
     @Named("chargeOffReasonData")
     default CodeValueData chargeOffReasonData(final CodeValue chargeOffReason) {
         return chargeOffReason != null ? chargeOffReason.toData() : null;
+    }
+
+    @Named("writeOffReasonData")
+    default CodeValueData writeOffReasonData(final CodeValue writeOffReason) {
+        return writeOffReason != null ? writeOffReason.toData() : null;
     }
 
     @Named("monetaryCurrencyToCurrencyData")
@@ -168,17 +174,23 @@ public interface WorkingCapitalLoanMapper {
             timelineData.setDisbursedByLastname(firstDisbursement.getDisbursedBy().getLastname());
             timelineData.setActualDisbursementDate(firstDisbursement.getActualDisbursementDate());
         }
+        timelineData.setClosedOnDate(loan.getClosedOnDate());
         if (loan.getClosedBy() != null) {
             timelineData.setClosedByUsername(loan.getClosedBy().getUsername());
             timelineData.setClosedByFirstname(loan.getClosedBy().getFirstname());
             timelineData.setClosedByLastname(loan.getClosedBy().getLastname());
-            timelineData.setClosedOnDate(loan.getClosedOnDate());
         }
         if (loan.getRejectedBy() != null) {
             timelineData.setRejectedByUsername(loan.getRejectedBy().getUsername());
             timelineData.setRejectedByFirstname(loan.getRejectedBy().getFirstname());
             timelineData.setRejectedByLastname(loan.getRejectedBy().getLastname());
             timelineData.setRejectedOnDate(loan.getRejectedOnDate());
+        }
+        if (loan.getChargedOffBy() != null) {
+            timelineData.setChargedOffByUsername(loan.getChargedOffBy().getUsername());
+            timelineData.setChargedOffByFirstname(loan.getChargedOffBy().getFirstname());
+            timelineData.setChargedOffByLastname(loan.getChargedOffBy().getLastname());
+            timelineData.setChargedOffOnDate(loan.getChargedOffOnDate());
         }
         return timelineData;
     }

@@ -22,25 +22,29 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.BusinessDateUpdateRequest;
-import org.apache.fineract.client.models.ExternalEventConfigurationUpdateRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
-import org.apache.fineract.integrationtests.common.BusinessStepHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.ExternalEventConfigurationHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
-import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventsExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @Slf4j
 @ExtendWith({ LoanTestLifecycleExtension.class, ExternalEventsExtension.class })
-public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest {
+@Order(1)
+public class CustomSnapshotEventIntegrationTest extends FeignLoanTestBase {
+
+    private static final String LOAN_COB_JOB = "LOAN_CLOSE_OF_BUSINESS";
+    private static final String LOAN_ACCOUNT_CUSTOM_SNAPSHOT_EVENT = "LoanAccountCustomSnapshotBusinessEvent";
+
+    private final FeignBusinessStepHelper businessStepHelper = new FeignBusinessStepHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void testSnapshotEventGenerationWhenLoanInstallmentIsNotPayed() {
@@ -53,15 +57,15 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             enableLoanAccountCustomSnapshotBusinessEvent();
 
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
+            Long loanProductId = createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1250.0, 4);
 
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1250), "01 January 2023");
@@ -82,9 +86,9 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             updateBusinessDateAndExecuteCOBJob("01 February 2023");
 
             // verify external events
-            List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventResponse> allExternalEvents = externalEventHelper.getAllExternalEvents();
             Assertions.assertEquals(1, allExternalEvents.size());
-            Assertions.assertEquals("LoanAccountCustomSnapshotBusinessEvent", allExternalEvents.get(0).getType());
+            Assertions.assertEquals(LOAN_ACCOUNT_CUSTOM_SNAPSHOT_EVENT, allExternalEvents.get(0).getType());
             Assertions.assertEquals(loanId, allExternalEvents.get(0).getAggregateRootId());
 
             // Loan Delinquency data validation
@@ -120,15 +124,15 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             enableLoanAccountCustomSnapshotBusinessEvent();
 
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
+            Long loanProductId = createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1250.0, 4);
 
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1250), "01 January 2023");
@@ -160,7 +164,7 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             updateBusinessDateAndExecuteCOBJob("01 February 2023");
 
             // verify external events
-            List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventResponse> allExternalEvents = externalEventHelper.getAllExternalEvents();
             Assertions.assertEquals(0, allExternalEvents.size());
         });
     }
@@ -176,15 +180,15 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             enableLoanAccountCustomSnapshotBusinessEvent();
 
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
+            Long loanProductId = createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1250.0, 4);
 
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1250), "01 January 2023");
@@ -205,7 +209,7 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             updateBusinessDateAndExecuteCOBJob("01 February 2023");
 
             // verify external events
-            List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventResponse> allExternalEvents = externalEventHelper.getAllExternalEvents();
             Assertions.assertEquals(0, allExternalEvents.size());
         });
     }
@@ -220,15 +224,15 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             enableLoanAccountCustomSnapshotBusinessEvent();
 
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
+            Long loanProductId = createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1250.0, 4);
 
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1250), "01 January 2023");
@@ -249,7 +253,7 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             updateBusinessDateAndExecuteCOBJob("31 January 2023");
 
             // verify external events
-            List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventResponse> allExternalEvents = externalEventHelper.getAllExternalEvents();
             Assertions.assertEquals(0, allExternalEvents.size());
         });
     }
@@ -265,15 +269,15 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
                     "EXTERNAL_ASSET_OWNER_TRANSFER", "CHECK_DUE_INSTALLMENTS");
 
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = createClient();
 
             // Create Loan Product
             PostLoanProductsRequest loanProductsRequest = create1InstallmentAmountInMultiplesOf4Period1MonthLongWithInterestAndAmortizationProduct(
-                    InterestType.FLAT, AmortizationType.EQUAL_INSTALLMENTS);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+                    LoanTestData.InterestType.FLAT, LoanTestData.AmortizationType.EQUAL_INSTALLMENTS);
+            Long loanProductId = createLoanProduct(loanProductsRequest);
 
             // Apply and Approve Loan
-            Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "01 January 2023", 1250.0, 4);
+            Long loanId = applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1250.0, 4);
 
             // Disburse Loan
             disburseLoan(loanId, BigDecimal.valueOf(1250), "01 January 2023");
@@ -294,38 +298,26 @@ public class CustomSnapshotEventIntegrationTest extends BaseLoanIntegrationTest 
             updateBusinessDateAndExecuteCOBJob("01 February 2023");
 
             // verify external events
-            List<ExternalEventResponse> allExternalEvents = ExternalEventHelper.getAllExternalEvents(requestSpec, responseSpec);
+            List<ExternalEventResponse> allExternalEvents = externalEventHelper.getAllExternalEvents();
             Assertions.assertEquals(0, allExternalEvents.size());
         });
     }
 
     private void enableCOBBusinessStep(String... steps) {
-        new BusinessStepHelper().updateSteps("LOAN_CLOSE_OF_BUSINESS", steps);
-
+        businessStepHelper.updateSteps(LOAN_COB_JOB, steps);
     }
 
     private void enableLoanAccountCustomSnapshotBusinessEvent() {
-        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, new ExternalEventConfigurationUpdateRequest()
-                        .externalEventConfigurations(Map.of("LoanAccountCustomSnapshotBusinessEvent", true)));
-        Assertions.assertEquals(updatedConfigurations.size(), 1);
-        Assertions.assertTrue(updatedConfigurations.containsKey("LoanAccountCustomSnapshotBusinessEvent"));
-        Assertions.assertTrue(updatedConfigurations.get("LoanAccountCustomSnapshotBusinessEvent"));
+        externalEventHelper.enableBusinessEvent(LOAN_ACCOUNT_CUSTOM_SNAPSHOT_EVENT);
     }
 
     private void disableLoanAccountCustomSnapshotBusinessEvent() {
-        final Map<String, Boolean> updatedConfigurations = ExternalEventConfigurationHelper.updateExternalEventConfigurations(requestSpec,
-                responseSpec, new ExternalEventConfigurationUpdateRequest()
-                        .externalEventConfigurations(Map.of("LoanAccountCustomSnapshotBusinessEvent", false)));
-        Assertions.assertEquals(updatedConfigurations.size(), 1);
-        Assertions.assertTrue(updatedConfigurations.containsKey("LoanAccountCustomSnapshotBusinessEvent"));
-        Assertions.assertFalse(updatedConfigurations.get("LoanAccountCustomSnapshotBusinessEvent"));
+        externalEventHelper.disableBusinessEvent(LOAN_ACCOUNT_CUSTOM_SNAPSHOT_EVENT);
     }
 
     private void updateBusinessDateAndExecuteCOBJob(String date) {
-        businessDateHelper.updateBusinessDate(new BusinessDateUpdateRequest().type(BusinessDateUpdateRequest.TypeEnum.BUSINESS_DATE)
-                .date(date).dateFormat(DATETIME_PATTERN).locale("en"));
-        SchedulerJobHelper.executeAndAwaitJob("Loan COB");
+        updateBusinessDate(date);
+        schedulerHelper.executeAndAwaitJob("Loan COB");
     }
 
 }

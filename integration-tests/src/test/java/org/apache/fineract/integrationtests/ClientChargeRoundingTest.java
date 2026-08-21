@@ -18,53 +18,50 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static io.restassured.RestAssured.given;
-import static org.apache.fineract.integrationtests.common.ClientHelper.addChargesForClient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.response.Response;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.CurrencyConfigurationData;
 import org.apache.fineract.client.models.CurrencyUpdateRequest;
 import org.apache.fineract.client.models.GetClientsChargesPageItems;
 import org.apache.fineract.client.models.GetClientsClientIdChargesResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.FineractClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
+import org.apache.fineract.client.models.PostClientsClientIdChargesRequest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class ClientChargeRoundingTest extends BaseLoanIntegrationTest {
+public class ClientChargeRoundingTest extends FeignLoanTestBase {
 
     private Long clientId;
-    private ChargesHelper chargesHelper;
     private static final String DATE = "01 January 2026";
 
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() {
         enableRequiredCurrencies();
-        clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-        chargesHelper = new ChargesHelper();
+        clientId = createClient();
     }
 
     @Test
-    public void shouldRoundUsdClientChargeTo_TwoDecimalPlaces() throws Exception {
+    public void shouldRoundUsdClientChargeTo_TwoDecimalPlaces() {
         PostChargesResponse chargesResponse = createFlatClientCharge(19.876, "USD");
 
-        Integer appliedChargeId = applyChargeToClient(clientId, chargesResponse.getResourceId(), new BigDecimal("19.876"));
+        applyChargeToClient(clientId, chargesResponse.getResourceId(), new BigDecimal("19.876"));
 
-        GetClientsChargesPageItems charge = getClientCharge(clientId, appliedChargeId.longValue());
+        GetClientsChargesPageItems charge = getSingleClientCharge(clientId);
 
         assertNotNull(charge);
         BigDecimal actualChargeAmount = charge.getAmount();
@@ -73,12 +70,12 @@ public class ClientChargeRoundingTest extends BaseLoanIntegrationTest {
     }
 
     @Test
-    public void shouldRoundJpyClientChargeTo_ZeroDecimalPlaces() throws Exception {
+    public void shouldRoundJpyClientChargeTo_ZeroDecimalPlaces() {
         PostChargesResponse chargesResponse = createFlatClientCharge(19.8, "JPY");
 
-        Integer appliedChargeId = applyChargeToClient(clientId, chargesResponse.getResourceId(), new BigDecimal("19.8"));
+        applyChargeToClient(clientId, chargesResponse.getResourceId(), new BigDecimal("19.8"));
 
-        GetClientsChargesPageItems charge = getClientCharge(clientId, appliedChargeId.longValue());
+        GetClientsChargesPageItems charge = getSingleClientCharge(clientId);
 
         assertNotNull(charge);
         BigDecimal actualChargeAmount = charge.getAmount();
@@ -87,12 +84,12 @@ public class ClientChargeRoundingTest extends BaseLoanIntegrationTest {
     }
 
     @Test
-    public void shouldRoundUpJpyClientCharge_whenValueIsAboveHalfTo_ZeroDecimalPlaces() throws Exception {
+    public void shouldRoundUpJpyClientCharge_whenValueIsAboveHalfTo_ZeroDecimalPlaces() {
         PostChargesResponse chargesResponse = createFlatClientCharge(0.55, "JPY");
 
-        Integer appliedChargeId = applyChargeToClient(clientId, chargesResponse.getResourceId(), new BigDecimal("0.55"));
+        applyChargeToClient(clientId, chargesResponse.getResourceId(), new BigDecimal("0.55"));
 
-        GetClientsChargesPageItems charge = getClientCharge(clientId, appliedChargeId.longValue());
+        GetClientsChargesPageItems charge = getSingleClientCharge(clientId);
 
         assertNotNull(charge);
         BigDecimal actualChargeAmount = charge.getAmount();
@@ -101,14 +98,14 @@ public class ClientChargeRoundingTest extends BaseLoanIntegrationTest {
     }
 
     @Test
-    public void shouldFailToAddJpyClientCharge_whenRoundedToZero() throws Exception {
+    public void shouldFailToAddJpyClientCharge_whenRoundedToZero() {
         PostChargesResponse chargesResponse = createFlatClientCharge(0.5, "JPY");
 
-        Response response = applyChargeToClientRaw(clientId, chargesResponse.getResourceId(), new BigDecimal("0.5"));
+        CallFailedRuntimeException exception = applyChargeToClientExpectingError(clientId, chargesResponse.getResourceId(),
+                new BigDecimal("0.5"));
 
-        assertEquals(400, response.statusCode());
-        String errorBody = response.asString();
-        assertTrue(errorBody.contains("error.msg.client.charge.amount.rounded.to.zero"));
+        assertEquals(400, exception.getStatus());
+        assertTrue(exception.getResponseBody().contains("error.msg.client.charge.amount.rounded.to.zero"));
         assertFalse(hasAnyClientCharges(clientId), "Expected no client charge to be created when rounded amount becomes 0");
     }
 
@@ -118,51 +115,40 @@ public class ClientChargeRoundingTest extends BaseLoanIntegrationTest {
 
     private PostChargesResponse createFlatClientCharge(double amount, String currencyCode) {
         String uniqueChargeName = "Client Charge Flat " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(3) // CLIENT
+        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(3) // CLIENT
                 .chargeTimeType(2).chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode(currencyCode).locale("en").active(true).penalty(false));
     }
 
-    private Integer applyChargeToClient(Long clientId, Long chargeId, BigDecimal amount) {
-        String request = """
-                {
-                  "chargeId": %d,
-                  "amount": %s,
-                  "locale": "en",
-                  "dateFormat": "dd MMMM yyyy",
-                  "dueDate": "%s"
-                }
-                """.formatted(chargeId, amount.toPlainString(), DATE);
-
-        return addChargesForClient(requestSpec, responseSpec, clientId.intValue(), request);
+    private void applyChargeToClient(Long clientId, Long chargeId, BigDecimal amount) {
+        chargesHelper.addClientCharge(clientId, clientChargeRequest(chargeId, amount));
     }
 
-    private Response applyChargeToClientRaw(Long clientId, Long chargeId, BigDecimal amount) {
-
-        String request = """
-                {
-                  "chargeId": %d,
-                  "amount": %s,
-                  "locale": "en",
-                  "dateFormat": "dd MMMM yyyy",
-                  "dueDate": "%s"
-                }
-                """.formatted(chargeId, amount.toPlainString(), DATE);
-
-        String url = "/fineract-provider/api/v1/clients/" + clientId + "/charges?" + Utils.TENANT_IDENTIFIER;
-
-        return given().spec(requestSpec).body(request).when().post(url);
+    private CallFailedRuntimeException applyChargeToClientExpectingError(Long clientId, Long chargeId, BigDecimal amount) {
+        return assertThrows(CallFailedRuntimeException.class,
+                () -> chargesHelper.addClientCharge(clientId, clientChargeRequest(chargeId, amount)));
     }
 
-    private GetClientsChargesPageItems getClientCharge(Long clientId, Long chargeId) throws IOException {
-        return FineractClientHelper.getFineractClient().clientCharges.retrieveOneClientCharge(clientId, chargeId).execute().body();
+    private PostClientsClientIdChargesRequest clientChargeRequest(Long chargeId, BigDecimal amount) {
+        return new PostClientsClientIdChargesRequest()//
+                .chargeId(chargeId)//
+                .amount(amount)//
+                .locale(LoanTestData.LOCALE)//
+                .dateFormat(DATETIME_PATTERN)//
+                .dueDate(DATE);
     }
 
-    private boolean hasAnyClientCharges(Long clientId) throws IOException {
+    private GetClientsChargesPageItems getSingleClientCharge(Long clientId) {
+        GetClientsClientIdChargesResponse response = chargesHelper.getClientCharges(clientId);
+        assertNotNull(response);
+        Set<GetClientsChargesPageItems> pageItems = response.getPageItems();
+        assertNotNull(pageItems);
+        assertEquals(1, pageItems.size());
+        return pageItems.iterator().next();
+    }
 
-        GetClientsClientIdChargesResponse response = FineractClientHelper.getFineractClient().clientCharges
-                .retrieveAllClientCharges(clientId, "all", null, null, null).execute().body();
-
+    private boolean hasAnyClientCharges(Long clientId) {
+        GetClientsClientIdChargesResponse response = chargesHelper.getClientCharges(clientId);
         return response != null && response.getPageItems() != null && !response.getPageItems().isEmpty();
     }
 
@@ -174,12 +160,12 @@ public class ClientChargeRoundingTest extends BaseLoanIntegrationTest {
      * Currencies used by these tests must be explicitly enabled in the currency configuration. Otherwise, charge
      * creation and persistence may succeed while retrieval APIs do not return the charges.
      */
-    private void enableRequiredCurrencies() throws Exception {
+    private void enableRequiredCurrencies() {
         CurrencyUpdateRequest request = new CurrencyUpdateRequest().currencies(List.of("USD", "JPY"));
 
-        FineractClientHelper.getFineractClient().currencies.updateCurrencies(request).execute();
+        FineractFeignClientHelper.getFineractFeignClient().currency().updateCurrencies(request);
 
-        CurrencyConfigurationData data = FineractClientHelper.getFineractClient().currencies.retrieveCurrencies().execute().body();
+        CurrencyConfigurationData data = FineractFeignClientHelper.getFineractFeignClient().currency().retrieveCurrencies();
 
         assertNotNull(data);
         assertNotNull(data.getSelectedCurrencyOptions());

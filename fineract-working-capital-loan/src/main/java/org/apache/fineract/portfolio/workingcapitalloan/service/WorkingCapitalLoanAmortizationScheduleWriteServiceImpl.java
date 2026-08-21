@@ -40,7 +40,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapital
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -299,6 +299,19 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         model.recalculateNetAmortizationAndDeferredBalanceFrom(transactionDate);
 
         scheduleRepositoryWrapper.writeModel(loan, model);
+    }
+
+    @Override
+    public void acknowledgeElapsedPeriods(final WorkingCapitalLoan loan, final LocalDate businessDate) {
+        Validate.notNull(loan, "loan must not be null");
+        Validate.notNull(businessDate, "businessDate must not be null");
+
+        final MathContext mc = MoneyHelper.getMathContext();
+        // Unlike the payment paths this runs for every loan the batch touches, including ones that never reached
+        // disbursement, so a missing schedule is an ordinary outcome rather than a broken state.
+        scheduleRepositoryWrapper.readModel(loan.getId(), mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan))
+                .filter(model -> model.acknowledgeElapsedPeriods(businessDate))
+                .ifPresent(model -> scheduleRepositoryWrapper.writeModel(loan, model));
     }
 
     @Override

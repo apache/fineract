@@ -21,7 +21,6 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -34,24 +33,22 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdLoanChargeData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
-import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
+public class LoanChargeRoundingTest extends FeignLoanTestBase {
 
     private Long clientId;
 
@@ -60,7 +57,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+        clientId = createClient();
     }
 
     /** FLAT CHARGE **/
@@ -120,11 +117,10 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 0.5);
 
-            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> loanTransactionHelper.addLoanCharge(loanId, request));
+            CallFailedRuntimeException exception = loanHelper.addLoanChargeExpectingError(loanId, request);
 
-            assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero"));
+            assertEquals(403, exception.getStatus());
+            assertErrorGlobalisationCode(exception, "error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero");
 
             assertNoChargesPersisted(loanId, chargeResponse.getResourceId());
         });
@@ -191,11 +187,10 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 0.005);
 
-            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> loanTransactionHelper.addLoanCharge(loanId, request));
+            CallFailedRuntimeException exception = loanHelper.addLoanChargeExpectingError(loanId, request);
 
-            assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero"));
+            assertEquals(403, exception.getStatus());
+            assertErrorGlobalisationCode(exception, "error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero");
 
             assertNoChargesPersisted(loanId, chargeResponse.getResourceId());
         });
@@ -303,11 +298,10 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 0.38);
 
-            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> loanTransactionHelper.addLoanCharge(loanId, request));
+            CallFailedRuntimeException exception = loanHelper.addLoanChargeExpectingError(loanId, request);
 
-            assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero"));
+            assertEquals(403, exception.getStatus());
+            assertErrorGlobalisationCode(exception, "error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero");
 
             assertNoChargesPersisted(loanId, chargeResponse.getResourceId());
         });
@@ -388,11 +382,10 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 1.68);
 
-            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> loanTransactionHelper.addLoanCharge(loanId, request));
+            CallFailedRuntimeException exception = loanHelper.addLoanChargeExpectingError(loanId, request);
 
-            assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero"));
+            assertEquals(403, exception.getStatus());
+            assertErrorGlobalisationCode(exception, "error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero");
 
             assertNoChargesPersisted(loanId, chargeResponse.getResourceId());
         });
@@ -416,7 +409,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             addLoanCharge(loanId, chargeResponse.getResourceId(), DATE, 0.5);
 
-            List<GetLoansLoanIdLoanChargeData> charges = getLoanCharges(loanId);
+            List<GetLoansLoanIdLoanChargeData> charges = getLoanChargeData(loanId);
             assertNotNull(charges);
             assertEquals(2, charges.size());
 
@@ -448,13 +441,12 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 0.09);
 
-            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> loanTransactionHelper.addLoanCharge(loanId, request));
+            CallFailedRuntimeException exception = loanHelper.addLoanChargeExpectingError(loanId, request);
 
-            assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero"));
+            assertEquals(403, exception.getStatus());
+            assertErrorGlobalisationCode(exception, "error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero");
 
-            List<GetLoansLoanIdLoanChargeData> charges = getLoanCharges(loanId);
+            List<GetLoansLoanIdLoanChargeData> charges = getLoanChargeData(loanId);
             assertTrue(charges == null || charges.isEmpty(), "Expected no charges since rounded amount becomes 0");
 
             assertNoChargesPersisted(loanId, chargeResponse.getResourceId());
@@ -478,13 +470,12 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 0.04);
 
-            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> loanTransactionHelper.addLoanCharge(loanId, request));
+            CallFailedRuntimeException exception = loanHelper.addLoanChargeExpectingError(loanId, request);
 
-            assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero"));
+            assertEquals(403, exception.getStatus());
+            assertErrorGlobalisationCode(exception, "error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero");
 
-            List<GetLoansLoanIdLoanChargeData> charges = getLoanCharges(loanId);
+            List<GetLoansLoanIdLoanChargeData> charges = getLoanChargeData(loanId);
             assertTrue(charges == null || charges.isEmpty(), "Expected no charges since rounded amount becomes 0");
 
             assertNoChargesPersisted(loanId, chargeResponse.getResourceId());
@@ -509,7 +500,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
             assertNotNull(chargeResponse.getResourceId());
             addLoanCharge(loanId, chargeResponse.getResourceId(), DATE, 0.5);
 
-            List<GetLoansLoanIdLoanChargeData> charges = getLoanCharges(loanId);
+            List<GetLoansLoanIdLoanChargeData> charges = getLoanChargeData(loanId);
 
             assertNotNull(charges);
             assertEquals(1, charges.size());
@@ -539,7 +530,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             addLoanCharge(loanId, chargeResponse.getResourceId(), DATE, 0.09);
 
-            List<GetLoansLoanIdLoanChargeData> charges = getLoanCharges(loanId);
+            List<GetLoansLoanIdLoanChargeData> charges = getLoanChargeData(loanId);
 
             assertNotNull(charges);
             assertEquals(1, charges.size());
@@ -570,11 +561,10 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
             PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeResponse.getResourceId(), DATE, 0.04);
 
-            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> loanTransactionHelper.addLoanCharge(loanId, request));
+            CallFailedRuntimeException exception = loanHelper.addLoanChargeExpectingError(loanId, request);
 
-            assertEquals(403, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero"));
+            assertEquals(403, exception.getStatus());
+            assertErrorGlobalisationCode(exception, "error.msg.loanCharge.cannot.be.added.as.amount.rounded.to.zero");
 
             assertNoChargesPersisted(loanId, chargeResponse.getResourceId());
         });
@@ -585,16 +575,12 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
     // -----------------------------
 
     private Long createLoanProduct(int digitsAfterDecimal, int inMultiplesOf) {
-        return loanProductHelper
-                .createLoanProduct(baseLoanProductRequest().digitsAfterDecimal(digitsAfterDecimal).inMultiplesOf(inMultiplesOf))
-                .getResourceId();
+        return createLoanProduct(baseLoanProductRequest().digitsAfterDecimal(digitsAfterDecimal).inMultiplesOf(inMultiplesOf));
     }
 
     private Long createMultiDisbursementLoanProduct(int digitsAfterDecimal, int inMultiplesOf) {
-        return loanProductHelper
-                .createLoanProduct(
-                        baseLoanProductRequestMultiRepayment().digitsAfterDecimal(digitsAfterDecimal).inMultiplesOf(inMultiplesOf))
-                .getResourceId();
+        return createLoanProduct(
+                baseLoanProductRequestMultiRepayment().digitsAfterDecimal(digitsAfterDecimal).inMultiplesOf(inMultiplesOf));
     }
 
     private PostLoanProductsRequest baseLoanProductRequest() {
@@ -619,84 +605,76 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
     }
 
     private Long applyAndApproveLoan(Long productId, double principal, int repayments) {
-        PostLoansResponse response = loanTransactionHelper.applyLoan(applyLoanRequest(clientId, productId, DATE, principal, repayments));
-        Long loanId = response.getLoanId();
+        Long loanId = applyForLoan(LoanRequestBuilders.applyLoanRequest(clientId, productId, DATE, principal, repayments));
         BigDecimal approvedPrincipal = getLoanPrincipal(loanId);
         assertNotNull(approvedPrincipal);
-        loanTransactionHelper.approveLoan(loanId, approveLoanRequest(approvedPrincipal.doubleValue(), DATE));
+        approveLoan(loanId, approveLoanRequest(approvedPrincipal.doubleValue(), DATE));
         return loanId;
     }
 
     private BigDecimal getLoanPrincipal(Long loanId) {
-        return loanTransactionHelper.getLoanDetails(loanId).getPrincipal();
+        return getLoanDetails(loanId).getPrincipal();
     }
 
     private Long applyAndApproveMultiTrancheLoan(Long productId, List<PostLoansDisbursementData> disbursements) {
         double totalPrincipal = disbursements.stream().map(PostLoansDisbursementData::getPrincipal).mapToDouble(BigDecimal::doubleValue)
                 .sum();
 
-        PostLoansRequest request = applyLoanRequest(clientId, productId, DATE, totalPrincipal, disbursements.size());
+        PostLoansRequest request = LoanRequestBuilders.applyLoanRequest(clientId, productId, DATE, totalPrincipal, disbursements.size());
         request.interestCalculationPeriodType(0).setDisbursementData(disbursements);
-        PostLoansResponse response = loanTransactionHelper.applyLoan(request);
-        Long loanId = response.getLoanId();
-        loanTransactionHelper.approveLoan(loanId, approveLoanRequest(totalPrincipal, DATE));
+        Long loanId = applyForLoan(request);
+        approveLoan(loanId, approveLoanRequest(totalPrincipal, DATE));
         return loanId;
     }
 
     private PostChargesResponse createFlatCharge(double amount) {
         String uniqueChargeName = "Loan Flat Charge" + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2)
+        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2)
                 .chargeCalculationType(1).amount(amount).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));
     }
 
     private PostChargesResponse createPercentageOfAmountCharge(double percentage) {
         String uniqueChargeName = "Loan Percentage of Amount Charge" + UUID.randomUUID().toString().replace("-", "");
         return chargesHelper
-                .createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2).chargeCalculationType(2)
+                .createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2).chargeCalculationType(2)
                         .amount(percentage).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));
     }
 
     private PostChargesResponse createPercentageOfAmountPlusInterestCharge(double percentage) {
         String uniqueChargeName = "Loan Percentage of Amount Plus Interest Charge" + UUID.randomUUID().toString().replace("-", "");
         return chargesHelper
-                .createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2).chargeCalculationType(3)
+                .createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2).chargeCalculationType(3)
                         .amount(percentage).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));
     }
 
     private PostChargesResponse createPercentageOfInterestCharge(double percentage) {
         String uniqueChargeName = "Loan Percentage of Interest Charge" + UUID.randomUUID().toString().replace("-", "");
         return chargesHelper
-                .createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2).chargeCalculationType(4)
+                .createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(2).chargeCalculationType(4)
                         .amount(percentage).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));
     }
 
     private PostChargesResponse createPercentageOfTrancheDisbursementCharge(double percentage) {
         String uniqueChargeName = "Loan Tranche Charge" + UUID.randomUUID().toString().replace("-", "");
         return chargesHelper
-                .createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(12).chargeCalculationType(5)
+                .createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(12).chargeCalculationType(5)
                         .amount(percentage).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));
     }
 
     private PostChargesResponse createPercentageOfDisbursementCharge(double percentage) {
         String uniqueChargeName = "Loan Disbursement Charge" + UUID.randomUUID().toString().replace("-", "");
         return chargesHelper
-                .createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(1).chargeCalculationType(2)
+                .createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(1).chargeTimeType(1).chargeCalculationType(2)
                         .amount(percentage).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));
     }
 
-    protected PostLoansLoanIdChargesRequest buildLoanChargeRequest(Long chargeId, String dueDate, Double amount) {
+    private PostLoansLoanIdChargesRequest buildLoanChargeRequest(Long chargeId, String dueDate, Double amount) {
         return new PostLoansLoanIdChargesRequest().chargeId(chargeId).amount(amount).dueDate(dueDate).dateFormat("dd MMMM yyyy")
                 .locale("en");
     }
 
-    @Override
-    protected PostLoansLoanIdChargesResponse addLoanCharge(Long loanId, Long chargeId, String dueDate, Double amount) {
-        PostLoansLoanIdChargesRequest request = buildLoanChargeRequest(chargeId, dueDate, amount);
-        return loanTransactionHelper.addLoanCharge(loanId, request);
-    }
-
     private BigDecimal getLoanChargeAmount(Long loanId, Long chargeId) {
-        List<GetLoansLoanIdLoanChargeData> charges = getLoanCharges(loanId);
+        List<GetLoansLoanIdLoanChargeData> charges = getLoanChargeData(loanId);
         assertNotNull(charges);
         GetLoansLoanIdLoanChargeData charge = charges.stream().filter(c -> Objects.equals(c.getChargeId(), chargeId)).findFirst()
                 .orElseThrow(() -> new AssertionError("Loan charge not found: " + chargeId));
@@ -714,8 +692,8 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
         return applyRoundingRules(rawCharge, digitsAfterDecimal, inMultiplesOf);
     }
 
-    private List<GetLoansLoanIdLoanChargeData> getLoanCharges(Long loanId) {
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+    private List<GetLoansLoanIdLoanChargeData> getLoanChargeData(Long loanId) {
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
         return loanDetails.getCharges();
     }
 
@@ -776,29 +754,29 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
 
     /// AMOUNT + INTEREST
     private Long createAndDisburseProgressiveLoan(double principal, int digitsAfterDecimal, int inMultiplesOf) {
-        PostLoanProductsResponse loanProduct = loanProductHelper.createLoanProduct(
+        Long productId = createLoanProduct(
                 create4IProgressive().numberOfRepayments(12).interestRatePerPeriod(1.0).isInterestRecalculationEnabled(false)
                         .currencyCode("USD").digitsAfterDecimal(digitsAfterDecimal).inMultiplesOf(inMultiplesOf));
 
-        PostLoansRequest request = applyLoanRequest(clientId, loanProduct.getResourceId(), DATE, principal, 12);
+        PostLoansRequest request = LoanRequestBuilders.applyLoanRequest(clientId, productId, DATE, principal, 12);
 
         request.setInterestRatePerPeriod(new BigDecimal("1.0"));
         request.setInterestRateFrequencyType(1);
         request.setTransactionProcessingStrategyCode("advanced-payment-allocation-strategy");
 
-        Long loanId = loanTransactionHelper.applyLoan(request).getLoanId();
+        Long loanId = applyForLoan(request);
 
-        loanTransactionHelper.approveLoan(loanId, approveLoanRequest(principal, DATE));
+        approveLoan(loanId, approveLoanRequest(principal, DATE));
 
-        loanTransactionHelper.disburseLoan(loanId, DATE, principal);
+        disburseLoanWithAmount(loanId, DATE, principal);
 
         return loanId;
     }
 
     private BigDecimal executeCobAndGetTotalInterest(Long loanId) {
-        inlineLoanCOBHelper.executeInlineCOB(loanId);
+        executeInlineCOB(loanId);
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
         BigDecimal totalInterest = loanDetails.getRepaymentSchedule().getPeriods().stream()
                 .map(p -> p.getInterestDue() == null ? BigDecimal.ZERO : p.getInterestDue()).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -809,7 +787,7 @@ public class LoanChargeRoundingTest extends BaseLoanIntegrationTest {
     }
 
     private void assertNoChargesPersisted(Long loanId, Long chargeId) {
-        List<GetLoansLoanIdLoanChargeData> charges = getLoanCharges(loanId);
+        List<GetLoansLoanIdLoanChargeData> charges = getLoanChargeData(loanId);
 
         boolean chargeExists = charges != null && charges.stream().anyMatch(c -> Objects.equals(c.getChargeId(), chargeId));
 

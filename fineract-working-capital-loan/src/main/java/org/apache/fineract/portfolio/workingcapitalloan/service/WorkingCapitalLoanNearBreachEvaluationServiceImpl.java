@@ -46,21 +46,21 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImpl implements Workin
     private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
 
     @Override
-    public void evaluateNearBreach(final WorkingCapitalLoan loan, final WorkingCapitalLoanNearBreachAction latestAction,
+    public boolean evaluateNearBreach(final WorkingCapitalLoan loan, final WorkingCapitalLoanNearBreachAction latestAction,
             final LocalDate effectiveDate) {
         final Optional<WorkingCapitalLoanBreachSchedule> relevantPeriod = breachScheduleRepository
                 .findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(loan.getId(), effectiveDate, effectiveDate);
         if (relevantPeriod.isEmpty()) {
-            return;
+            return false;
         }
         final WorkingCapitalLoanBreachSchedule period = relevantPeriod.get();
         if (period.getNearBreach() != null) {
-            return;
+            return false;
         }
         if (isBreachEvaluationDisabled(loan.getId(), effectiveDate)) {
             log.debug("Skipping near breach evaluation for WC loan {} - breach evaluation is disabled as of {}", loan.getId(),
                     effectiveDate);
-            return;
+            return false;
         }
         final WorkingCapitalNearBreach config = loan.getLoanProductRelatedDetails().getNearBreach();
 
@@ -76,22 +76,28 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImpl implements Workin
             effectiveFrequency = config.getFrequency();
             effectiveFrequencyType = config.getFrequencyType();
         }
-        if (evaluatePeriod(loan.getId(), period, effectiveThreshold, effectiveFrequency, effectiveFrequencyType, effectiveDate)) {
+        final Integer breachGraceDays = getBreachGraceDays(loan);
+        if (evaluatePeriod(loan.getId(), period, effectiveThreshold, effectiveFrequency, effectiveFrequencyType, breachGraceDays,
+                effectiveDate)) {
             breachScheduleRepository.saveAndFlush(period);
+            return true;
         }
+        return false;
     }
 
     private boolean evaluatePeriod(final Long loanId, final WorkingCapitalLoanBreachSchedule period, final BigDecimal threshold,
-            final Integer frequency, final WorkingCapitalLoanPeriodFrequencyType frequencyType, final LocalDate effectiveDate) {
+            final Integer frequency, final WorkingCapitalLoanPeriodFrequencyType frequencyType, final Integer breachGraceDays,
+            final LocalDate effectiveDate) {
         if (period.getMinPaymentAmount() == null || period.getMinPaymentAmount().compareTo(BigDecimal.ZERO) == 0) {
             return false;
         }
-        final LocalDate firstEvalDate = addFrequency(period.getFromDate(), frequency, frequencyType);
+        final LocalDate evaluationStartDate = period.getFromDate().plusDays(breachGraceDays);
+        final LocalDate firstEvalDate = addFrequency(evaluationStartDate, frequency, frequencyType);
         if (firstEvalDate.isAfter(period.getToDate())) {
             return false;
         }
-        final List<LocalDate> evalDates = listEvalDates(period.getFromDate(), period.getToDate(), frequency, frequencyType);
-        final int evalIndex = evalDates.indexOf(effectiveDate);
+        final List<LocalDate> evalDates = listEvalDates(evaluationStartDate, period.getToDate(), frequency, frequencyType);
+        final int evalIndex = latestEvaluationIndex(evalDates, effectiveDate);
         if (evalIndex >= 0) {
             final MonetaryCurrency currency = period.getLoan().getLoanProductRelatedDetails().getCurrency();
             final BigDecimal thresholdFraction = threshold.divide(BigDecimal.valueOf(100), MoneyHelper.getMathContext());
@@ -133,13 +139,31 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImpl implements Workin
         return dates;
     }
 
+    private int latestEvaluationIndex(final List<LocalDate> evalDates, final LocalDate effectiveDate) {
+        int latestIndex = -1;
+        for (int index = 0; index < evalDates.size(); index++) {
+            if (evalDates.get(index).isAfter(effectiveDate)) {
+                break;
+            }
+            latestIndex = index;
+        }
+        return latestIndex;
+    }
+
     private LocalDate addFrequency(final LocalDate date, final int amount, final WorkingCapitalLoanPeriodFrequencyType frequencyType) {
         return switch (frequencyType) {
-            case DAYS -> date.plusDays(amount);
-            case WEEKS -> date.plusWeeks(amount);
-            case MONTHS -> date.plusMonths(amount);
-            case YEARS -> date.plusYears(amount);
+            case DAYS -> date.plusDays(amount - 1L);
+            case WEEKS -> date.plusWeeks(amount).minusDays(1);
+            case MONTHS -> date.plusMonths(amount).minusDays(1);
+            case YEARS -> date.plusYears(amount).minusDays(1);
         };
+    }
+
+    private Integer getBreachGraceDays(final WorkingCapitalLoan loan) {
+        if (loan.getLoanProductRelatedDetails() == null || loan.getLoanProductRelatedDetails().getBreachGraceDays() == null) {
+            return 0;
+        }
+        return loan.getLoanProductRelatedDetails().getBreachGraceDays();
     }
 
     private boolean isBreachEvaluationDisabled(final Long loanId, final LocalDate date) {

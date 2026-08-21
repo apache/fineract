@@ -22,147 +22,108 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.UUID;
-import org.apache.fineract.client.models.DelinquencyBucketResponse;
-import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
+import org.apache.fineract.client.models.JobBusinessStepConfigData;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.cob.data.JobBusinessStepConfigData;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.BusinessStepConfigurationHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessStepHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
-public class LoanAccountArrearsAgeingCOBBusinessStepTest extends BaseLoanIntegrationTest {
+@Order(1)
+public class LoanAccountArrearsAgeingCOBBusinessStepTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
-    private LoanTransactionHelper loanTransactionHelper;
-    public static final String UPDATE_LOAN_ARREARS_AGING = "UPDATE_LOAN_ARREARS_AGING";
+    private static final String LOAN_JOB_NAME = "LOAN_CLOSE_OF_BUSINESS";
+    private static final String UPDATE_LOAN_ARREARS_AGING = "UPDATE_LOAN_ARREARS_AGING";
 
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-    }
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
+    private final FeignBusinessStepHelper businessStepHelper = new FeignBusinessStepHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void loanArrearsAgeingCOBBusinessStepTest() {
         // Set Business Date
         try {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+            updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
 
             LocalDate businessDate = Utils.getLocalDateOfTenant();
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(dateTimeFormatter.format(businessDate));
 
             LocalDate operationDate = businessDate.minusDays(40);
-            String loanOperationDate = Utils.dateFormatter.format(operationDate);
+            String loanOperationDate = dateTimeFormatter.format(operationDate);
 
+            Long clientId = createClient();
             // create Client
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-
-            // create Loan Product
-
             // Delinquency Bucket
-            final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
-            final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
-
-            final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                    delinquencyBucketId);
-            assertNotNull(getLoanProductsProductResponse);
-
-            // Loan1 ExternalId
-            String loan1ExternalIdStr = UUID.randomUUID().toString();
+            Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
+            // create Loan Product
+            Long loanProductId = createLoanProduct(dueDateRespectiveNoAccountingNoInterestProduct(1000, 30, 1, 0,
+                    LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY)
+                    .delinquencyBucketId(delinquencyBucketId));
 
             // create Loan Account for Client with Loan Product type 1
-            Long loanProductId = getLoanProductsProductResponse.getId();
-            final Integer loanId_1 = createLoanAccount(loanOperationDate, clientId, loanProductId, loan1ExternalIdStr);
-
-            String loan2ExternalIdStr = UUID.randomUUID().toString();
-            final Integer loanId_2 = createLoanAccount(loanOperationDate, clientId, loanProductId, loan2ExternalIdStr);
+            Long loanId1 = createArrearsLoanAccount(clientId, loanProductId, loanOperationDate);
+            Long loanId2 = createArrearsLoanAccount(clientId, loanProductId, loanOperationDate);
 
             // Run Loan cob with verfying business step for Update Arrears ageing details
-
             // COB Step Validation
-            final JobBusinessStepConfigData jobBusinessStepConfigData = BusinessStepConfigurationHelper
-                    .getConfiguredBusinessStepsByJobName(requestSpec, responseSpec, BusinessConfigurationApiTest.LOAN_JOB_NAME);
+            JobBusinessStepConfigData jobBusinessStepConfigData = businessStepHelper.getConfiguredBusinessStepsByJobName(LOAN_JOB_NAME);
             assertNotNull(jobBusinessStepConfigData);
-            assertEquals(BusinessConfigurationApiTest.LOAN_JOB_NAME, jobBusinessStepConfigData.getJobName());
+            assertEquals(LOAN_JOB_NAME, jobBusinessStepConfigData.getJobName());
             assertTrue(jobBusinessStepConfigData.getBusinessSteps().size() > 0);
             assertTrue(jobBusinessStepConfigData.getBusinessSteps().stream()
                     .anyMatch(businessStep -> UPDATE_LOAN_ARREARS_AGING.equals(businessStep.getStepName())));
 
             // Run the Loan COB Job
-            final String jobName = "Loan COB";
-            SchedulerJobHelper.executeAndAwaitJob(jobName);
+            schedulerHelper.executeAndAwaitJob("Loan COB");
 
+            // verify Arrears details are updated for both loans
+            verifyArrearsSummary(loanId1);
             // verify Arrears details are updated for both the loans, by verifying loan summary fields for
             // principalOverdue,totalOverdue,overdueSinceddate
-
             // Retrieve Loan 1 with loanId
-            GetLoansLoanIdResponse loan1Details = loanTransactionHelper.getLoanDetails((long) loanId_1);
-            GetLoansLoanIdSummary loan1Summary = loan1Details.getSummary();
-            assertNotNull(loan1Summary);
-            assertNotNull(loan1Summary.getOverdueSinceDate());
-            assertEquals(1000.00, Utils.getDoubleValue(loan1Summary.getPrincipalOverdue()));
-            assertEquals(1000.00, Utils.getDoubleValue(loan1Summary.getTotalOverdue()));
-
             // Retrieve Loan 2 with loanId
-            GetLoansLoanIdResponse loan2Details = loanTransactionHelper.getLoanDetails((long) loanId_2);
-            GetLoansLoanIdSummary loan2Summary = loan2Details.getSummary();
-            assertNotNull(loan2Summary);
-            assertNotNull(loan2Summary.getOverdueSinceDate());
-            assertEquals(1000.00, Utils.getDoubleValue(loan2Summary.getPrincipalOverdue()));
-            assertEquals(1000.00, Utils.getDoubleValue(loan2Summary.getTotalOverdue()));
+            verifyArrearsSummary(loanId2);
         } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+            updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(false));
         }
     }
 
-    private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Long delinquencyBucketId) {
-        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().build(null, delinquencyBucketId);
-        final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
-        return loanTransactionHelper.getLoanProduct(loanProductId);
+    private void verifyArrearsSummary(final Long loanId) {
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+        GetLoansLoanIdSummary loanSummary = loanDetails.getSummary();
+        assertNotNull(loanSummary);
+        assertNotNull(loanSummary.getOverdueSinceDate());
+        assertEquals(1000.00, Utils.getDoubleValue(loanSummary.getPrincipalOverdue()));
+        assertEquals(1000.00, Utils.getDoubleValue(loanSummary.getTotalOverdue()));
     }
 
-    private Integer createLoanAccount(final String operationDate, final Integer clientID, final Long loanProductID,
-            final String externalId) {
-
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate(operationDate).withSubmittedOnDate(operationDate).withLoanType("individual")
-                .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
-
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan(operationDate, "1000", loanId, null);
-        loanTransactionHelper.disburseLoanWithNetDisbursalAmount(operationDate, loanId, "1000");
+    private Long createArrearsLoanAccount(final Long clientId, final Long productId, final String operationDate) {
+        PostLoansRequest request = new PostLoansRequest().clientId(clientId).productId(productId).principal(new BigDecimal("1000"))
+                .loanTermFrequency(30).loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS).numberOfRepayments(1)
+                .repaymentEvery(30).repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS).interestRatePerPeriod(BigDecimal.ZERO)
+                .interestType(LoanTestData.InterestType.FLAT).amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)
+                .transactionProcessingStrategyCode(
+                        LoanApplicationTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY)
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)
+                .expectedDisbursementDate(operationDate).submittedOnDate(operationDate).dateFormat(LoanTestData.DATETIME_PATTERN)
+                .locale(LoanTestData.LOCALE).loanType("individual");
+        Long loanId = applyForLoan(request);
+        approveLoan(loanId, approveLoanRequest(1000.0, operationDate));
+        disburseLoan(loanId, BigDecimal.valueOf(1000), operationDate);
         return loanId;
     }
 }

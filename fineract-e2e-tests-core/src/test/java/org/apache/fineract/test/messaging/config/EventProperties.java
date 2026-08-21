@@ -38,6 +38,13 @@ public class EventProperties {
     @Value("${fineract-test.event.verification-enabled}")
     private boolean eventVerificationEnabled;
 
+    /**
+     * When enabled, a failed event assertion queries the server for the events it actually persisted, so CI logs show
+     * whether the event was never recorded or merely never delivered. Off by default; switched on in CI only.
+     */
+    @Value("${fineract-test.event.failure-diagnostics-enabled}")
+    private boolean failureDiagnosticsEnabled;
+
     public boolean isEventVerificationDisabled() {
         return !isEventVerificationEnabled();
     }

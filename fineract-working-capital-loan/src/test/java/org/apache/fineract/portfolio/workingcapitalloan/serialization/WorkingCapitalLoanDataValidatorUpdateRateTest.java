@@ -83,7 +83,9 @@ class WorkingCapitalLoanDataValidatorUpdateRateTest {
         final FromJsonHelper fromApiJsonHelper = new FromJsonHelper();
         validator = new WorkingCapitalLoanDataValidator(fromApiJsonHelper, null, null, null, null, null, rateChangeRepository);
 
-        // Default: active loan, current rate = 10, product min = 1, max = 95. With no rate changes on record the loan's
+        // Default: active loan, current rate = 10, product min = 1, max = 95. The mocked loan reports no maturity
+        // date, so the effective-date-past-maturity check has nothing to compare against and stands aside. With no rate
+        // changes on record the loan's
         // own rate is the one in effect, so "10" is still the rate a request has to differ from.
         lenient().when(rateChangeRepository.findByWorkingCapitalLoanIdAndReversedFalse(any())).thenReturn(List.of());
         lenient().when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);

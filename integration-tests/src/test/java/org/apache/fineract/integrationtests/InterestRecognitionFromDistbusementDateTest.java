@@ -23,48 +23,16 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
-import org.apache.fineract.client.models.PostLoansResponse;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class InterestRecognitionFromDistbusementDateTest extends BaseLoanIntegrationTest {
-
-    private static final Logger LOG = LoggerFactory.getLogger(InterestRecognitionFromDistbusementDateTest.class);
-    private static final String DATETIME_PATTERN = "dd MMMM yyyy";
-    private static ResponseSpecification responseSpec;
-    private static RequestSpecification requestSpec;
-    private static LoanTransactionHelper loanTransactionHelper;
-    private static Integer commonLoanProductId;
-    private static PostClientsResponse client;
-
-    @BeforeAll
-    public static void setup() {
-        Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        requestSpec.header("Fineract-Platform-TenantId", "default");
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-    }
+public class InterestRecognitionFromDistbusementDateTest extends FeignLoanTestBase {
 
     // UC1: Create Loan Product using Progressive Loan Schedule Type and interestChargedFromDisbursementDate flag
     // 1. Create a Loan product with Adv. Pment. Alloc. (PROGRESSIVE) without interestChargedFromDisbursementDate
@@ -75,27 +43,24 @@ public class InterestRecognitionFromDistbusementDateTest extends BaseLoanIntegra
         final String operationDate = "1 January 2025";
         runAt(operationDate, () -> {
             // Create a Loan Product Adv. Pment. Alloc. (PROGRESSIVE) withou interestChargedFromDisbursementDate
-            LOG.info("Create a Loan Product Adv. Pment. Alloc. (PROGRESSIVE) not using interestChargedFromDisbursementDate flag");
+            // Create a Loan Product Adv. Pment. Alloc. (PROGRESSIVE) without interestChargedFromDisbursementDate
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .numberOfRepayments(6);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            GetLoanProductsProductIdResponse loanProductData = loanProductHelper
-                    .retrieveLoanProductById(loanProductResponse.getResourceId());
+            Long loanProductId = createLoanProduct(product);
+            GetLoanProductsProductIdResponse loanProductData = retrieveLoanProduct(loanProductId);
             assertEquals(Boolean.FALSE, loanProductData.getInterestRecognitionOnDisbursementDate());
 
             // Create a Loan Product Adv. Pment. Alloc. (PROGRESSIVE) using interestChargedFromDisbursementDate in true
-            LOG.info("Create a Loan Product Adv. Pment. Alloc. (PROGRESSIVE) using interestChargedFromDisbursementDate flag");
             product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation().numberOfRepayments(6)
                     .interestRecognitionOnDisbursementDate(true);
-            loanProductResponse = loanProductHelper.createLoanProduct(product);
-            loanProductData = loanProductHelper.retrieveLoanProductById(loanProductResponse.getResourceId());
+            loanProductId = createLoanProduct(product);
+            loanProductData = retrieveLoanProduct(loanProductId);
             assertEquals(Boolean.TRUE, loanProductData.getInterestRecognitionOnDisbursementDate());
 
             // Try to create a Loan Product (CUMULATIVE) using interestChargedFromDisbursementDate in true
-            LOG.info("Try to create a Loan Product (CUMULATIVE) using interestChargedFromDisbursementDate flag");
-            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> loanProductHelper.createLoanProduct(
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> createLoanProduct(
                     createOnePeriod30DaysPeriodicAccrualProduct(8.0).numberOfRepayments(6).interestRecognitionOnDisbursementDate(true)));
-            assertEquals(403, exception.getResponse().code());
+            assertEquals(403, exception.getStatus());
             assertTrue(exception.getMessage()
                     .contains("interestRecognitionOnDisbursementDate.is.only.supported.for.progressive.loan.schedule.type"));
         });
@@ -111,32 +76,27 @@ public class InterestRecognitionFromDistbusementDateTest extends BaseLoanIntegra
         runAt(operationDate, () -> {
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .numberOfRepayments(6).interestRecognitionOnDisbursementDate(true);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-            GetLoanProductsProductIdResponse loanProductData = loanProductHelper
-                    .retrieveLoanProductById(loanProductResponse.getResourceId());
+            Long loanProductId = createLoanProduct(product);
+            GetLoanProductsProductIdResponse loanProductData = retrieveLoanProduct(loanProductId);
 
-            client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
-
-            PostLoansRequest applicationRequest = applyLoanRequest(client.getClientId(), loanProductResponse.getResourceId(), operationDate,
-                    100.0, 4).transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
-            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            Long clientId = createClient();
 
             // Create a Loan account and inherit the interestChargedFromDisbursementDate flag
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductId, operationDate, 100.0, 4)
+                    .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
+            Long loanId = applyForLoan(applicationRequest);
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertEquals(loanProductData.getInterestRecognitionOnDisbursementDate(),
                     loanDetails.getInterestRecognitionOnDisbursementDate());
 
             // Create a Loan account and override the interestChargedFromDisbursementDate flag
-            applicationRequest = applyLoanRequest(client.getClientId(), loanProductResponse.getResourceId(), operationDate, 100.0, 4)
+            applicationRequest = applyLoanRequest(clientId, loanProductId, operationDate, 100.0, 4)
                     .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
                     .interestRecognitionOnDisbursementDate(false);
-            loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
-
-            // Create a Loan account and inherit the interestChargedFromDisbursementDate flag
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            loanId = applyForLoan(applicationRequest);
+            loanDetails = getLoanDetails(loanId);
             assertNotEquals(loanProductData.getInterestRecognitionOnDisbursementDate(),
                     loanDetails.getInterestRecognitionOnDisbursementDate());
         });
     }
-
 }

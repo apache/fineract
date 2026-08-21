@@ -325,10 +325,9 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         checkWorkingCapitalLoanProductCreate();
     }
 
-    @When("Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:")
-    public void createWorkingCapitalLoanProductWithCustomBreachConfig(final DataTable table) {
+    @When("Admin creates a new Working Capital Breach Configuration:")
+    public Long createBreach(final DataTable table) {
         final Map<String, String> data = table.asMaps().getFirst();
-
         final String breachName = "WC Breach " + Utils.randomStringGenerator("", 10);
         final WorkingCapitalBreachRequest breachRequest = new WorkingCapitalBreachRequest().name(breachName)
                 .breachFrequency(Integer.valueOf(data.get("breachFrequency"))).breachFrequencyType(data.get("breachFrequencyType"))
@@ -338,6 +337,29 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
                 () -> fineractFeignClient.workingCapitalBreaches().createWorkingCapitalBreach(breachRequest));
         final Long breachId = breachCreateResponse.getResourceId();
         testContext().set(TestContextKey.WORKING_CAPITAL_BREACH_ID, breachId);
+        return breachId;
+    }
+
+    @When("Admin creates a new Working Capital Near Breach Configuration:")
+    public Long createNearBreach(final DataTable table) {
+        final Map<String, String> data = table.asMaps().getFirst();
+        final WorkingCapitalNearBreachRequest nearBreachRequest = new WorkingCapitalNearBreachRequest()
+                .nearBreachName("WC Near Breach " + Utils.randomStringGenerator("", 10))
+                .nearBreachFrequency(Integer.valueOf(data.get("nearBreachFrequency")))
+                .nearBreachFrequencyType(data.get("nearBreachFrequencyType"))
+                .nearBreachThreshold(new BigDecimal(data.get("nearBreachThreshold")));
+        final CommandProcessingResult nearBreachCreateResponse = ok(
+                () -> fineractFeignClient.workingCapitalNearBreaches().createWorkingCapitalNearBreach(nearBreachRequest));
+        final Long nearBreachId = nearBreachCreateResponse.getResourceId();
+        testContext().set(TestContextKey.WORKING_CAPITAL_NEAR_BREACH_ID, nearBreachId);
+        return nearBreachId;
+    }
+
+    @When("Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:")
+    public void createWorkingCapitalLoanProductWithCustomBreachConfig(final DataTable table) {
+        final Map<String, String> data = table.asMaps().getFirst();
+
+        final Long breachId = createBreach(table);
 
         final String graceDaysStr = data.get("delinquencyGraceDays");
         final Integer graceDays = graceDaysStr != null && !graceDaysStr.isEmpty() ? Integer.valueOf(graceDaysStr) : null;

@@ -28,9 +28,9 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 
 public interface WorkingCapitalLoanBreachScheduleService {
 
-    void generateInitialPeriod(WorkingCapitalLoan loan);
+    boolean generateInitialPeriod(WorkingCapitalLoan loan);
 
-    void generateNextPeriodIfNeeded(WorkingCapitalLoan loan, LocalDate businessDate);
+    boolean generateNextPeriodIfNeeded(WorkingCapitalLoan loan, LocalDate businessDate);
 
     boolean hasSchedule(Long loanId);
 
@@ -42,7 +42,7 @@ public interface WorkingCapitalLoanBreachScheduleService {
 
     void applyRepaymentUndo(Long loanId, LocalDate transactionDate, BigDecimal amount);
 
-    void evaluateBreach(WorkingCapitalLoan loan, LocalDate businessDate);
+    boolean evaluateBreach(WorkingCapitalLoan loan, LocalDate businessDate);
 
     /**
      * Recalculates the schedule from the effective reschedule parameters resolved from the persisted RESCHEDULE

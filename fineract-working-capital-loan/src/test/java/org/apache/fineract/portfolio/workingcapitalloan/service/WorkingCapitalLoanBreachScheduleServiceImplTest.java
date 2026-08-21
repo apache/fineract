@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionDateAndAmountHolder;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
@@ -84,6 +85,9 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
     @Mock
     private WorkingCapitalLoanBalanceRepository balanceRepository;
 
+    @Mock
+    private BusinessEventNotifierService businessEventNotifierService;
+
     private WorkingCapitalLoanBreachScheduleServiceImpl underTest;
 
     private WorkingCapitalLoan loan;
@@ -99,7 +103,7 @@ class WorkingCapitalLoanBreachScheduleServiceImplTest {
         MoneyHelper.initializeTenantRoundingMode("default", RoundingMode.HALF_UP.ordinal());
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BUSINESS_DATE, LocalDate.of(2026, 6, 1))));
         underTest = new WorkingCapitalLoanBreachScheduleServiceImpl(repository, mapper, loanRepository, breachActionRepository,
-                transactionRepository, balanceRepository);
+                transactionRepository, balanceRepository, businessEventNotifierService);
         loan = new WorkingCapitalLoan();
         loan.setId(LOAN_ID);
         balance = WorkingCapitalLoanBalance.createFor(loan);

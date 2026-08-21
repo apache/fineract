@@ -438,7 +438,6 @@ Feature: WorkingCapitalLoanChargeAdjustmentAccountingFeature
       | 60.0       | 60.0            | 0.0      | 50.0           | 20.0                | 30.0         |
     Then Admin closes the Working Capital loan with a full repayment on "11 January 2026"
 
-
   @TestRailId:C89826
   Scenario: Verify Working Capital fee charge adjustment accounting entries - UC7: fully repaid loan - partial fee charge adjustment has overpayment journal entries
     Given Admin sets the business date to "01 January 2026"

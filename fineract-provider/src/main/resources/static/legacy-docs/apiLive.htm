@@ -7035,6 +7035,8 @@ GET https://DomainName/api/v1/clients/{clientId}/identifiers
       "name": "Drivers License"
     },
     "documentKey": "12345",
+    "issuanceDate": [2024, 1, 1],
+    "expiryDate": [2034, 1, 1],
     "description": "Issued in the year 2--7"
   }
 ]
@@ -7120,6 +7122,8 @@ GET https://DomainName/api/v1/clients/{clientId}/identifiers/{identifierId}
     "name": "Drivers License"
   },
   "documentKey": "12345",
+  "issuanceDate": [2024, 1, 1],
+  "expiryDate": [2034, 1, 1],
   "description": "Issued in 2007"
 }
 					</code>
@@ -7151,7 +7155,11 @@ Request Body:
 {
 "documentTypeId":"1",
 "documentKey":"KA-54677",
-"description":"Document has been verified"
+"description":"Document has been verified",
+"issuanceDate":"01 January 2024",
+"expiryDate":"01 January 2034",
+"dateFormat":"dd MMMM yyyy",
+"locale":"en"
 }
 					</code>
 					<code class="method-response">
@@ -7180,7 +7188,11 @@ Request Body:
 {
 "documentTypeId":"4",
 "documentKey":"KA-94667",
-"description":"Document has been updated"
+"description":"Document has been updated",
+"issuanceDate":"01 February 2024",
+"expiryDate":"01 February 2034",
+"dateFormat":"dd MMMM yyyy",
+"locale":"en"
 }
 					</code>
 					<code class="method-response">
@@ -7191,7 +7203,9 @@ Request Body:
   "changes": {
     "documentTypeId": 4,
     "documentKey": "KA-94667",
-    "description": "Document has been updated"
+    "description": "Document has been updated",
+    "issuanceDate": [2024, 2, 1],
+    "expiryDate": [2034, 2, 1]
   }
 }
 					</code>

@@ -24,6 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -41,7 +46,9 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignCenterHelp
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.common.CenterHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +58,8 @@ public class CenterIntegrationTest {
     private static final LocalDate OFFICE_OPENING_DATE = LocalDate.of(2007, 7, 1);
     private static final String GROUP_ACTIVATION_DATE = "04 March 2011";
     private static final int NOT_FOUND = 404;
-
+    private RequestSpecification requestSpec;
+    private ResponseSpecification expectBadRequest;
     private FeignCenterHelper centerHelper;
     private FeignStaffHelper staffHelper;
     private FeignGroupHelper groupHelper;
@@ -64,6 +72,10 @@ public class CenterIntegrationTest {
         this.staffHelper = new FeignStaffHelper(fineractClient);
         this.groupHelper = new FeignGroupHelper(fineractClient);
         this.officeHelper = new FeignOfficeHelper(fineractClient);
+        Utils.initializeRESTAssured();
+        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        this.expectBadRequest = new ResponseSpecBuilder().expectStatusCode(400).build();
     }
 
     @Test
@@ -107,6 +119,49 @@ public class CenterIntegrationTest {
         assertEquals(staffId, center.getStaffId());
         assertFalse(center.getActive());
         assertEquals(groupMembers, groupMemberIds(center));
+    }
+
+    /**
+     * Regression test for the SQL injection fix in CenterReadPlatformServiceImpl: a malicious {@code orderBy} value
+     * that attempts to break out of the ORDER BY clause and read data from an unrelated, more sensitive table must be
+     * rejected with a validation error, not silently concatenated into the SQL.
+     */
+    @Test
+    public void testListCentersRejectsSqlInjectionInOrderBy() {
+        final String maliciousOrderBy = "id, (select password from m_appuser limit 1)-- -";
+
+        final Object response = CenterHelper.listCentersRaw(maliciousOrderBy, "ASC", false, requestSpec, expectBadRequest);
+        assertNotNull(response, "Expected a validation-error response body, not a silent 200 with leaked data");
+    }
+
+    /** Same injection attempt against the paginated listing endpoint, which the patch modifies separately. */
+    @Test
+    public void testPaginatedListCentersRejectsSqlInjectionInOrderBy() {
+        final String maliciousOrderBy = "id, (select password from m_appuser limit 1)-- -";
+
+        final Object response = CenterHelper.listCentersRaw(maliciousOrderBy, "ASC", true, requestSpec, expectBadRequest);
+        assertNotNull(response, "Expected a validation-error response body, not a silent 200 with leaked data");
+    }
+
+    /**
+     * Regression test for the new strict ASC/DESC allow-list on {@code sortOrder}: any value other than exactly
+     * ASC/DESC — including an injection payload appended to a nominally valid value — must be rejected.
+     */
+    @Test
+    public void testListCentersRejectsInvalidSortOrderValue() {
+        final String maliciousSortOrder = "ASC; DROP TABLE m_office; --";
+
+        final Object response = CenterHelper.listCentersRaw("id", maliciousSortOrder, false, requestSpec, expectBadRequest);
+        assertNotNull(response, "Expected a validation-error response body, not a silent 200");
+    }
+
+    /** Same invalid-sortOrder check against the paginated listing endpoint. */
+    @Test
+    public void testPaginatedListCentersRejectsInvalidSortOrderValue() {
+        final String maliciousSortOrder = "ASC; DROP TABLE m_office; --";
+
+        final Object response = CenterHelper.listCentersRaw("id", maliciousSortOrder, true, requestSpec, expectBadRequest);
+        assertNotNull(response, "Expected a validation-error response body, not a silent 200");
     }
 
     @Test

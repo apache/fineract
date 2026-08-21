@@ -134,6 +134,34 @@ final class LoansApiResourceSwagger {
             public Boolean overpaid;
         }
 
+        static final class GetLoansLoanIdCollateralData {
+
+            private GetLoansLoanIdCollateralData() {}
+
+            @Schema(example = "1")
+            public Long collateralId;
+            @Schema(example = "1")
+            public Long clientCollateralId;
+            @Schema(example = "1")
+            public BigDecimal quantity;
+            @Schema(example = "10000.00")
+            public BigDecimal total;
+            @Schema(example = "10000.00")
+            public BigDecimal totalCollateral;
+        }
+
+        static final class GetLoansLoanIdSubStatus {
+
+            private GetLoansLoanIdSubStatus() {}
+
+            @Schema(example = "1")
+            public Long id;
+            @Schema(example = "loanSubStatus.foreclosed")
+            public String code;
+            @Schema(example = "Foreclosed")
+            public String value;
+        }
+
         static final class GetLoansLoanIdLoanType {
 
             private GetLoansLoanIdLoanType() {}
@@ -314,6 +342,7 @@ final class LoansApiResourceSwagger {
             @Schema(example = "0.00")
             public BigDecimal totalOutstanding;
             public List<GetLoansLoanIdRepaymentPeriod> periods;
+            public List<GetLoansLoanIdRepaymentPeriod> futurePeriods;
         }
 
         static final class GetLoansLoanIdRepaymentPeriod {
@@ -1162,6 +1191,8 @@ final class LoansApiResourceSwagger {
         @Schema(example = "000000001")
         public String accountNo;
         public GetLoansLoanIdStatus status;
+        public GetLoansLoanIdSubStatus subStatus;
+        public List<GetLoansLoanIdCollateralData> collateral;
         @Schema(example = "false")
         public boolean disallowExpectedDisbursements;
         @Schema(example = "1")
@@ -1433,6 +1464,7 @@ final class LoansApiResourceSwagger {
         public List<PostLoansDataTable> datatables;
 
         public List<PostLoansRequestChargeData> charges;
+        public List<PostLoansRequestCollateralData> collateral;
         @Schema(example = "1")
         public Long linkAccountId;
 
@@ -1460,6 +1492,20 @@ final class LoansApiResourceSwagger {
 
             @Schema(example = "1.0")
             public BigDecimal amount;
+
+            @Schema(example = "29 September 2011")
+            public String dueDate;
+        }
+
+        static final class PostLoansRequestCollateralData {
+
+            private PostLoansRequestCollateralData() {}
+
+            @Schema(example = "1")
+            public Long clientCollateralId;
+
+            @Schema(example = "1")
+            public BigDecimal quantity;
         }
 
         @Schema(description = "Originator data for loan creation request")
@@ -1815,6 +1861,8 @@ final class LoansApiResourceSwagger {
         public String externalId;
         @Schema(example = "5000.33")
         public BigDecimal transactionAmount;
+        @Schema(example = "5000.33")
+        public BigDecimal netDisbursalAmount;
         @Schema(example = "Description of disbursement details.")
         public String note;
         @Schema(example = "28 June 2022")

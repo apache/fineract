@@ -30,6 +30,8 @@ import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntry;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryRepository;
 import org.apache.fineract.accounting.journalentry.domain.JournalEntryType;
+import org.apache.fineract.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
+import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -70,19 +72,28 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
      *            whether the entry carries the transaction's payment detail. Repayment credit legs are booked without
      *            it and every other leg with it, mirroring what the per-type posting methods did before they were
      *            folded into {@link #plannedPostings}.
+     * @param resolvedAccount
+     *            an already-resolved GL account for legs whose destination is not a product account-type mapping (the
+     *            write-off reason mapped expense). When present it wins over {@code account}, both when posting and in
+     *            the restatement guard, so the guard keeps describing the ledger the poster produced.
      */
-    private record LedgerPosting(CashAccountsForLoan account, boolean debit, BigDecimal amount, boolean withPaymentDetail) {
+    private record LedgerPosting(CashAccountsForLoan account, GLAccount resolvedAccount, boolean debit, BigDecimal amount,
+            boolean withPaymentDetail) {
 
         static LedgerPosting debit(final CashAccountsForLoan account, final BigDecimal amount) {
-            return new LedgerPosting(account, true, MathUtil.nullToZero(amount), true);
+            return new LedgerPosting(account, null, true, MathUtil.nullToZero(amount), true);
+        }
+
+        static LedgerPosting debit(final GLAccount account, final BigDecimal amount) {
+            return new LedgerPosting(null, account, true, MathUtil.nullToZero(amount), true);
         }
 
         static LedgerPosting credit(final CashAccountsForLoan account, final BigDecimal amount) {
-            return new LedgerPosting(account, false, MathUtil.nullToZero(amount), true);
+            return new LedgerPosting(account, null, false, MathUtil.nullToZero(amount), true);
         }
 
         static LedgerPosting creditWithoutPaymentDetail(final CashAccountsForLoan account, final BigDecimal amount) {
-            return new LedgerPosting(account, false, MathUtil.nullToZero(amount), false);
+            return new LedgerPosting(account, null, false, MathUtil.nullToZero(amount), false);
         }
     }
 
@@ -118,6 +129,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                 chargeAdjustmentPostings(txn, principalPortion, feesPortion, penaltiesPortion, overpaymentPortion, isChargedOff);
             case LoanTransactionType.ACCRUAL -> chargeAccrualPostings(feesPortion, penaltiesPortion);
             case LoanTransactionType.CHARGE_OFF -> chargeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion);
+            case LoanTransactionType.WRITEOFF -> writeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion, isChargedOff);
             default -> throw new NotImplementedException(
                     "Post Journal Entries is not implemented yet for " + txn.getTypeOf().getCode() + " for Working Capital Loan");
         };
@@ -187,6 +199,53 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                 LedgerPosting.credit(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion),
                 LedgerPosting.credit(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion),
                 LedgerPosting.credit(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion));
+    }
+
+    /**
+     * Terminal write-off: debit the write-off loss account for the whole outstanding, credit the portfolio and
+     * receivable accounts per portion (mirrors the accrual term-loan treatment, without the interest leg WC does not
+     * have). The loss debits the expense account the product maps to the loan's write-off reason when such a mapping
+     * exists, the generic Losses Written-off account otherwise -- see {@link #writeOffLossDebit}.
+     * <p>
+     * A loan that was already charged off reclassifies instead: the receivables are already off the books, so the
+     * credits go against the accounts {@link #chargeOffPostings} debited -- the charge-off expense (or fraud expense)
+     * for principal and the charged-off fee/penalty income accounts -- moving the loss to Losses Written-off. The net
+     * P&amp;L effect is zero; only its presentation changes. Crediting the asset accounts again here would drive them
+     * negative and recognize the loss twice.
+     * </p>
+     */
+    private List<LedgerPosting> writeOffPostings(final WorkingCapitalLoan loan, final BigDecimal principalPortion,
+            final BigDecimal feesPortion, final BigDecimal penaltiesPortion, final boolean isChargedOff) {
+        if (isChargedOff) {
+            return List.of(
+                    LedgerPosting.debit(CashAccountsForLoan.LOSSES_WRITTEN_OFF,
+                            MathUtil.add(principalPortion, feesPortion, penaltiesPortion)),
+                    LedgerPosting.credit(chargeOffExpenseAccount(loan), principalPortion),
+                    LedgerPosting.credit(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES, feesPortion),
+                    LedgerPosting.credit(CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY, penaltiesPortion));
+        }
+
+        return List.of(writeOffLossDebit(loan, MathUtil.add(principalPortion, feesPortion, penaltiesPortion)),
+                LedgerPosting.credit(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion),
+                LedgerPosting.credit(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion),
+                LedgerPosting.credit(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion));
+    }
+
+    /**
+     * The debit leg a write-off expenses the loss to: the expense account the product maps to the loan's write-off
+     * reason, falling back to the generic Losses Written-off account when the write-off carries no reason or the
+     * product does not map it.
+     */
+    private LedgerPosting writeOffLossDebit(final WorkingCapitalLoan loan, final BigDecimal amount) {
+        final CodeValue writeOffReason = loan.getWriteOffReason();
+        if (writeOffReason != null) {
+            final ProductToGLAccountMapping mapping = helper.getWriteOffMappingByCodeValue(loan.getLoanProduct().getId(),
+                    PortfolioProductType.WORKING_CAPITAL_LOAN, writeOffReason.getId());
+            if (mapping != null) {
+                return LedgerPosting.debit(mapping.getGlAccount(), amount);
+            }
+        }
+        return LedgerPosting.debit(CashAccountsForLoan.LOSSES_WRITTEN_OFF, amount);
     }
 
     private boolean isAdjustedChargeAPenalty(final WorkingCapitalLoanTransaction txn) {
@@ -328,8 +387,8 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             if (!MathUtil.isGreaterThanZero(posting.amount())) {
                 continue; // a zero leg is never booked, so it must not be expected either
             }
-            final GLAccount account = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, posting.account().getValue(),
-                    paymentTypeId);
+            final GLAccount account = posting.resolvedAccount() != null ? posting.resolvedAccount()
+                    : helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, posting.account().getValue(), paymentTypeId);
             amounts.merge(new PostingKey(account.getId(), posting.debit()), posting.amount(), BigDecimal::add);
         }
         return amounts;
@@ -514,8 +573,8 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             if (!MathUtil.isGreaterThanZero(posting.amount())) {
                 return;
             }
-            final GLAccount account = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, posting.account().getValue(),
-                    paymentTypeId);
+            final GLAccount account = posting.resolvedAccount() != null ? posting.resolvedAccount()
+                    : helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, posting.account().getValue(), paymentTypeId);
             final PaymentDetail entryPaymentDetail = posting.withPaymentDetail() ? paymentDetail : null;
             if (posting.debit()) {
                 helper.createDebitJournalEntryForWorkingCapitalLoan(office, currencyCode, account, loanId, txnId, transactionDate,

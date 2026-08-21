@@ -17,15 +17,15 @@ Feature: Working Capital Delinquency Configuration
     Then Admin failed to create a new WC Delinquency Bucket for field "<wc_db_field_name_invalid>" with invalid data <wc_db_field_value_invalid> results with an error <wc_db_error_message>
 
     Examples:
-      | wc_db_field_name_invalid    | wc_db_field_value_invalid | wc_db_error_message                                                                |
-      | name                        | "null"                    | The parameter `name` is mandatory.                                                 |
-      | name                        | ""                        | The parameter `name` is mandatory.                                                 |
-      | ranges                      | "[]"                      | The parameter `ranges` cannot be empty. You must select at least one.              |
-      | bucketType                  | "INVALID"                 | The parameter `bucketType` must be one of [ REGULAR, WORKING_CAPITAL ] .           |
-      | minimumPayment              | "-1"                      | The parameter `minimumPayment` must be greater than 0.                             |
-      | minimumPaymentType          | "INVALID"                 | The parameter `minimumPaymentType` must be one of [ PERCENTAGE, FLAT ] .           |
-      | frequencyType               | "INVALID"                 | The parameter `frequencyType` must be one of [ DAYS, WEEKS, MONTHS, YEARS ] .      |
-      | minimumPaymentPeriodAndRule | "null"                    | The parameter `minimumPaymentPeriodAndRule` is mandatory.                          |
+      | wc_db_field_name_invalid    | wc_db_field_value_invalid | wc_db_error_message                                                           |
+      | name                        | "null"                    | The parameter `name` is mandatory.                                            |
+      | name                        | ""                        | The parameter `name` is mandatory.                                            |
+      | ranges                      | "[]"                      | The parameter `ranges` cannot be empty. You must select at least one.         |
+      | bucketType                  | "INVALID"                 | The parameter `bucketType` must be one of [ REGULAR, WORKING_CAPITAL ] .      |
+      | minimumPayment              | "-1"                      | The parameter `minimumPayment` must be greater than 0.                        |
+      | minimumPaymentType          | "INVALID"                 | The parameter `minimumPaymentType` must be one of [ PERCENTAGE, FLAT ] .      |
+      | frequencyType               | "INVALID"                 | The parameter `frequencyType` must be one of [ DAYS, WEEKS, MONTHS, YEARS ] . |
+      | minimumPaymentPeriodAndRule | "null"                    | The parameter `minimumPaymentPeriodAndRule` is mandatory.                     |
 
   @TestRailId:C72331
   Scenario: Verify Working Capital Delinquency Configuration create validation with existing name outcomes with error - UC3
@@ -37,12 +37,12 @@ Feature: Working Capital Delinquency Configuration
     Then Admin failed to update WC Delinquency Bucket for field "<wc_db_field_name_invalid>" with invalid data <wc_db_field_value_invalid> results with an error <wc_db_error_message>
 
     Examples:
-      | wc_db_field_name_invalid  | wc_db_field_value_invalid | wc_db_error_message                                                                |
-      | ranges                    | "[]"                      | The parameter `ranges` cannot be empty. You must select at least one.              |
-      | bucketType                | "INVALID"                 | The parameter `bucketType` must be one of [ REGULAR, WORKING_CAPITAL ] .           |
-      | minimumPayment            | "-1"                      | The parameter `minimumPayment` must be greater than 0.                             |
-      | minimumPaymentType        | "INVALID"                 | The parameter `minimumPaymentType` must be one of [ PERCENTAGE, FLAT ] .           |
-      | frequencyType             | "INVALID"                 | The parameter `frequencyType` must be one of [ DAYS, WEEKS, MONTHS, YEARS ] .      |
+      | wc_db_field_name_invalid | wc_db_field_value_invalid | wc_db_error_message                                                           |
+      | ranges                   | "[]"                      | The parameter `ranges` cannot be empty. You must select at least one.         |
+      | bucketType               | "INVALID"                 | The parameter `bucketType` must be one of [ REGULAR, WORKING_CAPITAL ] .      |
+      | minimumPayment           | "-1"                      | The parameter `minimumPayment` must be greater than 0.                        |
+      | minimumPaymentType       | "INVALID"                 | The parameter `minimumPaymentType` must be one of [ PERCENTAGE, FLAT ] .      |
+      | frequencyType            | "INVALID"                 | The parameter `frequencyType` must be one of [ DAYS, WEEKS, MONTHS, YEARS ] . |
 
   @TestRailId:C72333
   Scenario: Verify Working Capital Delinquency Configuration update validation with existing name outcomes with error  - UC5

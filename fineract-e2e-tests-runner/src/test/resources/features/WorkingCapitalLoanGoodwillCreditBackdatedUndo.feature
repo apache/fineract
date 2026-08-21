@@ -150,7 +150,7 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | 01 January 2026 | Disbursement              | 9000.0            | false    |
       | 01 January 2026 | Discount Fee              | 1000.0            | false    |
       | 02 January 2026 | Goodwill Credit           | 3000.0            | false    |
-      | 02 January 2026 | Discount Fee Amortization | 498.67            | false    |
+      | 02 January 2026 | Discount Fee Amortization | 498.68            | false    |
     When Customer undo "1"th "GOODWILL_CREDIT" transaction made on "02 January 2026" on Working Capital loan
     When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -159,8 +159,8 @@ Feature: Working Capital Loan Goodwill Credit Backdated and Undo
       | 01 January 2026 | Disbursement                         | 9000.0            | false    |
       | 01 January 2026 | Discount Fee                         | 1000.0            | false    |
       | 02 January 2026 | Goodwill Credit                      | 3000.0            | true     |
-      | 02 January 2026 | Discount Fee Amortization            | 498.67            | false    |
-      | 03 January 2026 | Discount Fee Amortization Adjustment | 498.67            | false    |
+      | 02 January 2026 | Discount Fee Amortization            | 498.68            | false    |
+      | 03 January 2026 | Discount Fee Amortization Adjustment | 498.68            | false    |
     And Working Capital loan balance payload contains the following fields:
       | field          | value |
       | realizedIncome | 0.0   |

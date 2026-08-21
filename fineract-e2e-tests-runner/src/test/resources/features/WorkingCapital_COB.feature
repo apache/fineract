@@ -1,5 +1,6 @@
 @WorkingCapital
 @WCCOBFeature
+@Order(1)
 Feature: Working Capital COB Job
 
   Background:
@@ -11,12 +12,13 @@ Feature: Working Capital COB Job
     Then Admin verifies configured business steps for "WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS" match:
       | stepName                              | order |
       | DUMMY_BUSINESS_STEP                   | 1     |
-      | WC_DELINQUENCY_RANGE_SCHEDULE         | 2     |
-      | WC_LOAN_DELINQUENCY_CLASSIFICATION    | 3     |
-      | WC_BREACH_SCHEDULE                    | 4     |
-      | WC_NEAR_BREACH_EVALUATION             | 5     |
-      | WC_DISCOUNT_FEE_AMORTIZATION          | 6     |
-      | WC_CHARGE_ACCRUAL                     | 7     |
+      | WC_MISSED_PAYMENT_ACKNOWLEDGEMENT     | 2     |
+      | WC_DELINQUENCY_RANGE_SCHEDULE         | 3     |
+      | WC_LOAN_DELINQUENCY_CLASSIFICATION    | 4     |
+      | WC_BREACH_SCHEDULE                    | 5     |
+      | WC_NEAR_BREACH_EVALUATION             | 6     |
+      | WC_DISCOUNT_FEE_AMORTIZATION          | 7     |
+      | WC_CHARGE_ACCRUAL                     | 8     |
     Then Admin verifies scheduler job "WC_COB" has display name "Working Capital Loan COB"
     Then Admin verifies scheduler job "WC_COB" has active status "false"
 

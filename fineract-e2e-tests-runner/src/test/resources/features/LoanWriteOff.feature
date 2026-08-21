@@ -20,7 +20,6 @@
         | Close (as written-off) | 650.0  | 650.0     | 0.0      | 0.0  | 0.0       | 0.0          |
       Then Customer undo "1"th transaction made on "22 January 2023" results a 403 error and "update not allowed as loan status is written off" error message
 
-
     @TestRailId:C2935
     Scenario: As a user I want to do Write-off a loan and verify that backdate repayment post write-off results in error
       When Admin sets the business date to "1 January 2023"
@@ -36,10 +35,9 @@
       And Admin does write-off the loan on "29 January 2023"
       Then Loan status will be "CLOSED_WRITTEN_OFF"
       Then Loan Transactions tab has a transaction with date: "29 January 2023", and with the following data:
-        | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
+        | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance |
         | Close (as written-off) | 650.0  | 650.0     | 0.0      | 0.0  | 0.0       | 0.0          |
       Then Loan "AUTOPAY" repayment transaction on "26 January 2023" with 50 EUR transaction amount results in error
-
 
     @TestRailId:C2936
     Scenario: As a user I want to do Write-off a loan and verify that undo write-off results in error

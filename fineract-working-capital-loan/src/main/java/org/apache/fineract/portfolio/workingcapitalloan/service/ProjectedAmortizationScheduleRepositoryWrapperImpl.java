@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import java.math.MathContext;
+import java.time.LocalDate;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -57,6 +58,14 @@ public class ProjectedAmortizationScheduleRepositoryWrapperImpl implements Proje
         entity.setJsonModel(jsonModel);
         entity.setJsonModelVersion(ProjectedAmortizationScheduleModel.getModelVersion());
         repository.save(entity);
+        updateExpectedMaturityDate(loan, model);
+    }
+
+    private void updateExpectedMaturityDate(final WorkingCapitalLoan loan, final ProjectedAmortizationScheduleModel model) {
+        final LocalDate maturityDate = model.scheduledMaturityDate();
+        if (maturityDate != null && !maturityDate.equals(loan.getExpectedMaturityDate())) {
+            loan.setExpectedMaturityDate(maturityDate);
+        }
     }
 
     private ProjectedAmortizationLoanModel findOrCreateEntity(final WorkingCapitalLoan loan) {

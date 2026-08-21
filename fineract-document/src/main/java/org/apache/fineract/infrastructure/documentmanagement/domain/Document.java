@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.documentmanagement.domain;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -72,4 +73,10 @@ public final class Document implements Serializable {
 
     @Column("storage_type_enum")
     private Integer storageType;
+
+    @Column("issuance_date")
+    private LocalDate issuanceDate;
+
+    @Column("expiry_date")
+    private LocalDate expiryDate;
 }

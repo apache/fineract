@@ -118,7 +118,8 @@ class ProjectedAmortizationSchedulePrincipalAdjustmentTest {
 
         final ProjectedPayment adjustedPayment = paymentOn(adjusted, ADJUSTMENT_DATE);
         assertNotNull(adjustedPayment);
-        assertEquals(0, adjustedPayment.expectedPaymentAmount().getAmount().compareTo(new BigDecimal("250")));
+        // The loan was repaid in full, so the period bills nothing of its own and the row carries the adjustment alone.
+        assertEquals(0, adjustedPayment.expectedPaymentAmount().getAmount().compareTo(ADJUSTMENT));
         assertEquals(adjustedPayment.paymentNo(), adjusted.projectedPayments().getLast().paymentNo(),
                 "the adjusted period must be the last one kept");
         for (int i = 0; i < adjusted.projectedPayments().size(); i++) {

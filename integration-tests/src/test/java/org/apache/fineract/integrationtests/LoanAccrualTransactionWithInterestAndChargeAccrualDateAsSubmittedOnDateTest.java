@@ -22,36 +22,33 @@ import static org.apache.fineract.integrationtests.common.loans.LoanApplicationT
 
 import java.math.BigDecimal;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
-import org.apache.fineract.client.models.PostLoanProductsResponse;
-import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
-import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
-public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOnDateTest extends BaseLoanIntegrationTest {
+@Order(1)
+public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOnDateTest extends FeignLoanTestBase {
 
     @Test
     public void accrualTransactionForInterestBearingLoan_WithoutCharges_SubmittedOnDateAsChargeAccrualDateWorksTest() {
         runAt("15 April 2024", () -> {
-
             try {
                 // Configure Charge accrual date as submitted on date
                 globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
                         new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
 
                 // Create Client
-                Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+                Long clientId = createClient();
 
                 // Create Loan Product
-                PostLoanProductsRequest loanProductsRequest = createLoanProductWithInterestCalculation();
-                PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+                Long loanProductId = createLoanProduct(createLoanProductWithInterestCalculation());
 
                 // Apply and Approve Loan
-                Long loanId = applyAndApproveLoanApplication(clientId, loanProductResponse.getResourceId(), "15 April 2024", 1000.0, 4);
+                Long loanId = applyAndApproveLoanApplication(clientId, loanProductId, "15 April 2024", 1000.0, 4);
 
                 // Disburse Loan
                 disburseLoan(loanId, BigDecimal.valueOf(500), "15 April 2024");
@@ -73,7 +70,7 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
                 updateBusinessDate("25 April 2024");
 
                 // run cob
-                SchedulerJobHelper.executeAndAwaitJob("Loan COB");
+                schedulerHelper.executeAndAwaitJob("Loan COB");
 
                 verifyTransactions(loanId, //
                         transaction(500.0, "Disbursement", "15 April 2024", 500.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
@@ -105,29 +102,25 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
                 globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
                         new PutGlobalConfigurationsRequest().stringValue("due-date"));
             }
-
         });
-
     }
 
     @Test
     public void accrualTransactionForInterestBearingLoan_WithCharges_SubmittedOnDateAsChargeAccrualDateWorksTest() {
         runAt("15 April 2024", () -> {
-
             try {
                 // Configure Charge accrual date as submitted on date
                 globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
                         new PutGlobalConfigurationsRequest().stringValue("submitted-date"));
 
                 // Create Client
-                Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+                Long clientId = createClient();
 
                 // Create Loan Product
-                PostLoanProductsRequest loanProductsRequest = createLoanProductWithInterestCalculation();
-                PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+                Long loanProductId = createLoanProduct(createLoanProductWithInterestCalculation());
 
                 // Apply and Approve Loan
-                Long loanId = applyAndApproveLoanApplication(clientId, loanProductResponse.getResourceId(), "15 April 2024", 1000.0, 4);
+                Long loanId = applyAndApproveLoanApplication(clientId, loanProductId, "15 April 2024", 1000.0, 4);
 
                 // Disburse Loan
                 disburseLoan(loanId, BigDecimal.valueOf(500), "15 April 2024");
@@ -164,7 +157,7 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
                 updateBusinessDate("25 April 2024");
 
                 // run cob
-                SchedulerJobHelper.executeAndAwaitJob("Loan COB");
+                schedulerHelper.executeAndAwaitJob("Loan COB");
 
                 verifyTransactions(loanId, //
                         transaction(500.0, "Disbursement", "15 April 2024", 500.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
@@ -193,7 +186,7 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
                         transaction(500.0, "Disbursement", "26 April 2024", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
 
                 // run cob
-                SchedulerJobHelper.executeAndAwaitJob("Loan COB");
+                schedulerHelper.executeAndAwaitJob("Loan COB");
 
                 verifyTransactions(loanId, //
                         transaction(500.0, "Disbursement", "15 April 2024", 500.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
@@ -205,9 +198,7 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
                 globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.CHARGE_ACCRUAL_DATE,
                         new PutGlobalConfigurationsRequest().stringValue("due-date"));
             }
-
         });
-
     }
 
     private Long applyAndApproveLoanApplication(Long clientId, Long productId, String disbursementDate, double amount,
@@ -215,16 +206,15 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
         PostLoansRequest postLoansRequest = new PostLoansRequest().clientId(clientId).productId(productId)
                 .expectedDisbursementDate(disbursementDate).dateFormat(DATETIME_PATTERN)
                 .transactionProcessingStrategyCode(DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY)
-                .locale("en").submittedOnDate(disbursementDate).amortizationType(AmortizationType.EQUAL_INSTALLMENTS)
+                .locale("en").submittedOnDate(disbursementDate).amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS)
                 .interestRatePerPeriod(new BigDecimal(12.0))
-                .interestCalculationPeriodType(InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)
-                .interestType(InterestType.DECLINING_BALANCE).repaymentEvery(15).repaymentFrequencyType(RepaymentFrequencyType.DAYS)
-                .numberOfRepayments(numberOfRepayments).loanTermFrequency(numberOfRepayments * 15).loanTermFrequencyType(0)
-                .maxOutstandingLoanBalance(BigDecimal.valueOf(amount)).principal(BigDecimal.valueOf(amount)).loanType("individual");
-        PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(postLoansRequest);
-        PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
-                approveLoanRequest(amount, disbursementDate));
-        return approvedLoanResult.getLoanId();
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE).repaymentEvery(15)
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS).numberOfRepayments(numberOfRepayments)
+                .loanTermFrequency(numberOfRepayments * 15).loanTermFrequencyType(0).maxOutstandingLoanBalance(BigDecimal.valueOf(amount))
+                .principal(BigDecimal.valueOf(amount)).loanType("individual");
+        Long loanId = applyForLoan(postLoansRequest);
+        return approveLoan(loanId, approveLoanRequest(amount, disbursementDate)).getLoanId();
     }
 
     private PostLoanProductsRequest createLoanProductWithInterestCalculation() {
@@ -236,12 +226,12 @@ public class LoanAccrualTransactionWithInterestAndChargeAccrualDateAsSubmittedOn
                 .principal(1000.0)//
                 .numberOfRepayments(4)//
                 .repaymentEvery(15)//
-                .repaymentFrequencyType(RepaymentFrequencyType.DAYS.longValue())//
-                .interestType(InterestType.DECLINING_BALANCE)//
-                .amortizationType(AmortizationType.EQUAL_INSTALLMENTS)//
-                .interestCalculationPeriodType(InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS_L)//
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
                 .interestRatePerPeriod(12.0) //
-                .interestRateFrequencyType(InterestRateFrequencyType.MONTHS)//
+                .interestRateFrequencyType(LoanTestData.InterestRateFrequencyType.MONTHS)//
                 .isInterestRecalculationEnabled(true) //
                 .interestRecalculationCompoundingMethod(0).rescheduleStrategyMethod(3).recalculationRestFrequencyType(1)
                 .recalculationRestFrequencyInterval(1);

@@ -2112,3 +2112,13 @@ Feature: Working Capital Charge-Off Accounting Entries
       | EXPENSE   | 744007       | Credit Loss/Bad Debt      | 4.47  |        |
       | LIABILITY | 240005       | Deferred Interest Revenue |       | 4.47   |
     Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
+
+  @TestRailId:C94065
+  Scenario: Working Capital loan raises Fraud Changed business event when the fraud flag is set
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    When Admin sets the fraud flag of the Working Capital loan to true
+    Then a Working Capital Loan Fraud Changed business event is raised
+    And Admin closes the Working Capital loan with a full repayment on "01 January 2026"

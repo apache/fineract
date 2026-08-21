@@ -91,7 +91,7 @@ public class WorkingCapitalLoanStartDatesTest {
             loanIdRef.set(createDisbursedLoan());
         });
 
-        BusinessDateHelper.runAt("21 January 2026", () -> {
+        BusinessDateHelper.runAt("26 January 2026", () -> {
             final Long loanId = loanIdRef.get();
             ok(() -> FineractFeignClientHelper.getFineractFeignClient().inlineJob().executeInlineJob("WC_LOAN_COB",
                     new InlineJobRequest().addLoanIdsItem(loanId)));
@@ -100,14 +100,13 @@ public class WorkingCapitalLoanStartDatesTest {
             final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
             final GetWorkingCapitalLoansLoanIdResponse response = loanHelper.retrieveLoan(loanId);
 
-            // breachStartDate = fromDate of the first breached period = disbursement + breachGraceDays (grace already
-            // in schedule)
-            assertEquals(DISBURSEMENT_DATE.plusDays(BREACH_GRACE_DAYS), response.getBreachStartDate(),
-                    "breachStartDate should be the fromDate of the first breached period (disbursement + breachGraceDays)");
+            // breachStartDate = fromDate of the first breached period = disbursement
+            assertEquals(DISBURSEMENT_DATE, response.getBreachStartDate(),
+                    "breachStartDate should be the fromDate of the first breached period (disbursement)");
 
-            // delinquencyStartDate = fromDate of the first delinquent period (= disbursement) + delinquencyGraceDays
-            assertEquals(DISBURSEMENT_DATE.plusDays(DELINQUENCY_GRACE_DAYS), response.getDelinquencyStartDate(),
-                    "delinquencyStartDate should be the fromDate of the first delinquent period plus delinquencyGraceDays");
+            // delinquencyStartDate = fromDate of the first delinquent period (= disbursement)
+            assertEquals(DISBURSEMENT_DATE, response.getDelinquencyStartDate(),
+                    "delinquencyStartDate should be the fromDate of the first delinquent period");
         });
     }
 
@@ -129,9 +128,8 @@ public class WorkingCapitalLoanStartDatesTest {
             final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
             final GetWorkingCapitalLoansLoanIdResponse response = loanHelper.retrieveLoan(loanId);
 
-            // delinquencyStartDate must anchor on the loan submitted-on date (creation), not the disbursement date,
-            // plus the delinquencyGraceDays.
-            assertEquals(SUBMITTED_ON_DATE.plusDays(DELINQUENCY_GRACE_DAYS), response.getDelinquencyStartDate(),
+            // delinquencyStartDate must anchor on the loan submitted-on date (creation), not the disbursement date.
+            assertEquals(SUBMITTED_ON_DATE, response.getDelinquencyStartDate(),
                     "delinquencyStartDate should anchor on submittedOnDate + delinquencyGraceDays when delinquencyStartType = LOAN_CREATION");
         });
     }
@@ -155,10 +153,9 @@ public class WorkingCapitalLoanStartDatesTest {
             final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
             final GetWorkingCapitalLoansLoanIdResponse response = loanHelper.retrieveLoan(loanId);
 
-            // breachStartDate must anchor on the loan submitted-on (creation) date, not the disbursement date, plus the
-            // breachGraceDays.
-            assertEquals(SUBMITTED_ON_DATE.plusDays(BREACH_GRACE_DAYS), response.getBreachStartDate(),
-                    "breachStartDate should anchor on submittedOnDate + breachGraceDays when breachStartType = LOAN_CREATION");
+            // breachStartDate must anchor on the loan submitted-on (creation) date, not the disbursement date.
+            assertEquals(SUBMITTED_ON_DATE, response.getBreachStartDate(),
+                    "breachStartDate should anchor on submittedOnDate when breachStartType = LOAN_CREATION");
         });
     }
 
@@ -181,8 +178,8 @@ public class WorkingCapitalLoanStartDatesTest {
             final WorkingCapitalLoanHelper loanHelper = new WorkingCapitalLoanHelper();
             final GetWorkingCapitalLoansLoanIdResponse response = loanHelper.retrieveLoan(loanId);
 
-            assertEquals(DISBURSEMENT_DATE.plusDays(BREACH_GRACE_DAYS), response.getBreachStartDate(),
-                    "breachStartDate should anchor on disbursementDate + breachGraceDays when breachStartType = DISBURSEMENT");
+            assertEquals(DISBURSEMENT_DATE, response.getBreachStartDate(),
+                    "breachStartDate should anchor on disbursementDate when breachStartType = DISBURSEMENT");
         });
     }
 

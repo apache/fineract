@@ -22,12 +22,14 @@ import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.Collections;
+import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.ClientTextSearch;
 import org.apache.fineract.client.models.DeleteClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientsClientIdAccountsResponse;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
+import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.PageClientSearchData;
 import org.apache.fineract.client.models.PagedRequestClientTextSearch;
 import org.apache.fineract.client.models.PostClientsClientIdChanges;
@@ -105,6 +107,16 @@ public class FeignClientHelper {
 
     public GetClientsClientIdAccountsResponse getClientAccounts(Long clientId) {
         return ok(() -> fineractClient.clients().retrieveAllClientAccounts(clientId));
+    }
+
+    public GetClientsClientIdAccountsResponse getClientAccounts(String externalId) {
+        return ok(() -> fineractClient.clients().retrieveAllClientAccountsByExternalId(externalId));
+    }
+
+    /** Number of clients carrying the given external id; {@code 0} when no client was created with it. */
+    public Integer countClientsByExternalId(String externalId) {
+        GetClientsResponse clients = ok(() -> fineractClient.clients().retrieveAllClients(Map.of("externalId", externalId)));
+        return clients.getTotalFilteredRecords();
     }
 
     public PageClientSearchData searchClients(String text) {

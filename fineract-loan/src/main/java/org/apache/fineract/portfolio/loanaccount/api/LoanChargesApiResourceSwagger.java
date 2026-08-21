@@ -80,6 +80,8 @@ final class LoanChargesApiResourceSwagger {
         public Long id;
         @Schema(example = "1")
         public Long chargeId;
+        @Schema(example = "1")
+        public Long loanId;
         @Schema(example = "Loan Processing fee")
         public String name;
         public GetLoanChargeTimeType chargeTimeType;

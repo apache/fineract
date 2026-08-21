@@ -125,7 +125,7 @@ final class ClientChargesApiResourceSwagger {
         private PostClientsClientIdChargesRequest() {}
 
         @Schema(example = "100")
-        public Integer amount;
+        public BigDecimal amount;
         @Schema(example = "226")
         public Long chargeId;
         @Schema(example = "dd MMMM yyyy")

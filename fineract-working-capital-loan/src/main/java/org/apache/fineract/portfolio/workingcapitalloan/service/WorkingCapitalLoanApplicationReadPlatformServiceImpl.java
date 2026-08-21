@@ -245,13 +245,11 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
         breachScheduleRepository.findTopByLoanIdAndBreachTrueOrderByFromDateAsc(loan.getId())
                 .ifPresent(period -> data.setBreachStartDate(period.getFromDate()));
 
-        // delinquencyStartDate: fromDate of the earliest delinquent period plus delinquencyGraceDays. The delinquency
-        // range
-        // schedule does not apply the grace days when generating periods, so they are added here.
+        // delinquencyStartDate: fromDate of the earliest delinquent period. The delinquency range
         delinquencyRangeScheduleRepository.findTopByLoanIdAndMinPaymentCriteriaMetFalseOrderByFromDateAsc(loan.getId())
                 .ifPresent(period -> {
-                    final int graceDays = data.getDelinquencyGraceDays() != null ? data.getDelinquencyGraceDays() : 0;
-                    data.setDelinquencyStartDate(period.getFromDate().plusDays(graceDays));
+                    data.setDelinquencyStartDate(period.getFromDate());
+                    Optional.ofNullable(data.getSummary()).ifPresent(summary -> summary.setOverdueSinceDate(period.getToDate()));
                 });
     }
 

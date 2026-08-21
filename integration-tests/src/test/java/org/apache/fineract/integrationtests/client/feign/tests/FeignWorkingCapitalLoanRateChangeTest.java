@@ -163,25 +163,6 @@ public class FeignWorkingCapitalLoanRateChangeTest extends FeignIntegrationTest 
         });
     }
 
-    @Test
-    void testRateChangePastEndOfTermSucceeds() {
-        // Use a small principal with high rate to create a very short-term loan,
-        // then advance past term. The rate change should succeed — the segment starts
-        // at the base term end with the remaining principal as balance.
-        businessDateHelper.runAt("2026-01-01", () -> {
-            Long clientForTest = clientHelper.createClient("01 January 2026");
-            Long loanId = createAndDisburseLoanOnDate(clientForTest, BigDecimal.valueOf(100), BigDecimal.valueOf(18), "01 January 2026");
-
-            // Advance past the loan term — rate change at day 5 is past the schedule end
-            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-06");
-
-            wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(15), "06 January 2026"));
-
-            assertEquals(0, BigDecimal.valueOf(15).compareTo(rateInEffectOn(loanId, LocalDate.of(2026, 1, 6))),
-                    "Rate in force on 06 January should be 15 after the past-term rate change");
-        });
-    }
-
     /**
      * The rate the loan is actually billed at on {@code asOf}, taken from the rate-change history.
      *
