@@ -20,17 +20,17 @@ package org.apache.fineract.infrastructure.core.service.database;
 
 import java.util.List;
 import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 @Component
+@DependsOnDatabaseInitialization
 public class MySQLQueryService implements DatabaseQueryService {
 
     private final DatabaseTypeResolver databaseTypeResolver;
 
-    @Autowired
     public MySQLQueryService(DatabaseTypeResolver databaseTypeResolver) {
         this.databaseTypeResolver = databaseTypeResolver;
     }

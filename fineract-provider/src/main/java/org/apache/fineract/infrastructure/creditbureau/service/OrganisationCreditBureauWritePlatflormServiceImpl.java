@@ -27,7 +27,6 @@ import org.apache.fineract.infrastructure.creditbureau.domain.OrganisationCredit
 import org.apache.fineract.infrastructure.creditbureau.domain.OrganisationCreditBureauRepository;
 import org.apache.fineract.infrastructure.creditbureau.serialization.CreditBureauCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +41,6 @@ public class OrganisationCreditBureauWritePlatflormServiceImpl implements Organi
 
     private final CreditBureauCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
-    @Autowired
     public OrganisationCreditBureauWritePlatflormServiceImpl(final PlatformSecurityContext context,
             final OrganisationCreditBureauRepository organisationCreditBureauRepository,
             final CreditBureauRepository creditBureauRepository, final CreditBureauCommandFromApiJsonDeserializer fromApiJsonDeserializer) {

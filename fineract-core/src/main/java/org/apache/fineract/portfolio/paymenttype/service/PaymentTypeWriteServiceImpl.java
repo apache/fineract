@@ -55,7 +55,6 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
 
     @Override
     @CacheEvict(value = "payment_types", key = "T(org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('payment_types')")
-    @SuppressWarnings("AvoidHidingCauseException")
     public PaymentTypeUpdateResponse updatePaymentType(@Valid PaymentTypeUpdateRequest request) {
         try {
             final var paymentType = repository.findById(request.getId())
@@ -82,7 +81,8 @@ public class PaymentTypeWriteServiceImpl implements PaymentTypeWriteService {
 
             repository.saveAndFlush(paymentType);
         } catch (final JpaSystemException | DataIntegrityViolationException e) {
-            throw new PaymentTypeNotFoundException(request.getId());
+            throw ErrorHandler.getMappable(e, "error.msg.paymenttypes.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
         }
 
         return PaymentTypeUpdateResponse.builder().resourceId(request.getId()).build();

@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.jobs.service.aggregationjob.tasklet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -45,13 +44,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.scope.context.StepContext;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.core.step.StepContribution;
+import org.springframework.batch.core.step.StepExecution;
+import org.springframework.batch.infrastructure.item.ExecutionContext;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -97,7 +96,6 @@ class JournalEntryAggregationTrackingTaskletTest {
     public void testHappyPath(final Long recordWriteCount) throws Exception {
         given(stepContribution.getStepExecution()).willReturn(stepExecution);
         given(stepExecution.getWriteCount()).willReturn(recordWriteCount);
-        doNothing().when(journalEntryAggregationWriterService).insertJournalEntryTracking(any(JournalEntryAggregationTrackingData.class));
         given(chunkContext.getStepContext()).willReturn(stepContext);
         given(stepContext.getStepExecution()).willReturn(stepExecution);
         given(stepExecution.getJobExecution()).willReturn(jobExecutionContext);

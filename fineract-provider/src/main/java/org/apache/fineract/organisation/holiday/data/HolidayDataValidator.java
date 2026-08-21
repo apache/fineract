@@ -39,7 +39,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.organisation.holiday.api.HolidayApiConstants;
 import org.apache.fineract.organisation.holiday.domain.RescheduleType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -52,7 +51,6 @@ public class HolidayDataValidator {
                     HolidayApiConstants.officesParamName, HolidayApiConstants.repaymentsRescheduledToParamName,
                     HolidayApiConstants.reschedulingType));
 
-    @Autowired
     public HolidayDataValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }

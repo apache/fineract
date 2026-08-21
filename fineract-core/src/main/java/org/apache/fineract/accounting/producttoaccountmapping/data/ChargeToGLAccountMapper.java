@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.accounting.producttoaccountmapping.data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ import org.apache.fineract.portfolio.charge.data.ChargeData;
 @Accessors(chain = true)
 public class ChargeToGLAccountMapper implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     private ChargeData charge;
     private GLAccountData incomeAccount;

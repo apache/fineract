@@ -34,7 +34,6 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.useradministration.api.PasswordPreferencesApiConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -44,7 +43,6 @@ public class PasswordPreferencesDataValidator {
     private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(PasswordPreferencesApiConstants.VALIDATION_POLICY_ID));
 
-    @Autowired
     public PasswordPreferencesDataValidator(FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }

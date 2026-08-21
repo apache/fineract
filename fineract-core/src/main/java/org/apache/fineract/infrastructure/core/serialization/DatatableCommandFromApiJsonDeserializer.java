@@ -76,7 +76,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.core.service.database.JdbcJavaType;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -106,7 +105,6 @@ public class DatatableCommandFromApiJsonDeserializer {
     private final FromJsonHelper fromApiJsonHelper;
     private final DatabaseTypeResolver databaseTypeResolver;
 
-    @Autowired
     public DatatableCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper, DatabaseTypeResolver databaseTypeResolver) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.databaseTypeResolver = databaseTypeResolver;

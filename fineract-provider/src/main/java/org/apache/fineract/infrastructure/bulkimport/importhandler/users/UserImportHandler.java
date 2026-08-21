@@ -39,7 +39,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -49,7 +48,6 @@ public class UserImportHandler implements ImportHandler {
 
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
-    @Autowired
     public UserImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }

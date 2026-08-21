@@ -21,10 +21,6 @@ package org.apache.fineract.integrationtests.common;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -33,6 +29,10 @@ import org.apache.fineract.client.models.AuditData;
 import org.apache.fineract.client.models.AuditSearchData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  *
@@ -115,7 +115,7 @@ public final class AuditHelper {
         try {
             final JsonNode pageItemsNode = MAPPER.readTree(response).get("pageItems");
             return MAPPER.convertValue(pageItemsNode, AUDIT_DATA_LIST_TYPE);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Unable to parse audits list response: " + response, e);
         }
     }

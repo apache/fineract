@@ -18,11 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.service;
 
-import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL;
-import static org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType.ACCRUAL_ADJUSTMENT;
-
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.loan.transaction.LoanAccrualTransactionCreatedBusinessEvent;
@@ -31,7 +27,6 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepository;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
 @RequiredArgsConstructor
 public class LoanAccrualTransactionBusinessEventServiceImpl implements LoanAccrualTransactionBusinessEventService {
@@ -41,10 +36,9 @@ public class LoanAccrualTransactionBusinessEventServiceImpl implements LoanAccru
 
     @Override
     public void raiseBusinessEventForAccrualTransactions(final Loan loan, final List<Long> existingTransactionIds) {
-        final Set<LoanTransactionType> accrualTypes = Set.of(ACCRUAL, ACCRUAL_ADJUSTMENT);
         final List<LoanTransaction> accrualTransactions = existingTransactionIds.isEmpty()
-                ? loanTransactionRepository.findNonReversedByLoanAndTypes(loan, accrualTypes)
-                : loanTransactionRepository.findNonReversedByLoanAndTypesAndNotInIds(loan, accrualTypes, existingTransactionIds);
+                ? loanTransactionRepository.findNonReversedAccrualsByLoan(loan)
+                : loanTransactionRepository.findNonReversedAccrualsByLoanAndNotInIds(loan, existingTransactionIds);
 
         accrualTransactions.forEach(transaction -> {
             final LoanTransactionBusinessEvent businessEvent = transaction.isAccrual()

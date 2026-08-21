@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.survey.domain.Likelihood;
 import org.apache.fineract.infrastructure.survey.domain.LikelihoodRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -47,7 +46,6 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
     private final LikelihoodDataValidator likelihoodDataValidator;
     private final LikelihoodRepository repository;
 
-    @Autowired
     WriteLikelihoodServiceImpl(final PlatformSecurityContext context, final LikelihoodDataValidator likelihoodDataValidator,
             final LikelihoodRepository repository) {
         this.context = context;

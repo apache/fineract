@@ -30,6 +30,7 @@ dependencies {
             'com.fasterxml.jackson.core:jackson-databind',
             'com.fasterxml.jackson.datatype:jackson-datatype-jsr310',
             'com.fasterxml.jackson.datatype:jackson-datatype-jdk8',
+            'tools.jackson.core:jackson-databind',
             'org.openapitools:jackson-databind-nullable:0.2.6',
             'jakarta.annotation:jakarta.annotation-api',
             'io.swagger.core.v3:swagger-annotations-jakarta',

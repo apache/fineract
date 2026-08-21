@@ -33,15 +33,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
+import tools.jackson.databind.json.JsonMapper;
 
 @SpringBootTest
 @ContextConfiguration(classes = TestConfiguration.class)
 public class CommandProcessingResultSerializationTest {
 
     @Autowired
-    private MappingJackson2HttpMessageConverter converter;
+    private JsonMapper objectMapper;
 
     @Test
     public void testCommandProcessingResultSerialization() throws IOException {
@@ -52,6 +53,7 @@ public class CommandProcessingResultSerializationTest {
                 "resourceIdentifier", null, null, null, null, null, null, null, Boolean.TRUE, null, new ExternalId("externalId"),
                 ExternalId.empty(), null);
         SimpleHttpOutputMessage outputMessage = new SimpleHttpOutputMessage(os, headers);
+        JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter(objectMapper);
         converter.write(commandProcessingResult, MediaType.APPLICATION_JSON, outputMessage);
         Map<String, Object> result = new Gson().fromJson(os.toString(Charset.defaultCharset()), Map.class);
         assertEquals(4, result.size());

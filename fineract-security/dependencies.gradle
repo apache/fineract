@@ -30,7 +30,7 @@ dependencies {
 
     // Spring Boot Security dependencies
     implementation(
-            'org.springframework.boot:spring-boot-starter-web',
+            'org.springframework.boot:spring-boot-starter-webmvc',
             'org.springframework.boot:spring-boot-starter-security',
             'org.springframework.boot:spring-boot-starter-oauth2-authorization-server',
             'org.springframework.boot:spring-boot-starter-oauth2-resource-server',
@@ -73,11 +73,12 @@ dependencies {
     }
 
     // Email support for OTP delivery
-    implementation ('org.apache.commons:commons-email') {
+    implementation ('org.apache.commons:commons-email2-jakarta') {
         exclude group: 'com.sun.mail', module: 'javax.mail'
+        exclude group: 'com.sun.mail', module: 'jakarta.mail'
         exclude group: 'javax.activation', module: 'activation'
     }
-    implementation 'com.sun.mail:jakarta.mail'
+    implementation 'jakarta.mail:jakarta.mail-api'
 
     compileOnly 'com.github.spotbugs:spotbugs-annotations'
     compileOnly 'org.projectlombok:lombok'
@@ -93,6 +94,6 @@ dependencies {
         exclude group: 'javax.activation'
         exclude group: 'org.skyscreamer'
     }
-    testImplementation ('org.mockito:mockito-inline')
-    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation ('org.mockito:mockito-core')
+    testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
 }

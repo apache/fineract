@@ -56,7 +56,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -67,7 +66,6 @@ public class ChartOfAccountsImportHandler implements ImportHandler {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final GLAccountRepositoryWrapper glAccountRepository;
 
-    @Autowired
     public ChartOfAccountsImportHandler(final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             GLAccountRepositoryWrapper glAccountRepository) {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;

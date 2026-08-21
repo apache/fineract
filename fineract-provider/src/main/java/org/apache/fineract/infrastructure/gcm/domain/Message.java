@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.gcm.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -81,6 +82,7 @@ import org.apache.fineract.infrastructure.gcm.GcmConstants;
 @Accessors(chain = true)
 public final class Message implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private String collapseKey;

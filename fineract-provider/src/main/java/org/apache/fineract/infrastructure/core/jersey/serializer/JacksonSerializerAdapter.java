@@ -18,22 +18,27 @@
  */
 package org.apache.fineract.infrastructure.core.jersey.serializer;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.jersey.converter.JsonConverter;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 @RequiredArgsConstructor
-public class JacksonSerializerAdapter<T> extends JsonSerializer<T> implements Serializable {
+public class JacksonSerializerAdapter<T> extends ValueSerializer<T> implements Serializable {
 
     private final JsonConverter<T> converter;
 
     @Override
-    public void serialize(T value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        converter.convertToJson(value, gen);
+    public void serialize(T value, JsonGenerator gen, SerializationContext serializers) {
+        try {
+            converter.convertToJson(value, gen);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override

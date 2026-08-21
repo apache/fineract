@@ -33,7 +33,6 @@ import org.apache.fineract.interoperation.data.InteropQuoteRequestData;
 import org.apache.fineract.interoperation.data.InteropTransactionRequestData;
 import org.apache.fineract.interoperation.data.InteropTransferRequestData;
 import org.apache.fineract.interoperation.domain.InteropIdentifierType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,7 +40,6 @@ public class InteropDataValidator {
 
     private final FromJsonHelper jsonHelper;
 
-    @Autowired
     public InteropDataValidator(final FromJsonHelper fromJsonHelper) {
         this.jsonHelper = fromJsonHelper;
     }

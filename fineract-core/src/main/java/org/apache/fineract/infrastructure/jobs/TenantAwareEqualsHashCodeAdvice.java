@@ -44,9 +44,8 @@ public class TenantAwareEqualsHashCodeAdvice implements MethodInterceptor {
         if ("equals".equals(methodName) && args.length == 1) {
             Object other = args[0];
 
-            if (other instanceof Factory) {
-
-                TenantAwareEqualsHashCodeAdvice otherProxy = (TenantAwareEqualsHashCodeAdvice) ((Factory) other).getCallback(0);
+            if (other instanceof Factory factory) {
+                TenantAwareEqualsHashCodeAdvice otherProxy = (TenantAwareEqualsHashCodeAdvice) factory.getCallback(0);
                 return Objects.equals(target, otherProxy.target) && Objects.equals(tenantIdentifier, otherProxy.tenantIdentifier);
             }
             return false;

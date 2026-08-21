@@ -50,7 +50,6 @@ import org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConst
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveAttributeName;
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveEntityType;
 import org.apache.fineract.portfolio.interestratechart.incentive.InterestIncentiveType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -66,7 +65,6 @@ public class InterestIncentiveDataValidator {
             Arrays.asList(InterestIncentiveApiConstants.idParamName, entityTypeParamName, attributeNameParamName, conditionTypeParamName,
                     attributeValueParamName, incentiveTypeparamName, amountParamName));
 
-    @Autowired
     public InterestIncentiveDataValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }

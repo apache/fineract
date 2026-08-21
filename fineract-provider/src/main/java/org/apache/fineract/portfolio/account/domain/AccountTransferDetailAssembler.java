@@ -38,7 +38,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.service.LoanAssembler;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -50,7 +49,6 @@ public class AccountTransferDetailAssembler {
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanAssembler loanAccountAssembler;
 
-    @Autowired
     public AccountTransferDetailAssembler(final ClientRepositoryWrapper clientRepository,
             final OfficeRepositoryWrapper officeRepositoryWrapper, final SavingsAccountAssembler savingsAccountAssembler,
             final FromJsonHelper fromApiJsonHelper, final LoanAssembler loanAccountAssembler) {

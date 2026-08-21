@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.infrastructure.event.external.service.serialization.serializer.loan;
 
 import static java.nio.charset.StandardCharsets.UTF_8;

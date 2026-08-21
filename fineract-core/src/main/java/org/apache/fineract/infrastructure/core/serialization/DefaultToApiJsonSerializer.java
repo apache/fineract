@@ -22,7 +22,6 @@ import com.google.gson.Gson;
 import java.util.Collection;
 import java.util.Set;
 import org.apache.fineract.infrastructure.core.service.Page;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,7 +35,6 @@ public class DefaultToApiJsonSerializer<T> implements ToApiJsonSerializer<T> {
     private final CommandProcessingResultJsonSerializer commandProcessingResultSerializer;
     private final GoogleGsonSerializerHelper helper;
 
-    @Autowired
     public DefaultToApiJsonSerializer(final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff,
             final CommandProcessingResultJsonSerializer commandProcessingResultSerializer, final GoogleGsonSerializerHelper helper) {
         this.excludeNothingWithPrettyPrintingOff = excludeNothingWithPrettyPrintingOff;

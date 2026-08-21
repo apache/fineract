@@ -112,8 +112,7 @@ public class TwoFactorAuthenticationFilter extends GenericFilterBean {
             UsernamePasswordAuthenticationToken updatedAuthentication = new UsernamePasswordAuthenticationToken(
                     currentAuthentication.getPrincipal(), currentAuthentication.getCredentials(), updatedAuthorities);
             return updatedAuthentication;
-        } else if (currentAuthentication instanceof FineractJwtAuthenticationToken) {
-            FineractJwtAuthenticationToken fineractJwtAuthenticationToken = (FineractJwtAuthenticationToken) currentAuthentication;
+        } else if (currentAuthentication instanceof FineractJwtAuthenticationToken fineractJwtAuthenticationToken) {
             FineractJwtAuthenticationToken updatedAuthentication = new FineractJwtAuthenticationToken(
                     fineractJwtAuthenticationToken.getToken(), updatedAuthorities, (UserDetails) currentAuthentication.getPrincipal());
             return updatedAuthentication;

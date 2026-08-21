@@ -29,7 +29,6 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.jobs.domain.CustomJobParameterRepository;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.batch.core.configuration.JobLocator;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Conditional;
@@ -42,12 +41,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class InlineWorkingCapitalLoanCOBExecutorServiceImpl extends InlineCommonLockableCOBExecutorService<WorkingCapitalLoanAccountLock> {
 
     public InlineWorkingCapitalLoanCOBExecutorServiceImpl(WorkingCapitalAccountLockRepository loanAccountLockRepository,
-            InlineLoanCOBExecutionDataParser dataParser, JobLauncher jobLauncher, JobLocator jobLocator, JobExplorer jobExplorer,
+            InlineLoanCOBExecutionDataParser dataParser, JobLauncher jobLauncher, JobLocator jobLocator,
             @Qualifier("requiresNewTransactionTemplate") TransactionTemplate requiresNewTransactionTemplate,
             CustomJobParameterRepository customJobParameterRepository, PlatformSecurityContext context,
             WorkingCapitalLoanRetrieveIdService retrieveIdService, FineractProperties fineractProperties) {
-        super(loanAccountLockRepository, dataParser, jobLauncher, jobLocator, jobExplorer, requiresNewTransactionTemplate,
-                customJobParameterRepository, context, retrieveIdService, fineractProperties);
+        super(loanAccountLockRepository, dataParser, jobLauncher, jobLocator, requiresNewTransactionTemplate, customJobParameterRepository,
+                context, retrieveIdService, fineractProperties);
     }
 
     @Override

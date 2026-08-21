@@ -19,11 +19,11 @@
 package org.springframework.batch.core.scope.context;
 
 import org.apache.fineract.infrastructure.jobs.TenantAwareEqualsHashCodeAdvice;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.JobParameters;
+import org.jspecify.annotations.Nullable;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.job.JobInstance;
+import org.springframework.batch.core.job.parameters.JobParameters;
 import org.springframework.cglib.proxy.Enhancer;
-import org.springframework.lang.Nullable;
 
 // Temporary solution until spring-batch fixes the concurrency issue
 // https://github.com/spring-projects/spring-batch/issues/4774
@@ -53,8 +53,8 @@ public class JobSynchronizationManager {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(JobExecution.class);
         enhancer.setCallback(new TenantAwareEqualsHashCodeAdvice(jobExecution));
-        return manager.register((JobExecution) enhancer.create(new Class[] { JobInstance.class, Long.class, JobParameters.class },
-                new Object[] { jobExecution.getJobInstance(), jobExecution.getId(), jobExecution.getJobParameters() }));
+        return manager.register((JobExecution) enhancer.create(new Class[] { long.class, JobInstance.class, JobParameters.class },
+                new Object[] { jobExecution.getId(), jobExecution.getJobInstance(), jobExecution.getJobParameters() }));
     }
 
     public static void close() {

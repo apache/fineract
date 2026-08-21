@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.client.domain;
 
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,7 +26,6 @@ public class ClientAddressRepositoryWrapper {
 
     private final ClientAddressRepository clientAddressRepository;
 
-    @Autowired
     public ClientAddressRepositoryWrapper(final ClientAddressRepository clientAddressRepository) {
         this.clientAddressRepository = clientAddressRepository;
     }

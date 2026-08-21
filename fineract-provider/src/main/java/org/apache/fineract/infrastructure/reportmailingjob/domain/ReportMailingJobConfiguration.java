@@ -22,6 +22,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.io.Serial;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -37,6 +38,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Accessors(chain = true)
 public class ReportMailingJobConfiguration extends AbstractPersistableCustom<Long> {
 
+    @Serial
     private static final long serialVersionUID = 3099279770861263184L;
 
     @Column(name = "name", nullable = false)

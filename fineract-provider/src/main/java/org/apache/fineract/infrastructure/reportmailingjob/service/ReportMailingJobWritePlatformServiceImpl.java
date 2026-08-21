@@ -40,7 +40,6 @@ import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -57,7 +56,6 @@ public class ReportMailingJobWritePlatformServiceImpl implements ReportMailingJo
     private final ReportMailingJobRepository reportMailingJobRepository;
     private final PlatformSecurityContext platformSecurityContext;
 
-    @Autowired
     public ReportMailingJobWritePlatformServiceImpl(final ReportRepositoryWrapper reportRepositoryWrapper,
             final ReportMailingJobValidator reportMailingJobValidator,
             final ReportMailingJobRepositoryWrapper reportMailingJobRepositoryWrapper,

@@ -42,13 +42,9 @@ public final class MeasuringUtil {
     public static <T> T measure(Supplier<T> s, BiConsumer<T, Duration> c) {
         StopWatch sw = new StopWatch();
         sw.start();
-        T result = null;
-        try {
-            result = s.get();
-        } finally {
-            sw.stop();
-            c.accept(result, Duration.ofMillis(sw.getTotalTimeMillis()));
-        }
+        T result = s.get();
+        sw.stop();
+        c.accept(result, Duration.ofMillis(sw.getTotalTimeMillis()));
         return result;
     }
 }

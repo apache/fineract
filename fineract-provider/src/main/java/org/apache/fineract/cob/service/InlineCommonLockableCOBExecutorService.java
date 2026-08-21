@@ -26,9 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -57,13 +55,11 @@ import org.apache.fineract.infrastructure.jobs.service.InlineExecutorService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.springbatch.SpringBatchJobConstants;
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobLocator;
-import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.job.parameters.JobParameter;
+import org.springframework.batch.core.job.parameters.JobParameters;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.transaction.annotation.Propagation;
@@ -79,7 +75,6 @@ public abstract class InlineCommonLockableCOBExecutorService<T extends AccountLo
     private final InlineLoanCOBExecutionDataParser dataParser;
     private final JobLauncher jobLauncher;
     private final JobLocator jobLocator;
-    private final JobExplorer jobExplorer;
     private final TransactionTemplate requiresNewTransactionTemplate;
     private final CustomJobParameterRepository customJobParameterRepository;
     private final PlatformSecurityContext context;
@@ -137,8 +132,8 @@ public abstract class InlineCommonLockableCOBExecutorService<T extends AccountLo
         } catch (NoSuchJobException e) {
             throw new JobNotFoundException(jobName, e);
         }
-        JobParameters jobParameters = new JobParametersBuilder(jobExplorer).getNextJobParameters(inlineLoanCOBJob)
-                .addJobParameters(new JobParameters(getJobParametersMap(loanIds, businessDate))).toJobParameters();
+
+        JobParameters jobParameters = new JobParameters(getJobParametersSet(loanIds, businessDate));
         JobExecution jobExecution;
         try {
             jobExecution = jobLauncher.run(inlineLoanCOBJob, jobParameters);
@@ -199,15 +194,13 @@ public abstract class InlineCommonLockableCOBExecutorService<T extends AccountLo
         return customJobParameterRepository.save(paramSet);
     }
 
-    private Map<String, JobParameter<?>> getJobParametersMap(List<Long> loanIds, LocalDate businessDate) {
+    private Set<JobParameter<?>> getJobParametersSet(List<Long> loanIds, LocalDate businessDate) {
         String parameterJson = gson.toJson(loanIds);
         Long loanIdsJobParameterId = saveCustomJobParameter(COBConstant.INLINE_IDS_PARAMETER_NAME, parameterJson);
         Long businessDateJobParameterId = saveCustomJobParameter(COBConstant.BUSINESS_DATE_PARAMETER_NAME,
                 businessDate.format(DateTimeFormatter.ISO_DATE));
-        Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
-        jobParameterMap.put(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, new JobParameter<>(loanIdsJobParameterId, Long.class));
-        jobParameterMap.put(COBConstant.BUSINESS_DATE_PARAMETER_NAME, new JobParameter<>(businessDateJobParameterId, Long.class));
-        return jobParameterMap;
+        return Set.of(new JobParameter<>(SpringBatchJobConstants.CUSTOM_JOB_PARAMETER_ID_KEY, loanIdsJobParameterId, Long.class),
+                new JobParameter<>(COBConstant.BUSINESS_DATE_PARAMETER_NAME, businessDateJobParameterId, Long.class));
     }
 
     private void lockLoanAccounts(List<Long> loanIds, LocalDate businessDate) {

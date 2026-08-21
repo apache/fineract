@@ -43,7 +43,6 @@ import org.apache.fineract.portfolio.savings.domain.SavingsProductRepository;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.useradministration.domain.RoleRepository;
 import org.apache.fineract.useradministration.exception.RoleNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -66,7 +65,6 @@ public class FineractEntityDataValidator {
                     FineractEntityApiResourceConstants.LOCALE, FineractEntityApiResourceConstants.DATE_FORMAT,
                     FineractEntityApiResourceConstants.endDate));
 
-    @Autowired
     public FineractEntityDataValidator(final FromJsonHelper fromApiJsonHelper, final OfficeRepositoryWrapper officeRepositoryWrapper,
             final LoanProductRepository loanProductRepository, final SavingsProductRepository savingsProductRepository,
             final ChargeRepositoryWrapper chargeRepositoryWrapper, final RoleRepository roleRepository) {

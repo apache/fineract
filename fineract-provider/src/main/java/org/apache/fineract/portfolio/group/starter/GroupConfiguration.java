@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.group.starter;
 
 import org.apache.fineract.commands.service.CommandProcessingService;

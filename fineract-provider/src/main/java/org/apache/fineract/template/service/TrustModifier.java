@@ -48,8 +48,7 @@ public final class TrustModifier {
     public static void relaxHostChecking(final HttpURLConnection conn)
             throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
 
-        if (conn instanceof HttpsURLConnection) {
-            final HttpsURLConnection httpsConnection = (HttpsURLConnection) conn;
+        if (conn instanceof HttpsURLConnection httpsConnection) {
             final SSLSocketFactory factory = prepFactory(httpsConnection);
             httpsConnection.setSSLSocketFactory(factory);
             httpsConnection.setHostnameVerifier(TRUSTING_HOSTNAME_VERIFIER);

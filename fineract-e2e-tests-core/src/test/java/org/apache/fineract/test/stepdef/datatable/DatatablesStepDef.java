@@ -23,8 +23,6 @@ import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -59,6 +57,8 @@ import org.apache.fineract.test.data.datatable.DatatableEntityType;
 import org.apache.fineract.test.data.datatable.DatatableNameGenerator;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @RequiredArgsConstructor
 public class DatatablesStepDef extends AbstractStepDef {
@@ -533,7 +533,7 @@ public class DatatablesStepDef extends AbstractStepDef {
         }
         try {
             return OBJECT_MAPPER.writeValueAsString(Map.of("locale", "en", columnName, parseValue(value)));
-        } catch (final JsonProcessingException e) {
+        } catch (final JacksonException e) {
             throw new IllegalStateException("Failed to serialize datatable entry body", e);
         }
     }
@@ -600,7 +600,7 @@ public class DatatablesStepDef extends AbstractStepDef {
         }
         try {
             return toRowList(OBJECT_MAPPER.readValue(serialized, Object.class));
-        } catch (final JsonProcessingException e) {
+        } catch (final JacksonException e) {
             throw new IllegalStateException("Failed to deserialize datatable row response", e);
         }
     }

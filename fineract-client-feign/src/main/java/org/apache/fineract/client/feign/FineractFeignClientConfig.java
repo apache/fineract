@@ -24,8 +24,6 @@ import feign.Request;
 import feign.Retryer;
 import feign.codec.Encoder;
 import feign.hc5.ApacheHttp5Client;
-import feign.jackson.JacksonDecoder;
-import feign.jackson.JacksonEncoder;
 import feign.slf4j.Slf4jLogger;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
@@ -92,11 +90,11 @@ public final class FineractFeignClientConfig {
     }
 
     public <T> T createClient(Class<T> apiType) {
-        JacksonEncoder jacksonEncoder = new JacksonEncoder(ObjectMapperFactory.getShared());
+        Jackson3Encoder jacksonEncoder = new Jackson3Encoder(ObjectMapperFactory.getShared());
         Encoder multipartEncoder = new FineractMultipartEncoder(jacksonEncoder);
 
         return Feign.builder().client(getOrCreateHttpClient()).encoder(multipartEncoder)
-                .decoder(new ApiResponseDecoder(new JacksonDecoder(ObjectMapperFactory.getShared())))
+                .decoder(new ApiResponseDecoder(new Jackson3Decoder(ObjectMapperFactory.getShared())))
                 .errorDecoder(new FineractErrorDecoder())
                 .options(new Request.Options(connectTimeout, TimeUnit.MILLISECONDS, readTimeout, TimeUnit.MILLISECONDS, true))
                 .retryer(Retryer.NEVER_RETRY).requestInterceptor(new BasicAuthRequestInterceptor(username, password))

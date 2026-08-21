@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.batch.command.internal;
 
-import static org.apache.http.HttpStatus.SC_NOT_IMPLEMENTED;
+import static org.apache.hc.core5.http.HttpStatus.SC_NOT_IMPLEMENTED;
 
 import jakarta.ws.rs.core.UriInfo;
 import org.apache.fineract.batch.command.CommandStrategy;

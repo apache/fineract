@@ -18,16 +18,15 @@
  */
 package org.apache.fineract.infrastructure.core.jersey.serializer;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import java.io.IOException;
 import org.apache.fineract.infrastructure.core.service.StringUtil;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
-public class MaskedValueSerializer extends JsonSerializer<String> {
+public class MaskedValueSerializer extends ValueSerializer<String> {
 
     @Override
-    public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+    public void serialize(String value, JsonGenerator gen, SerializationContext serializers) {
         if (value == null || value.isBlank()) {
             gen.writeString(value);
             return;

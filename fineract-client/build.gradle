@@ -76,7 +76,8 @@ task buildJavaSdk(type: org.openapitools.generator.gradle.plugin.tasks.GenerateT
         library: 'retrofit2',
         hideGenerationTimestamp: 'true',
         containerDefaultToNull: 'true',
-        oauth2Implementation: 'none'
+        oauth2Implementation: 'none',
+        useJakartaEe: 'true'
     ]
     generateModelTests = false
     generateApiTests = false
@@ -224,36 +225,36 @@ task cleanupGeneratedJavaFiles() {
 // Configure Java compilation
 tasks.named('compileJava') {
     outputs.cacheIf { true }
-    dependsOn(buildJavaSdk, buildTypescriptAngularSdk, buildAsciidoc, cleanupGeneratedJavaFiles, licenseFormatMain, spotlessMiscApply)
-    mustRunAfter(licenseFormatMain, cleanupGeneratedJavaFiles)
+    dependsOn(buildJavaSdk, buildTypescriptAngularSdk, buildAsciidoc, cleanupGeneratedJavaFiles, spotlessMiscApply)
+    mustRunAfter(cleanupGeneratedJavaFiles)
 }
 
 // Configure sources jar task
 tasks.named('sourcesJar') {
     dependsOn(cleanupGeneratedJavaFiles)
     mustRunAfter(cleanupGeneratedJavaFiles)
-    
+
     from(sourceSets.main.java.srcDirs) {
         include "**/*.java"
     }
-}
-
-// Configure license formatting
-tasks.named('licenseFormatMain') {
-    dependsOn(cleanupGeneratedJavaFiles)
-    mustRunAfter(cleanupGeneratedJavaFiles)
-    source = sourceSets.main.java.srcDirs
-}
-
-tasks.named('licenseMain') {
-    dependsOn(licenseFormatMain)
-    mustRunAfter(licenseFormatMain)
 }
 
 java {
     // keep this at Java 8, not 17; see https://issues.apache.org/jira/browse/FINERACT-1214
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+// Tests are not published and run on the JDK 21 toolchain, so they may use
+// Java 17+ test dependencies (JUnit 6) without affecting the Java 8 client artifact.
+tasks.named('compileTestJava') {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+[configurations.testCompileClasspath, configurations.testRuntimeClasspath].each {
+    it.attributes {
+        attribute(org.gradle.api.attributes.java.TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -269,4 +270,9 @@ test {
 configurations {
     generatedCompileClasspath.extendsFrom implementation
     generatedRuntimeClasspath.extendsFrom runtimeClasspath
+}
+
+dependencies {
+    runtimeOnly "jakarta.xml.bind:jakarta.xml.bind-api:4.0.5"
+    runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
 }

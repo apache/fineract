@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.creditbureau.data.CreditBureauData;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,6 @@ public class CreditBureauReadPlatformServiceImpl implements CreditBureauReadPlat
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
 
-    @Autowired
     public CreditBureauReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;

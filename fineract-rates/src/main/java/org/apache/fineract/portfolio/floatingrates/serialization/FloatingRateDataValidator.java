@@ -38,7 +38,6 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRate;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -61,7 +60,6 @@ public class FloatingRateDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
     private final FloatingRateRepository floatingRateRepository;
 
-    @Autowired
     public FloatingRateDataValidator(final FromJsonHelper fromApiJsonHelper, final FloatingRateRepository floatingRateRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.floatingRateRepository = floatingRateRepository;

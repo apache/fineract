@@ -33,11 +33,11 @@ import org.apache.fineract.cob.data.COBPartition;
 import org.apache.fineract.cob.resolver.BusinessDateResolver;
 import org.apache.fineract.cob.resolver.CatchUpFlagResolver;
 import org.apache.fineract.cob.service.RetrieveIdService;
-import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
-import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.core.step.StepExecution;
+import org.springframework.batch.infrastructure.item.ExecutionContext;
 import org.springframework.util.StopWatch;
 
 @Slf4j

@@ -20,9 +20,11 @@ package org.apache.fineract.infrastructure.core.service.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.stereotype.Component;
 
 @Component
+@DependsOnDatabaseInitialization
 public class HikariDataSourceFactory {
 
     public HikariDataSource create(HikariConfig config) {

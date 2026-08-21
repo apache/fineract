@@ -29,7 +29,6 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,7 +40,6 @@ public class EmailMessageAssembler {
     private final StaffRepositoryWrapper staffRepository;
     private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
     public EmailMessageAssembler(final EmailMessageRepository emailMessageRepository, final GroupRepositoryWrapper groupRepositoryWrapper,
             final ClientRepositoryWrapper clientRepository, final StaffRepositoryWrapper staffRepository,
             final FromJsonHelper fromApiJsonHelper) {

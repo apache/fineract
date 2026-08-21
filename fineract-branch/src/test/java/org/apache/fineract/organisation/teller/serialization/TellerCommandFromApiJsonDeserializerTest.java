@@ -21,8 +21,6 @@ package org.apache.fineract.organisation.teller.serialization;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,11 +28,14 @@ import java.util.Optional;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 class TellerCommandFromApiJsonDeserializerTest {
 
@@ -42,7 +43,7 @@ class TellerCommandFromApiJsonDeserializerTest {
     private final TellerCommandFromApiJsonDeserializer underTest = new TellerCommandFromApiJsonDeserializer(fromJsonHelper);
 
     @Test
-    public void testCashTxnValidJsonPassesValidation() throws JsonProcessingException {
+    public void testCashTxnValidJsonPassesValidation() throws JacksonException {
         String json = cashTxnJson(BigDecimal.valueOf(1000), "10 September 2022", "Test note", "USD");
         assertDoesNotThrow(() -> underTest.validateForCashTxnForCashier(json));
     }
@@ -83,7 +84,7 @@ class TellerCommandFromApiJsonDeserializerTest {
 
     @NonNull
     private String cashTxnJson(@Nullable BigDecimal txnAmount, @Nullable String txnDate, @Nullable String txnNote,
-            @Nullable String currencyCode) throws JsonProcessingException {
+            @Nullable String currencyCode) throws JacksonException {
         Map<String, Object> map = new HashMap<>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
@@ -95,8 +96,8 @@ class TellerCommandFromApiJsonDeserializerTest {
     }
 
     @NonNull
-    private String createJsonCommand(Map<String, Object> jsonMap) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
+    private String createJsonCommand(Map<String, Object> jsonMap) throws JacksonException {
+        ObjectMapper objectMapper = new JsonMapper();
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMap);
     }
 

@@ -19,7 +19,6 @@
 package org.apache.fineract.organisation.monetary.domain;
 
 import org.apache.fineract.organisation.monetary.exception.CurrencyNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,7 +37,6 @@ public class ApplicationCurrencyRepositoryWrapper {
 
     private final ApplicationCurrencyRepository repository;
 
-    @Autowired
     public ApplicationCurrencyRepositoryWrapper(final ApplicationCurrencyRepository repository) {
         this.repository = repository;
     }

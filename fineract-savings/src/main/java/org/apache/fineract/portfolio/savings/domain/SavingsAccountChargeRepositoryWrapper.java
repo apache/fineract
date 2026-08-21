@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.savings.domain;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.portfolio.charge.exception.SavingsAccountChargeNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -34,7 +33,6 @@ public class SavingsAccountChargeRepositoryWrapper {
 
     private final SavingsAccountChargeRepository repository;
 
-    @Autowired
     public SavingsAccountChargeRepositoryWrapper(final SavingsAccountChargeRepository repository) {
         this.repository = repository;
     }

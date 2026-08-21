@@ -28,7 +28,6 @@ import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJob
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobEmailData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -42,7 +41,6 @@ public class ReportMailingJobEmailServiceImpl implements ReportMailingJobEmailSe
     /**
      * ReportMailingJobEmailServiceImpl constructor
      **/
-    @Autowired
     public ReportMailingJobEmailServiceImpl(
             final ReportMailingJobConfigurationReadPlatformService reportMailingJobConfigurationReadPlatformService) {
         this.reportMailingJobConfigurationReadPlatformService = reportMailingJobConfigurationReadPlatformService;

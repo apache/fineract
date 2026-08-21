@@ -33,7 +33,6 @@ import org.apache.fineract.infrastructure.core.serialization.FromApiJsonDeserial
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.collateral.api.CollateralApiConstants.CollateralJSONinputParams;
 import org.apache.fineract.portfolio.collateral.command.CollateralCommand;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -44,7 +43,6 @@ public final class CollateralCommandFromApiJsonDeserializer extends AbstractFrom
 
     private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
     public CollateralCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }

@@ -25,11 +25,11 @@ dependencies {
     implementation(
             'org.springframework.boot:spring-boot-starter',
             'org.springframework.boot:spring-boot-starter-data-jdbc',
-            'io.github.resilience4j:resilience4j-spring-boot3',
+            'io.github.resilience4j:resilience4j-spring-boot4',
 
-            'com.fasterxml.jackson.core:jackson-databind',
+            'tools.jackson.core:jackson-databind',
 
-            'org.liquibase:liquibase-core',
+            'org.springframework.boot:spring-boot-starter-liquibase',
 
             'org.postgresql:postgresql',
 
@@ -55,7 +55,7 @@ dependencies {
             'com.mysql:mysql-connector-j',
             )
     testImplementation (
-            'org.mockito:mockito-inline',
+            'org.mockito:mockito-core',
             'org.testcontainers:junit-jupiter',
             'org.testcontainers:postgresql',
             'org.testcontainers:mariadb',

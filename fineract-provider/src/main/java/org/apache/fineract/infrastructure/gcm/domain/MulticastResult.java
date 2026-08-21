@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.gcm.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,6 +36,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public final class MulticastResult implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private int success;

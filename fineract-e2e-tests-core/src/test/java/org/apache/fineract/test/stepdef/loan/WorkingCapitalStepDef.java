@@ -24,8 +24,6 @@ import static org.apache.fineract.test.support.TestContextKey.WORKING_CAPITAL_BR
 import static org.apache.fineract.test.support.TestContextKey.WORKING_CAPITAL_NEAR_BREACH_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -84,6 +82,8 @@ import org.apache.fineract.test.support.TestContext;
 import org.apache.fineract.test.support.TestContextKey;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -217,7 +217,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     }
 
     @When("Admin updates a Working Capital Loan Product with breach and near breach")
-    public void updateWorkingCapitalLoanProductWithBreachAndNearBreach() throws JsonProcessingException {
+    public void updateWorkingCapitalLoanProductWithBreachAndNearBreach() throws JacksonException {
         final Long breachId = getWcBreachIdForFrequency(1, WorkingCapitalBreachFrequencyType.YEARS.getCode());
         final Long nearBreachId = getWcNearBreachIdForFrequency(10, WorkingCapitalBreachFrequencyType.DAYS.getCode());
 
@@ -225,7 +225,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
     }
 
     @When("Admin updates a Working Capital Loan Product with near breach")
-    public void updateWorkingCapitalLoanProductWithNearBreach() throws JsonProcessingException {
+    public void updateWorkingCapitalLoanProductWithNearBreach() throws JacksonException {
         PostWorkingCapitalLoanProductsRequest workingCapitalLoanProductsRequest = testContext()
                 .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST);
         final Long breachId = workingCapitalLoanProductsRequest.getBreachId();
@@ -236,7 +236,7 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
 
     @When("Admin updates a WCLP with breach {int} {string} frequency and near breach {int} {string} frequency")
     public void updateWorkingCapitalLoanProductWithBreachAndNearBreach(int breachFrequency, String breachFrequencyType,
-            int nearBreachFrequency, String nearBreachFrequencyType) throws JsonProcessingException {
+            int nearBreachFrequency, String nearBreachFrequencyType) throws JacksonException {
 
         final Long breachId = getWcBreachIdForFrequency(breachFrequency, breachFrequencyType);
         final Long nearBreachId = getWcNearBreachIdForFrequency(nearBreachFrequency, nearBreachFrequencyType);

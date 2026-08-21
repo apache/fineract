@@ -34,7 +34,6 @@ import liquibase.ThreadLocalScopeManager;
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.spring.SpringLiquibase;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
@@ -43,6 +42,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -50,9 +50,9 @@ import org.springframework.stereotype.Service;
 /**
  * A service that picks up on tenants that are configured to auto-update their specific schema on application startup.
  */
+@DependsOnDatabaseInitialization
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class TenantDatabaseUpgradeService implements InitializingBean {
 
     public static final String TENANT_STORE_DB_CONTEXT = "tenant_store_db";
@@ -61,7 +61,6 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
     public static final String CUSTOM_CHANGELOG_CONTEXT = "custom_changelog";
 
     private final TenantDetailsService tenantDetailsService;
-    @Qualifier("hikariTenantDataSource")
     private final DataSource tenantDataSource;
     private final FineractProperties fineractProperties;
     private final TenantDatabaseStateVerifier databaseStateVerifier;
@@ -74,6 +73,21 @@ public class TenantDatabaseUpgradeService implements InitializingBean {
 
     static {
         System.setProperty("liquibase.analytics.enabled", "false");
+    }
+
+    public TenantDatabaseUpgradeService(final TenantDetailsService tenantDetailsService,
+            @Qualifier("hikariTenantDataSource") final DataSource tenantDataSource, final FineractProperties fineractProperties,
+            final TenantDatabaseStateVerifier databaseStateVerifier, final ExtendedSpringLiquibaseFactory liquibaseFactory,
+            final TenantDataSourceFactory tenantDataSourceFactory, final Environment environment,
+            final List<CustomTaskChange> customTaskChangesForDependencyInjection) {
+        this.tenantDetailsService = tenantDetailsService;
+        this.tenantDataSource = tenantDataSource;
+        this.fineractProperties = fineractProperties;
+        this.databaseStateVerifier = databaseStateVerifier;
+        this.liquibaseFactory = liquibaseFactory;
+        this.tenantDataSourceFactory = tenantDataSourceFactory;
+        this.environment = environment;
+        this.customTaskChangesForDependencyInjection = customTaskChangesForDependencyInjection;
     }
 
     @Override

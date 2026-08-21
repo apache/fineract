@@ -19,11 +19,6 @@
 package org.apache.fineract.infrastructure.core.jersey;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.jersey.converter.JsonConverter;
@@ -32,27 +27,37 @@ import org.apache.fineract.infrastructure.core.jersey.serializer.JacksonSerializ
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JacksonLocalDateArrayModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 
 @Configuration
 public class JerseyJacksonConverterConfig {
 
     @Bean
-    public ObjectMapper objectMapper(List<JsonSerializer<?>> serializers, List<JsonDeserializer<?>> deserializers,
+    public JsonMapper objectMapper(List<ValueSerializer<?>> serializers, List<ValueDeserializer<?>> deserializers,
             List<JsonConverter<?>> jsonConverters) {
         // Merge JsonConverters with serializers and deserializers
-        List<JsonSerializer<?>> mergedSerializers = new ArrayList<>(serializers);
+        List<ValueSerializer<?>> mergedSerializers = new ArrayList<>(serializers);
         mergedSerializers.addAll(jsonConverters.stream().map(JacksonSerializerAdapter::new).toList());
-        List<JsonDeserializer<?>> mergedDeserializers = new ArrayList<>(deserializers);
+        List<ValueDeserializer<?>> mergedDeserializers = new ArrayList<>(deserializers);
         mergedDeserializers.addAll(jsonConverters.stream().map(JacksonDeserializerAdapter::new).toList());
-        ObjectMapper objectMapper = new Jackson2ObjectMapperBuilder() //
-                .serializers(mergedSerializers.toArray(new JsonSerializer[0])) //
-                .serializationInclusion(JsonInclude.Include.NON_NULL) //
-                .deserializers(mergedDeserializers.toArray(new JsonDeserializer[0])) //
-                .featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES) //
-                .featuresToEnable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS) //
-                .build(); //
-        objectMapper.registerModule(new JacksonLocalDateArrayModule());
-        return objectMapper;
+        SimpleModule module = new SimpleModule();
+        mergedSerializers.forEach(module::addSerializer);
+        mergedDeserializers.forEach(d -> {
+            @SuppressWarnings("unchecked")
+            Class<Object> type = (Class<Object>) d.handledType();
+            module.addDeserializer(type, (ValueDeserializer<Object>) d);
+        });
+
+        return JsonMapper.builder()
+                .changeDefaultPropertyInclusion(
+                        v -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL))
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
+                .addModule(module).addModule(new JacksonLocalDateArrayModule()).build();
     }
+
 }

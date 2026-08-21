@@ -275,10 +275,10 @@ class WorkingCapitalLoanApplicationDataValidatorTest {
 
     private String createJsonWithField(final String fieldName, final Object value) {
         final JsonObject json = createBaseJsonObject();
-        if (value instanceof Number) {
-            json.addProperty(fieldName, (Number) value);
-        } else if (value instanceof String) {
-            json.addProperty(fieldName, (String) value);
+        if (value instanceof Number number) {
+            json.addProperty(fieldName, number);
+        } else if (value instanceof String string) {
+            json.addProperty(fieldName, string);
         }
         return json.toString();
     }

@@ -71,7 +71,7 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
     private static final String ENCLOSING_TRANSACTION = "enclosingTransaction";
     private static final String BODY_GET_REQUEST = "{}";
     private static final Gson GSON = new Gson();
-    private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER = org.apache.fineract.client.feign.ObjectMapperFactory
+    private static final tools.jackson.databind.ObjectMapper OBJECT_MAPPER = org.apache.fineract.client.feign.ObjectMapperFactory
             .getShared();
     private static final String WCL_BASE_URL = "v1/working-capital-loans";
     private static final String WCL_EXTERNAL_ID_URL = WCL_BASE_URL + "/external-id/";
@@ -285,7 +285,7 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
     private static <T> T fromJson(String json, Class<T> clazz) {
         try {
             return OBJECT_MAPPER.readValue(json, clazz);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (tools.jackson.core.JacksonException e) {
             throw new RuntimeException("Error deserializing JSON to object", e);
         }
     }

@@ -21,17 +21,17 @@ package org.apache.fineract.infrastructure.core.service.database;
 import java.util.List;
 import java.util.Objects;
 import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 @Component
+@DependsOnDatabaseInitialization
 public class PostgreSQLQueryService implements DatabaseQueryService {
 
     private final DatabaseTypeResolver databaseTypeResolver;
 
-    @Autowired
     public PostgreSQLQueryService(DatabaseTypeResolver databaseTypeResolver) {
         this.databaseTypeResolver = databaseTypeResolver;
     }

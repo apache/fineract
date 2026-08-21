@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.exception;
 
-import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
+import static org.apache.hc.core5.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
 
 import jakarta.validation.constraints.NotNull;
 import org.apache.fineract.commands.domain.CommandSource;

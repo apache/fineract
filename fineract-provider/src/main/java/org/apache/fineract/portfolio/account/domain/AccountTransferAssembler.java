@@ -31,7 +31,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,7 +38,6 @@ public class AccountTransferAssembler {
 
     private final AccountTransferDetailAssembler accountTransferDetailAssembler;
 
-    @Autowired
     public AccountTransferAssembler(final AccountTransferDetailAssembler accountTransferDetailAssembler) {
         this.accountTransferDetailAssembler = accountTransferDetailAssembler;
     }

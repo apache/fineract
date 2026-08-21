@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.meeting.domain;
 
 import org.apache.fineract.portfolio.meeting.exception.MeetingNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,7 +37,6 @@ public class MeetingRepositoryWrapper {
 
     private final MeetingRepository repository;
 
-    @Autowired
     public MeetingRepositoryWrapper(final MeetingRepository repository) {
         this.repository = repository;
     }

@@ -35,7 +35,6 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.survey.api.LikelihoodApiConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -48,7 +47,6 @@ public class LikelihoodDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
     private static final Set<String> UPDATE_LIKELIHOOD_DATA_PARAMETERS = new HashSet<>(Arrays.asList(LikelihoodApiConstants.ACTIVE));
 
-    @Autowired
     public LikelihoodDataValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }

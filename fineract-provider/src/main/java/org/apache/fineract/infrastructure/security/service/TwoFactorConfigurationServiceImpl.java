@@ -37,7 +37,6 @@ import org.apache.fineract.infrastructure.security.data.OTPRequest;
 import org.apache.fineract.infrastructure.security.domain.TwoFactorConfiguration;
 import org.apache.fineract.infrastructure.security.domain.TwoFactorConfigurationRepository;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -53,7 +52,6 @@ public class TwoFactorConfigurationServiceImpl implements TwoFactorConfiguration
 
     private final TwoFactorConfigurationRepository configurationRepository;
 
-    @Autowired
     public TwoFactorConfigurationServiceImpl(TwoFactorConfigurationRepository configurationRepository) {
         this.configurationRepository = configurationRepository;
     }

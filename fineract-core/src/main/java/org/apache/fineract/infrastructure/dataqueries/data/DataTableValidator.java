@@ -44,7 +44,6 @@ import org.apache.fineract.portfolio.search.data.AdvancedQueryRequest;
 import org.apache.fineract.portfolio.search.data.ColumnFilterData;
 import org.apache.fineract.portfolio.search.data.FilterData;
 import org.apache.fineract.portfolio.search.data.TableQueryData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -54,7 +53,6 @@ public class DataTableValidator {
     private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(
             Arrays.asList(DataTableApiConstant.categoryParamName, DataTableApiConstant.localParamName));
 
-    @Autowired
     public DataTableValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }

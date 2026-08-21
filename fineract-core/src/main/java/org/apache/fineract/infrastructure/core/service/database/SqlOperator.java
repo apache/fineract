@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 @AllArgsConstructor
 @Getter

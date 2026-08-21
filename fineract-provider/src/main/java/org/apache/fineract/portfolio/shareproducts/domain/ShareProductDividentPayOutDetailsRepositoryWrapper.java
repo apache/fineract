@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.shareproducts.domain;
 
 import org.apache.fineract.portfolio.shareproducts.exception.DividendNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -27,7 +26,6 @@ public class ShareProductDividentPayOutDetailsRepositoryWrapper {
 
     private final ShareProductDividentPayOutDetailsRepository shareProductDividentPayOutDetailsRepository;
 
-    @Autowired
     public ShareProductDividentPayOutDetailsRepositoryWrapper(
             final ShareProductDividentPayOutDetailsRepository shareProductDividentPayOutDetailsRepository) {
         this.shareProductDividentPayOutDetailsRepository = shareProductDividentPayOutDetailsRepository;

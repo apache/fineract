@@ -38,3 +38,11 @@ if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
         }
     }
 }
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+dependencies {
+    runtimeOnly "jakarta.xml.bind:jakarta.xml.bind-api:4.0.5"
+    runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
+}

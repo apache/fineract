@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.math.BigDecimal;
@@ -123,6 +122,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.imp
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
+import tools.jackson.core.type.TypeReference;
 
 @ExtendWith({ LoanTestLifecycleExtension.class, ExternalEventsExtension.class })
 public abstract class FeignLoanTestBase extends FeignIntegrationTest implements LoanProductTemplates {

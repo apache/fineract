@@ -49,7 +49,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.interestratechart.InterestRateChartApiConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -66,7 +65,6 @@ public class InterestRateChartDataValidator {
                     nameParamName, descriptionParamName, fromDateParamName, endDateParamName, chartSlabs,
                     InterestRateChartApiConstants.deleteParamName, isPrimaryGroupingByAmountParamName));
 
-    @Autowired
     public InterestRateChartDataValidator(final FromJsonHelper fromApiJsonHelper,
             final InterestRateChartSlabDataValidator chartSlabDataValidator) {
         this.fromApiJsonHelper = fromApiJsonHelper;

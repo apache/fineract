@@ -19,8 +19,8 @@
 package org.apache.fineract.infrastructure.core.exceptionmapper;
 
 import static org.apache.fineract.infrastructure.core.exception.AbstractIdempotentCommandException.IDEMPOTENT_CACHE_HEADER;
-import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
-import static org.apache.http.HttpStatus.SC_OK;
+import static org.apache.hc.core5.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
+import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;

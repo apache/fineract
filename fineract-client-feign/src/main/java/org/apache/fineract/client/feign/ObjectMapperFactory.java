@@ -19,12 +19,9 @@
 package org.apache.fineract.client.feign;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.fineract.client.adapter.ExternalIdAdapter;
-import org.openapitools.jackson.nullable.JsonNullableModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Factory for creating and configuring Jackson ObjectMapper instances.
@@ -43,26 +40,10 @@ public final class ObjectMapperFactory {
      * @return A new configured ObjectMapper instance
      */
     public static ObjectMapper createObjectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-
-        // Configure the ObjectMapper
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
-        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-
-        // Register Java 8 date/time support
-        mapper.registerModule(new JavaTimeModule());
-
-        // Support OpenAPI-generated JsonNullable fields
-        mapper.registerModule(new JsonNullableModule());
-
-        // Register ExternalId adapter
-        mapper.registerModule(ExternalIdAdapter.createModule());
-
-        // Disable FAIL_ON_EMPTY_BEANS for empty responses
-        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        return mapper;
+        return JsonMapper.builder()
+                .changeDefaultPropertyInclusion(
+                        v -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL))
+                .addModule(ExternalIdAdapter.createModule()).build();
     }
 
     /**

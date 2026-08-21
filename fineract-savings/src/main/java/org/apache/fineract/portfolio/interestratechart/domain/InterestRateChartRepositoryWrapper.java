@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.interestratechart.domain;
 
 import org.apache.fineract.portfolio.interestratechart.exception.InterestRateChartNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,7 +37,6 @@ public class InterestRateChartRepositoryWrapper {
 
     private final InterestRateChartRepository repository;
 
-    @Autowired
     public InterestRateChartRepositoryWrapper(final InterestRateChartRepository repository) {
         this.repository = repository;
     }

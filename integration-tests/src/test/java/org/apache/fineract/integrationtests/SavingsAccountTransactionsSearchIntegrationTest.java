@@ -22,7 +22,6 @@ import static org.apache.fineract.infrastructure.core.service.DateUtils.parseLoc
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -60,6 +59,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import tools.jackson.core.JacksonException;
 
 @SuppressWarnings({ "rawtypes" })
 @ExtendWith({ SavingsTestLifecycleExtension.class })
@@ -97,7 +97,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
     }
 
     @Test
-    public void testSavingsTransactionsSearchAmountFrom() throws JsonProcessingException {
+    public void testSavingsTransactionsSearchAmountFrom() throws JacksonException {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
@@ -119,7 +119,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
     }
 
     @Test
-    public void testSavingsTransactionsSearchAmountFromTo() throws JsonProcessingException {
+    public void testSavingsTransactionsSearchAmountFromTo() throws JacksonException {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
@@ -142,7 +142,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
     }
 
     @Test
-    public void testSavingsTransactionsSearchDateFromTo() throws JsonProcessingException {
+    public void testSavingsTransactionsSearchDateFromTo() throws JacksonException {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
@@ -167,7 +167,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
     }
 
     @Test
-    public void testSavingsTransactionsSearchSubmittedDateFromTo() throws JsonProcessingException {
+    public void testSavingsTransactionsSearchSubmittedDateFromTo() throws JacksonException {
         LocalDate businessDate = Utils.getLocalDateOfTenant();
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
@@ -235,7 +235,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
     }
 
     @Test
-    public void testSavingsTransactionsSearchTransactionTypesWithdrawAndDeposit() throws JsonProcessingException {
+    public void testSavingsTransactionsSearchTransactionTypesWithdrawAndDeposit() throws JacksonException {
         final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);

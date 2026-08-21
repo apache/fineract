@@ -22,18 +22,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import feign.Request;
 import feign.Response;
-import feign.jackson.JacksonDecoder;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import org.apache.fineract.client.feign.Jackson3Decoder;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.apache.fineract.client.models.ApiResponse;
 import org.junit.jupiter.api.Test;
 
 class ApiResponseDecoderTest {
 
-    private final ApiResponseDecoder decoder = new ApiResponseDecoder(new JacksonDecoder(ObjectMapperFactory.getShared()));
+    private final ApiResponseDecoder decoder = new ApiResponseDecoder(new Jackson3Decoder(ObjectMapperFactory.getShared()));
 
     @Test
     void decodeStringReturnsRawResponseBody() throws Exception {

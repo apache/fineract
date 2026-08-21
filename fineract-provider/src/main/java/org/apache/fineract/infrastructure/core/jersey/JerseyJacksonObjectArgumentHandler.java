@@ -33,14 +33,12 @@ import java.io.OutputStream;
 import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJacksonInputMessage;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
 
 @Provider
 @Produces(MediaType.APPLICATION_JSON_VALUE)
@@ -49,7 +47,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class JerseyJacksonObjectArgumentHandler<T> implements MessageBodyReader<T>, MessageBodyWriter<T> {
 
-    private final MappingJackson2HttpMessageConverter converter;
+    private final ObjectMapper objectMapper;
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, jakarta.ws.rs.core.MediaType mediaType) {
@@ -68,9 +66,8 @@ public class JerseyJacksonObjectArgumentHandler<T> implements MessageBodyReader<
             return type.cast(json);
         } else {
             // Create the proper type from the JSON
-            HttpHeaders headers = new HttpHeaders();
-            headers.putAll(httpHeaders);
-            return (T) converter.read(genericType, type, new MappingJacksonInputMessage(entityStream, headers));
+            JavaType javaType = objectMapper.constructType(genericType);
+            return (T) objectMapper.readValue(entityStream, javaType);
         }
     }
 
@@ -87,12 +84,7 @@ public class JerseyJacksonObjectArgumentHandler<T> implements MessageBodyReader<
             IOUtils.write((String) t, entityStream, UTF_8);
         } else {
             // Create the proper JSON string from the object
-            HttpHeaders headers = new HttpHeaders();
-            httpHeaders.forEach((header, rawValues) -> {
-                List<String> values = rawValues.stream().map(Object::toString).toList();
-                headers.put(header, values);
-            });
-            converter.write(t, genericType, MediaType.APPLICATION_JSON, new SimpleHttpOutputMessage(entityStream, headers));
+            objectMapper.writeValue(entityStream, t);
         }
     }
 }

@@ -37,9 +37,9 @@ dependencies {
     driver 'com.mysql:mysql-connector-j'
     driver 'org.mariadb.jdbc:mariadb-java-client'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.14.4'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.14.4'
-    testRuntimeOnly 'org.junit.platform:junit-platform-suite:1.14.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testRuntimeOnly 'org.junit.platform:junit-platform-suite'
 }
 
 cargo {

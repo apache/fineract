@@ -32,7 +32,6 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -47,7 +46,6 @@ public final class CodeCommandFromApiJsonDeserializer {
     private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(List.of("name"));
     private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
     public CodeCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }

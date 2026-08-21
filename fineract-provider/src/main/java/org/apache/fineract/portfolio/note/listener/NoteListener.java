@@ -20,7 +20,8 @@ package org.apache.fineract.portfolio.note.listener;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.portfolio.note.data.NoteCreateRequest;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.portfolio.note.data.NoteCreateEvent;
 import org.apache.fineract.portfolio.note.service.NoteWritePlatformService;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -33,17 +34,26 @@ class NoteListener {
     private final NoteWritePlatformService noteWritePlatformService;
 
     @EventListener
-    void onCreate(NoteCreateRequest request) {
-        noteWritePlatformService.createNote(request);
+    void onCreate(NoteCreateEvent event) {
+        createNote(event);
     }
 
     @EventListener
-    void onUpdate(NoteCreateRequest request) {
-        noteWritePlatformService.createNote(request);
+    void onUpdate(NoteCreateEvent event) {
+        createNote(event);
     }
 
     @EventListener
-    void onDelete(NoteCreateRequest request) {
-        noteWritePlatformService.createNote(request);
+    void onDelete(NoteCreateEvent event) {
+        createNote(event);
+    }
+
+    private void createNote(NoteCreateEvent event) {
+        ThreadLocalContextUtil.init(event.getContext());
+        try {
+            noteWritePlatformService.createNote(event.getRequest());
+        } finally {
+            ThreadLocalContextUtil.reset();
+        }
     }
 }

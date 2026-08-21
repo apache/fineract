@@ -82,7 +82,6 @@ import org.apache.fineract.portfolio.savings.SavingsPeriodFrequencyType;
 import org.apache.fineract.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupRepositoryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -92,7 +91,6 @@ public class DepositProductAssembler {
     private final InterestRateChartAssembler chartAssembler;
     private final TaxGroupRepositoryWrapper taxGroupRepository;
 
-    @Autowired
     public DepositProductAssembler(final ChargeRepositoryWrapper chargeRepository, final InterestRateChartAssembler chartAssembler,
             final TaxGroupRepositoryWrapper taxGroupRepository) {
         this.chargeRepository = chargeRepository;

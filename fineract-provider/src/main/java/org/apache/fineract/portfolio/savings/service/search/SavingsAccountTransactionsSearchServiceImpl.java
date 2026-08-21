@@ -49,14 +49,13 @@ import org.apache.fineract.portfolio.search.data.ColumnFilterData;
 import org.apache.fineract.portfolio.search.data.TableQueryData;
 import org.apache.fineract.portfolio.search.data.TransactionSearchRequest;
 import org.apache.fineract.portfolio.search.service.SearchUtil;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(readOnly = true)
@@ -103,7 +102,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
                 MathUtil.formatToSql(searchParameters.getToAmount()), columnFilters);
 
         Page<SavingsAccountTransactionData> emptyResult = PageableExecutionUtils.getPage(new ArrayList<>(0), pageable, () -> 0);
-        if (addTransactionTypesFilter(searchParameters, columnFilters) == null) {
+        if (noMatchingTransactionTypes(searchParameters, columnFilters)) {
             return emptyResult;
         }
 
@@ -140,8 +139,7 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
         }
     }
 
-    @Nullable
-    private static Boolean addTransactionTypesFilter(@NonNull TransactionSearchRequest searchParameters,
+    private static boolean noMatchingTransactionTypes(@NonNull TransactionSearchRequest searchParameters,
             List<ColumnFilterData> columnFilters) {
         Predicate<SavingsAccountTransactionType> filter = null;
         Boolean credit = searchParameters.getCredit();
@@ -167,11 +165,11 @@ public class SavingsAccountTransactionsSearchServiceImpl implements SavingsAccou
             filter = filter.and(t -> t != SavingsAccountTransactionType.INVALID);
             List<SavingsAccountTransactionType> filteredTypes = SavingsAccountTransactionType.getFiltered(filter);
             if (filteredTypes.isEmpty()) {
-                return null;
+                return true;
             } else {
                 String[] values = filteredTypes.stream().map(t -> String.valueOf(t.getId())).toArray(String[]::new);
                 columnFilters.add(ColumnFilterData.create("transaction_type_enum", SqlOperator.IN, values));
-                return true;
+                return false;
             }
         }
         return false;

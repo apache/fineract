@@ -23,9 +23,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import feign.Feign;
 import feign.Request;
 import feign.Retryer;
-import feign.jackson.JacksonEncoder;
 import java.util.concurrent.TimeUnit;
 import org.apache.fineract.client.feign.BasicAuthRequestInterceptor;
+import org.apache.fineract.client.feign.Jackson3Encoder;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -55,7 +55,7 @@ public class TestRailConfiguration {
             throw new IllegalStateException("TestRail password has not been set");
         }
 
-        return Feign.builder().encoder(new JacksonEncoder(ObjectMapperFactory.getShared()))
+        return Feign.builder().encoder(new Jackson3Encoder(ObjectMapperFactory.getShared()))
                 .options(new Request.Options(30, TimeUnit.SECONDS, 60, TimeUnit.SECONDS, true)).retryer(Retryer.NEVER_RETRY)
                 .requestInterceptor(new BasicAuthRequestInterceptor(testRailUsername, testRailPassword))
                 .target(TestRailApiClient.class, testRailBaseUrl);

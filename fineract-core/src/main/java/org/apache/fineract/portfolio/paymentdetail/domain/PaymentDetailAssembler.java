@@ -24,7 +24,6 @@ import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentType;
 import org.apache.fineract.portfolio.paymenttype.domain.PaymentTypeRepository;
 import org.apache.fineract.portfolio.paymenttype.exception.PaymentTypeNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,7 +32,6 @@ public class PaymentDetailAssembler {
     private final FromJsonHelper fromApiJsonHelper;
     private final PaymentTypeRepository paymentTypeRepository;
 
-    @Autowired
     public PaymentDetailAssembler(final FromJsonHelper fromApiJsonHelper, final PaymentTypeRepository paymentTypeRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.paymentTypeRepository = paymentTypeRepository;

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.entityaccess.data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
 import lombok.Data;
@@ -29,6 +30,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class FineractEntityToEntityMappingData implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     @SuppressWarnings("unused")
     private Long mapId;

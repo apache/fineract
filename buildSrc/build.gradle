@@ -51,8 +51,8 @@ configurations.all {
 }
 
 dependencies {
-    implementation 'com.sun.activation:jakarta.activation'
-    implementation 'com.sun.mail:jakarta.mail'
+    implementation 'org.eclipse.angus:angus-activation'
+    implementation 'org.eclipse.angus:angus-mail'
     implementation 'org.freemarker:freemarker'
     implementation ('com.tmatesoft.svnkit:svnkit') {
         exclude group: 'net.i2p.crypto', module: 'eddsa'

@@ -49,7 +49,6 @@ import org.apache.fineract.portfolio.account.domain.AccountTransferRecurrenceTyp
 import org.apache.fineract.portfolio.account.domain.AccountTransferType;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -78,7 +77,6 @@ public class StandingInstructionDataValidator {
             StandingInstructionApiConstants.recurrenceFrequencyParamName, StandingInstructionApiConstants.recurrenceIntervalParamName,
             StandingInstructionApiConstants.recurrenceOnMonthDayParamName, StandingInstructionApiConstants.monthDayFormatParamName));
 
-    @Autowired
     public StandingInstructionDataValidator(final FromJsonHelper fromApiJsonHelper,
             final AccountTransfersDetailDataValidator accountTransfersDetailDataValidator) {
         this.fromApiJsonHelper = fromApiJsonHelper;

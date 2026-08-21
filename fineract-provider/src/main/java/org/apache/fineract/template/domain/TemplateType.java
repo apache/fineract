@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.template.domain;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.gson.annotations.SerializedName;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 @JsonSerialize(using = TemplateTypeSerializer.class)
 public enum TemplateType {

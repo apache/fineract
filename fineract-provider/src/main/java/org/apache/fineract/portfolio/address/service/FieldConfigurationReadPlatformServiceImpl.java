@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.util.List;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.data.FieldConfigurationData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,6 @@ public class FieldConfigurationReadPlatformServiceImpl implements FieldConfigura
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
 
-    @Autowired
     public FieldConfigurationReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;

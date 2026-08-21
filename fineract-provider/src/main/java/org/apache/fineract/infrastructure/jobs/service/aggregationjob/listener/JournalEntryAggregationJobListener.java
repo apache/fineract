@@ -35,9 +35,8 @@ import org.apache.fineract.infrastructure.jobs.service.aggregationjob.JournalEnt
 import org.apache.fineract.infrastructure.jobs.service.aggregationjob.domain.JournalEntryAggregationTrackingRepository;
 import org.apache.fineract.infrastructure.jobs.service.aggregationjob.services.JournalEntryAggregationWriterService;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobExecutionListener;
-import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.listener.JobExecutionListener;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -100,8 +99,8 @@ public class JournalEntryAggregationJobListener implements JobExecutionListener 
                 .get(JournalEntryAggregationJobConstant.AGGREGATED_ON_DATE_TO);
         final Long jobExecutionId = jobExecution.getId();
         final Long recordProcessCount = jobExecution.getStepExecutions().stream()
-                .filter(stepExecution -> stepExecution.getStepName().equals(JOB_SUMMARY_STEP_NAME)).mapToLong(StepExecution::getWriteCount)
-                .sum();
+                .filter(stepExecution -> stepExecution.getStepName().equals(JOB_SUMMARY_STEP_NAME))
+                .mapToLong(_stepExecution -> (int) _stepExecution.getWriteCount()).sum();
         final Instant startDateTime = jobExecution.getStartTime() != null ? jobExecution.getStartTime().toInstant(ZoneOffset.UTC) : null;
         final Instant endDateTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime().toInstant(ZoneOffset.UTC) : null;
         long jobDuration = 0L;

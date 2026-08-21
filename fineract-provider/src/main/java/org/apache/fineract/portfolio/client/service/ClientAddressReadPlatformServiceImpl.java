@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.address.data.ClientAddressData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,6 @@ public class ClientAddressReadPlatformServiceImpl implements ClientAddressReadPl
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
 
-    @Autowired
     public ClientAddressReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate) {
         this.context = context;
         this.jdbcTemplate = jdbcTemplate;

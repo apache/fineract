@@ -20,6 +20,7 @@ package org.apache.fineract.cob.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.io.Serial;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +31,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class WorkingCapitalLoanAccountLock extends AccountLock {
 
+    @Serial
     private static final long serialVersionUID = -5476985607461625252L;
 
     public WorkingCapitalLoanAccountLock(Long loanId, LockOwner lockOwner, LocalDate lockPlacedOnCobBusinessDate) {

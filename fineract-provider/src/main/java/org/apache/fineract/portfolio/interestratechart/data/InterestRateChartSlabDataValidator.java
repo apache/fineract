@@ -51,7 +51,6 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.interestratechart.InterestIncentiveApiConstants;
 import org.apache.fineract.portfolio.interestratechart.InterestRateChartSlabApiConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -69,7 +68,6 @@ public class InterestRateChartSlabDataValidator {
                     descriptionParamName, periodTypeParamName, fromPeriodParamName, toPeriodParamName, amountRangeFromParamName,
                     amountRangeToParamName, annualInterestRateParamName, currencyCodeParamName, incentivesParamName));
 
-    @Autowired
     public InterestRateChartSlabDataValidator(final FromJsonHelper fromApiJsonHelper,
             final InterestIncentiveDataValidator interestIncentiveDataValidator) {
         this.fromApiJsonHelper = fromApiJsonHelper;

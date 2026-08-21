@@ -209,6 +209,12 @@ public class ClasspathDuplicatesStepDefinitions implements En {
                 || resourcePath.endsWith("classic-engine.properties") //
                 || resourcePath.endsWith("loader.properties") //
                 // ProGuard configuration files are safe to have multiple versions of
-                || resourcePath.equals("META-INF/proguard/gson.pro"); //
+                || resourcePath.equals("META-INF/proguard/gson.pro") //
+                // commons-email2-jakarta depends on commons-email2-core, both ship the identical
+                // MIME type mapping resource
+                || resourcePath.equals("META-INF/mime.types") //
+                // httpclient5 and docker-java-transport-zerodep both bundle the identical
+                // Mozilla public suffix list data file
+                || resourcePath.equals("org/publicsuffix/list/effective_tld_names.dat"); //
     }
 }

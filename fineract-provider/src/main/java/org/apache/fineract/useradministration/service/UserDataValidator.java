@@ -40,7 +40,6 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.apache.fineract.useradministration.domain.PasswordValidationPolicy;
 import org.apache.fineract.useradministration.domain.PasswordValidationPolicyRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -72,7 +71,6 @@ public final class UserDataValidator {
 
     private final PasswordValidationPolicyRepository passwordValidationPolicy;
 
-    @Autowired
     public UserDataValidator(final FromJsonHelper fromApiJsonHelper, final PasswordValidationPolicyRepository passwordValidationPolicy) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.passwordValidationPolicy = passwordValidationPolicy;

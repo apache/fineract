@@ -610,8 +610,7 @@ public class SavingsInterestPostingTest {
                 continue;
             }
 
-            if (v instanceof List<?>) {
-                List<?> arr = (List<?>) v;
+            if (v instanceof List<?> arr) {
                 if (arr.size() >= 3 && arr.get(0) instanceof Number && arr.get(1) instanceof Number && arr.get(2) instanceof Number) {
                     int year = ((Number) arr.get(0)).intValue();
                     int month = ((Number) arr.get(1)).intValue();
@@ -620,8 +619,7 @@ public class SavingsInterestPostingTest {
                 }
             }
 
-            if (v instanceof String) {
-                String s = (String) v;
+            if (v instanceof String s) {
                 DateTimeFormatter[] fmts = new DateTimeFormatter[] { DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US),
                         DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.US), DateTimeFormatter.ofPattern("yyyy-MM-dd") };
                 for (DateTimeFormatter f : fmts) {
@@ -662,14 +660,14 @@ public class SavingsInterestPostingTest {
     @SuppressWarnings({ "rawtypes" })
     private boolean isReversed(HashMap tx) {
         Object v = tx.get("reversed");
-        if (v instanceof Boolean) {
-            return (Boolean) v;
+        if (v instanceof Boolean boolean1) {
+            return boolean1;
         }
-        if (v instanceof Number) {
-            return ((Number) v).intValue() != 0;
+        if (v instanceof Number number) {
+            return number.intValue() != 0;
         }
-        if (v instanceof String) {
-            return Boolean.parseBoolean((String) v);
+        if (v instanceof String string) {
+            return Boolean.parseBoolean(string);
         }
         return false;
     }

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.gcm.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -57,6 +58,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public final class Notification implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     private String title;
     private String body;

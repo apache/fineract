@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.apache.fineract.portfolio.rate.exception.RateNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,7 +29,6 @@ public class RateRepositoryWrapper {
 
     private final RateRepository repository;
 
-    @Autowired
     public RateRepositoryWrapper(final RateRepository repository) {
         this.repository = repository;
     }

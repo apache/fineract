@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.core.serialization.AbstractFromApiJson
 import org.apache.fineract.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.useradministration.command.PermissionsCommand;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -45,7 +44,6 @@ public final class PermissionsCommandFromApiJsonDeserializer extends AbstractFro
     private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(Arrays.asList("permissions"));
     private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
     public PermissionsCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }

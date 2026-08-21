@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.configuration.service.MoneyHelperInitializationService;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
@@ -35,6 +34,7 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
@@ -45,13 +45,12 @@ import org.springframework.stereotype.Service;
  *
  * {@link ThreadLocalContextUtil} is used to retrieve the {@link FineractPlatformTenant} for the request.
  */
+@DependsOnDatabaseInitialization
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceService, ApplicationListener<ContextRefreshedEvent> {
 
     private static final Map<Long, DataSource> TENANT_TO_DATA_SOURCE_MAP = new ConcurrentHashMap<>();
-    @Qualifier("hikariTenantDataSource")
     private final DataSource tenantDataSource;
     private final TenantDetailsService tenantDetailsService;
 
@@ -60,6 +59,13 @@ public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceSe
     private final Set<Long> tenantMoneyInitializingSet = Sets.newConcurrentHashSet();
     @Autowired(required = false)
     private MoneyHelperInitializationService moneyHelperInitializationService;
+
+    public TomcatJdbcDataSourcePerTenantService(@Qualifier("hikariTenantDataSource") final DataSource tenantDataSource,
+            final TenantDetailsService tenantDetailsService, final DataSourcePerTenantServiceFactory dataSourcePerTenantServiceFactory) {
+        this.tenantDataSource = tenantDataSource;
+        this.tenantDetailsService = tenantDetailsService;
+        this.dataSourcePerTenantServiceFactory = dataSourcePerTenantServiceFactory;
+    }
 
     @Override
     public DataSource retrieveDataSource() {

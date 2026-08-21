@@ -176,7 +176,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                             "GL Journal Entry with Asset Externalization not enabled");
                 }
                 final Optional<ExternalAssetOwner> optExternalAssetOwner = externalAssetOwnerRepository.findByExternalId(externalId);
-                if (!optExternalAssetOwner.isPresent()) {
+                if (optExternalAssetOwner.isEmpty()) {
                     throw new ExternalAssetOwnerNotFoundException(externalId);
                 }
                 externalAssetOwner = optExternalAssetOwner.get();

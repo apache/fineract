@@ -36,7 +36,6 @@ import org.apache.fineract.organisation.teller.service.TellerManagementReadPlatf
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -48,7 +47,6 @@ public class CashierTransactionDataValidator {
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private static final Logger LOG = LoggerFactory.getLogger(CashierTransactionDataValidator.class);
 
-    @Autowired
     public CashierTransactionDataValidator(final TellerManagementReadPlatformService tellerManagementReadPlatformService,
             final NamedParameterJdbcTemplate jdbcTemplate) {
         this.tellerManagementReadPlatformService = tellerManagementReadPlatformService;

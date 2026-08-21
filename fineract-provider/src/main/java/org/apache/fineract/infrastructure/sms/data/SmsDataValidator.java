@@ -34,7 +34,6 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.sms.SmsApiConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -48,7 +47,6 @@ public final class SmsDataValidator {
     public static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
             Arrays.asList(SmsApiConstants.messageParamName, SmsApiConstants.campaignIdParamName));
 
-    @Autowired
     public SmsDataValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }

@@ -23,6 +23,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.io.Serial;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +39,7 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 @Accessors(chain = true)
 public class ReportMailingJobRunHistory extends AbstractPersistableCustom<Long> {
 
+    @Serial
     private static final long serialVersionUID = -3757370929988421076L;
 
     @ManyToOne

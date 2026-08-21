@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.interestratechart.data;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -114,6 +115,7 @@ public final class InterestRateChartData {
                 incentiveTypeOptions, genderOptions, clientTypeOptions, clientClassificationOptions);
     }
 
+    @JsonCreator
     private InterestRateChartData(Long id, String name, String description, LocalDate fromDate, LocalDate endDate,
             boolean isPrimaryGroupingByAmount, Long savingsProductId, String savingsProductName,
             Collection<InterestRateChartSlabData> chartSlabs, Collection<EnumOptionData> periodTypes,

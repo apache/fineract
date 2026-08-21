@@ -27,8 +27,6 @@ import static org.apache.fineract.portfolio.delinquency.validator.DelinquencyAct
 import static org.apache.fineract.portfolio.delinquency.validator.DelinquencyActionParameters.START_DATE;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonParser;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -46,12 +44,15 @@ import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mockito;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 class DelinquencyActionParseAndValidatorTest {
 
@@ -62,7 +63,7 @@ class DelinquencyActionParseAndValidatorTest {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
 
     @Test
-    public void testParseAndValidationIsOKForPause() throws JsonProcessingException {
+    public void testParseAndValidationIsOKForPause() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         Mockito.when(loan.getDisbursementDate()).thenReturn(localDate("07 September 2022"));
@@ -77,7 +78,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testParseAndValidationIsOKForResume() throws JsonProcessingException {
+    public void testParseAndValidationIsOKForResume() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
 
@@ -94,7 +95,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testPauseBothStartAndEndDateIsOverlappingWithAnActivePause() throws JsonProcessingException {
+    public void testPauseBothStartAndEndDateIsOverlappingWithAnActivePause() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         Mockito.when(loan.getDisbursementDate()).thenReturn(localDate("07 September 2022"));
@@ -110,7 +111,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testPauseStartIsOverlappingWithAnActivePause() throws JsonProcessingException {
+    public void testPauseStartIsOverlappingWithAnActivePause() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         Mockito.when(loan.getDisbursementDate()).thenReturn(localDate("11 September 2022"));
@@ -126,7 +127,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testNewPauseEndIsOverlappingWithExistingPause() throws JsonProcessingException {
+    public void testNewPauseEndIsOverlappingWithExistingPause() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         Mockito.when(loan.getDisbursementDate()).thenReturn(localDate("11 September 2022"));
@@ -141,7 +142,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testNewPauseIsOverlappingWithExistingPauseBecauseSameDates() throws JsonProcessingException {
+    public void testNewPauseIsOverlappingWithExistingPauseBecauseSameDates() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         Mockito.when(loan.getDisbursementDate()).thenReturn(localDate("11 September 2022"));
@@ -157,7 +158,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testNewPauseIsNotOverlappingBecauseThereWasAResume() throws JsonProcessingException {
+    public void testNewPauseIsNotOverlappingBecauseThereWasAResume() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         Mockito.when(loan.getDisbursementDate()).thenReturn(localDate("11 September 2022"));
@@ -176,7 +177,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testResumeIsNotOverlappingWithAnActivePause() throws JsonProcessingException {
+    public void testResumeIsNotOverlappingWithAnActivePause() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
 
@@ -189,7 +190,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testValidationErrorWhenDelinquencyActionIsMissing() throws JsonProcessingException {
+    public void testValidationErrorWhenDelinquencyActionIsMissing() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.APPROVED);
 
@@ -201,7 +202,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testValidationErrorWhenLoanIsNotActive() throws JsonProcessingException {
+    public void testValidationErrorWhenLoanIsNotActive() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.APPROVED);
 
@@ -213,7 +214,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testValidationErrorResumeShouldHaveNoEndDate() throws JsonProcessingException {
+    public void testValidationErrorResumeShouldHaveNoEndDate() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
 
@@ -225,7 +226,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testValidationErrorResumeInvalidStartDate() throws JsonProcessingException {
+    public void testValidationErrorResumeInvalidStartDate() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
 
@@ -237,7 +238,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testValidationErrorResumeOnExistingResumeDate() throws JsonProcessingException {
+    public void testValidationErrorResumeOnExistingResumeDate() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
 
@@ -263,7 +264,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testValidationErrorPausePeriodShouldBeAtLeastOneDay() throws JsonProcessingException {
+    public void testValidationErrorPausePeriodShouldBeAtLeastOneDay() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
 
@@ -275,7 +276,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testValidationErrorPausePeriodMustNotBeBeforeDisbursement() throws JsonProcessingException {
+    public void testValidationErrorPausePeriodMustNotBeBeforeDisbursement() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         Mockito.when(loan.getDisbursementDate()).thenReturn(localDate("11 September 2022"));
@@ -314,7 +315,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testNewPausePeriodStartingOnExistingEndDate() throws JsonProcessingException {
+    public void testNewPausePeriodStartingOnExistingEndDate() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         Mockito.when(loan.getDisbursementDate()).thenReturn(localDate("11 September 2022"));
@@ -331,7 +332,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testNewPauseEndingOnExistingStartDate() throws JsonProcessingException {
+    public void testNewPauseEndingOnExistingStartDate() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         Mockito.when(loan.getDisbursementDate()).thenReturn(localDate("11 September 2022"));
@@ -348,7 +349,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testNewPausePeriodStartingOnExistingEffectiveEndDate() throws JsonProcessingException {
+    public void testNewPausePeriodStartingOnExistingEffectiveEndDate() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         Mockito.when(loan.getDisbursementDate()).thenReturn(localDate("11 September 2022"));
@@ -368,7 +369,7 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @Test
-    public void testParseAndValidationIsOKForBackdatedPause() throws JsonProcessingException {
+    public void testParseAndValidationIsOKForBackdatedPause() throws JacksonException {
         Loan loan = Mockito.mock(Loan.class);
         Mockito.when(loan.getStatus()).thenReturn(LoanStatus.ACTIVE);
         Mockito.when(loan.getDisbursementDate()).thenReturn(localDate("07 September 2022"));
@@ -384,7 +385,7 @@ class DelinquencyActionParseAndValidatorTest {
 
     @NonNull
     private JsonCommand delinquencyAction(@Nullable String action, @Nullable String startDate, @Nullable String endDate)
-            throws JsonProcessingException {
+            throws JacksonException {
         Map<String, Object> map = new HashMap<>();
         Optional.ofNullable(action).ifPresent(a -> map.put(ACTION, a));
         map.put(DATE_FORMAT, "dd MMMM yyyy");
@@ -399,8 +400,8 @@ class DelinquencyActionParseAndValidatorTest {
     }
 
     @NonNull
-    private JsonCommand createJsonCommand(Map<String, Object> jsonMap) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
+    private JsonCommand createJsonCommand(Map<String, Object> jsonMap) throws JacksonException {
+        ObjectMapper objectMapper = new JsonMapper();
         String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMap);
         return new JsonCommand(null, JsonParser.parseString(json));
     }

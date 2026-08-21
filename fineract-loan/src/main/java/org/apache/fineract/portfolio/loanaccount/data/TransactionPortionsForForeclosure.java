@@ -21,14 +21,6 @@ package org.apache.fineract.portfolio.loanaccount.data;
 import java.math.BigDecimal;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
-public interface TransactionPortionsForForeclosure {
-
-    LoanTransactionType getTransactionType();
-
-    BigDecimal getInterestPortion();
-
-    BigDecimal getFeeChargesPortion();
-
-    BigDecimal getPenaltyChargesPortion();
-
+public record TransactionPortionsForForeclosure(LoanTransactionType transactionType, BigDecimal interestPortion,
+        BigDecimal feeChargesPortion, BigDecimal penaltyChargesPortion) {
 }

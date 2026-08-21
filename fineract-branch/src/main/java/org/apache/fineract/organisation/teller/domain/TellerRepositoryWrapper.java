@@ -19,7 +19,6 @@
 package org.apache.fineract.organisation.teller.domain;
 
 import org.apache.fineract.organisation.teller.exception.TellerNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,6 @@ public class TellerRepositoryWrapper {
 
     private final TellerRepository repository;
 
-    @Autowired
     public TellerRepositoryWrapper(final TellerRepository repository) {
         this.repository = repository;
     }

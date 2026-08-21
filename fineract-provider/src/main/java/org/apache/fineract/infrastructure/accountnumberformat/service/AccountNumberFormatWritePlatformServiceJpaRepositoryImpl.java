@@ -34,7 +34,6 @@ import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
 import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
@@ -47,7 +46,6 @@ public class AccountNumberFormatWritePlatformServiceJpaRepositoryImpl implements
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final AccountNumberFormatDataValidator accountNumberFormatDataValidator;
 
-    @Autowired
     AccountNumberFormatWritePlatformServiceJpaRepositoryImpl(final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository,
             final AccountNumberFormatDataValidator accountNumberFormatDataValidator) {
         this.accountNumberFormatRepository = accountNumberFormatRepository;

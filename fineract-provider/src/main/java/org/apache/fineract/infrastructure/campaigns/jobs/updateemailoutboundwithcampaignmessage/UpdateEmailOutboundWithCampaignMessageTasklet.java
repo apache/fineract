@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.infrastructure.campaigns.jobs.updateemailoutboundwithcampaignmessage;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
@@ -47,10 +45,13 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.calendar.service.CalendarUtils;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
-import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.StepContribution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -85,8 +86,8 @@ public class UpdateEmailOutboundWithCampaignMessageTasklet implements Tasklet {
     private void insertDirectCampaignIntoEmailOutboundTable(final String emailParams, final String emailSubject,
             final String messageTemplate, final String campaignName, final Long campaignId) {
         try {
-            HashMap<String, String> campaignParams = new ObjectMapper().readValue(emailParams, new TypeReference<>() {});
-            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(emailParams, new TypeReference<>() {});
+            HashMap<String, String> campaignParams = new JsonMapper().readValue(emailParams, new TypeReference<>() {});
+            HashMap<String, String> queryParamForRunReport = new JsonMapper().readValue(emailParams, new TypeReference<>() {});
             List<HashMap<String, Object>> runReportObject = emailCampaignWritePlatformService
                     .getRunReportByServiceImpl(campaignParams.get("reportName"), queryParamForRunReport);
             if (runReportObject != null) {
@@ -104,7 +105,7 @@ public class UpdateEmailOutboundWithCampaignMessageTasklet implements Tasklet {
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (JacksonException | IOException e) {
             throw new EmailParamMappingException(e);
         }
     }

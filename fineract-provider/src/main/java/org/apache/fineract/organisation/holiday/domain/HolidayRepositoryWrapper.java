@@ -22,7 +22,6 @@ import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.organisation.holiday.exception.HolidayNotFoundException;
 import org.apache.fineract.organisation.holiday.service.HolidayUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,7 +34,6 @@ public class HolidayRepositoryWrapper {
 
     private final HolidayRepository repository;
 
-    @Autowired
     public HolidayRepositoryWrapper(final HolidayRepository repository) {
         this.repository = repository;
     }

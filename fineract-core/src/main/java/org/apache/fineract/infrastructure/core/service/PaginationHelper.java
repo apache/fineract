@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Objects;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -33,7 +32,6 @@ public class PaginationHelper {
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final DatabaseTypeResolver databaseTypeResolver;
 
-    @Autowired
     public PaginationHelper(DatabaseSpecificSQLGenerator sqlGenerator, DatabaseTypeResolver databaseTypeResolver) {
         this.sqlGenerator = sqlGenerator;
         this.databaseTypeResolver = databaseTypeResolver;

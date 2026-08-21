@@ -29,7 +29,6 @@ import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurati
 import org.apache.fineract.infrastructure.configuration.domain.GlobalConfigurationRepositoryWrapper;
 import org.apache.fineract.infrastructure.dataqueries.api.DataTableApiConstant;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -42,7 +41,6 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
     private final GlobalConfigurationRepositoryWrapper configurationRepositoryWrapper;
     private final RowMapper<GlobalConfigurationPropertyData> rm;
 
-    @Autowired
     public ConfigurationReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final GlobalConfigurationRepositoryWrapper configurationRepositoryWrapper) {
         this.context = context;

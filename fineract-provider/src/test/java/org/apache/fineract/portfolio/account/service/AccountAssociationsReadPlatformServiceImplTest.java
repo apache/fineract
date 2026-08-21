@@ -1,5 +1,4 @@
 /**
- /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
@@ -28,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -37,6 +37,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public class AccountAssociationsReadPlatformServiceImplTest {
 
+    private AutoCloseable mocks;
+
     @Mock
     private JdbcTemplate jdbcTemplate;
 
@@ -45,7 +47,7 @@ public class AccountAssociationsReadPlatformServiceImplTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        mocks = MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -74,5 +76,10 @@ public class AccountAssociationsReadPlatformServiceImplTest {
         assertDoesNotThrow(() -> {
             service.retriveLoanAssociations(1L, 1);
         });
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        mocks.close();
     }
 }

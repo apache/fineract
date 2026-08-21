@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.client.domain;
 
 import org.apache.fineract.organisation.monetary.domain.OrganisationCurrencyRepositoryWrapper;
 import org.apache.fineract.portfolio.charge.exception.ChargeNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,7 +28,6 @@ public class ClientChargeRepositoryWrapper {
     private final ClientChargeRepository repository;
     private final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepository;
 
-    @Autowired
     public ClientChargeRepositoryWrapper(final ClientChargeRepository repository,
             final OrganisationCurrencyRepositoryWrapper organisationCurrencyRepositoryWrapper) {
         this.repository = repository;

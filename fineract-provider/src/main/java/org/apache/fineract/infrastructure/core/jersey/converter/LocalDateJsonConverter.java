@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.infrastructure.core.jersey.converter;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
 
 // This is registered in the JacksonLocalDateBeanSerializerModifier
 public class LocalDateJsonConverter implements JsonConverter<LocalDate> {
@@ -34,7 +34,7 @@ public class LocalDateJsonConverter implements JsonConverter<LocalDate> {
     public LocalDate convertToObject(JsonParser parser) throws IOException {
         LocalDate result = null;
         if (parser.hasToken(JsonToken.VALUE_STRING)) {
-            String formattedDate = parser.getText();
+            String formattedDate = parser.getString();
             result = LocalDate.parse(formattedDate, FORMATTER);
         }
         return result;

@@ -54,7 +54,7 @@ dependencies {
             'org.springdoc:springdoc-openapi-starter-webmvc-ui',
             'org.mapstruct:mapstruct',
 
-            'io.github.resilience4j:resilience4j-spring-boot3',
+            'io.github.resilience4j:resilience4j-spring-boot4',
             'org.apache.httpcomponents:httpcore',
             )
     implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
@@ -68,6 +68,7 @@ dependencies {
         exclude group: 'org.glassfish.hk2', module: 'hk2-runlevel'
         exclude group: 'org.hibernate.validator', module: 'hibernate-validator'
         exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
+        exclude group: 'org.glassfish.jersey.media', module: 'jersey-media-json-jackson'
     }
     implementation('org.dom4j:dom4j') {
         exclude group: 'javax.xml.bind'

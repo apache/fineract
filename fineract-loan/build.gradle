@@ -79,3 +79,14 @@ if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
         }
     }
 }
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+dependencies {
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
+
+    implementation "org.apache.httpcomponents.client5:httpclient5:5.4.4"
+
+    runtimeOnly "jakarta.xml.bind:jakarta.xml.bind-api:4.0.5"
+}

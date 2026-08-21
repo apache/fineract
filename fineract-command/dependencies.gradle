@@ -23,7 +23,7 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-validation',
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.security:spring-security-core',
-            'io.github.resilience4j:resilience4j-spring-boot3',
+            'io.github.resilience4j:resilience4j-spring-boot4',
 
             'com.google.guava:guava',
 
@@ -37,6 +37,7 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor'
 
     testImplementation(project(path: ':fineract-command-test'))
+    testImplementation 'org.springframework.boot:spring-boot-jdbc'
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
@@ -50,6 +51,5 @@ dependencies {
             'org.testcontainers:junit-jupiter',
             'org.springframework.restdocs:spring-restdocs-mockmvc',
             'org.springframework.restdocs:spring-restdocs-webtestclient',
-            'org.springframework.restdocs:spring-restdocs-restassured',
             )
 }

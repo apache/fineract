@@ -22,11 +22,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.PostLoad;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Transient;
+import java.io.Serial;
 import java.io.Serializable;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -50,6 +48,7 @@ import org.springframework.data.domain.Persistable;
 @NoArgsConstructor
 public abstract class AbstractPersistableCustom<T extends Serializable> implements Persistable<T>, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 9181640245194392646L;
 
     @Id
@@ -57,14 +56,9 @@ public abstract class AbstractPersistableCustom<T extends Serializable> implemen
     @Getter
     private T id;
 
+    @Override
     @Transient
-    @Setter(value = AccessLevel.NONE)
-    @Getter
-    private boolean isNew = true;
-
-    @PrePersist
-    @PostLoad
-    void markNotNew() {
-        this.isNew = false;
+    public boolean isNew() {
+        return id == null;
     }
 }

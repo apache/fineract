@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.integrationtests;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -33,11 +32,13 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.In
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData.RecalculationRestFrequencyType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 public class LoanNextPaymentDueAmountIntegrationTest extends FeignLoanTestBase {
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper = new JsonMapper();
     private static final String LOAN_ACCOUNT_DATA_V_1 = "org.apache.fineract.avro.loan.v1.LoanAccountDataV1";
 
     @Test

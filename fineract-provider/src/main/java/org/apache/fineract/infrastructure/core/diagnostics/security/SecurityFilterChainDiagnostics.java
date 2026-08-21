@@ -44,8 +44,8 @@ public class SecurityFilterChainDiagnostics implements InitializingBean {
     }
 
     private void printFilterChain(SecurityFilterChain filterChain) {
-        if (filterChain instanceof DefaultSecurityFilterChain) {
-            printDefaultFilterChain((DefaultSecurityFilterChain) filterChain);
+        if (filterChain instanceof DefaultSecurityFilterChain chain) {
+            printDefaultFilterChain(chain);
         } else {
             printUnknownFilterChain(filterChain);
         }

@@ -47,7 +47,6 @@ import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChec
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.domain.LegalForm;
 import org.apache.fineract.validation.constraints.DateFormatValidator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -58,7 +57,6 @@ public final class ClientDataValidator {
     private final EntityDatatableChecksRepository entityDatatableChecksRepository;
     private static final String MOBILE_NUMBER_REGEX = "^\\+?[0-9]{7,15}$";
 
-    @Autowired
     public ClientDataValidator(final FromJsonHelper fromApiJsonHelper,
             final ConfigurationReadPlatformService configurationReadPlatformService,
             final EntityDatatableChecksRepository entityDatatableChecksRepository) {

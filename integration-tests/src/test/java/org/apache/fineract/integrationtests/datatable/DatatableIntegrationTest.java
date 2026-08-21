@@ -273,7 +273,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
 
         assertEquals(itsAJson, ((Map) columnHeaders.get(9)).get("columnName"));
         Object jsonResponse = ((List) data.get("row")).get(9);
-        assertEquals(datatableEntryMap.get(itsAJson), jsonResponse instanceof Map ? ((Map) jsonResponse).get("value") : jsonResponse);
+        assertEquals(datatableEntryMap.get(itsAJson), jsonResponse instanceof Map m ? m.get("value") : jsonResponse);
 
         // Read the Datatable entry generated with genericResultSet in false
         List<HashMap<String, Object>> datatableEntryResponseNoGenericResult = this.datatableHelper.readDatatableEntry(datatableName,

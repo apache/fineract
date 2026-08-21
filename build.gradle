@@ -95,7 +95,7 @@ buildscript {
 
     dependencies {
         classpath 'com.bmuschko:gradle-cargo-plugin:2.9.0'
-        classpath 'org.eclipse.persistence:eclipselink:4.0.9'
+        classpath 'org.eclipse.persistence:eclipselink:5.0.1'
         classpath 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
         classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0'
         classpath 'org.apache.commons:commons-lang3:3.20.0'
@@ -110,10 +110,9 @@ plugins {
     id 'com.adarshr.test-logger' version '4.0.0'
     id 'com.diffplug.spotless' version '6.25.0' apply false
     id 'org.nosphere.apache.rat' version '0.8.1' apply false
-    id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.9' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.2' apply false
-    id 'org.springframework.boot' version '3.5.15' apply false
+    id 'org.springframework.boot' version '4.0.7' apply false
     id 'net.ltgt.errorprone' version '4.4.0' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.49' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.5.7' apply false
@@ -163,6 +162,9 @@ gitVersioning.apply {
 
 ext['groovy.version'] = '4.0.17'
 ext['swaggerFile'] = "$rootDir/fineract-provider/build/resources/main/static/fineract.json".toString()
+ext['apacheLicenseHeader'] = "/**\n" + rootProject.file("$rootDir/APACHE_LICENSETEXT.md").readLines()
+        .collect { it.isEmpty() ? " *" : " * $it" }
+        .join("\n") + "\n */\n"
 
 // Apply static weaving configuration to all subprojects
 subprojects { subproject ->
@@ -197,10 +199,12 @@ allprojects  {
 
     apply plugin: 'com.adarshr.test-logger'
     apply plugin: 'com.diffplug.spotless'
-    apply plugin: 'com.github.hierynomus.license'
     apply plugin: 'net.ltgt.errorprone'
 
     tasks.withType(JavaCompile).configureEach {
+        inputs.file(rootProject.file('lombok.config'))
+                .withPropertyName('lombokConfig')
+                .withPathSensitivity(PathSensitivity.RELATIVE)
         options.errorprone {
             disableWarningsInGeneratedCode = true
             disable(
@@ -248,29 +252,6 @@ allprojects  {
         }
 
         lineEndings 'UNIX'
-    }
-
-    // Configuration for Gradle license plug-in
-    // https://github.com/hierynomus/license-gradle-plugin
-    license {
-        header rootProject.file("$rootDir/APACHE_LICENSETEXT.md")
-        excludes([
-            "**/gradlew*",
-            "**/git.properties",
-            "**/*.html",
-            "**/templates/**",
-            "**/features/**",
-            "**/results/**",
-            "**/package-info.java",
-            "**/keystore.jks",
-            "**/legacy-docs/**",
-            "**/banner.txt",
-            "**/build.gradle.mustache",
-            "**/pom.mustache",
-            "**/avro/**/*.java",
-            "**/org/apache/fineract/client/**/*.java"
-        ])
-        strictCheck true
     }
 
     licenseReport {
@@ -408,6 +389,11 @@ configure(project.fineractJavaProjects) {
             cacheChangingModulesFor 0, 'seconds'
             cacheDynamicVersionsFor 0, 'seconds'
         }
+        // com.sun.activation:jakarta.activation is superseded by jakarta.activation-api +
+        // org.eclipse.angus:angus-activation; multiple third-party libraries (e.g. jaxb-runtime
+        // via tika, via hibernate-core) pull it in transitively without excluding it themselves,
+        // so it must be excluded globally to avoid classpath duplicates
+        exclude group: 'com.sun.activation', module: 'jakarta.activation'
     }
 
     tasks.withType(JavaCompile).configureEach {
@@ -493,7 +479,7 @@ configure(project.fineractJavaProjects) {
     }
 
     check {
-        dependsOn(rat, licenseMain, licenseTest)
+        dependsOn(rat)
     }
 
     dependencies {
@@ -538,6 +524,13 @@ configure(project.fineractJavaProjects) {
                 }
                 )
             }
+        }
+
+        format 'javaLicenseHeader', {
+            target sourceSets.main.java, sourceSets.test.java
+            targetExclude '**/build/**', '**/bin/**', '**/out/**', '**/package-info.java', '**/avro/**/*.java',
+                    '**/org/apache/fineract/client/**/*.java'
+            licenseHeader(rootProject.ext['apacheLicenseHeader'], 'package ')
         }
 
         lineEndings 'UNIX'
@@ -691,7 +684,7 @@ configure(project.fineractJavaProjects) {
     }
 
     check {
-        dependsOn(rat, licenseMain, licenseTest)
+        dependsOn(rat)
     }
 
     dependencies {
@@ -700,6 +693,7 @@ configure(project.fineractJavaProjects) {
                 'org.slf4j:slf4j-api',
                 'org.slf4j:log4j-over-slf4j',
                 'org.slf4j:jul-to-slf4j',
+                'org.slf4j:jcl-over-slf4j',
                 )
         implementation ("ch.qos.logback:logback-classic") {
             exclude(module: "slf4j-api")

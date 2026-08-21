@@ -21,8 +21,8 @@ package org.apache.fineract.cob.loan;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.task.TaskDecorator;
-import org.springframework.lang.NonNull;
 
 /**
  * Task decorator to ensure proper thread context propagation and cleanup

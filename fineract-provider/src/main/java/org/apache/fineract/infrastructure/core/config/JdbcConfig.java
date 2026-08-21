@@ -18,10 +18,14 @@
  */
 package org.apache.fineract.infrastructure.core.config;
 
+import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.jdbc.core.dialect.JdbcDialect;
+import org.springframework.data.jdbc.core.dialect.JdbcMySqlDialect;
+import org.springframework.data.jdbc.core.dialect.JdbcPostgresDialect;
 import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -31,6 +35,14 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 @EnableJdbcRepositories(basePackages = { "org.apache.fineract.command.jdbc.store.domain",
         "org.apache.fineract.infrastructure.documentmanagement.domain" }, jdbcOperationsRef = "namedParameterJdbcTemplate", transactionManagerRef = "jdbcTransactionManager")
 public class JdbcConfig {
+
+    @Bean
+    public JdbcDialect jdbcDialect(DatabaseTypeResolver databaseTypeResolver) {
+        if (databaseTypeResolver.isPostgreSQL()) {
+            return JdbcPostgresDialect.INSTANCE;
+        }
+        return JdbcMySqlDialect.INSTANCE;
+    }
 
     @Bean
     public JdbcTemplate jdbcTemplate(RoutingDataSource dataSource) {

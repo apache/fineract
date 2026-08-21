@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.infrastructure.core.jersey.converter;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
 
 @Component
 public class OffsetDateTimeJsonConverter implements JsonConverter<OffsetDateTime> {
@@ -35,7 +35,7 @@ public class OffsetDateTimeJsonConverter implements JsonConverter<OffsetDateTime
     public OffsetDateTime convertToObject(JsonParser parser) throws IOException {
         OffsetDateTime result = null;
         if (parser.hasToken(JsonToken.VALUE_STRING)) {
-            String formattedDate = parser.getText();
+            String formattedDate = parser.getString();
             result = OffsetDateTime.parse(formattedDate, FORMATTER);
         }
         return result;

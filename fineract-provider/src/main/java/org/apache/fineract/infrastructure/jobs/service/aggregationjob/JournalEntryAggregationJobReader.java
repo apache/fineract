@@ -21,33 +21,28 @@ package org.apache.fineract.infrastructure.jobs.service.aggregationjob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.domain.JdbcSupport;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
 import org.apache.fineract.infrastructure.core.service.migration.TenantDataSourceFactory;
 import org.apache.fineract.infrastructure.jobs.service.aggregationjob.data.JournalEntryAggregationSummaryData;
-import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.core.step.StepExecution;
+import org.springframework.batch.infrastructure.item.ExecutionContext;
+import org.springframework.batch.infrastructure.item.database.JdbcCursorItemReader;
 import org.springframework.stereotype.Component;
 
 @Component
 @StepScope
 public class JournalEntryAggregationJobReader extends JdbcCursorItemReader<JournalEntryAggregationSummaryData> {
 
-    private final DatabaseTypeResolver databaseTypeResolver;
     private LocalDate aggregatedOnDateFrom;
     private LocalDate aggregatedOnDateTo;
 
     public JournalEntryAggregationJobReader(TenantDataSourceFactory tenantDataSourceFactory, DatabaseTypeResolver databaseTypeResolver) {
-        this.databaseTypeResolver = databaseTypeResolver;
-        FineractPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-        setDataSource(tenantDataSourceFactory.create(tenant));
-        setSql(buildAggregationQuery());
-        setRowMapper(this::mapRow);
+        super(tenantDataSourceFactory.create(ThreadLocalContextUtil.getTenant()), buildAggregationQuery(databaseTypeResolver),
+                JournalEntryAggregationJobReader::mapRow);
     }
 
     @BeforeStep
@@ -64,7 +59,7 @@ public class JournalEntryAggregationJobReader extends JdbcCursorItemReader<Journ
 
     }
 
-    private JournalEntryAggregationSummaryData mapRow(ResultSet rs, int rowNum) throws SQLException {
+    private static JournalEntryAggregationSummaryData mapRow(ResultSet rs, int rowNum) throws SQLException {
         return JournalEntryAggregationSummaryData.builder() //
                 .glAccountId(rs.getLong("glAccountId")) //
                 .productId(rs.getLong("productId")) //
@@ -81,7 +76,7 @@ public class JournalEntryAggregationJobReader extends JdbcCursorItemReader<Journ
                 .build(); //
     }
 
-    private String buildAggregationQuery() {
+    private static String buildAggregationQuery(DatabaseTypeResolver databaseTypeResolver) {
         String aggregateFunction = databaseTypeResolver.isMySQL()
                 ? "GROUP_CONCAT(DISTINCT mlo.external_id ORDER BY mlo.external_id SEPARATOR ', ')"
                 : "STRING_AGG(DISTINCT mlo.external_id, ', ' ORDER BY mlo.external_id)";

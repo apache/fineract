@@ -19,7 +19,6 @@
 package org.apache.fineract.organisation.office.domain;
 
 import org.apache.fineract.organisation.office.exception.OfficeNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +32,6 @@ public class OfficeRepositoryWrapper {
 
     private final OfficeRepository repository;
 
-    @Autowired
     public OfficeRepositoryWrapper(final OfficeRepository repository) {
         this.repository = repository;
     }

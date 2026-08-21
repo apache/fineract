@@ -52,7 +52,6 @@ import org.apache.fineract.portfolio.shareproducts.constants.ShareProductApiCons
 import org.apache.fineract.portfolio.shareproducts.data.ShareProductMarketPriceData;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProduct;
 import org.apache.fineract.portfolio.shareproducts.domain.ShareProductMarketPrice;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -82,7 +81,6 @@ public class ShareProductDataSerializer {
     private final ChargeRepositoryWrapper chargeRepository;
     private final PlatformSecurityContext platformSecurityContext;
 
-    @Autowired
     public ShareProductDataSerializer(final FromJsonHelper fromApiJsonHelper, final ChargeRepositoryWrapper chargeRepository,
             final PlatformSecurityContext platformSecurityContext) {
         this.fromApiJsonHelper = fromApiJsonHelper;

@@ -19,7 +19,6 @@
 package org.apache.fineract.accounting.glaccount.domain;
 
 import org.apache.fineract.accounting.glaccount.exception.GLAccountNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -32,7 +31,6 @@ public class GLAccountRepositoryWrapper {
 
     private final GLAccountRepository repository;
 
-    @Autowired
     public GLAccountRepositoryWrapper(final GLAccountRepository repository) {
         this.repository = repository;
     }

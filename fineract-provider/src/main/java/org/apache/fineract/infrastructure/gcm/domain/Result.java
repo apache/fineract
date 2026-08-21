@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.gcm.domain;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import lombok.Data;
@@ -55,6 +56,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public final class Result implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     private String messageId;
     private String canonicalRegistrationId;

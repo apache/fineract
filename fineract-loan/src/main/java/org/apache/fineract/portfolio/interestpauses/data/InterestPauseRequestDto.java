@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.portfolio.interestpauses.data;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 @Getter
 @AllArgsConstructor
@@ -45,16 +45,16 @@ public class InterestPauseRequestDto {
 
     public String toJson() {
         try {
-            return new ObjectMapper().writeValueAsString(this);
-        } catch (JsonProcessingException e) {
+            return new JsonMapper().writeValueAsString(this);
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Error serializing request to JSON", e);
         }
     }
 
     public static InterestPauseRequestDto fromJson(String json) {
         try {
-            return new ObjectMapper().readValue(json, InterestPauseRequestDto.class);
-        } catch (JsonProcessingException e) {
+            return new JsonMapper().readValue(json, InterestPauseRequestDto.class);
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Error deserializing request from JSON", e);
         }
     }

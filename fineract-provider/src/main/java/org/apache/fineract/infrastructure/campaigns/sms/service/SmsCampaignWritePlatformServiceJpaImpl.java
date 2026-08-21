@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.infrastructure.campaigns.sms.service;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
@@ -83,6 +80,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 @Slf4j
@@ -207,9 +208,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
     @Override
     public void insertDirectCampaignIntoSmsOutboundTable(SmsCampaign smsCampaign) {
         try {
-            HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(), new TypeReference<>() {});
+            HashMap<String, String> campaignParams = new JsonMapper().readValue(smsCampaign.getParamValue(), new TypeReference<>() {});
 
-            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsCampaign.getParamValue(),
+            HashMap<String, String> queryParamForRunReport = new JsonMapper().readValue(smsCampaign.getParamValue(),
                     new TypeReference<>() {});
 
             List<HashMap<String, Object>> runReportObject = getRunReportByServiceImpl(campaignParams.get("reportName"),
@@ -233,7 +234,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                     }
                 }
             }
-        } catch (final IOException e) {
+        } catch (final JacksonException | IOException e) {
             log.error("Error occurred.", e);
         }
 
@@ -248,11 +249,11 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
 
             Set<Client> clientSet = new HashSet<>();
 
-            HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(),
+            HashMap<String, String> campaignParams = new JsonMapper().readValue(smsCampaign.getParamValue(),
                     new TypeReference<HashMap<String, String>>() {});
             campaignParams.put("loanId", loan.getId().toString());
 
-            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsCampaign.getParamValue(),
+            HashMap<String, String> queryParamForRunReport = new JsonMapper().readValue(smsCampaign.getParamValue(),
                     new TypeReference<HashMap<String, String>>() {});
             queryParamForRunReport.put("loanId", loan.getId().toString());
 
@@ -303,10 +304,10 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
     @Override
     public void insertDirectCampaignIntoSmsOutboundTable(final Client client, final SmsCampaign smsCampaign) {
         try {
-            HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(),
+            HashMap<String, String> campaignParams = new JsonMapper().readValue(smsCampaign.getParamValue(),
                     new TypeReference<HashMap<String, String>>() {});
             campaignParams.put("clientId", client.getId().toString());
-            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsCampaign.getParamValue(),
+            HashMap<String, String> queryParamForRunReport = new JsonMapper().readValue(smsCampaign.getParamValue(),
                     new TypeReference<HashMap<String, String>>() {});
 
             campaignParams.put("clientId", client.getId().toString());
@@ -345,10 +346,10 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
     @Override
     public void insertDirectCampaignIntoSmsOutboundTable(final SavingsAccount savingsAccount, final SmsCampaign smsCampaign) {
         try {
-            HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(),
+            HashMap<String, String> campaignParams = new JsonMapper().readValue(smsCampaign.getParamValue(),
                     new TypeReference<HashMap<String, String>>() {});
             campaignParams.put("savingsId", savingsAccount.getId().toString());
-            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsCampaign.getParamValue(),
+            HashMap<String, String> queryParamForRunReport = new JsonMapper().readValue(smsCampaign.getParamValue(),
                     new TypeReference<HashMap<String, String>>() {});
             queryParamForRunReport.put("savingsId", savingsAccount.getId().toString());
 
@@ -474,8 +475,8 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
 
         try {
             final String response = this.genericDataService.generateJsonFromGenericResultsetData(results);
-            resultList = new ObjectMapper().readValue(response, new TypeReference<List<HashMap<String, Object>>>() {});
-        } catch (JsonParseException e) {
+            resultList = new JsonMapper().readValue(response, new TypeReference<List<HashMap<String, Object>>>() {});
+        } catch (StreamReadException e) {
             log.warn("Conversion of report query results to JSON failed", e);
             return resultList;
         }
@@ -486,9 +487,9 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 Map.Entry<String, Object> map = it.next();
                 String key = map.getKey();
                 Object ob = map.getValue();
-                if (ob instanceof ArrayList && ((ArrayList) ob).size() == 3) {
-                    String changeArrayDateToStringDate = ((ArrayList) ob).get(2).toString() + "-" + ((ArrayList) ob).get(1).toString() + "-"
-                            + ((ArrayList) ob).get(0).toString();
+                if (ob instanceof ArrayList list && list.size() == 3) {
+                    String changeArrayDateToStringDate = list.get(2).toString() + "-" + list.get(1).toString() + "-"
+                            + list.get(0).toString();
                     entry.put(key, changeArrayDateToStringDate);
                 }
             }
@@ -507,8 +508,8 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
         final String textMessageTemplate = this.fromJsonHelper.extractStringNamed("message", query.parsedJson());
 
         try {
-            HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsParams, new TypeReference<>() {});
-            HashMap<String, String> queryParamForRunReport = new ObjectMapper().readValue(smsParams, new TypeReference<>() {});
+            HashMap<String, String> campaignParams = new JsonMapper().readValue(smsParams, new TypeReference<>() {});
+            HashMap<String, String> queryParamForRunReport = new JsonMapper().readValue(smsParams, new TypeReference<>() {});
 
             List<HashMap<String, Object>> runReportObject = this.getRunReportByServiceImpl(campaignParams.get("reportName"),
                     queryParamForRunReport);
@@ -526,7 +527,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
             } else {
                 campaignMessage = new CampaignPreviewData(textMessageTemplate, 0);
             }
-        } catch (final IOException e) {
+        } catch (final JacksonException | IOException e) {
             throw new PlatformDataIntegrityException("error.msg.sms.campaign.preview.parsing.error",
                     "Error occurred while parsing campaign params for SMS campaign preview message", e.getMessage(), e);
         }

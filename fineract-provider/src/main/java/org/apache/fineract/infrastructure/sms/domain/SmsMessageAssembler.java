@@ -32,7 +32,6 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -45,7 +44,6 @@ public class SmsMessageAssembler {
     private final SmsCampaignRepository smsCampaignRepository;
     private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
     public SmsMessageAssembler(final SmsMessageRepository smsMessageRepository, final GroupRepositoryWrapper groupRepositoryWrapper,
             final ClientRepositoryWrapper clientRepository, final StaffRepositoryWrapper staffRepository,
             final FromJsonHelper fromApiJsonHelper, final SmsCampaignRepository smsCampaignRepository) {

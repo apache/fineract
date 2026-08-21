@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.infrastructure.core.jersey.converter;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import java.io.IOException;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
 
 @Component
 public class ExternalIdJsonConverter implements JsonConverter<ExternalId> {
@@ -32,7 +32,7 @@ public class ExternalIdJsonConverter implements JsonConverter<ExternalId> {
     public ExternalId convertToObject(JsonParser parser) throws IOException {
         ExternalId result = ExternalId.empty();
         if (parser.hasToken(JsonToken.VALUE_STRING)) {
-            String externalId = parser.getText();
+            String externalId = parser.getString();
             result = new ExternalId(externalId);
         }
         return result;

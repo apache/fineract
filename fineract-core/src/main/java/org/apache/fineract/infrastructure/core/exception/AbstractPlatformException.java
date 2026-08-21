@@ -58,8 +58,8 @@ public abstract class AbstractPlatformException extends RuntimeException {
             return null;
         }
         for (Object defaultUserMessageArg : defaultUserMessageArgs) {
-            if (defaultUserMessageArg instanceof Throwable) {
-                return (Throwable) defaultUserMessageArg;
+            if (defaultUserMessageArg instanceof Throwable throwable) {
+                return throwable;
             }
         }
         return null;

@@ -29,7 +29,7 @@ public abstract class StaffCreateRequestMapper {
 
     protected final StaffDateMapper dateMapper = new StaffDateMapper();
 
-    @Mapping(source = "isActive", target = "active")
+    @Mapping(target = "active", expression = "java( source.getIsActive() == null || source.getIsActive() )")
     @Mapping(source = "isLoanOfficer", target = "loanOfficer")
     @Mapping(expression = "java( dateMapper.map(source.getJoiningDate(), source.getDateFormat()) )", target = "joiningDate")
     @Mapping(ignore = true, target = "id")

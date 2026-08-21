@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.group.domain;
 
 import org.apache.fineract.portfolio.group.exception.GroupRoleNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,7 +26,6 @@ public class GroupRoleRepositoryWrapper {
 
     private final GroupRoleRepository repository;
 
-    @Autowired
     public GroupRoleRepositoryWrapper(final GroupRoleRepository rRepository) {
         this.repository = rRepository;
     }

@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.accountnumberformat.domain;
 
 import org.apache.fineract.infrastructure.accountnumberformat.exception.AccountNumberFormatNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -27,7 +26,6 @@ public class AccountNumberFormatRepositoryWrapper implements AccountNumberFormat
 
     private final AccountNumberFormatRepository repository;
 
-    @Autowired
     public AccountNumberFormatRepositoryWrapper(final AccountNumberFormatRepository repository) {
         this.repository = repository;
     }

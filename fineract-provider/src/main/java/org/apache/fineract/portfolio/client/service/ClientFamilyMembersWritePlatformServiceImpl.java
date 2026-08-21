@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.client.service;
 
 import com.google.gson.JsonArray;
@@ -39,7 +38,6 @@ import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.serialization.ClientFamilyMemberCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -52,7 +50,6 @@ public class ClientFamilyMembersWritePlatformServiceImpl implements ClientFamily
     private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final ClientFamilyMemberCommandFromApiJsonDeserializer apiJsonDeserializer;
 
-    @Autowired
     public ClientFamilyMembersWritePlatformServiceImpl(final PlatformSecurityContext context, final CodeValueRepository codeValueRepository,
             final ClientFamilyMembersRepository clientFamilyRepository, final ClientRepositoryWrapper clientRepositoryWrapper,
             final ClientFamilyMemberCommandFromApiJsonDeserializer apiJsonDeserializer) {

@@ -28,7 +28,6 @@ import org.apache.fineract.portfolio.collateralmanagement.exception.ClientCollat
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -38,7 +37,6 @@ public class ClientCollateralManagementRepositoryWrapper {
     private final ClientRepositoryWrapper clientRepositoryWrapper;
     private final LoanProductRepository loanProductRepository;
 
-    @Autowired
     public ClientCollateralManagementRepositoryWrapper(final ClientCollateralManagementRepository clientCollateralManagementRepository,
             final ClientRepositoryWrapper clientRepositoryWrapper, final LoanProductRepository loanProductRepository) {
         this.clientCollateralManagementRepository = clientCollateralManagementRepository;

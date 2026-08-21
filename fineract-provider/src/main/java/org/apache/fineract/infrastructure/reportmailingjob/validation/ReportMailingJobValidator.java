@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.infrastructure.reportmailingjob.validation;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
@@ -43,8 +41,9 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.reportmailingjob.ReportMailingJobConstants;
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobEmailAttachmentFileFormat;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 @Component
 public class ReportMailingJobValidator {
@@ -53,7 +52,6 @@ public class ReportMailingJobValidator {
     private static final String EMAIL_REGEX = "^[\\w!#$%&’*+/=?`{|}~^-]+(?:\\.[\\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
 
-    @Autowired
     public ReportMailingJobValidator(final FromJsonHelper fromJsonHelper) {
         this.fromJsonHelper = fromJsonHelper;
     }
@@ -304,7 +302,7 @@ public class ReportMailingJobValidator {
 
         if (!StringUtils.isEmpty(stretchyReportParamMap)) {
             try {
-                stretchyReportParamHashMap = new ObjectMapper().readValue(stretchyReportParamMap,
+                stretchyReportParamHashMap = new JsonMapper().readValue(stretchyReportParamMap,
                         new TypeReference<HashMap<String, String>>() {});
             }
 

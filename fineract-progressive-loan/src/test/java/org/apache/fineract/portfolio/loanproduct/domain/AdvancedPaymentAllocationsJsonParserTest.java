@@ -24,8 +24,6 @@ import static org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocation
 import static org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType.IN_ADVANCE_PENALTY;
 import static org.mockito.Mockito.times;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonParser;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +43,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.lang.NonNull;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class AdvancedPaymentAllocationsJsonParserTest {
@@ -58,7 +59,7 @@ class AdvancedPaymentAllocationsJsonParserTest {
     private FromJsonHelper fromJsonHelper = new FromJsonHelper();
 
     @Test
-    public void testEmptyJson() throws JsonProcessingException {
+    public void testEmptyJson() throws JacksonException {
         Map<String, Object> map = new HashMap<>();
         JsonCommand command = createJsonCommand(map);
 
@@ -72,7 +73,7 @@ class AdvancedPaymentAllocationsJsonParserTest {
     }
 
     @Test
-    public void testNullAllocationRuleJson() throws JsonProcessingException {
+    public void testNullAllocationRuleJson() throws JacksonException {
         Map<String, Object> map = new HashMap<>();
         JsonCommand command = createJsonCommand(map);
 
@@ -86,7 +87,7 @@ class AdvancedPaymentAllocationsJsonParserTest {
     }
 
     @Test
-    public void testParseSinglePaymentAllocation() throws JsonProcessingException {
+    public void testParseSinglePaymentAllocation() throws JacksonException {
         // given
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> paymentAllocations = new ArrayList<>();
@@ -115,7 +116,7 @@ class AdvancedPaymentAllocationsJsonParserTest {
     }
 
     @Test
-    public void testInvalidTransactionTypeAndFutureAllocation() throws JsonProcessingException {
+    public void testInvalidTransactionTypeAndFutureAllocation() throws JacksonException {
         // given
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> paymentAllocations = new ArrayList<>();
@@ -144,7 +145,7 @@ class AdvancedPaymentAllocationsJsonParserTest {
     }
 
     @Test
-    public void testInvalidAndNullAllocationRules() throws JsonProcessingException {
+    public void testInvalidAndNullAllocationRules() throws JacksonException {
         // given
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> paymentAllocations = new ArrayList<>();
@@ -174,7 +175,7 @@ class AdvancedPaymentAllocationsJsonParserTest {
     }
 
     @Test
-    public void testNullTransactionTypeAndFutureAllocation() throws JsonProcessingException {
+    public void testNullTransactionTypeAndFutureAllocation() throws JacksonException {
         // given
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> paymentAllocations = new ArrayList<>();
@@ -224,8 +225,8 @@ class AdvancedPaymentAllocationsJsonParserTest {
     }
 
     @NonNull
-    private JsonCommand createJsonCommand(Map<String, Object> jsonMap) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
+    private JsonCommand createJsonCommand(Map<String, Object> jsonMap) throws JacksonException {
+        ObjectMapper objectMapper = new JsonMapper();
         String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMap);
         return JsonCommand.from(json, JsonParser.parseString(json), fromJsonHelper, null, 1L, 2L, 3L, 4L, null, null, null, null, null,
                 null, null, null, null);

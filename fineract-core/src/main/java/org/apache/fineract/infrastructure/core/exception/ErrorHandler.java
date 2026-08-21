@@ -133,10 +133,9 @@ public final class ErrorHandler {
         MultivaluedMap<String, Object> headers = response.getHeaders();
         Set<Header> batchHeaders = headers == null ? null
                 : headers.keySet().stream().map(e -> new Header(e, response.getHeaderString(e))).collect(Collectors.toSet());
-        Integer errorCode = exceptionMapper instanceof FineractExceptionMapper ? ((FineractExceptionMapper) exceptionMapper).errorCode()
-                : null;
+        Integer errorCode = exceptionMapper instanceof FineractExceptionMapper fem ? fem.errorCode() : null;
         Object msg = response.getEntity();
-        return new ErrorInfo(response.getStatus(), errorCode, msg instanceof String ? (String) msg : JSON_HELPER.toJson(msg), batchHeaders);
+        return new ErrorInfo(response.getStatus(), errorCode, msg instanceof String s ? s : JSON_HELPER.toJson(msg), batchHeaders);
     }
 
     public static RuntimeException getMappable(@NotNull Throwable thr) {

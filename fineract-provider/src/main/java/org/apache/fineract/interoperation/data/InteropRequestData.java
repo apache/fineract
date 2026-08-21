@@ -32,8 +32,6 @@ import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_TRANSACT
 import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_TRANSACTION_ROLE;
 import static org.apache.fineract.interoperation.util.InteropUtil.PARAM_TRANSACTION_TYPE;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -46,6 +44,8 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.interoperation.domain.InteropTransactionRole;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.ext.javatime.deser.LocalDateTimeDeserializer;
 
 public class InteropRequestData {
 

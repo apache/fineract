@@ -33,9 +33,11 @@ import java.util.TreeMap;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.job.JobInstance;
+import org.springframework.batch.core.job.parameters.JobParameters;
+import org.springframework.batch.core.step.StepExecution;
+import org.springframework.batch.infrastructure.item.ExecutionContext;
 
 public class LoanItemProcessorStepDefinitions implements En {
 
@@ -53,7 +55,7 @@ public class LoanItemProcessorStepDefinitions implements En {
 
     public LoanItemProcessorStepDefinitions() {
         Given("/^The LoanItemProcessor.process method with item (.*)$/", (String loanItem) -> {
-            JobExecution jobExecution = new JobExecution(1L);
+            JobExecution jobExecution = new JobExecution(1L, new JobInstance(1L, "job"), new JobParameters());
             jobExecution.getExecutionContext().put(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME,
                     LocalDate.now(ZoneId.systemDefault()).toString());
             StepExecution stepExecution = new StepExecution("test", jobExecution);

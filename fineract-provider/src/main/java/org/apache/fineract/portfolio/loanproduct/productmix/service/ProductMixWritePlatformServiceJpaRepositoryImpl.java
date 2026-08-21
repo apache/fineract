@@ -40,7 +40,6 @@ import org.apache.fineract.portfolio.loanproduct.productmix.domain.ProductMixRep
 import org.apache.fineract.portfolio.loanproduct.productmix.exception.ProductMixNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -57,7 +56,6 @@ public class ProductMixWritePlatformServiceJpaRepositoryImpl implements ProductM
     private final ProductMixRepository productMixRepository;
     private final LoanProductRepository productRepository;
 
-    @Autowired
     public ProductMixWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ProductMixRepository productMixRepository, final LoanProductRepository productRepository) {
         this.context = context;

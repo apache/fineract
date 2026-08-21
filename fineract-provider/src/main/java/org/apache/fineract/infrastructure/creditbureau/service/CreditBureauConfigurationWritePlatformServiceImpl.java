@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.creditbureau.domain.OrganisationCredit
 import org.apache.fineract.infrastructure.creditbureau.exception.CreditReportNotFoundException;
 import org.apache.fineract.infrastructure.creditbureau.serialization.CreditBureauConfigurationCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
@@ -47,7 +46,6 @@ public class CreditBureauConfigurationWritePlatformServiceImpl implements Credit
 
     private final OrganisationCreditBureauRepository organisationCreditBureauRepository;
 
-    @Autowired
     public CreditBureauConfigurationWritePlatformServiceImpl(final PlatformSecurityContext context,
             final CreditBureauConfigurationCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final CreditBureauConfigurationRepository creditBureauConfigurationRepository,

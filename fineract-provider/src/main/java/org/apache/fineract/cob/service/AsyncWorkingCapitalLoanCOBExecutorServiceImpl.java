@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.jobs.service.JobStarter;
-import org.springframework.batch.core.configuration.JobLocator;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
 public class AsyncWorkingCapitalLoanCOBExecutorServiceImpl extends AsyncCommonCOBExecutorService
         implements AsyncWorkingCapitalLoanCOBExecutorService {
 
-    public AsyncWorkingCapitalLoanCOBExecutorServiceImpl(JobLocator jobLocator, ScheduledJobDetailRepository scheduledJobDetailRepository,
+    public AsyncWorkingCapitalLoanCOBExecutorServiceImpl(JobRegistry jobLocator, ScheduledJobDetailRepository scheduledJobDetailRepository,
             JobStarter jobStarter, WorkingCapitalLoanRetrieveIdService retrieveIdService) {
         super(jobLocator, scheduledJobDetailRepository, jobStarter, retrieveIdService);
     }

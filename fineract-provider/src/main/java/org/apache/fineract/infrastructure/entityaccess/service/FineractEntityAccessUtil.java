@@ -32,7 +32,6 @@ import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityToEn
 import org.apache.fineract.infrastructure.entityaccess.domain.FineractEntityType;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +47,6 @@ public class FineractEntityAccessUtil {
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper;
     private final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository;
 
-    @Autowired
     public FineractEntityAccessUtil(final PlatformSecurityContext context,
             final GlobalConfigurationRepositoryWrapper globalConfigurationRepository,
             final FineractEntityAccessWriteService fineractEntityAccessWriteService,

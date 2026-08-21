@@ -24,7 +24,7 @@ dependencies {
 
     implementation(
             'org.springframework.boot:spring-boot-starter',
-            'io.github.resilience4j:resilience4j-spring-boot3',
+            'io.github.resilience4j:resilience4j-spring-boot4',
 
             'org.apache.commons:commons-lang3',
 
@@ -36,6 +36,7 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor'
 
     testImplementation(project(path: ':fineract-command-test'))
+    testImplementation 'org.springframework.boot:spring-boot-jdbc'
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
@@ -44,7 +45,7 @@ dependencies {
         exclude group: 'org.skyscreamer'
     }
     testImplementation (
-            'org.mockito:mockito-inline',
+            'org.mockito:mockito-core',
             'org.testcontainers:junit-jupiter',
             )
 }

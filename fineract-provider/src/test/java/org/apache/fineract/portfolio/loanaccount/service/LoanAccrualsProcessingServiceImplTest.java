@@ -234,14 +234,10 @@ public class LoanAccrualsProcessingServiceImplTest {
         when(postDueDateAccrual.getFeeChargesPortion()).thenReturn(BigDecimal.ZERO);
         when(postDueDateAccrual.getPenaltyChargesPortion()).thenReturn(BigDecimal.ZERO);
 
-        Set<LoanTransactionType> accrualTypes = Set.of(LoanTransactionType.ACCRUAL, LoanTransactionType.ACCRUAL_ADJUSTMENT);
-        Set<LoanTransactionType> accrualOnly = Set.of(LoanTransactionType.ACCRUAL);
-
-        // retrieveListOfAccrualTransactions uses both types
-        when(loanTransactionRepository.findNonReversedByLoanAndTypes(loan, accrualTypes)).thenReturn(List.of(postDueDateAccrual));
-        // adjustAccrualsAfter only queries for ACCRUAL (not ACCRUAL_ADJUSTMENT — those must persist)
-        when(loanTransactionRepository.findNonReversedByLoanAndTypesAndAfterDate(loan, accrualOnly, lastDueDate))
-                .thenReturn(List.of(postDueDateAccrual));
+        // retrieveListOfAccrualTransactions fetches the loan's non-reversed ACCRUAL/ACCRUAL_ADJUSTMENT transactions
+        when(loanTransactionRepository.findNonReversedAccrualsByLoan(loan)).thenReturn(List.of(postDueDateAccrual));
+        // adjustAccrualsAfter filters to ACCRUAL only (not ACCRUAL_ADJUSTMENT — those must persist)
+        when(loanTransactionRepository.findNonReversedByLoanAndAfterDate(loan, lastDueDate)).thenReturn(List.of(postDueDateAccrual));
         // Idempotency check queries the loan's in-memory transaction list
         when(loan.getLoanTransactions()).thenReturn(new java.util.ArrayList<>());
 

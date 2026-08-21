@@ -23,8 +23,8 @@ import org.apache.fineract.infrastructure.core.service.PagedLocalRequest;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionData;
 import org.apache.fineract.portfolio.search.data.AdvancedQueryRequest;
 import org.apache.fineract.portfolio.search.data.TransactionSearchRequest;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
-import org.springframework.lang.NonNull;
 
 public interface SavingsAccountTransactionSearchService {
 

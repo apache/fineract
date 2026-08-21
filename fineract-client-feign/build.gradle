@@ -119,8 +119,8 @@ task cleanupGeneratedJavaFiles() {
 
 tasks.named('compileJava') {
     outputs.cacheIf { true }
-    dependsOn(buildJavaSdk, cleanupGeneratedJavaFiles, licenseFormatMain, spotlessMiscApply)
-    mustRunAfter(licenseFormatMain, cleanupGeneratedJavaFiles)
+    dependsOn(buildJavaSdk, cleanupGeneratedJavaFiles, spotlessMiscApply)
+    mustRunAfter(cleanupGeneratedJavaFiles)
 }
 
 tasks.named('sourcesJar') {
@@ -130,17 +130,6 @@ tasks.named('sourcesJar') {
     from(sourceSets.main.java.srcDirs) {
         include "**/*.java"
     }
-}
-
-tasks.named('licenseFormatMain') {
-    dependsOn(cleanupGeneratedJavaFiles)
-    mustRunAfter(cleanupGeneratedJavaFiles)
-    source = sourceSets.main.java.srcDirs
-}
-
-tasks.named('licenseMain') {
-    dependsOn(licenseFormatMain)
-    mustRunAfter(licenseFormatMain)
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -197,4 +186,9 @@ jacocoTestReport {
 
 test {
     finalizedBy jacocoTestReport
+}
+
+dependencies {
+    runtimeOnly "jakarta.xml.bind:jakarta.xml.bind-api:4.0.5"
+    runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
 }

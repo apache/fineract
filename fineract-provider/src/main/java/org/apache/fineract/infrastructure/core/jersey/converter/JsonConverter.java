@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.infrastructure.core.jersey.converter;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
 import java.io.IOException;
 import java.io.Serializable;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
 
 public interface JsonConverter<T> extends Serializable {
 

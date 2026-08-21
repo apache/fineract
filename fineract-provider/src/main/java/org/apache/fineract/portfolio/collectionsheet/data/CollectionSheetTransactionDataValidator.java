@@ -42,7 +42,6 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.collectionsheet.CollectionSheetConstants;
 import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -71,7 +70,6 @@ public class CollectionSheetTransactionDataValidator {
                     PaymentDetailConstants.routingCodeParamName, PaymentDetailConstants.receiptNumberParamName,
                     PaymentDetailConstants.bankNumberParamName));
 
-    @Autowired
     public CollectionSheetTransactionDataValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }

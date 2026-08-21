@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.loanaccount.api;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -106,7 +105,6 @@ class LoansApiResourceRetrieveApprovalTemplateTest {
     void setUp() {
         loansApiResource = newLoansApiResource(context, loanReadPlatformService);
         when(context.authenticatedUser()).thenReturn(appUser);
-        doNothing().when(appUser).validateHasReadPermission(LOAN_READ_PERMISSION_RESOURCE);
     }
 
     @Test

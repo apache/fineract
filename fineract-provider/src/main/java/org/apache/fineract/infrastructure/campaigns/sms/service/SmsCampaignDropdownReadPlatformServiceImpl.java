@@ -35,7 +35,6 @@ import org.apache.fineract.portfolio.calendar.service.CalendarEnumerations;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -53,7 +52,6 @@ public class SmsCampaignDropdownReadPlatformServiceImpl implements SmsCampaignDr
 
     private final SmsConfigUtils smsConfigUtils;
 
-    @Autowired
     public SmsCampaignDropdownReadPlatformServiceImpl(final SmsConfigUtils smsConfigUtils) {
         this.restTemplate = new RestTemplate();
         this.smsConfigUtils = smsConfigUtils;

@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.infrastructure.core.exceptionmapper;
 
-import static org.apache.http.HttpStatus.SC_CONFLICT;
+import static org.apache.hc.core5.http.HttpStatus.SC_CONFLICT;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;

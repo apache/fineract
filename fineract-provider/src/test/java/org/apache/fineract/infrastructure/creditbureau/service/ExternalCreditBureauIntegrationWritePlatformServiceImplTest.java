@@ -27,10 +27,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.JsonParser;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -63,6 +59,7 @@ import org.apache.fineract.infrastructure.creditbureau.domain.TokenRepositoryWra
 import org.apache.fineract.infrastructure.creditbureau.serialization.CreditBureauTokenCommandFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -70,7 +67,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.springframework.lang.NonNull;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class ExternalCreditBureauIntegrationWritePlatformServiceImplTest {
 
@@ -92,7 +93,7 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImplTest {
     @Mock
     private CreditBureauTokenCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new JsonMapper();
 
     @InjectMocks
     private ExternalCreditBureauIntegrationWritePlatformServiceImpl underTest;
@@ -128,7 +129,7 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImplTest {
     }
 
     private String createResponseObjectArrayData(Supplier<String> responseMessageGenerator, Function<ArrayNode, ArrayNode> dataGenerator)
-            throws JsonProcessingException {
+            throws JacksonException {
         ObjectNode jsonResponse = mapper.createObjectNode();
 
         jsonResponse.put("ResponseMessage", responseMessageGenerator.get());
@@ -137,7 +138,7 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImplTest {
     }
 
     private String createResponseObjectObjectData(Supplier<String> responseMessageGenerator, Function<ObjectNode, ObjectNode> dataGenerator)
-            throws JsonProcessingException {
+            throws JacksonException {
         ObjectNode jsonResponse = mapper.createObjectNode();
 
         jsonResponse.put("ResponseMessage", responseMessageGenerator.get());
@@ -353,14 +354,14 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImplTest {
     }
 
     @Test
-    public void extractUniqueIdSuccessTest() throws JsonProcessingException {
+    public void extractUniqueIdSuccessTest() throws JacksonException {
         String json = createResponseObjectArrayData(() -> "Success", data -> data.add(mapper.createObjectNode().put("UniqueID", "123456")));
         Long id = underTest.extractUniqueId(json);
         assertEquals(123456L, id.longValue());
     }
 
     @Test
-    public void extractUniqueIdEmptyResultTest() throws JsonProcessingException {
+    public void extractUniqueIdEmptyResultTest() throws JacksonException {
         String json = createResponseObjectArrayData(() -> "NoResult", data -> data);
         PlatformDataIntegrityException result = assertThrows(PlatformDataIntegrityException.class, () -> {
             underTest.extractUniqueId(json);
@@ -369,7 +370,7 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImplTest {
     }
 
     @Test
-    public void extractUniqueIdMultipleResultTest() throws JsonProcessingException {
+    public void extractUniqueIdMultipleResultTest() throws JacksonException {
         String json = createResponseObjectArrayData(() -> "NoResult",
                 data -> data.add(mapper.createObjectNode().put("UniqueID", "123456").put("NRC", "NRCID1"))
                         .add(mapper.createObjectNode().put("UniqueID", "7654321").put("NRC", "NRCID2")));
@@ -380,7 +381,7 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImplTest {
     }
 
     @Test
-    public void extractUniqueIdNoDataTest() throws JsonProcessingException {
+    public void extractUniqueIdNoDataTest() throws JacksonException {
         String json = createResponseObjectArrayData(() -> "NoData", data -> null);
         PlatformDataIntegrityException result = assertThrows(PlatformDataIntegrityException.class, () -> {
             underTest.extractUniqueId(json);
@@ -411,7 +412,7 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImplTest {
     }
 
     @NonNull
-    private String createValidToken() throws JsonProcessingException {
+    private String createValidToken() throws JacksonException {
         ObjectNode jsonResponse = mapper.createObjectNode();
         jsonResponse.put("access_token", "AccessToken");
         jsonResponse.put("expires_in", 3600);
@@ -423,7 +424,7 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImplTest {
         return mapper.writeValueAsString(jsonResponse);
     }
 
-    private JsonCommand initialJsonCommand() throws JsonProcessingException {
+    private JsonCommand initialJsonCommand() throws JacksonException {
         ObjectNode command = mapper.createObjectNode();
         command.put("NRC", "NRCID");
         command.put("creditBureauID", "1"); // Must match to the mocked config

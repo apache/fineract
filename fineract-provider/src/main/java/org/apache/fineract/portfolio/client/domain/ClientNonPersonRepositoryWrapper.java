@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.client.domain;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.exception.ClientNonPersonNotFoundByClientIdException;
 import org.apache.fineract.portfolio.client.exception.ClientNonPersonNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,7 +34,6 @@ public class ClientNonPersonRepositoryWrapper {
     private final ClientNonPersonRepository repository;
     private final PlatformSecurityContext context;
 
-    @Autowired
     public ClientNonPersonRepositoryWrapper(final ClientNonPersonRepository repository, final PlatformSecurityContext context) {
         this.repository = repository;
         this.context = context;

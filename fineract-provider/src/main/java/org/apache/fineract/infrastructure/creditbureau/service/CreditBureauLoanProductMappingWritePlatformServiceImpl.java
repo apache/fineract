@@ -29,7 +29,6 @@ import org.apache.fineract.infrastructure.creditbureau.serialization.CreditBurea
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +45,6 @@ public class CreditBureauLoanProductMappingWritePlatformServiceImpl implements C
 
     private final CreditBureauLoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
-    @Autowired
     public CreditBureauLoanProductMappingWritePlatformServiceImpl(final PlatformSecurityContext context,
             final CreditBureauLoanProductMappingRepository creditBureauLoanProductMappingRepository,
             final OrganisationCreditBureauRepository organisationCreditBureauRepository, LoanProductRepository loanProductRepository,

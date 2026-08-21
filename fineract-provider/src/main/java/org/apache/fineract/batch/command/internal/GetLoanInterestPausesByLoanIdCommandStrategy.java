@@ -30,7 +30,7 @@ import org.apache.fineract.batch.domain.BatchResponse;
 import org.apache.fineract.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.apache.fineract.portfolio.interestpauses.api.LoanInterestPauseApiResource;
 import org.apache.fineract.portfolio.interestpauses.data.InterestPauseResponseDto;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**

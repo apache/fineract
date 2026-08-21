@@ -22,8 +22,6 @@ import static org.apache.fineract.client.feign.util.FeignCalls.executeVoid;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,13 +49,16 @@ import org.apache.fineract.test.data.GLAUsage;
 import org.apache.fineract.test.data.paymenttype.DefaultPaymentType;
 import org.apache.fineract.test.data.paymenttype.PaymentTypeResolver;
 import org.apache.fineract.test.factory.GLAccountRequestFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public final class WorkingCapitalLoanProductAdvancedAccountingTestHelper {
 
     private WorkingCapitalLoanProductAdvancedAccountingTestHelper() {}
 
     public static void assertTemplateHasOptions(final GetWorkingCapitalLoanProductsTemplateResponse template) {
-        final JsonNode root = toTree(new ObjectMapper(), template);
+        final JsonNode root = toTree(new JsonMapper(), template);
         assertThat(root.path("paymentTypeOptions").isArray()).as("paymentTypeOptions must be present in template").isTrue();
         assertThat(root.path("chargeOffReasonOptions").isArray()).as("chargeOffReasonOptions must be present in template").isTrue();
         assertThat(root.path("writeOffReasonOptions").isArray()).as("writeOffReasonOptions must be present in template").isTrue();
@@ -171,39 +172,39 @@ public final class WorkingCapitalLoanProductAdvancedAccountingTestHelper {
 
         assertThat(root.path("paymentChannelToFundSourceMappings").path(0).path("paymentType").path("id").asLong())
                 .as("paymentType.id mismatch").isEqualTo(expected.paymentTypeId());
-        assertThat(root.path("paymentChannelToFundSourceMappings").path(0).path("paymentType").path("name").asText())
+        assertThat(root.path("paymentChannelToFundSourceMappings").path(0).path("paymentType").path("name").asString())
                 .as("paymentType.name mismatch").isEqualTo(expected.paymentTypeName());
         assertThat(root.path("paymentChannelToFundSourceMappings").path(0).path("fundSourceAccount").path("id").asLong())
                 .as("fundSourceAccount.id mismatch").isEqualTo(expected.fundSourceAccountId());
-        assertThat(root.path("paymentChannelToFundSourceMappings").path(0).path("fundSourceAccount").path("name").asText())
+        assertThat(root.path("paymentChannelToFundSourceMappings").path(0).path("fundSourceAccount").path("name").asString())
                 .as("fundSourceAccount.name mismatch").isEqualTo(expected.fundSourceAccountName());
 
         assertThat(root.path("feeToIncomeAccountMappings").path(0).path("charge").path("id").asLong()).as("fee charge.id mismatch")
                 .isEqualTo(expected.feeChargeId());
         assertThat(root.path("feeToIncomeAccountMappings").path(0).path("incomeAccount").path("id").asLong())
                 .as("fee incomeAccount.id mismatch").isEqualTo(expected.feeIncomeAccountId());
-        assertThat(root.path("feeToIncomeAccountMappings").path(0).path("incomeAccount").path("name").asText())
+        assertThat(root.path("feeToIncomeAccountMappings").path(0).path("incomeAccount").path("name").asString())
                 .as("fee incomeAccount.name mismatch").isEqualTo(expected.feeIncomeAccountName());
 
         assertThat(root.path("penaltyToIncomeAccountMappings").path(0).path("charge").path("id").asLong()).as("penalty charge.id mismatch")
                 .isEqualTo(expected.penaltyChargeId());
         assertThat(root.path("penaltyToIncomeAccountMappings").path(0).path("incomeAccount").path("id").asLong())
                 .as("penalty incomeAccount.id mismatch").isEqualTo(expected.penaltyIncomeAccountId());
-        assertThat(root.path("penaltyToIncomeAccountMappings").path(0).path("incomeAccount").path("name").asText())
+        assertThat(root.path("penaltyToIncomeAccountMappings").path(0).path("incomeAccount").path("name").asString())
                 .as("penalty incomeAccount.name mismatch").isEqualTo(expected.penaltyIncomeAccountName());
 
         assertThat(root.path("chargeOffReasonToExpenseAccountMappings").path(0).path("reasonCodeValue").path("id").asLong())
                 .as("chargeOff reason id mismatch").isEqualTo(expected.chargeOffReasonId());
         assertThat(root.path("chargeOffReasonToExpenseAccountMappings").path(0).path("expenseAccount").path("id").asLong())
                 .as("chargeOff expenseAccount.id mismatch").isEqualTo(expected.chargeOffExpenseAccountId());
-        assertThat(root.path("chargeOffReasonToExpenseAccountMappings").path(0).path("expenseAccount").path("name").asText())
+        assertThat(root.path("chargeOffReasonToExpenseAccountMappings").path(0).path("expenseAccount").path("name").asString())
                 .as("chargeOff expenseAccount.name mismatch").isEqualTo(expected.chargeOffExpenseAccountName());
 
         assertThat(root.path("writeOffReasonsToExpenseMappings").path(0).path("reasonCodeValue").path("id").asLong())
                 .as("writeOff reason id mismatch").isEqualTo(expected.writeOffReasonId());
         assertThat(root.path("writeOffReasonsToExpenseMappings").path(0).path("expenseAccount").path("id").asLong())
                 .as("writeOff expenseAccount.id mismatch").isEqualTo(expected.writeOffExpenseAccountId());
-        assertThat(root.path("writeOffReasonsToExpenseMappings").path(0).path("expenseAccount").path("name").asText())
+        assertThat(root.path("writeOffReasonsToExpenseMappings").path(0).path("expenseAccount").path("name").asString())
                 .as("writeOff expenseAccount.name mismatch").isEqualTo(expected.writeOffExpenseAccountName());
     }
 

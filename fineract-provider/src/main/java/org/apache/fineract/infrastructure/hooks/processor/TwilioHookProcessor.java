@@ -22,7 +22,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ACTION
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_SMS;
 import static org.apache.fineract.infrastructure.hooks.api.HookApiConstants.apiKeyName;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -41,6 +40,7 @@ import org.apache.fineract.template.mapper.TemplateMapper;
 import org.apache.fineract.template.service.TemplateMergeService;
 import org.springframework.stereotype.Service;
 import retrofit2.Callback;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -101,7 +101,7 @@ public class TwilioHookProcessor implements HookProcessor {
     private JsonObject processUgdTemplate(final String payload, final Hook hook) throws IOException {
         JsonObject json = null;
         @SuppressWarnings("unchecked")
-        final HashMap<String, Object> map = new ObjectMapper().readValue(payload, HashMap.class);
+        final HashMap<String, Object> map = new JsonMapper().readValue(payload, HashMap.class);
         map.put("BASE_URI", System.getProperty("baseUrl"));
         if (map.containsKey("clientId")) {
             final Long clientId = Long.valueOf(Integer.toString((int) map.get("clientId")));

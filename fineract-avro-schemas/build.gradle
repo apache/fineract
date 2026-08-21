@@ -103,9 +103,17 @@ compileJava {
 }
 
 java {
-    // keep this at Java 8, not 17
+    // keep this at Java 8, not 17; see https://issues.apache.org/jira/browse/FINERACT-1214
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+// Same rationale as fineract-client: keep the published artifact at Java 8 while
+// letting the (empty) test classpath resolve Java 17 test dependencies.
+[configurations.testCompileClasspath, configurations.testRuntimeClasspath].each {
+    it.attributes {
+        attribute(org.gradle.api.attributes.java.TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -124,10 +132,15 @@ test {
     useJUnitPlatform()
 }
 
-licenseFormatMain.dependsOn buildJavaSdk
-licenseMain.dependsOn licenseFormatMain
+spotlessJavaApply.dependsOn buildJavaSdk
+spotlessJavaCheck.dependsOn spotlessJavaApply
 
 tasks.named('sourcesJar') {
     dependsOn tasks.named('buildJavaSdk')
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+dependencies {
+    runtimeOnly "jakarta.xml.bind:jakarta.xml.bind-api:4.0.5"
+    runtimeOnly "javax.xml.bind:jaxb-api:2.3.1"
 }

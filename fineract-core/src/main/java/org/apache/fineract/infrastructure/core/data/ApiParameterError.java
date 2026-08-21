@@ -94,9 +94,9 @@ public final class ApiParameterError {
         final List<ApiErrorMessageArg> messageArgs = new ArrayList<>();
         if (defaultUserMessageArgs != null) {
             for (final Object object : defaultUserMessageArgs) {
-                if (object instanceof LocalDate) {
+                if (object instanceof LocalDate date) {
                     final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter();
-                    final String formattedDate = dateFormatter.format((LocalDate) object);
+                    final String formattedDate = dateFormatter.format(date);
                     messageArgs.add(ApiErrorMessageArg.from(formattedDate));
                 } else {
                     messageArgs.add(ApiErrorMessageArg.from(object));
@@ -117,9 +117,9 @@ public final class ApiParameterError {
         final List<ApiErrorMessageArg> messageArgs = new ArrayList<>();
         if (defaultUserMessageArgs != null) {
             for (final Object object : defaultUserMessageArgs) {
-                if (object instanceof LocalDate) {
+                if (object instanceof LocalDate date) {
                     final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd").toFormatter();
-                    final String formattedDate = dateFormatter.format((LocalDate) object);
+                    final String formattedDate = dateFormatter.format(date);
                     messageArgs.add(ApiErrorMessageArg.from(formattedDate));
                 } else {
                     messageArgs.add(ApiErrorMessageArg.from(object));

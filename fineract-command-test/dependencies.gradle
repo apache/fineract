@@ -27,11 +27,11 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-data-jdbc',
             'org.springframework.boot:spring-boot-starter-web',
             'org.springframework.boot:spring-boot-starter-validation',
-            'io.github.resilience4j:resilience4j-spring-boot3',
+            'io.github.resilience4j:resilience4j-spring-boot4',
 
             'com.fasterxml.jackson.core:jackson-databind',
 
-            'org.liquibase:liquibase-core',
+            'org.springframework.boot:spring-boot-starter-liquibase',
 
             'com.mysql:mysql-connector-j',
             'org.postgresql:postgresql',
@@ -50,7 +50,7 @@ dependencies {
         exclude group: 'org.skyscreamer'
     }
     implementation (
-            'org.mockito:mockito-inline',
+            'org.mockito:mockito-core',
             'org.testcontainers:junit-jupiter',
             'org.testcontainers:postgresql',
             'org.testcontainers:mariadb',

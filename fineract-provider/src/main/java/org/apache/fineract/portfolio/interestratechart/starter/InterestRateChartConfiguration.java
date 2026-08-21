@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.interestratechart.starter;
 
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;

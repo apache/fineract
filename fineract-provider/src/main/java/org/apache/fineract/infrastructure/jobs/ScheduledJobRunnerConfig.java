@@ -20,14 +20,19 @@ package org.apache.fineract.infrastructure.jobs;
 
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.apache.fineract.infrastructure.jobs.config.FineractDataFieldMaxValueIncrementerFactory;
+import org.springframework.batch.core.configuration.JobLocator;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
+import org.springframework.batch.core.configuration.support.MapJobRegistry;
+import org.springframework.batch.core.job.Job;
+import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
+import org.springframework.batch.core.repository.explore.JobExplorer;
+import org.springframework.batch.core.repository.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
-import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
+import org.springframework.batch.infrastructure.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -88,5 +93,28 @@ public class ScheduledJobRunnerConfig {
         launcher.setJobRepository(jobRepository);
         launcher.afterPropertiesSet();
         return launcher;
+    }
+
+    // Spring Batch 6 (Spring Boot 4) auto-registers all Job beans in a JobRegistry via
+    // @EnableBatchProcessing, but re-declare the JobRegistry explicitly to guarantee a single
+    // shared MapJobRegistry instance, since code such as InlineLoanCOBExecutorServiceImpl depends on it.
+    @Bean
+    public JobRegistry jobRegistry() {
+        return new MapJobRegistry();
+    }
+
+    // Spring Batch 6's JobRegistry no longer extends JobLocator (unlike Spring Batch 5.x), and
+    // MapJobRegistry#getJob() now returns null instead of throwing NoSuchJobException. Adapt the
+    // JobRegistry bean above to a JobLocator to restore the previous contract, since code such as
+    // InlineLoanCOBExecutorServiceImpl depends on JobLocator and catches NoSuchJobException.
+    @Bean
+    public JobLocator jobLocator(JobRegistry jobRegistry) {
+        return jobName -> {
+            Job job = jobRegistry.getJob(jobName);
+            if (job == null) {
+                throw new NoSuchJobException("No job configuration with the name [" + jobName + "] was registered");
+            }
+            return job;
+        };
     }
 }

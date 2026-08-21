@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.entityaccess.domain;
 
 import org.apache.fineract.infrastructure.entityaccess.exception.FineractEntityAccessNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -32,7 +31,6 @@ public class FineractEntityAccessRepositoryWrapper {
 
     private final FineractEntityAccessRepository repository;
 
-    @Autowired
     public FineractEntityAccessRepositoryWrapper(final FineractEntityAccessRepository repository) {
         this.repository = repository;
     }

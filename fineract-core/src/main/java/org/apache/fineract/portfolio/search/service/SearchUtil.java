@@ -54,8 +54,8 @@ import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeader
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.apache.fineract.portfolio.search.data.ColumnFilterData;
 import org.apache.fineract.portfolio.search.data.FilterData;
+import org.jspecify.annotations.NonNull;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -95,20 +95,20 @@ public class SearchUtil {
             Object rowValue = rowSet.getObject(selectColumns.get(i));
             if (rowValue != null) {
                 String rCol = resultColumns.get(i);
-                if (rowValue instanceof Character) {
-                    json.addProperty(rCol, (Character) rowValue);
+                if (rowValue instanceof Character character) {
+                    json.addProperty(rCol, character);
                 } else if (rowValue instanceof Number) {
                     json.addProperty(rCol, new BigDecimal(rowValue.toString()));
-                } else if (rowValue instanceof Boolean) {
-                    json.addProperty(rCol, (Boolean) rowValue);
-                } else if (rowValue instanceof LocalDateTime) {
-                    json.addProperty(rCol, DateUtils.format((LocalDateTime) rowValue));
-                } else if (rowValue instanceof Timestamp) {
-                    json.addProperty(rCol, DateUtils.format(((Timestamp) rowValue).toLocalDateTime()));
-                } else if (rowValue instanceof LocalDate) {
-                    json.addProperty(rCol, DateUtils.format((LocalDate) rowValue));
-                } else if (rowValue instanceof Date) {
-                    json.addProperty(rCol, DateUtils.format(((Date) rowValue).toLocalDate()));
+                } else if (rowValue instanceof Boolean boolean1) {
+                    json.addProperty(rCol, boolean1);
+                } else if (rowValue instanceof LocalDateTime time) {
+                    json.addProperty(rCol, DateUtils.format(time));
+                } else if (rowValue instanceof Timestamp timestamp) {
+                    json.addProperty(rCol, DateUtils.format(timestamp.toLocalDateTime()));
+                } else if (rowValue instanceof LocalDate date1) {
+                    json.addProperty(rCol, DateUtils.format(date1));
+                } else if (rowValue instanceof Date date) {
+                    json.addProperty(rCol, DateUtils.format(date.toLocalDate()));
                 } else {
                     json.addProperty(rCol, rowValue.toString());
                 }

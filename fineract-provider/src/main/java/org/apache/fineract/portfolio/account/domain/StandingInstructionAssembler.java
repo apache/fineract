@@ -35,7 +35,6 @@ import java.time.LocalDate;
 import java.time.MonthDay;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.organisation.monetary.domain.Money;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -43,7 +42,6 @@ public class StandingInstructionAssembler {
 
     private final AccountTransferDetailAssembler accountTransferDetailAssembler;
 
-    @Autowired
     public StandingInstructionAssembler(final AccountTransferDetailAssembler accountTransferDetailAssembler) {
 
         this.accountTransferDetailAssembler = accountTransferDetailAssembler;

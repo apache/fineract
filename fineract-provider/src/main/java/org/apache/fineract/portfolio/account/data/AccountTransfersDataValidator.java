@@ -39,7 +39,6 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.account.AccountDetailConstants;
 import org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants;
 import org.apache.fineract.portfolio.paymentdetail.PaymentDetailConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -58,7 +57,6 @@ public class AccountTransfersDataValidator {
             PaymentDetailConstants.checkNumberParamName, PaymentDetailConstants.routingCodeParamName,
             PaymentDetailConstants.receiptNumberParamName, PaymentDetailConstants.bankNumberParamName));
 
-    @Autowired
     public AccountTransfersDataValidator(final FromJsonHelper fromApiJsonHelper,
             final AccountTransfersDetailDataValidator accountTransfersDetailDataValidator) {
         this.fromApiJsonHelper = fromApiJsonHelper;

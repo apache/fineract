@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.codes.domain;
 
 import org.apache.fineract.infrastructure.codes.exception.CodeValueNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -39,7 +38,6 @@ public class CodeValueRepositoryWrapper {
 
     private final CodeValueRepository repository;
 
-    @Autowired
     public CodeValueRepositoryWrapper(final CodeValueRepository repository) {
         this.repository = repository;
     }

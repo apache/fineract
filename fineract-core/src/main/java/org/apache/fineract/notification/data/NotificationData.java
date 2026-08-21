@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.notification.data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -30,6 +31,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class NotificationData implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private Long id;

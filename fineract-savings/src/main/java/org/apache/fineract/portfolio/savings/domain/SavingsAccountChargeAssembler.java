@@ -50,7 +50,6 @@ import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.charge.exception.ChargeCannotBeAppliedToException;
 import org.apache.fineract.portfolio.charge.exception.SavingsAccountChargeNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -60,7 +59,6 @@ public class SavingsAccountChargeAssembler {
     private final ChargeRepositoryWrapper chargeRepository;
     private final SavingsAccountChargeRepository savingsAccountChargeRepository;
 
-    @Autowired
     public SavingsAccountChargeAssembler(final FromJsonHelper fromApiJsonHelper, final ChargeRepositoryWrapper chargeRepository,
             final SavingsAccountChargeRepository savingsAccountChargeRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;

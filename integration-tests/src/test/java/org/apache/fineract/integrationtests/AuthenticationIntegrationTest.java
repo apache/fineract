@@ -20,8 +20,6 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -42,6 +40,9 @@ import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @Slf4j
 @ExtendWith(LoanTestLifecycleExtension.class)
@@ -86,7 +87,7 @@ public class AuthenticationIntegrationTest {
     }
 
     @Test
-    public void shouldReturnUnauthorizedForUnauthenticatedAccess() throws JsonProcessingException {
+    public void shouldReturnUnauthorizedForUnauthenticatedAccess() throws JacksonException {
         setupUnauthenticatedRequestSpec();
         this.responseSpec = new ResponseSpecBuilder().expectStatusCode(401).build();
 
@@ -95,7 +96,7 @@ public class AuthenticationIntegrationTest {
 
         String rawResponse = Utils.performServerPost(this.requestSpec, this.responseSpec, loanApprovalCommand, loanApprovalRequest, null);
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new JsonMapper();
         HashMap response = objectMapper.readValue(rawResponse, HashMap.class);
 
         assertEquals(401, (Integer) response.get("status"));

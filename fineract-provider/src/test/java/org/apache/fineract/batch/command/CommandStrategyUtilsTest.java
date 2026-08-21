@@ -127,8 +127,8 @@ class CommandStrategyUtilsTest {
         // then
         assertThat(result).isNotNull();
         Object actualValue = getFieldValue(result, fieldName);
-        if (expectedValue instanceof BigDecimal) {
-            assertThat((BigDecimal) actualValue).isEqualByComparingTo((BigDecimal) expectedValue);
+        if (expectedValue instanceof BigDecimal decimal) {
+            assertThat((BigDecimal) actualValue).isEqualByComparingTo(decimal);
         } else {
             assertThat(actualValue).isEqualTo(expectedValue);
         }

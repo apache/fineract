@@ -70,3 +70,15 @@ if (!(project.hasProperty('env') && project.getProperty('env') == 'dev')) {
         }
     }
 }
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+dependencies {
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
+
+    runtimeOnly "jakarta.xml.bind:jakarta.xml.bind-api:4.0.5"
+
+    testImplementation "org.springframework.boot:spring-boot-resttestclient:4.0.7"
+    testImplementation "org.springframework.boot:spring-boot-starter-restclient:4.0.7"
+}

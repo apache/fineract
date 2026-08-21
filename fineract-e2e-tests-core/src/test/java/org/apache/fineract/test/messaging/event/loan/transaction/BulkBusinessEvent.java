@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.test.messaging.event.loan.transaction;
 
 import java.util.function.Function;

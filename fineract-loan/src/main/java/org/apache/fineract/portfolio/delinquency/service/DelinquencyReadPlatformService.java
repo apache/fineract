@@ -28,7 +28,7 @@ import org.apache.fineract.portfolio.delinquency.data.LoanInstallmentDelinquency
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 import org.apache.fineract.portfolio.loanaccount.data.CollectionData;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public interface DelinquencyReadPlatformService {
 

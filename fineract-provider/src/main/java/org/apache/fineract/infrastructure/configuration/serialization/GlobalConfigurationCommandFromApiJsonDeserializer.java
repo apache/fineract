@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,7 +45,6 @@ public final class GlobalConfigurationCommandFromApiJsonDeserializer
     private static final Set<String> SUPPORTED_PARAMETERS = new HashSet<>(List.of("globalConfiguration"));
     private final FromJsonHelper fromApiJsonHelper;
 
-    @Autowired
     public GlobalConfigurationCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }

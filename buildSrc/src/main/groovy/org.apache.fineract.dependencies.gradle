@@ -25,11 +25,11 @@ dependencyManagement {
         mavenBom 'com.squareup.okhttp3:okhttp-bom:4.12.0'
         mavenBom 'org.slf4j:slf4j-bom:2.0.17'
         mavenBom 'io.micrometer:micrometer-bom:1.16.5'
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.15'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:4.0.7'
         mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:4.0.2'
         mavenBom 'io.opentelemetry:opentelemetry-bom:1.62.0'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:2.3.21'
-        mavenBom 'org.junit:junit-bom:5.14.4'
+        mavenBom 'org.junit:junit-bom:6.0.3'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.22.1'
         mavenBom 'io.cucumber:cucumber-bom:7.34.3'
         mavenBom 'org.mockito:mockito-bom:5.23.0'
@@ -50,7 +50,7 @@ dependencyManagement {
         dependency 'ch.qos.logback.contrib:logback-jackson:0.1.5'
         dependency 'org.codehaus.janino:janino:3.1.12'
 
-        dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.9'
+        dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:5.0.1'
         dependency 'com.google.guava:guava:33.6.0-jre'
         dependency 'com.google.code.gson:gson:2.14.0'
         dependency 'com.google.googlejavaformat:google-java-format:1.35.0'
@@ -63,6 +63,7 @@ dependencyManagement {
             exclude 'com.sun.mail:javax.mail'
             exclude 'javax.activation:activation'
         }
+        dependency 'org.apache.commons:commons-email2-jakarta:2.0.0-M1'
         dependency 'commons-io:commons-io:2.22.0'
         dependency 'com.github.librepdf:openpdf:3.0.4'
         dependency ('org.mnode.ical4j:ical4j:3.2.19') {
@@ -180,7 +181,7 @@ dependencyManagement {
         dependency 'com.vdurmont:semver4j:3.1.0'
         dependency 'org.beryx:text-io:3.4.1'
 
-        dependency ('org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17') {
+        dependency ('org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.2') {
             exclude 'io.swagger.core.v3:swagger-core'
         }
 
@@ -198,10 +199,7 @@ dependencyManagement {
 
         dependency 'jakarta.annotation:jakarta.annotation-api:3.0.0'
         dependency 'jakarta.activation:jakarta.activation-api:2.1.4'
-        dependency ('com.sun.mail:jakarta.mail:2.0.2') {
-            // Spring needs this version
-            exclude 'com.sun.activation:jakarta.activation'
-        }
+        dependency 'org.eclipse.angus:angus-activation:2.0.3'
         dependency ('jakarta.xml.bind:jakarta.xml.bind-api:4.0.5') {
             exclude 'jakarta.activation:jakarta.activation-api'
         }
@@ -270,10 +268,9 @@ dependencyManagement {
         dependency 'org.openjdk.jmh:jmh-core:1.37'
         dependency 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 
-        dependency 'org.springframework.restdocs:spring-restdocs-asciidoctor:3.0.5'
-        dependency 'org.springframework.restdocs:spring-restdocs-mockmvc:3.0.5'
-        dependency 'org.springframework.restdocs:spring-restdocs-webtestclient:3.0.5'
-        dependency 'org.springframework.restdocs:spring-restdocs-restassured:3.0.5'
+        dependency 'org.springframework.restdocs:spring-restdocs-asciidoctor:4.0.1'
+        dependency 'org.springframework.restdocs:spring-restdocs-mockmvc:4.0.1'
+        dependency 'org.springframework.restdocs:spring-restdocs-webtestclient:4.0.1'
 
         dependency 'com.lmax:disruptor:4.0.0'
 
@@ -287,8 +284,11 @@ dependencyManagement {
         dependency 'org.yakworks:spring-icu4j:0.5.2'
         dependency 'org.apache.commons:commons-lang3:3.20.0'
         dependency 'com.nimbusds:nimbus-jose-jwt:10.9'
-        dependency 'org.springframework:spring-core:6.2.18'
-        dependency 'org.springframework.security:spring-security-core:6.5.10'
+        dependency 'org.springframework:spring-core:7.0.8'
+        dependency 'org.springframework.security:spring-security-core:7.0.6'
+        dependency 'io.github.resilience4j:resilience4j-spring-boot4:2.4.0'
+        // New in Boot 4; the dependency-management plugin does not pick up its version from the Boot BOM.
+        dependency 'org.springframework.boot:spring-boot-starter-liquibase:4.0.7'
         // Keep Netty on the 4.1 line for MockServer compatibility.
         dependency 'io.netty:netty-buffer:4.1.135.Final'
         dependency 'io.netty:netty-common:4.1.135.Final'
@@ -309,8 +309,8 @@ dependencyManagement {
         dependency 'at.yawk.lz4:lz4-java:1.11.0'
         dependency 'org.thymeleaf:thymeleaf:3.1.5.RELEASE'
         dependency 'org.thymeleaf:thymeleaf-spring6:3.1.5.RELEASE'
-        dependency 'org.apache.tomcat.embed:tomcat-embed-core:10.1.55'
-        dependency 'org.apache.tomcat.embed:tomcat-embed-el:10.1.55'
-        dependency 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.55'
+        dependency 'org.apache.tomcat.embed:tomcat-embed-core:11.0.22'
+        dependency 'org.apache.tomcat.embed:tomcat-embed-el:11.0.22'
+        dependency 'org.apache.tomcat.embed:tomcat-embed-websocket:11.0.22'
     }
 }

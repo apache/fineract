@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.configuration.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.io.Serial;
 import java.io.Serializable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,6 +36,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 @Accessors(chain = true)
 public class ExternalServicePropertiesPK implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     @Column(name = "name", length = 150)
     private String name;

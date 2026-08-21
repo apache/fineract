@@ -24,6 +24,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.io.Serial;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
@@ -49,6 +50,7 @@ import org.apache.fineract.useradministration.domain.AppUser;
 @Accessors(chain = true)
 public class ReportMailingJob extends AbstractAuditableCustom {
 
+    @Serial
     private static final long serialVersionUID = -2197602941230009227L;
 
     @Column(name = "name", nullable = false)

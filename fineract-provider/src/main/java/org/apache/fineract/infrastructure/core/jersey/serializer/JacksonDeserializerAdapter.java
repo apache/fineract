@@ -18,22 +18,26 @@
  */
 package org.apache.fineract.infrastructure.core.jersey.serializer;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.jersey.converter.JsonConverter;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
 @RequiredArgsConstructor
-public class JacksonDeserializerAdapter<T> extends JsonDeserializer<T> {
+public class JacksonDeserializerAdapter<T> extends ValueDeserializer<T> {
 
     private final JsonConverter<T> converter;
 
     @Override
-    public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-        return converter.convertToObject(p);
+    public T deserialize(JsonParser p, DeserializationContext ctxt) {
+        try {
+            return converter.convertToObject(p);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override

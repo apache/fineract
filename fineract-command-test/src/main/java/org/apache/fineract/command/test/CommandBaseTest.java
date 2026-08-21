@@ -40,16 +40,16 @@ public abstract class CommandBaseTest {
     protected static final Network network = Network.newNetwork();
 
     @Container
-    protected static final PostgreSQLContainer<?> POSTGRES_CONTAINER = new PostgreSQLContainer<>(DockerImageName.parse("postgres:18.3"))
+    protected static final PostgreSQLContainer POSTGRES_CONTAINER = new PostgreSQLContainer<>(DockerImageName.parse("postgres:18.3"))
             .withNetwork(network).withUsername("root").withPassword("mifos").withDatabaseName("fineract-test");
 
     @Container
-    protected static final MariaDBContainer<?> MARIADB_CONTAINER = new MariaDBContainer<>(DockerImageName.parse("mariadb:12.2"))
+    protected static final MariaDBContainer MARIADB_CONTAINER = new MariaDBContainer<>(DockerImageName.parse("mariadb:12.2"))
             .withNetwork(network).withUsername("root").withPassword("mifos").withDatabaseName("fineract-test")
             .withCommand("--innodb-snapshot-isolation=OFF").waitingFor(Wait.forListeningPort());
 
     @Container
-    protected static final MySQLContainer<?> MYSQL_CONTAINER = new MySQLContainer<>(DockerImageName.parse("mysql:8")).withNetwork(network)
+    protected static final MySQLContainer MYSQL_CONTAINER = new MySQLContainer<>(DockerImageName.parse("mysql:8")).withNetwork(network)
             .withUsername("root").withPassword("mifos").withDatabaseName("fineract-test");
 
     @DynamicPropertySource

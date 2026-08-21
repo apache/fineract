@@ -731,8 +731,8 @@ public class JsonParserHelper {
                 }
                 final NumberStyleFormatter numberFormatter = new NumberStyleFormatter();
                 final Number parsedNumber = numberFormatter.parse(source, clientApplicationLocale);
-                if (parsedNumber instanceof BigDecimal) {
-                    number = (BigDecimal) parsedNumber;
+                if (parsedNumber instanceof BigDecimal decimal) {
+                    number = decimal;
                 } else {
                     number = BigDecimal.valueOf(parsedNumber.doubleValue());
                 }

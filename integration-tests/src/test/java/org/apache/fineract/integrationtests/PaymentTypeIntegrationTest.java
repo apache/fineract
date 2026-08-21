@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,8 +73,8 @@ public class PaymentTypeIntegrationTest {
 
         // 5. Update Payment Type
         String newName = PaymentTypeHelper.randomNameGenerator("P_TU", 5);
-        PaymentTypeHelper.updatePaymentType(paymentTypeId,
-                new PaymentTypeUpdateRequest().name(newName).description(description).isCashPayment(isCashPayment).position(position));
+        PaymentTypeHelper.updatePaymentType(paymentTypeId, new PaymentTypeUpdateRequest().name(newName).description(description)
+                .isCashPayment(isCashPayment).position(position).isSystemDefined(false));
 
         // 6. Verify Update
         var paymentTypeUpdatedResponse = PaymentTypeHelper.retrieveById(paymentTypeId);

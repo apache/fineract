@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.data;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
@@ -43,8 +41,9 @@ import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 @Component
 public final class EmailDataValidator {
@@ -53,7 +52,6 @@ public final class EmailDataValidator {
     private static final String EMAIL_REGEX = "^[\\w!#$%&’*+/=?`{|}~^-]+(?:\\.[\\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
     private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
 
-    @Autowired
     public EmailDataValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
@@ -302,7 +300,7 @@ public final class EmailDataValidator {
 
         if (!StringUtils.isEmpty(stretchyReportParamMap)) {
             try {
-                stretchyReportParamHashMap = new ObjectMapper().readValue(stretchyReportParamMap,
+                stretchyReportParamHashMap = new JsonMapper().readValue(stretchyReportParamMap,
                         new TypeReference<HashMap<String, String>>() {});
             }
 

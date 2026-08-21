@@ -39,7 +39,6 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -71,7 +70,6 @@ public final class GroupingTypesDataValidator {
             Arrays.asList(GroupingTypesApiConstants.localeParamName, GroupingTypesApiConstants.dateFormatParamName,
                     GroupingTypesApiConstants.closureDateParamName, GroupingTypesApiConstants.closureReasonIdParamName));
 
-    @Autowired
     public GroupingTypesDataValidator(final FromJsonHelper fromApiJsonHelper, final GroupRepositoryWrapper groupRepositoryWrapper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.groupRepositoryWrapper = groupRepositoryWrapper;

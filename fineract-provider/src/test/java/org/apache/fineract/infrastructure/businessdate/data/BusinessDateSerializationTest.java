@@ -21,22 +21,25 @@ package org.apache.fineract.infrastructure.businessdate.data;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import org.apache.fineract.infrastructure.businessdate.data.api.BusinessDateResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JacksonLocalDateArrayModule;
 import org.junit.jupiter.api.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 class BusinessDateSerializationTest {
 
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule())
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    private final ObjectMapper mapper = JsonMapper.builder()
+            .changeDefaultPropertyInclusion(
+                    incl -> incl.withContentInclusion(JsonInclude.Include.NON_NULL).withValueInclusion(JsonInclude.Include.NON_NULL))
+            .addModule(new JacksonLocalDateArrayModule()).build();
 
     @Test
-    void serializeBusinessDateData() throws JsonProcessingException {
+    void serializeBusinessDateData() throws JacksonException {
         var now = LocalDate.now(ZoneId.systemDefault());
         var businessDateResponse = BusinessDateResponse.builder().type(BusinessDateType.BUSINESS_DATE)
                 .description(BusinessDateType.BUSINESS_DATE.getDescription()).date(now).build();
@@ -48,7 +51,7 @@ class BusinessDateSerializationTest {
     }
 
     @Test
-    void serializeBusinessDateData_COB() throws JsonProcessingException {
+    void serializeBusinessDateData_COB() throws JacksonException {
         var now = LocalDate.now(ZoneId.systemDefault());
         var businessDateResponse = BusinessDateResponse.builder().type(BusinessDateType.COB_DATE)
                 .description(BusinessDateType.COB_DATE.getDescription()).date(now).build();

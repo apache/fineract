@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.core.serialization;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -29,7 +28,6 @@ public class CommandSerializerDefaultToJson implements CommandSerializer {
 
     private final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff;
 
-    @Autowired
     public CommandSerializerDefaultToJson(
             final ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson excludeNothingWithPrettyPrintingOff) {
         this.excludeNothingWithPrettyPrintingOff = excludeNothingWithPrettyPrintingOff;

@@ -80,11 +80,12 @@ import org.apache.fineract.test.messaging.event.loan.LoanRescheduledDueAdjustSch
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.springframework.beans.factory.annotation.Autowired;
+import tools.jackson.core.JacksonException;
 
 @Slf4j
 public class BatchApiStepDef extends AbstractStepDef {
 
-    private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER = org.apache.fineract.client.feign.ObjectMapperFactory
+    private static final tools.jackson.databind.ObjectMapper OBJECT_MAPPER = org.apache.fineract.client.feign.ObjectMapperFactory
             .getShared();
     private static final String DATE_FORMAT = "dd MMMM yyyy";
     private static final String DEFAULT_LOCALE = "en";
@@ -1344,7 +1345,7 @@ public class BatchApiStepDef extends AbstractStepDef {
 
         // Parse the loan ID from the response
         String loanCreateResponseBody = loanCreateResponse.getBody();
-        com.fasterxml.jackson.databind.JsonNode loanCreateJson = readTree(loanCreateResponseBody);
+        tools.jackson.databind.JsonNode loanCreateJson = readTree(loanCreateResponseBody);
         long loanId = loanCreateJson.get("loanId").asLong();
 
         // Get the loan details
@@ -1376,7 +1377,7 @@ public class BatchApiStepDef extends AbstractStepDef {
     private static String toJson(Object obj) {
         try {
             return OBJECT_MAPPER.writeValueAsString(obj);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException("Error serializing object to JSON", e);
         }
     }
@@ -1384,15 +1385,15 @@ public class BatchApiStepDef extends AbstractStepDef {
     private static <T> T fromJson(String json, Class<T> clazz) {
         try {
             return OBJECT_MAPPER.readValue(json, clazz);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException("Error deserializing JSON to object", e);
         }
     }
 
-    private static com.fasterxml.jackson.databind.JsonNode readTree(String json) {
+    private static tools.jackson.databind.JsonNode readTree(String json) {
         try {
             return OBJECT_MAPPER.readTree(json);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException("Error parsing JSON tree", e);
         }
     }

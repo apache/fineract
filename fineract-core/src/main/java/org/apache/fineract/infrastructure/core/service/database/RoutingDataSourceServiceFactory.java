@@ -19,8 +19,9 @@
 package org.apache.fineract.infrastructure.core.service.database;
 
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 /**
@@ -30,17 +31,22 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class RoutingDataSourceServiceFactory {
+public class RoutingDataSourceServiceFactory implements ApplicationContextAware {
 
-    @Autowired
     private ApplicationContext applicationContext;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 
     public RoutingDataSourceService determineDataSourceService() {
         String serviceName = "tomcatJdbcDataSourcePerTenantService";
         if (ThreadLocalContextUtil.CONTEXT_TENANTS.equalsIgnoreCase(ThreadLocalContextUtil.getDataSourceContext())) {
-            serviceName = "dataSourceForTenants";
+            if (applicationContext.containsBean("dataSourceForTenants")) {
+                serviceName = "dataSourceForTenants";
+            }
         }
         return this.applicationContext.getBean(serviceName, RoutingDataSourceService.class);
-
     }
 }

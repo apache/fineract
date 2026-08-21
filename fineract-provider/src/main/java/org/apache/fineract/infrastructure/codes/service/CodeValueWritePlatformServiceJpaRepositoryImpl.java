@@ -34,7 +34,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
@@ -53,7 +52,6 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
     private final CodeRepository codeRepository;
     private final CodeValueCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
-    @Autowired
     public CodeValueWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final CodeRepository codeRepository,
             final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final CodeValueRepository codeValueRepository,
             final CodeValueCommandFromApiJsonDeserializer fromApiJsonDeserializer) {

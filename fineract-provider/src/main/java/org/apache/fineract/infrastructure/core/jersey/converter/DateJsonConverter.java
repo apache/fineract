@@ -18,14 +18,14 @@
  */
 package org.apache.fineract.infrastructure.core.jersey.converter;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
 
 @Component
 public class DateJsonConverter implements JsonConverter<Date> {
@@ -36,7 +36,7 @@ public class DateJsonConverter implements JsonConverter<Date> {
     public Date convertToObject(JsonParser parser) throws IOException {
         Date result = null;
         if (parser.hasToken(JsonToken.VALUE_STRING)) {
-            String formattedDate = parser.getText();
+            String formattedDate = parser.getString();
             result = Date.from(Instant.from(FORMATTER.parse(formattedDate)));
         }
         return result;

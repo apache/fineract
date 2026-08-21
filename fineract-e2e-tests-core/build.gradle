@@ -69,6 +69,7 @@ dependencies {
     testImplementation 'com.squareup.retrofit2:retrofit'
     testImplementation 'io.github.openfeign:feign-core:13.12'
     testImplementation 'io.github.openfeign:feign-jackson:13.12'
+    testImplementation 'tools.jackson.core:jackson-databind'
     testImplementation 'org.apache.httpcomponents:httpclient'
     testImplementation 'org.apache.commons:commons-lang3'
     testImplementation 'com.google.guava:guava'

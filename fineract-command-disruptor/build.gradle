@@ -80,3 +80,12 @@ jmh {
     timeOnIteration = '2s' // Time per iteration
     benchmarkMode = ['thrpt'] // Default benchmark mode
 }
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+dependencies {
+    annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
+
+    runtimeOnly "jakarta.xml.bind:jakarta.xml.bind-api:4.0.5"
+}

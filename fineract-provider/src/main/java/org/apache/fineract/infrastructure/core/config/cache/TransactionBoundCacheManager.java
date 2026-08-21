@@ -39,7 +39,8 @@ public class TransactionBoundCacheManager implements TransactionLifecycleCallbac
         resetCaches();
     }
 
-    private void resetCaches() {
+    @Override
+    public void resetCaches() {
         Collection<String> cacheNames = delegate.getCacheNames();
         cacheNames.forEach(c -> {
             Cache cache = delegate.getCache(c);

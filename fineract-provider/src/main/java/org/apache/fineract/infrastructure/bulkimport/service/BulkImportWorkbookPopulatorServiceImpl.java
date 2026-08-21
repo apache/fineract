@@ -111,7 +111,6 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -138,7 +137,6 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     private final DepositProductReadPlatformService depositProductReadPlatformService;
     private final RoleReadPlatformService roleReadPlatformService;
 
-    @Autowired
     public BulkImportWorkbookPopulatorServiceImpl(final PlatformSecurityContext context,
             final OfficeReadPlatformService officeReadPlatformService, final StaffReadService staffReadPlatformService,
             final ClientReadPlatformService clientReadPlatformService, final CenterReadPlatformService centerReadPlatformService,

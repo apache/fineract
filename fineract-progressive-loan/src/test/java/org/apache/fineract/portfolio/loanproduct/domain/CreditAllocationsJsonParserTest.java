@@ -21,8 +21,6 @@ package org.apache.fineract.portfolio.loanproduct.domain;
 import static org.apache.fineract.portfolio.loanproduct.domain.CreditAllocationsValidator.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 import static org.mockito.Mockito.times;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonParser;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -33,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +39,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.lang.NonNull;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class CreditAllocationsJsonParserTest {
@@ -54,7 +55,7 @@ public class CreditAllocationsJsonParserTest {
     private FromJsonHelper fromJsonHelper = new FromJsonHelper();
 
     @Test
-    public void testEmptyJson() throws JsonProcessingException {
+    public void testEmptyJson() throws JacksonException {
         Map<String, Object> map = new HashMap<>();
         JsonCommand command = createJsonCommand(map);
 
@@ -68,7 +69,7 @@ public class CreditAllocationsJsonParserTest {
     }
 
     @Test
-    public void testParseSingleChargebackAllocation() throws JsonProcessingException {
+    public void testParseSingleChargebackAllocation() throws JacksonException {
         // given
         Map<String, Object> map = new HashMap<>();
         List<Map<String, Object>> creditAllocations = new ArrayList<>();
@@ -112,8 +113,8 @@ public class CreditAllocationsJsonParserTest {
     }
 
     @NonNull
-    private JsonCommand createJsonCommand(Map<String, Object> jsonMap) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
+    private JsonCommand createJsonCommand(Map<String, Object> jsonMap) throws JacksonException {
+        ObjectMapper objectMapper = new JsonMapper();
         String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonMap);
         return JsonCommand.from(json, JsonParser.parseString(json), fromJsonHelper, null, 1L, 2L, 3L, 4L, null, null, null, null, null,
                 null, null, null, null);

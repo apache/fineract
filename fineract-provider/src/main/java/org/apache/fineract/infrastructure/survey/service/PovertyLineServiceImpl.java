@@ -23,7 +23,6 @@ import java.util.List;
 import org.apache.fineract.infrastructure.survey.data.LikeliHoodPovertyLineData;
 import org.apache.fineract.infrastructure.survey.data.PovertyLineData;
 import org.apache.fineract.infrastructure.survey.data.PpiPovertyLineData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
@@ -33,7 +32,6 @@ public class PovertyLineServiceImpl implements PovertyLineService {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
     PovertyLineServiceImpl(final JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

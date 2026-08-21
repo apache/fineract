@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.interestratechart.handler;
 
 import io.github.resilience4j.retry.annotation.Retry;

@@ -18,15 +18,15 @@
  */
 package org.apache.fineract.client.adapter;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import java.io.IOException;
 import org.apache.fineract.client.models.ExternalId;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.module.SimpleModule;
 
 /**
  * Custom Jackson adapter for ExternalId type serialization and deserialization. This adapter ensures that ExternalId
@@ -40,10 +40,10 @@ public final class ExternalIdAdapter {
      * Jackson Serializer for ExternalId. Serializes an ExternalId object to its string value, or null if the ExternalId
      * or its value is null.
      */
-    public static class Serializer extends JsonSerializer<ExternalId> {
+    public static class Serializer extends ValueSerializer<ExternalId> {
 
         @Override
-        public void serialize(ExternalId value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        public void serialize(ExternalId value, JsonGenerator gen, SerializationContext ctxt) throws JacksonException {
             if (value == null || value.getValue() == null) {
                 gen.writeNull();
             } else {
@@ -56,10 +56,10 @@ public final class ExternalIdAdapter {
      * Jackson Deserializer for ExternalId. Deserializes a string value to an ExternalId object, or null if the input is
      * null.
      */
-    public static class Deserializer extends JsonDeserializer<ExternalId> {
+    public static class Deserializer extends ValueDeserializer<ExternalId> {
 
         @Override
-        public ExternalId deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        public ExternalId deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
             String value = p.getValueAsString();
             if (value == null) {
                 return null;

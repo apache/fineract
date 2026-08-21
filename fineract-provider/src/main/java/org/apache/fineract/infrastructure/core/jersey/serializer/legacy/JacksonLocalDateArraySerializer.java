@@ -18,17 +18,16 @@
  */
 package org.apache.fineract.infrastructure.core.jersey.serializer.legacy;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDate;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
-public class JacksonLocalDateArraySerializer extends JsonSerializer<LocalDate> implements Serializable {
+public class JacksonLocalDateArraySerializer extends ValueSerializer<LocalDate> implements Serializable {
 
     @Override
-    public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
+    public void serialize(LocalDate value, JsonGenerator gen, SerializationContext serializerProvider) {
         if (value != null) {
             gen.writeStartArray();
             gen.writeNumber(value.getYear());

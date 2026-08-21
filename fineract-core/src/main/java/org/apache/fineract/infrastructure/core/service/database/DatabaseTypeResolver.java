@@ -22,7 +22,6 @@ import com.zaxxer.hikari.HikariConfig;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,7 +34,6 @@ public class DatabaseTypeResolver implements InitializingBean {
     private static final AtomicReference<DatabaseType> currentDatabaseType = new AtomicReference<>();
     private final HikariConfig hikariConfig;
 
-    @Autowired
     public DatabaseTypeResolver(HikariConfig hikariConfig) {
         this.hikariConfig = hikariConfig;
     }

@@ -24,7 +24,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import org.apache.fineract.cob.service.InlineLoanCOBExecutorServiceImpl;
 import org.apache.fineract.cob.service.LoanAccountLockService;
-import org.apache.fineract.cob.service.RetrieveIdService;
+import org.apache.fineract.cob.service.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.http.BodyCachingHttpServletRequestWrapper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -32,7 +32,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,18 +55,13 @@ public class LoanCOBFilterHelperTest {
     @Mock
     private FineractProperties fineractProperties;
     @Mock
-    private RetrieveIdService retrieveIdService;
+    private RetrieveLoanIdService retrieveIdService;
 
     @Mock
     private LoanRescheduleRequestRepository loanRescheduleRequestRepository;
 
     @InjectMocks
     private LoanCOBFilterHelperImpl helper;
-
-    @BeforeEach
-    public void initLoanCOBFilterHelper() throws Exception {
-        helper.afterPropertiesSet();
-    }
 
     @Test
     public void testCOBFilterUnescapedChars() throws IOException {

@@ -18,16 +18,16 @@
  */
 package org.apache.fineract.infrastructure.jobs.config;
 
-import static org.springframework.batch.support.DatabaseType.MARIADB;
-import static org.springframework.batch.support.DatabaseType.MYSQL;
-import static org.springframework.batch.support.DatabaseType.POSTGRES;
+import static org.springframework.batch.infrastructure.support.DatabaseType.MARIADB;
+import static org.springframework.batch.infrastructure.support.DatabaseType.MYSQL;
+import static org.springframework.batch.infrastructure.support.DatabaseType.POSTGRES;
 
 import java.util.List;
 import java.util.Locale;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
-import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
-import org.springframework.batch.support.DatabaseType;
+import org.springframework.batch.infrastructure.item.database.support.DataFieldMaxValueIncrementerFactory;
+import org.springframework.batch.infrastructure.support.DatabaseType;
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer;
 import org.springframework.jdbc.support.incrementer.MySQLMaxValueIncrementer;
 import org.springframework.jdbc.support.incrementer.PostgresSequenceMaxValueIncrementer;

@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.accounting.producttoaccountmapping.data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,6 +31,7 @@ import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 @Accessors(chain = true)
 public class ClassificationToGLAccountData implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     private CodeValueData classificationCodeValue;
     private GLAccountData incomeAccount;

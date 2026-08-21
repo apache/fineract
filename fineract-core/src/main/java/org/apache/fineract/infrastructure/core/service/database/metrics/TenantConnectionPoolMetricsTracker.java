@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.infrastructure.core.service.database.metrics;
 
 import com.zaxxer.hikari.metrics.IMetricsTracker;

@@ -38,7 +38,6 @@ import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJob
 import org.apache.fineract.infrastructure.reportmailingjob.data.ReportMailingJobTimelineData;
 import org.apache.fineract.infrastructure.reportmailingjob.exception.ReportMailingJobNotFoundException;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -52,7 +51,6 @@ public class ReportMailingJobReadPlatformServiceImpl implements ReportMailingJob
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final PaginationHelper paginationHelper;
 
-    @Autowired
     public ReportMailingJobReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ColumnValidator columnValidator,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {
         this.jdbcTemplate = jdbcTemplate;

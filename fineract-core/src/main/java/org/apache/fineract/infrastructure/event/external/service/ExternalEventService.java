@@ -65,8 +65,8 @@ public class ExternalEventService {
         try {
             entityManager.flush();
             ExternalEvent externalEvent;
-            if (event instanceof BulkBusinessEvent) {
-                externalEvent = handleBulkBusinessEvent((BulkBusinessEvent) event);
+            if (event instanceof BulkBusinessEvent businessEvent) {
+                externalEvent = handleBulkBusinessEvent(businessEvent);
             } else {
                 externalEvent = handleRegularBusinessEvent(event);
             }

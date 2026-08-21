@@ -18,8 +18,8 @@
  */
 package org.apache.fineract.infrastructure.core.jersey.serializer.legacy;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.fineract.infrastructure.core.jersey.serializer.JacksonLocalDateBeanSerializerModifier;
+import tools.jackson.databind.module.SimpleModule;
 
 public class JacksonLocalDateArrayModule extends SimpleModule {
 

@@ -35,7 +35,6 @@ import org.apache.fineract.portfolio.collectionsheet.command.CollectionSheetBulk
 import org.apache.fineract.portfolio.collectionsheet.command.SingleRepaymentCommand;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetailAssembler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -48,7 +47,6 @@ public final class CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer
     private final FromJsonHelper fromApiJsonHelper;
     private final PaymentDetailAssembler paymentDetailAssembler;
 
-    @Autowired
     public CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper,
             final PaymentDetailAssembler paymentDetailAssembler) {
         this.fromApiJsonHelper = fromApiJsonHelper;

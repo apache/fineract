@@ -100,7 +100,6 @@ import org.apache.fineract.portfolio.savings.exception.FixedDepositProductNotFou
 import org.apache.fineract.portfolio.savings.exception.RecurringDepositProductNotFoundException;
 import org.apache.fineract.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.apache.fineract.useradministration.domain.AppUser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -123,7 +122,6 @@ public class DepositAccountAssembler {
     private final ExternalIdFactory externalIdFactory;
     private final ConfigurationDomainService configurationDomainService;
 
-    @Autowired
     public DepositAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
             final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
             final StaffRepositoryWrapper staffRepository, final FixedDepositProductRepository fixedDepositProductRepository,

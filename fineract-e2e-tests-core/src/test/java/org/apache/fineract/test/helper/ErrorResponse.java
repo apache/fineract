@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.test.helper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
 import lombok.Getter;
@@ -27,6 +25,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
 import retrofit2.Response;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @NoArgsConstructor
 @Getter
@@ -73,7 +73,7 @@ public class ErrorResponse {
         try {
             String errorBody = retrofitResponse.errorBody().string();
             return OBJECT_MAPPER.readValue(errorBody, ErrorResponse.class);
-        } catch (IOException e) {
+        } catch (IOException | JacksonException e) {
             throw new RuntimeException("Error while parsing the error body", e);
         }
     }
@@ -82,7 +82,7 @@ public class ErrorResponse {
         try {
             String errorBody = feignException.contentUTF8();
             return OBJECT_MAPPER.readValue(errorBody, ErrorResponse.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException("Error while parsing the error body", e);
         }
     }
@@ -93,7 +93,7 @@ public class ErrorResponse {
             ErrorResponse errorResponse = OBJECT_MAPPER.readValue(errorBody, ErrorResponse.class);
             errorResponse.setHttpStatusCode(feignException.status());
             return errorResponse;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException("Error while parsing the error body", e);
         }
     }

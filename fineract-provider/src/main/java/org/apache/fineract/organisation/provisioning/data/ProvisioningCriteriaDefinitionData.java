@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.provisioning.data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import lombok.Data;
@@ -29,6 +30,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public final class ProvisioningCriteriaDefinitionData implements Comparable<ProvisioningCriteriaDefinitionData>, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private Long id;

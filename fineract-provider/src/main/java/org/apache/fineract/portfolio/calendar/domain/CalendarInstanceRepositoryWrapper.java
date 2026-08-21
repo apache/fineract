@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.calendar.domain;
 
 import org.apache.fineract.portfolio.calendar.exception.CalendarInstanceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,7 +37,6 @@ public class CalendarInstanceRepositoryWrapper {
 
     private final CalendarInstanceRepository repository;
 
-    @Autowired
     public CalendarInstanceRepositoryWrapper(final CalendarInstanceRepository repository) {
         this.repository = repository;
     }

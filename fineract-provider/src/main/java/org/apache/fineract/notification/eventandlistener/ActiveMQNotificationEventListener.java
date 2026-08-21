@@ -40,8 +40,8 @@ public class ActiveMQNotificationEventListener implements SessionAwareMessageLis
 
     @Override
     public void onMessage(Message message, Session session) throws JMSException {
-        if (message instanceof ObjectMessage) {
-            NotificationData notificationData = (NotificationData) ((ObjectMessage) message).getObject();
+        if (message instanceof ObjectMessage objectMessage) {
+            NotificationData notificationData = (NotificationData) objectMessage.getObject();
             notificationEventListener.receive(notificationData);
         }
     }

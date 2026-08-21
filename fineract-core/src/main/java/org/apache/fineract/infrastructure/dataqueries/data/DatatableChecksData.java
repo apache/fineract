@@ -18,10 +18,12 @@
  */
 package org.apache.fineract.infrastructure.dataqueries.data;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class DatatableChecksData implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 3113568562509206452L;
     private final String entity;
     private final String dataTableName;

@@ -16,13 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.infrastructure.campaigns.sms.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
-import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -69,6 +65,9 @@ import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTypeExcept
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 @Slf4j
@@ -180,10 +179,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                     } else {
                         groupClients.add(loan.client());
                     }
-                    HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(),
-                            new TypeReference<>() {
-
-                            });
+                    HashMap<String, String> campaignParams = new JsonMapper().readValue(smsCampaign.getParamValue(),
+                            new TypeReference<>() {});
 
                     if (!groupClients.isEmpty()) {
                         for (Client client : groupClients) {
@@ -224,7 +221,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                             }
                         }
                     }
-                } catch (final IOException e) {
+                } catch (final JacksonException e) {
                     log.error("smsParams does not contain the key: ", e);
                 } catch (final RuntimeException e) {
                     log.debug("Client Office Id and SMS Campaign Office id doesn't match ", e);
@@ -241,10 +238,8 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                 try {
                     final SavingsAccount savingsAccount = savingsTransaction.getSavingsAccount();
                     final Client client = savingsAccount.getClient();
-                    HashMap<String, String> campaignParams = new ObjectMapper().readValue(smsCampaign.getParamValue(),
-                            new TypeReference<>() {
-
-                            });
+                    HashMap<String, String> campaignParams = new JsonMapper().readValue(smsCampaign.getParamValue(),
+                            new TypeReference<>() {});
                     HashMap<String, Object> smsParams = processSavingsTransactionDataForSms(savingsTransaction, client);
                     for (Map.Entry<String, String> entry : campaignParams.entrySet()) {
                         String value = entry.getValue();
@@ -283,7 +278,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                         smsDataMap.put(smsCampaign, messages);
                         this.smsMessageScheduledJobService.sendTriggeredMessages(smsDataMap);
                     }
-                } catch (final IOException e) {
+                } catch (final JacksonException e) {
                     log.error("smsParams does not contain the key: ", e);
                 } catch (final RuntimeException e) {
                     log.debug("Client Office Id and SMS Campaign Office id doesn't match ", e);

@@ -245,7 +245,7 @@ public class DataValidatorBuilder {
             return this;
         }
 
-        if (this.value instanceof List && ((List<?>) this.value).size() > maxLength) {
+        if (this.value instanceof List<?> list && list.size() > maxLength) {
             String validationErrorCode = "validation.msg." + this.resource + "." + this.parameter + ".exceeds.max.length.allowed";
             String defaultEnglishMessage = "The parameter `" + this.parameter + "` exceeds allowed max length of " + maxLength + ".";
             final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode, defaultEnglishMessage, this.parameter);

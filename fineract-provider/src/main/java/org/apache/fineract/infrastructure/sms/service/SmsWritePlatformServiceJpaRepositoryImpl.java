@@ -30,7 +30,6 @@ import org.apache.fineract.infrastructure.sms.domain.SmsMessageAssembler;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -46,7 +45,6 @@ public class SmsWritePlatformServiceJpaRepositoryImpl implements SmsWritePlatfor
     private final SmsMessageRepository repository;
     private final SmsDataValidator validator;
 
-    @Autowired
     public SmsWritePlatformServiceJpaRepositoryImpl(final SmsMessageAssembler assembler, final SmsMessageRepository repository,
             final SmsDataValidator validator) {
         this.assembler = assembler;

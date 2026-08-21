@@ -21,12 +21,14 @@ package org.apache.fineract.infrastructure.core.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Component
+@DependsOnDatabaseInitialization
 public class JdbcTemplateFactory {
 
     private final RoutingDataSource routingDataSource;

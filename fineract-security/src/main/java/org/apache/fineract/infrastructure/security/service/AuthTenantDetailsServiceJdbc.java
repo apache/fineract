@@ -22,8 +22,8 @@ import javax.sql.DataSource;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.tenant.TenantMapper;
 import org.apache.fineract.infrastructure.security.exception.InvalidTenantIdentifierException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -33,12 +33,12 @@ import org.springframework.stereotype.Service;
  * A JDBC implementation of {@link AuthTenantDetailsService} for loading a tenants details by a
  * <code>tenantIdentifier</code>.
  */
+@DependsOnDatabaseInitialization
 @Service
 public class AuthTenantDetailsServiceJdbc implements AuthTenantDetailsService {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
     public AuthTenantDetailsServiceJdbc(@Qualifier("hikariTenantDataSource") final DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }

@@ -34,7 +34,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformDataIntegrityEx
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -50,7 +49,6 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
     private final CodeRepository codeRepository;
     private final CodeCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
-    @Autowired
     public CodeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final CodeRepository codeRepository,
             final CodeCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;

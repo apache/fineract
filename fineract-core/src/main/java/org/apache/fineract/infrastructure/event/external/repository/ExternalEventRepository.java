@@ -33,7 +33,8 @@ import org.springframework.data.repository.query.Param;
 public interface ExternalEventRepository
         extends JpaRepository<ExternalEvent, Long>, JpaSpecificationExecutor<ExternalEvent>, CustomExternalEventRepository {
 
-    List<ExternalEventView> findByStatusOrderByBusinessDateAscIdAsc(ExternalEventStatus status, Pageable batchSize);
+    @Query("SELECT e FROM ExternalEvent e WHERE e.status = :status ORDER BY e.businessDate ASC, e.id ASC")
+    List<ExternalEventView> findByStatusOrderByBusinessDateAscIdAsc(@Param("status") ExternalEventStatus status, Pageable batchSize);
 
     @Modifying(flushAutomatically = true)
     @Query("delete from ExternalEvent e where e.status = :status and e.businessDate <= :dateForPurgeCriteria")

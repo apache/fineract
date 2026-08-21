@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.core.service.migration;
 import java.util.Map;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseType;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeResolver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,7 +31,6 @@ public class DatabaseAwareMigrationContextProvider {
 
     private final DatabaseTypeResolver databaseTypeResolver;
 
-    @Autowired
     public DatabaseAwareMigrationContextProvider(DatabaseTypeResolver databaseTypeResolver) {
         this.databaseTypeResolver = databaseTypeResolver;
     }

@@ -1,3 +1,4 @@
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -16,10 +17,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.common.domain.DaysInMonthType;
-import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
+import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlan;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanDisbursementPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanSchedulePlanDownPaymentPeriod;
@@ -29,15 +34,11 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.EmbeddableP
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanRepaymentScheduleModelData;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestMethod;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-
 /*
  * NOTE: This file used by a CI job to test Progressive Loan Embedded Jar compiled successfully and runs smoothly.
  */
 public class Main {
+
     public static void main(String[] args) throws InterruptedException {
         MathContext mc = new MathContext(12, RoundingMode.HALF_UP);
         EmbeddableProgressiveLoanScheduleGenerator calculator = new EmbeddableProgressiveLoanScheduleGenerator();
@@ -62,7 +63,10 @@ public class Main {
         final InterestMethod interestMethod = InterestMethod.DECLINING_BALANCE;
         final boolean allowPartialPeriodInterestCalculation = true;
 
-        var config = new LoanRepaymentScheduleModelData(startDate, currency, disbursedAmount, disbursementDate, noRepayments, repaymentFrequency, repaymentFrequencyType, annualNominalInterestRate, isDownPaymentEnabled, daysInMonthType, daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate, dasInYearCustomStrategy, interestMethod, allowPartialPeriodInterestCalculation, false);
+        var config = new LoanRepaymentScheduleModelData(startDate, currency, disbursedAmount, disbursementDate, noRepayments,
+                repaymentFrequency, repaymentFrequencyType, annualNominalInterestRate, isDownPaymentEnabled, daysInMonthType,
+                daysInYearType, downPaymentPercentage, installmentAmountInMultiplesOf, fixedLength, interestRecognitionOnDisbursementDate,
+                dasInYearCustomStrategy, interestMethod, allowPartialPeriodInterestCalculation, false);
 
         final LoanSchedulePlan plan = calculator.generate(mc, config);
         printPlan(plan);
@@ -70,7 +74,8 @@ public class Main {
 
     static void printPlan(final LoanSchedulePlan plan) throws InterruptedException {
         System.out.println("#------ Loan Schedule -----------------#");
-        System.out.printf("  Number of Periods: %d%n", plan.getPeriods().stream().filter(period -> !(period instanceof LoanSchedulePlanDisbursementPeriod)).count());
+        System.out.printf("  Number of Periods: %d%n",
+                plan.getPeriods().stream().filter(period -> !(period instanceof LoanSchedulePlanDisbursementPeriod)).count());
         System.out.printf("  Loan Term in Days: %d%n", plan.getLoanTermInDays());
         System.out.printf("  Total Disbursed Amount: %s%n", plan.getTotalDisbursedAmount());
         System.out.printf("  Total Interest Amount: %s%n", plan.getTotalInterestAmount());
@@ -80,10 +85,18 @@ public class Main {
         for (LoanSchedulePlanPeriod period : plan.getPeriods()) {
             if (period instanceof LoanSchedulePlanDisbursementPeriod dp) {
                 System.out.printf("  Disbursement - Date: %s, Amount: %s%n", dp.periodDueDate(), dp.getPrincipalAmount());
-            } if (period instanceof LoanSchedulePlanDownPaymentPeriod rp) {
-                System.out.printf("  Down payment Period: #%d, Due Date: %s, Balance: %s, Principal: %s, Total: %s, Total Outstanding Balance: %s%n", rp.periodNumber(), rp.periodDueDate(), rp.getOutstandingLoanBalance(), rp.getPrincipalAmount(), rp.getTotalDueAmount(), rp.getTotalOutstandingLoanBalance());
-            } if (period instanceof LoanSchedulePlanRepaymentPeriod rp) {
-                System.out.printf("  Repayment Period: #%d, Due Date: %s, Balance: %s, Principal: %s, Interest: %s, Total: %s, Total Outstanding Balance: %s%n", rp.periodNumber(), rp.periodDueDate(), rp.getOutstandingLoanBalance(), rp.getPrincipalAmount(), rp.getInterestAmount(), rp.getTotalDueAmount(), rp.getTotalOutstandingLoanBalance());
+            }
+            if (period instanceof LoanSchedulePlanDownPaymentPeriod rp) {
+                System.out.printf(
+                        "  Down payment Period: #%d, Due Date: %s, Balance: %s, Principal: %s, Total: %s, Total Outstanding Balance: %s%n",
+                        rp.periodNumber(), rp.periodDueDate(), rp.getOutstandingLoanBalance(), rp.getPrincipalAmount(),
+                        rp.getTotalDueAmount(), rp.getTotalOutstandingLoanBalance());
+            }
+            if (period instanceof LoanSchedulePlanRepaymentPeriod rp) {
+                System.out.printf(
+                        "  Repayment Period: #%d, Due Date: %s, Balance: %s, Principal: %s, Interest: %s, Total: %s, Total Outstanding Balance: %s%n",
+                        rp.periodNumber(), rp.periodDueDate(), rp.getOutstandingLoanBalance(), rp.getPrincipalAmount(),
+                        rp.getInterestAmount(), rp.getTotalDueAmount(), rp.getTotalOutstandingLoanBalance());
             }
         }
     }

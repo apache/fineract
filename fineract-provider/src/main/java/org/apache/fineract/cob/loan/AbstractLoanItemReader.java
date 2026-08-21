@@ -26,12 +26,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.exceptions.LockedReadException;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
+import org.jspecify.annotations.NonNull;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.AfterStep;
-import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.core.step.StepExecution;
+import org.springframework.batch.infrastructure.item.ItemReader;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.lang.NonNull;
 
 @Slf4j
 @RequiredArgsConstructor

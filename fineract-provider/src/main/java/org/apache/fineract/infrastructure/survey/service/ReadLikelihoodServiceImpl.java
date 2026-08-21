@@ -21,7 +21,6 @@ package org.apache.fineract.infrastructure.survey.service;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.survey.data.LikelihoodData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,6 @@ public class ReadLikelihoodServiceImpl implements ReadLikelihoodService {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
     ReadLikelihoodServiceImpl(final JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

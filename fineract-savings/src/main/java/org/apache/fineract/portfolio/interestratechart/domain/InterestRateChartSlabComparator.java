@@ -38,11 +38,11 @@ public class InterestRateChartSlabComparator<T> implements Comparator<T> {
         int compareResult = 0;
         InterestRateChartSlabFields slabs1 = null;
         InterestRateChartSlabFields slabs2 = null;
-        if (o1 instanceof InterestRateChartSlab) {
-            slabs1 = ((InterestRateChartSlab) o1).slabFields();
+        if (o1 instanceof InterestRateChartSlab slab) {
+            slabs1 = slab.slabFields();
             slabs2 = ((InterestRateChartSlab) o2).slabFields();
-        } else if (o1 instanceof DepositAccountInterestRateChartSlabs) {
-            slabs1 = ((DepositAccountInterestRateChartSlabs) o1).slabFields();
+        } else if (o1 instanceof DepositAccountInterestRateChartSlabs slabs) {
+            slabs1 = slabs.slabFields();
             slabs2 = ((DepositAccountInterestRateChartSlabs) o2).slabFields();
         } else {
             return compareResult;

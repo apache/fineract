@@ -21,9 +21,6 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -79,6 +76,9 @@ import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.Utils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 public class FeignLoanHelper {
 
@@ -135,7 +135,7 @@ public class FeignLoanHelper {
             String sanitizedJson = loanProductJson.replaceAll("(?<=\\d),(?=\\d{3}(?!\\d))", "");
             PostLoanProductsRequest request = ObjectMapperFactory.getShared().readValue(sanitizedJson, PostLoanProductsRequest.class);
             return createLoanProduct(request).getResourceId();
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Invalid loan product json", e);
         }
     }
@@ -148,7 +148,7 @@ public class FeignLoanHelper {
         try {
             Map<String, Object> body = ObjectMapperFactory.getShared().readValue(feignException.responseBodyAsString(), Map.class);
             return (T) body.get(jsonAttributeToGetBack);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to parse error response for attribute " + jsonAttributeToGetBack, e);
         }
     }
@@ -159,7 +159,7 @@ public class FeignLoanHelper {
             PostLoanProductsRequest request = ObjectMapperFactory.getShared().readValue(sanitizedJson, PostLoanProductsRequest.class);
             CallFailedRuntimeException ex = fail(() -> fineractClient.loanProducts().createLoanProduct(request));
             return extractErrorAttribute(ex, jsonAttributeToGetBack);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("Invalid loan product json", e);
         }
     }
@@ -475,7 +475,7 @@ public class FeignLoanHelper {
         }
         try {
             return mapper.writeValueAsString(body);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialize reschedule request", e);
         }
     }
@@ -503,7 +503,7 @@ public class FeignLoanHelper {
                 disburseJson, null);
         try {
             return ObjectMapperFactory.getShared().readValue(response, PostLoansLoanIdResponse.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to parse disburseToSavings response", e);
         }
     }
@@ -519,7 +519,7 @@ public class FeignLoanHelper {
         }
         try {
             return mapper.writeValueAsString(body);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialize disburseToSavings request", e);
         }
     }

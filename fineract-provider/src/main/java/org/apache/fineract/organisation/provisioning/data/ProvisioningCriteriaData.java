@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.organisation.provisioning.data;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -33,6 +34,7 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 @SuppressWarnings("unused")
 public final class ProvisioningCriteriaData implements Comparable<ProvisioningCriteriaData>, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private Long criteriaId;

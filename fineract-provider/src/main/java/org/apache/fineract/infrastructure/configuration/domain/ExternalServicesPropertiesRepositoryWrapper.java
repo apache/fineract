@@ -19,7 +19,6 @@
 package org.apache.fineract.infrastructure.configuration.domain;
 
 import org.apache.fineract.infrastructure.configuration.exception.ExternalServiceConfigurationNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,7 +26,6 @@ public class ExternalServicesPropertiesRepositoryWrapper {
 
     private final ExternalServicesPropertiesRepository repository;
 
-    @Autowired
     public ExternalServicesPropertiesRepositoryWrapper(final ExternalServicesPropertiesRepository repository) {
         this.repository = repository;
     }

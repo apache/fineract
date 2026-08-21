@@ -21,13 +21,14 @@ package org.apache.fineract.portfolio.account.data;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Test class to verify JSON serialization of StandingInstructionData, particularly focusing on the status field
@@ -39,8 +40,8 @@ public class StandingInstructionDataSerializationTest {
 
     @BeforeEach
     public void setUp() {
-        objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules(); // Register JavaTimeModule for LocalDate support
+        objectMapper = JsonMapper.builder().findAndAddModules().build(); // Register JavaTimeModule for LocalDate
+                                                                         // support
     }
 
     /**
@@ -95,7 +96,7 @@ public class StandingInstructionDataSerializationTest {
         assertEquals(1L, jsonNode.get("id").asLong());
 
         assertNotNull(jsonNode.get("name"), "name field should be present in JSON");
-        assertEquals("Test Standing Instruction", jsonNode.get("name").asText());
+        assertEquals("Test Standing Instruction", jsonNode.get("name").asString());
 
         assertNotNull(jsonNode.get("amount"), "amount field should be present in JSON");
         assertEquals(1000, jsonNode.get("amount").asInt());
@@ -109,10 +110,10 @@ public class StandingInstructionDataSerializationTest {
         assertEquals(3L, statusNode.get("id").asLong(), "status.id should be 3 for DELETED state");
 
         assertNotNull(statusNode.get("code"), "status.code should be present");
-        assertEquals("DELETED", statusNode.get("code").asText());
+        assertEquals("DELETED", statusNode.get("code").asString());
 
         assertNotNull(statusNode.get("value"), "status.value should be present");
-        assertEquals("Deleted", statusNode.get("value").asText());
+        assertEquals("Deleted", statusNode.get("value").asString());
     }
 
     /**
@@ -129,7 +130,7 @@ public class StandingInstructionDataSerializationTest {
 
         assertNotNull(activeNode.get("status"), "status field should be present for ACTIVE state");
         assertEquals(1L, activeNode.get("status").get("id").asLong());
-        assertEquals("ACTIVE", activeNode.get("status").get("code").asText());
+        assertEquals("ACTIVE", activeNode.get("status").get("code").asString());
 
         // Test DISABLED state (status=2)
         EnumOptionData disabledStatus = new EnumOptionData(2L, "DISABLED", "Disabled");
@@ -140,7 +141,7 @@ public class StandingInstructionDataSerializationTest {
 
         assertNotNull(disabledNode.get("status"), "status field should be present for DISABLED state");
         assertEquals(2L, disabledNode.get("status").get("id").asLong());
-        assertEquals("DISABLED", disabledNode.get("status").get("code").asText());
+        assertEquals("DISABLED", disabledNode.get("status").get("code").asString());
 
         // Test DELETED state (status=3)
         EnumOptionData deletedStatus = new EnumOptionData(3L, "DELETED", "Deleted");
@@ -151,7 +152,7 @@ public class StandingInstructionDataSerializationTest {
 
         assertNotNull(deletedNode.get("status"), "status field should be present for DELETED state");
         assertEquals(3L, deletedNode.get("status").get("id").asLong());
-        assertEquals("DELETED", deletedNode.get("status").get("code").asText());
+        assertEquals("DELETED", deletedNode.get("status").get("code").asString());
     }
 
     /**

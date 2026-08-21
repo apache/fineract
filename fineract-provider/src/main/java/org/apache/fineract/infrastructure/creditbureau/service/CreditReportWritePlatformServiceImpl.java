@@ -42,7 +42,6 @@ import org.apache.fineract.infrastructure.creditbureau.domain.CreditReport;
 import org.apache.fineract.infrastructure.creditbureau.domain.CreditReportRepository;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
@@ -59,7 +58,6 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
     private final CreditReportRepository creditReportRepository;
     private final ExternalCreditBureauIntegrationWritePlatformService externalCreditBureauIntegrationWritePlatformService;
 
-    @Autowired
     public CreditReportWritePlatformServiceImpl(final PlatformSecurityContext context, final CreditBureauRepository creditBureauRepository,
             final CreditReportRepository creditReportRepository,
             final ExternalCreditBureauIntegrationWritePlatformService externalCreditBureauIntegrationWritePlatformService) {
@@ -136,7 +134,7 @@ public class CreditReportWritePlatformServiceImpl implements CreditReportWritePl
         if (creditBureauID != null) {
             Optional<CreditBureau> creditBureau = this.creditBureauRepository.findById(creditBureauID);
 
-            if (!creditBureau.isEmpty()) {
+            if (creditBureau.isPresent()) {
                 return creditBureau.get().getName();
             }
         }

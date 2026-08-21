@@ -19,13 +19,14 @@
 package org.apache.fineract.infrastructure.core.service.migration;
 
 import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.liquibase.LiquibaseProperties;
+import org.springframework.boot.liquibase.autoconfigure.LiquibaseProperties;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
 
 @Component
+@DependsOnDatabaseInitialization
 public class ExtendedSpringLiquibaseFactory {
 
     private final LiquibaseProperties liquibaseProperties;
@@ -33,7 +34,6 @@ public class ExtendedSpringLiquibaseFactory {
     private final Environment environment;
     private final DatabaseAwareMigrationContextProvider databaseAwareMigrationContextProvider;
 
-    @Autowired
     public ExtendedSpringLiquibaseFactory(LiquibaseProperties liquibaseProperties, ResourceLoader resourceLoader, Environment environment,
             DatabaseAwareMigrationContextProvider databaseAwareMigrationContextProvider) {
         this.liquibaseProperties = liquibaseProperties;

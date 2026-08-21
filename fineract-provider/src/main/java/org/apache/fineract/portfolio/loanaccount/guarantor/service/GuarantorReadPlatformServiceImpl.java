@@ -42,7 +42,6 @@ import org.apache.fineract.portfolio.loanaccount.guarantor.data.GuarantorTransac
 import org.apache.fineract.portfolio.loanaccount.guarantor.data.ObligeeData;
 import org.apache.fineract.portfolio.savings.data.DepositAccountOnHoldTransactionData;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -58,7 +57,6 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     private final StaffReadService staffReadPlatformService;
     private final LoanRepositoryWrapper loanRepositoryWrapper;
 
-    @Autowired
     public GuarantorReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate, final ClientReadPlatformService clientReadPlatformService,
             final StaffReadService staffReadPlatformService, final LoanRepositoryWrapper loanRepositoryWrapper) {
         this.jdbcTemplate = jdbcTemplate;

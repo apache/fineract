@@ -26,6 +26,7 @@ import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsCons
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -50,6 +51,7 @@ import org.springframework.data.jpa.domain.AbstractAuditable;
 public abstract class AbstractAuditableWithUTCDateTimeCustom<T extends Serializable> extends AbstractPersistableCustom<T>
         implements Auditable<Long, T, OffsetDateTime> {
 
+    @Serial
     private static final long serialVersionUID = 141481953116476081L;
 
     @Column(name = CREATED_BY_DB_FIELD, updatable = false, nullable = false)

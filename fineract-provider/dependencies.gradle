@@ -114,22 +114,24 @@ dependencies {
 
             'io.swagger.core.v3:swagger-annotations-jakarta',
             'com.squareup.retrofit2:converter-gson',
-            'com.sun.activation:jakarta.activation',
-            'com.sun.mail:jakarta.mail',
+            'jakarta.mail:jakarta.mail-api',
 
             'org.springdoc:springdoc-openapi-starter-webmvc-ui',
             'org.mapstruct:mapstruct',
 
-            'io.github.resilience4j:resilience4j-spring-boot3',
+            'io.github.resilience4j:resilience4j-spring-boot4',
             'org.reflections:reflections',
             )
 
     implementation 'software.amazon.msk:aws-msk-iam-auth'
 
+    runtimeOnly 'org.eclipse.angus:angus-mail'
+
     implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta'
 
     implementation ('org.apache.commons:commons-email') {
         exclude group: 'com.sun.mail', module: 'javax.mail'
+        exclude group: 'com.sun.mail', module: 'jakarta.mail'
         exclude group: 'javax.activation', module: 'activation'
     }
 
@@ -138,6 +140,7 @@ dependencies {
         exclude group: 'org.glassfish.hk2', module: 'hk2-runlevel'
         exclude group: 'org.hibernate.validator', module: 'hibernate-validator'
         exclude group: 'jakarta.activation', module: 'jakarta.activation-api'
+        exclude group: 'org.glassfish.jersey.media', module: 'jersey-media-json-jackson'
     }
     implementation('org.dom4j:dom4j') {
         exclude group: 'javax.xml.bind'
@@ -217,6 +220,7 @@ dependencies {
             'io.cucumber:cucumber-java',
             'io.cucumber:cucumber-java8',
             'io.cucumber:cucumber-junit-platform-engine',
+            'org.springframework.boot:spring-boot-gson',
             )
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'

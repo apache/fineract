@@ -31,7 +31,6 @@ import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.constants.TwoFactorConfigurationConstants;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
@@ -41,7 +40,6 @@ public class TwoFactorConfigurationValidator {
 
     private final FromJsonHelper fromJsonHelper;
 
-    @Autowired
     public TwoFactorConfigurationValidator(FromJsonHelper fromJsonHelper) {
         this.fromJsonHelper = fromJsonHelper;
     }

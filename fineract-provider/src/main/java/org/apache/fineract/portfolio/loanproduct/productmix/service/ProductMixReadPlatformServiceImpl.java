@@ -28,7 +28,6 @@ import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
 import org.apache.fineract.portfolio.loanproduct.productmix.data.ProductMixData;
 import org.apache.fineract.portfolio.loanproduct.productmix.exception.ProductMixNotFoundException;
 import org.apache.fineract.portfolio.loanproduct.service.LoanProductReadPlatformService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -42,7 +41,6 @@ public class ProductMixReadPlatformServiceImpl implements ProductMixReadPlatform
     private final JdbcTemplate jdbcTemplate;
     private final LoanProductReadPlatformService loanProductReadPlatformService;
 
-    @Autowired
     public ProductMixReadPlatformServiceImpl(final PlatformSecurityContext context, final JdbcTemplate jdbcTemplate,
             final LoanProductReadPlatformService loanProductReadPlatformService) {
         this.context = context;

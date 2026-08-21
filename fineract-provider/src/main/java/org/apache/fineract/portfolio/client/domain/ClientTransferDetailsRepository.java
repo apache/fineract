@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.client.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -18,22 +18,20 @@
  */
 package org.apache.fineract.template.domain;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import java.io.IOException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
-public class TemplateEntitySerializer extends JsonSerializer<TemplateEntity> {
+public class TemplateEntitySerializer extends ValueSerializer<TemplateEntity> {
 
     @Override
     public void serialize(final TemplateEntity value, final JsonGenerator generator,
-            @SuppressWarnings("unused") final SerializerProvider provider) throws IOException, JsonProcessingException {
+            @SuppressWarnings("unused") final SerializationContext provider) {
 
         generator.writeStartObject();
-        generator.writeFieldName("id");
+        generator.writeName("id");
         generator.writeNumber(value.getId());
-        generator.writeFieldName("name");
+        generator.writeName("name");
         generator.writeString(value.getName());
         generator.writeEndObject();
     }

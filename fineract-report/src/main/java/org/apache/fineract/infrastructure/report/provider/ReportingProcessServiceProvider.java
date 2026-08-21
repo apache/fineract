@@ -26,7 +26,6 @@ import org.apache.fineract.infrastructure.report.annotation.ReportService;
 import org.apache.fineract.infrastructure.report.service.ReportingProcessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +39,6 @@ public class ReportingProcessServiceProvider {
 
     private final Map<String, ReportingProcessService> reportingProcessServices;
 
-    @Autowired
     public ReportingProcessServiceProvider(List<ReportingProcessService> reportingProcessServices) {
         var mapBuilder = ImmutableMap.<String, ReportingProcessService>builder();
         for (ReportingProcessService s : reportingProcessServices) {

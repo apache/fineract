@@ -24,16 +24,16 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import javax.sql.DataSource;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 
 @Component
+@DependsOnDatabaseInitialization
 public class DatabaseIndependentQueryService implements DatabaseQueryService {
 
     private final Collection<DatabaseQueryService> queryServices;
 
-    @Autowired
     public DatabaseIndependentQueryService(Collection<DatabaseQueryService> queryServices) {
         this.queryServices = queryServices;
     }

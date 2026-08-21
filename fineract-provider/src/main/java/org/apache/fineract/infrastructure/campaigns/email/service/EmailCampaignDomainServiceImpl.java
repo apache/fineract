@@ -18,8 +18,6 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,6 +35,8 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -97,7 +97,7 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
     private void notifyLoanOwner(LoanTransaction loanTransaction, String paramValue) throws IOException {
         List<EmailCampaign> campaigns = this.retrieveEmailCampaigns(paramValue);
         for (EmailCampaign emailCampaign : campaigns) {
-            HashMap<String, String> campaignParams = new ObjectMapper().readValue(emailCampaign.getParamValue(),
+            HashMap<String, String> campaignParams = new JsonMapper().readValue(emailCampaign.getParamValue(),
                     new TypeReference<HashMap<String, String>>() {});
             campaignParams.put("loanId", loanTransaction.getLoan().getId().toString());
             campaignParams.put("loanTransactionId", loanTransaction.getId().toString());
@@ -109,7 +109,7 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
     private void notifyLoanOwner(Loan loan, String paramValue) throws IOException {
         List<EmailCampaign> campaigns = this.retrieveEmailCampaigns(paramValue);
         for (EmailCampaign emailCampaign : campaigns) {
-            HashMap<String, String> campaignParams = new ObjectMapper().readValue(emailCampaign.getParamValue(),
+            HashMap<String, String> campaignParams = new JsonMapper().readValue(emailCampaign.getParamValue(),
                     new TypeReference<HashMap<String, String>>() {});
             campaignParams.put("loanId", loan.getId().toString());
             this.emailCampaignWritePlatformService.insertDirectCampaignIntoEmailOutboundTable(loan, emailCampaign, campaignParams);
