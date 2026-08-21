@@ -448,7 +448,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             final boolean isChargedOff) {
         final Office office = loan.getClient().getOffice();
         final Long productId = loan.getLoanProduct().getId();
-        final String currencyCode = loan.getLoanProductRelatedDetails().getCurrency().getCode();
+        final String currencyCode = loan.getCurrencyCode();
         final LocalDate transactionDate = txn.getTransactionDate();
         final Long loanId = loan.getId();
         final Long txnId = txn.getId();
@@ -475,7 +475,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             final WorkingCapitalLoanTransaction txn, final boolean isChargedOff) {
         final Office office = loan.getClient().getOffice();
         final Long productId = loan.getLoanProduct().getId();
-        final String currencyCode = loan.getLoanProductRelatedDetails().getCurrency().getCode();
+        final String currencyCode = loan.getCurrencyCode();
         final LocalDate transactionDate = txn.getTransactionDate();
         final Long loanId = loan.getId();
         final Long txnId = txn.getId();
@@ -511,7 +511,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             final CashAccountsForLoan debitAccountType, final CashAccountsForLoan creditAccountType) {
         final Office office = loan.getClient().getOffice();
         final Long productId = loan.getLoanProduct().getId();
-        final String currencyCode = loan.getLoanProductRelatedDetails().getCurrency().getCode();
+        final String currencyCode = loan.getCurrencyCode();
         final LocalDate transactionDate = txn.getTransactionDate();
         final Long loanId = loan.getId();
         final Long txnId = txn.getId();
@@ -560,7 +560,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         JournalEntryPostingHelper(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn) {
             paymentTypeId = extractPaymentTypeId(txn);
             transactionDate = txn.getTransactionDate();
-            currencyCode = loan.getLoanProductRelatedDetails().getCurrency().getCode();
+            currencyCode = loan.getCurrencyCode();
             productId = loan.getLoanProduct().getId();
             office = loan.getClient().getOffice();
             loanId = loan.getId();

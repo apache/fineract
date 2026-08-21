@@ -31,7 +31,6 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanApplicationModifiedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOriginatorLinkingService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
@@ -145,7 +144,7 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
     @Override
     public CommandProcessingResult deleteApplication(final Long loanId) {
         final WorkingCapitalLoan loan = retrieveLoanBy(loanId);
-        if (loan.getLoanStatus() != LoanStatus.SUBMITTED_AND_PENDING_APPROVAL) {
+        if (loan.isNotSubmittedAndPendingApproval()) {
             throw new WorkingCapitalLoanApplicationNotInSubmittedStateCannotBeDeletedException(loanId);
         }
         final List<WorkingCapitalLoanNote> relatedNotes = this.noteRepository.findByWcLoanId(loan.getId());

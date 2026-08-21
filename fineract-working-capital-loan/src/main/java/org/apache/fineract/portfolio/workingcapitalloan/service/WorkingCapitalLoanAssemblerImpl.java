@@ -289,8 +289,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
             loan.setClient(client);
             changes.put(WorkingCapitalLoanConstants.clientIdParameterName, clientId);
         }
-        if (command.isChangeInLongParameterNamed(WorkingCapitalLoanConstants.productIdParameterName,
-                loan.getLoanProduct() != null ? loan.getLoanProduct().getId() : null)) {
+        if (command.isChangeInLongParameterNamed(WorkingCapitalLoanConstants.productIdParameterName, loan.productId())) {
             final Long productId = fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanConstants.productIdParameterName, element);
             final WorkingCapitalLoanProduct product = loanProductRepository.findById(productId)
                     .orElseThrow(() -> new WorkingCapitalLoanProductNotFoundException(productId));

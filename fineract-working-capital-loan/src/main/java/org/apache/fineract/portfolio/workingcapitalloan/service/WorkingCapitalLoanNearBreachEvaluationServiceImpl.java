@@ -99,7 +99,7 @@ public class WorkingCapitalLoanNearBreachEvaluationServiceImpl implements Workin
         final List<LocalDate> evalDates = listEvalDates(evaluationStartDate, period.getToDate(), frequency, frequencyType);
         final int evalIndex = latestEvaluationIndex(evalDates, effectiveDate);
         if (evalIndex >= 0) {
-            final MonetaryCurrency currency = period.getLoan().getLoanProductRelatedDetails().getCurrency();
+            final MonetaryCurrency currency = period.getLoan().getCurrency();
             final BigDecimal thresholdFraction = threshold.divide(BigDecimal.valueOf(100), MoneyHelper.getMathContext());
             final Money requiredCumulative = calculateRequiredCumulative(currency, period.getMinPaymentAmount(), thresholdFraction,
                     evalIndex);

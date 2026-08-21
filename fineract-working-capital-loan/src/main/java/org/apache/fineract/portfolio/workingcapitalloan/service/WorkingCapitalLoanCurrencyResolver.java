@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 
 public final class WorkingCapitalLoanCurrencyResolver {
@@ -26,8 +27,9 @@ public final class WorkingCapitalLoanCurrencyResolver {
     private WorkingCapitalLoanCurrencyResolver() {}
 
     public static CurrencyData resolveCurrency(final WorkingCapitalLoan loan) {
-        if (loan.getLoanProductRelatedDetails() != null && loan.getLoanProductRelatedDetails().getCurrency() != null) {
-            return loan.getLoanProductRelatedDetails().getCurrency().toData();
+        final MonetaryCurrency currency = loan.getCurrency();
+        if (currency != null) {
+            return currency.toData();
         }
         if (loan.getLoanProduct() != null && loan.getLoanProduct().getCurrency() != null) {
             return loan.getLoanProduct().getCurrency().toData();
