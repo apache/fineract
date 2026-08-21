@@ -375,6 +375,7 @@ public abstract class TestContextKey {
     public static final String WORKING_CAPITAL_NEAR_BREACH_CREATE_REQUEST_FOR_UPDATE = "workingCapitalNearBreachCreateRequestForUpdate";
     public static final String WC_LOAN_ACTION_TEMPLATE_RESPONSE = "wcLoanActionTemplateResponse";
     public static final String WORKING_CAPITAL_LOAN_RATE_CHANGE_ID = "wcLoanRateChangeId";
+    public static final String WORKING_CAPITAL_CURRENT_TENANT_DATE_BEFORE_ACTION = "wcCurrentTenantDateBeforeAction";
     public static final String WORKING_CAPITAL_CHARGE_ID = "workingCapitalChargeId";
     public static final String WORKING_CAPITAL_LOAN_CHARGE_IDS = "workingCapitalLoanChargeIds";
     public static final String WORKING_CAPITAL_CHARGE_TEMPLATE = "workingCapitalChargeTemplate";
