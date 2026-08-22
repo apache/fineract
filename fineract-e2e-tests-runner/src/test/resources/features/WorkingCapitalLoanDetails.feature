@@ -82,7 +82,7 @@ Feature: Working Capital Loan Details
       | balance.principal                              | 100.0                        |
       | balance.principalPaid                          | 0.0                          |
       | balance.principalOutstanding                   | 100.0                        |
-      | balance.totalDisbursement                      | 0.0                          |
+      | balance.totalDisbursement                      | 100.0                        |
       | balance.totalRepayment                         | 0.0                          |
       | balance.totalOutstanding                       | 100.0                        |
       | balance.totalExpectedRepayment                 | 100.0                        |
@@ -100,7 +100,7 @@ Feature: Working Capital Loan Details
       | balance.totalDiscountFeeAdjustment             | 0.0                          |
       | summary.principal                              | 100.0                        |
       | summary.principalOutstanding                   | 100.0                        |
-      | summary.totalDisbursement                      | 0.0                          |
+      | summary.totalDisbursement                      | 100.0                        |
       | summary.totalOutstanding                       | 100.0                        |
       | summary.currency.code                          | EUR                          |
       | summary.currency.name                          | Euro                         |

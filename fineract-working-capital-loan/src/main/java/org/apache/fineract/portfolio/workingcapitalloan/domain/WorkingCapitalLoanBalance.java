@@ -48,6 +48,11 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
     @JoinColumn(name = "wc_loan_id", nullable = false, unique = true)
     private WorkingCapitalLoan wcLoan;
 
+    /**
+     * Total repayable principal: the disbursed amount plus the discount fee, adjusted by later discount changes. Zero
+     * until disbursement, and zero again once a disbursal is undone - a loan whose disbursal was undone is
+     * indistinguishable from one that was only ever approved, because in both cases nothing has been paid out.
+     */
     @Column(name = "principal", scale = 6, precision = 19, nullable = false)
     @Setter
     private BigDecimal principal = BigDecimal.ZERO;
@@ -100,6 +105,7 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
     @Setter
     private BigDecimal overpaymentAmount = BigDecimal.ZERO;
 
+    /** Total amount disbursed on the loan, excluding the discount fee. Reset to zero when the disbursal is undone. */
     @Column(name = "total_disbursement", scale = 6, precision = 19, nullable = false)
     @Setter
     private BigDecimal totalDisbursement = BigDecimal.ZERO;
@@ -133,6 +139,7 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
                 .map(WorkingCapitalLoanProductRelatedDetails::getDiscount).orElse(BigDecimal.ZERO);
         this.totalDiscountFee = discount;
         this.principal = disbursedAmount.add(discount);
+        this.totalDisbursement = disbursedAmount;
         this.overpaymentAmount = BigDecimal.ZERO;
     }
 

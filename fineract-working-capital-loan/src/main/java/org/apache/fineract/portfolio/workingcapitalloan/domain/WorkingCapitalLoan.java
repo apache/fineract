@@ -145,10 +145,16 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     @Column(name = "maturedon_date")
     private LocalDate maturedOnDate;
 
+    /** Principal requested on the application. Set at submission, updated on modification, never changed afterwards. */
     @Setter
     @Column(name = "principal_amount_proposed", scale = 6, precision = 19, nullable = false)
     private BigDecimal proposedPrincipal;
 
+    /**
+     * Principal granted at approval, defaulting to the proposed one. Zero before approval and after undoing it, which
+     * is a deliberate divergence from classic Fineract, where the approved principal mirrors the proposed one until it
+     * is actually approved.
+     */
     @Setter
     @Column(name = "approved_principal", scale = 6, precision = 19, nullable = false)
     private BigDecimal approvedPrincipal;

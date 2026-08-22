@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!--
+        Working capital principal fields were only ever written at submission, so loans that already went through
+        their lifecycle carry stale values that no future action will refresh. Every corrected value is derivable
+        from data that was always written correctly - the disbursement transactions and the loan status - so the
+        backfill reconstructs them rather than guessing.
+    -->
+
+    <!--
+        Active contractual principal: what was actually disbursed once a disbursement exists, otherwise the granted
+        amount while approved, otherwise the requested amount. Reversed disbursements are ignored, so a loan whose
+        disbursal was undone falls back to its approved amount exactly as the undo now does.
+    -->
+    <changeSet author="fineract" id="wcl-0070-backfill-loan-active-principal">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan"/>
+            <tableExists tableName="m_wc_loan_transaction"/>
+        </preConditions>
+        <sql>
+            UPDATE m_wc_loan
+            SET principal_amount = CASE
+                WHEN EXISTS (SELECT 1 FROM m_wc_loan_transaction t
+                             WHERE t.wc_loan_id = m_wc_loan.id AND t.transaction_type_id = 1 AND t.is_reversed = FALSE)
+                    THEN (SELECT SUM(t.transaction_amount) FROM m_wc_loan_transaction t
+                          WHERE t.wc_loan_id = m_wc_loan.id AND t.transaction_type_id = 1 AND t.is_reversed = FALSE)
+                WHEN m_wc_loan.loan_status_id = 200 THEN m_wc_loan.approved_principal
+                ELSE m_wc_loan.principal_amount_proposed
+            END
+        </sql>
+    </changeSet>
+
+    <!-- Total disbursed was never written by anything, so it is zero on every existing loan. -->
+    <changeSet author="fineract" id="wcl-0070-backfill-balance-total-disbursement">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_balance"/>
+            <tableExists tableName="m_wc_loan_transaction"/>
+        </preConditions>
+        <sql>
+            UPDATE m_wc_loan_balance
+            SET total_disbursement = COALESCE((SELECT SUM(t.transaction_amount) FROM m_wc_loan_transaction t
+                                               WHERE t.wc_loan_id = m_wc_loan_balance.wc_loan_id
+                                                 AND t.transaction_type_id = 1 AND t.is_reversed = FALSE), 0)
+        </sql>
+    </changeSet>
+
+    <!--
+        Undoing a disbursal used to leave the repayable balance at the approved principal, so an undone loan reported
+        a balance while the same state reached by approval alone reported none. Nothing is paid out on either, so the
+        balance of every loan without an active disbursement is cleared.
+    -->
+    <changeSet author="fineract" id="wcl-0070-clear-balance-without-disbursement">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_balance"/>
+            <tableExists tableName="m_wc_loan_transaction"/>
+        </preConditions>
+        <sql>
+            UPDATE m_wc_loan_balance
+            SET principal = 0,
+                principal_adjustment = 0,
+                principal_paid = 0,
+                total_discount_fee = 0,
+                total_discount_fee_adjustment = 0,
+                realized_income_from_discount_fee = 0,
+                overpayment_amount = 0
+            WHERE NOT EXISTS (SELECT 1 FROM m_wc_loan_transaction t
+                              WHERE t.wc_loan_id = m_wc_loan_balance.wc_loan_id
+                                AND t.transaction_type_id = 1 AND t.is_reversed = FALSE)
+        </sql>
+    </changeSet>
+
+    <!--
+        Modifying a pending application never moved the expected disbursement amount, so it still holds the originally
+        requested principal. From approval onwards the amount is rewritten, so only pending applications are stale.
+    -->
+    <changeSet author="fineract" id="wcl-0070-backfill-pending-expected-amount">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_disbursement_detail"/>
+            <tableExists tableName="m_wc_loan"/>
+        </preConditions>
+        <sql>
+            UPDATE m_wc_loan_disbursement_detail
+            SET expected_amount = (SELECT l.principal_amount_proposed FROM m_wc_loan l
+                                   WHERE l.id = m_wc_loan_disbursement_detail.wc_loan_id)
+            WHERE m_wc_loan_disbursement_detail.actual_disburse_date IS NULL
+              AND EXISTS (SELECT 1 FROM m_wc_loan l
+                          WHERE l.id = m_wc_loan_disbursement_detail.wc_loan_id AND l.loan_status_id = 100)
+        </sql>
+    </changeSet>
+</databaseChangeLog>

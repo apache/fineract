@@ -362,7 +362,9 @@ public class WorkingCapitalLoanDisbursementTest {
             assertStatus(data, "loanStatusType.approved");
             assertEqualBigDecimal(BigDecimal.valueOf(5000), data.getApprovedPrincipal());
             assertNotNull(data.getBalance(), "GET loan after undo should include balance");
-            assertEqualBigDecimal(BigDecimal.valueOf(5000), data.getBalance().getPrincipalOutstanding());
+            // Nothing is paid out after an undo-disbursal, so there is nothing outstanding - the loan is
+            // indistinguishable from one that was approved and never disbursed.
+            assertEqualBigDecimal(BigDecimal.ZERO, data.getBalance().getPrincipalOutstanding());
 
             assertNotNull(data.getDisbursementDetails(), "GET loan after undo should include disbursementDetails array");
             assertFalse(data.getDisbursementDetails().isEmpty(), "disbursementDetails should not be empty");

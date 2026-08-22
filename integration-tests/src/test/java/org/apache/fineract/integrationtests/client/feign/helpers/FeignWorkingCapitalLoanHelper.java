@@ -50,6 +50,8 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.ProjectedAmortizationScheduleData;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdDiscountRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRateRequest;
+import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
+import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.client.models.WorkingCapitalLoanChargeData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
@@ -89,6 +91,12 @@ public class FeignWorkingCapitalLoanHelper {
 
     public void undoApproval(Long loanId, PostWorkingCapitalLoansLoanIdRequest request) {
         ok(() -> fineractClient.workingCapitalLoans().stateTransitionWorkingCapitalLoanById(loanId, "undoapproval", request));
+    }
+
+    public Long modifyApplication(Long loanId, PutWorkingCapitalLoansLoanIdRequest request) {
+        PutWorkingCapitalLoansLoanIdResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(loanId, request, (String) null));
+        return response.getResourceId();
     }
 
     public void delete(Long loanId) {
