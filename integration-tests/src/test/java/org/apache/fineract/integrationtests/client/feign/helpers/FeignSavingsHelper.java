@@ -20,13 +20,18 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.DeleteSavingsAccountsAccountIdResponse;
+import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesResponse;
+import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsResponse;
+import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
+import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
 import org.apache.fineract.client.models.SavingsAccountSummaryData;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
@@ -93,5 +98,19 @@ public class FeignSavingsHelper {
         approveSavings(savingsId, date);
         activateSavings(savingsId, date);
         return savingsId;
+    }
+
+    public PostSavingsAccountsSavingsAccountIdChargesResponse addSavingsAccountCharge(Long savingsId,
+            PostSavingsAccountsSavingsAccountIdChargesRequest request) {
+        return ok(() -> fineractClient.savingsCharges().createSavingsAccountCharge(savingsId, request));
+    }
+
+    public GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse getSavingsAccountCharge(Long savingsId,
+            Long savingsAccountChargeId) {
+        return ok(() -> fineractClient.savingsCharges().retrieveOneSavingsAccountCharge(savingsId, savingsAccountChargeId));
+    }
+
+    public List<GetSavingsAccountsSavingsAccountIdChargesResponse> getSavingsCharges(Long savingsId) {
+        return ok(() -> fineractClient.savingsCharges().retrieveAllSavingsAccountCharges(savingsId, "all"));
     }
 }
