@@ -38,6 +38,22 @@
         <sqlFile path="parts/0002_initial_data_postgresql.sql" relativeToChangelogFile="true" splitStatements="false"/>
     </changeSet>
 
+    <changeSet author="fineract" id="1-mariadb" dbms="mariadb,mysql">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="m_office"/>
+            </not>
+        </preConditions>
+        <sqlFile path="parts/0001_initial_schema_mariadb.sql" relativeToChangelogFile="true" splitStatements="true"/>
+    </changeSet>
+
+    <changeSet author="fineract" id="2-mariadb" dbms="mariadb,mysql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_office</sqlCheck>
+        </preConditions>
+        <sqlFile path="parts/0002_initial_data_mariadb.sql" relativeToChangelogFile="true" splitStatements="true"/>
+    </changeSet>
+
     <include file="parts/0242_fix_group_summary_report_parameters.xml" relativeToChangelogFile="true"/>
     <include file="parts/0242_update_m_tellers_unique_key.xml" relativeToChangelogFile="true" />
     <include file="parts/0243_remove_mix_module.xml" relativeToChangelogFile="true" />
