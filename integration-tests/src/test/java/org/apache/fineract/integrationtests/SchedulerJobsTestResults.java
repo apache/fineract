@@ -107,8 +107,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class SchedulerJobsTestResults extends IntegrationTest {
 
-    private static final String FROM_ACCOUNT_TYPE_SAVINGS = "2";
-    private static final String TO_ACCOUNT_TYPE_SAVINGS = "2";
+    private static final Integer FROM_ACCOUNT_TYPE_SAVINGS = 2;
+    private static final Integer TO_ACCOUNT_TYPE_SAVINGS = 2;
     private static final String DATE_OF_JOINING = "01 January 2011";
     private static final String TRANSACTION_DATE = "01 March 2013";
     public static final String LOAN_APPROVAL_DATE = "01 March 2013";
@@ -731,8 +731,8 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsId);
         Float toSavingsBalanceBefore = (Float) toSavingsSummaryBefore.get("accountBalance");
 
-        Integer standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.toString(), fromSavingsId.toString(),
-                toSavingsId.toString(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY);
+        Long standingInstructionId = standingInstructionsHelper.createStandingInstruction(clientID.longValue(), fromSavingsId.longValue(),
+                toSavingsId.longValue(), FROM_ACCOUNT_TYPE_SAVINGS, TO_ACCOUNT_TYPE_SAVINGS, VALID_FROM, VALID_TO, MONTH_DAY);
         Assertions.assertNotNull(standingInstructionId);
 
         String JobName = "Execute Standing Instruction";
@@ -744,7 +744,7 @@ public class SchedulerJobsTestResults extends IntegrationTest {
         Float toSavingsBalanceAfter = (Float) toSavingsSummaryAfter.get("accountBalance");
 
         final GetStandingInstructionsStandingInstructionIdResponse standingInstructionData = standingInstructionsHelper
-                .getStandingInstructionById(standingInstructionId.longValue());
+                .getStandingInstructionById(standingInstructionId);
         Float expectedFromSavingsBalance = fromSavingsBalanceBefore - standingInstructionData.getAmount();
         Float expectedToSavingsBalance = toSavingsBalanceBefore + standingInstructionData.getAmount();
 

@@ -54,9 +54,16 @@ public class StandingInstructionHistoryApiResource {
     private final SqlValidator sqlValidator;
 
     @GET
-    @Operation(summary = "Standing Instructions Logged History", operationId = "retrieveAllStandingInstructionHistory", description = "The list capability of history can support pagination and sorting \n\n"
-            + "Example Requests :\n" + "\n" + "standinginstructionrunhistory\n" + "\n"
-            + "standinginstructionrunhistory?orderBy=name&sortOrder=DESC\n" + "\n" + "standinginstructionrunhistory?offset=10&limit=50")
+    @Operation(summary = "Standing Instructions Logged History", operationId = "retrieveAllStandingInstructionHistory", description = """
+            The list capability of history can support pagination and sorting\s
+
+            Example Requests :
+
+            standinginstructionrunhistory
+
+            standinginstructionrunhistory?orderBy=name&sortOrder=DESC
+
+            standinginstructionrunhistory?offset=10&limit=50""")
     @AlternativeOperationId("retrieveAll_20")
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = StandingInstructionHistoryApiResourceSwagger.GetStandingInstructionRunHistoryResponse.class)))
     public Page<StandingInstructionHistoryData> retrieveAll(

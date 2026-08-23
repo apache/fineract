@@ -18,19 +18,6 @@
  */
 package org.apache.fineract.portfolio.account.domain;
 
-import static org.apache.fineract.portfolio.account.AccountDetailConstants.transferTypeParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.amountParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.instructionTypeParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.priorityParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.recurrenceFrequencyParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.recurrenceIntervalParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.recurrenceOnMonthDayParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.recurrenceTypeParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.statusParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.validFromParamName;
-import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.validTillParamName;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -40,18 +27,13 @@ import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.MonthDay;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.ApiParameterError;
-import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
-import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "m_account_transfer_standing_instructions", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "name" }, name = "name") })
 public class AccountTransferStandingInstruction extends AbstractPersistableCustom<Long> {
@@ -134,142 +116,6 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
         this.recurrenceInterval = recurrenceInterval;
         this.recurrenceOnDay = recurrenceOnDay;
         this.recurrenceOnMonth = recurrenceOnMonth;
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(STANDING_INSTRUCTION_RESOURCE_NAME);
-
-        validateDependencies(baseDataValidator);
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-    }
-
-    public Map<String, Object> update(JsonCommand command) {
-        final Map<String, Object> actualChanges = new HashMap<>();
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                .resource(STANDING_INSTRUCTION_RESOURCE_NAME);
-
-        if (StandingInstructionStatus.fromInt(this.status).isDeleted()) {
-            baseDataValidator.reset().parameter(statusParamName).failWithCode("can.not.modify.once.deleted");
-        }
-
-        if (command.isChangeInDateParameterNamed(validFromParamName, this.validFrom)) {
-            this.validFrom = command.localDateValueOfParameterNamed(validFromParamName);
-            actualChanges.put(validFromParamName, this.validFrom);
-        }
-
-        if (command.isChangeInDateParameterNamed(validTillParamName, this.validTill)) {
-            this.validTill = command.localDateValueOfParameterNamed(validTillParamName);
-            actualChanges.put(validTillParamName, this.validTill);
-        }
-
-        if (command.isChangeInBigDecimalParameterNamed(amountParamName, this.amount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(amountParamName);
-            actualChanges.put(amountParamName, newValue);
-            this.amount = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(statusParamName, this.status)) {
-            final Integer newValue = command.integerValueOfParameterNamed(statusParamName);
-            actualChanges.put(statusParamName, newValue);
-            this.status = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(priorityParamName, this.priority)) {
-            final Integer newValue = command.integerValueOfParameterNamed(priorityParamName);
-            actualChanges.put(priorityParamName, newValue);
-            this.priority = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(instructionTypeParamName, this.instructionType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(instructionTypeParamName);
-            actualChanges.put(instructionTypeParamName, newValue);
-            this.instructionType = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(recurrenceTypeParamName, this.recurrenceType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(recurrenceTypeParamName);
-            actualChanges.put(recurrenceTypeParamName, newValue);
-            this.recurrenceType = newValue;
-        }
-
-        if (command.isChangeInIntegerParameterNamed(recurrenceFrequencyParamName, this.recurrenceFrequency)) {
-            final Integer newValue = command.integerValueOfParameterNamed(recurrenceFrequencyParamName);
-            actualChanges.put(recurrenceFrequencyParamName, newValue);
-            this.recurrenceFrequency = newValue;
-        }
-
-        if (command.hasParameter(recurrenceOnMonthDayParamName)) {
-            final MonthDay monthDay = command.extractMonthDayNamed(recurrenceOnMonthDayParamName);
-            final String actualValueEntered = command.stringValueOfParameterNamed(recurrenceOnMonthDayParamName);
-            final Integer dayOfMonthValue = monthDay.getDayOfMonth();
-            if (!this.recurrenceOnDay.equals(dayOfMonthValue)) {
-                actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
-                this.recurrenceOnDay = dayOfMonthValue;
-            }
-
-            final Integer monthOfYear = monthDay.getMonthValue();
-            if (!this.recurrenceOnMonth.equals(monthOfYear)) {
-                actualChanges.put(recurrenceOnMonthDayParamName, actualValueEntered);
-                this.recurrenceOnMonth = monthOfYear;
-            }
-        }
-
-        if (command.isChangeInIntegerParameterNamed(recurrenceIntervalParamName, this.recurrenceInterval)) {
-            final Integer newValue = command.integerValueOfParameterNamed(recurrenceIntervalParamName);
-            actualChanges.put(recurrenceIntervalParamName, newValue);
-            this.recurrenceInterval = newValue;
-        }
-        validateDependencies(baseDataValidator);
-        if (!dataValidationErrors.isEmpty()) {
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-        return actualChanges;
-    }
-
-    private void validateDependencies(final DataValidatorBuilder baseDataValidator) {
-
-        if (this.validTill != null && this.validFrom != null) {
-            baseDataValidator.reset().parameter(validTillParamName).value(this.validTill).validateDateAfter(this.validFrom);
-        }
-
-        if (AccountTransferRecurrenceType.fromInt(recurrenceType).isPeriodicRecurrence()) {
-            baseDataValidator.reset().parameter(recurrenceFrequencyParamName).value(this.recurrenceFrequency).notNull();
-            baseDataValidator.reset().parameter(recurrenceIntervalParamName).value(this.recurrenceInterval).notNull();
-            if (this.recurrenceFrequency != null) {
-                PeriodFrequencyType frequencyType = PeriodFrequencyType.fromInt(this.recurrenceFrequency);
-                if (frequencyType.isMonthly()) {
-                    baseDataValidator.reset().parameter(recurrenceOnMonthDayParamName).value(this.recurrenceOnDay).notNull();
-                } else if (frequencyType.isYearly()) {
-                    baseDataValidator.reset().parameter(recurrenceOnMonthDayParamName).value(this.recurrenceOnDay).notNull();
-                    baseDataValidator.reset().parameter(recurrenceOnMonthDayParamName).value(this.recurrenceOnMonth).notNull();
-                }
-            }
-        }
-
-        if (this.accountTransferDetails.toSavingsAccount() != null) {
-            baseDataValidator.reset().parameter(instructionTypeParamName).value(this.instructionType).notNull().inMinMaxRange(1, 1);
-            baseDataValidator.reset().parameter(recurrenceTypeParamName).value(this.recurrenceType).notNull().inMinMaxRange(1, 1);
-        }
-
-        if (StandingInstructionType.fromInt(this.instructionType).isFixedAmoutTransfer()) {
-            baseDataValidator.reset().parameter(amountParamName).value(this.amount).notNull();
-        }
-
-        String errorCode = null;
-        if (this.accountTransferDetails.transferType().isAccountTransfer()
-                && (this.accountTransferDetails.fromSavingsAccount() == null || this.accountTransferDetails.toSavingsAccount() == null)) {
-            errorCode = "not.account.transfer";
-        } else if (this.accountTransferDetails.transferType().isLoanRepayment()
-                && (this.accountTransferDetails.fromSavingsAccount() == null || this.accountTransferDetails.toLoanAccount() == null)) {
-            errorCode = "not.loan.repayment";
-        }
-        if (errorCode != null) {
-            baseDataValidator.reset().parameter(transferTypeParamName).failWithCode(errorCode);
-        }
-
     }
 
     public void updateLatsRunDate(LocalDate latsRunDate) {

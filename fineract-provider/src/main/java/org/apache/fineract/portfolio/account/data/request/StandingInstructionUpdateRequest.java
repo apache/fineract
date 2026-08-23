@@ -18,9 +18,9 @@
  */
 package org.apache.fineract.portfolio.account.data.request;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.io.Serial;
 import java.io.Serializable;
@@ -30,44 +30,33 @@ import java.time.MonthDay;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.portfolio.account.validation.ValidStandingInstructionCreate;
 
+/**
+ * Payload for updating an existing standing instruction. All fields are optional: only the values that are provided
+ * (non-null) are applied, which is why the constraints below only bound the value ranges - a {@code null} always
+ * passes.
+ */
 @Data
 @NoArgsConstructor
-@ValidStandingInstructionCreate
-public class StandingInstructionCreationRequest implements Serializable {
+public class StandingInstructionUpdateRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Long fromOfficeId;
-    private Long fromClientId;
-    private Long fromAccountId;
-    private Integer fromAccountType;
-    private Long toOfficeId;
-    private Long toClientId;
-    private Long toAccountId;
-    private Integer toAccountType;
+    // set from the path parameter, never part of the request body
+    @Hidden
+    private Long id;
 
-    @NotNull(message = "{org.apache.fineract.portfolio.account.standinginstruction.name.not-null}")
     private String name;
-    @NotNull(message = "{org.apache.fineract.portfolio.account.standinginstruction.transfer-type.not-null}")
-    @Min(value = 1, message = "{org.apache.fineract.portfolio.account.standinginstruction.transfer-type.range}")
-    @Max(value = 3, message = "{org.apache.fineract.portfolio.account.standinginstruction.transfer-type.range}")
-    private Integer transferType;
-    @NotNull(message = "{org.apache.fineract.portfolio.account.standinginstruction.status.not-null}")
     @Min(value = 1, message = "{org.apache.fineract.portfolio.account.standinginstruction.status.range}")
     @Max(value = 2, message = "{org.apache.fineract.portfolio.account.standinginstruction.status.range}")
     private Integer status;
-    @NotNull(message = "{org.apache.fineract.portfolio.account.standinginstruction.priority.not-null}")
     @Min(value = 1, message = "{org.apache.fineract.portfolio.account.standinginstruction.priority.range}")
     @Max(value = 4, message = "{org.apache.fineract.portfolio.account.standinginstruction.priority.range}")
     private Integer priority;
-    @NotNull(message = "{org.apache.fineract.portfolio.account.standinginstruction.instruction-type.not-null}")
     @Min(value = 1, message = "{org.apache.fineract.portfolio.account.standinginstruction.instruction-type.range}")
     @Max(value = 2, message = "{org.apache.fineract.portfolio.account.standinginstruction.instruction-type.range}")
     private Integer instructionType;
-    @NotNull(message = "{org.apache.fineract.portfolio.account.standinginstruction.recurrence-type.not-null}")
     @Min(value = 1, message = "{org.apache.fineract.portfolio.account.standinginstruction.recurrence-type.range}")
     @Max(value = 2, message = "{org.apache.fineract.portfolio.account.standinginstruction.recurrence-type.range}")
     private Integer recurrenceType;

@@ -65,7 +65,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.util.CollectionUtils;
 
-public class StandingInstructionReadPlatformServiceImpl implements StandingInstructionReadPlatformService {
+public class StandingInstructionReadServiceImpl implements StandingInstructionReadService {
 
     private final JdbcTemplate jdbcTemplate;
     private final ColumnValidator columnValidator;
@@ -81,8 +81,8 @@ public class StandingInstructionReadPlatformServiceImpl implements StandingInstr
     // pagination
     private final PaginationHelper paginationHelper;
 
-    public StandingInstructionReadPlatformServiceImpl(final JdbcTemplate jdbcTemplate,
-            final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
+    public StandingInstructionReadServiceImpl(final JdbcTemplate jdbcTemplate, final ClientReadPlatformService clientReadPlatformService,
+            final OfficeReadPlatformService officeReadPlatformService,
             final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService,
             final DropdownReadPlatformService dropdownReadPlatformService, final ColumnValidator columnValidator,
             DatabaseSpecificSQLGenerator sqlGenerator, PaginationHelper paginationHelper) {

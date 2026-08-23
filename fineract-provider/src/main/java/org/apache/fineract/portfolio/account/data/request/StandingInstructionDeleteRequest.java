@@ -16,17 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.account.service;
+package org.apache.fineract.portfolio.account.data.request;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import io.swagger.v3.oas.annotations.Hidden;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public interface StandingInstructionWritePlatformService {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class StandingInstructionDeleteRequest implements Serializable {
 
-    CommandProcessingResult create(JsonCommand command);
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    CommandProcessingResult update(Long id, JsonCommand command);
-
-    CommandProcessingResult delete(Long id);
-
+    @Hidden
+    private Long id;
 }

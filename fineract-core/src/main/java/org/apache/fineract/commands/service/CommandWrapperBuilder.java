@@ -231,7 +231,6 @@ import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_SHAREPRODUCT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_SMS;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_SMSCAMPAIGN;
-import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_STANDINGINSTRUCTION;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_SURVEY;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_TAXCOMPONENT;
 import static org.apache.fineract.commands.domain.CommandWrapperConstants.ENTITY_TAXGROUP;
@@ -2017,30 +2016,6 @@ public class CommandWrapperBuilder {
         this.entityName = ENTITY_ACCOUNTTRANSFER;
         this.entityId = null;
         this.href = "/accounttransfers";
-        return this;
-    }
-
-    public CommandWrapperBuilder createStandingInstruction() {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_STANDINGINSTRUCTION;
-        this.entityId = null;
-        this.href = "/standinginstructions";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateStandingInstruction(final Long standingInstructionId) {
-        this.actionName = ACTION_UPDATE;
-        this.entityName = ENTITY_STANDINGINSTRUCTION;
-        this.entityId = standingInstructionId;
-        this.href = "/standinginstructions";
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteStandingInstruction(final Long standingInstructionId) {
-        this.actionName = ACTION_DELETE;
-        this.entityName = ENTITY_STANDINGINSTRUCTION;
-        this.entityId = standingInstructionId;
-        this.href = "/standinginstructions";
         return this;
     }
 

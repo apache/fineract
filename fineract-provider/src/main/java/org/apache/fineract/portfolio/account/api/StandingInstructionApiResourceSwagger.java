@@ -215,17 +215,6 @@ final class StandingInstructionApiResourceSwagger {
         public Set<GetRecurrenceFrequencyOptionsResponseStandingInstructionSwagger> recurrenceFrequencyOptions;
     }
 
-    @Schema(description = "PostStandingInstructionsResponse")
-    public static final class PostStandingInstructionsResponse {
-
-        private PostStandingInstructionsResponse() {}
-
-        @Schema(example = "1")
-        public Long clientId;
-        @Schema(example = "65")
-        public Integer resourceId;
-    }
-
     @Schema(description = "GetStandingInstructionsResponse")
     public static final class GetStandingInstructionsResponse {
 
@@ -440,57 +429,6 @@ final class StandingInstructionApiResourceSwagger {
         public Set<GetPageItemsStandingInstructionSwagger> pageItems;
     }
 
-    @Schema(description = "PostStandingInstructionsRequest")
-    public static final class PostStandingInstructionsRequest {
-
-        private PostStandingInstructionsRequest() {}
-
-        @Schema(example = "1")
-        public Long fromOfficeId;
-        @Schema(example = "1")
-        public Long fromClientId;
-        @Schema(example = "2")
-        public Integer fromAccountType;
-        @Schema(example = "standing instruction")
-        public String name;
-        @Schema(example = "1")
-        public Integer transferType;
-        @Schema(example = "2")
-        public Integer priority;
-        @Schema(example = "1")
-        public Integer status;
-        @Schema(example = "1")
-        public Long fromAccountId;
-        @Schema(example = "1")
-        public Long toOfficeId;
-        @Schema(example = "1")
-        public Long toClientId;
-        @Schema(example = "2")
-        public Integer toAccountType;
-        @Schema(example = "3")
-        public Long toAccountId;
-        @Schema(example = "1")
-        public Integer instructionType;
-        @Schema(example = "221")
-        public Integer amount;
-        @Schema(example = "08 April 2014")
-        public String validFrom;
-        @Schema(example = "1")
-        public Integer recurrenceType;
-        @Schema(example = "1")
-        public Integer recurrenceInterval;
-        @Schema(example = "2")
-        public Integer recurrenceFrequency;
-        @Schema(description = "en")
-        public String locale;
-        @Schema(example = "dd MMMM yyyy")
-        public String dateFormat;
-        @Schema(example = "02 April")
-        public String recurrenceOnMonthDay;
-        @Schema(example = "dd MMMM")
-        public String monthDayFormat;
-    }
-
     @Schema(description = "GetStandingInstructionsStandingInstructionIdResponse")
     public static final class GetStandingInstructionsStandingInstructionIdResponse {
 
@@ -524,30 +462,5 @@ final class StandingInstructionApiResourceSwagger {
         public Integer recurrenceInterval;
         @Schema(example = "[4, 3]")
         public LocalDate recurrenceOnMonthDay;
-    }
-
-    @Schema(description = "PutStandingInstructionsStandingInstructionIdResponse")
-    public static final class PutStandingInstructionsStandingInstructionIdResponse {
-
-        private PutStandingInstructionsStandingInstructionIdResponse() {}
-
-        static final class PutUpdateStandingInstructionChanges {
-
-            @Schema(example = "2")
-            public Integer recurrenceInterval;
-        }
-
-        @Schema(example = "20")
-        public Long resourceId;
-        public PutUpdateStandingInstructionChanges changes;
-    }
-
-    @Schema(description = "PutStandingInstructionsStandingInstructionIdRequest")
-    public static final class PutStandingInstructionsStandingInstructionIdRequest {
-
-        private PutStandingInstructionsStandingInstructionIdRequest() {}
-
-        @Schema(example = "2")
-        public Integer recurrenceInterval;
     }
 }
