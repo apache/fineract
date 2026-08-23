@@ -1,0 +1,30 @@
+= FSIP-002: Scarf Data Tracking
+
+Adopted with three binding votes: Jdailey, Javier, Alexandar on May 16, 2024.
+
+Apache Fineract(R) will use Scarf to gain insights into downloads and users to more effectively understand the population of users and their needs. This will complement our existing data from Apache infra.
+
+Scarf[1] is on a list of approved vendors at Apache [2].
+Apache recommends against using Google and approves of Scarf[3]
+
+____
+"Yes: Scarf has signed a DPA with us, fully supports the GDPR and was added to our privacy terms. It is possible to use their service."
+____
+
+There is a case study covering how Apache Superset uses Scarf.
+
+____
+"Usage metrics gathered through Scarf provides Apache Superset with valuable insights they can use to drive decision-making. From making more educated decisions about long-term support for older releases to better understanding which installation paths are most common in practice. Apache Superset is able to allocate resources more effectively and ensure their software meets the needs of their users and community."[4]
+____
+
+There is a forever free tier at Scarf that is available as soon as we start, and there are minimal ways to get started. The first way will be to put a pixel in the documentation, on the dockerhub landing page, and on the website. The second approach is to put a forwarding gateway on downloads, e.g. for the binaries downloads. Eventually we may want to consider some level of telemetry data, see this Commit at Sedona [5], but that is more involved and for now, my proposal is to do this in an incremental manner.
+
+We would start with the pixel approach and see what kind of data we get from the free tier. If that looks promising, companies (vendors) or individuals will be asked to split the cost of paying for a base level of Scarf and that data would be accessible to the PMC for the benefit of the project. Benefits to the project would mainly be the ability to know who is using the software (for best understanding needs) and for encouraging contributions by users. (James Dailey )
+
+[1] https://about.scarf.sh/[https://about.scarf.sh]
+[2] https://privacy.apache.org/policies/privacy-policy-public.html
+[3] https://privacy.apache.org/faq/committers.html
+[4] https://about.scarf.sh/post/scarf-case-study-apache-superset
+[5] https://github.com/apache/sedona/pull/1373/commits/19e76e994f53aaa2978d0a98a3aaf9d2427f6f7f
+
+*COMPLETED and RUNNING*

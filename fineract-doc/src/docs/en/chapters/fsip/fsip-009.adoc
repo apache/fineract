@@ -1,0 +1,73 @@
+= FSIP-009: Standardize on PostgreSQL
+
+== Summary
+
+Only support Postgres. Remove MariaDB and MySQL support.
+
+This is a SIGNIFICANT improvement with huge potential gain and some risks to mitigate.
+
+This proposal is _only_ *our agreement on a single database*; to proceed and remove code and documentation related specifically to MariaDB and MySQL. With this proposal we will make an effort but *we are not committing* to migration guides, scripts, tests, tools, wizards, and case studies easing database migrations. The community is strongly encouraged to *gather real-world data*, to share and discuss this proposal with all users, encouraging them to create or sponsor creation of these critically important migration materials.
+
+https://lists.apache.org/thread/5byvzd2v9czcoh6501r9870cb2hbz96w[Discussion thread]. https://lists.apache.org/thread/25dg2t7oggvb2c31sow60mqcf1xj4qlz[Further discussion].
+
+== Status
+
+Accepted. https://lists.apache.org/thread/f2kqjbw5rcopzcnfr0w461wxq8do727j[Vote thread.] https://lists.apache.org/thread/2lzgy7pkxf2fr6vd3p6owd3xwn0zxfc2[Vote result].
+
+== Who is Involved
+
+* Adam Saghy ( https://lists.apache.org/thread/5byvzd2v9czcoh6501r9870cb2hbz96w[original proposal] , risk assessment)
+* Nidhi Bhawari (reviewer)
+* Bharath Gowda (reviewer)
+* Tito Mari Francis Escaño (reviewer)
+* Ambika (reviewer)
+* Awasum Yannick (reviewer, risk assessment)
+* Vignesh E (reviewer)
+* Paul Christison (reviewer)
+* Adam Monsen (FSIP author, reviewer)
+* Edward Kang (reviewer)
+* Victor Manual Romero Rodriguez (reviewer, risk assessment)
+* james dailey (reviewer)
+* Attila Budai (reviewer)
+* Aleksandar Vidakovic (reviewer)
+* Aman Mittal (reviewer)
+* Mohammed Saifulhuq (reviewer)
+* Jose Alberto Hernandez (reviewer)
+
+== Background/Motivation
+
+* Speed up development, simplify maintenance
+** support one SQL flavor only
+** less edge/corner cases to manage
+** more reliable testing
+** faster CI build
+* Leverage Postgres-specific features
+** sequences / identity columns for primary keys
+** native table partitioning
+** safer and more efficient transaction integrity support
+** more advanced indexing options
+* Improve security
+
+== Goals and Exclusions
+
+* Consolidate all relational database storage logic to work with Postgres only.
+* Inform community and provide hints and tips for deployments needing to migrate to Postgres.
+* Encourage entire community (especially all users: banks, vendors, and paid support orgs) to write or sponsor MariaDB/MySQL to Postgres migration guides, scripts, tests, tools, wizards, case studies, etc.
+* We recognize this is a major improvement _not without risk_ . See https://lists.apache.org/thread/5byvzd2v9czcoh6501r9870cb2hbz96w[comments by Victor and others in the discussion thread] about anticipated risk. We commit to mitigating the risk as much as possible while we commit ourselves to making difficult, informed, and courageous choices on how best to maintain Fineract.
+
+== Change Proposed
+
+Remove code and documentation related specifically to MariaDB and MySQL.
+
+Best effort migration support only. Volunteers, users, banks, vendors, and paid support orgs are expected to create or sponsor creation of anything useful for deployments needing to migrate.
+
+== Alternatives Considered
+
+None.
+
+== Phases of work
+
+. DISCUSS
+. VOTE
+. TRACK
+. CLOSE

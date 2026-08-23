@@ -1,0 +1,142 @@
+= FSIP-012: Event-driven architecture for modular design
+
+== Summary
+
+Fineract's feature modules import each other's internal classes directly: loan reads
+savings entities, savings calls accounting services, accounting depends on organisation
+repositories. Two shared modules already exist to prevent this -- `fineract-core` (read-only
+contracts) and `fineract-command` (write-side commands and events) -- but nothing enforces
+their use, so the boundary has eroded. We propose to make those two modules the only
+permitted cross-feature dependency: reads cross a boundary as a `fineract-core` interface
+returning a DTO, writes cross as a `fineract-command` command or domain event. Every direct
+feature-to-feature import is migrated to one of those two mechanisms, in risk order, and an
+ArchUnit rule is activated in CI to keep the boundary from eroding again. A Spring Modulith
+boundary scanner already exists and reports the current violation set per module, giving a
+before/after count for each phase. The REST API and integration tests stay unchanged
+throughout.
+
+== Status
+
+Under Development
+
+== Who is involved
+
+* Mansi Maurya (proposal owner, lead developer)
+* Aleksandar Vidakovic (reviewer)
+
+== Background / Motivation
+
+The package layout reflects a layered architecture (REST, DTOs, services, repositories), but
+the feature modules are not isolated from one another. Over the years, services and
+repositories from one feature have been imported directly into others, with no rule to stop
+it. `fineract-core` and `fineract-command` exist, but using them is optional; a developer can
+import another feature's repository and the build still passes.
+
+The concrete cost:
+
+* *Refactoring is unsafe.* Changing an internal class in one feature can silently break a
+  consumer in an unrelated module, surfacing only at test or runtime.
+* *Ownership is diffuse.* When several features import the same repository, adding a field,
+  changing a query, or deprecating a method turns into a multi-team negotiation.
+* *Isolated testing is impractical.* Unit-testing one service pulls in the transitive
+  dependency graph of everything it imports.
+* *Event-driven execution is blocked.* Direct synchronous calls between features leave no
+  seam at which to introduce events, asynchronous handling, or an outbox.
+
+The boundary scanner quantifies the problem today: accounting, savings, loan, group, teller,
+batch and the deposit modules each reference types from other features. The numbers per
+module are tracked so each phase shows measurable reduction.
+
+== Goals
+
+* `fineract-core` becomes the single home for shared, read-only contracts: read-service
+  interfaces, the DTOs/projections they return (`ClientSummaryDTO`, `OfficeDTO`, `ChargeDTO`,
+  `LoanAccountSummaryDTO`, ...), and shared value objects and enums. No business logic, no
+  feature-owned entities.
+* `fineract-command` becomes the single home for cross-feature write contracts: command and
+  domain-event definitions, the command/event bus, transactional outbox/inbox, and saga
+  support for long-running flows.
+* Every direct feature-to-feature import is removed and re-expressed as a `fineract-core`
+  read or a `fineract-command` write.
+* An ArchUnit rule is wired into CI once the violation count reaches zero, failing any build
+  that reintroduces a cross-feature import.
+* The REST API stays 100% backward-compatible: no changes to endpoints, request shapes, or
+  response shapes.
+* Integration tests stay green at every phase boundary; no phase requires a big-bang cutover.
+
+== Exclusions
+
+* The storage layer -- JPA entities, schema, query performance -- is out of scope; that is a
+  separate effort.
+* No changes to existing REST API contracts or response shapes.
+* No external message brokers; outbox/inbox stays within the database transaction for now.
+* Performance tuning and asynchronous execution are not in scope, though the event-driven
+  boundaries introduced here make them straightforward to add later.
+
+== Change proposed
+
+=== Reads: `fineract-core` contracts
+
+Instead of importing another feature's repository to perform a read, a feature depends on an
+interface declared in `fineract-core`, and the owning feature provides the implementation.
+The interface returns a DTO -- a plain, stable projection -- so the data crossing a boundary
+is never a live entity. This inverts the dependency: both the caller and the owner depend on
+`fineract-core`, neither on the other.
+
+----
+        accounting  --depends on-->  fineract-core (ChargeReadService)  <--implements--  charge
+----
+
+=== Writes: `fineract-command` commands and events
+
+A feature that needs another feature to act stops calling its service directly. It dispatches
+a command (point-to-point, expects a handler) or publishes a domain event (broadcast, zero or
+more subscribers). The owning feature handles it. `fineract-command` owns the command and
+event definitions, the dispatch bus, and a transactional outbox/inbox so a published event
+and its originating database change commit atomically.
+
+=== By-id references
+
+Where a feature only stores a reference to another feature's aggregate (e.g. a foreign-key
+relationship), the JPA association to the foreign entity is replaced with the identifier
+(`Long`), keeping the same database column. Details, when needed, are fetched through the
+relevant `fineract-core` read contract. This removes the import without a schema change.
+
+== Migration approach
+
+Each phase targets one package or feature and is a set of PRs. The scanner's before/after
+count per module is the unit of progress a reviewer can verify. Phases are ordered by
+cross-feature surface area and traffic, smallest first, so the mechanics are proven on
+low-risk modules before reaching savings and loan. The ArchUnit enforcement rule is activated
+only after the violation count is zero.
+
+== Phases of work
+
+. *Inventory.* Run the boundary scanner, classify each violation, and assign ownership.
+  Expand `fineract-core` (DTOs, read-service interfaces, shared value objects) and
+  `fineract-command` (bus, outbox/inbox, sagas, initial command and event catalogs).
+. *Easy wins.* Decouple accounting, client, and user-administration from organisation and
+  charge.
+. *Mid-tier.* group, account transfers, MIX, shareaccounts, batch.
+. *Savings.* Replace savings -> accounting direct calls with domain events; move all other
+  dependencies to core DTOs and interfaces.
+. *Loan.* Publish loan lifecycle events; replace every direct import with commands, events,
+  and core contracts. Largest phase.
+. *Deposits.* Break fixed/recurring deposit inheritance from savings; use an
+  `AccountLifecycle` and composition contracts instead.
+. *Orchestrators.* teller, reporting, notifications, and templates move to the command bus
+  and read models.
+. *Enforcement.* Activate the ArchUnit boundary rule in CI; track violation counts per PR
+  going forward.
+
+== Alternatives considered
+
+* *Do nothing / rely on review.* The boundary has already eroded under code review alone; an
+  automated rule is the only durable guarantee.
+* *Split every feature into its own Gradle module up front.* Physically separating modules
+  forces the boundary but is a large, high-risk change and reorders the work; the contract-
+  first approach lets features stay in place and migrate incrementally, with module
+  extraction following naturally once the imports are gone.
+* *Introduce an external message broker now.* Deferred. The outbox/inbox pattern within the
+  existing database transaction delivers reliable eventing without new infrastructure; a
+  broker can replace the transport later without changing the command/event contracts.

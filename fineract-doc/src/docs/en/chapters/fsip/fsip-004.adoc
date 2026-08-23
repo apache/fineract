@@ -1,0 +1,11 @@
+= FSIP-004: Cucumber Testing Framework
+
+https://lists.apache.org/thread/52082h1ps1hyo59lwogk5otn0ccyxv1f
+
+Supported by: Adam, Aleksandar , Arnold +1s
+
+*Summary: A new Testing Framework that complements and is expected to replace the existing integration testing framework was adopted by the community.*
+
+NOTE on June 14, 2024
+
+Devs - I believe that the cucumber test framework and approach are now accepted by the Community as per this discussion, and while this didn't go through a formal vote, I think that the discussion was sufficient and more formality on this is not needed. So, now there needs to be a wiki page or a set of instructions in the documentation for using and writing additional cucumber tests. That is needed at the same time as the acceptance of the tests. There will be people confused by our overall testing strategy. We have a collection of integration tests, that don't cover all of the APIs, are probably inadequate, and which take a long time to run, and now, we also have Cucumber tests. Are we keeping the existing integration tests? Or are we going to sunset them at some point? Should people count on the integration tests? How should a dev set up the cucumber tests to run? Is there a gradle task? Are all dependencies included in the code? James Dailey

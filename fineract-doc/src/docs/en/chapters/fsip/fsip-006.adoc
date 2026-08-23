@@ -1,0 +1,52 @@
+= FSIP-006: Type Safe Native SQL Queries
+
+== Summary
+
+*NOTE: THIS IS WORK IN PROGRESS!*
+
+We are proposing to introduce type safe SQL query generation by using the QueryDSL library. Moving away from string-based SQL native queries, this change aims to leverage QueryDSL's generated query types to eliminate runtime errors from malformed queries, improve maintainability through a fluent Java API, and enable the safe use of advanced database features while maintaining compile-time validation. The integration will focus on new query development and iterative refactoring of high-change-frequency existing queries.
+
+== Status
+
+Under Discussion, Proposed
+
+== Who is Involved
+
+* Aleksandar Vidakovic (proposal owner, lead developer)
+* TBD (reviewer)
+
+== Background/Motivation
+
+Apache Fineract has started out to use JPA/Jakarta Persistence to abstract database specific details. Over the years developers started to use native SQL queries mostly for performance reasons. While this was and is a valid strategy for critical path and performance sensitive components this approach has a major drawback. The queries are usually written by using string variables and/or related classes (StringBuffer, StringBuilder, custom utility classes like SqlQueryBuilder). The problem here is that developers tried various strategies to format the queries in a way to be easily readable. That effort is pretty much in vain, because we have automated code formatting and linting in place which affects the "layout" of these SQL query variables in a major way. The code formatter usually splits up the string into multiple pieces and distributes the parts over multiple lines to follow the line length constraints we defined in the formatting rules. Obviously that doesn't result in particularly readable code/queries. A far worse problem than the readability of this kind of code is that any changes/refactorings to the underlying data structures (database tables, mapping entity classes) is not caught by any of the refactoring tools or by the Java compiler. In case we are referencing tables, columns in the query that are not there anymore or renamed we only find out during runtime. Additionally developers started to use database specific non-SQL standard functions (e.g. variations of "current date") that prevented us for a long time to upgrade even the same database product (MySQL) from an old version (5.7) to a more modern one (8.x) let alone introduce another database system like PostgreSQL. We kind of solved these issues, but introduced custom code to abstract away e.g. the use of database specific functions. Introducing JPA/Jakarta Persistence is not a solution here, because of the overhead for translating OQL to SQL and the whole entity mapping "magic". QueryDSL as a solution hits a sweet spot, because it contains an annotation based code generator for all database related metadata (column types to Java types etc.) and provides a Java DSL (aka fluent API) that resemble SQL statements close enough. QueryDSL gives us syntactic and type safety and because everything under the hood is a prepared statement the danger of SQL injection attacks is greatly reused by design (and not retro-actively by trying to "escape" dangerous query values).
+
+== Goals
+
+* *Enhance type safety:* Shift query validation from runtime to compile-time by generating query types that reflect the database schema, eliminating a class of runtime errors.
+* *Improve maintainability and readability:* Replace concatenated SQL strings with a fluent, Java-based API that is easier to understand, refactor, and version control.
+* *Maintain performance:* Ensure the generated SQL queries are efficient and performant, comparable to hand-tuned native SQL.
+* *Standardize Query Construction:* Provide a consistent, modern approach for building both simple and complex SQL queries across the community.
+
+== Exclusions
+
+* *Abandoning JPA/Jakarta Persistence:* TBD
+* *Mandatory for all SQL:* sometimes it's easy enough to just use the "magic" function name translations of Spring Data's repository interfaces.
+
+== Change Proposed
+
+We will integrate QueryDSL SQL into the project through the following steps:
+
+. Add required dependencies (Spring Data JDBC, QueryDSL/Openfeign QueryDSL, Infobip QueryDSL starter)
+. Configure code generation in Gradle build scripts
+. Prioritize packages/modules for refactoring
+. Do a first migration on a low impact package/module
+
+== Alternatives Considered
+
+* *JOOQ:* TBD
+* *Multi-Line Strings:* TBD
+
+== Phases of work
+
+* Mar 2026: First prototype and pull request available
+* ??? 2026: community vote
+* ...

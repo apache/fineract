@@ -1,0 +1,108 @@
+= FSIP-003: Continue Enhancing New Progressive Loan Module to Support Interest-Bearing Loans
+
+Adopted June 17th.
+
+https://lists.apache.org/thread/v009fbf3m0s40y613byz2s3b1gppjwz6
+
+== Summary
+
+We are proposing to add support for interest-bearing loan products for progressive loan schedule by continuing to develop on the recently merged progressive loan handling changes and moving it into a new externalized _fineract-progressive-loan_ module.
+
+These changes are in support of an enterprise customer that has been sponsoring upstream contributions into Fineract to support the migration of its BNPL and installment lending products onto a new loan management system of record.
+
+This new module will aim to re-use existing logic from the legacy loan module by extracting it into separate methods or classes to reduce the complexity and improve the reusability.
+
+The legacy loan module is far too complicated to build these new loan capabilities onto but we also have decided not to build a completely separate and independent loan module that would lead to forked implementations.
+
+Our proposed approach will allow us to deliver a solution that meets the customer requirements while not breaking any existing functionality for the community. We will make substantial progress on the much-needed redesign and refactoring of the loan module and gradually and iteratively over time build out this enhanced loan module to ideally deprecate the legacy loan module.
+
+== Status
+
+*Under Discussion, Proposed*
+
+== Who is Involved
+
+Proposal Owner: Edward Cable
+
+Lead Developer(s) & Architects: Adam Saghy and Marta Jankovics
+
+Business Analyst: Bharath Gowda
+
+== Background/Motivation
+
+The Mifos Initiative has been working with a global enterprise-scale consumer of Fineract to migrate their loan management system of record from a legacy core banking system to one based on Fineract for their BNPL lending portfolio. This customer has sponsored the development of significant functional and non-functional contributions that have been merged upstream into Fineract over the past two years (PostgreSQL/Eclipselink support, Business Date, new Spring Batch module, new reliable event framework, transaction idempotency, downpayment support for multiple disbursals, configurable payment application logic, new transaction types, delinquency bucket tracking, etc).
+
+These upstream contributions have been designed, developed and tested by developers and architects from BaaSFlow along with business analysts and developers from Mifos.
+
+In support of these requirements, the Fineract community has already accepted and merged in enhancements to the current loan module to support the introduction of a progressive loan schedule for multi-disbursal loans enabling fully configurable payment application logic. This new capability was only added to loans without interest. In short, the difference between cumulative and progressive loan schedules (for multiple disbursals) is under the progressive calculation, a second disbursement don’t cause previous disbursements and transactions to be recalculated. Legacy cumulative loan calculation was designed for single disbursement installment loans. Multiple disbursement loans are now better supported with progressive loan calculation whereby additional disbursements will only be spread across future installment and not affect previous ones.
+
+* *Cumulative* (by default, legacy): all of the installments are used to split the newly disbursed amount (recalculating already executed disbursements and transactions)
+* *Progressive* Only the future installments to be used to split the newly disbursed amount.
+
+More detailed explanation below.
+
+The customer would now like to support interest-bearing loans using Fineract so that is why we are submitting this proposal to outline the proposed approach to continue enhancing the loan module to support interest-bearing loans on top of the progressive loan calculation.
+
+The proposal will not only support the requirements of the customer but make substantial progress on addressing the technical debt and overwhelming size and complexity of the current loan module which presents a highly steep learning curve for new and existing developers and is difficult to test, and doesn’t support all the standard calculations the financial services sector expects.
+
+== Goals and Exclusions
+
+* Extend the newly enhanced progressive loan module to support interest-bearing loan products
+* Improve the performance, maintainability and ease of developing around loan module by developing an externalized loan module that has new capabilities but aims to re-use existing business logic and optimized code - this in turn would reduce technical debt.
+* Continue externalization of Fineract services/packages into modules as done previously by moving away from all-in-one fineract-provider to fineract-core, fineract-loan, fineract-investor and now fineract-progressive-loan
+* Gradually deprecate the legacy loan module as the progressive loan module gets more capabilities introduced to it.
+* Proposed changes in progressive loan module will fix the errors that have been identified with EMI calculations where supposed configurable fields in EMI calculation formula are actually hard-coded and due to the PMT formula not giving precise EMI, resulting in slight differences in the last installment.
+* Initial phases of development won’t create a new loan module that is at 100% parity with the legacy loan module including no support for these enhancements to existing cumulative loan schedule handling.
+* New approach won’t support the entire wide range of configurations available for loans currently - initially implementing a narrow set of features and step by step adding more over time.
+
+== Change Proposed
+
+The changes proposed are the following:
+
+* Extract the already created and already merged progressive loan-related changes into a new module (fineract-progressive-loan).
+* No planned new APIs but additional configurations might be added (i.e. additional advanced payment adjustment type for configuration of interest recalculation, etc.
+* New capabilities introduced into this module will include:
+* Initial configuration will be for the progressive loan to support Declining balance interest strategy, with daily interest calculation and interest recalculation which modifies the last installment of the loan based on whether there were early or late repayments.
+
+We will adopt an approach that builds the progressive loan as a separate module but in a step-by-step manner either: have a new, redesigned better implementation for existing or new features or examine using existing logic when appropriate.
+
+If functionality should behave or work differently, we will attempt to refactor existing logic without breaking it so it could become common logic for the legacy and progressive loan modules. Whenever reusing something, it will first be simplified to avoid multi-conditional behavior and complexity.
+
+Through this approach, we will analyze and touch already working features as well such as disbursements, repayments, etc. Based on our analysis, some features will be reworked partially or fully in the new loan module or existing logic from the legacy module might be extracted into separate methods or classes to reduce the complexity and improve the reusability
+
+This will allow us to ensure the new loan can focus on meeting the actual requirements of the customer without being burdened by the near impossible task to support everything. However we will still be able to improve the common logic without breaking how it works as we do this gradually rework, refactor and redesign.
+
+We fully understand the current loan module is too complex and too fragmented making it hard to work with and hard to understand how it works and that it does need to be refactored and redesigned. By doing this incrementally and right-sizing the refactoring, we can do it in the right way by first introducing these changes for the progressive loan to see how well it works and performs and then we can either continue adding capability to the new loan module or introduce changes to the legacy loan module. Ideally over time we could deprecate the legacy module once the newly built progressive loan module is closer to functional parity.
+
+== Alternatives Considered
+
+We considered the following alternative approaches:
+
+* Build the additional interest-bearing capabilities directly onto the existing loan module
+* Create a completely separate brand new loan module without utilizing any logic/design/code of the existing loan module.
+
+Because of the overwhelming size and complexity of the current loan module (7000+ lines of code) and the high amount of technical debt, we chose not to build this directly onto the legacy module.
+
+We chose not to go with a completely independent new loan module that doesn’t utilize any of the existing business logic/calculations because we recognize that we can’t have a forked loan module and the legacy loan is still used widely so we didn’t want to break anything for current users at the moment and also have the ability to gradually add existing capabilities on the newly enhanced module
+
+Phases of work
+
+* May 2024 - Design of Proposed Changes and creation of tickets for proposed development
+* June 2024 - October 2024 - Development & Testing or Proposed Changes with iterative points to check on performance and progress of re-using existing logic
+* Nov 2024 - roadmap and backlog for community to pick up and address capabilities to be added to new progressive loan module.
+
+We will later share a wiki page which outlines the loan products that are supported and documents the gaps between the new progressive loan module and the existing legacy loan module.
+
+== Additional Information
+
+*Cumulative vs Progressive Loan Handling*
+
+_Previously Fineract (as designed primarily for fixed term installment lending) only supported a cumulative loan schedule and disbursement strategy where it didn’t matter when something was disbursed, and the total amount disbursed was split across all installments. So in a loan with multiple disbursements, when new amounts were disbursed, Fineract would recalculate and regenerate the schedule for the whole disbursement amount, affecting previously created disbursements and transactions._
+
+_This behavior wasn’t appropriate for line of credit type lending with multiple disbursements to support wallets, digital lending, BNPL, etc.. Support is now in place for a progressive loan strategy where the new disbursement amount is only distributed to future installments and the repayment schedule or installments that happened before the disbursement date are not recalculated._
+
+Features enabled by Progressive Loan Calculation
+
+* *Progressive Loan Calculation* - Legacy cumulative loan calculation was designed for single disbursement installment loans. Multiple disbursement loans are now better supported with progressive loan calculation whereby additional disbursements will only be spread across future installment and not affect previous ones.
+* *Configurable Payment Application Logic* - Previously in order to adjust the sequence against which a repayment is applied against the portions of a loan, penalty, fees, interest, principal one had to modify the source code. Now this is fully configurable from the UI with a drag and drop menu to modify the payment application logic for any transaction type.
+* *Vertical Loan Processing* - Underpinning this powerful new feature was the introduction of horizontal vs vertical loan processing. Legacy behavior was horizontal processing whereby a transaction is applied “horizontally” across the entire scope of an installment, against each portion one by one, only supporting payment application logic to be grouped by due type. With the new vertical loan processing, payments are now allocated “vertically” through the entire repayment schedule so the payment can be applied to all penalty portions of any due type across all installments.
