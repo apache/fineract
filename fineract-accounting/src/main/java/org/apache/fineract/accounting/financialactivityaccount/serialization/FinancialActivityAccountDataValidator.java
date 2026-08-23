@@ -86,8 +86,16 @@ public final class FinancialActivityAccountDataValidator {
         if (this.fromApiJsonHelper.parameterExists(paramNameForFinancialActivity, element)) {
             final Integer financialActivityId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(paramNameForFinancialActivity,
                     element);
+            // CASH_AT_MAINVAULT and CASH_AT_TELLER are accepted by validateForCreate above but were missing
+            // here, so a teller or vault mapping could be created and then never corrected: the update was
+            // rejected with "must be one of [ 100, 200, 300, 103, 201 ]". There is no reason for the two
+            // halves to disagree -- both write the same column, and the teller module reads the mapping via
+            // findByFinancialActivityTypeWithNotFoundDetection whichever way the row got there. Encountered on
+            // a tenant whose cashAtTeller pointed at an unrelated GL account, where the only ways out were to
+            // delete and recreate the row, losing its identity, or to UPDATE the database by hand.
             baseDataValidator.reset().parameter(paramNameForFinancialActivity).value(financialActivityId).ignoreIfNull().isOneOfTheseValues(
                     FinancialActivity.ASSET_TRANSFER.getValue(), FinancialActivity.LIABILITY_TRANSFER.getValue(),
+                    FinancialActivity.CASH_AT_MAINVAULT.getValue(), FinancialActivity.CASH_AT_TELLER.getValue(),
                     FinancialActivity.OPENING_BALANCES_TRANSFER_CONTRA.getValue(), FinancialActivity.ASSET_FUND_SOURCE.getValue(),
                     FinancialActivity.PAYABLE_DIVIDENDS.getValue());
         }
