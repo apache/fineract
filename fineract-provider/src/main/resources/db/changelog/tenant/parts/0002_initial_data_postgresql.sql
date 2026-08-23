@@ -34,7 +34,7 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
--- Data for Name: m_code; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_code; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_code (id, code_name, is_system_defined) VALUES ('1', 'Customer Identifier', 't');
 INSERT INTO public.m_code (id, code_name, is_system_defined) VALUES ('2', 'LoanCollateral', 't');
@@ -76,7 +76,7 @@ INSERT INTO public.m_code (id, code_name, is_system_defined) VALUES ('38', 'Savi
 INSERT INTO public.m_code (id, code_name, is_system_defined) VALUES ('39', 'ChargeOffReasons', 't');
 
 
--- Data for Name: m_code_value; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_code_value; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_code_value (id, code_id, code_value, code_description, order_position, code_score, is_active, is_mandatory) VALUES ('1', '1', 'Passport', NULL, '1', NULL, 't', 'f');
 INSERT INTO public.m_code_value (id, code_id, code_value, code_description, order_position, code_score, is_active, is_mandatory) VALUES ('2', '1', 'Id', NULL, '2', NULL, 't', 'f');
@@ -94,185 +94,185 @@ INSERT INTO public.m_code_value (id, code_id, code_value, code_description, orde
 INSERT INTO public.m_code_value (id, code_id, code_value, code_description, order_position, code_score, is_active, is_mandatory) VALUES ('14', '33', 'Money Transfer', NULL, '1', NULL, 't', 'f');
 
 
--- Data for Name: acc_gl_account; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: acc_gl_account; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_office; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_office; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_office (id, parent_id, hierarchy, external_id, name, opening_date) VALUES ('1', NULL, '.', '1', 'Head Office', '2009-01-01');
 
 
--- Data for Name: acc_accounting_rule; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: acc_accounting_rule; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_image; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_image; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_staff; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_staff; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_appuser; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_appuser; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_appuser (id, is_deleted, office_id, staff_id, username, firstname, lastname, password, email, firsttime_login_remaining, nonexpired, nonlocked, nonexpired_credentials, enabled, last_time_password_updated, password_never_expires, cannot_change_password, password_reset_required, failed_login_attempts, is_login_retries_enabled, temporary_password, temporary_password_expiry_time, is_password_reset_enabled) VALUES ('1', 'f', '1', NULL, 'mifos', 'App', 'Administrator', '{SHA-256}{1}5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a', 'demomfi@mifos.org', 'f', 't', 't', 't', 't', '2026-08-21', 'f', NULL, 'f', '0', 'f', NULL, NULL, 'f');
 INSERT INTO public.m_appuser (id, is_deleted, office_id, staff_id, username, firstname, lastname, password, email, firsttime_login_remaining, nonexpired, nonlocked, nonexpired_credentials, enabled, last_time_password_updated, password_never_expires, cannot_change_password, password_reset_required, failed_login_attempts, is_login_retries_enabled, temporary_password, temporary_password_expiry_time, is_password_reset_enabled) VALUES ('2', 'f', '1', NULL, 'system', 'system', 'system', '{SHA-256}{2}5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a', 'demomfi@mifos.org', 'f', 't', 't', 't', 't', '2026-08-21', 'f', NULL, 'f', '0', 'f', NULL, NULL, 'f');
 INSERT INTO public.m_appuser (id, is_deleted, office_id, staff_id, username, firstname, lastname, password, email, firsttime_login_remaining, nonexpired, nonlocked, nonexpired_credentials, enabled, last_time_password_updated, password_never_expires, cannot_change_password, password_reset_required, failed_login_attempts, is_login_retries_enabled, temporary_password, temporary_password_expiry_time, is_password_reset_enabled) VALUES ('3', 'f', '1', NULL, 'interopUser', 'Interop', 'User', '{SHA-256}{3}5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a', 'email@email.com', 'f', 't', 't', 't', 't', '2026-08-21', 'f', NULL, 'f', '0', 'f', NULL, NULL, 'f');
 
 
--- Data for Name: acc_gl_closure; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: acc_gl_closure; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: acc_gl_financial_activity_account; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: acc_gl_financial_activity_account; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_group_level; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_group_level; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_group_level (id, parent_id, super_parent, level_name, recursable, can_have_clients) VALUES ('1', NULL, 't', 'Center', 't', 'f');
 INSERT INTO public.m_group_level (id, parent_id, super_parent, level_name, recursable, can_have_clients) VALUES ('2', '1', 'f', 'Group', 'f', 't');
 
 
--- Data for Name: m_group; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_group; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: glim_accounts; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: glim_accounts; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: gsim_accounts; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: gsim_accounts; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_tax_group; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_tax_group; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_savings_product; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_savings_product; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_client; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_client; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_client_transaction; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_client_transaction; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_delinquency_bucket; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_delinquency_bucket; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_fund; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_fund; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_product_loan; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_product_loan; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_payment_type; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_payment_type; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_payment_type (id, value, description, is_cash_payment, order_position, code_name, is_system_defined) VALUES ('1', 'Money Transfer', 'Money Transfer', 'f', '1', NULL, 'f');
 INSERT INTO public.m_payment_type (id, value, description, is_cash_payment, order_position, code_name, is_system_defined) VALUES ('2', 'Repayment Adjustment Chargeback', 'Repayment Adjustment Chargeback', 'f', '1', 'REPAYMENT_ADJUSTMENT_CHARGEBACK', 't');
 INSERT INTO public.m_payment_type (id, value, description, is_cash_payment, order_position, code_name, is_system_defined) VALUES ('3', 'Repayment Adjustment Refund', 'Repayment Adjustment Refund', 'f', '1', 'REPAYMENT_ADJUSTMENT_REFUND', 't');
 
 
--- Data for Name: m_payment_detail; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_payment_detail; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_transaction; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_transaction; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_savings_account; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_savings_account; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_savings_account_transaction; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_savings_account_transaction; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_share_product; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_share_product; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_share_account; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_share_account; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_share_account_transactions; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_share_account_transactions; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: acc_gl_journal_entry; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: acc_gl_journal_entry; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: acc_gl_journal_entry_annual_summary; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: acc_gl_journal_entry_annual_summary; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_charge; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_charge; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: acc_product_mapping; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: acc_product_mapping; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: acc_rule_tags; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: acc_rule_tags; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: batch_custom_job_parameters; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: batch_custom_job_parameters; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: batch_job_instance; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: batch_job_instance; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: batch_job_execution; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: batch_job_execution; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: batch_job_execution_context; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: batch_job_execution_context; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: batch_job_execution_params; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: batch_job_execution_params; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: batch_step_execution; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: batch_step_execution; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: batch_step_execution_context; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: batch_step_execution_context; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: c_account_number_format; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: c_account_number_format; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: c_cache; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: c_cache; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.c_cache (id, cache_type_enum) VALUES ('1', '1');
 
 
--- Data for Name: c_configuration; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: c_configuration; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.c_configuration (id, name, value, date_value, string_value, enabled, is_trap_door, description) VALUES ('1', 'maker-checker', NULL, NULL, NULL, 'f', 'f', NULL);
 INSERT INTO public.c_configuration (id, name, value, date_value, string_value, enabled, is_trap_door, description) VALUES ('4', 'amazon-s3', NULL, NULL, NULL, 'f', 'f', NULL);
@@ -345,7 +345,7 @@ INSERT INTO public.c_configuration (id, name, value, date_value, string_value, e
 INSERT INTO public.c_configuration (id, name, value, date_value, string_value, enabled, is_trap_door, description) VALUES ('74', 'retained-earning-used-by-report-name', NULL, NULL, 'Trial Balance Summary Report with Asset Owner', 't', 'f', 'Report name which will be using using retained earning');
 
 
--- Data for Name: c_external_service; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: c_external_service; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.c_external_service (id, name) VALUES ('3', 'MESSAGE_GATEWAY');
 INSERT INTO public.c_external_service (id, name) VALUES ('4', 'NOTIFICATION');
@@ -353,7 +353,7 @@ INSERT INTO public.c_external_service (id, name) VALUES ('1', 'S3');
 INSERT INTO public.c_external_service (id, name) VALUES ('2', 'SMTP_Email_Account');
 
 
--- Data for Name: c_external_service_properties; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: c_external_service_properties; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.c_external_service_properties (name, value, external_service_id) VALUES ('s3_access_key', NULL, '1');
 INSERT INTO public.c_external_service_properties (name, value, external_service_id) VALUES ('s3_bucket_name', NULL, '1');
@@ -378,11 +378,11 @@ INSERT INTO public.c_external_service_properties (name, value, external_service_
 
 
 
--- Data for Name: interop_identifier; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: interop_identifier; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: job; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: job; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.job (id, name, display_name, cron_expression, create_time, task_priority, group_name, previous_run_start_time, next_run_time, job_key, initializing_errorlog, is_active, currently_running, updates_allowed, scheduler_group, is_misfired, node_id, is_mismatched_job, short_name) VALUES ('2', 'Update Loan Arrears Ageing', 'Update Loan Arrears Ageing', '0 1 0 1/1 * ? *', '2026-08-21 12:32:42.944851', '5', NULL, NULL, NULL, 'Update Loan Arrears AgeingJobDetail1 _ DEFAULT', NULL, 't', 'f', 't', '0', 'f', '1', 't', 'LA_ARAG');
 INSERT INTO public.job (id, name, display_name, cron_expression, create_time, task_priority, group_name, previous_run_start_time, next_run_time, job_key, initializing_errorlog, is_active, currently_running, updates_allowed, scheduler_group, is_misfired, node_id, is_mismatched_job, short_name) VALUES ('5', 'Apply Holidays To Loans', 'Apply Holidays To Loans', '0 0 12 * * ?', '2026-08-21 12:32:42.944851', '5', NULL, NULL, NULL, 'Apply Holidays To LoansJobDetail1 _ DEFAULT', NULL, 't', 'f', 't', '0', 'f', '1', 't', 'LA_AHOL');
@@ -425,7 +425,7 @@ INSERT INTO public.job (id, name, display_name, cron_expression, create_time, ta
 INSERT INTO public.job (id, name, display_name, cron_expression, create_time, task_priority, group_name, previous_run_start_time, next_run_time, job_key, initializing_errorlog, is_active, currently_running, updates_allowed, scheduler_group, is_misfired, node_id, is_mismatched_job, short_name) VALUES ('41', 'Retained Earning Job', 'Retained Earning Job', '0 0 6 * * ?', '2026-08-21 12:32:48.15403', '5', NULL, NULL, NULL, 'Retained Earning _ DEFAULT', NULL, 'f', 'f', 't', '0', 'f', '1', 'f', 'RE_ERNG');
 
 
--- Data for Name: job_parameters; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: job_parameters; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.job_parameters (id, job_id, parameter_name, parameter_value) VALUES ('1', '17', 'thread-pool-size', '10');
 INSERT INTO public.job_parameters (id, job_id, parameter_name, parameter_value) VALUES ('2', '17', 'batch-size', '100');
@@ -434,51 +434,51 @@ INSERT INTO public.job_parameters (id, job_id, parameter_name, parameter_value) 
 INSERT INTO public.job_parameters (id, job_id, parameter_name, parameter_value) VALUES ('5', '6', 'batch-size', '100');
 
 
--- Data for Name: job_run_history; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: job_run_history; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_account_transfer_details; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_account_transfer_details; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_account_transfer_standing_instructions; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_account_transfer_standing_instructions; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_account_transfer_standing_instructions_history; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_account_transfer_standing_instructions_history; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_account_transfer_transaction; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_account_transfer_transaction; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_address; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_address; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_adhoc; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_adhoc; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_appuser_previous_password; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_appuser_previous_password; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_role; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_role; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_role (id, name, description, is_disabled) VALUES ('1', 'Super user', 'This role provides all application permissions.', 'f');
 INSERT INTO public.m_role (id, name, description, is_disabled) VALUES ('2', 'Self Service User', 'self service user role', 't');
 
 
--- Data for Name: m_appuser_role; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_appuser_role; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_appuser_role (appuser_id, role_id) VALUES ('1', '1');
 INSERT INTO public.m_appuser_role (appuser_id, role_id) VALUES ('3', '1');
 
 
--- Data for Name: m_batch_business_steps; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_batch_business_steps; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_batch_business_steps (id, job_name, step_name, step_order) VALUES ('1', 'LOAN_CLOSE_OF_BUSINESS', 'APPLY_CHARGE_TO_OVERDUE_LOANS', '1');
 INSERT INTO public.m_batch_business_steps (id, job_name, step_name, step_order) VALUES ('2', 'LOAN_CLOSE_OF_BUSINESS', 'LOAN_DELINQUENCY_CLASSIFICATION', '2');
@@ -488,55 +488,55 @@ INSERT INTO public.m_batch_business_steps (id, job_name, step_name, step_order) 
 INSERT INTO public.m_batch_business_steps (id, job_name, step_name, step_order) VALUES ('6', 'LOAN_CLOSE_OF_BUSINESS', 'ADD_PERIODIC_ACCRUAL_ENTRIES', '6');
 
 
--- Data for Name: m_business_date; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_business_date; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_calendar; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_calendar; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_calendar_history; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_calendar_history; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_calendar_instance; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_calendar_instance; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_tellers; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_tellers; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_cashiers; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_cashiers; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_cashier_transactions; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_cashier_transactions; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_client_address; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_client_address; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_meeting; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_meeting; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_client_attendance; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_client_attendance; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_client_charge; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_client_charge; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_client_charge_paid_by; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_client_charge_paid_by; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_currency; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_currency; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_currency (id, code, decimal_places, currency_multiplesof, display_symbol, name, internationalized_name_code) VALUES ('1', 'AED', '2', NULL, NULL, 'UAE Dirham', 'currency.AED');
 INSERT INTO public.m_currency (id, code, decimal_places, currency_multiplesof, display_symbol, name, internationalized_name_code) VALUES ('2', 'AFN', '2', NULL, NULL, 'Afghanistan Afghani', 'currency.AFN');
@@ -704,32 +704,32 @@ INSERT INTO public.m_currency (id, code, decimal_places, currency_multiplesof, d
 INSERT INTO public.m_currency (id, code, decimal_places, currency_multiplesof, display_symbol, name, internationalized_name_code) VALUES ('164', 'SSP', '2', NULL, 'SS£', 'South Sudanese Pound', 'currency.SSP');
 
 
--- Data for Name: m_collateral_management; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_collateral_management; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_client_collateral_management; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_client_collateral_management; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_client_identifier; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_client_identifier; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_client_non_person; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_client_non_person; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_client_transfer_details; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_client_transfer_details; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_creditbureau; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_creditbureau; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_creditbureau (id, name, product, country, implementation_key) VALUES ('1', 'THITSAWORKS', '1', 'Myanmar', '1');
 
 
--- Data for Name: m_creditbureau_configuration; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_creditbureau_configuration; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_creditbureau_configuration (id, configkey, value, organisation_creditbureau_id, description) VALUES ('1', 'Password', '', '1', '');
 INSERT INTO public.m_creditbureau_configuration (id, configkey, value, organisation_creditbureau_id, description) VALUES ('2', 'SubscriptionId', '', '1', '');
@@ -741,71 +741,71 @@ INSERT INTO public.m_creditbureau_configuration (id, configkey, value, organisat
 INSERT INTO public.m_creditbureau_configuration (id, configkey, value, organisation_creditbureau_id, description) VALUES ('8', 'addCreditReporturl', '', '1', '');
 
 
--- Data for Name: m_organisation_creditbureau; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_organisation_creditbureau; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_creditbureau_loanproduct_mapping; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_creditbureau_loanproduct_mapping; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_creditbureau_token; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_creditbureau_token; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_creditreport; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_creditreport; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_delinquency_range; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_delinquency_range; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_delinquency_bucket_mappings; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_delinquency_bucket_mappings; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_deposit_account_on_hold_transaction; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_deposit_account_on_hold_transaction; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_deposit_account_recurring_detail; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_deposit_account_recurring_detail; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_deposit_account_term_and_preclosure; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_deposit_account_term_and_preclosure; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_interest_rate_chart; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_interest_rate_chart; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_deposit_product_interest_rate_chart; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_deposit_product_interest_rate_chart; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_deposit_product_recurring_detail; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_deposit_product_recurring_detail; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_deposit_product_term_and_preclosure; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_deposit_product_term_and_preclosure; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_document; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_document; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: x_registered_table; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: x_registered_table; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_entity_datatable_check; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_entity_datatable_check; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_entity_relation; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_entity_relation; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_entity_relation (id, from_entity_type, to_entity_type, code_name) VALUES ('1', '1', '2', 'office_access_to_loan_products');
 INSERT INTO public.m_entity_relation (id, from_entity_type, to_entity_type, code_name) VALUES ('2', '1', '3', 'office_access_to_savings_products');
@@ -814,19 +814,19 @@ INSERT INTO public.m_entity_relation (id, from_entity_type, to_entity_type, code
 INSERT INTO public.m_entity_relation (id, from_entity_type, to_entity_type, code_name) VALUES ('5', '5', '3', 'role_access_to_savings_products');
 
 
--- Data for Name: m_entity_to_entity_access; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_entity_to_entity_access; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_entity_to_entity_mapping; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_entity_to_entity_mapping; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_external_event; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_external_event; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_external_event_configuration; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_external_event_configuration; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_external_event_configuration (type, enabled) VALUES ('ClientActivateBusinessEvent', 'f');
 INSERT INTO public.m_external_event_configuration (type, enabled) VALUES ('ClientCreateBusinessEvent', 'f');
@@ -943,11 +943,11 @@ INSERT INTO public.m_external_event_configuration (type, enabled) VALUES ('LoanA
 INSERT INTO public.m_external_event_configuration (type, enabled) VALUES ('SavingsAccountForceWithdrawalBusinessEvent', 'f');
 
 
--- Data for Name: m_family_members; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_family_members; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_field_configuration; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_field_configuration; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_field_configuration (id, entity, subentity, field, is_enabled, is_mandatory, validation_regex) VALUES ('1', 'ADDRESS', 'CLIENT', 'addressType', 't', 'f', '');
 INSERT INTO public.m_field_configuration (id, entity, subentity, field, is_enabled, is_mandatory, validation_regex) VALUES ('3', 'ADDRESS', 'CLIENT', 'addressLine1', 't', 'f', '');
@@ -968,47 +968,47 @@ INSERT INTO public.m_field_configuration (id, entity, subentity, field, is_enabl
 INSERT INTO public.m_field_configuration (id, entity, subentity, field, is_enabled, is_mandatory, validation_regex) VALUES ('18', 'ADDRESS', 'CLIENT', 'isActive', 't', 'f', '');
 
 
--- Data for Name: m_floating_rates; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_floating_rates; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_floating_rates_periods; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_floating_rates_periods; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_group_client; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_group_client; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_group_roles; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_group_roles; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_guarantor; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_guarantor; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_portfolio_account_associations; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_portfolio_account_associations; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_guarantor_funding_details; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_guarantor_funding_details; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_guarantor_transaction; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_guarantor_transaction; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_holiday; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_holiday; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_holiday_office; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_holiday_office; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_hook_templates; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_hook_templates; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_hook_templates (id, name) VALUES ('1', 'Web');
 INSERT INTO public.m_hook_templates (id, name) VALUES ('2', 'SMS Bridge');
@@ -1016,23 +1016,23 @@ INSERT INTO public.m_hook_templates (id, name) VALUES ('3', 'Elastic Search');
 INSERT INTO public.m_hook_templates (id, name) VALUES ('4', 'Message Gateway');
 
 
--- Data for Name: m_template; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_template; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_hook; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_hook; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_hook_configuration; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_hook_configuration; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_hook_registered_events; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_hook_registered_events; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_hook_schema; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_hook_schema; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_hook_schema (id, hook_template_id, field_type, field_name, placeholder, optional) VALUES ('1', '1', 'string', 'Payload URL', NULL, 'f');
 INSERT INTO public.m_hook_schema (id, hook_template_id, field_type, field_name, placeholder, optional) VALUES ('2', '1', 'string', 'Content Type', 'json / form', 'f');
@@ -1047,147 +1047,147 @@ INSERT INTO public.m_hook_schema (id, hook_template_id, field_type, field_name, 
 INSERT INTO public.m_hook_schema (id, hook_template_id, field_type, field_name, placeholder, optional) VALUES ('11', '4', 'string', 'SMS Provider Id', NULL, 'f');
 
 
--- Data for Name: m_import_document; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_import_document; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_interest_rate_slab; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_interest_rate_slab; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_interest_incentives; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_interest_incentives; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_journal_entry_aggregation_summary; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_journal_entry_aggregation_summary; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_journal_entry_aggregation_tracking; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_journal_entry_aggregation_tracking; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_account_locks; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_account_locks; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_amortization_allocation_mapping; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_amortization_allocation_mapping; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_approved_amount_history; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_approved_amount_history; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_arrears_aging; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_arrears_aging; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_buy_down_fee_balance; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_buy_down_fee_balance; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_capitalized_income_balance; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_capitalized_income_balance; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_charge; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_charge; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_charge_paid_by; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_charge_paid_by; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_collateral; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_collateral; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_collateral_management; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_collateral_management; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_delinquency_tag_history; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_delinquency_tag_history; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_disbursement_detail; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_disbursement_detail; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_repayment_schedule; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_repayment_schedule; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_installment_charge; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_installment_charge; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_interest_recalculation_additional_details; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_interest_recalculation_additional_details; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_officer_assignment_history; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_officer_assignment_history; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_overdue_installment_charge; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_overdue_installment_charge; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_rate; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_rate; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_rate; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_rate; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_reage_parameter; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_reage_parameter; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_recalculation_details; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_recalculation_details; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_reschedule_request; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_reschedule_request; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_repayment_schedule_history; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_repayment_schedule_history; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_term_variations; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_term_variations; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_reschedule_request_term_variations_mapping; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_reschedule_request_term_variations_mapping; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_topup; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_topup; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_tranche_charges; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_tranche_charges; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_tranche_disbursement_charge; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_tranche_disbursement_charge; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_transaction_relation; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_transaction_relation; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loan_transaction_repayment_schedule_mapping; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loan_transaction_repayment_schedule_mapping; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_provision_category; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_provision_category; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_provision_category (id, category_name, description) VALUES ('1', 'STANDARD', 'Punctual Payment without any dues');
 INSERT INTO public.m_provision_category (id, category_name, description) VALUES ('2', 'SUB-STANDARD', 'Principal and/or Interest overdue by x days');
@@ -1195,47 +1195,47 @@ INSERT INTO public.m_provision_category (id, category_name, description) VALUES 
 INSERT INTO public.m_provision_category (id, category_name, description) VALUES ('4', 'LOSS', 'Principal and/or Interest overdue by y days');
 
 
--- Data for Name: m_provisioning_criteria; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_provisioning_criteria; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_provisioning_history; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_provisioning_history; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loanproduct_provisioning_entry; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loanproduct_provisioning_entry; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_loanproduct_provisioning_mapping; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_loanproduct_provisioning_mapping; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_mandatory_savings_schedule; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_mandatory_savings_schedule; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_note; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_note; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_office_transaction; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_office_transaction; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_organisation_currency; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_organisation_currency; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_organisation_currency (id, code, decimal_places, currency_multiplesof, name, display_symbol, internationalized_name_code) VALUES ('21', 'USD', '2', NULL, 'US Dollar', '$', 'currency.USD');
 
 
--- Data for Name: m_password_validation_policy; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_password_validation_policy; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_password_validation_policy (id, regex, description, active, key) VALUES ('2', '^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{6,50}$', 'Password must be at least 6 characters, no more than 50 characters long, must include at least one upper case letter, one lower case letter, one numeric digit and no space', 'f', 'secure');
 INSERT INTO public.m_password_validation_policy (id, regex, description, active, key) VALUES ('1', '^.{1,50}$', 'Password most be at least 1 character and not more that 50 characters long', 'f', 'simple');
 INSERT INTO public.m_password_validation_policy (id, regex, description, active, key) VALUES ('3', '^(?!.*(.)\1)(?!.*\s)(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^\w\s]).{12,50}$', 'Password must be 12 to 50 characters long, containing at least one uppercase letter, one lowercase letter, one numeric digit, and one special character, with no spaces or consecutive repeating characters', 't', 'strong');
 
 
--- Data for Name: m_permission; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_permission; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_permission (id, "grouping", code, entity_name, action_name, can_maker_checker) VALUES ('1', 'special', 'ALL_FUNCTIONS', NULL, NULL, 'f');
 INSERT INTO public.m_permission (id, "grouping", code, entity_name, action_name, can_maker_checker) VALUES ('2', 'special', 'ALL_FUNCTIONS_READ', NULL, NULL, 'f');
@@ -2149,55 +2149,55 @@ INSERT INTO public.m_permission (id, "grouping", code, entity_name, action_name,
 INSERT INTO public.m_permission (id, "grouping", code, entity_name, action_name, can_maker_checker) VALUES ('960', 'portfolio', 'FORCE_WITHDRAWAL_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'FORCE_WITHDRAWAL_CHECKER', 'f');
 
 
--- Data for Name: m_portfolio_command_source; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_portfolio_command_source; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_product_loan_charge; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_product_loan_charge; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_product_loan_configurable_attributes; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_product_loan_configurable_attributes; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_product_loan_floating_rates; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_product_loan_floating_rates; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_product_loan_guarantee_details; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_product_loan_guarantee_details; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_product_loan_rate; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_product_loan_rate; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_product_loan_recalculation_details; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_product_loan_recalculation_details; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_product_loan_variable_installment_config; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_product_loan_variable_installment_config; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_product_loan_variations_borrower_cycle; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_product_loan_variations_borrower_cycle; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_product_mix; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_product_mix; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_provisioning_criteria_definition; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_provisioning_criteria_definition; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_repayment_with_post_dated_checks; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_repayment_with_post_dated_checks; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: stretchy_report; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: stretchy_report; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.stretchy_report (id, report_name, report_type, report_subtype, report_category, report_sql, description, core_report, use_report, self_service_user_report) VALUES ('1', 'Client Listing', 'Table', NULL, 'Client', 'SELECT Concat(REPEAT(''..'', (( Length(ounder.hierarchy) - Length( REPLACE(ounder.hierarchy, ''.'', '''')) - 1 ))) , ounder.name)  AS "Office/Branch", c.account_no  AS "Client Account No.", c.display_name  AS name, r.enum_message_property AS "Status", c.activation_date AS "Activation", c.external_id AS "External Id" FROM   m_office o JOIN m_office ounder ON ounder.hierarchy LIKE Concat(o.hierarchy, ''%'') AND ounder.hierarchy LIKE Concat(''${currentUserHierarchy}'', ''%'') JOIN m_client c ON c.office_id = ounder.id LEFT JOIN r_enum_value r ON r.enum_name = ''status_enum'' AND r.enum_id = c.status_enum WHERE  o.id = ''${officeId}'' ORDER  BY ounder.hierarchy, c.account_no', 'Individual Client Report    Lists the small number of defined fields on the client table.  Would expect to copy this   report and add any ''one to one'' additional data for specific tenant needs.    Can be run for any size MFI but you''d expect it only to be run within a branch for   larger ones.  Depending on how many columns are displayed, there is probably is a limit of about 20/50k clients returned for html display (export to excel doesn''t   have that client browser/memory impact).', 't', 't', 'f');
 INSERT INTO public.stretchy_report (id, report_name, report_type, report_subtype, report_category, report_sql, description, core_report, use_report, self_service_user_report) VALUES ('2', 'Client Loans Listing', 'Table', NULL, 'Client', 'SELECT    Concat(REPEAT(''..'', ((Length(ounder.hierarchy) - Length(REPLACE(ounder.hierarchy, ''.'', '''')) - 1))), ounder.name) AS "Office/Branch", c.account_no AS "Client Account No.", c.display_name AS name, r.enum_message_property  AS "Client Status", lo.display_name  AS "Loan Officer", l.account_no AS "Loan Account No.", l.external_id  AS "External Id", p.name AS loan, st.enum_message_property AS "Status", f.name AS fund, purp.code_value  AS "Loan Purpose", Coalesce(cur.display_symbol, l.currency_code)  AS currency, l.principal_amount, l.arrearstolerance_amount AS "Arrears Tolerance Amount", l.number_of_repayments  AS "Expected No. Repayments", l.annual_nominal_interest_rate  AS "Annual Nominal Interest Rate", l.nominal_interest_rate_per_period  AS "Nominal Interest Rate Per Period", ipf.enum_message_property AS "Interest Rate Frequency", im.enum_message_property  AS "Interest Method", icp.enum_message_property AS "Interest Calculated in Period", l.term_frequency  AS "Term Frequency", tf.enum_message_property  AS "Term Frequency Period", l.repay_every AS "Repayment Frequency", rf.enum_message_property  AS "Repayment Frequency Period", am.enum_message_property  AS "Amortization", l.total_charges_due_at_disbursement_derived AS "Total Charges Due At Disbursement", DATE_TRUNC(''day'', l.submittedon_date) AS submitted, DATE_TRUNC(''day'', l.approvedon_date)                   approved, l.expected_disbursedon_date AS "Expected Disbursal", DATE_TRUNC(''day'', l.expected_firstrepaymenton_date) AS "Expected First Repayment", DATE_TRUNC(''day'', l.interest_calculated_from_date)  AS "Interest Calculated From" , DATE_TRUNC(''day'', l.disbursedon_date) AS disbursed, DATE_TRUNC(''day'', l.expected_maturedon_date)  AS "Expected Maturity", DATE_TRUNC(''day'', l.maturedon_date) AS "Matured On", DATE_TRUNC(''day'', l.closedon_date)  AS closed, DATE_TRUNC(''day'', l.rejectedon_date)  AS rejected, DATE_TRUNC(''day'', l.rescheduledon_date) AS rescheduled, DATE_TRUNC(''day'', l.withdrawnon_date) AS withdrawn, DATE_TRUNC(''day'', l.writtenoffon_date)  AS "Written Off" FROM      m_office o JOIN      m_office ounder ON        ounder.hierarchy LIKE concat(o.hierarchy, ''%'') AND       ounder.hierarchy LIKE concat(''${currentUserHierarchy}'', ''%'') JOIN      m_client c ON        c.office_id = ounder.id LEFT JOIN r_enum_value r ON        r.enum_name = ''status_enum'' AND       r.enum_id = c.status_enum LEFT JOIN m_loan l ON        l.client_id = c.id LEFT JOIN m_staff lo ON        lo.id = l.loan_officer_id LEFT JOIN m_product_loan p ON        p.id = l.product_id LEFT JOIN m_fund f ON        f.id = l.fund_id LEFT JOIN r_enum_value st ON        st.enum_name = ''loan_status_id'' AND       st.enum_id = l.loan_status_id LEFT JOIN r_enum_value ipf ON        ipf.enum_name = ''interest_period_frequency_enum'' AND       ipf.enum_id = l.interest_period_frequency_enum LEFT JOIN r_enum_value im ON        im.enum_name = ''interest_method_enum'' AND       im.enum_id = l.interest_method_enum LEFT JOIN r_enum_value tf ON        tf.enum_name = ''term_period_frequency_enum'' AND       tf.enum_id = l.term_period_frequency_enum LEFT JOIN r_enum_value icp ON        icp.enum_name = ''interest_calculated_in_period_enum'' AND       icp.enum_id = l.interest_calculated_in_period_enum LEFT JOIN r_enum_value rf ON        rf.enum_name = ''repayment_period_frequency_enum'' AND       rf.enum_id = l.repayment_period_frequency_enum LEFT JOIN r_enum_value am ON        am.enum_name = ''amortization_method_enum'' AND       am.enum_id = l.amortization_method_enum LEFT JOIN m_code_value purp ON        purp.id = l.loanpurpose_cv_id LEFT JOIN m_currency cur ON        cur.code = l.currency_code WHERE     o.id = ''${officeId}'' AND       ( l.currency_code = ''${currencyId}'' OR        ''-1'' = ''${currencyId}'') AND       ( l.product_id = ''${loanProductId}'' OR        ''-1'' = ''${loanProductId}'') AND       ( coalesce(l.loan_officer_id, -10) = ${loanOfficerId} OR        ''-1'' = ${loanOfficerId}) AND       ( coalesce(l.fund_id, -10) = ${fundId} OR        -1 = ${fundId}) AND       ( coalesce(l.loanpurpose_cv_id, -10) = ${loanPurposeId} OR        -1 = ${loanPurposeId}) ORDER BY  ounder.hierarchy, 2 , l.id', 'Individual Client Report    Pretty   wide report that lists the basic details of client loans.      Can be run for any size MFI but you''d expect it only to be run within a branch for larger ones.    There is probably is a limit of about 20/50k clients returned for html display (export to excel doesn''t have that client browser/memory impact).', 't', 't', 'f');
@@ -2285,11 +2285,11 @@ INSERT INTO public.stretchy_report (id, report_name, report_type, report_subtype
 INSERT INTO public.stretchy_report (id, report_name, report_type, report_subtype, report_category, report_sql, description, core_report, use_report, self_service_user_report) VALUES ('200', 'Transaction Summary Report with Asset Owner', 'Table', NULL, 'Accounting', 'WITH slt_except_charge_adj_and_accrual AS (SELECT ''${endDate}'' AS transactiondate,\n          t.id,\n          l.name,\n          d.payment_type_id,\n          CASE\n              WHEN d.payment_type_id IS NULL AND t.classification_cv_id IS NOT NULL\n                  THEN (SELECT code_value FROM m_code_value WHERE id = t.classification_cv_id)\n              ELSE NULL END AS classification_name,\n          t.transaction_type_enum,\n          t.amount,\n          t.overpayment_portion_derived,\n          t.principal_portion_derived,\n          t.interest_portion_derived,\n          t.fee_charges_portion_derived,\n          t.penalty_charges_portion_derived,\n          e.status,\n          e.settlement_date,\n          e.owner_id,\n          m.charged_off_on_date,\n          t.transaction_date,\n          m.charge_off_reason_cv_id,\n          (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n   FROM m_loan_transaction t\n            JOIN m_loan m ON m.id = t.loan_id\n            JOIN m_product_loan l ON l.id = m.product_id\n            LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id\n            LEFT JOIN m_external_asset_owner_transfer e\n                      ON e.loan_id = t.loan_id AND\n     e.settlement_date < ''${endDate}'' AND\n     e.effective_date_to >= ''${endDate}''\n   WHERE t.submitted_on_date = ''${endDate}''\n     AND t.transaction_type_enum not in (10, 26, 32, 34, 36, 39, 42, 43)\n     AND (t.office_id = ${officeId})),\n     slt_charge_adj AS (SELECT ''${endDate}'' AS transactiondate,\n           t.id,\n           l.name,\n           t.transaction_type_enum,\n           d.payment_type_id,\n           t.overpayment_portion_derived,\n           t.principal_portion_derived,\n           t.interest_portion_derived,\n           t.fee_charges_portion_derived,\n           t.penalty_charges_portion_derived,\n           t.amount,\n           e.status,\n           e.settlement_date,\n           e.owner_id,\n           m.charged_off_on_date,\n           t.transaction_date,\n           m.charge_off_reason_cv_id,\n           (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n    FROM m_loan_transaction t\n             JOIN m_loan m ON m.id = t.loan_id\n             JOIN m_product_loan l ON l.id = m.product_id\n             LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id\n             LEFT JOIN m_external_asset_owner_transfer e\n   ON e.loan_id = t.loan_id AND e.settlement_date < ''${endDate}'' AND\n      e.effective_date_to >= ''${endDate}''\n    WHERE t.submitted_on_date = ''${endDate}''\n      AND t.transaction_type_enum = 26\n      AND (t.office_id = ${officeId})),\n     rlt_except_charge_adj_and_accrual AS (SELECT ''${endDate}'' AS transactiondate,\n          t.id,\n          l.name,\n          t.transaction_type_enum,\n          d.payment_type_id,\n          CASE\n              WHEN d.payment_type_id IS NULL AND t.classification_cv_id IS NOT NULL\n                  THEN (SELECT code_value FROM m_code_value WHERE id = t.classification_cv_id)\n              ELSE NULL END AS classification_name,\n          t.overpayment_portion_derived,\n          t.principal_portion_derived,\n          t.interest_portion_derived,\n          t.fee_charges_portion_derived,\n          t.penalty_charges_portion_derived,\n          t.amount,\n          e.status,\n          e.settlement_date,\n          e.owner_id,\n          m.charged_off_on_date,\n          t.transaction_date,\n          m.charge_off_reason_cv_id,\n          (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n   FROM m_loan_transaction t\n            JOIN m_loan m ON m.id = t.loan_id\n            JOIN m_product_loan l ON l.id = m.product_id\n            LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id\n            LEFT JOIN m_external_asset_owner_transfer e\n                      ON e.loan_id = t.loan_id AND\n     e.settlement_date < ''${endDate}'' AND\n     e.effective_date_to >= ''${endDate}''\n   WHERE t.reversed_on_date = ''${endDate}''\n     AND t.transaction_type_enum not in (10, 26, 32, 34, 36, 39, 42, 43)\n     AND (t.office_id = ${officeId})),\n     rlt_charge_adj AS (SELECT ''${endDate}'' AS transactiondate,\n           t.id,\n           l.name,\n           t.transaction_type_enum,\n           d.payment_type_id,\n           t.overpayment_portion_derived,\n           t.principal_portion_derived,\n           t.interest_portion_derived,\n           t.fee_charges_portion_derived,\n           t.penalty_charges_portion_derived,\n           t.amount,\n           e.status,\n           e.settlement_date,\n           e.owner_id,\n           m.charged_off_on_date,\n           t.transaction_date,\n           m.charge_off_reason_cv_id,\n           (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n    FROM m_loan_transaction t\n             JOIN m_loan m ON m.id = t.loan_id\n             JOIN m_product_loan l ON l.id = m.product_id\n             LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id\n             LEFT JOIN m_external_asset_owner_transfer e\n   ON e.loan_id = t.loan_id AND e.settlement_date < ''${endDate}'' AND\n      e.effective_date_to >= ''${endDate}''\n    WHERE t.reversed_on_date = ''${endDate}''\n      AND t.transaction_type_enum = 26\n      AND (t.office_id = ${officeId})),\n     slt_cap_income_amortization AS (SELECT ''${endDate}'' AS transactiondate,\n    t.id,\n    l.name,\n    t.transaction_type_enum,\n    d.payment_type_id,\n    CASE\n        WHEN d.payment_type_id IS NULL AND bt.classification_cv_id IS NOT NULL\n            THEN (SELECT code_value FROM m_code_value WHERE id = bt.classification_cv_id)\n        ELSE NULL END AS classification_name,\n    CASE\n        WHEN t.overpayment_portion_derived IS NOT NULL\n            THEN map.amount\n        ELSE NULL END AS overpayment_portion_derived,\n    CASE\n        WHEN t.principal_portion_derived IS NOT NULL\n            THEN map.amount\n        ELSE NULL END AS principal_portion_derived,\n    CASE\n        WHEN t.interest_portion_derived IS NOT NULL\n            THEN map.amount\n        ELSE NULL END AS interest_portion_derived,\n    CASE\n        WHEN t.fee_charges_portion_derived IS NOT NULL\n            THEN map.amount\n        ELSE NULL END AS fee_charges_portion_derived,\n    CASE\n        WHEN t.penalty_charges_portion_derived IS NOT NULL\n            THEN map.amount\n        ELSE NULL END AS penalty_charges_portion_derived,\n    map.amount,\n    e.status,\n    e.settlement_date,\n    e.owner_id,\n    m.charged_off_on_date,\n    t.transaction_date,\n    m.charge_off_reason_cv_id,\n    (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n                 FROM m_loan_transaction t\n      JOIN m_loan m ON m.id = t.loan_id\n      JOIN m_product_loan l ON l.id = m.product_id\n      LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id\n      JOIN m_loan_amortization_allocation_mapping map\n           ON map.amortization_loan_transaction_id = t.id\n      JOIN m_loan_transaction bt ON bt.id = map.base_loan_transaction_id\n      LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id AND\n             e.settlement_date <\n             ''${endDate}'' AND\n             e.effective_date_to >=\n             ''${endDate}''\n                 WHERE t.submitted_on_date = ''${endDate}''\n                   AND t.is_reversed = false\n                   AND t.transaction_type_enum IN (36, 39, 42, 43)\n                   AND (t.office_id = ${officeId})),\n     rlt_cap_income_amortization AS (SELECT ''${endDate}'' AS transactiondate,\n    t.id,\n    l.name,\n    t.transaction_type_enum,\n    d.payment_type_id,\n    CASE\n        WHEN d.payment_type_id IS NULL AND bt.classification_cv_id IS NOT NULL\n            THEN (SELECT code_value FROM m_code_value WHERE id = bt.classification_cv_id)\n        ELSE NULL END AS classification_name,\n    CASE\n        WHEN t.overpayment_portion_derived IS NOT NULL\n            THEN map.amount\n        ELSE NULL END AS overpayment_portion_derived,\n    CASE\n        WHEN t.principal_portion_derived IS NOT NULL\n            THEN map.amount\n        ELSE NULL END AS principal_portion_derived,\n    CASE\n        WHEN t.interest_portion_derived IS NOT NULL\n            THEN map.amount\n        ELSE NULL END AS interest_portion_derived,\n    CASE\n        WHEN t.fee_charges_portion_derived IS NOT NULL\n            THEN map.amount\n        ELSE NULL END AS fee_charges_portion_derived,\n    CASE\n        WHEN t.penalty_charges_portion_derived IS NOT NULL\n            THEN map.amount\n        ELSE NULL END AS penalty_charges_portion_derived,\n    map.amount,\n    e.status,\n    e.settlement_date,\n    e.owner_id,\n    m.charged_off_on_date,\n    t.transaction_date,\n    m.charge_off_reason_cv_id,\n    (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n                 FROM m_loan_transaction t\n      JOIN m_loan m ON m.id = t.loan_id\n      JOIN m_product_loan l ON l.id = m.product_id\n      LEFT JOIN m_payment_detail d ON d.id = t.payment_detail_id\n      JOIN m_loan_amortization_allocation_mapping map\n           ON map.amortization_loan_transaction_id = t.id\n      JOIN m_loan_transaction bt ON bt.id = map.base_loan_transaction_id\n      LEFT JOIN m_external_asset_owner_transfer e ON e.loan_id = t.loan_id AND\n             e.settlement_date <\n             ''${endDate}'' AND\n             e.effective_date_to >=\n             ''${endDate}''\n                 WHERE t.reversed_on_date = ''${endDate}''\n                   AND t.is_reversed = true\n                   AND t.transaction_type_enum IN (36, 39, 42, 43)\n                   AND (t.office_id = ${officeId})),\n     active_external_asset_owner_transfers AS (SELECT ''${endDate}'' AS transactiondate,\n              t.id,\n              p.name,\n              t.owner_id,\n              t.previous_owner_id,\n              dt.principal_outstanding_derived,\n              dt.interest_outstanding_derived,\n              dt.fee_charges_outstanding_derived,\n              dt.penalty_charges_outstanding_derived,\n              dt.total_overpaid_derived,\n              l.charged_off_on_date,\n              t.settlement_date,\n              l.charge_off_reason_cv_id,\n              (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n       FROM m_external_asset_owner_transfer t\n                JOIN m_loan l ON l.id = t.loan_id\n                JOIN m_client c ON c.id = l.client_id\n                JOIN m_product_loan p ON p.id = l.product_id\n                JOIN m_external_asset_owner_transfer_details dt\n                     ON dt.asset_owner_transfer_id = t.id\n       WHERE t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'')\n         AND c.office_id = ${officeId}\n         AND t.settlement_date = ''${endDate}''),\n     buyback_external_asset_owner_transfers AS (SELECT ''${endDate}'' AS transactiondate,\n               t.id,\n               p.name,\n               dt.principal_outstanding_derived,\n               dt.interest_outstanding_derived,\n               dt.fee_charges_outstanding_derived,\n               dt.penalty_charges_outstanding_derived,\n               dt.total_overpaid_derived,\n               l.charged_off_on_date,\n               t.settlement_date,\n               l.charge_off_reason_cv_id,\n               t.owner_id,\n               (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n        FROM m_external_asset_owner_transfer t\n                 JOIN m_loan l ON l.id = t.loan_id\n                 JOIN m_client c ON c.id = l.client_id\n                 JOIN m_product_loan p ON p.id = l.product_id\n                 JOIN m_external_asset_owner_transfer_details dt\n                      ON dt.asset_owner_transfer_id = t.id\n        WHERE t.status in (''BUYBACK'', ''BUYBACK_INTERMEDIATE'')\n          AND c.office_id = ${officeId}\n          AND t.settlement_date = ''${endDate}'')\nSELECT ''${endDate}'' AS TransactionDate,\n       a.product AS Product,\n       CASE\n           WHEN a.transaction_type = 9999 THEN ''Asset Transfer''\n           WHEN a.transaction_type = 99999 THEN ''Asset Buyback''\n           ELSE (SELECT enum_message_property\n                 FROM r_enum_value\n                 WHERE enum_name = ''transaction_type_enum''\n                   AND enum_id = a.transaction_type) END AS TransactionType_Name,\n       COALESCE((SELECT value FROM m_payment_type WHERE id = a.payment_type_id),\n                a.classification_name) AS PaymentType_Name,\n       a.chargetype AS chargetype,\n       a.reversal_indicator AS Reversed,\n       a.Allocation_Type AS Allocation_Type,\n       (SELECT code_value FROM m_code_value WHERE id = a.charge_off_reason_id) AS Chargeoff_ReasonCode,\n       CASE\n           WHEN a.transaction_type = 9999 THEN sum(a.amount) * + 1\n           WHEN a.transaction_type = 99999 THEN sum(a.amount) * - 1\n           WHEN a.transaction_type IN (2, 23, 21, 22, 24, 4, 5, 8, 6, 27, 9, 26, 28, 31, 33, 34, 37, 39, 41, 43) AND\n                a.reversal_indicator = false THEN sum(a.amount) * -1\n           WHEN a.transaction_type IN (2, 23, 21, 22, 24, 4, 5, 8, 6, 27, 9, 26, 28, 31, 33, 34, 37, 39, 41, 43) AND\n                a.reversal_indicator = true THEN sum(a.amount) * + 1\n           WHEN a.transaction_type IN (1, 10, 25, 20, 35, 36, 40, 42) AND a.reversal_indicator = false THEN sum(a.amount) * + 1\n           WHEN a.transaction_type IN (1, 10, 25, 20, 35, 36, 40, 42) AND a.reversal_indicator = true\n               THEN sum(a.amount) * -1 END AS Transaction_Amount,\n       (SELECT external_id\n        FROM m_external_asset_owner\n        WHERE id = a.asset_owner_id) AS Asset_owner_id,\n       (SELECT external_id\n        FROM m_external_asset_owner\n        WHERE id = a.from_asset_owner_id) AS From_asset_owner_id,\n       a.originator_external_ids\nFROM (SELECT t.transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Principal'' AS Allocation_Type,\n             CASE\n                 WHEN t.transaction_type_enum in (1) THEN (CASE\n   WHEN t.amount is null THEN 0\n   WHEN t.overpayment_portion_derived is null THEN t.amount\n   WHEN t.overpayment_portion_derived is not null\n       THEN t.amount - t.overpayment_portion_derived\n   ELSE t.amount END)\n                 ELSE (CASE\n       WHEN t.principal_portion_derived is null THEN 0\n       ELSE t.principal_portion_derived end) END amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_except_charge_adj_and_accrual AS t\n      UNION ALL\n      SELECT t.transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Interest'' AS Allocation_Type,\n             CASE WHEN t.interest_portion_derived is null THEN 0 ELSE t.interest_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_except_charge_adj_and_accrual AS t\n      UNION ALL\n      SELECT t.transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Fees'' AS Allocation_Type,\n             CASE WHEN t.fee_charges_portion_derived is null THEN 0 ELSE t.fee_charges_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_except_charge_adj_and_accrual AS t\n      UNION ALL\n      SELECT t.transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Penalty'' AS Allocation_Type,\n             CASE\n                 WHEN t.penalty_charges_portion_derived is null THEN 0\n                 ELSE t.penalty_charges_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_except_charge_adj_and_accrual AS t\n      UNION ALL\n      SELECT t.transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Unallocated Credit (UNC)'' AS Allocation_Type,\n             CASE WHEN t.overpayment_portion_derived is null THEN 0 ELSE t.overpayment_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_except_charge_adj_and_accrual AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Fees'' AS Allocation_Type,\n             CASE WHEN t.fee_charges_portion_derived is null THEN 0 ELSE t.fee_charges_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.transaction_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_cap_income_amortization AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Penalty'' AS Allocation_Type,\n             CASE\n                 WHEN t.penalty_charges_portion_derived is null THEN 0\n                 ELSE t.penalty_charges_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.transaction_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_cap_income_amortization AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Interest'' AS Allocation_Type,\n             CASE WHEN t.interest_portion_derived is null THEN 0 ELSE t.interest_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.transaction_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_cap_income_amortization AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Principal'' AS Allocation_Type,\n             CASE WHEN t.principal_portion_derived is null THEN 0 ELSE t.principal_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.transaction_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_cap_income_amortization AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Unallocated Credit (UNC)'' AS Allocation_Type,\n             CASE WHEN t.overpayment_portion_derived is null THEN 0 ELSE t.overpayment_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.transaction_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_cap_income_amortization AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Fees'' AS Allocation_Type,\n             CASE WHEN t.fee_charges_portion_derived is null THEN 0 ELSE t.fee_charges_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.transaction_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_cap_income_amortization AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Penalty'' AS Allocation_Type,\n             CASE\n                 WHEN t.penalty_charges_portion_derived is null THEN 0\n                 ELSE t.penalty_charges_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.transaction_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_cap_income_amortization AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Interest'' AS Allocation_Type,\n             CASE WHEN t.interest_portion_derived is null THEN 0 ELSE t.interest_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.transaction_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_cap_income_amortization AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Principal'' AS Allocation_Type,\n             CASE WHEN t.principal_portion_derived is null THEN 0 ELSE t.principal_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.transaction_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_cap_income_amortization AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Unallocated Credit (UNC)'' AS Allocation_Type,\n             CASE WHEN t.overpayment_portion_derived is null THEN 0 ELSE t.overpayment_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.transaction_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_cap_income_amortization AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             l.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             mc.name AS chargetype,\n             false AS reversal_indicator,\n             ''Fees'' AS Allocation_Type,\n             CASE WHEN pd.amount is null THEN 0 ELSE pd.amount END AS amount,\n             CASE\n                 WHEN e.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND e.settlement_date < ''${endDate}''\n THEN e.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (m.charged_off_on_date <= t.transaction_date)\n THEN m.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n      FROM m_loan_transaction t\n               JOIN m_loan m ON m.id = t.loan_id\n               JOIN m_product_loan l ON l.id = m.product_id\n               JOIN m_loan_charge_paid_by pd ON pd.loan_transaction_id = t.id\n               JOIN m_loan_charge c ON c.id = pd.loan_charge_id\n               JOIN m_charge mc ON mc.id = c.charge_id AND mc.is_penalty = false\n               LEFT JOIN m_external_asset_owner_transfer e\n     ON e.loan_id = t.loan_id AND e.settlement_date < ''${endDate}'' AND\n        e.effective_date_to >= ''${endDate}''\n      WHERE t.submitted_on_date = ''${endDate}''\n        AND t.transaction_type_enum = 10\n        AND t.is_reversed = false\n        AND (t.office_id = ${officeId})\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             l.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             mc.name AS chargetype,\n             false AS reversal_indicator,\n             ''Penalty'' AS Allocation_Type,\n             CASE WHEN pd.amount is null THEN 0 ELSE pd.amount END AS amount,\n             CASE\n                 WHEN e.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND e.settlement_date < ''${endDate}''\n THEN e.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (m.charged_off_on_date <= t.transaction_date)\n THEN m.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n      FROM m_loan_transaction t\n               JOIN m_loan m ON m.id = t.loan_id\n               JOIN m_product_loan l ON l.id = m.product_id\n               JOIN m_loan_charge_paid_by pd ON pd.loan_transaction_id = t.id\n               JOIN m_loan_charge c ON c.id = pd.loan_charge_id\n               JOIN m_charge mc ON mc.id = c.charge_id AND mc.is_penalty = true\n               LEFT JOIN m_external_asset_owner_transfer e\n     ON e.loan_id = t.loan_id AND e.settlement_date < ''${endDate}'' AND\n        e.effective_date_to >= ''${endDate}''\n      WHERE t.submitted_on_date = ''${endDate}''\n        AND t.transaction_type_enum = 10\n        AND t.is_reversed = false\n        AND (t.office_id = ${officeId})\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             l.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Interest'' AS Allocation_Type,\n             CASE WHEN t.interest_portion_derived is null THEN 0 ELSE t.interest_portion_derived END AS amount,\n             CASE\n                 WHEN e.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND e.settlement_date < ''${endDate}''\n THEN e.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (m.charged_off_on_date <= t.transaction_date)\n THEN m.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n      FROM m_loan_transaction t\n               JOIN m_loan m ON m.id = t.loan_id\n               JOIN m_product_loan l ON l.id = m.product_id\n               LEFT JOIN m_external_asset_owner_transfer e\n     ON e.loan_id = t.loan_id AND e.settlement_date < ''${endDate}'' AND\n        e.effective_date_to >= ''${endDate}''\n      WHERE t.submitted_on_date = ''${endDate}''\n        AND t.transaction_type_enum in (10, 34)\n        AND t.is_reversed = false\n        AND (t.office_id = ${officeId})\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Fees'' AS Allocation_Type,\n             CASE WHEN t.fee_charges_portion_derived is null THEN 0 ELSE t.fee_charges_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_charge_adj AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Penalty'' AS Allocation_Type,\n             CASE\n                 WHEN t.penalty_charges_portion_derived is null THEN 0\n                 ELSE t.penalty_charges_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_charge_adj AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Interest'' AS Allocation_Type,\n             CASE WHEN t.interest_portion_derived is null THEN 0 ELSE t.interest_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_charge_adj AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Principal'' AS Allocation_Type,\n             CASE WHEN t.principal_portion_derived is null THEN 0 ELSE t.principal_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_charge_adj AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Unallocated Credit (UNC)'' AS Allocation_Type,\n             CASE WHEN t.overpayment_portion_derived is null THEN 0 ELSE t.overpayment_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM slt_charge_adj AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             true AS reversal_indicator,\n             ''Principal'' AS Allocation_Type,\n             CASE\n                 WHEN t.transaction_type_enum in (1) THEN (CASE\n   WHEN t.amount is null THEN 0\n   WHEN t.overpayment_portion_derived is null THEN t.amount\n   WHEN t.overpayment_portion_derived is not null\n       THEN t.amount - t.overpayment_portion_derived\n   ELSE t.amount END)\n                 ELSE (CASE\n       WHEN t.principal_portion_derived is null THEN 0\n       ELSE t.principal_portion_derived end) END amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_except_charge_adj_and_accrual AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             true AS reversal_indicator,\n             ''Interest'' AS Allocation_Type,\n             CASE WHEN t.interest_portion_derived is null THEN 0 ELSE t.interest_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_except_charge_adj_and_accrual AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             true AS reversal_indicator,\n             ''Fees'' AS Allocation_Type,\n             CASE WHEN t.fee_charges_portion_derived is null THEN 0 ELSE t.fee_charges_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_except_charge_adj_and_accrual AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             true AS reversal_indicator,\n             ''Penalty'' AS Allocation_Type,\n             CASE\n                 WHEN t.penalty_charges_portion_derived is null THEN 0\n                 ELSE t.penalty_charges_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_except_charge_adj_and_accrual AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             t.classification_name,\n             '''' AS chargetype,\n             true AS reversal_indicator,\n             ''Unallocated Credit (UNC)'' AS Allocation_Type,\n             CASE WHEN t.overpayment_portion_derived is null THEN 0 ELSE t.overpayment_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_except_charge_adj_and_accrual AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             l.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             mc.name AS chargetype,\n             true AS reversal_indicator,\n             ''Fees'' AS Allocation_Type,\n             CASE WHEN pd.amount is null THEN 0 ELSE pd.amount END AS amount,\n             CASE\n                 WHEN e.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND e.settlement_date < ''${endDate}''\n THEN e.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (m.charged_off_on_date <= t.transaction_date)\n THEN m.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n      FROM m_loan_transaction t\n               JOIN m_loan m ON m.id = t.loan_id\n               JOIN m_product_loan l ON l.id = m.product_id\n               JOIN m_loan_charge_paid_by pd ON pd.loan_transaction_id = t.id\n               JOIN m_loan_charge c ON c.id = pd.loan_charge_id\n               JOIN m_charge mc ON mc.id = c.charge_id AND mc.is_penalty = false\n               LEFT JOIN m_external_asset_owner_transfer e\n     ON e.loan_id = t.loan_id AND e.settlement_date < ''${endDate}'' AND\n        e.effective_date_to >= ''${endDate}''\n      WHERE t.reversed_on_date = ''${endDate}''\n        AND t.transaction_type_enum = 10\n        AND t.is_reversed = true\n        AND (t.office_id = ${officeId})\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             l.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             mc.name AS chargetype,\n             true AS reversal_indicator,\n             ''Penalty'' AS Allocation_Type,\n             CASE WHEN pd.amount is null THEN 0 ELSE pd.amount END AS amount,\n             CASE\n                 WHEN e.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND e.settlement_date < ''${endDate}''\n THEN e.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (m.charged_off_on_date <= t.transaction_date)\n THEN m.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n      FROM m_loan_transaction t\n               JOIN m_loan m ON m.id = t.loan_id\n               JOIN m_product_loan l ON l.id = m.product_id\n               JOIN m_loan_charge_paid_by pd ON pd.loan_transaction_id = t.id\n               JOIN m_loan_charge c ON c.id = pd.loan_charge_id\n               JOIN m_charge mc ON mc.id = c.charge_id AND mc.is_penalty = true\n               LEFT JOIN m_external_asset_owner_transfer e\n     ON e.loan_id = t.loan_id AND e.settlement_date < ''${endDate}'' AND\n        e.effective_date_to >= ''${endDate}''\n      WHERE t.reversed_on_date = ''${endDate}''\n        AND t.transaction_type_enum = 10\n        AND t.is_reversed = true\n        AND (t.office_id = ${officeId})\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             l.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             true AS reversal_indicator,\n             ''Interest'' AS Allocation_Type,\n             CASE WHEN t.interest_portion_derived is null THEN 0 ELSE t.interest_portion_derived END AS amount,\n             CASE\n                 WHEN e.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND e.settlement_date < ''${endDate}''\n THEN e.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (m.charged_off_on_date <= t.transaction_date)\n THEN m.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             (SELECT STRING_AGG(DISTINCT mlo.external_id, '', '' ORDER BY mlo.external_id) FROM m_loan_originator_mapping mlom JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id WHERE mlom.loan_id = t.loan_id) AS originator_external_ids\n      FROM m_loan_transaction t\n               JOIN m_loan m ON m.id = t.loan_id\n               JOIN m_product_loan l ON l.id = m.product_id\n               LEFT JOIN m_external_asset_owner_transfer e\n     ON e.loan_id = t.loan_id AND e.settlement_date < ''${endDate}'' AND\n        e.effective_date_to >= ''${endDate}''\n      WHERE t.reversed_on_date = ''${endDate}''\n        AND t.transaction_type_enum = 10\n        AND t.is_reversed = true\n        AND (t.office_id = ${officeId})\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             true AS reversal_indicator,\n             ''Fees'' AS Allocation_Type,\n             CASE WHEN t.fee_charges_portion_derived is null THEN 0 ELSE t.fee_charges_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_charge_adj AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             true AS reversal_indicator,\n             ''Penalty'' AS Allocation_Type,\n             CASE\n                 WHEN t.penalty_charges_portion_derived is null THEN 0\n                 ELSE t.penalty_charges_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_charge_adj AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             true AS reversal_indicator,\n             ''Interest'' AS Allocation_Type,\n             CASE WHEN t.interest_portion_derived is null THEN 0 ELSE t.interest_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_charge_adj AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             true AS reversal_indicator,\n             ''Principal'' AS Allocation_Type,\n             CASE WHEN t.principal_portion_derived is null THEN 0 ELSE t.principal_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_charge_adj AS t\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             t.transaction_type_enum AS transaction_type,\n             t.payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             true AS reversal_indicator,\n             ''Unallocated Credit (UNC)'' AS Allocation_Type,\n             CASE WHEN t.overpayment_portion_derived is null THEN 0 ELSE t.overpayment_portion_derived END AS amount,\n             CASE\n                 WHEN t.status in (''ACTIVE'', ''ACTIVE_INTERMEDIATE'') AND t.settlement_date < ''${endDate}''\n THEN t.owner_id END AS asset_owner_id,\n             CASE\n                 WHEN t.transaction_type_enum = 27 OR (t.charged_off_on_date <= t.transaction_date)\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             null::bigint AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM rlt_charge_adj AS t\n      UNION ALL\n      SELECT t.transactiondate,\n             t.id,\n             t.name AS product,\n             9999 AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Principal'' AS Allocation_type,\n             t.principal_outstanding_derived AS amount,\n             t.owner_id AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.settlement_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             t.previous_owner_id AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM active_external_asset_owner_transfers AS t\n      WHERE t.principal_outstanding_derived > 0\n      UNION ALL\n      SELECT t.transactiondate,\n             t.id,\n             t.name AS product,\n             9999 AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Interest'' AS Allocation_type,\n             t.interest_outstanding_derived AS amount,\n             t.owner_id AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.settlement_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             t.previous_owner_id AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM active_external_asset_owner_transfers AS t\n      WHERE t.interest_outstanding_derived > 0\n      UNION ALL\n      SELECT t.transactiondate,\n             t.id,\n             t.name AS product,\n             9999 AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Fees'' AS Allocation_type,\n             t.fee_charges_outstanding_derived AS amount,\n             t.owner_id AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.settlement_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             t.previous_owner_id AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM active_external_asset_owner_transfers AS t\n      WHERE t.fee_charges_outstanding_derived > 0\n      UNION ALL\n      SELECT t.transactiondate,\n             t.id,\n             t.name AS product,\n             9999 AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Penalty'' AS Allocation_type,\n             t.penalty_charges_outstanding_derived AS amount,\n             t.owner_id AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.settlement_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             t.previous_owner_id AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM active_external_asset_owner_transfers AS t\n      WHERE t.penalty_charges_outstanding_derived > 0\n      UNION ALL\n      SELECT t.transactiondate,\n             t.id,\n             t.name AS product,\n             9999 AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Unallocated Credit (UNC)'' AS Allocation_type,\n             t.total_overpaid_derived AS amount,\n             t.owner_id AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.settlement_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             t.previous_owner_id AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM active_external_asset_owner_transfers AS t\n      WHERE t.total_overpaid_derived > 0\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             99999 AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Principal'' AS Allocation_type,\n             t.principal_outstanding_derived AS amount,\n             null AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.settlement_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             t.owner_id AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM buyback_external_asset_owner_transfers AS t\n      WHERE t.principal_outstanding_derived > 0\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             99999 AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Interest'' AS Allocation_type,\n             t.interest_outstanding_derived AS amount,\n             null AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.settlement_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             t.owner_id AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM buyback_external_asset_owner_transfers AS t\n      WHERE t.interest_outstanding_derived > 0\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             99999 AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Fees'' AS Allocation_type,\n             t.fee_charges_outstanding_derived AS amount,\n             null AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.settlement_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             t.owner_id AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM buyback_external_asset_owner_transfers AS t\n      WHERE t.fee_charges_outstanding_derived > 0\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             99999 AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Penalty'' AS Allocation_type,\n             t.penalty_charges_outstanding_derived AS amount,\n             null AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.settlement_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             t.owner_id AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM buyback_external_asset_owner_transfers AS t\n      WHERE t.penalty_charges_outstanding_derived > 0\n      UNION ALL\n      SELECT ''${endDate}'' AS transactiondate,\n             t.id,\n             t.name AS product,\n             99999 AS transaction_type,\n             null AS payment_type_id,\n             null AS classification_name,\n             '''' AS chargetype,\n             false AS reversal_indicator,\n             ''Unallocated Credit (UNC)'' AS Allocation_type,\n             t.total_overpaid_derived * -1 AS amount,\n             null AS asset_owner_id,\n             CASE\n                 WHEN t.charged_off_on_date <= t.settlement_date\n THEN t.charge_off_reason_cv_id END AS charge_off_reason_id,\n             t.owner_id AS from_asset_owner_id,\n             t.originator_external_ids\n      FROM buyback_external_asset_owner_transfers AS t\n      WHERE t.total_overpaid_derived > 0) a\nGROUP BY a.transactiondate, a.product, a.transaction_type, a.payment_type_id, a.classification_name, a.chargetype,\n         a.reversal_indicator, a.Allocation_Type, a.asset_owner_id, a.charge_off_reason_id, a.from_asset_owner_id,\n         a.originator_external_ids\nORDER BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11', '', 'f', 't', 'f');
 
 
--- Data for Name: m_report_mailing_job; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_report_mailing_job; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_report_mailing_job_configuration; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_report_mailing_job_configuration; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_report_mailing_job_configuration (id, name, value) VALUES ('1', 'GMAIL_SMTP_SERVER', 'smtp.gmail.com');
 INSERT INTO public.m_report_mailing_job_configuration (id, name, value) VALUES ('2', 'GMAIL_SMTP_PORT', '587');
@@ -2297,131 +2297,131 @@ INSERT INTO public.m_report_mailing_job_configuration (id, name, value) VALUES (
 INSERT INTO public.m_report_mailing_job_configuration (id, name, value) VALUES ('4', 'GMAIL_SMTP_PASSWORD', '');
 
 
--- Data for Name: m_report_mailing_job_run_history; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_report_mailing_job_run_history; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_role_permission; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_role_permission; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_role_permission (role_id, permission_id) VALUES ('1', '1');
 INSERT INTO public.m_role_permission (role_id, permission_id) VALUES ('1', '959');
 INSERT INTO public.m_role_permission (role_id, permission_id) VALUES ('1', '960');
 
 
--- Data for Name: m_savings_account_charge; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_savings_account_charge; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_savings_account_charge_paid_by; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_savings_account_charge_paid_by; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_savings_account_interest_rate_chart; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_savings_account_interest_rate_chart; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_savings_account_interest_rate_slab; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_savings_account_interest_rate_slab; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_tax_component; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_tax_component; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_savings_account_transaction_tax_details; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_savings_account_transaction_tax_details; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_savings_interest_incentives; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_savings_interest_incentives; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_savings_officer_assignment_history; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_savings_officer_assignment_history; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_savings_product_charge; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_savings_product_charge; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_share_account_charge; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_share_account_charge; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_share_account_charge_paid_by; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_share_account_charge_paid_by; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_share_product_dividend_pay_out; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_share_product_dividend_pay_out; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_share_account_dividend_details; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_share_account_dividend_details; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_share_product_charge; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_share_product_charge; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_share_product_market_price; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_share_product_market_price; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_staff_assignment_history; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_staff_assignment_history; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_surveys; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_surveys; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_survey_components; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_survey_components; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_survey_lookup_tables; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_survey_lookup_tables; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_survey_questions; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_survey_questions; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_survey_responses; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_survey_responses; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_survey_scorecards; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_survey_scorecards; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_tax_component_history; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_tax_component_history; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_tax_group_mappings; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_tax_group_mappings; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_template_m_templatemappers; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_template_m_templatemappers; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_templatemappers; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_templatemappers; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_trial_balance; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_trial_balance; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: m_working_days; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: m_working_days; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.m_working_days (id, recurrence, repayment_rescheduling_enum, extend_term_daily_repayments, extend_term_holiday_repayment) VALUES ('1', 'FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR,SA,SU', '2', 'f', 'f');
 
 
--- Data for Name: mix_taxonomy; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: mix_taxonomy; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.mix_taxonomy (id, name, namespace_id, dimension, type, description, need_mapping) VALUES ('1', 'AdministrativeExpense', '1', NULL, '3', NULL, 't');
 INSERT INTO public.mix_taxonomy (id, name, namespace_id, dimension, type, description, need_mapping) VALUES ('2', 'Assets', '3', NULL, '1', 'All outstanding principals due for all outstanding client loans. This includes current, delinquent, and renegotiated loans, but not loans that have been written off. It does not include interest receivable.', 't');
@@ -2473,12 +2473,12 @@ INSERT INTO public.mix_taxonomy (id, name, namespace_id, dimension, type, descri
 INSERT INTO public.mix_taxonomy (id, name, namespace_id, dimension, type, description, need_mapping) VALUES ('48', 'WriteOffsOnGrossLoanPortfolio', '3', NULL, '2', 'The value of loans that have been recognized as uncollectible for accounting purposes. A write-off is an accounting procedure that removes the outstanding balance of the loan from the gross loan portfolio and impairment loss allowance. Thus, the write-off does not affect the net loan portfolio, total assets, or any equity account. If the impairment loss allowance is insufficient to cover the amount written off, the excess amount will result in an additional impairment loss on loans recognised in profit or loss of the period.', NULL);
 
 
--- Data for Name: mix_taxonomy_mapping; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: mix_taxonomy_mapping; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.mix_taxonomy_mapping (id, identifier, config, last_update_date, currency) VALUES ('1', 'default', NULL, NULL, '');
 
 
--- Data for Name: mix_xbrl_namespace; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: mix_xbrl_namespace; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.mix_xbrl_namespace (id, prefix, url) VALUES ('1', 'ifrs', 'http://xbrl.iasb.org/taxonomy/2009-04-01/ifrs');
 INSERT INTO public.mix_xbrl_namespace (id, prefix, url) VALUES ('2', 'iso4217', 'http://www.xbrl.org/2003/iso4217');
@@ -2489,36 +2489,36 @@ INSERT INTO public.mix_xbrl_namespace (id, prefix, url) VALUES ('6', 'link', 'ht
 INSERT INTO public.mix_xbrl_namespace (id, prefix, url) VALUES ('7', 'dc-all', 'http://www.themix.org/INT/fr/ifrs/basi/2010-08-31/dc-all');
 
 
--- Data for Name: notification_generator; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: notification_generator; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: notification_mapper; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: notification_mapper; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: oauth_access_token; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: oauth_access_token; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: oauth_client_details; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: oauth_client_details; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.oauth_client_details (client_id, resource_ids, client_secret, scope, authorized_grant_types, web_server_redirect_uri, authorities, access_token_validity, refresh_token_validity, additional_information, autoapprove) VALUES ('community-app', NULL, '{SHA-256}a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 'all', 'password,refresh_token', NULL, NULL, NULL, NULL, NULL, NULL);
 
 
--- Data for Name: oauth_refresh_token; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: oauth_refresh_token; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: ppi_likelihoods; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: ppi_likelihoods; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: ppi_likelihoods_ppi; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: ppi_likelihoods_ppi; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: ppi_scores; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: ppi_scores; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.ppi_scores (id, score_from, score_to) VALUES ('1', '0', '4');
 INSERT INTO public.ppi_scores (id, score_from, score_to) VALUES ('2', '5', '9');
@@ -2542,7 +2542,7 @@ INSERT INTO public.ppi_scores (id, score_from, score_to) VALUES ('19', '90', '94
 INSERT INTO public.ppi_scores (id, score_from, score_to) VALUES ('20', '95', '100');
 
 
--- Data for Name: r_enum_value; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: r_enum_value; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.r_enum_value (enum_name, enum_id, enum_message_property, enum_value, enum_type) VALUES ('account_type_type_enum', '0', 'INVALID', 'INVALID', 'f');
 INSERT INTO public.r_enum_value (enum_name, enum_id, enum_message_property, enum_value, enum_type) VALUES ('account_type_type_enum', '1', 'INDIVIDUAL', 'INDIVIDUAL', 'f');
@@ -2735,7 +2735,7 @@ INSERT INTO public.r_enum_value (enum_name, enum_id, enum_message_property, enum
 INSERT INTO public.r_enum_value (enum_name, enum_id, enum_message_property, enum_value, enum_type) VALUES ('processing_result_enum', '5', 'error', 'Error', 'f');
 
 
--- Data for Name: ref_loan_transaction_processing_strategy; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: ref_loan_transaction_processing_strategy; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.ref_loan_transaction_processing_strategy (id, code, name, sort_order) VALUES ('1', 'mifos-standard-strategy', 'Penalties, Fees, Interest, Principal order', '1');
 INSERT INTO public.ref_loan_transaction_processing_strategy (id, code, name, sort_order) VALUES ('2', 'heavensfamily-strategy', 'HeavensFamily Unique', '6');
@@ -2748,19 +2748,19 @@ INSERT INTO public.ref_loan_transaction_processing_strategy (id, code, name, sor
 INSERT INTO public.ref_loan_transaction_processing_strategy (id, code, name, sort_order) VALUES ('9', 'due-penalty-interest-principal-fee-in-advance-penalty-interest-principal-fee-strategy', 'Due penalty, interest, principal, fee, In advance penalty, interest, principal, fee', '9');
 
 
--- Data for Name: request_audit_table; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: request_audit_table; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: rpt_sequence; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: rpt_sequence; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: scheduled_email_campaign; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: scheduled_email_campaign; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: scheduled_email_configuration; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: scheduled_email_configuration; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.scheduled_email_configuration (id, name, value) VALUES ('1', 'SMTP_SERVER', NULL);
 INSERT INTO public.scheduled_email_configuration (id, name, value) VALUES ('2', 'SMTP_PORT', NULL);
@@ -2768,24 +2768,24 @@ INSERT INTO public.scheduled_email_configuration (id, name, value) VALUES ('3', 
 INSERT INTO public.scheduled_email_configuration (id, name, value) VALUES ('4', 'SMTP_PASSWORD', NULL);
 
 
--- Data for Name: scheduled_email_messages_outbound; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: scheduled_email_messages_outbound; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: scheduler_detail; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: scheduler_detail; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.scheduler_detail (id, is_suspended, execute_misfired_jobs, reset_scheduler_on_bootup) VALUES ('1', 'f', 't', 't');
 
 
--- Data for Name: sms_campaign; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: sms_campaign; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: sms_messages_outbound; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: sms_messages_outbound; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: stretchy_parameter; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: stretchy_parameter; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.stretchy_parameter (id, parameter_name, parameter_variable, parameter_label, "parameter_displayType", "parameter_FormatType", parameter_default, special, "selectOne", "selectAll", parameter_sql, parent_id) VALUES ('1', 'startDateSelect', 'startDate', 'startDate', 'date', 'date', 'today', NULL, NULL, NULL, NULL, NULL);
 INSERT INTO public.stretchy_parameter (id, parameter_name, parameter_variable, parameter_label, "parameter_displayType", "parameter_FormatType", parameter_default, special, "selectOne", "selectAll", parameter_sql, parent_id) VALUES ('2', 'endDateSelect', 'endDate', 'endDate', 'date', 'date', 'today', NULL, NULL, NULL, NULL, NULL);
@@ -2821,7 +2821,7 @@ INSERT INTO public.stretchy_parameter (id, parameter_name, parameter_variable, p
 INSERT INTO public.stretchy_parameter (id, parameter_name, parameter_variable, parameter_label, "parameter_displayType", "parameter_FormatType", parameter_default, special, "selectOne", "selectAll", parameter_sql, parent_id) VALUES ('1001', 'FullReportList', NULL, 'n/a', 'n/a', 'n/a', 'n/a', 'Y', NULL, NULL, 'select  r.id as report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,\nrp.id as parameter_id, rp.report_parameter_name, p.parameter_name\n  from stretchy_report r\n  left join stretchy_report_parameter rp on rp.report_id = r.id \n  left join stretchy_parameter p on p.id = rp.parameter_id\n  where r.use_report is true\n  and exists\n  ( select ''f''\n  from m_appuser_role ur \n  join m_role rr on rr.id = ur.role_id\n  join m_role_permission rp on rp.role_id = rr.id\n  join m_permission p on p.id = rp.permission_id\n  where ur.appuser_id = ${currentUserId}\n  and (p.code in (''ALL_FUNCTIONS_READ'', ''ALL_FUNCTIONS'') or p.code = concat(''READ_'', r.report_name)) )\n  order by r.report_category, r.report_name, rp.id', NULL);
 
 
--- Data for Name: stretchy_report_parameter; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: stretchy_report_parameter; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.stretchy_report_parameter (id, report_id, parameter_id, report_parameter_name) VALUES ('1', '1', '5', NULL);
 INSERT INTO public.stretchy_report_parameter (id, report_id, parameter_id, report_parameter_name) VALUES ('2', '2', '5', NULL);
@@ -3075,11 +3075,11 @@ INSERT INTO public.stretchy_report_parameter (id, report_id, parameter_id, repor
 INSERT INTO public.stretchy_report_parameter (id, report_id, parameter_id, report_parameter_name) VALUES ('541', '200', '5', 'endDate');
 
 
--- Data for Name: twofactor_access_token; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: twofactor_access_token; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Data for Name: twofactor_configuration; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: twofactor_configuration; Type: TABLE DATA; Schema: public; Owner: -
 
 INSERT INTO public.twofactor_configuration (id, name, value) VALUES ('1', 'otp-delivery-email-enable', 'true');
 INSERT INTO public.twofactor_configuration (id, name, value) VALUES ('2', 'otp-delivery-email-subject', 'Fineract Two-Factor Authentication Token');
@@ -3093,1071 +3093,1071 @@ INSERT INTO public.twofactor_configuration (id, name, value) VALUES ('9', 'acces
 INSERT INTO public.twofactor_configuration (id, name, value) VALUES ('10', 'access-token-live-time-extended', '604800');
 
 
--- Data for Name: x_table_column_code_mappings; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: x_table_column_code_mappings; Type: TABLE DATA; Schema: public; Owner: -
 
 
 
--- Name: acc_accounting_rule_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: acc_accounting_rule_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.acc_accounting_rule_id_seq', 1, false);
 
 
--- Name: acc_gl_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: acc_gl_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.acc_gl_account_id_seq', 1, false);
 
 
--- Name: acc_gl_closure_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: acc_gl_closure_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.acc_gl_closure_id_seq', 1, false);
 
 
--- Name: acc_gl_financial_activity_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: acc_gl_financial_activity_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.acc_gl_financial_activity_account_id_seq', 1, false);
 
 
--- Name: acc_gl_journal_entry_annual_summary_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: acc_gl_journal_entry_annual_summary_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.acc_gl_journal_entry_annual_summary_id_seq', 1, false);
 
 
--- Name: acc_gl_journal_entry_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: acc_gl_journal_entry_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.acc_gl_journal_entry_id_seq', 1, false);
 
 
--- Name: acc_product_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: acc_product_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.acc_product_mapping_id_seq', 1, false);
 
 
--- Name: acc_rule_tags_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: acc_rule_tags_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.acc_rule_tags_id_seq', 1, false);
 
 
--- Name: batch_custom_job_parameters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: batch_custom_job_parameters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.batch_custom_job_parameters_id_seq', 1, false);
 
 
--- Name: batch_job_execution_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: batch_job_execution_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.batch_job_execution_seq', 1, false);
 
 
--- Name: batch_job_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: batch_job_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.batch_job_seq', 1, false);
 
 
--- Name: batch_step_execution_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: batch_step_execution_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.batch_step_execution_seq', 1, false);
 
 
--- Name: c_account_number_format_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: c_account_number_format_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.c_account_number_format_id_seq', 1, false);
 
 
--- Name: c_cache_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: c_cache_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.c_cache_id_seq', 2, false);
 
 
--- Name: c_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: c_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.c_configuration_id_seq', 74, true);
 
 
--- Name: c_external_service_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: c_external_service_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.c_external_service_id_seq', 5, false);
 
 
--- Name: glim_accounts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: glim_accounts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.glim_accounts_id_seq', 1, false);
 
 
--- Name: gsim_accounts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: gsim_accounts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.gsim_accounts_id_seq', 1, false);
 
 
--- Name: interop_identifier_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: interop_identifier_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.interop_identifier_id_seq', 1, false);
 
 
--- Name: job_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: job_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.job_id_seq', 41, true);
 
 
--- Name: job_parameters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: job_parameters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.job_parameters_id_seq', 6, false);
 
 
--- Name: job_run_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: job_run_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.job_run_history_id_seq', 1, false);
 
 
--- Name: m_account_transfer_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_account_transfer_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_account_transfer_details_id_seq', 1, false);
 
 
--- Name: m_account_transfer_standing_instructions_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_account_transfer_standing_instructions_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_account_transfer_standing_instructions_history_id_seq', 1, false);
 
 
--- Name: m_account_transfer_standing_instructions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_account_transfer_standing_instructions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_account_transfer_standing_instructions_id_seq', 1, false);
 
 
--- Name: m_account_transfer_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_account_transfer_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_account_transfer_transaction_id_seq', 1, false);
 
 
--- Name: m_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_address_id_seq', 1, false);
 
 
--- Name: m_adhoc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_adhoc_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_adhoc_id_seq', 1, false);
 
 
--- Name: m_appuser_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_appuser_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_appuser_id_seq', 4, false);
 
 
--- Name: m_appuser_previous_password_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_appuser_previous_password_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_appuser_previous_password_id_seq', 1, false);
 
 
--- Name: m_batch_business_steps_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_batch_business_steps_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_batch_business_steps_id_seq', 6, true);
 
 
--- Name: m_business_date_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_business_date_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_business_date_id_seq', 1, false);
 
 
--- Name: m_calendar_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_calendar_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_calendar_history_id_seq', 1, false);
 
 
--- Name: m_calendar_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_calendar_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_calendar_id_seq', 1, false);
 
 
--- Name: m_calendar_instance_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_calendar_instance_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_calendar_instance_id_seq', 1, false);
 
 
--- Name: m_cashier_transactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_cashier_transactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_cashier_transactions_id_seq', 1, false);
 
 
--- Name: m_cashiers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_cashiers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_cashiers_id_seq', 1, false);
 
 
--- Name: m_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_charge_id_seq', 1, false);
 
 
--- Name: m_client_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_client_address_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_client_address_id_seq', 1, false);
 
 
--- Name: m_client_attendance_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_client_attendance_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_client_attendance_id_seq', 1, false);
 
 
--- Name: m_client_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_client_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_client_charge_id_seq', 1, false);
 
 
--- Name: m_client_charge_paid_by_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_client_charge_paid_by_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_client_charge_paid_by_id_seq', 1, false);
 
 
--- Name: m_client_collateral_management_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_client_collateral_management_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_client_collateral_management_id_seq', 1, false);
 
 
--- Name: m_client_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_client_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_client_id_seq', 1, false);
 
 
--- Name: m_client_identifier_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_client_identifier_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_client_identifier_id_seq', 1, false);
 
 
--- Name: m_client_non_person_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_client_non_person_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_client_non_person_id_seq', 1, false);
 
 
--- Name: m_client_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_client_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_client_transaction_id_seq', 1, false);
 
 
--- Name: m_client_transfer_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_client_transfer_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_client_transfer_details_id_seq', 1, false);
 
 
--- Name: m_code_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_code_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_code_id_seq', 39, true);
 
 
--- Name: m_code_value_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_code_value_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_code_value_id_seq', 15, false);
 
 
--- Name: m_collateral_management_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_collateral_management_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_collateral_management_id_seq', 1, false);
 
 
--- Name: m_creditbureau_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_creditbureau_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_creditbureau_configuration_id_seq', 9, false);
 
 
--- Name: m_creditbureau_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_creditbureau_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_creditbureau_id_seq', 2, false);
 
 
--- Name: m_creditbureau_loanproduct_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_creditbureau_loanproduct_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_creditbureau_loanproduct_mapping_id_seq', 1, false);
 
 
--- Name: m_creditbureau_token_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_creditbureau_token_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_creditbureau_token_id_seq', 1, false);
 
 
--- Name: m_creditreport_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_creditreport_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_creditreport_id_seq', 1, false);
 
 
--- Name: m_currency_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_currency_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_currency_id_seq', 165, false);
 
 
--- Name: m_delinquency_bucket_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_delinquency_bucket_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_delinquency_bucket_id_seq', 1, false);
 
 
--- Name: m_delinquency_bucket_mappings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_delinquency_bucket_mappings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_delinquency_bucket_mappings_id_seq', 1, false);
 
 
--- Name: m_delinquency_range_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_delinquency_range_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_delinquency_range_id_seq', 1, false);
 
 
--- Name: m_deposit_account_on_hold_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_deposit_account_on_hold_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_deposit_account_on_hold_transaction_id_seq', 1, false);
 
 
--- Name: m_deposit_account_recurring_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_deposit_account_recurring_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_deposit_account_recurring_detail_id_seq', 1, false);
 
 
--- Name: m_deposit_account_term_and_preclosure_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_deposit_account_term_and_preclosure_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_deposit_account_term_and_preclosure_id_seq', 1, false);
 
 
--- Name: m_deposit_product_recurring_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_deposit_product_recurring_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_deposit_product_recurring_detail_id_seq', 1, false);
 
 
--- Name: m_deposit_product_term_and_preclosure_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_deposit_product_term_and_preclosure_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_deposit_product_term_and_preclosure_id_seq', 1, false);
 
 
--- Name: m_document_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_document_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_document_id_seq', 1, false);
 
 
--- Name: m_entity_datatable_check_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_entity_datatable_check_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_entity_datatable_check_id_seq', 1, false);
 
 
--- Name: m_entity_relation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_entity_relation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_entity_relation_id_seq', 6, false);
 
 
--- Name: m_entity_to_entity_access_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_entity_to_entity_access_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_entity_to_entity_access_id_seq', 1, false);
 
 
--- Name: m_entity_to_entity_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_entity_to_entity_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_entity_to_entity_mapping_id_seq', 1, false);
 
 
--- Name: m_external_event_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_external_event_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_external_event_id_seq', 1, false);
 
 
--- Name: m_family_members_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_family_members_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_family_members_id_seq', 1, false);
 
 
--- Name: m_field_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_field_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_field_configuration_id_seq', 19, false);
 
 
--- Name: m_floating_rates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_floating_rates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_floating_rates_id_seq', 1, false);
 
 
--- Name: m_floating_rates_periods_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_floating_rates_periods_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_floating_rates_periods_id_seq', 1, false);
 
 
--- Name: m_fund_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_fund_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_fund_id_seq', 1, false);
 
 
--- Name: m_group_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_group_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_group_id_seq', 1, false);
 
 
--- Name: m_group_level_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_group_level_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_group_level_id_seq', 3, false);
 
 
--- Name: m_group_roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_group_roles_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_group_roles_id_seq', 1, false);
 
 
--- Name: m_guarantor_funding_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_guarantor_funding_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_guarantor_funding_details_id_seq', 1, false);
 
 
--- Name: m_guarantor_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_guarantor_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_guarantor_id_seq', 1, false);
 
 
--- Name: m_guarantor_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_guarantor_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_guarantor_transaction_id_seq', 1, false);
 
 
--- Name: m_holiday_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_holiday_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_holiday_id_seq', 1, false);
 
 
--- Name: m_hook_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_hook_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_hook_configuration_id_seq', 1, false);
 
 
--- Name: m_hook_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_hook_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_hook_id_seq', 1, false);
 
 
--- Name: m_hook_registered_events_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_hook_registered_events_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_hook_registered_events_id_seq', 1, false);
 
 
--- Name: m_hook_schema_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_hook_schema_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_hook_schema_id_seq', 12, false);
 
 
--- Name: m_hook_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_hook_templates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_hook_templates_id_seq', 5, false);
 
 
--- Name: m_image_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_image_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_image_id_seq', 1, false);
 
 
--- Name: m_import_document_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_import_document_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_import_document_id_seq', 1, false);
 
 
--- Name: m_interest_incentives_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_interest_incentives_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_interest_incentives_id_seq', 1, false);
 
 
--- Name: m_interest_rate_chart_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_interest_rate_chart_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_interest_rate_chart_id_seq', 1, false);
 
 
--- Name: m_interest_rate_slab_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_interest_rate_slab_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_interest_rate_slab_id_seq', 1, false);
 
 
--- Name: m_journal_entry_aggregation_summary_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_journal_entry_aggregation_summary_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_journal_entry_aggregation_summary_id_seq', 1, false);
 
 
--- Name: m_journal_entry_aggregation_tracking_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_journal_entry_aggregation_tracking_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_journal_entry_aggregation_tracking_id_seq', 1, false);
 
 
--- Name: m_loan_amortization_allocation_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_amortization_allocation_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_amortization_allocation_mapping_id_seq', 1, false);
 
 
--- Name: m_loan_approved_amount_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_approved_amount_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_approved_amount_history_id_seq', 1, false);
 
 
--- Name: m_loan_arrears_aging_loan_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_arrears_aging_loan_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_arrears_aging_loan_id_seq', 1, false);
 
 
--- Name: m_loan_buy_down_fee_balance_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_buy_down_fee_balance_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_buy_down_fee_balance_id_seq', 1, false);
 
 
--- Name: m_loan_capitalized_income_balance_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_capitalized_income_balance_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_capitalized_income_balance_id_seq', 1, false);
 
 
--- Name: m_loan_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_charge_id_seq', 1, false);
 
 
--- Name: m_loan_charge_paid_by_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_charge_paid_by_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_charge_paid_by_id_seq', 1, false);
 
 
--- Name: m_loan_collateral_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_collateral_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_collateral_id_seq', 1, false);
 
 
--- Name: m_loan_collateral_management_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_collateral_management_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_collateral_management_id_seq', 1, false);
 
 
--- Name: m_loan_delinquency_tag_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_delinquency_tag_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_delinquency_tag_history_id_seq', 1, false);
 
 
--- Name: m_loan_disbursement_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_disbursement_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_disbursement_detail_id_seq', 1, false);
 
 
--- Name: m_loan_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_id_seq', 1, false);
 
 
--- Name: m_loan_installment_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_installment_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_installment_charge_id_seq', 1, false);
 
 
--- Name: m_loan_interest_recalculation_additional_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_interest_recalculation_additional_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_interest_recalculation_additional_details_id_seq', 1, false);
 
 
--- Name: m_loan_officer_assignment_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_officer_assignment_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_officer_assignment_history_id_seq', 1, false);
 
 
--- Name: m_loan_overdue_installment_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_overdue_installment_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_overdue_installment_charge_id_seq', 1, false);
 
 
--- Name: m_loan_reage_parameter_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_reage_parameter_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_reage_parameter_id_seq', 1, false);
 
 
--- Name: m_loan_recalculation_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_recalculation_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_recalculation_details_id_seq', 1, false);
 
 
--- Name: m_loan_repayment_schedule_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_repayment_schedule_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_repayment_schedule_history_id_seq', 1, false);
 
 
--- Name: m_loan_repayment_schedule_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_repayment_schedule_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_repayment_schedule_id_seq', 1, false);
 
 
--- Name: m_loan_reschedule_request_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_reschedule_request_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_reschedule_request_id_seq', 1, false);
 
 
--- Name: m_loan_reschedule_request_term_variations_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_reschedule_request_term_variations_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_reschedule_request_term_variations_mapping_id_seq', 1, false);
 
 
--- Name: m_loan_term_variations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_term_variations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_term_variations_id_seq', 1, false);
 
 
--- Name: m_loan_topup_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_topup_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_topup_id_seq', 1, false);
 
 
--- Name: m_loan_tranche_charges_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_tranche_charges_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_tranche_charges_id_seq', 1, false);
 
 
--- Name: m_loan_tranche_disbursement_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_tranche_disbursement_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_tranche_disbursement_charge_id_seq', 1, false);
 
 
--- Name: m_loan_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_transaction_id_seq', 1, false);
 
 
--- Name: m_loan_transaction_relation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_transaction_relation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_transaction_relation_id_seq', 1, false);
 
 
--- Name: m_loan_transaction_repayment_schedule_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loan_transaction_repayment_schedule_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loan_transaction_repayment_schedule_mapping_id_seq', 1, false);
 
 
--- Name: m_loanproduct_provisioning_entry_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loanproduct_provisioning_entry_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loanproduct_provisioning_entry_id_seq', 1, false);
 
 
--- Name: m_loanproduct_provisioning_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_loanproduct_provisioning_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_loanproduct_provisioning_mapping_id_seq', 1, false);
 
 
--- Name: m_mandatory_savings_schedule_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_mandatory_savings_schedule_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_mandatory_savings_schedule_id_seq', 1, false);
 
 
--- Name: m_meeting_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_meeting_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_meeting_id_seq', 1, false);
 
 
--- Name: m_note_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_note_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_note_id_seq', 1, false);
 
 
--- Name: m_office_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_office_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_office_id_seq', 2, false);
 
 
--- Name: m_office_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_office_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_office_transaction_id_seq', 1, false);
 
 
--- Name: m_organisation_creditbureau_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_organisation_creditbureau_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_organisation_creditbureau_id_seq', 1, false);
 
 
--- Name: m_organisation_currency_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_organisation_currency_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_organisation_currency_id_seq', 22, false);
 
 
--- Name: m_password_validation_policy_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_password_validation_policy_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_password_validation_policy_id_seq', 3, true);
 
 
--- Name: m_payment_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_payment_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_payment_detail_id_seq', 1, false);
 
 
--- Name: m_payment_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_payment_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_payment_type_id_seq', 3, true);
 
 
--- Name: m_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_permission_id_seq', 960, true);
 
 
--- Name: m_portfolio_account_associations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_portfolio_account_associations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_portfolio_account_associations_id_seq', 1, false);
 
 
--- Name: m_portfolio_command_source_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_portfolio_command_source_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_portfolio_command_source_id_seq', 1, false);
 
 
--- Name: m_product_loan_configurable_attributes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_product_loan_configurable_attributes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_product_loan_configurable_attributes_id_seq', 1, false);
 
 
--- Name: m_product_loan_floating_rates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_product_loan_floating_rates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_product_loan_floating_rates_id_seq', 1, false);
 
 
--- Name: m_product_loan_guarantee_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_product_loan_guarantee_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_product_loan_guarantee_details_id_seq', 1, false);
 
 
--- Name: m_product_loan_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_product_loan_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_product_loan_id_seq', 1, false);
 
 
--- Name: m_product_loan_recalculation_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_product_loan_recalculation_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_product_loan_recalculation_details_id_seq', 1, false);
 
 
--- Name: m_product_loan_variable_installment_config_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_product_loan_variable_installment_config_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_product_loan_variable_installment_config_id_seq', 1, false);
 
 
--- Name: m_product_loan_variations_borrower_cycle_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_product_loan_variations_borrower_cycle_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_product_loan_variations_borrower_cycle_id_seq', 1, false);
 
 
--- Name: m_product_mix_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_product_mix_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_product_mix_id_seq', 1, false);
 
 
--- Name: m_provision_category_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_provision_category_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_provision_category_id_seq', 5, false);
 
 
--- Name: m_provisioning_criteria_definition_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_provisioning_criteria_definition_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_provisioning_criteria_definition_id_seq', 1, false);
 
 
--- Name: m_provisioning_criteria_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_provisioning_criteria_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_provisioning_criteria_id_seq', 1, false);
 
 
--- Name: m_provisioning_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_provisioning_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_provisioning_history_id_seq', 1, false);
 
 
--- Name: m_rate_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_rate_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_rate_id_seq', 1, false);
 
 
--- Name: m_repayment_with_post_dated_checks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_repayment_with_post_dated_checks_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_repayment_with_post_dated_checks_id_seq', 1, false);
 
 
--- Name: m_report_mailing_job_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_report_mailing_job_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_report_mailing_job_configuration_id_seq', 5, false);
 
 
--- Name: m_report_mailing_job_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_report_mailing_job_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_report_mailing_job_id_seq', 1, false);
 
 
--- Name: m_report_mailing_job_run_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_report_mailing_job_run_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_report_mailing_job_run_history_id_seq', 1, false);
 
 
--- Name: m_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_role_id_seq', 3, false);
 
 
--- Name: m_savings_account_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_savings_account_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_savings_account_charge_id_seq', 1, false);
 
 
--- Name: m_savings_account_charge_paid_by_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_savings_account_charge_paid_by_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_savings_account_charge_paid_by_id_seq', 1, false);
 
 
--- Name: m_savings_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_savings_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_savings_account_id_seq', 1, false);
 
 
--- Name: m_savings_account_interest_rate_chart_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_savings_account_interest_rate_chart_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_savings_account_interest_rate_chart_id_seq', 1, false);
 
 
--- Name: m_savings_account_interest_rate_slab_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_savings_account_interest_rate_slab_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_savings_account_interest_rate_slab_id_seq', 1, false);
 
 
--- Name: m_savings_account_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_savings_account_transaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_savings_account_transaction_id_seq', 1, false);
 
 
--- Name: m_savings_account_transaction_tax_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_savings_account_transaction_tax_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_savings_account_transaction_tax_details_id_seq', 1, false);
 
 
--- Name: m_savings_interest_incentives_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_savings_interest_incentives_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_savings_interest_incentives_id_seq', 1, false);
 
 
--- Name: m_savings_officer_assignment_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_savings_officer_assignment_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_savings_officer_assignment_history_id_seq', 1, false);
 
 
--- Name: m_savings_product_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_savings_product_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_savings_product_id_seq', 1, false);
 
 
--- Name: m_share_account_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_share_account_charge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_share_account_charge_id_seq', 1, false);
 
 
--- Name: m_share_account_charge_paid_by_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_share_account_charge_paid_by_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_share_account_charge_paid_by_id_seq', 1, false);
 
 
--- Name: m_share_account_dividend_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_share_account_dividend_details_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_share_account_dividend_details_id_seq', 1, false);
 
 
--- Name: m_share_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_share_account_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_share_account_id_seq', 1, false);
 
 
--- Name: m_share_account_transactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_share_account_transactions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_share_account_transactions_id_seq', 1, false);
 
 
--- Name: m_share_product_dividend_pay_out_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_share_product_dividend_pay_out_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_share_product_dividend_pay_out_id_seq', 1, false);
 
 
--- Name: m_share_product_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_share_product_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_share_product_id_seq', 1, false);
 
 
--- Name: m_share_product_market_price_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_share_product_market_price_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_share_product_market_price_id_seq', 1, false);
 
 
--- Name: m_staff_assignment_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_staff_assignment_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_staff_assignment_history_id_seq', 1, false);
 
 
--- Name: m_staff_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_staff_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_staff_id_seq', 1, false);
 
 
--- Name: m_survey_components_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_survey_components_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_survey_components_id_seq', 1, false);
 
 
--- Name: m_survey_lookup_tables_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_survey_lookup_tables_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_survey_lookup_tables_id_seq', 1, false);
 
 
--- Name: m_survey_questions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_survey_questions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_survey_questions_id_seq', 1, false);
 
 
--- Name: m_survey_responses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_survey_responses_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_survey_responses_id_seq', 1, false);
 
 
--- Name: m_survey_scorecards_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_survey_scorecards_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_survey_scorecards_id_seq', 1, false);
 
 
--- Name: m_surveys_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_surveys_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_surveys_id_seq', 1, false);
 
 
--- Name: m_tax_component_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_tax_component_history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_tax_component_history_id_seq', 1, false);
 
 
--- Name: m_tax_component_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_tax_component_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_tax_component_id_seq', 1, false);
 
 
--- Name: m_tax_group_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_tax_group_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_tax_group_id_seq', 1, false);
 
 
--- Name: m_tax_group_mappings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_tax_group_mappings_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_tax_group_mappings_id_seq', 1, false);
 
 
--- Name: m_tellers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_tellers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_tellers_id_seq', 1, false);
 
 
--- Name: m_template_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_template_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_template_id_seq', 1, false);
 
 
--- Name: m_templatemappers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_templatemappers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_templatemappers_id_seq', 1, false);
 
 
--- Name: m_working_days_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: m_working_days_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.m_working_days_id_seq', 2, false);
 
 
--- Name: mix_taxonomy_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: mix_taxonomy_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.mix_taxonomy_id_seq', 49, false);
 
 
--- Name: mix_taxonomy_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: mix_taxonomy_mapping_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.mix_taxonomy_mapping_id_seq', 2, false);
 
 
--- Name: mix_xbrl_namespace_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: mix_xbrl_namespace_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.mix_xbrl_namespace_id_seq', 8, false);
 
 
--- Name: notification_generator_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: notification_generator_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.notification_generator_id_seq', 1, false);
 
 
--- Name: notification_mapper_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: notification_mapper_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.notification_mapper_id_seq', 1, false);
 
 
--- Name: ppi_likelihoods_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: ppi_likelihoods_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.ppi_likelihoods_id_seq', 1, false);
 
 
--- Name: ppi_likelihoods_ppi_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: ppi_likelihoods_ppi_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.ppi_likelihoods_ppi_id_seq', 1, false);
 
 
--- Name: ppi_scores_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: ppi_scores_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.ppi_scores_id_seq', 21, false);
 
 
--- Name: ref_loan_transaction_processing_strategy_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: ref_loan_transaction_processing_strategy_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.ref_loan_transaction_processing_strategy_id_seq', 8, false);
 
 
--- Name: request_audit_table_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: request_audit_table_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.request_audit_table_id_seq', 1, false);
 
 
--- Name: rpt_sequence_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: rpt_sequence_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.rpt_sequence_id_seq', 1, false);
 
 
--- Name: scheduled_email_campaign_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: scheduled_email_campaign_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.scheduled_email_campaign_id_seq', 1, false);
 
 
--- Name: scheduled_email_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: scheduled_email_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.scheduled_email_configuration_id_seq', 5, false);
 
 
--- Name: scheduled_email_messages_outbound_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: scheduled_email_messages_outbound_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.scheduled_email_messages_outbound_id_seq', 1, false);
 
 
--- Name: scheduler_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: scheduler_detail_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.scheduler_detail_id_seq', 2, false);
 
 
--- Name: sms_campaign_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: sms_campaign_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.sms_campaign_id_seq', 1, false);
 
 
--- Name: sms_messages_outbound_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: sms_messages_outbound_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.sms_messages_outbound_id_seq', 1, false);
 
 
--- Name: stretchy_parameter_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: stretchy_parameter_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.stretchy_parameter_id_seq', 1023, false);
 
 
--- Name: stretchy_report_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: stretchy_report_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.stretchy_report_id_seq', 200, true);
 
 
--- Name: stretchy_report_parameter_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: stretchy_report_parameter_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.stretchy_report_parameter_id_seq', 541, true);
 
 
--- Name: twofactor_access_token_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: twofactor_access_token_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.twofactor_access_token_id_seq', 1, false);
 
 
--- Name: twofactor_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: twofactor_configuration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 
 SELECT pg_catalog.setval('public.twofactor_configuration_id_seq', 11, false);
 
