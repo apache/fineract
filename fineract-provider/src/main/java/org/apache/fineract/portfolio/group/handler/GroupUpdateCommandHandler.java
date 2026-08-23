@@ -18,26 +18,33 @@
  */
 package org.apache.fineract.portfolio.group.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.group.data.GroupUpdateRequest;
+import org.apache.fineract.portfolio.group.data.GroupUpdateResponse;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "GROUP", action = "CLOSE")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class CloseGroupCommandHandler implements NewCommandSourceHandler {
+public class GroupUpdateCommandHandler implements CommandHandler<GroupUpdateRequest, GroupUpdateResponse> {
 
     private final GroupingTypesWritePlatformService groupingTypesWritePlatformService;
 
+    @Retry(name = "commandGroupUpdate", fallbackMethod = "fallback")
     @Override
     @Transactional
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.groupingTypesWritePlatformService.closeGroup(command.entityId(), command);
+    public GroupUpdateResponse handle(Command<GroupUpdateRequest> command) {
+        return groupingTypesWritePlatformService.updateGroup(command.getPayload());
     }
 
+    @Override
+    public GroupUpdateResponse fallback(Command<GroupUpdateRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
+    }
 }

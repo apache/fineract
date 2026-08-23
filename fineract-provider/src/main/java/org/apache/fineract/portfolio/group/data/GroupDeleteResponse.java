@@ -16,32 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.domain.group;
+package org.apache.fineract.portfolio.group.data;
 
-import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
-import org.apache.fineract.portfolio.group.domain.Group;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public class GroupsCreateBusinessEvent extends AbstractBusinessEvent<Group> {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class GroupDeleteResponse implements Serializable {
 
-    private static final String CATEGORY = "Group";
-    private static final String TYPE = "GroupsCreateBusinessEvent";
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    public GroupsCreateBusinessEvent(Group value) {
-        super(value);
-    }
-
-    @Override
-    public String getCategory() {
-        return CATEGORY;
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    @Override
-    public Long getAggregateRootId() {
-        return get().getId();
-    }
+    private Long resourceId;
+    private Long officeId;
+    private Long groupId;
 }

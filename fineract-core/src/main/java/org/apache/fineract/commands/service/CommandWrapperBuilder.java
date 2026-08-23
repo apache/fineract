@@ -2263,13 +2263,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createGroup() {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_GROUP;
-        this.href = "/groups/template";
-        return this;
-    }
-
     public CommandWrapperBuilder updateGroup(final Long groupId) {
         this.actionName = ACTION_UPDATE;
         this.entityName = ENTITY_GROUP;
@@ -2355,15 +2348,6 @@ public class CommandWrapperBuilder {
         this.entityId = groupId;
         this.groupId = groupId;
         this.href = "/groups/" + groupId + "?command=assignStaff";
-        return this;
-    }
-
-    public CommandWrapperBuilder closeGroup(final Long groupId) {
-        this.actionName = ACTION_CLOSE;
-        this.entityName = ENTITY_GROUP;
-        this.entityId = groupId;
-        this.groupId = groupId;
-        this.href = "/groups/" + groupId + "?command=close";
         return this;
     }
 

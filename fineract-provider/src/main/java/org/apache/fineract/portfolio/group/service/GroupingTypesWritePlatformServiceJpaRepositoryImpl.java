@@ -21,11 +21,13 @@ package org.apache.fineract.portfolio.group.service;
 import jakarta.persistence.PersistenceException;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,6 +71,14 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.LoanStatusMapper;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
+import org.apache.fineract.portfolio.group.data.GroupCloseRequest;
+import org.apache.fineract.portfolio.group.data.GroupCloseResponse;
+import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
+import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
+import org.apache.fineract.portfolio.group.data.GroupDeleteRequest;
+import org.apache.fineract.portfolio.group.data.GroupDeleteResponse;
+import org.apache.fineract.portfolio.group.data.GroupUpdateRequest;
+import org.apache.fineract.portfolio.group.data.GroupUpdateResponse;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupLevel;
 import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
@@ -262,23 +272,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
     @Transactional
     @Override
-    public CommandProcessingResult createGroup(final Long centerId, final JsonCommand command) {
-
-        if (centerId != null) {
-            this.fromApiJsonDeserializer.validateForCreateCenterGroup(command);
-        } else {
-            this.fromApiJsonDeserializer.validateForCreateGroup(command);
-        }
-
-        CommandProcessingResult commandProcessingResult = createGroupingType(command, GroupTypes.GROUP, centerId);
-
-        businessEventNotifierService.notifyPostBusinessEvent(new GroupsCreateBusinessEvent(commandProcessingResult));
-
-        return commandProcessingResult;
-    }
-
-    @Transactional
-    @Override
     public CommandProcessingResult activateGroupOrCenter(final Long groupId, final JsonCommand command) {
 
         try {
@@ -345,13 +338,51 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         return updateGroupingType(centerId, command, GroupTypes.CENTER);
     }
 
-    @Transactional
     @Override
-    public CommandProcessingResult updateGroup(final Long groupId, final JsonCommand command) {
+    @Transactional
+    public GroupUpdateResponse updateGroup(final GroupUpdateRequest request) {
 
-        this.fromApiJsonDeserializer.validateForUpdateGroup(command, groupId);
+        final Group group = this.groupRepository.findOneWithNotFoundDetection(request.getGroupId());
 
-        return updateGroupingType(groupId, command, GroupTypes.GROUP);
+        final String groupHierarchy = group.getOffice().getHierarchy();
+
+        this.context.validateAccessRights(groupHierarchy);
+
+        final Map<String, Object> changes = new HashMap<>();
+
+        if (StringUtils.isNotBlank(request.getName()) && !Objects.equals(request.getName(), group.getName())) {
+
+            group.setName(request.getName());
+            changes.put(GroupUpdateRequest.Fields.name, request.getName());
+        }
+
+        if (!Objects.equals(request.getExternalId(), group.getExternalId())) {
+
+            group.setExternalId(request.getExternalId());
+            changes.put(GroupUpdateRequest.Fields.externalId, request.getExternalId());
+        }
+
+        if (request.getStaffId() != null) {
+
+            final Staff newStaff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(request.getStaffId(), groupHierarchy);
+
+            group.updateStaff(newStaff);
+
+            changes.put(GroupUpdateRequest.Fields.staffId, request.getStaffId());
+        }
+
+        if (request.getCenterId() != null) {
+
+            final Group parentGroup = this.groupRepository.findOneWithNotFoundDetection(request.getCenterId());
+
+            group.setParent(parentGroup);
+            group.generateHierarchy();
+
+            changes.put(GroupUpdateRequest.Fields.centerId, request.getCenterId());
+        }
+
+        return GroupUpdateResponse.builder().resourceId(group.getId()).groupId(group.getId()).officeId(group.officeId()).changes(changes)
+                .build();
     }
 
     private CommandProcessingResult updateGroupingType(final Long groupId, final JsonCommand command, final GroupTypes groupingType) {
@@ -547,9 +578,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
     @Transactional
     @Override
-    public CommandProcessingResult deleteGroup(final Long groupId) {
+    public GroupDeleteResponse deleteGroup(final GroupDeleteRequest request) {
         try {
-
+            final Long groupId = request.getGroupId();
             final Group groupForDelete = this.groupRepository.findOneWithNotFoundDetection(groupId);
 
             if (groupForDelete.isNotPending()) {
@@ -559,15 +590,19 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final List<Note> relatedNotes = this.noteRepository.findByGroup(groupForDelete);
             this.noteRepository.deleteAllInBatch(relatedNotes);
 
+            final Long officeId = groupForDelete.officeId();
+            final Long deletedGroupId = groupForDelete.getId();
+
             this.groupRepository.delete(groupForDelete);
             this.groupRepository.flush();
-            return new CommandProcessingResultBuilder() //
-                    .withOfficeId(groupForDelete.getId()) //
-                    .withGroupId(groupForDelete.officeId()) //
-                    .withEntityId(groupForDelete.getId()) //
+
+            return GroupDeleteResponse.builder() //
+                    .resourceId(deletedGroupId) //
+                    .officeId(officeId) //
+                    .groupId(deletedGroupId) //
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            final Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
             log.error("Error occured.", throwable);
             throw ErrorHandler.getMappable(dve, "error.msg.group.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
@@ -575,16 +610,15 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     }
 
     @Override
-    public CommandProcessingResult closeGroup(final Long groupId, final JsonCommand command) {
-        this.fromApiJsonDeserializer.validateForGroupClose(command);
+    @Transactional
+    public GroupCloseResponse closeGroup(final GroupCloseRequest request) {
+        final Long groupId = request.getGroupId();
         final Group group = this.groupRepository.findOneWithNotFoundDetection(groupId);
-        final LocalDate closureDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.closureDateParamName);
-        final Long closureReasonId = command.longValueOfParameterNamed(GroupingTypesApiConstants.closureReasonIdParamName);
 
-        final AppUser currentUser = this.context.authenticatedUser();
+        final LocalDate closureDate = parseDate(request.getClosureDate(), request.getDateFormat(), request.getLocale());
 
         final CodeValue closureReason = this.codeValueRepository
-                .findOneByCodeNameAndIdWithNotFoundDetection(GroupingTypesApiConstants.GROUP_CLOSURE_REASON, closureReasonId);
+                .findOneByCodeNameAndIdWithNotFoundDetection(GroupingTypesApiConstants.GROUP_CLOSURE_REASON, request.getClosureReasonId());
 
         if (group.hasActiveClients()) {
             final String errorMessage = group.getGroupLevel().getLevelName()
@@ -598,14 +632,11 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         entityDatatableChecksWritePlatformService.runTheCheck(groupId, EntityTables.GROUP.getName(), StatusEnum.CLOSE.getValue(),
                 EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
 
-        group.close(currentUser, closureReason, closureDate);
+        group.close(null, closureReason, closureDate);
 
         this.groupRepository.saveAndFlush(group);
 
-        return new CommandProcessingResultBuilder() //
-                .withGroupId(groupId) //
-                .withEntityId(groupId) //
-                .build();
+        return GroupCloseResponse.builder().resourceId(groupId).groupId(groupId).build();
     }
 
     private void validateLoansAndSavingsForGroupOrCenterClose(final Group groupOrCenter, final LocalDate closureDate) {
@@ -943,5 +974,128 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 }
             }
         }
+    }
+
+    @Transactional
+    @Override
+    public GroupCreateResponse createGroup(final GroupCreateRequest request) {
+        try {
+            final Long centerId = request.getCenterId();
+
+            Long officeId;
+            Group parentGroup = null;
+            if (centerId == null) {
+                officeId = request.getOfficeId();
+            } else {
+                parentGroup = this.groupRepository.findOneWithNotFoundDetection(centerId);
+                officeId = parentGroup.officeId();
+            }
+
+            final Office groupOffice = this.officeRepositoryWrapper.findOneWithNotFoundDetection(officeId);
+            final LocalDate activationDate = parseDate(request.getActivationDate(), request.getDateFormat(), request.getLocale());
+            final GroupLevel groupLevel = this.groupLevelRepository.findById(GroupTypes.GROUP.getId()).orElse(null);
+
+            validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(groupOffice, groupLevel, activationDate);
+
+            Staff staff = null;
+            final Long staffId = request.getStaffId();
+            if (staffId != null) {
+                staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, groupOffice.getHierarchy());
+            }
+
+            final Set<Client> clientMembers = assembleSetOfClients(officeId, request.getClientMembers());
+            final Set<Group> groupMembers = Collections.emptySet();
+
+            final boolean active = Boolean.TRUE.equals(request.getActive());
+
+            LocalDate submittedOnDate = DateUtils.getBusinessLocalDate();
+            if (active && activationDate != null && DateUtils.isAfter(submittedOnDate, activationDate)) {
+                submittedOnDate = activationDate;
+            }
+            if (request.getSubmittedOnDate() != null && !request.getSubmittedOnDate().isBlank()) {
+                submittedOnDate = parseDate(request.getSubmittedOnDate(), request.getDateFormat(), request.getLocale());
+            }
+
+            final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, request.getName(), request.getExternalId(),
+                    active, activationDate, clientMembers, groupMembers, submittedOnDate, null, null);
+
+            if (newGroup.isActive()) {
+                this.groupRepository.saveAndFlush(newGroup);
+                if (newGroup.isGroup()) {
+                    validateGroupRulesBeforeActivation(newGroup);
+                }
+            }
+
+            this.groupRepository.save(newGroup);
+            generateAccountNumber(newGroup);
+            newGroup.generateHierarchy();
+            this.groupRepository.saveAndFlush(newGroup);
+            newGroup.captureStaffHistoryDuringCenterCreation(staff, activationDate);
+
+            if (request.getDatatables() != null && !request.getDatatables().isEmpty()) {
+                this.entityDatatableChecksWritePlatformService.saveDatatables(StatusEnum.CREATE.getValue(), EntityTables.GROUP.getName(),
+                        newGroup.getId(), null, request.getDatatables());
+            }
+
+            this.entityDatatableChecksWritePlatformService.runTheCheck(newGroup.getId(), EntityTables.GROUP.getName(),
+                    StatusEnum.CREATE.getValue(), EntityTables.GROUP.getForeignKeyColumnNameOnDatatable(), null);
+
+            businessEventNotifierService.notifyPostBusinessEvent(new GroupsCreateBusinessEvent(newGroup));
+
+            return GroupCreateResponse.builder().resourceId(newGroup.getId()).officeId(groupOffice.getId()).groupId(newGroup.getId())
+                    .build();
+
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            handleGroupDataIntegrityIssuesTyped(request.getName(), request.getExternalId(), dve.getMostSpecificCause(), dve,
+                    GroupTypes.GROUP);
+            return GroupCreateResponse.builder().build();
+        } catch (final PersistenceException dve) {
+            final Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            handleGroupDataIntegrityIssuesTyped(request.getName(), request.getExternalId(), throwable, dve, GroupTypes.GROUP);
+            return GroupCreateResponse.builder().build();
+        }
+    }
+
+    private Set<Client> assembleSetOfClients(final Long groupOfficeId, final Set<Long> clientMemberIds) {
+        final Set<Client> clientMembers = new HashSet<>();
+        if (clientMemberIds == null || clientMemberIds.isEmpty()) {
+            return clientMembers;
+        }
+        for (final Long clientId : clientMemberIds) {
+            final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+            if (!client.isOfficeIdentifiedBy(groupOfficeId)) {
+                final String errorMessage = "Client with identifier " + clientId + " must have the same office as group.";
+                throw new InvalidOfficeException("client", "attach.to.group", errorMessage, clientId.toString(), groupOfficeId);
+            }
+            clientMembers.add(client);
+        }
+        return clientMembers;
+    }
+
+    private void handleGroupDataIntegrityIssuesTyped(final String name, final String externalId, final Throwable realCause,
+            final Exception dve, final GroupTypes groupingType) {
+        final String resource = groupingType.equals(GroupTypes.CENTER) ? "center" : "group";
+        if (realCause != null && realCause.getMessage() != null) {
+            if (realCause.getMessage().contains("external_id")) {
+                throw new PlatformDataIntegrityException("error.msg." + resource + ".duplicate.externalId",
+                        "Group with externalId `" + externalId + "` already exists", "externalId", externalId);
+            } else if (realCause.getMessage().contains("name")) {
+                throw new PlatformDataIntegrityException("error.msg." + resource + ".duplicate.name",
+                        "Group with name `" + name + "` already exists", "name", name);
+            }
+        }
+        log.error("Error occured.", dve);
+        throw new PlatformDataIntegrityException("error.msg." + resource + ".unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource: " + (realCause != null ? realCause.getMessage() : dve.getMessage()));
+    }
+
+    private LocalDate parseDate(final String value, final String dateFormat, final String locale) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        final String pattern = (dateFormat != null && !dateFormat.isBlank()) ? dateFormat : "yyyy-MM-dd";
+        final java.util.Locale resolvedLocale = (locale != null && !locale.isBlank()) ? java.util.Locale.forLanguageTag(locale)
+                : java.util.Locale.ENGLISH;
+        return LocalDate.parse(value, java.time.format.DateTimeFormatter.ofPattern(pattern, resolvedLocale));
     }
 }

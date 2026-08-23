@@ -16,32 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.domain.group;
+package org.apache.fineract.portfolio.group.command;
 
-import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
-import org.apache.fineract.portfolio.group.domain.Group;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.group.data.GroupUpdateRequest;
 
-public class GroupsCreateBusinessEvent extends AbstractBusinessEvent<Group> {
-
-    private static final String CATEGORY = "Group";
-    private static final String TYPE = "GroupsCreateBusinessEvent";
-
-    public GroupsCreateBusinessEvent(Group value) {
-        super(value);
-    }
-
-    @Override
-    public String getCategory() {
-        return CATEGORY;
-    }
-
-    @Override
-    public String getType() {
-        return TYPE;
-    }
-
-    @Override
-    public Long getAggregateRootId() {
-        return get().getId();
-    }
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class GroupUpdateCommand extends Command<GroupUpdateRequest> {}

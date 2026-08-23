@@ -370,6 +370,7 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_HOOK")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/hooks/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_HOOK")
+
                     // template
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/templates/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_TEMPLATE")
@@ -385,6 +386,14 @@ public class SecurityConfig {
 
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/standinginstructionrunhistory"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_STANDINGINSTRUCTION")
+
+                    // group
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/groups"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_GROUP")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/groups/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_GROUP")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/groups/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_GROUP")
 
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()

@@ -18,27 +18,33 @@
  */
 package org.apache.fineract.portfolio.group.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.group.data.GroupDeleteRequest;
+import org.apache.fineract.portfolio.group.data.GroupDeleteResponse;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "GROUP", action = "CREATE")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class CreateGroupCommandHandler implements NewCommandSourceHandler {
+public class GroupDeleteCommandHandler implements CommandHandler<GroupDeleteRequest, GroupDeleteResponse> {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+    private final GroupingTypesWritePlatformService groupingTypesWritePlatformService;
 
-    @Transactional
+    @Retry(name = "commandGroupDelete", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    public GroupDeleteResponse handle(Command<GroupDeleteRequest> command) {
+        return groupingTypesWritePlatformService.deleteGroup(command.getPayload());
+    }
 
-        final Long centerId = command.longValueOfParameterNamed("centerId");
-        return this.groupWritePlatformService.createGroup(centerId, command);
+    @Override
+    public GroupDeleteResponse fallback(Command<GroupDeleteRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }
