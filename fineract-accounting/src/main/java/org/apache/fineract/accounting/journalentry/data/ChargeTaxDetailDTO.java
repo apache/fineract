@@ -19,28 +19,22 @@
 package org.apache.fineract.accounting.journalentry.data;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@RequiredArgsConstructor
-@Getter
-public class SharesTransactionDTO {
+/**
+ * Carries the pro-rated tax amount for a single TaxComponent when a LoanCharge is (partially) paid. Used to propagate
+ * tax details from the domain layer to the accounting bridge.
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ChargeTaxDetailDTO {
 
-    private final Long officeId;
-    private final Long paymentTypeId;
-    private final String transactionId;
-    private final LocalDate transactionDate;
-    private final ShareAccountTransactionEnumData transactionType;
-    private final ShareAccountTransactionEnumData transactionStatus;
+    /** GL account to credit (tax liability account from TaxComponent.creditAccount). */
+    private Long creditAccountId;
 
-    private final BigDecimal amount;
-
-    /*** Breakup of amounts **/
-    private final BigDecimal chargeAmount;
-
-    /** Breakdowns of fees and penalties this Transaction pays **/
-    private final List<ChargePaymentDTO> feePayments;
+    /** Pro-rated tax amount for this component in this payment. */
+    private BigDecimal amount;
 }

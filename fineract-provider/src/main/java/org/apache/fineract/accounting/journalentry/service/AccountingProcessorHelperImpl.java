@@ -42,12 +42,18 @@ import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialA
 import org.apache.fineract.accounting.financialactivityaccount.domain.FinancialActivityAccountRepositoryWrapper;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
 import org.apache.fineract.accounting.glaccount.domain.GLAccountRepository;
+import org.apache.fineract.accounting.journalentry.data.AccountingBridgeDataDTO;
+import org.apache.fineract.accounting.journalentry.data.AccountingBridgeLoanTransactionDTO;
 import org.apache.fineract.accounting.journalentry.data.ChargePaymentDTO;
+import org.apache.fineract.accounting.journalentry.data.ChargeTaxDetailDTO;
 import org.apache.fineract.accounting.journalentry.data.ChargeTaxPaymentDTO;
 import org.apache.fineract.accounting.journalentry.data.ClientChargePaymentDTO;
 import org.apache.fineract.accounting.journalentry.data.ClientTransactionDTO;
+import org.apache.fineract.accounting.journalentry.data.LoanChargeDTO;
+import org.apache.fineract.accounting.journalentry.data.LoanChargePaidByDTO;
 import org.apache.fineract.accounting.journalentry.data.LoanDTO;
 import org.apache.fineract.accounting.journalentry.data.LoanTransactionDTO;
+import org.apache.fineract.accounting.journalentry.data.LoanTransactionTypeDTO;
 import org.apache.fineract.accounting.journalentry.data.SavingsDTO;
 import org.apache.fineract.accounting.journalentry.data.SavingsTransactionDTO;
 import org.apache.fineract.accounting.journalentry.data.SharesDTO;
@@ -74,18 +80,17 @@ import org.apache.fineract.portfolio.PortfolioProductType;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
-import org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeLoanTransactionDTO;
-import org.apache.fineract.portfolio.loanaccount.data.ChargeTaxDetailDTO;
-import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
-import org.apache.fineract.portfolio.loanaccount.data.LoanChargePaidByDTO;
-import org.apache.fineract.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.shareaccounts.data.ShareAccountTransactionEnumData;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
-public class AccountingProcessorHelper {
+@Service
+@ConditionalOnMissingBean(value = AccountingProcessorHelper.class, ignored = AccountingProcessorHelperImpl.class)
+public class AccountingProcessorHelperImpl implements AccountingProcessorHelper {
 
     public static final String LOAN_TRANSACTION_IDENTIFIER = "L";
     public static final String SAVINGS_TRANSACTION_IDENTIFIER = "S";
@@ -104,8 +109,8 @@ public class AccountingProcessorHelper {
     private final ChargeRepositoryWrapper chargeRepositoryWrapper;
     private final BusinessEventNotifierService businessEventNotifierService;
 
-    public LoanDTO populateLoanDtoFromDTO(
-            final org.apache.fineract.portfolio.loanaccount.data.AccountingBridgeDataDTO accountingBridgeData) {
+    @Override
+    public LoanDTO populateLoanDtoFromDTO(final AccountingBridgeDataDTO accountingBridgeData) {
         final Long loanId = accountingBridgeData.getLoanId();
         final Long loanProductId = accountingBridgeData.getLoanProductId();
         final Long officeId = accountingBridgeData.getOfficeId();
@@ -127,7 +132,7 @@ public class AccountingProcessorHelper {
             final Long transactionOfficeId = loanTxnDto.getOfficeId();
             final String transactionId = loanTxnDto.getId().toString();
             final LocalDate transactionDate = loanTxnDto.getDate();
-            final LoanTransactionEnumData transactionType = loanTxnDto.getType();
+            final LoanTransactionTypeDTO transactionType = loanTxnDto.getType();
             final BigDecimal amount = loanTxnDto.getAmount();
             final BigDecimal principal = loanTxnDto.getPrincipalPortion();
             final BigDecimal interest = loanTxnDto.getInterestPortion();
@@ -137,7 +142,7 @@ public class AccountingProcessorHelper {
             final boolean reversed = loanTxnDto.isReversed();
             final Long paymentTypeId = loanTxnDto.getPaymentTypeId();
             final String chargeRefundChargeType = loanTxnDto.getChargeRefundChargeType();
-            final LoanChargeData loanChargeData = loanTxnDto.getLoanChargeData();
+            final LoanChargeDTO loanChargeDTO = loanTxnDto.getLoanChargeDTO();
 
             final List<ChargePaymentDTO> feePaymentDetails = new ArrayList<>();
             final List<ChargePaymentDTO> penaltyPaymentDetails = new ArrayList<>();
@@ -175,7 +180,7 @@ public class AccountingProcessorHelper {
 
             final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
                     transactionDate, transactionType, amount, principal, interest, fees, penalties, overPayments, reversed,
-                    penaltyPaymentDetails, feePaymentDetails, localIsAccountTransfer, chargeRefundChargeType, loanChargeData, principalPaid,
+                    penaltyPaymentDetails, feePaymentDetails, localIsAccountTransfer, chargeRefundChargeType, loanChargeDTO, principalPaid,
                     feePaid, penaltyPaid);
 
             transaction.setLoanToLoanTransfer(loanTxnDto.isLoanToLoanTransfer());
@@ -190,16 +195,19 @@ public class AccountingProcessorHelper {
                 accountingBridgeData.getCapitalizedIncomeClassificationCodeValue(), accountingBridgeData.getWriteOffReasonCodeValue());
     }
 
+    @Override
     public ProductToGLAccountMapping getChargeOffMappingByCodeValue(Long loanProductId, PortfolioProductType productType,
             Long chargeOffReasonId) {
         return accountMappingRepository.findChargeOffReasonMapping(loanProductId, productType.getValue(), chargeOffReasonId);
     }
 
+    @Override
     public ProductToGLAccountMapping getWriteOffMappingByCodeValue(Long loanProductId, PortfolioProductType productType,
             Long writeOffReasonId) {
         return accountMappingRepository.findWriteOffReasonMapping(loanProductId, productType.getValue(), writeOffReasonId);
     }
 
+    @Override
     public ProductToGLAccountMapping getClassificationMappingByCodeValue(Long loanProductId, PortfolioProductType productType,
             final Long classificationId, final String classificationType) {
         if (LoanProductAccountingParams.BUYDOWN_FEE_CLASSIFICATION_TO_INCOME_ACCOUNT_MAPPINGS.getValue().equals(classificationType)) {
@@ -210,6 +218,7 @@ public class AccountingProcessorHelper {
         }
     }
 
+    @Override
     public SavingsDTO populateSavingsDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
             final boolean accrualBasedAccountingEnabled) {
         final Long loanId = (Long) accountingBridgeData.get("savingsId");
@@ -284,6 +293,7 @@ public class AccountingProcessorHelper {
                 newSavingsTransactions);
     }
 
+    @Override
     public SharesDTO populateSharesDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
             final boolean accrualBasedAccountingEnabled) {
         final Long shareAccountId = (Long) accountingBridgeData.get("shareAccountId");
@@ -329,6 +339,7 @@ public class AccountingProcessorHelper {
                 accrualBasedAccountingEnabled, newTransactions);
     }
 
+    @Override
     public ClientTransactionDTO populateClientTransactionDtoFromMap(final Map<String, Object> accountingBridgeData) {
 
         final Long transactionOfficeId = (Long) accountingBridgeData.get("officeId");
@@ -391,6 +402,7 @@ public class AccountingProcessorHelper {
      * @param chargePaymentDTOs
      *            chargePaymentDTOs
      */
+    @Override
     public void createJournalEntriesForLoanCharges(final Office office, final String currencyCode, final Integer accountTypeToBeDebited,
             final Integer accountTypeToBeCredited, final Long loanProductId, final Long loanId, final String transactionId,
             final LocalDate transactionDate, final BigDecimal totalAmount, final List<ChargePaymentDTO> chargePaymentDTOs) {
@@ -466,6 +478,7 @@ public class AccountingProcessorHelper {
      * @param amount
      * @param isReversal
      */
+    @Override
     public void createCashBasedJournalEntriesAndReversalsForSavings(final Office office, final String currencyCode,
             final Integer accountTypeToBeDebited, final Integer accountTypeToBeCredited, final Long savingsProductId,
             final Long paymentTypeId, final Long loanId, final String transactionId, final LocalDate transactionDate,
@@ -498,6 +511,7 @@ public class AccountingProcessorHelper {
      * @param transactionDate
      * @param amount
      */
+    @Override
     public void createJournalEntriesForLoan(final Office office, final String currencyCode, final Integer accountTypeToBeDebited,
             final Integer accountTypeToBeCredited, final Long loanProductId, final Long paymentTypeId, final Long loanId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount) {
@@ -507,6 +521,7 @@ public class AccountingProcessorHelper {
                 transactionId, transactionDate, amount);
     }
 
+    @Override
     public void createJournalEntriesForLoan(final Office office, final String currencyCode, final Integer accountTypeToBeDebited,
             final GLAccount accountToBeCredited, final Long loanProductId, final Long paymentTypeId, final Long loanId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount) {
@@ -515,6 +530,7 @@ public class AccountingProcessorHelper {
                 transactionId, transactionDate, amount);
     }
 
+    @Override
     public void createSplitJournalEntriesForLoan(Office office, String currencyCode, List<JournalAmountHolder> splitAccountsHolder,
             JournalAmountHolder totalAccountHolder, Long loanProductId, Long paymentTypeId, Long loanId, String transactionId,
             LocalDate transactionDate) {
@@ -534,6 +550,7 @@ public class AccountingProcessorHelper {
         }
     }
 
+    @Override
     public void createCreditJournalEntryForLoan(final Office office, final String currencyCode,
             final CashAccountsForLoan accountMappingType, final Long loanProductId, final Long paymentTypeId, final Long loanId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount) {
@@ -542,6 +559,7 @@ public class AccountingProcessorHelper {
                 transactionDate, amount);
     }
 
+    @Override
     public void createCreditJournalEntryForLoan(final Office office, final String currencyCode,
             final AccrualAccountsForLoan accountMappingType, final Long loanProductId, final Long paymentTypeId, final Long loanId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount) {
@@ -554,6 +572,7 @@ public class AccountingProcessorHelper {
      * @param latestGLClosure
      * @param transactionDate
      */
+    @Override
     public void checkForBranchClosures(final GLClosure latestGLClosure, final LocalDate transactionDate) {
         // check if an accounting closure has happened for this branch after the transaction Date
         if (latestGLClosure != null) {
@@ -564,6 +583,7 @@ public class AccountingProcessorHelper {
         }
     }
 
+    @Override
     public GLClosure getLatestClosureByBranch(final long officeId) {
         return this.closureRepository.getLatestGLClosureByBranch(officeId);
     }
@@ -614,6 +634,7 @@ public class AccountingProcessorHelper {
      * @param isReversal
      * @param taxDetails
      */
+    @Override
     public void createCashBasedJournalEntriesAndReversalsForSavingsTax(final Office office, final String currencyCode,
             final CashAccountsForSavings accountTypeToBeDebited, final CashAccountsForSavings accountTypeToBeCredited,
             final Long savingsProductId, final Long paymentTypeId, final Long savingsId, final String transactionId,
@@ -635,6 +656,7 @@ public class AccountingProcessorHelper {
                 paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
     }
 
+    @Override
     public void createAccrualBasedJournalEntriesAndReversalsForSavingsTax(final Office office, final String currencyCode,
             final AccountingConstants.AccrualAccountsForSavings accountTypeToBeDebited,
             final AccountingConstants.AccrualAccountsForSavings accountTypeToBeCredited, final Long savingsProductId,
@@ -657,6 +679,7 @@ public class AccountingProcessorHelper {
                 savingsProductId, paymentTypeId, savingsId, transactionId, transactionDate, amount, isReversal);
     }
 
+    @Override
     public void createCashBasedDebitJournalEntriesAndReversalsForSavings(final Office office, final String currencyCode,
             final Integer accountTypeToBeDebited, final Long savingsProductId, final Long paymentTypeId, final Long savingsId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversal) {
@@ -670,6 +693,7 @@ public class AccountingProcessorHelper {
         }
     }
 
+    @Override
     public void createCashBasedCreditJournalEntriesAndReversalsForSavings(final Office office, final String currencyCode,
             final Integer accountTypeToBeCredited, final Long savingsProductId, final Long paymentTypeId, final Long savingsId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversal) {
@@ -683,6 +707,7 @@ public class AccountingProcessorHelper {
         }
     }
 
+    @Override
     public void createCashBasedCreditJournalEntriesAndReversalsForSavings(final Office office, final String currencyCode,
             final Long creditAccountId, final Long savingsId, final String transactionId, final LocalDate transactionDate,
             final BigDecimal amount, final Boolean isReversal) {
@@ -695,6 +720,7 @@ public class AccountingProcessorHelper {
         }
     }
 
+    @Override
     public void createAccrualBasedDebitJournalEntriesAndReversalsForSavings(final Office office, final String currencyCode,
             final Integer accountTypeToBeDebited, final Long savingsProductId, final Long paymentTypeId, final Long savingsId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversal) {
@@ -708,6 +734,7 @@ public class AccountingProcessorHelper {
         }
     }
 
+    @Override
     public void createAccrualBasedCreditJournalEntriesAndReversalsForSavings(final Office office, final String currencyCode,
             final Integer accountTypeToBeCredited, final Long savingsProductId, final Long paymentTypeId, final Long savingsId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount, final Boolean isReversal) {
@@ -721,6 +748,7 @@ public class AccountingProcessorHelper {
         }
     }
 
+    @Override
     public void createAccrualBasedBasedCreditJournalEntriesAndReversalsForSavings(final Office office, final String currencyCode,
             final Long creditAccountId, final Long savingsId, final String transactionId, final LocalDate transactionDate,
             final BigDecimal amount, final Boolean isReversal) {
@@ -747,6 +775,7 @@ public class AccountingProcessorHelper {
         createCreditJournalEntryForSavings(office, currencyCode, creditAccount, savingsId, transactionId, transactionDate, amount);
     }
 
+    @Override
     public void createDebitJournalEntryForLoan(final Office office, final String currencyCode, final int accountMappingTypeId,
             final Long loanProductId, final Long paymentTypeId, final Long loanId, final String transactionId,
             final LocalDate transactionDate, final BigDecimal amount) {
@@ -754,11 +783,13 @@ public class AccountingProcessorHelper {
         createDebitJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
     }
 
+    @Override
     public void createDebitJournalEntryForLoan(final Office office, final String currencyCode, final Long loanId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount, final GLAccount account) {
         createDebitJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
     }
 
+    @Override
     public void createDebitJournalEntryForLoanCharges(final Office office, final String currencyCode, final int accountMappingTypeId,
             final Long loanProductId, final Long chargeId, final Long loanId, final String transactionId, final LocalDate transactionDate,
             final BigDecimal amount) {
@@ -766,6 +797,7 @@ public class AccountingProcessorHelper {
         createDebitJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
     }
 
+    @Override
     public void createCreditJournalEntryForLoanCharges(final Office office, final String currencyCode, final int accountMappingTypeId,
             final Long loanProductId, final Long loanId, final String transactionId, final LocalDate transactionDate,
             final BigDecimal totalAmount, final List<ChargePaymentDTO> chargePaymentDTOs) {
@@ -773,6 +805,7 @@ public class AccountingProcessorHelper {
                 transactionDate, totalAmount, chargePaymentDTOs, true);
     }
 
+    @Override
     public void createDebitJournalEntryForLoanCharges(final Office office, final String currencyCode, final int accountMappingTypeId,
             final Long loanProductId, final Long loanId, final String transactionId, final LocalDate transactionDate,
             final BigDecimal totalAmount, final List<ChargePaymentDTO> chargePaymentDTOs) {
@@ -810,6 +843,7 @@ public class AccountingProcessorHelper {
      * @param chargePaymentDTOs
      *            chargePaymentDTOs
      */
+    @Override
     public void createCashBasedJournalEntriesAndReversalsForSavingsCharges(final Office office, final String currencyCode,
             final CashAccountsForSavings accountTypeToBeDebited, CashAccountsForSavings accountTypeToBeCredited,
             final Long savingsProductId, final Long paymentTypeId, final Long loanId, final String transactionId,
@@ -845,6 +879,7 @@ public class AccountingProcessorHelper {
         }
     }
 
+    @Override
     public void createAccrualBasedJournalEntriesAndReversalsForSavingsCharges(final Office office, final String currencyCode,
             final AccountingConstants.AccrualAccountsForSavings accountTypeToBeDebited,
             final AccountingConstants.AccrualAccountsForSavings accountTypeToBeCredited, final Long savingsProductId,
@@ -880,10 +915,12 @@ public class AccountingProcessorHelper {
         }
     }
 
+    @Override
     public Office getOfficeById(final long officeId) {
         return this.officeRepository.getReferenceById(officeId);
     }
 
+    @Override
     public void createCreditJournalEntryForLoan(final Office office, final String currencyCode, final int accountMappingTypeId,
             final Long loanProductId, final Long paymentTypeId, final Long loanId, final String transactionId,
             final LocalDate transactionDate, final BigDecimal amount) {
@@ -891,11 +928,13 @@ public class AccountingProcessorHelper {
         createCreditJournalEntryForLoan(office, currencyCode, loanId, transactionId, transactionDate, amount, account);
     }
 
+    @Override
     public void createCreditJournalEntryForLoan(final Office office, final String currencyCode, final Long loanId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount, final GLAccount account) {
         createCreditJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
     }
 
+    @Override
     public void createCreditJournalEntryForLoanByGLAccountId(final Office office, final String currencyCode, final Long loanId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount, final Long glAccountId) {
         final GLAccount account = glAccountRepository.findById(glAccountId)
@@ -903,6 +942,7 @@ public class AccountingProcessorHelper {
         createCreditJournalEntryForLoan(office, currencyCode, account, loanId, transactionId, transactionDate, amount);
     }
 
+    @Override
     public void createDebitJournalEntryForLoanByGLAccountId(final Office office, final String currencyCode, final Long loanId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount, final Long glAccountId) {
         final GLAccount account = glAccountRepository.findById(glAccountId)
@@ -953,6 +993,7 @@ public class AccountingProcessorHelper {
         persistJournalEntry(journalEntry);
     }
 
+    @Override
     public void createProvisioningDebitJournalEntry(LocalDate transactionDate, Long provisioningEntryId, Office office, String currencyCode,
             GLAccount account, BigDecimal amount) {
         final boolean manualEntry = false;
@@ -963,6 +1004,7 @@ public class AccountingProcessorHelper {
         persistJournalEntry(journalEntry);
     }
 
+    @Override
     public void createProvisioningCreditJournalEntry(LocalDate transactionDate, Long provisioningEntryId, Office office,
             String currencyCode, GLAccount account, BigDecimal amount) {
         final boolean manualEntry = false;
@@ -973,6 +1015,7 @@ public class AccountingProcessorHelper {
         persistJournalEntry(journalEntry);
     }
 
+    @Override
     public void createDebitJournalEntryForLoan(final Office office, final String currencyCode, final GLAccount account, final Long loanId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount) {
         final boolean manualEntry = false;
@@ -988,6 +1031,7 @@ public class AccountingProcessorHelper {
         persistJournalEntry(journalEntry);
     }
 
+    @Override
     public void createCreditJournalEntryForWorkingCapitalLoan(final Office office, final String currencyCode, final GLAccount account,
             final Long workingCapitalLoanId, final Long workingCapitalLoanTransactionId, final LocalDate transactionDate,
             final BigDecimal amount, final PaymentDetail paymentDetail) {
@@ -998,6 +1042,7 @@ public class AccountingProcessorHelper {
         persistJournalEntry(journalEntry);
     }
 
+    @Override
     public void createDebitJournalEntryForWorkingCapitalLoan(final Office office, final String currencyCode, final GLAccount account,
             final Long workingCapitalLoanId, final Long workingCapitalLoanTransactionId, final LocalDate transactionDate,
             final BigDecimal amount, final PaymentDetail paymentDetail) {
@@ -1008,6 +1053,7 @@ public class AccountingProcessorHelper {
         persistJournalEntry(journalEntry);
     }
 
+    @Override
     public GLAccount getLinkedGLAccountForWorkingCapitalLoanProduct(final Long workingCapitalLoanProductId, final int accountMappingTypeId,
             final Long paymentTypeId) {
         ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(
@@ -1055,6 +1101,7 @@ public class AccountingProcessorHelper {
         persistJournalEntry(journalEntry);
     }
 
+    @Override
     public void createJournalEntriesForShares(final Office office, final String currencyCode, final int accountTypeToDebitId,
             final int accountTypeToCreditId, final Long shareProductId, final Long paymentTypeId, final Long shareAccountId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal amount) {
@@ -1064,6 +1111,7 @@ public class AccountingProcessorHelper {
                 transactionId, transactionDate, amount);
     }
 
+    @Override
     public void createDebitJournalEntryForShares(final Office office, final String currencyCode, final int accountTypeToDebitId,
             final Long shareProductId, final Long paymentTypeId, final Long shareAccountId, final String transactionId,
             final LocalDate transactionDate, final BigDecimal amount) {
@@ -1071,6 +1119,7 @@ public class AccountingProcessorHelper {
         createDebitJournalEntryForShares(office, currencyCode, debitAccount, shareAccountId, transactionId, transactionDate, amount);
     }
 
+    @Override
     public void createCreditJournalEntryForShares(final Office office, final String currencyCode, final int accountTypeToCreditId,
             final Long shareProductId, final Long paymentTypeId, final Long shareAccountId, final String transactionId,
             final LocalDate transactionDate, final BigDecimal amount) {
@@ -1078,6 +1127,7 @@ public class AccountingProcessorHelper {
         createCreditJournalEntryForShares(office, currencyCode, creditAccount, shareAccountId, transactionId, transactionDate, amount);
     }
 
+    @Override
     public void createCashBasedJournalEntriesForSharesCharges(final Office office, final String currencyCode,
             final CashAccountsForShares accountTypeToBeDebited, final CashAccountsForShares accountTypeToBeCredited,
             final Long shareProductId, final Long paymentTypeId, final Long shareAccountId, final String transactionId,
@@ -1089,6 +1139,7 @@ public class AccountingProcessorHelper {
                 transactionId, transactionDate, totalAmount, chargePaymentDTOs);
     }
 
+    @Override
     public void createCashBasedJournalEntryForSharesCharges(final Office office, final String currencyCode,
             final CashAccountsForShares accountTypeToBeCredited, final Long shareProductId, final Long shareAccountId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal totalAmount,
@@ -1121,6 +1172,7 @@ public class AccountingProcessorHelper {
         }
     }
 
+    @Override
     public void revertCashBasedJournalEntryForSharesCharges(final Office office, final String currencyCode,
             final CashAccountsForShares accountTypeToBeCredited, final Long shareProductId, final Long shareAccountId,
             final String transactionId, final LocalDate transactionDate, final BigDecimal totalAmount,
@@ -1183,6 +1235,7 @@ public class AccountingProcessorHelper {
         persistJournalEntry(journalEntry);
     }
 
+    @Override
     public GLAccount getLinkedGLAccountForLoanProduct(final Long loanProductId, final int accountMappingTypeId, final Long paymentTypeId) {
         GLAccount glAccount;
         if (isOrganizationAccount(accountMappingTypeId)) {
@@ -1342,6 +1395,7 @@ public class AccountingProcessorHelper {
         return FinancialActivity.fromInt(accountMappingTypeId) != null;
     }
 
+    @Override
     public BigDecimal createCreditJournalEntryOrReversalForClientPayments(final Office office, final String currencyCode,
             final Long clientId, final Long transactionId, final LocalDate transactionDate, final Boolean isReversal,
             final List<ClientChargePaymentDTO> clientChargePaymentDTOs) {
@@ -1378,6 +1432,7 @@ public class AccountingProcessorHelper {
         return totalCreditedAmount;
     }
 
+    @Override
     public void createDebitJournalEntryOrReversalForClientChargePayments(final Office office, final String currencyCode,
             final Long clientId, final Long transactionId, final LocalDate transactionDate, final BigDecimal amount,
             final Boolean isReversal) {
@@ -1394,6 +1449,7 @@ public class AccountingProcessorHelper {
         return this.glAccountRepository.getReferenceById(accountId);
     }
 
+    @Override
     public Integer getValueForFeeOrPenaltyIncomeAccount(final String chargeRefundChargeType) {
         if (chargeRefundChargeType == null
                 || !(chargeRefundChargeType.equalsIgnoreCase("P") || chargeRefundChargeType.equalsIgnoreCase("F"))) {
@@ -1412,6 +1468,7 @@ public class AccountingProcessorHelper {
         return incomeAccount;
     }
 
+    @Override
     public JournalEntry persistJournalEntry(JournalEntry journalEntry) {
         boolean isNew = journalEntry.isNew();
         JournalEntry savedJournalEntry = this.glJournalEntryRepository.saveAndFlush(journalEntry);

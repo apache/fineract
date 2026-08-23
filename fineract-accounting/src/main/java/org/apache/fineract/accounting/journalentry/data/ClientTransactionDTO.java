@@ -24,7 +24,6 @@ import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
-import org.apache.fineract.portfolio.client.domain.ClientTransactionType;
 
 @RequiredArgsConstructor
 @Getter
@@ -50,6 +49,6 @@ public class ClientTransactionDTO {
     private final List<ClientChargePaymentDTO> chargePayments;
 
     public boolean isChargePayment() {
-        return ClientTransactionType.PAY_CHARGE.getValue().equals(this.transactionType.getId().intValue());
+        return this.transactionType != null && this.transactionType.getId() != null && this.transactionType.getId().intValue() == 1;
     }
 }

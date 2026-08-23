@@ -19,8 +19,11 @@
 package org.apache.fineract.portfolio.shareaccounts.data;
 
 import java.io.Serializable;
+import lombok.Getter;
+import org.apache.fineract.accounting.journalentry.data.ShareAccountTransactionTypeDTO;
 
-public class ShareAccountTransactionEnumData implements Serializable {
+@Getter
+public class ShareAccountTransactionEnumData implements Serializable, ShareAccountTransactionTypeDTO {
 
     private final Long id;
     private final String code;
@@ -43,42 +46,6 @@ public class ShareAccountTransactionEnumData implements Serializable {
         this.isPurchased = Long.valueOf(500).equals(this.id);
         this.isRedeemed = Long.valueOf(600).equals(this.id);
         this.isChargePayment = Long.valueOf(700).equals(this.id);
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public String getCode() {
-        return this.code;
-    }
-
-    public String getValue() {
-        return this.value;
-    }
-
-    public boolean isApplied() {
-        return this.isApplied;
-    }
-
-    public boolean isApproved() {
-        return this.isApproved;
-    }
-
-    public boolean isRejected() {
-        return this.isRejected;
-    }
-
-    public boolean isPurchased() {
-        return this.isPurchased;
-    }
-
-    public boolean isRedeemed() {
-        return this.isRedeemed;
-    }
-
-    public boolean isChargePayment() {
-        return this.isChargePayment;
     }
 
 }

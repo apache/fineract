@@ -62,12 +62,16 @@ import org.apache.fineract.portfolio.paymentdetail.data.PaymentDetailData;
 import org.apache.fineract.portfolio.paymenttype.data.PaymentTypeData;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.apache.fineract.portfolio.savings.service.SavingsEnumerations;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 @RequiredArgsConstructor
+@Service
+@ConditionalOnMissingBean(value = JournalEntryReadPlatformService.class, ignored = JournalEntryReadPlatformServiceImpl.class)
 public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
