@@ -18,12 +18,22 @@
  */
 package org.apache.fineract.portfolio.floatingrates.service;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import java.util.List;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
+import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
 
-public interface FloatingRateWritePlatformService {
+public interface FloatingRatesReadService {
 
-    CommandProcessingResult createFloatingRate(JsonCommand command);
+    List<FloatingRateData> retrieveAll();
 
-    CommandProcessingResult updateFloatingRate(JsonCommand command);
+    List<FloatingRateData> retrieveLookupActive();
+
+    FloatingRateData retrieveOne(Long floatingRateId);
+
+    List<FloatingRateData> retrieveAllActive();
+
+    FloatingRateData retrieveBaseLendingRate();
+
+    List<InterestRatePeriodData> retrieveInterestRatePeriods(Long productId);
+
 }

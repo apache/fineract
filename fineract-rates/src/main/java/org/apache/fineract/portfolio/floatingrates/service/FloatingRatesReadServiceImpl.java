@@ -36,7 +36,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 @RequiredArgsConstructor
-public class FloatingRatesReadPlatformServiceImpl implements FloatingRatesReadPlatformService {
+public class FloatingRatesReadServiceImpl implements FloatingRatesReadService {
 
     private final JdbcTemplate jdbcTemplate;
 

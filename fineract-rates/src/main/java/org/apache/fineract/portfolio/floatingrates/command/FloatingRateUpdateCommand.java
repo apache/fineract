@@ -16,24 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.floatingrates.service;
+package org.apache.fineract.portfolio.floatingrates.command;
 
-import java.util.List;
-import org.apache.fineract.portfolio.floatingrates.data.FloatingRateData;
-import org.apache.fineract.portfolio.floatingrates.data.InterestRatePeriodData;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.floatingrates.data.FloatingRateUpdateRequest;
 
-public interface FloatingRatesReadPlatformService {
-
-    List<FloatingRateData> retrieveAll();
-
-    List<FloatingRateData> retrieveLookupActive();
-
-    FloatingRateData retrieveOne(Long floatingRateId);
-
-    List<FloatingRateData> retrieveAllActive();
-
-    FloatingRateData retrieveBaseLendingRate();
-
-    List<InterestRatePeriodData> retrieveInterestRatePeriods(Long productId);
-
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class FloatingRateUpdateCommand extends Command<FloatingRateUpdateRequest> {}

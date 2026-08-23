@@ -84,7 +84,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRateDTO;
 import org.apache.fineract.portfolio.floatingrates.data.FloatingRatePeriodData;
 import org.apache.fineract.portfolio.floatingrates.exception.FloatingRateNotFoundException;
-import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
+import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadService;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
@@ -157,7 +157,7 @@ public class LoanScheduleAssembler {
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepositoryWrapper groupRepository;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
-    private final FloatingRatesReadPlatformService floatingRatesReadPlatformService;
+    private final FloatingRatesReadService floatingRatesReadPlatformService;
     private final VariableLoanScheduleFromApiJsonValidator variableLoanScheduleFromApiJsonValidator;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final LoanUtilService loanUtilService;
