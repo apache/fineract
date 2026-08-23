@@ -18,7 +18,9 @@
  */
 package org.apache.fineract.portfolio.client.service;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import jakarta.persistence.PersistenceException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -66,7 +68,8 @@ import org.apache.fineract.organisation.office.domain.OfficeRepositoryWrapper;
 import org.apache.fineract.organisation.staff.domain.Staff;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.portfolio.account.service.AccountNumberGenerator;
-import org.apache.fineract.portfolio.address.service.AddressWritePlatformService;
+import org.apache.fineract.portfolio.address.data.AddressCreateRequest;
+import org.apache.fineract.portfolio.address.service.AddressDomainService;
 import org.apache.fineract.portfolio.client.api.ClientApiConstants;
 import org.apache.fineract.portfolio.client.data.ClientDataValidator;
 import org.apache.fineract.portfolio.client.domain.Client;
@@ -124,7 +127,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ConfigurationDomainService configurationDomainService;
     private final AccountNumberFormatRepositoryWrapper accountNumberFormatRepository;
     private final FromJsonHelper fromApiJsonHelper;
-    private final AddressWritePlatformService addressWritePlatformService;
+    private final AddressDomainService addressDomainService;
     private final ClientFamilyMembersWritePlatformService clientFamilyMembersWritePlatformService;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final EntityDatatableChecksWritePlatformService entityDatatableChecksWritePlatformService;
@@ -322,7 +325,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             if (isAddressEnabled) {
-                this.addressWritePlatformService.addNewClientAddress(newClient, command);
+                createClientAddressesFromCommand(newClient, command);
             }
 
             if (command.arrayOfParameterNamed("familyMembers") != null) {
@@ -1101,4 +1104,31 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 .build();
     }
 
+    private void createClientAddressesFromCommand(final Client client, final JsonCommand command) {
+        if (!command.parameterExists("address")) {
+            return;
+        }
+        final JsonArray addressArray = command.arrayOfParameterNamed("address");
+        if (addressArray == null || addressArray.size() == 0) {
+            return;
+        }
+        for (int i = 0; i < addressArray.size(); i++) {
+            final JsonObject addressJson = addressArray.get(i).getAsJsonObject();
+            final AddressCreateRequest request = AddressCreateRequest.builder().clientId(client.getId())
+                    .addressTypeId(this.fromApiJsonHelper.extractLongNamed("addressTypeId", addressJson))
+                    .addressLine1(this.fromApiJsonHelper.extractStringNamed("addressLine1", addressJson))
+                    .addressLine2(this.fromApiJsonHelper.extractStringNamed("addressLine2", addressJson))
+                    .addressLine3(this.fromApiJsonHelper.extractStringNamed("addressLine3", addressJson))
+                    .townVillage(this.fromApiJsonHelper.extractStringNamed("townVillage", addressJson))
+                    .city(this.fromApiJsonHelper.extractStringNamed("city", addressJson))
+                    .countyDistrict(this.fromApiJsonHelper.extractStringNamed("countyDistrict", addressJson))
+                    .stateProvinceId(this.fromApiJsonHelper.extractLongNamed("stateProvinceId", addressJson))
+                    .countryId(this.fromApiJsonHelper.extractLongNamed("countryId", addressJson))
+                    .postalCode(this.fromApiJsonHelper.extractStringNamed("postalCode", addressJson))
+                    .latitude(this.fromApiJsonHelper.extractBigDecimalNamed("latitude", addressJson, command.extractLocale()))
+                    .longitude(this.fromApiJsonHelper.extractBigDecimalNamed("longitude", addressJson, command.extractLocale()))
+                    .isActive(this.fromApiJsonHelper.extractBooleanNamed("isActive", addressJson)).build();
+            this.addressDomainService.create(request);
+        }
+    }
 }
