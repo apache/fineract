@@ -365,15 +365,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder addClientAddress(final long clientId, final long addressTypeId) {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_ADDRESS;
-        this.entityId = addressTypeId;
-        this.href = "/clients/" + clientId + "/addresses";
-        this.clientId = clientId;
-        return this;
-    }
-
     public CommandWrapperBuilder updateClientAddress(final long clientId) {
         this.actionName = ACTION_UPDATE;
         this.entityName = ENTITY_ADDRESS;
