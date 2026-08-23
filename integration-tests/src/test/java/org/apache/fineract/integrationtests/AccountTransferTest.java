@@ -55,10 +55,11 @@ import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +68,7 @@ import org.slf4j.LoggerFactory;
  * JUnit Test Cases for Account Transfer for.
  */
 @SuppressWarnings({ "rawtypes", "unused" })
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class AccountTransferTest {
 
@@ -106,7 +108,7 @@ public class AccountTransferTest {
     private Integer financialActivityAccountId;
     private Account liabilityTransferAccount;
 
-    @BeforeEach
+    @BeforeAll
     public void setup() {
         Utils.initializeRESTAssured();
         this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
@@ -117,7 +119,9 @@ public class AccountTransferTest {
         this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
 
         List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
-        if (financialActivities.isEmpty()) {
+        if (financialActivities.stream()
+                .noneMatch(financialActivityAccount -> FinancialActivityAccountsTest.LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID
+                        .equals(financialActivityAccount.get("id")))) {
             /* Setup liability transfer account **/
             /* Create a Liability and an Asset Transfer Account **/
             liabilityTransferAccount = accountHelper.createLiabilityAccount();
@@ -144,7 +148,7 @@ public class AccountTransferTest {
     /**
      * Delete the Liability transfer account
      */
-    @AfterEach
+    @AfterAll
     public void tearDown() {
         Integer deletedFinancialActivityAccountId = financialActivityAccountHelper
                 .deleteFinancialActivityAccount(financialActivityAccountId, responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);

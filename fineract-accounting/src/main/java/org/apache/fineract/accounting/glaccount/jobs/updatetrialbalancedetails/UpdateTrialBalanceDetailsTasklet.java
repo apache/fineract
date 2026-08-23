@@ -20,6 +20,7 @@ package org.apache.fineract.accounting.glaccount.jobs.updatetrialbalancedetails;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +78,7 @@ public class UpdateTrialBalanceDetailsTasklet implements Tasklet {
             tb.setGlAccountId((Long) row[1]);
             tb.setAmount((BigDecimal) row[2]);
             tb.setEntryDate((LocalDate) row[3]);
-            tb.setTransactionDate((LocalDate) row[4]);
+            tb.setTransactionDate(((OffsetDateTime) row[4]).toLocalDate());
             tb.setClosingBalance((BigDecimal) row[5]);
             return tb;
         }).toList();
