@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -85,8 +86,23 @@ import org.apache.fineract.portfolio.client.data.ClientData;
 import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.apache.fineract.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
+import org.apache.fineract.portfolio.group.command.AssociateClientsCommand;
+import org.apache.fineract.portfolio.group.command.DisassociateClientsCommand;
+import org.apache.fineract.portfolio.group.command.GroupActivateCommand;
+import org.apache.fineract.portfolio.group.command.GroupAssignStaffCommand;
+import org.apache.fineract.portfolio.group.command.GroupUnassignStaffCommand;
+import org.apache.fineract.portfolio.group.data.AssociateClientsRequest;
+import org.apache.fineract.portfolio.group.data.AssociateClientsResponse;
+import org.apache.fineract.portfolio.group.data.DisassociateClientsRequest;
+import org.apache.fineract.portfolio.group.data.DisassociateClientsResponse;
+import org.apache.fineract.portfolio.group.data.GroupActivateRequest;
+import org.apache.fineract.portfolio.group.data.GroupActivateResponse;
+import org.apache.fineract.portfolio.group.data.GroupAssignStaffRequest;
+import org.apache.fineract.portfolio.group.data.GroupAssignStaffResponse;
 import org.apache.fineract.portfolio.group.data.GroupGeneralData;
 import org.apache.fineract.portfolio.group.data.GroupRoleData;
+import org.apache.fineract.portfolio.group.data.GroupUnassignStaffRequest;
+import org.apache.fineract.portfolio.group.data.GroupUnassignStaffResponse;
 import org.apache.fineract.portfolio.group.service.CenterReadPlatformService;
 import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
 import org.apache.fineract.portfolio.group.service.GroupRolesReadPlatformService;
@@ -132,6 +148,7 @@ public class GroupsApiResource {
     private final GLIMAccountInfoReadPlatformService glimAccountInfoReadPlatformService;
     private final GSIMReadPlatformService gsimReadPlatformService;
     private final SqlValidator sqlValidator;
+    private final CommandDispatcher commandDispatcher;
 
     @GET
     @Path("template")
@@ -344,18 +361,59 @@ public class GroupsApiResource {
     @Operation(summary = "Unassign a Staff", operationId = "unassignLoanOfficerGroup", description = "Allows you to unassign the Staff.\n\n"
             + "Mandatory Fields: staffId")
     @AlternativeOperationId("unassignLoanOfficer")
-    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdCommandUnassignStaffRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdCommandUnassignStaffResponse.class)))
-    public String unassignLoanOfficer(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
-            @Parameter(hidden = true) final String apiRequestBodyAsJson) {
+    public GroupUnassignStaffResponse unassignLoanOfficer(@PathParam("groupId") final Long groupId, GroupUnassignStaffRequest request) {
+        request.setGroupId(groupId);
+        final GroupUnassignStaffCommand command = new GroupUnassignStaffCommand();
+        command.setPayload(request);
+        return commandDispatcher.<GroupUnassignStaffRequest, GroupUnassignStaffResponse>dispatch(command).get();
+    }
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .unassignGroupStaff(groupId) //
-                .withJson(apiRequestBodyAsJson) //
-                .build(); //
-        final CommandProcessingResult result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return toApiJsonSerializer.serialize(result);
+    @POST
+    @Path("{groupId}/associateClients")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Associate Clients to a Group", operationId = "associateClients", description = "Associate existing clients to an existing Group")
+    public AssociateClientsResponse associateClients(@PathParam("groupId") final Long groupId, AssociateClientsRequest request) {
+        request.setGroupId(groupId);
+        final AssociateClientsCommand command = new AssociateClientsCommand();
+        command.setPayload(request);
+        return commandDispatcher.<AssociateClientsRequest, AssociateClientsResponse>dispatch(command).get();
+    }
 
+    @POST
+    @Path("{groupId}/disassociateClients")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Disassociate Clients from a Group", operationId = "disassociateClients", description = "Disassociate clients from an existing Group")
+    public DisassociateClientsResponse disassociateClients(@PathParam("groupId") final Long groupId, DisassociateClientsRequest request) {
+        request.setGroupId(groupId);
+        final DisassociateClientsCommand command = new DisassociateClientsCommand();
+        command.setPayload(request);
+        return commandDispatcher.<DisassociateClientsRequest, DisassociateClientsResponse>dispatch(command).get();
+    }
+
+    @POST
+    @Path("{groupId}/activate")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Activate a Group", operationId = "activateGroup", description = "Activate a Group in Pending state")
+    public GroupActivateResponse activate(@PathParam("groupId") final Long groupId, GroupActivateRequest request) {
+        request.setGroupId(groupId);
+        final GroupActivateCommand command = new GroupActivateCommand();
+        command.setPayload(request);
+        return commandDispatcher.<GroupActivateRequest, GroupActivateResponse>dispatch(command).get();
+    }
+
+    @POST
+    @Path("{groupId}/assignStaff")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Assign Staff to Group", operationId = "assignStaff", description = "Assign a Staff to an existing Group")
+    public GroupAssignStaffResponse assignStaff(@PathParam("groupId") final Long groupId, GroupAssignStaffRequest request) {
+        request.setGroupId(groupId);
+        final GroupAssignStaffCommand command = new GroupAssignStaffCommand();
+        command.setPayload(request);
+        return commandDispatcher.<GroupAssignStaffRequest, GroupAssignStaffResponse>dispatch(command).get();
     }
 
     @PUT
@@ -396,40 +454,9 @@ public class GroupsApiResource {
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(summary = "Activate a Group | Associate Clients | Disassociate Clients | Transfer Clients across groups | Generate Collection Sheet | Save Collection Sheet | Unassign a Staff | Assign a Staff | Close a Group | Unassign a Role | Update a Role", operationId = "handleCommandsGroup", description = "Activate a Group:\n\n"
-            + "Groups can be created in a Pending state. This API exists to enable group activation.\n\n" + "\n\n"
-            + "If the group happens to be already active this API will result in an error.\n\n" + "Mandatory Fields: activationDate\n\n"
-            + "Associate Clients:\n\n" + "This API allows to associate existing clients to a group.\n\n" + "\n\n"
-            + "The clients are listed from the office to which the group is associated.\n\n" + "\n\n"
-            + "If client(s) is already associated with group then API will result in an error.\n\n" + "Mandatory Fields: clientMembers\n\n"
-            + "Disassociate Clients:\n\n" + "This API allows to disassociate clients from a group.\n\n" + "\n\n"
-            + "Disassociating a client with active joint liability group loans results in an error.\n\n"
-            + "Mandatory Fields: clientMembers\n\n" + "Transfer Clients across groups:\n\n"
-            + "This API allows to transfer clients from one group to another\n\n" + "Mandatory Fields: destinationGroupId and clients\n\n"
-            + "Optional Fields: inheritDestinationGroupLoanOfficer (defaults to true) and transferActiveLoans (defaults to true)\n\n"
-            + "Generate Collection Sheet:\n\n"
-            + "This API retrieves repayment details of all jlg loans of all members of a group on a specified meeting date.\n\n"
-            + "Mandatory Fields: calendarId and transactionDate\n\n" + "Save Collection Sheet:\n\n"
-            + "This api allows the loan officer to perform bulk repayments of JLG loans for a group on its meeting date.\n\n"
-            + "Mandatory Fields: calendarId, transactionDate, actualDisbursementDate\n\n"
-            + "Optional Fields: clientsAttendance, bulkRepaymentTransaction, bulkDisbursementTransactions\n\n" + "Unassign a Staff:\n\n"
-            + "Allows you to unassign the Staff.\n\n" + "Mandatory Fields: staffId\n\n" + "Assign a Staff:\n\n"
-            + "Allows you to assign Staff to an existing Group.\n\n" + "\n\n"
-            + "The selected Staff should be belong to the same office (or an office higher up in the hierarchy) as this group"
-            + "Mandatory Fields: staffId\n\n"
-            + "Optional Fields: inheritStaffForClientAccounts (Optional: Boolean if true all members of the group (i.e all clients with active loans and savings ) will inherit the staffId)\n\n"
-            + "Close a Group:\n\n"
-            + "This API exists to close a group. Groups can be closed if they don't have any non-closed clients/loans/savingsAccounts.\n\n"
-            + "\n\n" + "If the group has any active clients/loans/savingsAccount, this API will result in an error." + "Assign a Role:\n\n"
-            + "Allows you to assign a Role to an existing member of a group.\n\n" + "\n\n"
-            + "We can define the different roles applicable to group members by adding code values to the pre-defined system code GROUPROLE. Example:Group leader etc.\n\n"
-            + "Mandatory Fields: clientId, role\n\n" + "Unassign a Role:\n\n"
-            + "Allows you to unassign Roles associated tp Group members.\n\n" + "Update a Role:\n\n"
-            + "Allows you to update the member Role.\n\n" + "Mandatory Fields: role\n\n"
-            + "Showing request/response for Transfer Clients across groups")
+    @Operation(summary = "Associate Clients | Disassociate Clients | Transfer Clients across groups | Generate Collection Sheet | Save Collection Sheet | Assign a Role | Unassign a Role | Update a Role | Close a Group", operationId = "handleCommandsGroup", description = "Handles remaining group commands. Activate, AssignStaff and UnassignStaff have been migrated to dedicated typed endpoints.")
     @AlternativeOperationId("activateOrGenerateCollectionSheet")
     @RequestBody(required = true, content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdRequest.class)))
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = GroupsApiResourceSwagger.PostGroupsGroupIdResponse.class)))
     public String activateOrGenerateCollectionSheet(@PathParam("groupId") @Parameter(description = "groupId") final Long groupId,
             @QueryParam("command") @Parameter(description = "command") final String commandParam,
             @QueryParam("roleId") @Parameter(description = "roleId") final Long roleId,
@@ -437,19 +464,7 @@ public class GroupsApiResource {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
         CommandProcessingResult result = null;
-        if (is(commandParam, "activate")) {
-            final CommandWrapper commandRequest = builder.activateGroup(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, "associateClients")) {
-            final CommandWrapper commandRequest = builder.associateClientsToGroup(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, "disassociateClients")) {
-            final CommandWrapper commandRequest = builder.disassociateClientsFromGroup(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, "generateCollectionSheet")) {
+        if (is(commandParam, "generateCollectionSheet")) {
             final JsonElement parsedQuery = fromJsonHelper.parse(apiRequestBodyAsJson);
             final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, fromJsonHelper);
             final JLGCollectionSheetData collectionSheet = collectionSheetReadPlatformService.generateGroupCollectionSheet(groupId, query);
@@ -457,14 +472,6 @@ public class GroupsApiResource {
             return toApiJsonSerializer.serialize(settings, collectionSheet, GroupingTypesApiConstants.COLLECTIONSHEET_DATA_PARAMETERS);
         } else if (is(commandParam, "saveCollectionSheet")) {
             final CommandWrapper commandRequest = builder.saveGroupCollectionSheet(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, "unassignStaff")) {
-            final CommandWrapper commandRequest = builder.unassignGroupStaff(groupId).build();
-            result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
-            return toApiJsonSerializer.serialize(result);
-        } else if (is(commandParam, "assignStaff")) {
-            final CommandWrapper commandRequest = builder.assignGroupStaff(groupId).build();
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "assignRole")) {
@@ -488,10 +495,9 @@ public class GroupsApiResource {
             result = commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return toApiJsonSerializer.serialize(result);
         } else {
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "generateCollectionSheet",
-                    "saveCollectionSheet", "unassignStaff", "assignRole", "unassignRole", "updateassignRole" });
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "generateCollectionSheet",
+                    "saveCollectionSheet", "assignRole", "unassignRole", "updateRole", "transferClients", "close" });
         }
-
     }
 
     private boolean is(final String commandParam, final String commandValue) {

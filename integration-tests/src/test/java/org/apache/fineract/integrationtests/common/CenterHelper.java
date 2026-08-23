@@ -404,8 +404,7 @@ public final class CenterHelper {
     @Deprecated(forRemoval = true)
     public static Object assignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String groupId,
             final Long staffId) {
-        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
-                + "&command=assignStaff";
+        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "/assignStaff?" + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------Assign Staff---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL, assignStaffAsJSON(staffId), "changes");
     }
@@ -416,8 +415,8 @@ public final class CenterHelper {
     @Deprecated(forRemoval = true)
     public static Object unassignStaff(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String groupId, final Long staffId) {
-        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "?" + Utils.TENANT_IDENTIFIER
-                + "&command=unassignStaff";
+        final String GROUP_ASSIGN_STAFF_URL = "/fineract-provider/api/v1/groups/" + groupId + "/command/unassign_staff?"
+                + Utils.TENANT_IDENTIFIER;
         LOG.info("---------------------------------Unassign Staff---------------------------------------------");
         return Utils.performServerPost(requestSpec, responseSpec, GROUP_ASSIGN_STAFF_URL, unassignStaffAsJSON(staffId), "changes");
     }

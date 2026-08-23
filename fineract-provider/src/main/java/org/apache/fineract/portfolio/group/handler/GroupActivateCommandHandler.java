@@ -16,27 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.portfolio.group.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.group.data.GroupActivateRequest;
+import org.apache.fineract.portfolio.group.data.GroupActivateResponse;
 import org.apache.fineract.portfolio.group.service.GroupingTypesWritePlatformService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@CommandType(entity = "GROUP", action = "DISASSOCIATECLIENTS")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class DisassociateClientsFromGroupCommandHandler implements NewCommandSourceHandler {
+public class GroupActivateCommandHandler implements CommandHandler<GroupActivateRequest, GroupActivateResponse> {
 
     private final GroupingTypesWritePlatformService writePlatformService;
 
-    @Transactional
+    @Retry(name = "commandGroupActivate", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.disassociateClientsFromGroup(command.entityId(), command);
+    @Transactional
+    public GroupActivateResponse handle(Command<GroupActivateRequest> command) {
+        return writePlatformService.activateGroup(command.getPayload());
+    }
+
+    @Override
+    public GroupActivateResponse fallback(Command<GroupActivateRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }

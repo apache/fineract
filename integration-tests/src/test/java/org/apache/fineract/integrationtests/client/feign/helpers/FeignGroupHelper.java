@@ -25,12 +25,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.AssociateClientsRequest;
 import org.apache.fineract.client.models.DeleteGroupsGroupIdResponse;
+import org.apache.fineract.client.models.DisassociateClientsRequest;
 import org.apache.fineract.client.models.GetGroupsGroupIdClientMembers;
 import org.apache.fineract.client.models.GetGroupsGroupIdResponse;
 import org.apache.fineract.client.models.GetGroupsPageItems;
-import org.apache.fineract.client.models.PostGroupsGroupIdChanges;
-import org.apache.fineract.client.models.PostGroupsGroupIdRequest;
+import org.apache.fineract.client.models.GroupActivateRequest;
+import org.apache.fineract.client.models.GroupAssignStaffRequest;
+import org.apache.fineract.client.models.GroupAssignStaffResponse;
 import org.apache.fineract.client.models.PostGroupsRequest;
 import org.apache.fineract.client.models.PostGroupsResponse;
 import org.apache.fineract.client.models.PutGroupsGroupIdRequest;
@@ -45,10 +48,6 @@ public class FeignGroupHelper {
     private static final String DEFAULT_ACTIVATION_DATE = "04 March 2011";
     private static final String DEFAULT_SUBMITTED_DATE = "04 March 2011";
 
-    private static final String ACTIVATE_COMMAND = "activate";
-    private static final String ASSOCIATE_CLIENTS_COMMAND = "associateClients";
-    private static final String DISASSOCIATE_CLIENTS_COMMAND = "disassociateClients";
-    private static final String ASSIGN_STAFF_COMMAND = "assignStaff";
     private static final String CLIENT_MEMBERS_ASSOCIATION = "clientMembers";
 
     private final FineractFeignClient fineractClient;
@@ -123,34 +122,41 @@ public class FeignGroupHelper {
     }
 
     public void activateGroup(Long groupId, String activationDate) {
-        PostGroupsGroupIdRequest request = new PostGroupsGroupIdRequest()//
-                .activationDate(activationDate)//
-                .dateFormat(LoanTestData.DATETIME_PATTERN)//
+        GroupActivateRequest request = new GroupActivateRequest().activationDate(activationDate).dateFormat(LoanTestData.DATETIME_PATTERN)
                 .locale(LoanTestData.LOCALE);
-        postGroupCommand(groupId, ACTIVATE_COMMAND, request);
+        ok(() -> fineractClient.groups().activateGroup(groupId, request));
     }
 
     public void associateClient(Long groupId, Long clientId) {
-        postGroupCommand(groupId, ASSOCIATE_CLIENTS_COMMAND, new PostGroupsGroupIdRequest().clientMembers(List.of(clientId)));
+        AssociateClientsRequest request = new AssociateClientsRequest().clientMembers(Set.of(clientId));
+        ok(() -> fineractClient.groups().associateClients(groupId, request));
     }
 
     public void disAssociateClient(Long groupId, Long clientId) {
-        postGroupCommand(groupId, DISASSOCIATE_CLIENTS_COMMAND, new PostGroupsGroupIdRequest().clientMembers(List.of(clientId)));
+        DisassociateClientsRequest request = new DisassociateClientsRequest().clientMembers(Set.of(clientId));
+        ok(() -> fineractClient.groups().disassociateClients(groupId, request));
     }
 
-    /** Assigns a staff member to the group; returns the {@code changes} object (contains {@code staffId}). */
-    public PostGroupsGroupIdChanges assignStaff(Long groupId, Long staffId) {
-        return postGroupCommand(groupId, ASSIGN_STAFF_COMMAND, new PostGroupsGroupIdRequest().staffId(staffId));
+    /** Assigns a staff member to the group; returns the staffId from changes. */
+    public Long assignStaff(Long groupId, Long staffId) {
+        GroupAssignStaffRequest request = new GroupAssignStaffRequest().staffId(staffId);
+        GroupAssignStaffResponse response = ok(() -> fineractClient.groups().assignStaff(groupId, request));
+        return extractStaffId(response.getChanges());
     }
 
-    /** Assigns staff to the group and cascades it to member client accounts; returns the {@code changes} object. */
-    public PostGroupsGroupIdChanges assignStaffInheritStaffForClientAccounts(Long groupId, Long staffId) {
-        PostGroupsGroupIdRequest request = new PostGroupsGroupIdRequest().staffId(staffId).inheritStaffForClientAccounts(true);
-        return postGroupCommand(groupId, ASSIGN_STAFF_COMMAND, request);
+    /** Assigns staff to the group and cascades to member client accounts; returns the staffId. */
+    public Long assignStaffInheritStaffForClientAccounts(Long groupId, Long staffId) {
+        GroupAssignStaffRequest request = new GroupAssignStaffRequest().staffId(staffId).inheritStaffForClientAccounts(true);
+        GroupAssignStaffResponse response = ok(() -> fineractClient.groups().assignStaff(groupId, request));
+        return extractStaffId(response.getChanges());
     }
 
-    private PostGroupsGroupIdChanges postGroupCommand(Long groupId, String command, PostGroupsGroupIdRequest request) {
-        return ok(() -> fineractClient.groups().handleCommandsGroup(groupId, request, Map.of("command", command))).getChanges();
+    private static Long extractStaffId(Map<String, Object> changes) {
+        if (changes == null) {
+            return null;
+        }
+        Object v = changes.get("staffId");
+        return v == null ? null : Long.valueOf(v.toString());
     }
 
     /**

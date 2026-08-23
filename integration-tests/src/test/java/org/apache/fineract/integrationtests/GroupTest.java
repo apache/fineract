@@ -92,7 +92,7 @@ public class GroupTest extends FeignLoanTestBase {
         assertNotNull(staffId2);
 
         // assign staff "staffId1" to the group
-        assertEquals(staffId1, groupHelper.assignStaff(groupId, staffId1).getStaffId(), "Verify assigned staff id is the same as id sent");
+        assertEquals(staffId1, groupHelper.assignStaff(groupId, staffId1), "Verify assigned staff id is the same as id sent");
 
         // assign staff "staffId2" to the client
         assertEquals(staffId2, clientHelper.assignStaffToClient(clientId, staffId2).getStaffId(),
@@ -107,7 +107,7 @@ public class GroupTest extends FeignLoanTestBase {
         disburseLoanWithNetDisbursalAmount(loanId, LOAN_DATE, getLoanDetails(loanId).getNetDisbursalAmount().toPlainString());
 
         // assign staff "staffId1" to the group and cascade it to member client accounts
-        final Long inheritedStaffId = groupHelper.assignStaffInheritStaffForClientAccounts(groupId, staffId1).getStaffId();
+        final Long inheritedStaffId = groupHelper.assignStaffInheritStaffForClientAccounts(groupId, staffId1);
 
         // the client's staff officer changed away from staffId2 and now matches the inherited staff
         assertNotEquals(staffId2, inheritedStaffId, "Verify if client staff has changed");

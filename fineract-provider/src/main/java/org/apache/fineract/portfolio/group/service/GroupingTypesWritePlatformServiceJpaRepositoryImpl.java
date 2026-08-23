@@ -69,6 +69,16 @@ import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.domain.ClientRepositoryWrapper;
 import org.apache.fineract.portfolio.client.service.LoanStatusMapper;
 import org.apache.fineract.portfolio.group.api.GroupingTypesApiConstants;
+import org.apache.fineract.portfolio.group.data.AssociateClientsRequest;
+import org.apache.fineract.portfolio.group.data.AssociateClientsResponse;
+import org.apache.fineract.portfolio.group.data.DisassociateClientsRequest;
+import org.apache.fineract.portfolio.group.data.DisassociateClientsResponse;
+import org.apache.fineract.portfolio.group.data.GroupActivateRequest;
+import org.apache.fineract.portfolio.group.data.GroupActivateResponse;
+import org.apache.fineract.portfolio.group.data.GroupAssignStaffRequest;
+import org.apache.fineract.portfolio.group.data.GroupAssignStaffResponse;
+import org.apache.fineract.portfolio.group.data.GroupUnassignStaffRequest;
+import org.apache.fineract.portfolio.group.data.GroupUnassignStaffResponse;
 import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.group.domain.GroupLevel;
 import org.apache.fineract.portfolio.group.domain.GroupLevelRepository;
@@ -231,6 +241,140 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         }
     }
 
+    @Transactional
+    @Override
+    public GroupActivateResponse activateGroup(final GroupActivateRequest request) {
+        try {
+            final Group group = this.groupRepository.findOneWithNotFoundDetection(request.getGroupId());
+
+            if (group.isGroup()) {
+                validateGroupRulesBeforeActivation(group);
+            }
+
+            final LocalDate activationDate = parseDate(request.getActivationDate(), request.getDateFormat(), request.getLocale());
+            validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(group.getOffice(), group.getGroupLevel(), activationDate);
+
+            group.activate(null, activationDate);
+
+            return GroupActivateResponse.builder().resourceId(group.getId()).officeId(group.officeId()).groupId(group.getId()).build();
+
+        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
+            handleGroupDataIntegrityIssuesTyped(null, null, dve.getMostSpecificCause(), dve, GroupTypes.GROUP);
+            return GroupActivateResponse.builder().build();
+        } catch (final PersistenceException dve) {
+            final Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
+            handleGroupDataIntegrityIssuesTyped(null, null, throwable, dve, GroupTypes.GROUP);
+            return GroupActivateResponse.builder().build();
+        }
+    }
+
+    @Transactional
+    @Override
+    public GroupAssignStaffResponse assignGroupStaff(final GroupAssignStaffRequest request) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
+
+        final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(request.getGroupId());
+
+        final Staff staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(request.getStaffId(),
+                groupForUpdate.getOffice().getHierarchy());
+        groupForUpdate.updateStaff(staff);
+
+        if (Boolean.TRUE.equals(request.getInheritStaffForClientAccounts())) {
+            LocalDate loanOfficerReassignmentDate = DateUtils.getBusinessLocalDate();
+            Set<Client> clients = groupForUpdate.getClientMembers();
+            if (clients != null) {
+                for (Client client : clients) {
+                    client.updateStaff(staff);
+                    if (this.loanRepositoryWrapper.doNonClosedLoanAccountsExistForClient(client.getId())) {
+                        for (final Loan loan : this.loanRepositoryWrapper.findLoanByClientId(client.getId())) {
+                            if (loan.isDisbursed() && !loan.isClosed()) {
+                                loanOfficerService.reassignLoanOfficer(loan, staff, loanOfficerReassignmentDate);
+                            }
+                        }
+                    }
+                    if (this.savingsAccountRepositoryWrapper.doNonClosedSavingAccountsExistForClient(client.getId())) {
+                        for (final SavingsAccount savingsAccount : this.savingsAccountRepositoryWrapper
+                                .findSavingAccountByClientId(client.getId())) {
+                            if (!savingsAccount.isClosed()) {
+                                savingsAccount.reassignSavingsOfficer(staff, loanOfficerReassignmentDate);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        this.groupRepository.saveAndFlush(groupForUpdate);
+
+        actualChanges.put(GroupingTypesApiConstants.staffIdParamName, request.getStaffId());
+
+        return GroupAssignStaffResponse.builder().resourceId(groupForUpdate.getId()).officeId(groupForUpdate.officeId())
+                .groupId(request.getGroupId()).changes(actualChanges).build();
+    }
+
+    @Transactional
+    @Override
+    public GroupUnassignStaffResponse unassignGroupStaff(final GroupUnassignStaffRequest request) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
+
+        final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(request.getGroupId());
+        final Staff presentStaff = groupForUpdate.getStaff();
+        if (presentStaff == null) {
+            throw new GroupHasNoStaffException(request.getGroupId());
+        }
+
+        final Long presentStaffId = presentStaff.getId();
+        if (request.getStaffId() != null && request.getStaffId().equals(presentStaffId)) {
+            groupForUpdate.unassignStaff();
+        }
+
+        this.groupRepository.saveAndFlush(groupForUpdate);
+
+        actualChanges.put(GroupingTypesApiConstants.staffIdParamName, null);
+
+        return GroupUnassignStaffResponse.builder().resourceId(groupForUpdate.getId()).officeId(groupForUpdate.officeId())
+                .groupId(request.getGroupId()).changes(actualChanges).build();
+    }
+
+    private LocalDate parseDate(final String value, final String dateFormat, final String locale) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        final String fmt = (dateFormat == null || dateFormat.isBlank()) ? "dd MMMM yyyy" : dateFormat;
+        final java.util.Locale loc = (locale == null || locale.isBlank()) ? java.util.Locale.ENGLISH
+                : java.util.Locale.forLanguageTag(locale);
+        return LocalDate.parse(value, java.time.format.DateTimeFormatter.ofPattern(fmt, loc));
+    }
+
+    private void handleGroupDataIntegrityIssuesTyped(final String name, final String externalId, final Throwable realCause,
+            final Exception dve, final GroupTypes groupLevel) {
+        String levelName = "Invalid";
+        switch (groupLevel) {
+            case CENTER:
+                levelName = "Center";
+            break;
+            case GROUP:
+                levelName = "Group";
+            break;
+            case INVALID:
+            break;
+        }
+
+        if (realCause.getMessage().contains("'external_id'")) {
+            final String errorMessageForUser = levelName + " with externalId `" + externalId + "` already exists.";
+            final String errorMessageForMachine = "error.msg." + levelName.toLowerCase() + ".duplicate.externalId";
+            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser,
+                    GroupingTypesApiConstants.externalIdParamName, externalId);
+        } else if (realCause.getMessage().contains("'name'")) {
+            final String errorMessageForUser = levelName + " with name `" + name + "` already exists.";
+            final String errorMessageForMachine = "error.msg." + levelName.toLowerCase() + ".duplicate.name";
+            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser, GroupingTypesApiConstants.nameParamName,
+                    name);
+        }
+
+        log.error("Error occured.", dve);
+        throw ErrorHandler.getMappable(dve, "error.msg.group.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
+    }
+
     private void generateAccountNumber(Group newGroup) {
         EntityAccountType entityAccountType = null;
         AccountNumberFormat accountNumberFormat = null;
@@ -243,6 +387,73 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             accountNumberFormat = this.accountNumberFormatRepository.findByAccountType(entityAccountType);
             newGroup.updateAccountNo(this.accountNumberGenerator.generateGroupAccountNumber(newGroup, accountNumberFormat));
         }
+    }
+
+    @Transactional
+    @Override
+    public AssociateClientsResponse associateClientsToGroup(final AssociateClientsRequest request) {
+        final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(request.getGroupId());
+        final Set<Client> clientMembers = assembleSetOfClientsByIds(groupForUpdate.officeId(), request.getClientMembers());
+        final Map<String, Object> actualChanges = new HashMap<>();
+
+        final List<String> changes = groupForUpdate.associateClients(clientMembers);
+
+        if (groupForUpdate.isGroup()) {
+            validateGroupRulesBeforeClientAssociation(groupForUpdate);
+        }
+        if (!changes.isEmpty()) {
+            actualChanges.put(GroupingTypesApiConstants.clientMembersParamName, changes);
+        }
+
+        this.groupRepository.saveAndFlush(groupForUpdate);
+
+        return AssociateClientsResponse.builder() //
+                .resourceId(groupForUpdate.getId()) //
+                .officeId(groupForUpdate.officeId()) //
+                .groupId(groupForUpdate.getId()) //
+                .changes(actualChanges) //
+                .build();
+    }
+
+    private Set<Client> assembleSetOfClientsByIds(final Long groupOfficeId, final Set<Long> clientIds) {
+        final Set<Client> clientMembers = new HashSet<>();
+        if (clientIds == null || clientIds.isEmpty()) {
+            return clientMembers;
+        }
+        for (final Long clientId : clientIds) {
+            final Client client = this.clientRepositoryWrapper.findOneWithNotFoundDetection(clientId);
+            if (!client.isOfficeIdentifiedBy(groupOfficeId)) {
+                final String errorMessage = "Client with identifier " + clientId + " must have the same office as group.";
+                throw new InvalidOfficeException("client", "attach.to.group", errorMessage, clientId.toString(), groupOfficeId);
+            }
+            clientMembers.add(client);
+        }
+        return clientMembers;
+    }
+
+    @Transactional
+    @Override
+    public DisassociateClientsResponse disassociateClientsFromGroup(final DisassociateClientsRequest request) {
+        final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(request.getGroupId());
+        final Set<Client> clientMembers = assembleSetOfClientsByIds(groupForUpdate.officeId(), request.getClientMembers());
+
+        checkForActiveJLGLoans(groupForUpdate.getId(), clientMembers);
+        validateForJLGSavings(groupForUpdate.getId(), clientMembers);
+
+        final Map<String, Object> actualChanges = new HashMap<>();
+        final List<String> changes = groupForUpdate.disassociateClients(clientMembers);
+        if (!changes.isEmpty()) {
+            actualChanges.put(GroupingTypesApiConstants.clientMembersParamName, changes);
+        }
+
+        this.groupRepository.saveAndFlush(groupForUpdate);
+
+        return DisassociateClientsResponse.builder() //
+                .resourceId(groupForUpdate.getId()) //
+                .officeId(groupForUpdate.officeId()) //
+                .groupId(groupForUpdate.getId()) //
+                .changes(actualChanges) //
+                .build();
     }
 
     @Transactional
@@ -275,45 +486,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         businessEventNotifierService.notifyPostBusinessEvent(new GroupsCreateBusinessEvent(commandProcessingResult));
 
         return commandProcessingResult;
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult activateGroupOrCenter(final Long groupId, final JsonCommand command) {
-
-        try {
-            this.fromApiJsonDeserializer.validateForActivation(command, GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
-
-            final AppUser currentUser = this.context.authenticatedUser();
-
-            final Group group = this.groupRepository.findOneWithNotFoundDetection(groupId);
-
-            if (group.isGroup()) {
-                validateGroupRulesBeforeActivation(group);
-            }
-
-            final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
-
-            validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(group.getOffice(), group.getGroupLevel(), activationDate);
-
-            group.activate(currentUser, activationDate);
-
-            this.groupRepository.saveAndFlush(group);
-
-            return new CommandProcessingResultBuilder() //
-                    .withCommandId(command.commandId()) //
-                    .withOfficeId(group.officeId()) //
-                    .withGroupId(groupId) //
-                    .withEntityId(groupId) //
-                    .build();
-        } catch (final JpaSystemException | DataIntegrityViolationException dve) {
-            handleGroupDataIntegrityIssues(command, dve.getMostSpecificCause(), dve, GroupTypes.GROUP);
-            return CommandProcessingResult.empty();
-        } catch (final PersistenceException dve) {
-            Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            handleGroupDataIntegrityIssues(command, throwable, dve, GroupTypes.GROUP);
-            return CommandProcessingResult.empty();
-        }
     }
 
     private void validateGroupRulesBeforeActivation(final Group group) {
@@ -452,97 +624,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             handleGroupDataIntegrityIssues(command, throwable, dve, groupingType);
             return CommandProcessingResult.empty();
         }
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult unassignGroupOrCenterStaff(final Long grouptId, final JsonCommand command) {
-
-        this.context.authenticatedUser();
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(9);
-
-        this.fromApiJsonDeserializer.validateForUnassignStaff(command.json());
-        final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(grouptId);
-        final Staff presentStaff = groupForUpdate.getStaff();
-        Long presentStaffId = null;
-        if (presentStaff == null) {
-            throw new GroupHasNoStaffException(grouptId);
-        }
-        presentStaffId = presentStaff.getId();
-        final String staffIdParamName = "staffId";
-        if (!command.isChangeInLongParameterNamed(staffIdParamName, presentStaffId)) {
-            groupForUpdate.unassignStaff();
-        }
-        this.groupRepository.saveAndFlush(groupForUpdate);
-
-        actualChanges.put(staffIdParamName, null);
-
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withOfficeId(groupForUpdate.getId()) //
-                .withGroupId(groupForUpdate.officeId()) //
-                .withEntityId(groupForUpdate.getId()) //
-                .with(actualChanges) //
-                .build();
-
-    }
-
-    @Override
-    public CommandProcessingResult assignGroupOrCenterStaff(final Long groupId, final JsonCommand command) {
-
-        this.context.authenticatedUser();
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(5);
-
-        this.fromApiJsonDeserializer.validateForAssignStaff(command.json());
-
-        final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(groupId);
-
-        Staff staff = null;
-        final Long staffId = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
-        final boolean inheritStaffForClientAccounts = command
-                .booleanPrimitiveValueOfParameterNamed(GroupingTypesApiConstants.inheritStaffForClientAccounts);
-        staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, groupForUpdate.getOffice().getHierarchy());
-        groupForUpdate.updateStaff(staff);
-
-        if (inheritStaffForClientAccounts) {
-            LocalDate loanOfficerReassignmentDate = DateUtils.getBusinessLocalDate();
-            /*
-             * update loan officer for client and update loan officer for clients loans and savings
-             */
-            Set<Client> clients = groupForUpdate.getClientMembers();
-            if (clients != null) {
-                for (Client client : clients) {
-                    client.updateStaff(staff);
-                    if (this.loanRepositoryWrapper.doNonClosedLoanAccountsExistForClient(client.getId())) {
-                        for (final Loan loan : this.loanRepositoryWrapper.findLoanByClientId(client.getId())) {
-                            if (loan.isDisbursed() && !loan.isClosed()) {
-                                loanOfficerService.reassignLoanOfficer(loan, staff, loanOfficerReassignmentDate);
-                            }
-                        }
-                    }
-                    if (this.savingsAccountRepositoryWrapper.doNonClosedSavingAccountsExistForClient(client.getId())) {
-                        for (final SavingsAccount savingsAccount : this.savingsAccountRepositoryWrapper
-                                .findSavingAccountByClientId(client.getId())) {
-                            if (!savingsAccount.isClosed()) {
-                                savingsAccount.reassignSavingsOfficer(staff, loanOfficerReassignmentDate);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        this.groupRepository.saveAndFlush(groupForUpdate);
-
-        actualChanges.put(GroupingTypesApiConstants.staffIdParamName, staffId);
-
-        return new CommandProcessingResultBuilder() //
-                .withOfficeId(groupForUpdate.officeId()) //
-                .withEntityId(groupForUpdate.getId()) //
-                .withGroupId(groupId) //
-                .with(actualChanges) //
-                .build();
     }
 
     @Transactional
@@ -759,64 +840,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         log.error("Error occured.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.group.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
-    }
-
-    @Override
-    public CommandProcessingResult associateClientsToGroup(final Long groupId, final JsonCommand command) {
-
-        this.fromApiJsonDeserializer.validateForAssociateClients(command.json());
-
-        final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(groupId);
-        final Set<Client> clientMembers = assembleSetOfClients(groupForUpdate.officeId(), command);
-        final Map<String, Object> actualChanges = new HashMap<>();
-
-        final List<String> changes = groupForUpdate.associateClients(clientMembers);
-
-        if (groupForUpdate.isGroup()) {
-            validateGroupRulesBeforeClientAssociation(groupForUpdate);
-        }
-        if (!changes.isEmpty()) {
-            actualChanges.put(GroupingTypesApiConstants.clientMembersParamName, changes);
-        }
-
-        this.groupRepository.saveAndFlush(groupForUpdate);
-
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withOfficeId(groupForUpdate.officeId()) //
-                .withGroupId(groupForUpdate.getId()) //
-                .withEntityId(groupForUpdate.getId()) //
-                .with(actualChanges) //
-                .build();
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult disassociateClientsFromGroup(final Long groupId, final JsonCommand command) {
-        this.fromApiJsonDeserializer.validateForDisassociateClients(command.json());
-
-        final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(groupId);
-        final Set<Client> clientMembers = assembleSetOfClients(groupForUpdate.officeId(), command);
-
-        // check if any client has got group loans
-        checkForActiveJLGLoans(groupForUpdate.getId(), clientMembers);
-        validateForJLGSavings(groupForUpdate.getId(), clientMembers);
-        final Map<String, Object> actualChanges = new HashMap<>();
-
-        final List<String> changes = groupForUpdate.disassociateClients(clientMembers);
-        if (!changes.isEmpty()) {
-            actualChanges.put(GroupingTypesApiConstants.clientMembersParamName, changes);
-        }
-
-        this.groupRepository.saveAndFlush(groupForUpdate);
-
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withOfficeId(groupForUpdate.officeId()) //
-                .withGroupId(groupForUpdate.getId()) //
-                .withEntityId(groupForUpdate.getId()) //
-                .with(actualChanges) //
-                .build();
     }
 
     @Transactional
