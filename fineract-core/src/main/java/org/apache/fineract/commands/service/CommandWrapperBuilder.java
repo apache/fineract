@@ -2263,13 +2263,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createGroup() {
-        this.actionName = ACTION_CREATE;
-        this.entityName = ENTITY_GROUP;
-        this.href = "/groups/template";
-        return this;
-    }
-
     public CommandWrapperBuilder updateGroup(final Long groupId) {
         this.actionName = ACTION_UPDATE;
         this.entityName = ENTITY_GROUP;

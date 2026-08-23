@@ -236,6 +236,43 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
 
     @Transactional
     @Override
+    public boolean saveDatatables(final Integer status, final String entity, final Long entityId, final Long productId,
+            final java.util.List<org.apache.fineract.portfolio.group.data.DatatableEntry> datatableEntries) {
+        if (datatableEntries == null || datatableEntries.isEmpty()) {
+            return false;
+        }
+        final AppUser user = this.context.authenticatedUser();
+        boolean isMakerCheckerEnabled = false;
+        for (org.apache.fineract.portfolio.group.data.DatatableEntry entry : datatableEntries) {
+            final String datatableName = entry.getRegisteredTableName();
+            if (datatableName == null || entry.getData() == null) {
+                final ApiParameterError error = ApiParameterError.generalError(
+                        "registeredTableName.and.data.parameters.must.be.present.in.each.list.items.in.datatables",
+                        "registeredTableName and data parameters must be present in each list items in datatables");
+                List<ApiParameterError> errors = new ArrayList<>();
+                errors.add(error);
+                throw new PlatformApiDataValidationException(errors);
+            }
+            final String taskPermissionName = "CREATE_" + datatableName;
+            user.validateHasPermissionTo(taskPermissionName);
+            if (this.configurationDomainService.isMakerCheckerEnabledForTask(taskPermissionName)) {
+                isMakerCheckerEnabled = true;
+            }
+            try {
+                final String dataAsJson = new com.google.gson.Gson().toJson(entry.getData());
+                datatableWriteService.createNewDatatableEntry(datatableName, entityId, dataAsJson);
+            } catch (PlatformApiDataValidationException e) {
+                for (ApiParameterError error : e.getErrors()) {
+                    error.setParameterName("datatables." + datatableName + "." + error.getParameterName());
+                }
+                throw e;
+            }
+        }
+        return isMakerCheckerEnabled;
+    }
+
+    @Transactional
+    @Override
     public CommandProcessingResult deleteCheck(final Long entityDatatableCheckId) {
         final EntityDatatableChecks check = this.entityDatatableChecksRepository.findById(entityDatatableCheckId)
                 .orElseThrow(() -> new EntityDatatableChecksNotFoundException(entityDatatableCheckId));
