@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignRawHttpHelper;
@@ -74,8 +75,8 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
             builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
             builder = builder.withMaxTrancheCount("30");
         }
-        final String loanProductJSON = builder.build(null);
-        return createLoanProductFromJson(loanProductJSON);
+        final PostLoanProductsRequest loanProductRequest = builder.buildRequest(null);
+        return createLoanProduct(loanProductRequest);
     }
 
     private Long applyForLoanApplicationWithTranches(final Long clientId, final Long loanProductID, String principal,

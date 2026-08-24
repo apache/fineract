@@ -35,6 +35,7 @@ import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
@@ -192,7 +193,7 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends FeignLoa
         AdvancedPaymentData merchantIssuedRefundAllocation = createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION");
         AdvancedPaymentData payoutRefundAllocation = createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT");
         log.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
                 .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
                 .withEnableDownPayment(true, "25", true).withinterestRatePerPeriod("0").withInterestRateFrequencyTypeAsMonths()
                 .withRepaymentStrategy(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
@@ -201,8 +202,8 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest extends FeignLoa
                 .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
                 .addAdvancedPaymentAllocation(defaultAllocation, goodwillCreditAllocation, merchantIssuedRefundAllocation,
                         payoutRefundAllocation)
-                .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0").build(null);
-        return createLoanProductFromJson(loanProductJSON);
+                .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0").buildRequest(null);
+        return createLoanProduct(loanProductRequest);
     }
 
     private Long applyForLoanApplication(final Long clientId, final Long loanProductId, final Long savingsId, final Long principal,

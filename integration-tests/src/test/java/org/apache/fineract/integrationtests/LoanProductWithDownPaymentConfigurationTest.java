@@ -29,7 +29,6 @@ import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.Test;
@@ -77,44 +76,42 @@ public class LoanProductWithDownPaymentConfigurationTest extends FeignLoanTestBa
         Boolean enableDownPayment = true;
 
         ArrayList<HashMap<String, Object>> loanProductErrorData = getLoanProductError(
-                Utils.convertToJson(
-                        new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, "0", false).build(null, delinquencyBucketId)),
+                new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, "0", false).buildRequest(null, delinquencyBucketId),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.is.less.than.min",
                 loanProductErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        loanProductErrorData = getLoanProductError(Utils.convertToJson(
-                new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, "101", false).build(null, delinquencyBucketId)),
+        loanProductErrorData = getLoanProductError(
+                new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, "101", false).buildRequest(null, delinquencyBucketId),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.is.greater.than.max",
                 loanProductErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        loanProductErrorData = getLoanProductError(Utils.convertToJson(new LoanProductTestBuilder()
-                .withEnableDownPayment(enableDownPayment, "12.55555555", false).build(null, delinquencyBucketId)),
+        loanProductErrorData = getLoanProductError(new LoanProductTestBuilder()
+                .withEnableDownPayment(enableDownPayment, "12.55555555", false).buildRequest(null, delinquencyBucketId),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.scale.is.greater.than.6",
                 loanProductErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         loanProductErrorData = getLoanProductError(
-                Utils.convertToJson(
-                        new LoanProductTestBuilder().withEnableDownPayment(false, "12.5", false).build(null, delinquencyBucketId)),
+                new LoanProductTestBuilder().withEnableDownPayment(false, "12.5", false).buildRequest(null, delinquencyBucketId),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.supported.only.for.enable.down.payment.true",
                 loanProductErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        loanProductErrorData = getLoanProductError(Utils.convertToJson(
-                new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, null, false).build(null, delinquencyBucketId)),
+        loanProductErrorData = getLoanProductError(
+                new LoanProductTestBuilder().withEnableDownPayment(enableDownPayment, null, false).buildRequest(null, delinquencyBucketId),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.disbursedAmountPercentageForDownPayment.required.for.enable.down.payment.true",
                 loanProductErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         loanProductErrorData = getLoanProductError(
-                Utils.convertToJson(new LoanProductTestBuilder().withEnableDownPayment(false, null, true).build(null, delinquencyBucketId)),
+                new LoanProductTestBuilder().withEnableDownPayment(false, null, true).buildRequest(null, delinquencyBucketId),
                 CommonConstants.RESPONSE_ERROR);
         assertNotNull(loanProductErrorData);
         assertEquals("validation.msg.loanproduct.enableAutoRepaymentForDownPayment.supported.only.for.enable.down.payment.true",
@@ -122,14 +119,14 @@ public class LoanProductWithDownPaymentConfigurationTest extends FeignLoanTestBa
     }
 
     private GetLoanProductsProductIdResponse createLoanProductWithoutDownPayment(final Long delinquencyBucketId) {
-        Long loanProductId = createLoanProductFromJson(Utils.convertToJson(new LoanProductTestBuilder().build(null, delinquencyBucketId)));
+        Long loanProductId = createLoanProduct(new LoanProductTestBuilder().buildRequest(null, delinquencyBucketId));
         return retrieveLoanProduct(loanProductId);
     }
 
     private Long createLoanProductWithDownPaymentConfiguration(final Long delinquencyBucketId, Boolean enableDownPayment,
             String disbursedAmountPercentageForDownPayment, Boolean enableAutoRepaymentForDownPayment) {
-        return createLoanProductFromJson(Utils.convertToJson(new LoanProductTestBuilder()
+        return createLoanProduct(new LoanProductTestBuilder()
                 .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment)
-                .build(null, delinquencyBucketId)));
+                .buildRequest(null, delinquencyBucketId));
     }
 }

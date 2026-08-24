@@ -27,6 +27,7 @@ import java.util.Set;
 import org.apache.fineract.client.models.GetClientsClientIdAccountsResponse;
 import org.apache.fineract.client.models.GetClientsLoanAccounts;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
@@ -59,7 +60,7 @@ public class LoanAccountsContainsCurrencyFieldTest extends FeignLoanTestBase {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID,
                 new PutGlobalConfigurationsRequest().enabled(false));
 
-        final Long loanProductId = createLoanProductFromJson(buildLoanProductJson());
+        final Long loanProductId = createLoanProduct(buildLoanProductRequest());
         // Create Loan Account
         final Long loanId = createAndApproveLoan(clientId, loanProductId, activationDate);
         assertNotNull(loanId);
@@ -100,10 +101,10 @@ public class LoanAccountsContainsCurrencyFieldTest extends FeignLoanTestBase {
         return loanId;
     }
 
-    private String buildLoanProductJson() {
+    private PostLoanProductsRequest buildLoanProductRequest() {
         return new LoanProductTestBuilder().withPrincipal("12,000.00").withNumberOfRepayments("4").withRepaymentAfterEvery("1")
                 .withRepaymentTypeAsMonth().withinterestRatePerPeriod("1").withInterestRateFrequencyTypeAsMonths()
                 .withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance().withTranches(false)
-                .withAccounting(NONE, new Account[] {}).build(null);
+                .withAccounting(NONE, new Account[] {}).buildRequest(null);
     }
 }

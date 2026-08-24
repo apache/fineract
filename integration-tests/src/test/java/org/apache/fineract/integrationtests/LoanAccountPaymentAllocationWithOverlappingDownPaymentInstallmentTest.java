@@ -32,6 +32,7 @@ import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -774,14 +775,14 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
 
     private GetLoanProductsProductIdResponse createLoanProductWithEnableDownPaymentAndMultipleDisbursements(Boolean enableDownPayment,
             String disbursedAmountPercentageForDownPayment, boolean enableAutoRepaymentForDownPayment) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("2").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30").withDaysInYear("365")
                 .withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment)
-                .build(null);
-        final Long loanProductId = createLoanProductFromJson(loanProductJSON);
+                .buildRequest(null);
+        final Long loanProductId = createLoanProduct(loanProductRequest);
         return retrieveLoanProduct(loanProductId);
     }
 
@@ -789,14 +790,14 @@ public class LoanAccountPaymentAllocationWithOverlappingDownPaymentInstallmentTe
             Boolean enableDownPayment, String disbursedAmountPercentageForDownPayment, boolean enableAutoRepaymentForDownPayment,
             AdvancedPaymentData... advancedPaymentData) {
 
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("2").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30").withDaysInYear("365")
                 .withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment)
-                .addAdvancedPaymentAllocation(advancedPaymentData).withLoanScheduleType(LoanScheduleType.PROGRESSIVE).build(null);
-        final Long loanProductId = createLoanProductFromJson(loanProductJSON);
+                .addAdvancedPaymentAllocation(advancedPaymentData).withLoanScheduleType(LoanScheduleType.PROGRESSIVE).buildRequest(null);
+        final Long loanProductId = createLoanProduct(loanProductRequest);
         return retrieveLoanProduct(loanProductId);
     }
 

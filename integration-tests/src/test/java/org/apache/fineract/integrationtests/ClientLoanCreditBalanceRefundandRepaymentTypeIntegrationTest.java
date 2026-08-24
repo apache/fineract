@@ -39,6 +39,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
@@ -103,8 +104,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
             loanProductTestBuilder = loanProductTestBuilder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
             loanProductTestBuilder = loanProductTestBuilder.withMaxTrancheCount("30");
         }
-        final String loanProductJSON = loanProductTestBuilder.build(null);
-        return createLoanProductFromJson(loanProductJSON);
+        final PostLoanProductsRequest loanProductRequest = loanProductTestBuilder.buildRequest(null);
+        return createLoanProduct(loanProductRequest);
     }
 
     private Long applyForLoanApplication(final Long clientID, final Long loanProductID, String principal, String submitDate,

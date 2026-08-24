@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import org.apache.fineract.client.models.DelinquencyBucketResponse;
@@ -1718,14 +1717,14 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
     private GetLoanProductsProductIdResponse createLoanProductWithDownPaymentConfigurationAndAccrualAccounting(Boolean enableDownPayment,
             String disbursedAmountPercentageForDownPayment, boolean enableAutoRepaymentForDownPayment, final Account... accounts) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
                 .withAccountingRulePeriodicAccrual(accounts).withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30")
                 .withDaysInYear("365").withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment)
-                .build(null);
-        final Long loanProductId = createLoanProductFromJson(loanProductJSON);
+                .buildRequest(null);
+        final Long loanProductId = createLoanProduct(loanProductRequest);
         return retrieveLoanProduct(loanProductId);
     }
 
@@ -1747,34 +1746,34 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
     private GetLoanProductsProductIdResponse createLoanProductWithEnableDownPaymentAndMultipleDisbursementsWithDisableRepaymentConfiguration(
             Boolean enableDownPayment, String disbursedAmountPercentageForDownPayment, boolean enableAutoRepaymentForDownPayment) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("3").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30").withDaysInYear("365")
                 .withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment)
-                .build(null);
-        final Long loanProductId = createLoanProductFromJson(loanProductJSON);
+                .buildRequest(null);
+        final Long loanProductId = createLoanProduct(loanProductRequest);
         return retrieveLoanProduct(loanProductId);
     }
 
     private Integer createLoanProductWithDownPaymentConfiguration(final Long delinquencyBucketId, Boolean enableDownPayment,
             String disbursedAmountPercentageForDownPayment, Boolean enableAutoRepaymentForDownPayment, boolean multiDisbursement) {
-        HashMap<String, Object> loanProductMap;
+        PostLoanProductsRequest loanProductRequest;
         if (multiDisbursement) {
-            loanProductMap = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments() //
+            loanProductRequest = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments() //
                     .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
                     .withInterestTypeAsDecliningBalance() //
                     .withMultiDisburse() //
                     .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment) //
                     .withDisallowExpectedDisbursements(true) //
-                    .build(null, delinquencyBucketId);
+                    .buildRequest(null, delinquencyBucketId);
         } else {
-            loanProductMap = new LoanProductTestBuilder() //
+            loanProductRequest = new LoanProductTestBuilder() //
                     .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment) //
-                    .build(null, delinquencyBucketId);
+                    .buildRequest(null, delinquencyBucketId);
         }
-        return createLoanProductFromJson(Utils.convertToJson(loanProductMap)).intValue();
+        return createLoanProduct(loanProductRequest).intValue();
     }
 
     private Integer createAndApproveLoanAccount(final Integer clientID, final Long loanProductID, final String externalId,

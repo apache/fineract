@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.math.BigDecimal;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
@@ -104,8 +105,8 @@ public class ClientLoanChargeExternalIntegrationTest extends FeignLoanTestBase {
         if (multiDisburseLoan) {
             builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
         }
-        final String loanProductJSON = builder.build(null);
-        return createLoanProductFromJson(loanProductJSON);
+        final PostLoanProductsRequest loanProductRequest = builder.buildRequest(null);
+        return createLoanProduct(loanProductRequest);
     }
 
     private Long applyForLoanApplication(final Long clientId, final Long loanProductId, String principal) {

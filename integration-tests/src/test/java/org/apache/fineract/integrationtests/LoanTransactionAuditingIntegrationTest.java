@@ -39,6 +39,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
@@ -180,7 +181,7 @@ public class LoanTransactionAuditingIntegrationTest extends FeignLoanTestBase {
         final org.apache.fineract.integrationtests.common.accounting.Account expenseAccount = getAccounts().getChargeOffExpenseAccount();
         final org.apache.fineract.integrationtests.common.accounting.Account overpaymentAccount = getAccounts().getOverpaymentAccount();
 
-        final String loanProductJSON = new LoanProductTestBuilder() //
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder() //
                 .withPrincipal("10000000.00") //
                 .withNumberOfRepayments("24") //
                 .withRepaymentAfterEvery("1") //
@@ -193,7 +194,7 @@ public class LoanTransactionAuditingIntegrationTest extends FeignLoanTestBase {
                 .currencyDetails(digitsAfterDecimal, inMultiplesOf)
                 .withAccounting(accountingRule, new org.apache.fineract.integrationtests.common.accounting.Account[] { assetAccount,
                         incomeAccount, expenseAccount, overpaymentAccount })
-                .build(null);
-        return createLoanProductFromJson(loanProductJSON);
+                .buildRequest(null);
+        return createLoanProduct(loanProductRequest);
     }
 }

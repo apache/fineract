@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -153,12 +154,12 @@ public class LoanWriteOffWithAdvancedPaymentAllocationTest extends FeignLoanTest
 
     private Long createApaLoanProduct() {
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
-        String loanProductCreateJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
-                .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
+        PostLoanProductsRequest loanProductCreateRequest = new LoanProductTestBuilder().withPrincipal("15,000.00")
+                .withNumberOfRepayments("4").withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .addAdvancedPaymentAllocation(defaultAllocation).withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
-                .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL).build();
-        return createLoanProductFromJson(loanProductCreateJSON);
+                .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL).buildRequest();
+        return createLoanProduct(loanProductCreateRequest);
     }
 
     private Long createAndDisburseLoan(Long clientId, Long loanProductId, String externalId) {

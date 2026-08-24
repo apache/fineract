@@ -26,6 +26,7 @@ import java.util.UUID;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
@@ -88,13 +89,13 @@ public class LoanTransactionReprocessForAdvancedPaymentAllocationTest extends Fe
 
     private Long createLoanProduct(Account... accounts) {
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
-        String loanProductCreateJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
-                .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
+        PostLoanProductsRequest loanProductCreateRequest = new LoanProductTestBuilder().withPrincipal("15,000.00")
+                .withNumberOfRepayments("4").withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withAccountingRulePeriodicAccrual(accounts).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
                 .addAdvancedPaymentAllocation(defaultAllocation).withLoanScheduleType(LoanScheduleType.PROGRESSIVE).withMultiDisburse()
-                .withDisallowExpectedDisbursements(true).build();
-        return createLoanProductFromJson(loanProductCreateJSON);
+                .withDisallowExpectedDisbursements(true).buildRequest();
+        return createLoanProduct(loanProductCreateRequest);
     }
 
     private Long createLoanAccount(Long clientId, Long loanProductId, String externalId) {

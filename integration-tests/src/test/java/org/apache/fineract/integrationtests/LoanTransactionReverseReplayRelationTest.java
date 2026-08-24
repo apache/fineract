@@ -31,6 +31,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,8 +54,7 @@ public class LoanTransactionReverseReplayRelationTest extends FeignLoanTestBase 
         final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
 
         // Client and Loan account creation
-        final Long productId = createLoanProductFromJson(new com.google.gson.Gson()
-                .toJson(new org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder().build(null, delinquencyBucketId)));
+        final Long productId = createLoanProduct(new LoanProductTestBuilder().buildRequest(null, delinquencyBucketId));
         assertNotNull(productId);
 
         final Long loanId = applyForLoan(new PostLoansRequest()//

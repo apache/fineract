@@ -6302,7 +6302,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
             boolean autoPayForDownPayment, LoanScheduleType loanScheduleType, LoanScheduleProcessingType loanScheduleProcessingType,
             AdvancedPaymentData allocationRuleData, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
                 .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
                 .withEnableDownPayment(true, "25", autoPayForDownPayment).withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths()
@@ -6311,14 +6311,14 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
                 .addAdvancedPaymentAllocation(allocationRuleData).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
                 .withInterestTypeAsDecliningBalance().withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withLoanScheduleType(loanScheduleType).withLoanScheduleProcessingType(loanScheduleProcessingType).withDaysInMonth("30")
-                .withDaysInYear("365").withMoratorium("0", "0").build(null);
-        return loanHelper.createLoanProductFromJson(loanProductJSON);
+                .withDaysInYear("365").withMoratorium("0", "0").buildRequest(null);
+        return loanHelper.createLoanProduct(loanProductRequest).getResourceId();
     }
 
     private static Long createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
             boolean autoPayForDownPayment, LoanScheduleType loanScheduleType, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
                 .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
                 .withEnableDownPayment(true, "25", autoPayForDownPayment).withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths()
@@ -6326,15 +6326,15 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
                 .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRulePeriodicAccrual(accounts)
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withInterestTypeAsDecliningBalance().withMultiDisburse()
                 .withDisallowExpectedDisbursements(true).withLoanScheduleType(loanScheduleType).withDaysInMonth("30").withDaysInYear("365")
-                .withMoratorium("0", "0").build(null);
-        return loanHelper.createLoanProductFromJson(loanProductJSON);
+                .withMoratorium("0", "0").buildRequest(null);
+        return loanHelper.createLoanProduct(loanProductRequest).getResourceId();
     }
 
     private static ArrayList<HashMap<String, Object>> createLoanProductGetError(final String principal, final String repaymentAfterEvery,
             final String numberOfRepayments, boolean autoPayForDownPayment, LoanScheduleType loanScheduleType,
             LoanScheduleProcessingType loanScheduleProcessingType, AdvancedPaymentData allocationRuleData, final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
                 .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
                 .withEnableDownPayment(true, "25", autoPayForDownPayment).withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths()
@@ -6343,8 +6343,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
                 .addAdvancedPaymentAllocation(allocationRuleData).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
                 .withInterestTypeAsDecliningBalance().withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withLoanScheduleType(loanScheduleType).withLoanScheduleProcessingType(loanScheduleProcessingType).withDaysInMonth("30")
-                .withDaysInYear("365").withMoratorium("0", "0").build(null);
-        return loanHelper.getLoanProductError(loanProductJSON, CommonConstants.RESPONSE_ERROR);
+                .withDaysInYear("365").withMoratorium("0", "0").buildRequest(null);
+        return loanHelper.getLoanProductError(loanProductRequest, CommonConstants.RESPONSE_ERROR);
     }
 
     private static Long createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
@@ -6355,7 +6355,7 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
         AdvancedPaymentData merchantIssuedRefundAllocation = createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION");
         AdvancedPaymentData payoutRefundAllocation = createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT");
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
                 .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
                 .withEnableDownPayment(downPaymentEnabled, downPaymentPercentage, autoPayForDownPayment).withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths()
@@ -6366,8 +6366,8 @@ public class AdvancedPaymentAllocationLoanRepaymentScheduleTest extends FeignLoa
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withInterestTypeAsDecliningBalance().withMultiDisburse()
                 .withDisallowExpectedDisbursements(true).withLoanScheduleType(loanScheduleType)
                 .withLoanScheduleProcessingType(loanScheduleProcessingType).withDaysInMonth("30").withDaysInYear("365")
-                .withMoratorium("0", "0").build(null);
-        return loanHelper.createLoanProductFromJson(loanProductJSON);
+                .withMoratorium("0", "0").buildRequest(null);
+        return loanHelper.createLoanProduct(loanProductRequest).getResourceId();
     }
 
     private static void validatePeriod(GetLoansLoanIdResponse loanDetails, Integer index, LocalDate dueDate, LocalDate paidDate,

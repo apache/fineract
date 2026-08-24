@@ -109,17 +109,17 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
         LOG.info(
                 "---------------------------------CREATING LOAN PRODUCT WITH RECALULATION ENABLED ------------------------------------------");
 
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(String.valueOf((int) loanPrincipalAmount))
-                .withNumberOfRepayments(String.valueOf(numberOfRepayments))
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder()
+                .withPrincipal(String.valueOf((int) loanPrincipalAmount)).withNumberOfRepayments(String.valueOf(numberOfRepayments))
                 .withinterestRatePerPeriod(String.valueOf((int) interestRatePerPeriod)).withInterestRateFrequencyTypeAsYear()
                 .withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeAsDays()
                 .withInterestRecalculationDetails(LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                         LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
                         LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE)
                 .withInterestRecalculationRestFrequencyDetails(LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", null, null)
-                .withInterestRecalculationCompoundingFrequencyDetails(null, null, null, null).build(null);
+                .withInterestRecalculationCompoundingFrequencyDetails(null, null, null, null).buildRequest(null);
 
-        this.loanProductId = createLoanProductFromJson(loanProductJSON);
+        this.loanProductId = createLoanProduct(loanProductRequest);
         assertTrue(Boolean.TRUE.equals(retrieveLoanProduct(this.loanProductId).getIsInterestRecalculationEnabled()));
         LOG.info("Successfully created loan product  (ID:{}) ", this.loanProductId);
     }

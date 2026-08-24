@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.UUID;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AdvancedPaymentData;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
@@ -72,13 +73,13 @@ public class LoanChargeTypeInstallmentFeeErrorHandlingWithAdvancedPaymentAllocat
     private Long createLoanProduct(final Account... accounts) {
         String futureInstallmentAllocationRule = "NEXT_INSTALLMENT";
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation(futureInstallmentAllocationRule);
-        String loanProductCreateJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
-                .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
+        PostLoanProductsRequest loanProductCreateRequest = new LoanProductTestBuilder().withPrincipal("15,000.00")
+                .withNumberOfRepayments("4").withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withAccountingRulePeriodicAccrual(accounts).withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
                 .addAdvancedPaymentAllocation(defaultAllocation).withLoanScheduleType(LoanScheduleType.PROGRESSIVE).withMultiDisburse()
-                .withDisallowExpectedDisbursements(true).build();
-        return createLoanProductFromJson(loanProductCreateJSON);
+                .withDisallowExpectedDisbursements(true).buildRequest();
+        return createLoanProduct(loanProductCreateRequest);
     }
 
     private Long createLoanAccount(final Long clientId, final Long loanProductId, final String externalId) {

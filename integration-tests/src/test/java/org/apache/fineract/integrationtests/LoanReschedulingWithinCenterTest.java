@@ -40,6 +40,7 @@ import org.apache.fineract.client.models.GetCentersCenterIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.client.models.PostLoansLoanIdDisbursementData;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -307,8 +308,8 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
             final String recalculationRestFrequencyType, final String recalculationRestFrequencyInterval,
             final String recalculationRestFrequencyDate, final String preCloseInterestCalculationStrategy,
             final boolean isMultiTrancheLoan) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("10000.00").withNumberOfRepayments("12")
-                .withRepaymentAfterEvery("2").withRepaymentTypeAsWeek().withinterestRatePerPeriod("2")
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withPrincipal("10000.00")
+                .withNumberOfRepayments("12").withRepaymentAfterEvery("2").withRepaymentTypeAsWeek().withinterestRatePerPeriod("2")
                 .withInterestRateFrequencyTypeAsMonths().withTranches(isMultiTrancheLoan)
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withRepaymentStrategy(repaymentStrategy)
                 .withInterestTypeAsDecliningBalance()
@@ -316,8 +317,8 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
                         preCloseInterestCalculationStrategy)
                 .withInterestRecalculationRestFrequencyDetails(recalculationRestFrequencyType, recalculationRestFrequencyInterval, null,
                         null)
-                .withInterestRecalculationCompoundingFrequencyDetails(null, null, null, null).build(null);
-        return createLoanProductFromJson(loanProductJSON);
+                .withInterestRecalculationCompoundingFrequencyDetails(null, null, null, null).buildRequest(null);
+        return createLoanProduct(loanProductRequest);
     }
 
     private Long applyForLoanApplicationForInterestRecalculation(final Long clientId, Long groupId, Long calendarId,

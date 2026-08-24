@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -85,8 +86,8 @@ public class ClientLoanNonTrancheMultipleDisbursementsIntegrationTest extends Fe
                             recalculationCompoundingFrequencyInterval, recalculationCompoundingFrequencyOnDayType,
                             recalculationCompoundingFrequencyDayOfWeekType);
         }
-        final String loanProductJSON = builder.build(null);
-        return createLoanProductFromJson(loanProductJSON);
+        final PostLoanProductsRequest loanProductRequest = builder.buildRequest(null);
+        return createLoanProduct(loanProductRequest);
     }
 
     private Long applyForLoanApplication(final Long clientId, final Long loanProductID, String principal, String submitDate,

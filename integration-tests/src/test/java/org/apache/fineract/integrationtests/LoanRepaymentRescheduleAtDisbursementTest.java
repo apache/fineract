@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.client.models.PostLoansLoanIdDisbursementData;
 import org.apache.fineract.client.models.PostLoansRequest;
@@ -49,7 +50,7 @@ public class LoanRepaymentRescheduleAtDisbursementTest extends FeignLoanTestBase
 
         Long clientId = createClient("01 January 2014");
 
-        Long loanProductId = createLoanProductFromJson(buildLoanProductJson());
+        Long loanProductId = createLoanProduct(buildLoanProductRequest());
 
         List<PostLoansDisbursementData> createTranches = List.of(LoanRequestBuilders.applyTrancheDetail("01 March 2015", 5000.0),
                 LoanRequestBuilders.applyTrancheDetail("01 May 2015", 5000.0));
@@ -79,7 +80,7 @@ public class LoanRepaymentRescheduleAtDisbursementTest extends FeignLoanTestBase
         assertEquals(884.03, Utils.getDoubleValue(firstInstallment.getTotalDueForPeriod()));
     }
 
-    private String buildLoanProductJson() {
+    private PostLoanProductsRequest buildLoanProductRequest() {
         return new LoanProductTestBuilder().withPrincipal("10000.00").withNumberOfRepayments("12").withRepaymentAfterEvery("2")
                 .withRepaymentTypeAsWeek().withinterestRatePerPeriod("2").withInterestRateFrequencyTypeAsMonths().withTranches(true)
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withRepaymentStrategy(LoanProductTestBuilder.RBI_INDIA_STRATEGY)
@@ -88,7 +89,7 @@ public class LoanRepaymentRescheduleAtDisbursementTest extends FeignLoanTestBase
                         LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
                         LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE)
                 .withInterestRecalculationRestFrequencyDetails(LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", null, null)
-                .withInterestRecalculationCompoundingFrequencyDetails(null, null, null, null).build(null);
+                .withInterestRecalculationCompoundingFrequencyDetails(null, null, null, null).buildRequest(null);
     }
 
     private PostLoansRequest buildLoanApplication(Long clientId, Long loanProductId, String disbursementDate,

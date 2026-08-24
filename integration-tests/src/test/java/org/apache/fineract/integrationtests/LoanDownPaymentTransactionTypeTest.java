@@ -25,10 +25,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.HashMap;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
@@ -36,7 +36,6 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
-import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.Test;
@@ -109,8 +108,8 @@ public class LoanDownPaymentTransactionTypeTest extends FeignLoanTestBase {
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final Long delinquencyBucketId) {
-        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().build(null, delinquencyBucketId);
-        final Long loanProductId = createLoanProductFromJson(Utils.convertToJson(loanProductMap));
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().buildRequest(null, delinquencyBucketId);
+        final Long loanProductId = createLoanProduct(loanProductRequest);
         return retrieveLoanProduct(loanProductId);
     }
 
