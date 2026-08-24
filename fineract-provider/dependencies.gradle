@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+ext['spring-modulith.version'] = '1.4.11'
 dependencies {
     modules {
         module("io.swagger.core.v3:swagger-annotations") {
@@ -226,6 +226,8 @@ dependencies {
         exclude group: 'org.skyscreamer'
     }
     testImplementation ('org.mockito:mockito-inline')
+    testImplementation 'org.springframework.modulith:spring-modulith-api'
+    testImplementation 'org.springframework.modulith:spring-modulith-core'
 
     testRuntimeOnly(
             'org.mariadb.jdbc:mariadb-java-client',
