@@ -390,9 +390,31 @@ than the code having changed:
 
 === Metrics Used
 
-Metrics appear at two granularities and conflating them is the most common way to misread
-the results.
+The five metrics below come from Robert C. Martin's package metrics, described in
+_Agile Software Development_ (2002) and summarised on Wikipedia under
+https://en.wikipedia.org/wiki/Software_package_metrics[Software package metrics]. They are
+used here because they are a small set, every mainstream analysis tool understands them,
+and each one answers a question that can be stated in a sentence.
 
+In plain terms, they answer five questions about a component:
+
+[cols="1,3", options="header"]
+|===
+| Metric | The question it answers
+
+| `Ca` — afferent coupling | *Who depends on me?* How much other code would be affected if I changed.
+| `Ce` — efferent coupling | *Who do I depend on?* How much other code I have reached out to.
+| `I` — instability | *Am I a consumer or a foundation?* The share of my coupling that points outward.
+| `A` — abstractness | *Am I an interface or an implementation?* The share of my types that are abstract.
+| `D` — distance | *Am I in the right place?* How far my abstractness is from what my dependants need.
+|===
+
+*Naming convention.* This chapter uses the short forms `Ca`, `Ce`, `I`, `A` and `D`
+throughout. The generated JSON and CSV reports spell the first two out as
+`afferentCoupling` and `efferentCoupling`; they are the same measurements under different
+names.
+
+*Two granularities.* Conflating them is the most common way to misread the results.
 *Feature-level* metrics count whole features: in the baseline table, `Ce = 8` means the
 feature depends on eight other features. *Class-level* metrics count individual types: the
 build-generated report gives charge `Ce = 55`, meaning its classes reference 55 distinct
@@ -460,6 +482,51 @@ depended upon by nothing.
 `charge` illustrates the first precisely: 140 classes depend on it while only 5% of it is
 abstract, giving `A = 0.05`, `I = 0.28` and `D = 0.66`.
 
+==== Acceptable Ranges
+
+A raw value such as `0.34` says little on its own. The bands below give each metric a
+reading, so a number can be judged without deriving the interpretation each time.
+
+[cols="1,2,2,2", options="header"]
+|===
+| Metric | Good | Acceptable | Needs attention
+
+| `D` — distance
+| `0.00`–`0.20` +
+_close to the main sequence_
+| `0.20`–`0.40` +
+_drifting, worth watching_
+| `> 0.40` +
+_wrong abstraction for its dependants_
+
+| `I` — instability
+| matches the role: near `0.0` for a foundation, near `1.0` for a leaf
+| `0.3`–`0.7` for a component that is genuinely both
+| mid-range **with** high `Ca` — many depend on it and it is itself unstable
+
+| `A` — abstractness
+| high where `Ca` is high; low where `Ca` is low
+| —
+| low `A` with high `Ca` — dependants are binding to implementations
+
+| `CFV` — cross-feature violations
+| `0` +
+_extractable as-is_
+| `1`–`5` +
+_tractable in one change_
+| `6+` +
+_needs staged work_
+|===
+
+Two cautions. `I` and `A` have no universally good value — they are only right or wrong
+*relative to the component's intended role*, which is why the `I` row describes a match
+rather than a range. And `D` is the summary of the other two: a component with the right
+abstractness for its stability has a low `D` automatically, so `D` is the single number to
+sort by when prioritising.
+
+Worked example: `charge` at `D = 0.66` falls in *needs attention*; `loan` at `D = 0.37` is
+*acceptable but drifting*; `report` at `D = 0.00` is *good*.
+
 === Interpreting the Numbers
 
 Two derived figures appear alongside the Martin set:
@@ -491,6 +558,13 @@ Reading guidance, in the order the metrics are worth consulting:
 * *Check the split-package list before trusting any package-level `Ce`.*
 
 === Baseline Measurements Across Modules
+
+IMPORTANT: *The figures and diagrams in this section are a snapshot taken on 2026-08-20.*
+They describe the platform as it stood on that date and do not update themselves. Nothing
+in the normal build recalculates them, so a reader arriving later should assume they have
+drifted. To see the current position, run `./gradlew architectureMetricsReport` — the
+`generatedAt` field at the top of the generated report always carries the date its figures
+were measured.
 
 [cols="3,>1,>1,>1,>1,>1,>1,>1,2", options="header"]
 |===
@@ -536,6 +610,47 @@ above, which counts dependency pairs rather than type composition:
 | loan | 0.12 | 0.51 | 0.37 | Balanced instability, insufficient abstraction
 | report | 0.67 | 0.33 | 0.00 | On the main sequence
 |===
+
+==== How to Read the Diagrams
+
+Three diagrams follow. Each answers a different question, and none of them is a ranking on
+its own.
+
+*1. Abstractness against instability.* A scatter plot. Instability (`I`) runs along the
+bottom, abstractness (`A`) up the side, both from 0 to 1. Each dot is one feature; the dot
+grows with the number of classes in it, and its colour deepens as distance (`D`) grows.
+
+The dashed diagonal is the *main sequence*, the line `A + I = 1`. It encodes one rule: the
+more things depend on you, the more abstract you should be. *Sitting on the line is
+good; the further from it, the worse.*
+
+Which side matters:
+
+* *Below-left of the line* — concrete and heavily depended upon. This is the *zone of
+  pain*: changing it is expensive because everything binds to its implementation. Every
+  Fineract feature that needs work is here.
+* *Above-right of the line* — abstract but nothing depends on it. This is the *zone of
+  uselessness*: effort spent on abstraction nobody uses.
+
+*2. Distance from the main sequence.* The same information as a sorted bar chart, one bar
+per feature. *Longer bar and deeper colour mean further from the line, so worse.* This is
+the diagram to read when deciding what to work on first — it is the first chart flattened
+into a priority order.
+
+Read it alongside `CFV` rather than instead of it. A feature can be badly *positioned*
+(high `D`) without reaching too far *outward* (high `CFV`), and the two call for different
+remedies — `useradministration` is the worked example, high on the first and low on the
+second.
+
+*3. Cross-feature dependency matrix.* A grid with one filled cell per dependency: the
+feature named on the *row* depends on the feature named in the *column*. *A denser grid
+means more coupling.* Reading a row across shows everything that feature reaches out to;
+reading a column down shows everything that depends on it.
+
+Two patterns are worth looking for. A cell that is filled in both directions — row A /
+column B *and* row B / column A — is a *cycle*, and neither feature can be built without
+the other. A column that is almost entirely filled marks a feature the whole platform
+depends on, which needs stability rather than decoupling.
 
 .Abstractness against instability, with the main sequence
 [vegalite, format=svg, width=100%]
