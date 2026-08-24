@@ -27,6 +27,11 @@ sets. Everything below is derived from that one file.
 """
 import argparse, json, pathlib, sys
 
+# This script lives in <repo>/tools, so the repository root is its parent's parent.
+# Defaults are resolved against it rather than the working directory, so the script
+# behaves the same wherever it is invoked from.
+REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
+
 MAIN_SEQUENCE = "main-sequence.vl.json"
 DISTANCE_RANK = "distance-ranking.vl.json"
 COUPLING_MTX = "cross-feature-matrix.vl.json"
@@ -192,7 +197,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("report", type=pathlib.Path)
     ap.add_argument("--outdir", type=pathlib.Path,
-                    default=pathlib.Path("fineract/fineract-doc/src/docs/en/diagrams"))
+                    default=REPO_ROOT / "fineract-doc/src/docs/en/diagrams")
     ap.add_argument("--exclude", default="external",
                     help="comma-separated components to drop (default: external)")
     ap.add_argument("--skeleton", type=pathlib.Path,
