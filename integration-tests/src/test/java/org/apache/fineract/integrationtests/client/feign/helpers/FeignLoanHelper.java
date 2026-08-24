@@ -151,20 +151,6 @@ public class FeignLoanHelper {
         return ok(() -> fineractClient.loanProducts().createLoanProduct(request));
     }
 
-    /**
-     * WARNING: This method uses ObjectMapperFactory which silences unknown property errors. Do not use this method in
-     * tests expecting strict deserialization.
-     */
-    public Long createLoanProductFromJson(String loanProductJson) {
-        try {
-            String sanitizedJson = loanProductJson.replaceAll("(?<=\\d),(?=\\d{3}(?!\\d))", "");
-            PostLoanProductsRequest request = ObjectMapperFactory.getShared().readValue(sanitizedJson, PostLoanProductsRequest.class);
-            return createLoanProduct(request).getResourceId();
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-            throw new IllegalArgumentException("Invalid loan product json", e);
-        }
-    }
-
     @SuppressWarnings("unchecked")
     private <T> T extractErrorAttribute(CallFailedRuntimeException exception, String jsonAttributeToGetBack) {
         if (!(exception.getCause() instanceof org.apache.fineract.client.feign.FeignException feignException)) {
@@ -178,15 +164,9 @@ public class FeignLoanHelper {
         }
     }
 
-    public <T> T getLoanProductError(String loanProductJson, String jsonAttributeToGetBack) {
-        try {
-            String sanitizedJson = loanProductJson.replaceAll("(?<=\\d),(?=\\d{3}(?!\\d))", "");
-            PostLoanProductsRequest request = ObjectMapperFactory.getShared().readValue(sanitizedJson, PostLoanProductsRequest.class);
-            CallFailedRuntimeException ex = fail(() -> fineractClient.loanProducts().createLoanProduct(request));
-            return extractErrorAttribute(ex, jsonAttributeToGetBack);
-        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-            throw new IllegalArgumentException("Invalid loan product json", e);
-        }
+    public <T> T getLoanProductError(PostLoanProductsRequest request, String jsonAttributeToGetBack) {
+        CallFailedRuntimeException ex = fail(() -> fineractClient.loanProducts().createLoanProduct(request));
+        return extractErrorAttribute(ex, jsonAttributeToGetBack);
     }
 
     public CallFailedRuntimeException addLoanChargeExpectingError(Long loanId, PostLoansLoanIdChargesRequest request) {

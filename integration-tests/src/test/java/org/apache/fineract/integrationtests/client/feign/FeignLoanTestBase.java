@@ -216,10 +216,6 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return loanHelper.createLoanProduct(request).getResourceId();
     }
 
-    protected Long createLoanProductFromJson(String loanProductJson) {
-        return loanHelper.createLoanProductFromJson(loanProductJson);
-    }
-
     protected GetLoanProductsProductIdResponse retrieveLoanProduct(Long productId) {
         return loanHelper.retrieveLoanProduct(productId);
     }
@@ -1061,8 +1057,8 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         });
     }
 
-    protected Integer getLoanProductId(String loanProductJson) {
-        return createLoanProductFromJson(loanProductJson).intValue();
+    protected Integer getLoanProductId(PostLoanProductsRequest request) {
+        return createLoanProduct(request).intValue();
     }
 
     protected PostLoansResponse applyForLoanApplication(Integer clientId, Integer loanProductId, String externalId) {
@@ -1861,8 +1857,8 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return loanHelper.getAdvancedPaymentAllocationRules(loanId);
     }
 
-    protected <T> T getLoanProductError(String loanProductJson, String jsonAttributeToGetBack) {
-        return loanHelper.getLoanProductError(loanProductJson, jsonAttributeToGetBack);
+    protected <T> T getLoanProductError(PostLoanProductsRequest request, String jsonAttributeToGetBack) {
+        return loanHelper.getLoanProductError(request, jsonAttributeToGetBack);
     }
 
     protected PostLoansLoanIdTransactionsResponse makeRefundByCash(Long loanId, String date, Double amount) {
