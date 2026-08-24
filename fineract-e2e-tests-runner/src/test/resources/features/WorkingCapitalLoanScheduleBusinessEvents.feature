@@ -166,8 +166,6 @@ Feature: Working Capital Loan Schedule Business Events
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
   @TestRailId:C94073
-  Scenario: Working Capital loan raises Breach Schedule Changed business event when a near breach reschedule action is created
-
   Scenario: Working Capital loan raises Breach Reschedule business event when a near breach reschedule action is created
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data

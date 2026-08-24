@@ -1,0 +1,80 @@
+= FSIP-007: Traditional Merge Strategy
+
+== Summary
+
+When merging a PR into `develop` (our main integration branch), use a *traditional merge* *commit* instead of squashing, rebasing, and fast-forwarding.
+
+https://lists.apache.org/thread/3569vo83c75yvm8q9xtord2n70gf5oz1[Discussion thread]
+
+== Status
+
+Accepted. https://lists.apache.org/thread/5qg1xpjpspfdpmy6n0h2kbkqon7twsxk[Vote thread]. https://lists.apache.org/thread/gpf9clbz4l0cdmvo45sg9b986fvns9do[Vote result].
+
+== Who is Involved
+
+* Adam Monsen (original proposal)
+* Krishna Mewara (reviewer)
+* Adam Saghy (reviewer)
+* james dailey (reviewer)
+
+== Background/Motivation
+
+The original motivation was supporting verifiable signed git commits. This was https://issues.apache.org/jira/browse/FINERACT-2177[proposed in 2025] and https://github.com/apache/fineract/pull/5431[adopted in 2026]. Upon investigation, it was determined the current merge strategy (squash, rebase, fast-forward) precludes signed commits except in special situations (done locally or when squash/rebase were unnecessary, e.g. one commit was created and PR was merged before any other commits on `develop` were added).
+
+Additional motivations: preserve more history, preserve more developer intent.
+
+_When I'm looking at commit history, I want to be able to know exactly what happened, when, by whom, and why. I want to see branch start & end points, when changes were made and unmade. Yes it means more commits. Thankfully Git is built to handle many, many commits. It has excellent filtering to, for example, examine simplified history._
+
+-- https://lists.apache.org/thread/3569vo83c75yvm8q9xtord2n70gf5oz1[Adam Monsen]
+
+== Goals and Exclusions
+
+Continue to use GitHub for reviewing and merging PRs as well as local tooling (e.g. `git merge` on the command line).
+
+Encourage developers to use as few or as many commits as they choose in their PRs, with the intent to most clearly communicate the reviewable progress of their work during PR review and for posterity. This means rebasing locally, adding/removing commits, and force-pushing are all still allowed, although these should be used only as necessary/helpful (e.g. when a new commit on `develop` assists the PR or to correct noise/mistakes). If force-push is used, communicate it thoughtfully.
+
+Encourage developers to leave commits as-is/un-squashed when updating PRs with new changes. It's helpful for posterity / intent forensics to see progress along the way, changes reversed, etc. Ideally with commit log detail about the "why" for the changes, summaries of our discussions leading to the changes, ideas/plans for future changes, etc.
+
+== Change Proposed
+
+Standardize on and manually enforce traditional git merge commits for merging approved PRs to the `develop` branch. When merging a PR, do not enforce squash/rebase/fast-forward.
+
+For examining history, document and practice use of git history simplification strategies such as
+
+----
+git log --first-parent develop
+git log --no-merges
+git log --max-parents=1
+----
+
+or simply viewing https://github.com/apache/fineract/commits/develop/[the commits list on github].
+
+After a ~one week bake-in period, https://github.com/apache/infrastructure-asfyaml#merge-buttons[enforce new strategy] with `.asf.yaml`:
+
+----
+# must be added to existing github section
+# (do not create a new one)
+github:
+  enabled_merge_buttons:
+    merge: true
+    squash: false
+    rebase: false
+  protected_branches:
+    develop:
+      required_linear_history: false
+      required_signatures: true
+      required_conversation_resolution: true
+----
+
+== Alternatives Considered
+
+Continue to enforce squash/rebase/fast-forward, but do so locally only, so committer's signature is valid. Abandoned as this would leave behind useless merge commit "triangles" in the history.
+
+== Phases of work
+
+This is effectively a process change, hence, mostly follows the simple/default FSIP pattern.
+
+. DISCUSS
+. VOTE
+. TRACK (update community, update docs, remind ourselves via dev list, chat, PR comments)
+. CLOSE

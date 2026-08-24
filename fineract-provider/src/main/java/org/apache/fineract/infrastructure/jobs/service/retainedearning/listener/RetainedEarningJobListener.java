@@ -82,8 +82,8 @@ public class RetainedEarningJobListener implements JobExecutionListener {
         }
         log.info(
                 "Execution Summary for jobName={}, totalRecordProcessCount={}, startTime={}, endTime={}, startTime_ms={}, endTime_ms={}, "
-                        + "jobExecutionId={}, jobExecutionDurationInMinutes={}, tenantId={}",
+                        + "jobExecutionId={}, jobExecutionDurationInMinutes={}, tenantId={}, jobStatus={}",
                 RETAINED_EARNING_JOB_NAME, recordProcessCount, startDateTime, endDateTime, startDateTimeMilliSecond, endDateTimeMilliSecond,
-                jobExecutionId, jobDuration, ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+                jobExecutionId, jobDuration, ThreadLocalContextUtil.getTenant().getTenantIdentifier(), jobExecution.getStatus());
     }
 }

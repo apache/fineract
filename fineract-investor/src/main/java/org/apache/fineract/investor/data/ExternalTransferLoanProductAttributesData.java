@@ -20,14 +20,12 @@ package org.apache.fineract.investor.data;
 
 import java.io.Serializable;
 import lombok.Data;
-import lombok.Getter;
 
 /**
  * Data object representing an external transfer loan product attribute
  */
 
 @Data
-@Getter
 public class ExternalTransferLoanProductAttributesData implements Serializable {
 
     private Long attributeId;

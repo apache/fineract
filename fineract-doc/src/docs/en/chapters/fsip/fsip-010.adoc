@@ -1,0 +1,117 @@
+= FSIP-010: (Revenue-based) Working Capital Loan product
+
+*Status:* Draft
+*Author(s):* Adam Saghy, Bharath Gowda, Mihaly Dallos
+*Created:* April 2026
+
+== Summary
+
+This proposal introduces a new loan product type in Apache Fineract tailored for small and medium-sized merchants seeking working capital. Unlike traditional installment-based loan products, this product ties repayment dynamically to the borrower's ongoing revenue stream, offering a transparent, flexible, and merchant-friendly financing model that diverges significantly from Fineract's existing loan product capabilities.
+
+== Motivation / Business Case
+
+Small and medium-sized merchants regularly face cash flow constraints driven by the seasonal or unpredictable nature of their sales cycles. Traditional loan products with fixed monthly installments create financial hardship during low-revenue periods while failing to capitalize on high-revenue periods.
+
+A *Revenue-Based Working Capital Loan* closes this gap by:
+
+* Basing loan eligibility and sizing on the merchant's *proven transaction and sales history* , rather than traditional credit scoring
+* Introducing a *single transparent fixed fee* agreed at origination, as an alternative to a periodic interest-based cost structure
+* Adjusting repayment amounts *proportionally to incoming revenue* , so repayments naturally slow down or accelerate with business performance
+* Removing the rigidity of fixed payment schedules and fixed maturity dates
+* Supporting loan terms ranging from a few months up to *2–3 years*
+
+== Proposed Solution
+
+=== New Loan Product Type: Working Capital Loan
+
+A new dedicated loan product configuration is proposed, distinguished from existing Fineract loan products by the following pillars:
+
+=== Pillar 1 – Fixed Fee (Non-Interest Cost of Borrowing)
+
+* The cost of borrowing is expressed as a *single upfront flat fee* , determined at loan origination
+* No periodic interest charges or APR-based amortization schedule
+* The fee remains constant regardless of repayment speed
+
+=== Pillar 2 – Revenue-Based Repayment
+
+* Repayments are computed as a *configurable fixed percentage of the borrower's periodic revenue*
+* Repayment amounts are inherently variable, automatically rising with higher revenue and reducing during slower periods
+* An API must be designed and implemented to support *modification of the repayment percentage* during the loan lifecycle
+
+=== Pillar 3 – Open-Ended Loan Term
+
+* No fixed maturity date is set at origination
+* The loan concludes once the total outstanding balance (principal + fixed fee) is fully settled
+* This requires a new approach to *Effective Interest Rate (EIR) calculation* , as the standard schedule-based EIR method is incompatible with a variable repayment timeline
+
+=== Pillar 4 – Minimum Repayment Checkpoints
+
+* A minimum repayment threshold must be satisfied within defined review windows (e.g., X% of outstanding balance every N days)
+* Failure to meet the threshold triggers *delinquency and collections workflows*
+* Requires enhancements to existing *collections programs* such as Breathing Space and Re-Age to support this product's specific checkpoint-based delinquency model
+
+=== Pillar 5 – Flexible Early Settlement
+
+* Full early repayment is supported at any time without additional penalty
+* Requires *credit balance refund* support and *chargeback handling*
+
+== Key Technical Components
+
+=== Loan Product Configuration Parameters
+
+|===
+| *Parameter*
+| *Description*
+
+| repaymentPercentage
+| % of merchant revenue deducted per repayment event
+
+| fixedFee
+| Single flat charge applied at origination
+
+| minRepaymentThreshold
+| Minimum % of outstanding balance per checkpoint
+
+| maxLoanAmountFactor
+| Multiplier applied against historical revenue for sizing
+|===
+
+=== EIR Calculation Engine
+
+* EIR is *estimated at origination* using projected repayment timelines based on historical revenue
+* *Actual EIR is recalculated dynamically* as real repayments are received, compared against initial disclosure
+* A dedicated *batch job foundation* supports this ongoing recalculation
+* EIR breach management logic handles scenarios where actual EIR diverges materially from disclosed EIR
+
+=== Collections & Delinquency
+
+* Delinquency rules are checkpoint-based, not missed-installment-based
+* Extensions of existing collections programs adapted for this product model
+
+== Impact on Existing Fineract Modules
+
+|===
+| *Module*
+| *Nature of Impact*
+
+| Loan Product
+| New product type flag and configuration schema
+
+| Repayment Schedule
+| Variable/event-driven schedule engine
+
+| EIR Calculation
+| New variable-term EIR method + batch recalculation
+
+| Accounting
+| New transaction types for revenue-based repayment events
+
+| Collections
+| Checkpoint-based delinquency triggers and program extensions
+|===
+
+== Out of Scope
+
+* Automated underwriting and eligibility scoring engine
+* Direct integration with payment processors or transaction platforms
+* Merchant-facing dashboards or portals

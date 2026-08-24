@@ -21,13 +21,14 @@ package org.apache.fineract.portfolio.loanaccount.data;
 import java.io.Serial;
 import java.io.Serializable;
 import lombok.Getter;
+import org.apache.fineract.accounting.journalentry.data.LoanTransactionTypeDTO;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 
 /**
  * Immutable data object represent loan status enumerations.
  */
 @Getter
-public class LoanTransactionEnumData implements Serializable {
+public class LoanTransactionEnumData implements Serializable, LoanTransactionTypeDTO {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -125,11 +126,9 @@ public class LoanTransactionEnumData implements Serializable {
                 .equals(this.id);
     }
 
+    @Override
     public boolean isRepaymentType() {
-        if (isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund() || isChargeAdjustment()
-                || isDownPayment()) {
-            return true;
-        }
-        return false;
+        return isRepayment() || isMerchantIssuedRefund() || isPayoutRefund() || isGoodwillCredit() || isChargeRefund()
+                || isChargeAdjustment() || isDownPayment();
     }
 }
