@@ -1,5 +1,6 @@
 @WorkingCapital
 @WorkingCapitalLoanScheduleBusinessEventsFeature @WCCOBFeature
+@Order(1)
 Feature: Working Capital Loan Schedule Business Events
 
   @TestRailId:C94069

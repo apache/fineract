@@ -795,7 +795,7 @@ Feature: WorkingCapitalDiscountFeeAmortization
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | actualBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualDiscountFeeBalance |
       | 0         | 2026-01-01 | -900.00               | 900.00          | 900.00        |                            |                     |                          | 100.00                     | 100.00                   |
       | 1         | 2026-01-01 | 50.00                 | 859.23          | 859.23        | 9.23                       | 50.00               | 9.23                     | 90.77                      | 90.77                    |
-      | 2         | 2026-01-02 | 50.00                 | 818.03          | 818.04        | 8.81                       | 50.00               | 8.81                     | 81.96                      | 81.96                    |
+      | 2         | 2026-01-02 | 50.00                 | 818.03          | 818.03        | 8.81                       | 50.00               | 8.80                     | 81.96                      | 81.97                    |
       | 3         | 2026-01-03 | 50.00                 | 776.42          |               | 8.39                       |                     |                          | 73.57                      |                          |
       | 4         | 2026-01-04 | 50.00                 | 734.38          |               | 7.96                       |                     |                          | 65.61                      |                          |
       | 5         | 2026-01-05 | 50.00                 | 691.91          |               | 7.53                       |                     |                          | 58.08                      |                          |
@@ -818,18 +818,18 @@ Feature: WorkingCapitalDiscountFeeAmortization
     When Admin runs inline COB job for Working Capital Loan
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
-      | 1000.0    | 100.0              | 100000.0           | 18.04          | 81.96            | 0.0               |
+      | 1000.0    | 100.0              | 100000.0           | 18.03          | 81.97            | 0.0               |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement              | 900.0             | 900.0            | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Discount Fee              | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
       | 02 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Discount Fee Amortization | 18.04             |                  |                   |                       | false    |
+      | 02 January 2026 | Discount Fee Amortization | 18.03             |                  |                   |                       | false    |
     Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "02 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
-      | INCOME    | 404000       | Interest Income           |       | 18.04  |
-      | LIABILITY | 240005       | Deferred Interest Revenue | 18.04 |        |
+      | INCOME    | 404000       | Interest Income           |       | 18.03  |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 18.03 |        |
 
   @TestRailId:C85163
   Scenario: Verify Discount Fee Adjustment with following discount fee amortization when repayment is made on the disbursement date

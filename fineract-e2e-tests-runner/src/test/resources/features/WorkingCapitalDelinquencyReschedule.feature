@@ -1,5 +1,6 @@
 @WorkingCapital
-@WorkingCapitalDelinquencyRescheduleActionFeature @WCCOBFeature
+@WorkingCapitalDelinquencyRescheduleActionFeature @WCCOBFeature 
+@Order(1)
 Feature: Working Capital Delinquency Reschedule Action
 
   @TestRailId:C74495
