@@ -24,13 +24,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
 
     <changeSet author="fineract" id="1" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'acc_gl_journal_entry_annual_summary' AND column_name = 'created_on_utc' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE acc_gl_journal_entry_annual_summary
                 MODIFY COLUMN created_on_utc datetime(6) NULL DEFAULT NULL,
                 MODIFY COLUMN last_modified_on_utc datetime(6) NULL DEFAULT NULL;
@@ -38,26 +32,14 @@
     </changeSet>
 
     <changeSet author="fineract" id="2" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_appuser' AND column_name = 'temporary_password_expiry_time' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_appuser
                 MODIFY COLUMN temporary_password_expiry_time datetime(6) NULL DEFAULT NULL;
         ]]></sql>
     </changeSet>
 
     <changeSet author="fineract" id="3" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_command' AND column_name = 'created_at' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_command
                 MODIFY COLUMN created_at datetime(6) NULL DEFAULT NULL,
                 MODIFY COLUMN updated_at datetime(6) NULL DEFAULT NULL,
@@ -68,13 +50,7 @@
     </changeSet>
 
     <changeSet author="fineract" id="5" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_external_asset_owner_loan_product_configurable_attributes' AND column_name = 'created_on_utc' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_external_asset_owner_loan_product_configurable_attributes
                 MODIFY COLUMN created_on_utc datetime(6) NULL DEFAULT NULL,
                 MODIFY COLUMN last_modified_on_utc datetime(6) NULL DEFAULT NULL;
@@ -82,13 +58,7 @@
     </changeSet>
 
     <changeSet author="fineract" id="6" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_journal_entry_aggregation_summary' AND column_name = 'created_on_utc' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_journal_entry_aggregation_summary
                 MODIFY COLUMN created_on_utc datetime(6) NULL DEFAULT NULL,
                 MODIFY COLUMN last_modified_on_utc datetime(6) NULL DEFAULT NULL;
@@ -96,13 +66,7 @@
     </changeSet>
 
     <changeSet author="fineract" id="7" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_journal_entry_aggregation_tracking' AND column_name = 'created_on_utc' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_journal_entry_aggregation_tracking
                 MODIFY COLUMN created_on_utc datetime(6) NULL DEFAULT NULL,
                 MODIFY COLUMN last_modified_on_utc datetime(6) NULL DEFAULT NULL;
@@ -110,13 +74,7 @@
     </changeSet>
 
     <changeSet author="fineract" id="8" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_loan_amortization_allocation_mapping' AND column_name = 'created_on_utc' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_loan_amortization_allocation_mapping
                 MODIFY COLUMN created_on_utc datetime(6) NULL DEFAULT NULL,
                 MODIFY COLUMN last_modified_on_utc datetime(6) NULL DEFAULT NULL;
@@ -124,13 +82,7 @@
     </changeSet>
 
     <changeSet author="fineract" id="9" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_loan_approved_amount_history' AND column_name = 'created_on_utc' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_loan_approved_amount_history
                 MODIFY COLUMN created_on_utc datetime(6) NULL DEFAULT NULL,
                 MODIFY COLUMN last_modified_on_utc datetime(6) NULL DEFAULT NULL;
@@ -138,13 +90,7 @@
     </changeSet>
 
     <changeSet author="fineract" id="10" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_loan_buy_down_fee_balance' AND column_name = 'created_on_utc' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_loan_buy_down_fee_balance
                 MODIFY COLUMN created_on_utc datetime(6) NULL DEFAULT NULL,
                 MODIFY COLUMN last_modified_on_utc datetime(6) NULL DEFAULT NULL;
@@ -152,13 +98,7 @@
     </changeSet>
 
     <changeSet author="fineract" id="11" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_loan_capitalized_income_balance' AND column_name = 'created_on_utc' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_loan_capitalized_income_balance
                 MODIFY COLUMN created_on_utc datetime(6) NULL DEFAULT NULL,
                 MODIFY COLUMN last_modified_on_utc datetime(6) NULL DEFAULT NULL;
@@ -166,13 +106,7 @@
     </changeSet>
 
     <changeSet author="fineract" id="12" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_loan_originator' AND column_name = 'created_on_utc' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_loan_originator
                 MODIFY COLUMN created_on_utc datetime(6) NOT NULL,
                 MODIFY COLUMN last_modified_on_utc datetime(6) NOT NULL;
@@ -180,13 +114,7 @@
     </changeSet>
 
     <changeSet author="fineract" id="13" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_loan_originator_mapping' AND column_name = 'created_on_utc' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_loan_originator_mapping
                 MODIFY COLUMN created_on_utc datetime(6) NOT NULL,
                 MODIFY COLUMN last_modified_on_utc datetime(6) NOT NULL;
@@ -194,13 +122,7 @@
     </changeSet>
 
     <changeSet author="fineract" id="14" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_loan_term_variations' AND column_name = 'created_on_utc' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_loan_term_variations
                 MODIFY COLUMN created_on_utc datetime(6) NULL DEFAULT NULL,
                 MODIFY COLUMN last_modified_on_utc datetime(6) NULL DEFAULT NULL;
@@ -208,13 +130,7 @@
     </changeSet>
 
     <changeSet author="fineract" id="16" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_wc_delinquency_configuration' AND column_name = 'created_on_utc' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_wc_delinquency_configuration
                 MODIFY COLUMN created_on_utc datetime(6) NULL DEFAULT NULL,
                 MODIFY COLUMN last_modified_on_utc datetime(6) NULL DEFAULT NULL;
@@ -222,13 +138,7 @@
     </changeSet>
 
     <changeSet author="fineract" id="17" context="mysql" runInTransaction="false">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM information_schema.columns
-                WHERE table_name = 'm_wc_loan_account_locks' AND column_name = 'lock_placed_on' AND datetime_precision = 6
-            </sqlCheck>
-        </preConditions>
-<sql><![CDATA[
+        <sql><![CDATA[
             ALTER TABLE m_wc_loan_account_locks
                 MODIFY COLUMN lock_placed_on datetime(6) NOT NULL;
         ]]></sql>
