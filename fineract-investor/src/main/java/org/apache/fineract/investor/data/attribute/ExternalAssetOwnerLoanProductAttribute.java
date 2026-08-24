@@ -18,9 +18,17 @@
  */
 package org.apache.fineract.investor.data.attribute;
 
+import java.util.List;
+
 public interface ExternalAssetOwnerLoanProductAttribute {
 
     String getAttributeKey();
 
     String getAttributeValue();
+
+    List<String> getAttributeValues();
+
+    boolean validate(String attributeValue);
+
+    boolean isMultiValue();
 }

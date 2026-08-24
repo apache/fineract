@@ -1,0 +1,34 @@
+= FSIP-001: Modular Security Architecture
+
+Adopted by the Community over many months beginning April 2023 and continuing until May 2024 See listserv discussions.
+
+https://lists.apache.org/thread/m46dnqwn8lcy9ohhgd5j03yjjsjpq3ny
+
+Clarifications but no objections raised to the need, and progress was undertaken incrementally.
+
+This led to the recognition of the need for a more formal SIP acceptance process.
+
+This SIP is the reason we adopted a more formal process of DISCUSS, VOTE, and TRACK.
+
+== GOALS
+
+* separate the current security infrastructure as much as possible from Fineract’s core; i. e. make it a custom module
+* create the OAuth Client aka Keycloak module as a drop-in replacement for the current security mechanics
+
+* delegate everything authentication/authorization related to 3rd party libs/frameworks/products/services
+
+* re-use 3rd party libs/frameworks/products/services user interfaces and remove corresponding views (e. g. user management) from Fineract web app
+
+* as minimal refactoring as possible in the short/mid term
+
+* keep backwards compatibility for a couple of major releases
+
+* provide good documentation and/or automated tools for migration
+
+== Non-Goals
+
+* Fineract as a standalone identity server
+
+More details here in Jira ticket 1908.
+
+https://issues.apache.org/jira/browse/FINERACT-1908[FINERACT-1908]

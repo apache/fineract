@@ -57,6 +57,7 @@ import org.junit.jupiter.api.Test;
 public class WorkingCapitalLoanDelinquencyActionIntegrationTest {
 
     private static final int PERIOD_FREQUENCY_DAYS = 30;
+    private static final String OVERLAP_ERROR_MESSAGE = "Delinquency pause period cannot overlap with another pause period";
 
     private final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
@@ -481,7 +482,315 @@ public class WorkingCapitalLoanDelinquencyActionIntegrationTest {
         assertEquals(404, getException.getStatus());
     }
 
+    /**
+     * With an existing future-dated pause, a second future-dated pause sharing the same startDate but a longer endDate
+     * must be rejected with 400 and the overlap message.
+     */
+    @Test
+    public void testFutureDatedOverlappingPauseSameStartLongerEndIsRejected() {
+        final Long[] loanIdHolder = new Long[1];
+        final LocalDate businessDate = LocalDate.of(2026, 7, 1);
+
+        BusinessDateHelper.runAt("17 June 2026", () -> loanIdHolder[0] = createActiveLoan(businessDate.minusDays(14)));
+
+        BusinessDateHelper.runAt("01 July 2026", () -> {
+            // given - an existing pause entirely in the future relative to the business date
+            final LocalDate pause1Start = businessDate.plusDays(61);
+            final LocalDate pause1End = businessDate.plusDays(68);
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanIdHolder[0], "pause", pause1Start, pause1End);
+
+            // when - a second future-dated pause with the same start but a longer end
+            // then - rejected with 400 + overlap message
+            assertPauseRejectedAsOverlapping(loanIdHolder[0], pause1Start, businessDate.plusDays(74));
+
+            // and - only the original pause is persisted, with its dates unchanged
+            final List<WorkingCapitalLoanDelinquencyActionData> actions = WorkingCapitalLoanDelinquencyActionHelper
+                    .retrieveDelinquencyActions(loanIdHolder[0]);
+            assertEquals(1, actions.size(), "The rejected overlapping pause must not be persisted");
+            assertEquals(WorkingCapitalLoanDelinquencyActionData.ActionEnum.PAUSE, actions.getFirst().getAction());
+            assertEquals(pause1Start, actions.getFirst().getStartDate(), "Existing pause startDate must be unchanged");
+            assertEquals(pause1End, actions.getFirst().getEndDate(), "Existing pause endDate must be unchanged");
+        });
+    }
+
+    /**
+     * A future-dated pause identical to an existing one (same startDate and endDate) must be rejected with 400 and the
+     * overlap message.
+     */
+    @Test
+    public void testFutureDatedIdenticalDuplicatePauseIsRejected() {
+        final Long[] loanIdHolder = new Long[1];
+        final LocalDate businessDate = LocalDate.of(2026, 7, 1);
+
+        BusinessDateHelper.runAt("17 June 2026", () -> loanIdHolder[0] = createActiveLoan(businessDate.minusDays(14)));
+
+        BusinessDateHelper.runAt("01 July 2026", () -> {
+            // given
+            final LocalDate pause1Start = businessDate.plusDays(61);
+            final LocalDate pause1End = businessDate.plusDays(68);
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanIdHolder[0], "pause", pause1Start, pause1End);
+
+            // when / then - an identical duplicate pause is rejected
+            assertPauseRejectedAsOverlapping(loanIdHolder[0], pause1Start, pause1End);
+
+            final List<WorkingCapitalLoanDelinquencyActionData> actions = WorkingCapitalLoanDelinquencyActionHelper
+                    .retrieveDelinquencyActions(loanIdHolder[0]);
+            assertEquals(1, actions.size(), "The rejected duplicate pause must not be persisted");
+            assertEquals(pause1Start, actions.getFirst().getStartDate(), "Existing pause startDate must be unchanged");
+            assertEquals(pause1End, actions.getFirst().getEndDate(), "Existing pause endDate must be unchanged");
+        });
+    }
+
+    /**
+     * With an existing backdated pause, a second backdated pause sharing the same startDate but a different endDate
+     * must be rejected with 400 and the overlap message.
+     */
+    @Test
+    public void testBackdatedOverlappingPauseSameStartDifferentEndIsRejected() {
+        final Long[] loanIdHolder = new Long[1];
+        final LocalDate businessDate = LocalDate.of(2026, 7, 1);
+
+        BusinessDateHelper.runAt("17 June 2026", () -> loanIdHolder[0] = createActiveLoan(businessDate.minusDays(14)));
+
+        BusinessDateHelper.runAt("01 July 2026", () -> {
+            // given - an existing pause entirely in the past relative to the business date
+            final LocalDate pause1Start = businessDate.minusDays(10);
+            final LocalDate pause1End = businessDate.minusDays(5);
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanIdHolder[0], "pause", pause1Start, pause1End);
+
+            // when / then - a backdated pause with the same start but a different end is rejected
+            assertPauseRejectedAsOverlapping(loanIdHolder[0], pause1Start, businessDate.minusDays(1));
+
+            final List<WorkingCapitalLoanDelinquencyActionData> actions = WorkingCapitalLoanDelinquencyActionHelper
+                    .retrieveDelinquencyActions(loanIdHolder[0]);
+            assertEquals(1, actions.size(), "The rejected overlapping backdated pause must not be persisted");
+            assertEquals(pause1Start, actions.getFirst().getStartDate(), "Existing pause startDate must be unchanged");
+            assertEquals(pause1End, actions.getFirst().getEndDate(), "Existing pause endDate must be unchanged");
+        });
+    }
+
+    /**
+     * A new pause starting exactly on an existing pause's endDate (inclusive boundary) must be rejected with 400 and
+     * the overlap message.
+     */
+    @Test
+    public void testBackdatedPauseStartingOnExistingPauseEndIsRejected() {
+        final Long[] loanIdHolder = new Long[1];
+        final LocalDate businessDate = LocalDate.of(2026, 7, 1);
+
+        BusinessDateHelper.runAt("17 June 2026", () -> loanIdHolder[0] = createActiveLoan(businessDate.minusDays(14)));
+
+        BusinessDateHelper.runAt("01 July 2026", () -> {
+            // given
+            final LocalDate pause1Start = businessDate.minusDays(10);
+            final LocalDate pause1End = businessDate.minusDays(5);
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanIdHolder[0], "pause", pause1Start, pause1End);
+
+            // when / then - a new pause starting on the existing pause's endDate is rejected (inclusive intervals)
+            assertPauseRejectedAsOverlapping(loanIdHolder[0], pause1End, businessDate.plusDays(3));
+
+            final List<WorkingCapitalLoanDelinquencyActionData> actions = WorkingCapitalLoanDelinquencyActionHelper
+                    .retrieveDelinquencyActions(loanIdHolder[0]);
+            assertEquals(1, actions.size(), "The rejected boundary-overlapping pause must not be persisted");
+            assertEquals(pause1Start, actions.getFirst().getStartDate(), "Existing pause startDate must be unchanged");
+            assertEquals(pause1End, actions.getFirst().getEndDate(), "Existing pause endDate must be unchanged");
+        });
+    }
+
+    /**
+     * A new pause ending exactly on an existing pause's startDate (inclusive boundary) must be rejected with 400 and
+     * the overlap message.
+     */
+    @Test
+    public void testPauseEndingOnExistingPauseStartIsRejected() {
+        final Long[] loanIdHolder = new Long[1];
+        final LocalDate businessDate = LocalDate.of(2026, 7, 1);
+
+        BusinessDateHelper.runAt("17 June 2026", () -> loanIdHolder[0] = createActiveLoan(businessDate.minusDays(14)));
+
+        BusinessDateHelper.runAt("01 July 2026", () -> {
+            // given
+            final LocalDate pause1Start = businessDate.plusDays(10);
+            final LocalDate pause1End = businessDate.plusDays(15);
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanIdHolder[0], "pause", pause1Start, pause1End);
+
+            // when / then - a new pause ending on the existing pause's startDate is rejected (inclusive intervals)
+            assertPauseRejectedAsOverlapping(loanIdHolder[0], businessDate.plusDays(5), pause1Start);
+
+            final List<WorkingCapitalLoanDelinquencyActionData> actions = WorkingCapitalLoanDelinquencyActionHelper
+                    .retrieveDelinquencyActions(loanIdHolder[0]);
+            assertEquals(1, actions.size(), "The rejected boundary-overlapping pause must not be persisted");
+            assertEquals(pause1Start, actions.getFirst().getStartDate(), "Existing pause startDate must be unchanged");
+            assertEquals(pause1End, actions.getFirst().getEndDate(), "Existing pause endDate must be unchanged");
+        });
+    }
+
+    /**
+     * A new pause fully containing an existing pause must be rejected with 400 and the overlap message.
+     */
+    @Test
+    public void testPauseFullyContainingExistingPauseIsRejected() {
+        final Long[] loanIdHolder = new Long[1];
+        final LocalDate businessDate = LocalDate.of(2026, 7, 1);
+
+        BusinessDateHelper.runAt("17 June 2026", () -> loanIdHolder[0] = createActiveLoan(businessDate.minusDays(14)));
+
+        BusinessDateHelper.runAt("01 July 2026", () -> {
+            // given
+            final LocalDate pause1Start = businessDate.plusDays(10);
+            final LocalDate pause1End = businessDate.plusDays(15);
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanIdHolder[0], "pause", pause1Start, pause1End);
+
+            // when / then - a new pause that fully contains the existing one is rejected
+            assertPauseRejectedAsOverlapping(loanIdHolder[0], businessDate.plusDays(5), businessDate.plusDays(20));
+
+            final List<WorkingCapitalLoanDelinquencyActionData> actions = WorkingCapitalLoanDelinquencyActionHelper
+                    .retrieveDelinquencyActions(loanIdHolder[0]);
+            assertEquals(1, actions.size(), "The rejected containing pause must not be persisted");
+            assertEquals(pause1Start, actions.getFirst().getStartDate(), "Existing pause startDate must be unchanged");
+            assertEquals(pause1End, actions.getFirst().getEndDate(), "Existing pause endDate must be unchanged");
+        });
+    }
+
+    /**
+     * A new pause fully inside an existing pause must be rejected with 400 and the overlap message.
+     */
+    @Test
+    public void testPauseFullyInsideExistingPauseIsRejected() {
+        final Long[] loanIdHolder = new Long[1];
+        final LocalDate businessDate = LocalDate.of(2026, 7, 1);
+
+        BusinessDateHelper.runAt("17 June 2026", () -> loanIdHolder[0] = createActiveLoan(businessDate.minusDays(14)));
+
+        BusinessDateHelper.runAt("01 July 2026", () -> {
+            // given
+            final LocalDate pause1Start = businessDate.plusDays(5);
+            final LocalDate pause1End = businessDate.plusDays(20);
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanIdHolder[0], "pause", pause1Start, pause1End);
+
+            // when / then - a new pause entirely inside the existing one is rejected
+            assertPauseRejectedAsOverlapping(loanIdHolder[0], businessDate.plusDays(10), businessDate.plusDays(15));
+
+            final List<WorkingCapitalLoanDelinquencyActionData> actions = WorkingCapitalLoanDelinquencyActionHelper
+                    .retrieveDelinquencyActions(loanIdHolder[0]);
+            assertEquals(1, actions.size(), "The rejected contained pause must not be persisted");
+            assertEquals(pause1Start, actions.getFirst().getStartDate(), "Existing pause startDate must be unchanged");
+            assertEquals(pause1End, actions.getFirst().getEndDate(), "Existing pause endDate must be unchanged");
+        });
+    }
+
+    /**
+     * Two future-dated pauses with a 1-day gap between the inclusive periods must both be accepted and persisted with
+     * their exact dates.
+     */
+    @Test
+    public void testAdjacentFutureDatedPausesAreAccepted() {
+        final Long[] loanIdHolder = new Long[1];
+        final LocalDate businessDate = LocalDate.of(2026, 7, 1);
+
+        BusinessDateHelper.runAt("17 June 2026", () -> loanIdHolder[0] = createActiveLoan(businessDate.minusDays(14)));
+
+        BusinessDateHelper.runAt("01 July 2026", () -> {
+            // given
+            final LocalDate pause1Start = businessDate.plusDays(10);
+            final LocalDate pause1End = businessDate.plusDays(15);
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanIdHolder[0], "pause", pause1Start, pause1End);
+
+            // when - the second pause starts the day after the first pause ends
+            final LocalDate pause2Start = businessDate.plusDays(16);
+            final LocalDate pause2End = businessDate.plusDays(20);
+            final PostWorkingCapitalLoansDelinquencyActionResponse result = WorkingCapitalLoanDelinquencyActionHelper
+                    .createDelinquencyAction(loanIdHolder[0], "pause", pause2Start, pause2End);
+            assertNotNull(result, "Adjacent non-overlapping future-dated pause must be accepted");
+
+            // then - both pauses persisted with their exact dates
+            final List<WorkingCapitalLoanDelinquencyActionData> actions = WorkingCapitalLoanDelinquencyActionHelper
+                    .retrieveDelinquencyActions(loanIdHolder[0]);
+            assertEquals(2, actions.size(), "Both adjacent future-dated pauses must be persisted");
+            assertEquals(WorkingCapitalLoanDelinquencyActionData.ActionEnum.PAUSE, actions.get(0).getAction());
+            assertEquals(pause1Start, actions.get(0).getStartDate());
+            assertEquals(pause1End, actions.get(0).getEndDate());
+            assertEquals(WorkingCapitalLoanDelinquencyActionData.ActionEnum.PAUSE, actions.get(1).getAction());
+            assertEquals(pause2Start, actions.get(1).getStartDate());
+            assertEquals(pause2End, actions.get(1).getEndDate());
+        });
+    }
+
+    /**
+     * Once a pause is resumed, its blocked window ends at the RESUME-aware effective end date. A new pause starting the
+     * day after the effective end must be accepted (loan A); a new pause starting exactly on the effective end must be
+     * rejected as overlapping (loan B).
+     */
+    @Test
+    public void testPauseAfterResumeRespectsEffectiveEndBoundary() {
+        final Long[] loanAHolder = new Long[1];
+        final Long[] loanBHolder = new Long[1];
+        final LocalDate businessDate = LocalDate.of(2026, 7, 1);
+        final LocalDate pause1Start = businessDate.minusDays(5);
+        final LocalDate pause1End = businessDate.plusDays(10);
+
+        // given - two loans, each with an active pause [D-5, D+10] created before the resume date
+        BusinessDateHelper.runAt("26 June 2026", () -> {
+            loanAHolder[0] = createActiveLoan(businessDate.minusDays(14));
+            loanBHolder[0] = createActiveLoan(businessDate.minusDays(14));
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanAHolder[0], "pause", pause1Start, pause1End);
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanBHolder[0], "pause", pause1Start, pause1End);
+        });
+
+        BusinessDateHelper.runAt("01 July 2026", () -> {
+            // and - both pauses are resumed on the business date D, shortening the blocked window to [D-5, D]
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanAHolder[0], "resume", businessDate, null);
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanBHolder[0], "resume", businessDate, null);
+
+            // when (a) - loan A: a new pause starting the day after the effective end (D+1) is accepted
+            final LocalDate pause2Start = businessDate.plusDays(1);
+            final LocalDate pause2End = businessDate.plusDays(8);
+            final PostWorkingCapitalLoansDelinquencyActionResponse result = WorkingCapitalLoanDelinquencyActionHelper
+                    .createDelinquencyAction(loanAHolder[0], "pause", pause2Start, pause2End);
+            assertNotNull(result, "Pause starting the day after the resumed pause's effective end must be accepted");
+
+            // then (a) - loan A has 2 PAUSE rows with exact dates, first one shortened via effectiveEndDate = D
+            final List<WorkingCapitalLoanDelinquencyActionData> loanAActions = WorkingCapitalLoanDelinquencyActionHelper
+                    .retrieveDelinquencyActions(loanAHolder[0]);
+            final List<WorkingCapitalLoanDelinquencyActionData> loanAPauses = loanAActions.stream()
+                    .filter(a -> WorkingCapitalLoanDelinquencyActionData.ActionEnum.PAUSE == a.getAction()).toList();
+            assertEquals(2, loanAPauses.size(), "Loan A must have exactly 2 persisted PAUSE rows");
+            assertEquals(pause1Start, loanAPauses.get(0).getStartDate());
+            assertEquals(pause1End, loanAPauses.get(0).getEndDate(), "Original endDate of the resumed pause must be unchanged");
+            assertEquals(businessDate, loanAPauses.get(0).getEffectiveEndDate(),
+                    "Resumed pause's effectiveEndDate must equal the resume date D");
+            assertEquals(pause2Start, loanAPauses.get(1).getStartDate());
+            assertEquals(pause2End, loanAPauses.get(1).getEndDate());
+
+            // when/then (b) - loan B: a new pause starting exactly on the effective end (D) is rejected as overlap
+            assertPauseRejectedAsOverlapping(loanBHolder[0], businessDate, businessDate.plusDays(8));
+
+            final List<WorkingCapitalLoanDelinquencyActionData> loanBPauses = WorkingCapitalLoanDelinquencyActionHelper
+                    .retrieveDelinquencyActions(loanBHolder[0]).stream()
+                    .filter(a -> WorkingCapitalLoanDelinquencyActionData.ActionEnum.PAUSE == a.getAction()).toList();
+            assertEquals(1, loanBPauses.size(), "Loan B must still have only the original PAUSE row");
+        });
+    }
+
     // ===================== Helper Methods =====================
+
+    private void assertPauseRejectedAsOverlapping(final Long loanId, final LocalDate startDate, final LocalDate endDate) {
+        final CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanId, "pause", startDate, endDate));
+        assertEquals(400, exception.getStatus(), "Overlapping pause must be rejected with HTTP 400");
+        assertNotNull(exception.getResponseBody(), "Overlap rejection must carry an error body");
+        assertTrue(exception.getResponseBody().contains(OVERLAP_ERROR_MESSAGE),
+                "Error body must contain '" + OVERLAP_ERROR_MESSAGE + "' but was: " + exception.getResponseBody());
+    }
+
+    private Long createActiveLoan(final LocalDate disbursementDate) {
+        final Long bucketId = createWorkingCapitalLoanDelinquencyBucket(PERIOD_FREQUENCY_DAYS);
+        final Long productId = createProduct(bucketId);
+        final Long clientId = createClient();
+        final Long loanId = submitAndApproveLoan(clientId, productId);
+        WorkingCapitalLoanDelinquencyActionHelper.activateLoan(loanId, disbursementDate);
+        return loanId;
+    }
 
     private Long createWorkingCapitalLoanDelinquencyBucket(final int frequencyDays) {
         final PostDelinquencyRangeResponse range1 = DelinquencyRangesHelper.createRange(new DelinquencyRangeRequest()

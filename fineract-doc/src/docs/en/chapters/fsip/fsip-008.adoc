@@ -1,0 +1,94 @@
+= FSIP-008: Introducing SOLID Principles To Decouple Modules
+
+== Summary
+
+NOTE: this proposal was called "Event Driven Architecture - EDA" in previous discussions. *THIS IS WORK IN PROGRESS!*
+
+We are proposing to introduce the use of SOLID principles in the current Fineract code base to avoid direct references between services (and sometimes low level storage related/repository classes).
+
+Quick reminder and overview what the 5 acronyms mean:
+
+[options="header"]
+|===
+| Principle
+| Meaning
+| Benefit
+
+| *S*ingle *R*esponsibility (*SRP*)
+| A class should have only *one reason* to change, meaning it should have a *single responsibility*
+| Maintainability, limited "blast radius" of changes, code is easier to understand
+
+| *O*pen/*C*losed (*OCP*)
+| Classes should be *open* for *extension* but *closed* for *modification*
+| Reduces risk of bugs when adding new features, as existing, tested code isn't altered
+
+| *L*iskov *S*ubstitution (*LSP*)
+| Objects of a *super-class* should be *replaceable* with objects of its *sub-classes* without breaking the application (see also current custom modules approach)
+| Ensures reliability and correctness in inheritance hierarchies, promoting code re-usability
+
+| *I*nterface *S*egregation (*ISP*)
+| Classes/services should not be forced to depend on interfaces they do not use; it's better to have many specific interfaces than one general-purpose interface
+| Reduces coupling and prevents classes from being "fat" with methods they don't need
+
+| *D*ependency *I*nversion (*DIP*)
+| *High-level modules* should not depend on *low-level modules*; both should depend on *abstractions*.
+| Decouples components, making the system more modular, testable, and resilient to change
+|===
+
+Apply these principles not blindly for the sake of the principles. Use some practical judgement to decide if these principles really help in a given case or if it's maybe better to just leave the code as is (for now) and/or apply a different strategy.
+
+== Status
+
+Under Discussion, Proposed, GSoC2026
+
+== Who is Involved
+
+* Aleksandar Vidakovic (proposal owner, lead developer)
+* TBD (reviewer)
+
+== Background/Motivation
+
+The current code-base has evolved over several years/decades. As a result, the system accumulated some technical debt of. The biggest group of issues is probably the lack of and enforcement of domain boundaries and the resulting direct references of services across different domains, but also breaking the rules of the layered architecture (e.g. by using storage related repository classes of one domain in another domain's business service implementation). Initially Fineract/MifosX started out as a classic layered architecture. The result of this is:
+
+* *Impact Radius:* A change in one module requires changes in modules that are in a different domain/module/package/feature.
+* *Re-usability:* It is difficult to reuse existing code in other contexts because the specific implementations drag in any transitive dependencies.
+* *Isolated Tests:* Heavy reliance on global state and static calls makes unit testing difficult or impossible without extensive mocking frameworks.
+* *Extensibility:* If we don't proper demarcation lines between the modules then the replacement/adoption of these modules/functionalities for different/custom contexts is difficult if not impossible
+
+== Goals
+
+* *Improve maintainability:* local changes (in a specific domain) won't have a global blast radius.
+* *Improve Testability:* Isolated tests, much simplified configuration/dependency injection.
+* *Reduce cognitive load:* Specific classes should become smaller (aka no "kitchen sink" dependency injection scenarios) and easier to understand.
+* *Enable extensibility:* avoid "open heart" surgery on existing code for customizations and instead make components easily replaceable.
+* *Standardization:* Create a toolbox of common solutions instead of getting too "creative"; should make code reviews a lot easier.
+
+== Exclusions
+
+* *Complete rewrite:* TBD
+* *Legacy works:* TBD
+* *New framework:* TBD
+* *Dogmatism:* TBD
+
+== Change Proposed
+
+* *Adapter pattern:* TBD
+* *Application event publisher (EDA, optional):* TBD
+* *Internal commands (CQRS, optional):* TBD
+
+== Alternatives Considered
+
+=== Continues with current practice
+
+TBD
+
+=== Complete rewrite
+
+TBD
+
+== Phases of work
+
+* March 2026: Minimal documentation and examples available
+* ??? 2026: community vote
+* ??? 2026: pick worthwhile package/feature/module, should be standalone after refactoring
+* ??? 2026: review the results, lessons learned

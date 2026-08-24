@@ -25,6 +25,7 @@ public final class WorkingCapitalLoanConstants {
     }
 
     public static final String WCL_RESOURCE_NAME = "WORKINGCAPITALLOAN";
+    public static final String WORKING_CAPITAL_LOAN_TRANSACTION_IDENTIFIER = "WC";
 
     /**
      * Shared by the create/modify validation error and the schedule-generation exception so both emit the same message.

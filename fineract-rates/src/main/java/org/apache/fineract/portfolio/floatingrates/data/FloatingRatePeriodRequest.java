@@ -18,12 +18,20 @@
  */
 package org.apache.fineract.portfolio.floatingrates.data;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.util.Locale;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 @Data
 @NoArgsConstructor
@@ -33,10 +41,26 @@ public class FloatingRatePeriodRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @NotBlank(message = "{org.apache.fineract.portfolio.floatingrate.from-date.not-blank}")
     private String fromDate;
+    @NotNull(message = "{org.apache.fineract.portfolio.floatingrate.interest-rate.not-null}")
+    @PositiveOrZero(message = "{org.apache.fineract.portfolio.floatingrate.interest-rate.positive-or-zero}")
     private BigDecimal interestRate;
     private Boolean isDifferentialToBaseLendingRate;
     private String locale;
     private String dateFormat;
 
+    public LocalDate fromDateAsLocalDate() {
+        if (StringUtils.isBlank(this.fromDate)) {
+            return null;
+        }
+        if (StringUtils.isBlank(this.dateFormat)) {
+            return LocalDate.parse(this.fromDate, DateTimeFormatter.ISO_LOCAL_DATE);
+        }
+        final Locale parseLocale = StringUtils.isBlank(this.locale) ? Locale.getDefault()
+                : Locale.forLanguageTag(this.locale.replace('_', '-'));
+        final DateTimeFormatter formatter = new DateTimeFormatterBuilder().parseCaseInsensitive().appendPattern(this.dateFormat)
+                .toFormatter(parseLocale);
+        return LocalDate.parse(this.fromDate, formatter);
+    }
 }

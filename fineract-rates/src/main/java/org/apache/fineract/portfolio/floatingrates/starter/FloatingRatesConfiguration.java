@@ -18,12 +18,12 @@
  */
 package org.apache.fineract.portfolio.floatingrates.starter;
 
+import jakarta.validation.Validator;
 import org.apache.fineract.portfolio.floatingrates.domain.FloatingRateRepositoryWrapper;
-import org.apache.fineract.portfolio.floatingrates.serialization.FloatingRateDataValidator;
-import org.apache.fineract.portfolio.floatingrates.service.FloatingRateWritePlatformService;
-import org.apache.fineract.portfolio.floatingrates.service.FloatingRateWritePlatformServiceImpl;
-import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformService;
-import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadPlatformServiceImpl;
+import org.apache.fineract.portfolio.floatingrates.service.FloatingRateWriteService;
+import org.apache.fineract.portfolio.floatingrates.service.FloatingRateWriteServiceImpl;
+import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadService;
+import org.apache.fineract.portfolio.floatingrates.service.FloatingRatesReadServiceImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,15 +33,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class FloatingRatesConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(FloatingRatesReadPlatformService.class)
-    public FloatingRatesReadPlatformService floatingRatesReadPlatformService(JdbcTemplate jdbcTemplate) {
-        return new FloatingRatesReadPlatformServiceImpl(jdbcTemplate);
+    @ConditionalOnMissingBean(FloatingRatesReadService.class)
+    public FloatingRatesReadService floatingRatesReadPlatformService(JdbcTemplate jdbcTemplate) {
+        return new FloatingRatesReadServiceImpl(jdbcTemplate);
     }
 
     @Bean
-    @ConditionalOnMissingBean(FloatingRateWritePlatformService.class)
-    public FloatingRateWritePlatformService floatingRateWritePlatformService(FloatingRateDataValidator fromApiJsonDeserializer,
-            FloatingRateRepositoryWrapper floatingRateRepository) {
-        return new FloatingRateWritePlatformServiceImpl(fromApiJsonDeserializer, floatingRateRepository);
+    @ConditionalOnMissingBean(FloatingRateWriteService.class)
+    public FloatingRateWriteService floatingRateWriteService(Validator validator, FloatingRateRepositoryWrapper floatingRateRepository) {
+        return new FloatingRateWriteServiceImpl(validator, floatingRateRepository);
     }
 }

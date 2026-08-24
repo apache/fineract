@@ -35,6 +35,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
@@ -45,6 +46,7 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.security.service.PlatformUserRightsContext;
 import org.apache.fineract.investor.config.InvestorModuleIsEnabledCondition;
 import org.apache.fineract.investor.data.ExternalTransferLoanProductAttributesData;
+import org.apache.fineract.investor.data.ExternalTransferLoanProductAttributesTemplateData;
 import org.apache.fineract.investor.service.ExternalAssetOwnerLoanProductAttributesReadService;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
@@ -59,6 +61,16 @@ public class ExternalAssetOwnerLoanProductAttributesApiResource {
     private final PlatformUserRightsContext platformUserRightsContext;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ExternalAssetOwnerLoanProductAttributesReadService externalAssetOwnerLoanProductAttributesReadService;
+
+    @GET
+    @Path("/template")
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(summary = "Retrieve External Asset Owner Loan Product Attributes Template", operationId = "retrieveTemplateExternalAssetOwnerLoanProductAttributes", description = "Retrieves all available external asset owner loan product attributes and the values each attribute can take.")
+    public List<ExternalTransferLoanProductAttributesTemplateData> getExternalAssetOwnerLoanProductAttributesTemplate() {
+        platformUserRightsContext.isAuthenticated();
+
+        return externalAssetOwnerLoanProductAttributesReadService.retrieveExternalAssetOwnerLoanProductAttributesTemplate();
+    }
 
     @POST
     @Path("/{loanProductId}/attributes")

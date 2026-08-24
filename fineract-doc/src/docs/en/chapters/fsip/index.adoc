@@ -1,5 +1,29 @@
-= FSIP: Fineract Significant Improvement Proposal
+= FSIP: Fineract Significant Improvement Proposals
 
-NOTE: See https://cwiki.apache.org/confluence/display/FINERACT/Fineract+Significant+Improvement+Proposals[here] for the current list of FSIPs.
+Fineract Significant Improvement Proposals (FSIPs) are the mechanism the community uses to propose, discuss, and track significant changes to Apache Fineract. Each FSIP follows the pattern *DISCUSS, VOTE, TRACK, CLOSE*.
 
-TBD
+NOTE: See https://cwiki.apache.org/confluence/display/FINERACT/Fineract+Significant+Improvement+Proposals[the Apache Fineract wiki] for the authoritative, up-to-date list of FSIPs. The proposals below were imported from that wiki.
+
+include::fsip-001.adoc[leveloffset=+1]
+
+include::fsip-002.adoc[leveloffset=+1]
+
+include::fsip-003.adoc[leveloffset=+1]
+
+include::fsip-004.adoc[leveloffset=+1]
+
+include::fsip-005.adoc[leveloffset=+1]
+
+include::fsip-006.adoc[leveloffset=+1]
+
+include::fsip-007.adoc[leveloffset=+1]
+
+include::fsip-008.adoc[leveloffset=+1]
+
+include::fsip-009.adoc[leveloffset=+1]
+
+include::fsip-010.adoc[leveloffset=+1]
+
+include::fsip-011.adoc[leveloffset=+1]
+
+include::fsip-012.adoc[leveloffset=+1]

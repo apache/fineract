@@ -26,11 +26,11 @@ import com.google.gson.JsonParser;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.models.FloatingRateCreateRequest;
+import org.apache.fineract.client.models.FloatingRateCreateResponse;
 import org.apache.fineract.client.models.FloatingRatePeriodRequest;
-import org.apache.fineract.client.models.FloatingRateRequest;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostFloatingRatesResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignRawHttpHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -126,10 +126,11 @@ public class FloatingRateInterestRecalculationTest extends FeignLoanTestBase {
         FloatingRatePeriodRequest changedPeriod = new FloatingRatePeriodRequest().fromDate("01 April 2024")
                 .interestRate(CHANGED_INTEREST_RATE).isDifferentialToBaseLendingRate(false).locale("en").dateFormat("dd MMMM yyyy");
 
-        FloatingRateRequest floatingRateRequest = new FloatingRateRequest().name(Utils.uniqueRandomStringGenerator("FLOAT_RATE_", 6))
-                .isBaseLendingRate(false).isActive(true).ratePeriods(List.of(initialPeriod, changedPeriod));
+        FloatingRateCreateRequest floatingRateRequest = new FloatingRateCreateRequest()
+                .name(Utils.uniqueRandomStringGenerator("FLOAT_RATE_", 6)).isBaseLendingRate(false).isActive(true)
+                .ratePeriods(List.of(initialPeriod, changedPeriod));
 
-        PostFloatingRatesResponse response = ok(() -> fineractClient().floatingRates().createFloatingRate(floatingRateRequest));
+        FloatingRateCreateResponse response = ok(() -> fineractClient().floatingRates().createFloatingRate(floatingRateRequest));
         assertNotNull(response);
         assertNotNull(response.getResourceId());
         return response.getResourceId();

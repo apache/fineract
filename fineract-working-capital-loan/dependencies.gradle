@@ -41,6 +41,8 @@ dependencies {
 
             'org.apache.commons:commons-lang3',
 
+            'org.apache.httpcomponents:httpclient',
+
             'com.jayway.jsonpath:json-path',
 
             'io.swagger.core.v3:swagger-annotations-jakarta',

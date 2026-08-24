@@ -1,0 +1,45 @@
+= FSIP-011: Implement the "Q" in CQRS
+
+== Summary
+
+*NOTE: THIS IS WORK IN PROGRESS!*
+
+TBD.
+
+== Status
+
+Under Discussion, Proposed
+
+== Who is Involved
+
+* Aleksandar Vidakovic (proposal owner, lead developer)
+* TBD (reviewer)
+
+== Background/Motivation
+
+TBD.
+
+== Goals
+
+* *Standardize Query:* TBD.
+
+== Exclusions
+
+== Change Proposed
+
+We will integrate QueryDSL SQL into the project through the following steps:
+
+. TBD
+. TBD
+. ...
+
+== Alternatives Considered
+
+* TBD
+* ...
+
+== Phases of work
+
+* July 2026: First prototype and pull request available
+* ??? 2026: community vote
+* ...
