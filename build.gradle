@@ -130,6 +130,7 @@ plugins {
     id 'me.champeau.jmh' version '0.7.3' apply false
     id 'org.cyclonedx.bom' version '3.2.4' apply false
     id 'com.docktape.swagger-brake' version '2.7.0' apply false
+    id 'io.github.usekylis.java-architecture-metrics' version '0.1.1' apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
@@ -435,6 +436,7 @@ configure(project.fineractJavaProjects) {
     apply plugin: 'jacoco'
     apply plugin: 'com.github.spotbugs'
     apply plugin: 'com.github.andygoossens.modernizer'
+    apply plugin: 'io.github.usekylis.java-architecture-metrics'
     apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
 
     group = 'org.apache.fineract'
@@ -944,4 +946,245 @@ tasks.register('printSourceSetInformation') {
             println ""
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+// Feature-level architecture metrics (Robert C. Martin: Ce, Ca, I, A, D)
+//
+// The analyzer resolves a dependency's target component only among the classes
+// it actually scanned, so a per-module run silently drops every cross-module
+// edge. The aggregate task below scans all Java modules at once and collapses
+// packages into features, so the report carries the true cross-feature matrix
+// (afferentCoupling, efferentCoupling, incoming/outgoingComponents).
+//
+//   ./gradlew architectureMetricsReport
+//   -> build/reports/architecture/fineract-feature-metrics.{json,csv}
+// ---------------------------------------------------------------------------
+
+ext.fineractComponentOf = { String packageName ->
+    if (packageName == null || packageName.isEmpty()) return 'external'
+    if (!packageName.startsWith('org.apache.fineract.')) return 'external'
+
+    // org(0) . apache(1) . fineract(2) . <area>(3) . <sub>(4)
+    def parts = packageName.split('\\.')
+    def area = parts.length > 3 ? parts[3] : null
+    def sub = parts.length > 4 ? parts[4] : null
+
+    // areas that are a documented feature in their own right
+    def areaFeature = [
+        accounting        : 'accounting',
+        useradministration: 'useradministration',
+        batch             : 'batch',
+        mix               : 'mix',
+        template          : 'template',
+        notification      : 'notifications',
+    ]
+    if (areaFeature.containsKey(area)) return areaFeature.get(area)
+
+    // only infrastructure.report is a feature; the rest is shared substrate
+    if (area == 'infrastructure') return sub == 'report' ? 'report' : 'platform'
+
+    if (area == 'organisation') {
+        if (sub == 'teller') return 'teller'
+        if (sub in ['office', 'staff', 'monetary', 'holiday', 'workingdays', 'provisioning']) return 'organisation'
+        return 'platform'
+    }
+
+    if (area == 'portfolio') {
+        def portfolioFeature = [
+            // loan and everything that only exists to serve a loan
+            loanaccount                : 'loan',
+            loanproduct                : 'loan',
+            loanorigination            : 'loan',
+            delinquency                : 'loan',
+            collateral                 : 'loan',
+            collateralmanagement       : 'loan',
+            interestpauses             : 'loan',
+            repaymentwithpostdatedchecks: 'loan',
+            floatingrates              : 'loan',
+            // fixed and recurring deposits have no package of their own;
+            // they are types inside portfolio.savings, so they roll up here
+            savings                    : 'savings',
+            interestratechart          : 'savings',
+            client                     : 'client',
+            address                    : 'client',
+            accountdetails             : 'client',
+            group                      : 'group',
+            meeting                    : 'group',
+            collectionsheet            : 'group',
+            shareaccounts              : 'shareaccounts',
+            shareproducts              : 'shareaccounts',
+            // transfers between accounts
+            account                    : 'account-transfers',
+            accounts                   : 'account-transfers',
+            transfer                   : 'account-transfers',
+            charge                     : 'charge',
+            calendar                   : 'calendar',
+            rate                       : 'rate',
+        ]
+        return portfolioFeature.containsKey(sub) ? portfolioFeature.get(sub) : 'platform'
+    }
+
+    return 'platform'
+}
+
+// No componentOf() here on purpose: the plugin's own task keeps its default of one
+// component per Java package, so the package report makes no assumption about naming
+// depth or convention. Grouping into features is done by a separate task below.
+configure(project.fineractJavaProjects) {
+    plugins.withId('io.github.usekylis.java-architecture-metrics') {
+        architectureMetrics {
+            sourceSet('main')
+            reportFormats('json', 'csv')
+        }
+    }
+}
+
+// Aggregate run, hosted on :fineract-provider because it already depends on
+// every feature module. Its classesDirectories are widened to all Java modules
+// so a single scan sees the whole platform.
+//
+// The generated API SDK modules are excluded: they are emitted by the OpenAPI
+// generator rather than written by hand, so they are not features, and pulling
+// their `classes` task into this graph runs the code generator unnecessarily.
+ext.archMetricsExcludedModules = ['fineract-client', 'fineract-client-feign'] as Set
+
+ext.archMetricsScannedProjects = {
+    rootProject.fineractJavaProjects.findAll {
+        !rootProject.ext.archMetricsExcludedModules.contains(it.name)
+    }
+}
+
+// Two reports are produced from the same aggregate scan.
+//
+// The PACKAGE report makes no assumptions about how packages are named or how deeply
+// they are nested: every Java package is its own component. It is the unfiltered view
+// of where the platform actually stands.
+//
+// The FEATURE report groups those packages into the features the documentation is
+// written around. It is a reading aid layered on top of the package data, not a
+// replacement for it -- where the grouping heuristic does not recognise a package, the
+// package still appears, under its own name.
+project(':fineract-provider') {
+    plugins.withId('io.github.usekylis.java-architecture-metrics') {
+
+        // The plugin's own task is left at its defaults: one component per package.
+        architectureMetrics {
+            reportBaseName('fineract-package-metrics')
+            outputDirectory(rootProject.layout.buildDirectory.dir('reports/architecture/packages'))
+            classesDirectories(rootProject.ext.archMetricsScannedProjects().collect { p ->
+                p.layout.buildDirectory.dir('classes/java/main')
+            })
+        }
+
+        // A second task of the same type, differing only in how classes are grouped.
+        tasks.register('architectureMetricsFeatures', io.github.usekylis.archmetrics.ArchitectureMetricsTask) {
+            group = 'verification'
+            description = 'Architecture metrics with packages grouped into documented features.'
+            sourceSetName.set('main')
+            reportBaseName.set('fineract-feature-metrics')
+            outputDirectory.set(rootProject.layout.buildDirectory.dir('reports/architecture/features'))
+            formats.set([
+                io.github.usekylis.archmetrics.ReportFormat.JSON,
+                io.github.usekylis.archmetrics.ReportFormat.CSV,
+            ])
+            classesDirectories.from(rootProject.ext.archMetricsScannedProjects().collect { p ->
+                p.layout.buildDirectory.dir('classes/java/main')
+            })
+            componentIdentifier.set({ classInfo ->
+                rootProject.ext.fineractComponentOf(classInfo.packageName)
+            } as io.github.usekylis.archmetrics.ComponentIdentifier)
+        }
+    }
+
+    tasks.matching { it.name in ['architectureMetrics', 'architectureMetricsFeatures'] }.configureEach { t ->
+        t.dependsOn rootProject.ext.archMetricsScannedProjects().collect { "${it.path}:classes" }
+    }
+}
+
+// Regenerate the Vega-Lite specifications from the report, so the diagrams in the
+// documentation can never drift from the metrics they are drawn from.
+//
+// The transform script lives in the surrounding analysis workspace rather than in this
+// repository, so it is looked up in both places and the task skips cleanly when neither
+// is present -- a checkout without it still builds.
+ext.archMetricsTransform = [
+    file("${rootDir}/tools/archmetrics_to_vega.py"),
+    file("${rootDir}/../tools/archmetrics_to_vega.py"),
+].find { it.isFile() }
+
+ext.archMetricsDiagramDir = file("${rootDir}/fineract-doc/src/docs/en/diagrams")
+
+// Skeleton sections for every measured package, so that a place to write already exists
+// for packages nobody has analysed yet. Generated from the package report, which makes no
+// assumption about package naming or nesting depth.
+ext.archMetricsSkeletonFile =
+    file("${rootDir}/fineract-doc/src/docs/en/chapters/architecture/generated-package-overview.adoc")
+
+tasks.register('architectureMetricsSkeleton', Exec) {
+    group = 'verification'
+    description = 'Regenerate the per-package skeleton sections from the package-level metrics report.'
+    dependsOn ':fineract-provider:architectureMetrics'
+
+    def script = rootProject.ext.archMetricsTransform
+    def skeleton = rootProject.ext.archMetricsSkeletonFile
+    def packageJson = rootProject.layout.buildDirectory
+        .file('reports/architecture/packages/fineract-package-metrics.json').get().asFile
+
+    onlyIf {
+        if (script == null) {
+            logger.warn('architectureMetricsSkeleton: archmetrics_to_vega.py not found, skipping skeleton regeneration.')
+            return false
+        }
+        return true
+    }
+
+    inputs.file(packageJson).withPropertyName('packageReport')
+    outputs.file(skeleton).withPropertyName('skeleton')
+
+    commandLine 'python3',
+        script != null ? script.absolutePath : 'archmetrics_to_vega.py',
+        packageJson.absolutePath,
+        '--no-diagrams',
+        '--exclude', 'external',
+        '--skeleton', skeleton.absolutePath,
+        '--min-cfv', '1'
+}
+
+tasks.register('architectureMetricsDiagrams', Exec) {
+    group = 'verification'
+    description = 'Regenerate the Vega-Lite diagram specifications from the architecture metrics report.'
+    dependsOn ':fineract-provider:architectureMetricsFeatures'
+
+    def script = rootProject.ext.archMetricsTransform
+    def diagramDir = rootProject.ext.archMetricsDiagramDir
+    def reportJson = rootProject.layout.buildDirectory
+        .file('reports/architecture/features/fineract-feature-metrics.json').get().asFile
+
+    onlyIf {
+        if (script == null) {
+            logger.warn('architectureMetricsDiagrams: archmetrics_to_vega.py not found, skipping diagram regeneration.')
+            return false
+        }
+        return true
+    }
+
+    inputs.file(reportJson).withPropertyName('report')
+    outputs.files(
+        new File(diagramDir, 'main-sequence.vl.json'),
+        new File(diagramDir, 'distance-ranking.vl.json'),
+        new File(diagramDir, 'cross-feature-matrix.vl.json'),
+    ).withPropertyName('specs')
+
+    commandLine 'python3',
+        script != null ? script.absolutePath : 'archmetrics_to_vega.py',
+        reportJson.absolutePath,
+        '--outdir', diagramDir.absolutePath,
+        '--exclude', 'external,platform'
+}
+
+tasks.register('architectureMetricsReport') {
+    group = 'verification'
+    description = 'Robert C. Martin architecture metrics for the whole platform, at package and feature level.'
+    dependsOn 'architectureMetricsDiagrams', 'architectureMetricsSkeleton'
 }

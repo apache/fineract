@@ -1,0 +1,154 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Distance from the main sequence, by component",
+  "width": 520,
+  "height": {
+    "step": 14
+  },
+  "data": {
+    "values": [
+      {
+        "component": "loan",
+        "D": 0.3742,
+        "Ce": 461,
+        "Ca": 447
+      },
+      {
+        "component": "account-transfers",
+        "D": 0.2342,
+        "Ce": 148,
+        "Ca": 66
+      },
+      {
+        "component": "client",
+        "D": 0.438,
+        "Ce": 160,
+        "Ca": 193
+      },
+      {
+        "component": "savings",
+        "D": 0.3383,
+        "Ce": 227,
+        "Ca": 156
+      },
+      {
+        "component": "accounting",
+        "D": 0.334,
+        "Ce": 154,
+        "Ca": 123
+      },
+      {
+        "component": "group",
+        "D": 0.3237,
+        "Ce": 138,
+        "Ca": 88
+      },
+      {
+        "component": "organisation",
+        "D": 0.7651,
+        "Ce": 73,
+        "Ca": 597
+      },
+      {
+        "component": "shareaccounts",
+        "D": 0.0862,
+        "Ce": 101,
+        "Ca": 28
+      },
+      {
+        "component": "charge",
+        "D": 0.6646,
+        "Ce": 55,
+        "Ca": 140
+      },
+      {
+        "component": "notifications",
+        "D": 0.1563,
+        "Ce": 58,
+        "Ca": 2
+      },
+      {
+        "component": "calendar",
+        "D": 0.5133,
+        "Ce": 44,
+        "Ca": 76
+      },
+      {
+        "component": "batch",
+        "D": 0.2536,
+        "Ce": 42,
+        "Ca": 16
+      },
+      {
+        "component": "teller",
+        "D": 0.0518,
+        "Ce": 54,
+        "Ca": 2
+      },
+      {
+        "component": "rate",
+        "D": 0.2409,
+        "Ce": 26,
+        "Ca": 15
+      },
+      {
+        "component": "useradministration",
+        "D": 0.7466,
+        "Ce": 51,
+        "Ca": 343
+      },
+      {
+        "component": "report",
+        "D": 0.0,
+        "Ce": 4,
+        "Ca": 8
+      },
+      {
+        "component": "template",
+        "D": 0.1346,
+        "Ce": 12,
+        "Ca": 4
+      }
+    ]
+  },
+  "mark": "bar",
+  "encoding": {
+    "y": {
+      "field": "component",
+      "type": "nominal",
+      "sort": "-x",
+      "title": null
+    },
+    "x": {
+      "field": "D",
+      "type": "quantitative",
+      "title": "Distance (D = |A + I - 1|)"
+    },
+    "color": {
+      "field": "D",
+      "type": "quantitative",
+      "legend": null,
+      "scale": {
+        "scheme": "orangered"
+      }
+    },
+    "tooltip": [
+      {
+        "field": "component",
+        "type": "nominal"
+      },
+      {
+        "field": "D",
+        "type": "quantitative"
+      },
+      {
+        "field": "Ce",
+        "type": "quantitative"
+      },
+      {
+        "field": "Ca",
+        "type": "quantitative"
+      }
+    ]
+  }
+}

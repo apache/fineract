@@ -1,0 +1,525 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Cross-feature dependencies (row depends on column)",
+  "width": 520,
+  "height": 520,
+  "data": {
+    "values": [
+      {
+        "from": "loan",
+        "to": "account-transfers",
+        "v": 1
+      },
+      {
+        "from": "loan",
+        "to": "accounting",
+        "v": 1
+      },
+      {
+        "from": "loan",
+        "to": "calendar",
+        "v": 1
+      },
+      {
+        "from": "loan",
+        "to": "charge",
+        "v": 1
+      },
+      {
+        "from": "loan",
+        "to": "client",
+        "v": 1
+      },
+      {
+        "from": "loan",
+        "to": "group",
+        "v": 1
+      },
+      {
+        "from": "loan",
+        "to": "organisation",
+        "v": 1
+      },
+      {
+        "from": "loan",
+        "to": "rate",
+        "v": 1
+      },
+      {
+        "from": "loan",
+        "to": "savings",
+        "v": 1
+      },
+      {
+        "from": "loan",
+        "to": "teller",
+        "v": 1
+      },
+      {
+        "from": "loan",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "account-transfers",
+        "to": "batch",
+        "v": 1
+      },
+      {
+        "from": "account-transfers",
+        "to": "calendar",
+        "v": 1
+      },
+      {
+        "from": "account-transfers",
+        "to": "client",
+        "v": 1
+      },
+      {
+        "from": "account-transfers",
+        "to": "group",
+        "v": 1
+      },
+      {
+        "from": "account-transfers",
+        "to": "loan",
+        "v": 1
+      },
+      {
+        "from": "account-transfers",
+        "to": "organisation",
+        "v": 1
+      },
+      {
+        "from": "account-transfers",
+        "to": "savings",
+        "v": 1
+      },
+      {
+        "from": "account-transfers",
+        "to": "shareaccounts",
+        "v": 1
+      },
+      {
+        "from": "account-transfers",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "client",
+        "to": "account-transfers",
+        "v": 1
+      },
+      {
+        "from": "client",
+        "to": "accounting",
+        "v": 1
+      },
+      {
+        "from": "client",
+        "to": "charge",
+        "v": 1
+      },
+      {
+        "from": "client",
+        "to": "group",
+        "v": 1
+      },
+      {
+        "from": "client",
+        "to": "loan",
+        "v": 1
+      },
+      {
+        "from": "client",
+        "to": "organisation",
+        "v": 1
+      },
+      {
+        "from": "client",
+        "to": "savings",
+        "v": 1
+      },
+      {
+        "from": "client",
+        "to": "shareaccounts",
+        "v": 1
+      },
+      {
+        "from": "client",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "savings",
+        "to": "account-transfers",
+        "v": 1
+      },
+      {
+        "from": "savings",
+        "to": "accounting",
+        "v": 1
+      },
+      {
+        "from": "savings",
+        "to": "calendar",
+        "v": 1
+      },
+      {
+        "from": "savings",
+        "to": "charge",
+        "v": 1
+      },
+      {
+        "from": "savings",
+        "to": "client",
+        "v": 1
+      },
+      {
+        "from": "savings",
+        "to": "group",
+        "v": 1
+      },
+      {
+        "from": "savings",
+        "to": "loan",
+        "v": 1
+      },
+      {
+        "from": "savings",
+        "to": "organisation",
+        "v": 1
+      },
+      {
+        "from": "savings",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "accounting",
+        "to": "account-transfers",
+        "v": 1
+      },
+      {
+        "from": "accounting",
+        "to": "charge",
+        "v": 1
+      },
+      {
+        "from": "accounting",
+        "to": "client",
+        "v": 1
+      },
+      {
+        "from": "accounting",
+        "to": "loan",
+        "v": 1
+      },
+      {
+        "from": "accounting",
+        "to": "organisation",
+        "v": 1
+      },
+      {
+        "from": "accounting",
+        "to": "savings",
+        "v": 1
+      },
+      {
+        "from": "accounting",
+        "to": "shareaccounts",
+        "v": 1
+      },
+      {
+        "from": "accounting",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "group",
+        "to": "account-transfers",
+        "v": 1
+      },
+      {
+        "from": "group",
+        "to": "calendar",
+        "v": 1
+      },
+      {
+        "from": "group",
+        "to": "client",
+        "v": 1
+      },
+      {
+        "from": "group",
+        "to": "loan",
+        "v": 1
+      },
+      {
+        "from": "group",
+        "to": "organisation",
+        "v": 1
+      },
+      {
+        "from": "group",
+        "to": "savings",
+        "v": 1
+      },
+      {
+        "from": "group",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "organisation",
+        "to": "accounting",
+        "v": 1
+      },
+      {
+        "from": "organisation",
+        "to": "calendar",
+        "v": 1
+      },
+      {
+        "from": "organisation",
+        "to": "charge",
+        "v": 1
+      },
+      {
+        "from": "organisation",
+        "to": "client",
+        "v": 1
+      },
+      {
+        "from": "organisation",
+        "to": "loan",
+        "v": 1
+      },
+      {
+        "from": "organisation",
+        "to": "savings",
+        "v": 1
+      },
+      {
+        "from": "organisation",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "shareaccounts",
+        "to": "account-transfers",
+        "v": 1
+      },
+      {
+        "from": "shareaccounts",
+        "to": "accounting",
+        "v": 1
+      },
+      {
+        "from": "shareaccounts",
+        "to": "charge",
+        "v": 1
+      },
+      {
+        "from": "shareaccounts",
+        "to": "client",
+        "v": 1
+      },
+      {
+        "from": "shareaccounts",
+        "to": "organisation",
+        "v": 1
+      },
+      {
+        "from": "shareaccounts",
+        "to": "savings",
+        "v": 1
+      },
+      {
+        "from": "shareaccounts",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "charge",
+        "to": "accounting",
+        "v": 1
+      },
+      {
+        "from": "charge",
+        "to": "loan",
+        "v": 1
+      },
+      {
+        "from": "charge",
+        "to": "organisation",
+        "v": 1
+      },
+      {
+        "from": "charge",
+        "to": "savings",
+        "v": 1
+      },
+      {
+        "from": "charge",
+        "to": "shareaccounts",
+        "v": 1
+      },
+      {
+        "from": "charge",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "notifications",
+        "to": "client",
+        "v": 1
+      },
+      {
+        "from": "notifications",
+        "to": "loan",
+        "v": 1
+      },
+      {
+        "from": "notifications",
+        "to": "organisation",
+        "v": 1
+      },
+      {
+        "from": "notifications",
+        "to": "savings",
+        "v": 1
+      },
+      {
+        "from": "notifications",
+        "to": "shareaccounts",
+        "v": 1
+      },
+      {
+        "from": "notifications",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "calendar",
+        "to": "client",
+        "v": 1
+      },
+      {
+        "from": "calendar",
+        "to": "group",
+        "v": 1
+      },
+      {
+        "from": "calendar",
+        "to": "loan",
+        "v": 1
+      },
+      {
+        "from": "calendar",
+        "to": "organisation",
+        "v": 1
+      },
+      {
+        "from": "calendar",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "batch",
+        "to": "client",
+        "v": 1
+      },
+      {
+        "from": "batch",
+        "to": "loan",
+        "v": 1
+      },
+      {
+        "from": "batch",
+        "to": "savings",
+        "v": 1
+      },
+      {
+        "from": "batch",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "teller",
+        "to": "accounting",
+        "v": 1
+      },
+      {
+        "from": "teller",
+        "to": "client",
+        "v": 1
+      },
+      {
+        "from": "teller",
+        "to": "organisation",
+        "v": 1
+      },
+      {
+        "from": "teller",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "rate",
+        "to": "charge",
+        "v": 1
+      },
+      {
+        "from": "rate",
+        "to": "loan",
+        "v": 1
+      },
+      {
+        "from": "rate",
+        "to": "useradministration",
+        "v": 1
+      },
+      {
+        "from": "useradministration",
+        "to": "client",
+        "v": 1
+      },
+      {
+        "from": "useradministration",
+        "to": "organisation",
+        "v": 1
+      }
+    ]
+  },
+  "mark": "rect",
+  "encoding": {
+    "y": {
+      "field": "from",
+      "type": "nominal",
+      "title": "depends on ->"
+    },
+    "x": {
+      "field": "to",
+      "type": "nominal",
+      "title": null,
+      "axis": {
+        "labelAngle": -45,
+        "orient": "top"
+      }
+    },
+    "color": {
+      "value": "#d1495b"
+    },
+    "tooltip": [
+      {
+        "field": "from",
+        "type": "nominal"
+      },
+      {
+        "field": "to",
+        "type": "nominal"
+      }
+    ]
+  }
+}
