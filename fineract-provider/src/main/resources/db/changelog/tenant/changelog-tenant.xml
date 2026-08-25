@@ -273,4 +273,5 @@
     <include file="parts/0251_add_disallow_backdated_transactions_configuration.xml" relativeToChangelogFile="true" />
     <include file="parts/0252_trial_balance_summary_update_originator_external_ids.xml" relativeToChangelogFile="true" />
     <include file="parts/0253_remove_unused_entity_access.xml" relativeToChangelogFile="true" />
+    <include file="parts/0243_spring_batch_6_upgrade.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

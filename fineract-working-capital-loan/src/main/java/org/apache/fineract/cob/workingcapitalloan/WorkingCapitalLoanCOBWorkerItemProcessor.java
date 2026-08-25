@@ -20,8 +20,7 @@ package org.apache.fineract.cob.workingcapitalloan;
 
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanModelProcessingService;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.annotation.BeforeStep;
+import org.springframework.batch.core.step.StepExecution;
 
 public class WorkingCapitalLoanCOBWorkerItemProcessor extends AbstractWorkingCapitalLoanCOBWorkerItemProcessor {
 
@@ -30,7 +29,7 @@ public class WorkingCapitalLoanCOBWorkerItemProcessor extends AbstractWorkingCap
         super(cobBusinessStepService, modelProcessingService);
     }
 
-    @BeforeStep
+    @Override
     public void beforeStep(StepExecution stepExecution) {
         setExecutionContext(stepExecution.getExecutionContext());
         setBusinessDate(stepExecution);

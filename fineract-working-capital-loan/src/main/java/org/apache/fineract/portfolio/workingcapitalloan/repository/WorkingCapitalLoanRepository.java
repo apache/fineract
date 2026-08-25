@@ -86,7 +86,7 @@ public interface WorkingCapitalLoanRepository extends JpaRepository<WorkingCapit
     List<COBIdAndLastClosedBusinessDate> findAllLoansBehindOrNullByLoanIdsAndStatuses(@Param("cobBusinessDate") LocalDate cobBusinessDate,
             @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
 
-    @Query("select loan.id as id from  WorkingCapitalLoan loan where loan.externalId = :externalId")
+    @Query("select loan.id from WorkingCapitalLoan loan where loan.externalId = :externalId")
     Long findIdByExternalId(@Param("externalId") ExternalId externalId);
 
     @Query("select loan.id, loan.lastClosedBusinessDate from WorkingCapitalLoan loan where loan.id IN :loanIds and loan.loanStatus in :loanStatuses and loan.lastClosedBusinessDate < :cobBusinessDate")

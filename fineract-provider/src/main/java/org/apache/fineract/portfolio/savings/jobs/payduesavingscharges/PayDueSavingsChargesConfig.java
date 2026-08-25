@@ -21,11 +21,10 @@ package org.apache.fineract.portfolio.savings.jobs.payduesavingscharges;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -52,8 +51,7 @@ public class PayDueSavingsChargesConfig {
 
     @Bean
     public Job payDueSavingsChargesJob() {
-        return new JobBuilder(JobName.PAY_DUE_SAVINGS_CHARGES.name(), jobRepository).start(payDueSavingsChargesStep())
-                .incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(JobName.PAY_DUE_SAVINGS_CHARGES.name(), jobRepository).start(payDueSavingsChargesStep()).build();
     }
 
     @Bean

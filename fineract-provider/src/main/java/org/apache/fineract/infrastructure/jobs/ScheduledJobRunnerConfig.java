@@ -18,28 +18,58 @@
  */
 package org.apache.fineract.infrastructure.jobs;
 
+import java.util.List;
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.apache.fineract.infrastructure.jobs.config.FineractDataFieldMaxValueIncrementerFactory;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
-import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
+import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
-import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
-import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
+import org.springframework.batch.core.repository.dao.JacksonExecutionContextStringSerializer;
+import org.springframework.batch.core.repository.support.JdbcJobRepositoryFactoryBean;
+import org.springframework.batch.infrastructure.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import tools.jackson.databind.jsontype.PolymorphicTypeValidator;
 
 @Configuration(proxyBeanMethods = false)
 @EnableBatchProcessing
 public class ScheduledJobRunnerConfig {
 
+    // mirrors the serializer's default type validator, extended with Fineract types, because
+    // execution contexts carry e.g. the COB business-step set and partition parameters
+    private static final List<String> ALLOWED_EXECUTION_CONTEXT_SUBTYPES = List.of(//
+            "java.util.", //
+            "java.sql.", //
+            "java.lang.", //
+            "java.math.", //
+            "java.time.", //
+            "java.net.", //
+            "java.xml.", //
+            "org.springframework.batch.", //
+            "org.apache.fineract.");
+
     @Bean
-    public Jackson2ExecutionContextStringSerializer executionContextSerializer() {
-        return new Jackson2ExecutionContextStringSerializer();
+    public JobRegistry jobRegistry() {
+        // @EnableBatchProcessing's registrar wires its jobOperator against the bean named
+        // "jobRegistry" but does not define one itself
+        return new MapJobRegistry();
+    }
+
+    @Bean
+    public JacksonExecutionContextStringSerializer executionContextSerializer() {
+        return new JacksonExecutionContextStringSerializer(
+                JsonMapper.builder().activateDefaultTyping(executionContextTypeValidator()).build());
+    }
+
+    private static PolymorphicTypeValidator executionContextTypeValidator() {
+        BasicPolymorphicTypeValidator.Builder builder = BasicPolymorphicTypeValidator.builder();
+        ALLOWED_EXECUTION_CONTEXT_SUBTYPES.forEach(builder::allowIfSubType);
+        return builder.build();
     }
 
     @Bean
@@ -52,9 +82,9 @@ public class ScheduledJobRunnerConfig {
     @Bean
     public JobRepository jobRepository(RoutingDataSource routingDataSource,
             @Qualifier("jdbcTransactionManager") PlatformTransactionManager transactionManager,
-            Jackson2ExecutionContextStringSerializer executionContextSerializer, DataFieldMaxValueIncrementerFactory incrementerFactory)
+            JacksonExecutionContextStringSerializer executionContextSerializer, DataFieldMaxValueIncrementerFactory incrementerFactory)
             throws Exception {
-        JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
+        JdbcJobRepositoryFactoryBean factory = new JdbcJobRepositoryFactoryBean();
         factory.setDataSource(routingDataSource);
         factory.setTransactionManager(transactionManager);
         // Deliberate downgrade from Spring Batch's SERIALIZABLE default: SERIALIZABLE on the create-JobExecution path
@@ -68,25 +98,5 @@ public class ScheduledJobRunnerConfig {
         factory.setIncrementerFactory(incrementerFactory);
         factory.afterPropertiesSet();
         return factory.getObject();
-    }
-
-    @Bean
-    public JobExplorer jobExplorer(RoutingDataSource routingDataSource,
-            @Qualifier("jdbcTransactionManager") PlatformTransactionManager transactionManager,
-            Jackson2ExecutionContextStringSerializer executionContextSerializer) throws Exception {
-        JobExplorerFactoryBean jobExplorerFactoryBean = new JobExplorerFactoryBean();
-        jobExplorerFactoryBean.setDataSource(routingDataSource);
-        jobExplorerFactoryBean.setTransactionManager(transactionManager);
-        jobExplorerFactoryBean.setSerializer(executionContextSerializer);
-        jobExplorerFactoryBean.afterPropertiesSet();
-        return jobExplorerFactoryBean.getObject();
-    }
-
-    @Bean
-    public TaskExecutorJobLauncher jobLauncher(JobRepository jobRepository) throws Exception {
-        TaskExecutorJobLauncher launcher = new TaskExecutorJobLauncher();
-        launcher.setJobRepository(jobRepository);
-        launcher.afterPropertiesSet();
-        return launcher;
     }
 }

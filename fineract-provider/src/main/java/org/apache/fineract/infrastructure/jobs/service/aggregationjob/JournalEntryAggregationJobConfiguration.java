@@ -28,11 +28,10 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.jobs.service.aggregationjob.data.JournalEntryAggregationSummaryData;
 import org.apache.fineract.infrastructure.jobs.service.aggregationjob.listener.JournalEntryAggregationJobListener;
 import org.apache.fineract.infrastructure.jobs.service.aggregationjob.tasklet.JournalEntryAggregationTrackingTasklet;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -67,8 +66,9 @@ public class JournalEntryAggregationJobConfiguration {
     public Step journalEntryAggregationSummaryStep() {
         return new StepBuilder(JOB_SUMMARY_STEP_NAME, jobRepository)
                 .<JournalEntryAggregationSummaryData, JournalEntryAggregationSummaryData>chunk(
-                        fineractProperties.getJob().getJournalEntryAggregation().getChunkSize(), transactionManager)
-                .reader(journalEntryAggregationJobReader()).writer(aggregationItemWriter).allowStartIfComplete(true).build();
+                        fineractProperties.getJob().getJournalEntryAggregation().getChunkSize())
+                .transactionManager(transactionManager).reader(journalEntryAggregationJobReader()).writer(aggregationItemWriter)
+                .allowStartIfComplete(true).build();
     }
 
     @Bean
@@ -87,8 +87,7 @@ public class JournalEntryAggregationJobConfiguration {
         return new JobBuilder(JobName.JOURNAL_ENTRY_AGGREGATION.name(), jobRepository).listener(journalEntryAggregationJobListener)
                 .start(journalEntryAggregationJobExecutionDecider).on(JournalEntryAggregationJobConstant.NO_OP_EXECUTION).end()
                 .from(journalEntryAggregationJobExecutionDecider).on(JournalEntryAggregationJobConstant.CONTINUE_JOB_EXECUTION)
-                .to(journalEntryAggregationSummaryStep()).next(journalEntryAggregationTrackingStep()).end()
-                .incrementer(new RunIdIncrementer()).build();
+                .to(journalEntryAggregationSummaryStep()).next(journalEntryAggregationTrackingStep()).end().build();
     }
 
 }

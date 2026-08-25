@@ -26,8 +26,8 @@ import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
 import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
 import org.apache.fineract.infrastructure.dataqueries.data.GenericResultsetData;
 import org.apache.fineract.portfolio.search.data.AdvancedQueryData;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
-import org.springframework.lang.NonNull;
 
 public interface DatatableReadService {
 

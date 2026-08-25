@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.sql.JDBCType;
 import java.util.Locale;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public enum JdbcJavaType {
 

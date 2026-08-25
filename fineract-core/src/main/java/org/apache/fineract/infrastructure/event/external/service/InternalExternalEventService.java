@@ -18,9 +18,6 @@
  */
 package org.apache.fineract.infrastructure.event.external.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -38,6 +35,9 @@ import org.apache.fineract.infrastructure.event.external.repository.domain.Exter
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @Profile(FineractProfiles.TEST)
@@ -80,8 +80,7 @@ public class InternalExternalEventService {
 
         try {
             return convertToReadableFormat(externalEvents);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException
-                | JsonProcessingException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException | JacksonException e) {
             throw new RuntimeException("Error while converting external events to readable format", e);
         }
     }
@@ -102,8 +101,8 @@ public class InternalExternalEventService {
         return (root, query, cb) -> cb.equal(root.get("aggregateRootId"), aggregateRootId);
     }
 
-    private List<ExternalEventResponse> convertToReadableFormat(List<ExternalEvent> externalEvents) throws ClassNotFoundException,
-            NoSuchMethodException, InvocationTargetException, IllegalAccessException, JsonProcessingException {
+    private List<ExternalEventResponse> convertToReadableFormat(List<ExternalEvent> externalEvents)
+            throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, JacksonException {
         var eventMessages = new ArrayList<ExternalEventResponse>();
         for (var externalEvent : externalEvents) {
             var payLoadClass = Class.forName(externalEvent.getSchema());
@@ -141,8 +140,8 @@ public class InternalExternalEventService {
         return eventMessages;
     }
 
-    private Map<String, Object> retrieveBulkMessage(BulkMessageItemV1 messageItem) throws ClassNotFoundException, InvocationTargetException,
-            IllegalAccessException, NoSuchMethodException, JsonProcessingException {
+    private Map<String, Object> retrieveBulkMessage(BulkMessageItemV1 messageItem)
+            throws ClassNotFoundException, InvocationTargetException, IllegalAccessException, NoSuchMethodException, JacksonException {
         var messageBulkMessagePayLoad = Class.forName(messageItem.getDataschema());
         var methodForPayLoad = messageBulkMessagePayLoad.getMethod("fromByteBuffer", ByteBuffer.class);
         var payLoadBulkItem = methodForPayLoad.invoke(null, messageItem.getData());
@@ -155,7 +154,7 @@ public class InternalExternalEventService {
         return item;
     }
 
-    private Map<String, Object> toJsonMap(String json) throws JsonProcessingException {
+    private Map<String, Object> toJsonMap(String json) throws JacksonException {
         return mapper.readValue(json, new TypeReference<>() {});
     }
 

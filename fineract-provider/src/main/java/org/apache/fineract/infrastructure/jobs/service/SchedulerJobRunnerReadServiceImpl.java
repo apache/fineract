@@ -34,10 +34,10 @@ import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailReposito
 import org.apache.fineract.infrastructure.jobs.exception.JobNotFoundException;
 import org.apache.fineract.infrastructure.jobs.exception.OperationNotAllowedException;
 import org.apache.fineract.infrastructure.security.utils.ColumnValidator;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,7 +71,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
     }
 
     @Override
-    public JobDetailData retrieveOne(@NonNull IdTypeResolver.IdType idType, String identifier) {
+    public JobDetailData retrieveOne(IdTypeResolver.@NonNull IdType idType, String identifier) {
         JobDetailData jobDetail = switch (idType) {
             case ID -> jobDetailRepository.getDataById(Long.valueOf(identifier));
             case SHORT_NAME -> jobDetailRepository.getDataByShortName(identifier);
@@ -84,7 +84,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
     }
 
     @Override
-    public Page<JobDetailHistoryData> retrieveJobHistory(@NonNull IdTypeResolver.IdType idType, String identifier,
+    public Page<JobDetailHistoryData> retrieveJobHistory(IdTypeResolver.@NonNull IdType idType, String identifier,
             SearchParameters searchParameters) {
         if (!isJobExist(idType, identifier)) {
             throw new JobNotFoundException(idType, identifier);
@@ -128,7 +128,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
 
     @Override
     @NonNull
-    public Long retrieveId(@NonNull IdTypeResolver.IdType idType, String identifier) {
+    public Long retrieveId(IdTypeResolver.@NonNull IdType idType, String identifier) {
         return switch (idType) {
             case ID -> Long.valueOf(identifier);
             case SHORT_NAME ->
@@ -149,7 +149,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
         return true;
     }
 
-    private boolean isJobExist(@NonNull IdTypeResolver.IdType idType, @NonNull String jobId) {
+    private boolean isJobExist(IdTypeResolver.@NonNull IdType idType, @NonNull String jobId) {
         return switch (idType) {
             case ID -> jobDetailRepository.existsById(Long.valueOf(jobId));
             case SHORT_NAME -> jobDetailRepository.existsByShortName(jobId);
