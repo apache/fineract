@@ -152,6 +152,7 @@ public class StaffApiResource {
             - isActive
             """)
     @AlternativeOperationId("create_3")
+    // tag::createStaff[]
     public StaffCreateResponse createStaff(@RequestBody(required = true) @Valid StaffCreateRequest request) {
         final var command = new StaffCreateCommand();
 
@@ -161,6 +162,7 @@ public class StaffApiResource {
 
         return response.get();
     }
+    // end::createStaff[]
 
     @PUT
     @Path("{staffId}")

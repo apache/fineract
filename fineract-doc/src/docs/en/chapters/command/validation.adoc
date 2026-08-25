@@ -1,12 +1,93 @@
 = Validation
 
-TBD
+The legacy command path validates input inside the business services: each service builds a `DataValidatorBuilder`, walks the parsed JSON and checks presence, length and numeric ranges by hand. Those checks are long, hard to read and hard to test apart from the service around them.
 
-Jakarta Validation...
+Endpoints migrated to the new command infrastructure validate the typed request at the REST boundary with https://jakarta.ee/specifications/bean-validation/[Jakarta Bean Validation], implemented by Hibernate Validator. A request that violates a constraint is rejected before the resource method runs, so it is never dispatched and the handler only ever sees valid payloads.
 
-.Validation Messages
+== Wiring
+
+Annotating the request parameter of the JAX-RS resource method with `@Valid` is the only wiring needed.
+
+.`StaffApiResource.createStaff`
+[source,java,indent=0]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/organisation/staff/api/StaffApiResource.java[tag=createStaff]
+----
+
+The request DTO owns the constraints. It follows the DTO conventions of the <<_refactoring_instructions,refactoring instructions>>: Lombok, `java.io.Serializable`, a serialization version of `1L` and no records. Fields taken from the URL, such as the entity id on update requests, stay on the DTO but carry `@Hidden` so they don't appear in the OpenAPI schema (see `StaffUpdateRequest`).
+
+== Field-level constraints
+
+Most fields only need the standard annotations: `@NotNull`, `@NotBlank`, `@Positive` / `@PositiveOrZero`, `@Length(max = ...)` or `@Size(max = ...)` for strings, `@Pattern` for simple format rules, and `@Valid` to cascade into a nested DTO.
+
+.Required, bounded string (`StaffCreateRequest.firstname`)
+[source,java,indent=0]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/organisation/staff/data/StaffCreateRequest.java[tag=firstname]
+----
+
+The `message` attribute never holds English text. It holds a message key in `{braces}`, which Hibernate Validator resolves from the message bundle. The DTOs stay translatable and the wording lives in one file.
+
+Constraints that are not built in are written once as a custom constraint and reused, as `StaffCreateRequest.mobileNo` does with `@ValidPhoneNumber` (see <<Custom constraints>>):
+
+.Built-in and custom constraint on one field (`StaffCreateRequest.mobileNo`)
+[source,java,indent=0]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/organisation/staff/data/StaffCreateRequest.java[tag=mobileNo]
+----
+
+`StaffCreateRequest` is a complete example of a request DTO validated this way.
+
+== Message keys
+
+All messages live in `fineract-validation/src/main/resources/ValidationMessages.properties`. A key is the feature's base package followed by the field and the constraint, lowercase, with dashes between words, for example `org.apache.fineract.organisation.staff.firstname.max`.
+
 [source,properties]
 ----
-include::{rootdir}/fineract-validation/src/main/resources/ValidationMessages.properties[]
+include::{rootdir}/fineract-validation/src/main/resources/ValidationMessages.properties[tag=staff-firstname]
 ----
 
+Hibernate Validator fills placeholders such as `{max}` from the annotation attributes, so the message always matches the limit declared on the DTO. Keep the wording in line with the existing entries.
+
+== Error response
+
+A failed validation surfaces as a `jakarta.validation.ConstraintViolationException`. `JakartaValidationExceptionMapper` in `fineract-core` (`org.apache.fineract.infrastructure.core.exceptionmapper`) turns it into a `400 Bad Request` with an `ApiGlobalErrorResponse` body: the global code is `validation.msg.validation.errors.exist`, and there is one `ApiParameterError` per violation, carrying the message key, the resolved message and the property path of the violated field.
+
+.Response to a staff create request without `firstname` (abridged)
+[source,json]
+----
+{
+  "httpStatusCode": "400",
+  "developerMessage": "The request was invalid. This typically will happen due to validation errors which are provided.",
+  "defaultUserMessage": "Validation errors exist.",
+  "userMessageGlobalisationCode": "validation.msg.validation.errors.exist",
+  "errors": [
+    {
+      "userMessageGlobalisationCode": "org.apache.fineract.organisation.staff.firstname.not-null",
+      "defaultUserMessage": "The parameter 'firstname' is mandatory",
+      "developerMessage": "The parameter 'firstname' is mandatory",
+      "parameterName": "createStaff.request.firstname"
+    }
+  ]
+}
+----
+
+== Custom constraints
+
+When no built-in annotation fits, add a constraint annotation and its `ConstraintValidator`. Constraints used by a single feature go in that feature's `validation` package (see the package structure in the <<_refactoring_instructions,refactoring instructions>>). Constraints shared by several features live in a common module; `@ValidPhoneNumber` in `fineract-core` (`org.apache.fineract.infrastructure.core.validator`) is one.
+
+.`@ValidPhoneNumber`
+[source,java]
+----
+include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/validator/ValidPhoneNumber.java[tag=annotation]
+----
+
+.`PhoneNumberValidator`
+[source,java]
+----
+include::{rootdir}/fineract-core/src/main/java/org/apache/fineract/infrastructure/core/validator/PhoneNumberValidator.java[tag=validator]
+----
+
+The validator only checks the shape of the value, here against the regular expression configured in `fineract.phone.regex`. Rules that need the database or the current state of an entity, such as uniqueness, state transitions or permissions, belong in the service layer, not in a constraint validator.
+
+NOTE: `DataValidatorBuilder` stays in place for the endpoints that have not been migrated yet. Do not use it in new code.
