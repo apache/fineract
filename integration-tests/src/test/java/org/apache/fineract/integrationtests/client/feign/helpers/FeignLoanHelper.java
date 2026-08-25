@@ -43,6 +43,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansResponse;
+import org.apache.fineract.client.models.GetPostDatedChecks;
 import org.apache.fineract.client.models.InterestPauseRequestDto;
 import org.apache.fineract.client.models.InterestPauseResponseDto;
 import org.apache.fineract.client.models.LoanApprovedAmountHistoryData;
@@ -720,4 +721,12 @@ public class FeignLoanHelper {
                 .locale("en")//
                 .dateFormat("dd MMMM yyyy");
     }
+
+    /**
+     * Returns the post dated check backing the given repayment installment of the loan.
+     */
+    public GetPostDatedChecks getPostDatedCheck(Long loanId, Integer installmentId) {
+        return ok(() -> fineractClient.repaymentWithPostDatedChecks().getPostDatedCheck(installmentId, loanId));
+    }
+
 }
