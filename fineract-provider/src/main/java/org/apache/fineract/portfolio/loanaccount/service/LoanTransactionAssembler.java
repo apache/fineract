@@ -35,7 +35,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 @RequiredArgsConstructor
 public class LoanTransactionAssembler {

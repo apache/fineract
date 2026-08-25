@@ -18,7 +18,6 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,7 @@ public interface EmailCampaignWritePlatformService {
     CommandProcessingResult reactivateEmailCampaign(Long campaignId, JsonCommand command);
 
     @SuppressWarnings({ "unused", "rawtypes" })
-    List<HashMap<String, Object>> getRunReportByServiceImpl(String reportName, Map<String, String> queryParams) throws IOException;
+    List<HashMap<String, Object>> getRunReportByServiceImpl(String reportName, Map<String, String> queryParams);
 
     PreviewCampaignMessage previewMessage(JsonQuery query);
 

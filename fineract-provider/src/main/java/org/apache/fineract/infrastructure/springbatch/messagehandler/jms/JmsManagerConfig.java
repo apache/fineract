@@ -32,6 +32,7 @@ import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.jms.dsl.Jms;
+import org.springframework.jms.support.converter.MessageConverter;
 
 @Configuration
 @EnableBatchIntegration
@@ -47,11 +48,12 @@ public class JmsManagerConfig {
     private FineractProperties fineractProperties;
 
     @Bean
-    public IntegrationFlow outboundFlow(ConnectionFactory connectionFactory) {
+    public IntegrationFlow outboundFlow(ConnectionFactory connectionFactory, MessageConverter batchPartitionMessageConverter) {
         return IntegrationFlow.from(outboundRequests) //
                 .intercept(outputInterceptor) //
                 .log(LoggingHandler.Level.DEBUG) //
                 .handle(Jms.outboundAdapter(connectionFactory)
+                        .configureJmsTemplate(template -> template.jmsMessageConverter(batchPartitionMessageConverter))
                         .destination(fineractProperties.getRemoteJobMessageHandler().getJms().getRequestQueueName()))
                 .get();
     }

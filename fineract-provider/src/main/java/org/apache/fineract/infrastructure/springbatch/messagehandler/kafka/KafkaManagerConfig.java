@@ -43,7 +43,7 @@ import org.springframework.integration.kafka.outbound.KafkaProducerMessageHandle
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.support.serializer.JsonSerializer;
+import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
 import org.springframework.messaging.support.GenericMessage;
 
 @Configuration
@@ -64,7 +64,7 @@ public class KafkaManagerConfig {
                 fineractProperties.getRemoteJobMessageHandler().getKafka().getProducer().getExtraPropertiesMap());
         props.put(BOOTSTRAP_SERVERS_CONFIG, fineractProperties.getRemoteJobMessageHandler().getKafka().getBootstrapServers());
         props.put(KEY_SERIALIZER_CLASS_CONFIG, IntegerSerializer.class);
-        props.put(VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        props.put(VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
         return new DefaultKafkaProducerFactory<>(props);
     }
 

@@ -154,6 +154,8 @@ public class ClasspathDuplicatesStepDefinitions implements En {
                 || resourcePath.startsWith("META-INF/additional-spring") //
                 || resourcePath.startsWith("META-INF/terracotta") //
                 || resourcePath.startsWith("com/fasterxml/jackson/core/io/doubleparser") //
+                // httpclient5 5.5+ and docker-java-transport-zerodep both bundle Mozilla's public suffix list
+                || resourcePath.startsWith("org/publicsuffix/list/") //
                 // Groovy is groovy
                 || resourcePath.startsWith("META-INF/groovy") //
                 || resourcePath.startsWith("org/springframework/batch/core/scope/context/JobSynchronizationManager") //

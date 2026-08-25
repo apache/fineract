@@ -45,7 +45,8 @@ public class HttpMessageNotReadableErrorControllerTest {
     public void nonNumericValueForNumericFieldReturnsFieldSpecificValidationError() throws Exception {
         final InvalidFormatException invalidFormatException = invalidFormatExceptionFor("not-a-number", BigDecimal.class);
         invalidFormatException.prependPath(HttpMessageNotReadableErrorControllerTest.class, "txnAmount");
-        final HttpMessageNotReadableException exception = new HttpMessageNotReadableException("JSON parse error", invalidFormatException);
+        final HttpMessageNotReadableException exception = new HttpMessageNotReadableException("JSON parse error", invalidFormatException,
+                null);
 
         final Response response = controller.toResponse(exception);
 
@@ -62,7 +63,8 @@ public class HttpMessageNotReadableErrorControllerTest {
     public void invalidFormatOnNonNumericFieldFallsBackToGenericInvalidJsonError() throws Exception {
         final InvalidFormatException invalidFormatException = invalidFormatExceptionFor("not-a-date", LocalDate.class);
         invalidFormatException.prependPath(HttpMessageNotReadableErrorControllerTest.class, "txnDate");
-        final HttpMessageNotReadableException exception = new HttpMessageNotReadableException("JSON parse error", invalidFormatException);
+        final HttpMessageNotReadableException exception = new HttpMessageNotReadableException("JSON parse error", invalidFormatException,
+                null);
 
         final Response response = controller.toResponse(exception);
 
@@ -76,7 +78,7 @@ public class HttpMessageNotReadableErrorControllerTest {
     @Test
     public void malformedJsonSyntaxFallsBackToGenericInvalidJsonError() {
         final JsonParseException jsonParseException = new JsonParseException((JsonParser) null, "Unexpected end-of-input");
-        final HttpMessageNotReadableException exception = new HttpMessageNotReadableException("JSON parse error", jsonParseException);
+        final HttpMessageNotReadableException exception = new HttpMessageNotReadableException("JSON parse error", jsonParseException, null);
 
         final Response response = controller.toResponse(exception);
 

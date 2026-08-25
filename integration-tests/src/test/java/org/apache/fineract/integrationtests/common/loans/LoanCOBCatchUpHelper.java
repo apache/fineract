@@ -25,7 +25,7 @@ import org.apache.fineract.client.models.IsCatchUpRunningDTO;
 import org.apache.fineract.client.models.OldestCOBProcessedLoanDTO;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import retrofit2.Response;
 
 @Slf4j
