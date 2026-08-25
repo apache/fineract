@@ -35,9 +35,6 @@ github:
         # Dismiss stale pull request approvals when new commits are pushed.
         # New, reviewable commits pushed will dismiss previous pull request review approvals.
         dismiss_stale_reviews: true
-  pull_requests:
-    # enable updating head branches of pull requests
-    allow_update_branch: true
 notifications:
   commits: commits@fineract.apache.org
   pullrequests: issues@fineract.apache.org
