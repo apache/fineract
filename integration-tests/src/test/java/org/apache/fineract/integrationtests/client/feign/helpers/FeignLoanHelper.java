@@ -577,6 +577,12 @@ public class FeignLoanHelper {
         return ok(() -> fineractClient.loans().handleCommandsLoanByExternalId(loanExternalId, request, "unassignLoanOfficer"));
     }
 
+    /** Recovers the outstanding balance of a written-off or overdue loan from its guarantors' on-hold funds. */
+    public PostLoansLoanIdResponse recoverGuarantees(Long loanId) {
+        return ok(() -> fineractClient.loans().handleCommandsLoan(loanId, new PostLoansLoanIdRequest(),
+                Map.of("command", "recoverGuarantees")));
+    }
+
     public PostLoansLoanIdResponse recoverGuaranteesLoan(String loanExternalId, PostLoansLoanIdRequest request) {
         return recoverGuaranteeByExternalId(loanExternalId, request);
     }
