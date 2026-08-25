@@ -47,5 +47,4 @@ dependencies {
         exclude group: 'org.skyscreamer'
     }
     testImplementation( 'io.github.classgraph:classgraph' )
-    testImplementation ('org.mockito:mockito-inline')
 }

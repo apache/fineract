@@ -19,10 +19,7 @@
 
 package org.apache.fineract.infrastructure.campaigns.sms.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
-import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -69,6 +66,9 @@ import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanTypeExcept
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccountTransaction;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @Slf4j
@@ -224,7 +224,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                             }
                         }
                     }
-                } catch (final IOException e) {
+                } catch (final JacksonException e) {
                     log.error("smsParams does not contain the key: ", e);
                 } catch (final RuntimeException e) {
                     log.debug("Client Office Id and SMS Campaign Office id doesn't match ", e);
@@ -283,7 +283,7 @@ public class SmsCampaignDomainServiceImpl implements SmsCampaignDomainService {
                         smsDataMap.put(smsCampaign, messages);
                         this.smsMessageScheduledJobService.sendTriggeredMessages(smsDataMap);
                     }
-                } catch (final IOException e) {
+                } catch (final JacksonException e) {
                     log.error("smsParams does not contain the key: ", e);
                 } catch (final RuntimeException e) {
                     log.debug("Client Office Id and SMS Campaign Office id doesn't match ", e);

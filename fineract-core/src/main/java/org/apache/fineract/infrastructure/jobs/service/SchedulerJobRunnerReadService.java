@@ -24,19 +24,19 @@ import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailData;
 import org.apache.fineract.infrastructure.jobs.data.JobDetailHistoryData;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public interface SchedulerJobRunnerReadService {
 
     List<JobDetailData> findAllJobDetails();
 
-    JobDetailData retrieveOne(@NonNull IdTypeResolver.IdType idType, String identifier);
+    JobDetailData retrieveOne(IdTypeResolver.@NonNull IdType idType, String identifier);
 
-    Page<JobDetailHistoryData> retrieveJobHistory(@NonNull IdTypeResolver.IdType idType, String identifier,
+    Page<JobDetailHistoryData> retrieveJobHistory(IdTypeResolver.@NonNull IdType idType, String identifier,
             SearchParameters searchParameters);
 
     @NonNull
-    Long retrieveId(@NonNull IdTypeResolver.IdType idType, String identifier);
+    Long retrieveId(IdTypeResolver.@NonNull IdType idType, String identifier);
 
     boolean isUpdatesAllowed();
 }

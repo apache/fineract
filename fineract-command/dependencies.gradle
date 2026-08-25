@@ -21,9 +21,9 @@ dependencies {
     implementation(
             'org.springframework.boot:spring-boot-starter',
             'org.springframework.boot:spring-boot-starter-validation',
-            'org.springframework.boot:spring-boot-starter-web',
+            'org.springframework.boot:spring-boot-starter-webmvc',
             'org.springframework.security:spring-security-core',
-            'io.github.resilience4j:resilience4j-spring-boot3',
+            'io.github.resilience4j:resilience4j-spring-boot4',
 
             'com.google.guava:guava',
 
@@ -36,6 +36,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct:mapstruct-processor'
 
+    testImplementation 'org.springframework.boot:spring-boot-jdbc'
     testImplementation(project(path: ':fineract-command-test'))
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
@@ -46,10 +47,8 @@ dependencies {
     }
     testImplementation (
             project(':fineract-validation'),
-            'org.mockito:mockito-inline',
             'org.testcontainers:junit-jupiter',
             'org.springframework.restdocs:spring-restdocs-mockmvc',
             'org.springframework.restdocs:spring-restdocs-webtestclient',
-            'org.springframework.restdocs:spring-restdocs-restassured',
             )
 }

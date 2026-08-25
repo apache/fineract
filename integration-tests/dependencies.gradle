@@ -20,7 +20,10 @@ dependencies {
     // testCompile dependencies are ONLY used in src/test, not src/main.
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
-    tomcat 'org.apache.tomcat:tomcat:10.1.55@zip'
+    tomcat 'org.apache.tomcat:tomcat:11.0.22@zip'
+    // gradle-cargo-plugin 2.9.0 defaults to a Codehaus Cargo version that predates Tomcat 11 support
+    cargo 'org.codehaus.cargo:cargo-core-uberjar:1.10.21'
+    cargo 'org.codehaus.cargo:cargo-ant:1.10.21'
     def providerMainOutput = project(':fineract-provider').extensions.getByType(SourceSetContainer).named('main').get().output
     testImplementation( providerMainOutput,
             project(path: ':fineract-core', configuration: 'runtimeElements'),

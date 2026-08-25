@@ -26,8 +26,8 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.listener.JobExecutionListener;
 import org.springframework.stereotype.Component;
 
 /**
@@ -45,7 +45,7 @@ public class RetainedEarningJobListener implements JobExecutionListener {
      */
     @Override
     public void beforeJob(JobExecution jobExecution) {
-        log.info("Starting Retained Earning Job: {}", jobExecution.getJobId());
+        log.info("Starting Retained Earning Job: {}", jobExecution.getJobInstanceId());
     }
 
     /**

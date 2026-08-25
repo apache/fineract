@@ -38,12 +38,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.JobOperator;
-import org.springframework.batch.core.launch.NoSuchJobExecutionException;
-import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.core.step.StepExecution;
+import org.springframework.batch.infrastructure.item.ExecutionContext;
 
 @ExtendWith(MockitoExtension.class)
 class LoanCOBPartitionerTest {
@@ -77,6 +76,8 @@ class LoanCOBPartitionerTest {
         when(jobExecution.getExecutionContext()).thenReturn(executionContext);
         when(executionContext.get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME)).thenReturn(BUSINESS_DATE);
         when(executionContext.get(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME)).thenReturn(false);
+        // the partitioner records the partition count on the manager step's context so a restart can reproduce the names
+        when(stepExecution.getExecutionContext()).thenReturn(new ExecutionContext());
         LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveIdService, jobOperator,stepExecution, 1L);
 
         //when
@@ -89,14 +90,13 @@ class LoanCOBPartitionerTest {
     }
 
     @Test
-    public void testLoanCOBPartitionerEmptyBusinessSteps() throws NoSuchJobExecutionException, JobExecutionNotRunningException {
+    public void testLoanCOBPartitionerEmptyBusinessSteps() throws JobExecutionNotRunningException {
         //given
         when(propertyService.getPartitionSize(LoanCOBConstant.JOB_NAME)).thenReturn(5);
         when(cobBusinessStepService.getCOBBusinessSteps(LoanCOBBusinessStep.class, LoanCOBConstant.LOAN_COB_JOB_NAME))
                 .thenReturn(Set.of());
 
         when(stepExecution.getJobExecution()).thenReturn(jobExecution);
-        when(jobExecution.getId()).thenReturn(123L);
         LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveIdService, jobOperator, stepExecution, 1L);
 
         //when
@@ -104,7 +104,7 @@ class LoanCOBPartitionerTest {
 
         //then
         Assertions.assertEquals(0, partitions.size());
-        verify(jobOperator, times(1)).stop(123L);
+        verify(jobOperator, times(1)).stop(jobExecution);
     }
 
     @Test
@@ -119,6 +119,8 @@ class LoanCOBPartitionerTest {
         when(jobExecution.getExecutionContext()).thenReturn(executionContext);
         when(executionContext.get(LoanCOBConstant.BUSINESS_DATE_PARAMETER_NAME)).thenReturn(BUSINESS_DATE);
         when(executionContext.get(LoanCOBConstant.IS_CATCH_UP_PARAMETER_NAME)).thenReturn(false);
+        // the partitioner records the partition count on the manager step's context so a restart can reproduce the names
+        when(stepExecution.getExecutionContext()).thenReturn(new ExecutionContext());
         LoanCOBPartitioner loanCOBPartitioner = new LoanCOBPartitioner(propertyService, cobBusinessStepService, retrieveIdService, jobOperator,stepExecution, 1L);
 
         //when

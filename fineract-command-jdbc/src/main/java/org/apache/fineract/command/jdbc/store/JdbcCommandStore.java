@@ -23,7 +23,6 @@ import static java.util.Objects.isNull;
 import static org.apache.fineract.command.core.CommandConstants.COMMAND_JSON_CLASS_ATTRIBUTE;
 import static org.apache.fineract.command.core.CommandState.UNKNOWN;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.retry.annotation.Retry;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -44,6 +43,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -60,14 +60,14 @@ public class JdbcCommandStore implements CommandStore {
     @SuppressWarnings("unchecked")
     public <T> T getRequestById(Long id) {
         return (T) repository.findById(id).map(CommandEntity::getRequest)
-                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asText()))).orElse(null);
+                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asString()))).orElse(null);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getResponseById(Long id) {
         return (T) repository.findById(id).map(CommandEntity::getResponse)
-                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asText()))).orElse(null);
+                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asString()))).orElse(null);
     }
 
     @Override
@@ -79,14 +79,14 @@ public class JdbcCommandStore implements CommandStore {
     @SuppressWarnings("unchecked")
     public <T> T getRequestByKey(String key) {
         return (T) repository.findOneByIdempotencyKey(key).map(CommandEntity::getRequest)
-                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asText()))).orElse(null);
+                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asString()))).orElse(null);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getResponseByKey(String key) {
         return (T) repository.findOneByIdempotencyKey(key).map(CommandEntity::getResponse)
-                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asText()))).orElse(null);
+                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asString()))).orElse(null);
     }
 
     @Override

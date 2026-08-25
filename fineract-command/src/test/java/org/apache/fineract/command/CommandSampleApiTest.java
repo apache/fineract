@@ -44,13 +44,15 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -65,14 +67,21 @@ class CommandSampleApiTest {
 
     private List<ClientHttpRequestInterceptor> interceptors;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
     @Autowired
     private CommandProperties properties;
 
     @BeforeEach
     public void setUp() {
+        this.restTemplate = new RestTemplate();
+        this.restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+
+            @Override
+            public boolean hasError(ClientHttpResponse response) {
+                return false;
+            }
+        });
         this.baseUrl = "http://localhost:" + port + "/test/dummy";
         this.interceptors = List.of((request, body, execution) -> {
             var headers = request.getHeaders();
@@ -86,7 +95,7 @@ class CommandSampleApiTest {
 
     @Test
     void validation() {
-        restTemplate.getRestTemplate().setInterceptors(interceptors);
+        restTemplate.setInterceptors(interceptors);
         var problemDetail = restTemplate.postForObject(baseUrl + "/sync", DummyRequest.builder().build(), ProblemDetail.class);
 
         log.warn("Problem detail (sync) : {} ({})", problemDetail.getDetail(), problemDetail.getProperties());
@@ -99,7 +108,7 @@ class CommandSampleApiTest {
         final var content = "test-sync";
         final var idempotencyKey = UUID.randomUUID().toString();
 
-        restTemplate.getRestTemplate().setInterceptors(interceptors);
+        restTemplate.setInterceptors(interceptors);
 
         final var headers = new HttpHeaders();
         headers.add(properties.getIdemPotencyKeyHeaderName(), idempotencyKey);
@@ -145,7 +154,7 @@ class CommandSampleApiTest {
             return execution.execute(req, body);
         });
 
-        restTemplate.getRestTemplate().setInterceptors(interceptors);
+        restTemplate.setInterceptors(interceptors);
 
         // first request passes
         var response = restTemplate.postForEntity(baseUrl + path, request, Map.class);

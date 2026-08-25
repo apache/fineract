@@ -35,8 +35,8 @@ import org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEven
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.NoExternalEvent;
 import org.apache.fineract.infrastructure.event.external.service.ExternalEventService;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionExecution;
 import org.springframework.transaction.TransactionExecutionListener;

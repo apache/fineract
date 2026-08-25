@@ -34,20 +34,17 @@ import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
-import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.step.builder.SimpleStepBuilder;
+import org.springframework.batch.core.step.Step;
+import org.springframework.batch.core.step.builder.ChunkOrientedStepBuilder;
 import org.springframework.batch.integration.partition.RemotePartitioningWorkerStepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.SyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.integration.channel.QueueChannel;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -92,8 +89,9 @@ public class LoanCOBWorkerConfiguration {
 
     @Bean(name = LoanCOBConstant.LOAN_COB_WORKER_STEP)
     public Step loanCOBWorkerStep() {
-        final SimpleStepBuilder<Loan, Loan> stepBuilder = stepBuilderFactory.get("Loan COB worker - Step").inputChannel(inboundRequests)
-                .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name()), transactionManager) //
+        final ChunkOrientedStepBuilder<Loan, Loan> stepBuilder = stepBuilderFactory.get("Loan COB worker - Step")
+                .inputChannel(inboundRequests) //
+                .<Loan, Loan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name())) //
                 .reader(cobWorkerItemReader()) //
                 .processor(cobWorkerItemProcessor()) //
                 .writer(cobWorkerItemWriter()) //
@@ -101,32 +99,29 @@ public class LoanCOBWorkerConfiguration {
                 .retry(Exception.class) //
                 .retryLimit(propertyService.getRetryLimit(LoanCOBConstant.JOB_NAME)) //
                 .skip(Exception.class) //
-                .skipLimit(propertyService.getChunkSize(LoanCOBConstant.JOB_NAME) + 1) //
+                .skipLimit(propertyService.getSkipLimit(LoanCOBConstant.JOB_NAME)) //
                 .listener(loanItemListener()) //
                 .listener(cobWorkerStepListener()) //
                 .transactionManager(transactionManager);
 
-        if (propertyService.getThreadPoolMaxPoolSize(LoanCOBConstant.JOB_NAME) > 1) {
-            stepBuilder.taskExecutor(cobTaskExecutor());
-        }
+        // No task executor is registered, deliberately and unconditionally.
+        //
+        // Batch 6's ChunkOrientedStep keeps the chunk transaction on the step thread and, when a task executor is
+        // present, submits the ITEMS of a chunk to it (ChunkOrientedStep.processChunkConcurrently). Item processing
+        // then runs with no transaction of its own, so COBBusinessStepService.run has to open one - which commits
+        // independently of the chunk write. A chunk-write rollback, a skip in scan mode or a step restart therefore
+        // leaves the business-step writes committed while the loan is not marked COB'd, and the next pass re-runs
+        // them over it.
+        //
+        // Leaving the executor unset keeps isConcurrent() false, so processing stays on the step thread and joins the
+        // chunk transaction exactly as it did under Batch 5. This is NOT configurable on purpose: the thread pool size
+        // reads like a throughput dial but decides transactional semantics, so it must not be reachable from
+        // configuration. Concurrency comes from partitioning instead - lower partition-size and add worker instances.
+        //
+        // Do not reintroduce a task executor until FINERACT-2621 establishes that every COB business step is
+        // idempotent under a second pass.
 
         return stepBuilder.build();
-    }
-
-    @Bean
-    public TaskExecutor cobTaskExecutor() {
-        if (propertyService.getThreadPoolMaxPoolSize(LoanCOBConstant.JOB_NAME) == 1) {
-            return new SyncTaskExecutor();
-        }
-        final ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setThreadNamePrefix("COB-Thread-");
-        taskExecutor.setThreadGroupName("COB-Thread");
-        taskExecutor.setCorePoolSize(propertyService.getThreadPoolCorePoolSize(JobName.LOAN_COB.name()));
-        taskExecutor.setMaxPoolSize(propertyService.getThreadPoolMaxPoolSize(JobName.LOAN_COB.name()));
-        taskExecutor.setQueueCapacity(propertyService.getThreadPoolQueueCapacity(JobName.LOAN_COB.name()));
-        taskExecutor.setAllowCoreThreadTimeOut(true);
-        taskExecutor.setTaskDecorator(new ContextAwareTaskDecorator());
-        return taskExecutor;
     }
 
     @Bean
@@ -169,8 +164,6 @@ public class LoanCOBWorkerConfiguration {
     @Bean
     @StepScope
     public LoanItemWriter cobWorkerItemWriter() {
-        LoanItemWriter repositoryItemWriter = new LoanItemWriter(loanLockingService);
-        repositoryItemWriter.setRepository(loanRepository);
-        return repositoryItemWriter;
+        return new LoanItemWriter(loanLockingService, loanRepository);
     }
 }

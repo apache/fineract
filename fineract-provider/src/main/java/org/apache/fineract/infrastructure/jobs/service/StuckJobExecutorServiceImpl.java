@@ -23,7 +23,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.jobs.data.partitionedjobs.PartitionedJob;
 import org.apache.fineract.infrastructure.jobs.domain.JobExecutionRepository;
+import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.batch.core.launch.NoSuchJobExecutionException;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -37,6 +40,7 @@ public class StuckJobExecutorServiceImpl implements StuckJobExecutorService {
     @Qualifier("requiresNewTransactionJdbcTemplate")
     private final TransactionTemplate requiresNewTransactionJdbcTemplate;
     private final JobOperator jobOperator;
+    private final JobRepository jobRepository;
 
     @Override
     public void resumeStuckJob(String jobName) {
@@ -54,10 +58,26 @@ public class StuckJobExecutorServiceImpl implements StuckJobExecutorService {
 
     private void handleStuckTaskletJob(Long stuckJobId) {
         try {
-            jobOperator.restart(stuckJobId);
+            jobOperator.restart(getJobExecutionOrFail(stuckJobId));
         } catch (Exception e) {
             throw new RuntimeException("Exception while handling a stuck job", e);
         }
+    }
+
+    /**
+     * Batch 6 replaced {@code JobOperator.restart(long)} with {@code restart(JobExecution)}, but
+     * {@code JobRepository.getJobExecution} is {@code @Nullable} and takes a primitive. Resolve both here so an unknown
+     * or absent id surfaces as a meaningful error rather than an NPE.
+     */
+    private JobExecution getJobExecutionOrFail(Long stuckJobId) throws NoSuchJobExecutionException {
+        if (stuckJobId == null) {
+            throw new NoSuchJobExecutionException("Job execution id must not be null");
+        }
+        JobExecution jobExecution = jobRepository.getJobExecution(stuckJobId);
+        if (jobExecution == null) {
+            throw new NoSuchJobExecutionException("No job execution found for id " + stuckJobId);
+        }
+        return jobExecution;
     }
 
     private void restartPartitionedJobs(String jobName, List<Long> stuckJobIds) {
@@ -85,7 +105,7 @@ public class StuckJobExecutorServiceImpl implements StuckJobExecutorService {
         try {
             waitUntilAllPartitionsFinished(stuckJobId, partitionerStepName);
             updateJobStatusToFailedInNewTransaction(stuckJobId, partitionerStepName);
-            jobOperator.restart(stuckJobId);
+            jobOperator.restart(getJobExecutionOrFail(stuckJobId));
         } catch (Exception e) {
             throw new RuntimeException("Exception while handling a stuck job", e);
         }

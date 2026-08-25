@@ -93,9 +93,20 @@ buildscript {
         maven { url 'https://plugins.gradle.org/m2/' }
     }
 
+    configurations.classpath {
+        resolutionStrategy {
+            // The Spring Boot 4 Gradle plugin pulls spring-core 7.x onto the shared buildscript
+            // classpath, but the hierynomus license plugin's transitive license-maven-plugin:3.0
+            // needs a PropertyPlaceholderHelper constructor that Spring Framework 7 removed.
+            // TODO: drop this pin once com.github.hierynomus.license ships a license-maven-plugin
+            // that works against Spring Framework 7. Buildscript-only; no runtime effect.
+            force 'org.springframework:spring-core:6.2.18'
+        }
+    }
+
     dependencies {
         classpath 'com.bmuschko:gradle-cargo-plugin:2.9.0'
-        classpath 'org.eclipse.persistence:eclipselink:4.0.9'
+        classpath 'org.eclipse.persistence:eclipselink:5.0.1'
         classpath 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
         classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0'
         classpath 'org.apache.commons:commons-lang3:3.20.0'
@@ -113,7 +124,7 @@ plugins {
     id 'com.github.hierynomus.license' version '0.16.1' apply false
     id 'com.github.jk1.dependency-license-report' version '2.9' apply false
     id 'org.zeroturnaround.gradle.jrebel' version '1.2.2' apply false
-    id 'org.springframework.boot' version '3.5.15' apply false
+    id 'org.springframework.boot' version '4.1.0' apply false
     id 'net.ltgt.errorprone' version '4.4.0' apply false
     id 'io.swagger.core.v3.swagger-gradle-plugin' version '2.2.49' apply false
     id 'com.gorylenko.gradle-git-properties' version '2.5.7' apply false
@@ -415,6 +426,11 @@ configure(project.fineractJavaProjects) {
         options.incremental = true
         options.fork = true
         outputs.cacheIf { true }
+        // Lombok reads lombok.config at compile time; without this input, cached or
+        // incremental builds can reuse classes generated under an older config
+        inputs.file(rootProject.file('lombok.config'))
+                .withPropertyName('lombokConfig')
+                .withPathSensitivity(PathSensitivity.NONE)
         options.compilerArgs << '-parameters'
         options.encoding = 'UTF-8'
         options.compilerArgs << '-Xlint:unchecked'
@@ -702,6 +718,9 @@ configure(project.fineractJavaProjects) {
                 'org.slf4j:slf4j-api',
                 'org.slf4j:log4j-over-slf4j',
                 'org.slf4j:jul-to-slf4j',
+                // Spring Framework 7 removed spring-jcl (which provided org.apache.commons.logging);
+                // commons-logging itself is excluded globally, so bridge JCL to SLF4J everywhere
+                'org.slf4j:jcl-over-slf4j',
                 )
         implementation ("ch.qos.logback:logback-classic") {
             exclude(module: "slf4j-api")
@@ -827,7 +846,6 @@ configure(project.fineractCustomProjects) {
             exclude group: 'org.skyscreamer'
         }
         testImplementation( 'org.mockito:mockito-core',
-                'org.mockito:mockito-inline',
                 'org.mockito:mockito-junit-jupiter',
                 'org.junit.jupiter:junit-jupiter-api',
                 'org.junit.jupiter:junit-jupiter-engine',
