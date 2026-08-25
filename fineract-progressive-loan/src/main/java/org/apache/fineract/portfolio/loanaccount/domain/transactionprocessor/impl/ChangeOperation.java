@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.loanaccount.data.LoanTermVariationsData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 @Getter
 public class ChangeOperation implements Comparable<ChangeOperation> {

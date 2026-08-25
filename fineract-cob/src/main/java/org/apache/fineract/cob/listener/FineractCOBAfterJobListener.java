@@ -18,7 +18,7 @@
  */
 package org.apache.fineract.cob.listener;
 
-import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.job.JobExecution;
 
 public interface FineractCOBAfterJobListener {
 

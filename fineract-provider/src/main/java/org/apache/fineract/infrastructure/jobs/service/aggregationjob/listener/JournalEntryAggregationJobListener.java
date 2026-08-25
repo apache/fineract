@@ -35,9 +35,9 @@ import org.apache.fineract.infrastructure.jobs.service.aggregationjob.JournalEnt
 import org.apache.fineract.infrastructure.jobs.service.aggregationjob.domain.JournalEntryAggregationTrackingRepository;
 import org.apache.fineract.infrastructure.jobs.service.aggregationjob.services.JournalEntryAggregationWriterService;
 import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobExecutionListener;
-import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.job.JobExecution;
+import org.springframework.batch.core.listener.JobExecutionListener;
+import org.springframework.batch.core.step.StepExecution;
 import org.springframework.stereotype.Component;
 
 @Component
