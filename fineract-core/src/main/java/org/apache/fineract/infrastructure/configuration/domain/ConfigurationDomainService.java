@@ -180,4 +180,7 @@ public interface ConfigurationDomainService {
 
     boolean isBlockTransactionsOnClosedOverpaidLoansEnabled();
 
+    boolean isBackdatedTransactionsDisallowed();
+
+    Long retrieveBackdatedTransactionsToleranceDays();
 }

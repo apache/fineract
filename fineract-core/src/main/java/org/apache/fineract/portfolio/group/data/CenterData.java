@@ -259,6 +259,10 @@ public final class CenterData implements Serializable {
         return collectionMeetingCalendar;
     }
 
+    public String getExternalId() {
+        return this.externalId;
+    }
+
     public String getStaffName() {
         return this.staffName;
     }

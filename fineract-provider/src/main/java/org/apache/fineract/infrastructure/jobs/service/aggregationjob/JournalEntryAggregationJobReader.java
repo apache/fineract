@@ -109,10 +109,10 @@ public class JournalEntryAggregationJobReader extends JdbcCursorItemReader<Journ
                         acc_gl_journal_entry.entity_type_enum AS entityTypeEnum,
                         acc_gl_journal_entry.office_id AS officeId,
                         aw.owner_id AS externalOwner,
-                        COALESCE((SELECT \s""" + aggregateFunction + """
+                        (SELECT \s""" + aggregateFunction + """
                          FROM m_loan_originator_mapping mlom
                          JOIN m_loan_originator mlo ON mlo.id = mlom.originator_id
-                         WHERE mlom.loan_id = loan.id), '') AS originatorExternalIds,
+                         WHERE mlom.loan_id = loan.id) AS originatorExternalIds,
                         acc_gl_journal_entry.type_enum,
                         acc_gl_journal_entry.amount,
                         acc_gl_journal_entry.submitted_on_date AS aggregatedOnDate,

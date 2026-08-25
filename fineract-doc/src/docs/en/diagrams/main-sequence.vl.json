@@ -1,0 +1,249 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": "Abstractness vs Instability (distance from the main sequence)",
+  "width": 520,
+  "height": 420,
+  "data": {
+    "values": [
+      {
+        "component": "loan",
+        "A": 0.1181,
+        "I": 0.5077,
+        "D": 0.3742,
+        "classCount": 1507
+      },
+      {
+        "component": "account-transfers",
+        "A": 0.0742,
+        "I": 0.6916,
+        "D": 0.2342,
+        "classCount": 229
+      },
+      {
+        "component": "client",
+        "A": 0.1087,
+        "I": 0.4533,
+        "D": 0.438,
+        "classCount": 276
+      },
+      {
+        "component": "savings",
+        "A": 0.069,
+        "I": 0.5927,
+        "D": 0.3383,
+        "classCount": 783
+      },
+      {
+        "component": "accounting",
+        "A": 0.1101,
+        "I": 0.556,
+        "D": 0.334,
+        "classCount": 318
+      },
+      {
+        "component": "group",
+        "A": 0.0657,
+        "I": 0.6106,
+        "D": 0.3237,
+        "classCount": 274
+      },
+      {
+        "component": "organisation",
+        "A": 0.126,
+        "I": 0.109,
+        "D": 0.7651,
+        "classCount": 254
+      },
+      {
+        "component": "shareaccounts",
+        "A": 0.1308,
+        "I": 0.7829,
+        "D": 0.0862,
+        "classCount": 107
+      },
+      {
+        "component": "charge",
+        "A": 0.0533,
+        "I": 0.2821,
+        "D": 0.6646,
+        "classCount": 75
+      },
+      {
+        "component": "notifications",
+        "A": 0.1897,
+        "I": 0.9667,
+        "D": 0.1563,
+        "classCount": 58
+      },
+      {
+        "component": "calendar",
+        "A": 0.12,
+        "I": 0.3667,
+        "D": 0.5133,
+        "classCount": 50
+      },
+      {
+        "component": "batch",
+        "A": 0.0222,
+        "I": 0.7241,
+        "D": 0.2536,
+        "classCount": 90
+      },
+      {
+        "component": "teller",
+        "A": 0.0875,
+        "I": 0.9643,
+        "D": 0.0518,
+        "classCount": 80
+      },
+      {
+        "component": "rate",
+        "A": 0.125,
+        "I": 0.6341,
+        "D": 0.2409,
+        "classCount": 24
+      },
+      {
+        "component": "useradministration",
+        "A": 0.124,
+        "I": 0.1294,
+        "D": 0.7466,
+        "classCount": 121
+      },
+      {
+        "component": "report",
+        "A": 0.6667,
+        "I": 0.3333,
+        "D": 0.0,
+        "classCount": 6
+      },
+      {
+        "component": "template",
+        "A": 0.1154,
+        "I": 0.75,
+        "D": 0.1346,
+        "classCount": 52
+      }
+    ]
+  },
+  "layer": [
+    {
+      "data": {
+        "values": [
+          {
+            "I": 0,
+            "A": 1
+          },
+          {
+            "I": 1,
+            "A": 0
+          }
+        ]
+      },
+      "mark": {
+        "type": "line",
+        "strokeDash": [
+          6,
+          4
+        ],
+        "color": "#888"
+      },
+      "encoding": {
+        "x": {
+          "field": "I",
+          "type": "quantitative"
+        },
+        "y": {
+          "field": "A",
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "circle",
+        "opacity": 0.8
+      },
+      "encoding": {
+        "x": {
+          "field": "I",
+          "type": "quantitative",
+          "title": "Instability (I = Ce / (Ca + Ce))",
+          "scale": {
+            "domain": [
+              0,
+              1
+            ]
+          }
+        },
+        "y": {
+          "field": "A",
+          "type": "quantitative",
+          "title": "Abstractness (A)",
+          "scale": {
+            "domain": [
+              0,
+              1
+            ]
+          }
+        },
+        "size": {
+          "field": "classCount",
+          "type": "quantitative",
+          "title": "classes"
+        },
+        "color": {
+          "field": "D",
+          "type": "quantitative",
+          "title": "Distance",
+          "scale": {
+            "scheme": "orangered"
+          }
+        },
+        "tooltip": [
+          {
+            "field": "component",
+            "type": "nominal"
+          },
+          {
+            "field": "A",
+            "type": "quantitative"
+          },
+          {
+            "field": "I",
+            "type": "quantitative"
+          },
+          {
+            "field": "D",
+            "type": "quantitative"
+          },
+          {
+            "field": "classCount",
+            "type": "quantitative"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "dy": -10,
+        "fontSize": 9
+      },
+      "encoding": {
+        "x": {
+          "field": "I",
+          "type": "quantitative"
+        },
+        "y": {
+          "field": "A",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "component",
+          "type": "nominal"
+        }
+      }
+    }
+  ]
+}

@@ -95,6 +95,8 @@ final class CentersApiResourceSwagger {
             public Boolean active;
             @Schema(example = "Center 1")
             public String name;
+            @Schema(example = "EXT-001")
+            public String externalId;
             @Schema(example = "1")
             public Long officeId;
             @Schema(example = "Head Office")

@@ -139,6 +139,8 @@ final class GroupsApiResourceSwagger {
             public Long id;
             @Schema(example = "AnotherGroup")
             public String name;
+            @Schema(example = "000-1A")
+            public String externalId;
             public GetGroupsStatus status;
             @Schema(example = "false")
             public Boolean active;

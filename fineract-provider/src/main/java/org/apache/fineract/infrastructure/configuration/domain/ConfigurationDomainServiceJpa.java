@@ -635,6 +635,16 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     }
 
     @Override
+    public boolean isBackdatedTransactionsDisallowed() {
+        return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.DISALLOW_BACKDATED_TRANSACTIONS).isEnabled();
+    }
+
+    @Override
+    public Long retrieveBackdatedTransactionsToleranceDays() {
+        return getGlobalConfigurationPropertyData(GlobalConfigurationConstants.DISALLOW_BACKDATED_TRANSACTIONS).getValue();
+    }
+
+    @Override
     public Long getOfficeId() {
         final GlobalConfigurationPropertyData property = getGlobalConfigurationPropertyData(GlobalConfigurationConstants.OFFICE_ID);
         return property.getValue();

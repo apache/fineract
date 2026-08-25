@@ -117,7 +117,7 @@ public class SmsCampaignValidator {
         final Long triggerType = this.fromApiJsonHelper.extractLongNamed(SmsCampaignValidator.triggerType, element);
         baseDataValidator.reset().parameter(SmsCampaignValidator.triggerType).value(triggerType).notNull().integerGreaterThanZero();
 
-        if (triggerType.intValue() == SmsCampaignTriggerType.SCHEDULE.getValue()) {
+        if (triggerType != null && triggerType.intValue() == SmsCampaignTriggerType.SCHEDULE.getValue()) {
 
             final Integer frequencyParam = this.fromApiJsonHelper.extractIntegerWithLocaleNamed(SmsCampaignValidator.frequencyParamName,
                     element);
@@ -143,7 +143,7 @@ public class SmsCampaignValidator {
         baseDataValidator.reset().parameter(SmsCampaignValidator.message).value(message).notBlank().notExceedingLengthOf(480);
 
         final JsonElement paramValueJsonObject = this.fromApiJsonHelper.extractJsonObjectNamed(SmsCampaignValidator.paramValue, element);
-        if (triggerType.intValue() != SmsCampaignTriggerType.TRIGGERED.getValue()) {
+        if (triggerType != null && triggerType.intValue() != SmsCampaignTriggerType.TRIGGERED.getValue()) {
             baseDataValidator.reset().parameter(SmsCampaignValidator.paramValue).value(paramValueJsonObject).notBlank();
             if (paramValueJsonObject != null && paramValueJsonObject.isJsonObject()) {
                 for (Map.Entry<String, JsonElement> entry : paramValueJsonObject.getAsJsonObject().entrySet()) {
@@ -190,7 +190,7 @@ public class SmsCampaignValidator {
         final Long triggerType = this.fromApiJsonHelper.extractLongNamed(SmsCampaignValidator.triggerType, element);
         baseDataValidator.reset().parameter(SmsCampaignValidator.triggerType).value(triggerType).notNull().integerGreaterThanZero();
 
-        if (triggerType.intValue() == SmsCampaignTriggerType.SCHEDULE.getValue()) {
+        if (triggerType != null && triggerType.intValue() == SmsCampaignTriggerType.SCHEDULE.getValue()) {
             if (this.fromApiJsonHelper.parameterExists(SmsCampaignValidator.recurrenceParamName, element)) {
                 final String recurrenceParamName = this.fromApiJsonHelper.extractStringNamed(SmsCampaignValidator.recurrenceParamName,
                         element);
@@ -212,7 +212,7 @@ public class SmsCampaignValidator {
         baseDataValidator.reset().parameter(SmsCampaignValidator.message).value(message).notBlank().notExceedingLengthOf(480);
 
         final JsonElement paramValueJsonObject = this.fromApiJsonHelper.extractJsonObjectNamed(SmsCampaignValidator.paramValue, element);
-        if (triggerType.intValue() != SmsCampaignTriggerType.TRIGGERED.getValue()) {
+        if (triggerType != null && triggerType.intValue() != SmsCampaignTriggerType.TRIGGERED.getValue()) {
             baseDataValidator.reset().parameter(SmsCampaignValidator.paramValue).value(paramValueJsonObject).notBlank();
             if (paramValueJsonObject != null && paramValueJsonObject.isJsonObject()) {
                 for (Map.Entry<String, JsonElement> entry : paramValueJsonObject.getAsJsonObject().entrySet()) {

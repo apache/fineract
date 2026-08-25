@@ -149,6 +149,7 @@ import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingC
 import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanUndoChargeOffEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.loan.WorkingCapitalLoanUndoDisbursalEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.AbstractWorkingCapitalLoanTransactionEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentPostBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanChargeOffTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanDisbursalTransactionBusinessEvent;
@@ -161,6 +162,8 @@ import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.W
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanRepaymentTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanTransactionReversedBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanUndoWrittenOffBusinessEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanWrittenOffBusinessEvent;
 import org.apache.fineract.test.messaging.store.EventStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -1200,6 +1203,29 @@ public class EventCheckHelper {
                 "Charge-off transaction not found");
         workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanChargeOffTransactionBusinessEvent.class, loanId, transaction,
                 expectedAmount, false);
+    }
+
+    public void workingCapitalLoanChargeAdjustmentTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "chargeAdjustment",
+                false, "Charge adjustment transaction not found");
+        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanChargeAdjustmentPostBusinessEvent.class, loanId, transaction,
+                expectedAmount, false);
+    }
+
+    public void workingCapitalLoanWrittenOffTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "writeOff", false,
+                "Write-off transaction not found");
+        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanWrittenOffBusinessEvent.class, loanId, transaction, expectedAmount,
+                false);
+    }
+
+    public void workingCapitalLoanUndoWrittenOffTransactionEventCheck(final Long loanId) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "writeOff", true,
+                "Reversed write-off transaction not found");
+        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanUndoWrittenOffBusinessEvent.class, loanId, transaction, null, true);
     }
 
     public void workingCapitalLoanDiscountFeeAmortizationTransactionEventCheck(final Long loanId, final String transactionDate) {

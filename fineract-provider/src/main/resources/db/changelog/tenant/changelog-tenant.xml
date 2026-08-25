@@ -270,4 +270,6 @@
     <include file="parts/0248_add_dates_to_client_identifier.xml" relativeToChangelogFile="true"/>
     <include file="parts/0249_add_issuance_and_expiry_dates_to_m_document.xml" relativeToChangelogFile="true"/>
     <include file="parts/0250_modify_note_length.xml" relativeToChangelogFile="true" />
+    <include file="parts/0251_add_disallow_backdated_transactions_configuration.xml" relativeToChangelogFile="true" />
+    <include file="parts/0252_trial_balance_summary_update_originator_external_ids.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
