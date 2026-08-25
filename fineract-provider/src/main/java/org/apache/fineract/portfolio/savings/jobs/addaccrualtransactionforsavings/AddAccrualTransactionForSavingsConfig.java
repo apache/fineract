@@ -20,11 +20,10 @@ package org.apache.fineract.portfolio.savings.jobs.addaccrualtransactionforsavin
 
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.savings.service.SavingsAccrualWritePlatformService;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -50,7 +49,7 @@ public class AddAccrualTransactionForSavingsConfig {
     @Bean
     public Job addAccrualTransactionForSavingsJob() {
         return new JobBuilder(JobName.ADD_PERIODIC_ACCRUAL_ENTRIES_FOR_SAVINGS_WITH_INCOME_POSTED_AS_TRANSACTIONS.name(), jobRepository)
-                .start(addAccrualTransactionForSavingsStep()).incrementer(new RunIdIncrementer()).build();
+                .start(addAccrualTransactionForSavingsStep()).build();
     }
 
     @Bean

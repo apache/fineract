@@ -32,10 +32,10 @@ import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.apache.logging.log4j.util.Strings;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -27,7 +27,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.security.service.AuthTenantDetailsService;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.web.filter.OncePerRequestFilter;
 

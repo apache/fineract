@@ -19,10 +19,6 @@
 
 package org.apache.fineract.infrastructure.jobs.filter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,17 +46,16 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.LoanIdsHardLockedException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
 
 @RequiredArgsConstructor
 @Component
 @Conditional(LoanCOBEnabledCondition.class)
-public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher
-        implements WorkingCapitalLoanCOBFilterHelper, InitializingBean {
+public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher implements WorkingCapitalLoanCOBFilterHelper {
 
     private final AbstractAccountLockService<WorkingCapitalLoanAccountLock> loanAccountLockService;
     private final PlatformSecurityContext context;
@@ -68,8 +63,6 @@ public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher
     private final WorkingCapitalLoanRepository loanRepository;
     private final FineractProperties fineractProperties;
     private final WorkingCapitalLoanRetrieveIdService retrieveIdService;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
 
@@ -173,12 +166,14 @@ public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher
         return loanIds.stream().distinct().toList();
     }
 
-    private Long getTopLevelLoanIdFromBatchRequest(BatchRequest batchRequest) throws JsonProcessingException {
+    private Long getTopLevelLoanIdFromBatchRequest(BatchRequest batchRequest) {
         String body = batchRequest.getBody();
         if (StringUtils.isNotBlank(body)) {
             JsonNode jsonNode = objectMapper.readTree(body);
             if (jsonNode.has("loanId")) {
-                return jsonNode.get("loanId").asLong();
+                // the body may hold an unresolved batch reference like "$.loanId"; Jackson 3 asLong() throws on
+                // non-numeric values while Jackson 2 returned 0, so keep the lenient behavior explicitly
+                return jsonNode.get("loanId").asLong(0);
             }
         }
         return null;
@@ -207,11 +202,6 @@ public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher
     @Override
     public void executeInlineCob(List<Long> loanIds) {
         inlineLoanCOBExecutorService.execute(loanIds, WorkingCapitalLoanCOBConstant.INLINE_WORKING_CAPITAL_LOAN_COB_JOB_NAME);
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        objectMapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
     }
 
 }

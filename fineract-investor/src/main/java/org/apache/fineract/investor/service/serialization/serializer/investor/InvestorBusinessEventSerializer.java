@@ -48,7 +48,7 @@ import org.apache.fineract.investor.domain.InvestorBusinessEvent;
 import org.apache.fineract.investor.service.ExternalAssetOwnersReadService;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component

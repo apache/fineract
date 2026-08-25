@@ -18,15 +18,12 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.google.gson.Gson;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.time.LocalDate;
@@ -76,6 +73,9 @@ import org.springframework.dao.NonTransientDataAccessException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @Slf4j
@@ -213,7 +213,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                     }
                 }
             }
-        } catch (final IOException e) {
+        } catch (final JacksonException e) {
             log.error("Failed to parse campaign params while inserting direct campaign into email outbound table for campaign {} ({})",
                     emailCampaign.getId(), emailCampaign.getCampaignName(), e);
         }
@@ -247,7 +247,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                     }
                 }
             }
-        } catch (final IOException e) {
+        } catch (final JacksonException e) {
             log.error("Failed to parse campaign params while inserting direct campaign into email outbound table for campaign {} ({})",
                     campaignId, campaignName, e);
         }
@@ -355,8 +355,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
 
     @SuppressWarnings({ "unused", "rawtypes" })
     @Override
-    public List<HashMap<String, Object>> getRunReportByServiceImpl(final String reportName, final Map<String, String> queryParams)
-            throws IOException {
+    public List<HashMap<String, Object>> getRunReportByServiceImpl(final String reportName, final Map<String, String> queryParams) {
         final String reportType = "report";
 
         List<HashMap<String, Object>> resultList;
@@ -411,7 +410,7 @@ public class EmailCampaignWritePlatformCommandHandlerImpl implements EmailCampai
                     }
                 }
             }
-        } catch (final IOException e) {
+        } catch (final JacksonException e) {
             log.error("Failed to parse campaign params while generating email campaign preview message", e);
         }
 

@@ -18,10 +18,7 @@
  */
 package org.apache.fineract.infrastructure.campaigns.email.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +34,9 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +62,7 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
             LoanTransaction loanTransaction = event.get();
             try {
                 notifyLoanOwner(loanTransaction, "Loan Repayment");
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 log.error("Exception when trying to send triggered email: {}", e.getMessage());
             }
         }
@@ -75,7 +75,7 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
             Loan loan = event.get();
             try {
                 notifyLoanOwner(loan, "Loan Rejected");
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 log.error("Exception when trying to send triggered email: {}", e.getMessage());
             }
         }
@@ -88,13 +88,13 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
             Loan loan = event.get();
             try {
                 notifyLoanOwner(loan, "Loan Approved");
-            } catch (IOException e) {
+            } catch (JacksonException e) {
                 log.error("Exception when trying to send triggered email: {}", e.getMessage());
             }
         }
     }
 
-    private void notifyLoanOwner(LoanTransaction loanTransaction, String paramValue) throws IOException {
+    private void notifyLoanOwner(LoanTransaction loanTransaction, String paramValue) {
         List<EmailCampaign> campaigns = this.retrieveEmailCampaigns(paramValue);
         for (EmailCampaign emailCampaign : campaigns) {
             HashMap<String, String> campaignParams = new ObjectMapper().readValue(emailCampaign.getParamValue(),
@@ -106,7 +106,7 @@ public class EmailCampaignDomainServiceImpl implements EmailCampaignDomainServic
         }
     }
 
-    private void notifyLoanOwner(Loan loan, String paramValue) throws IOException {
+    private void notifyLoanOwner(Loan loan, String paramValue) {
         List<EmailCampaign> campaigns = this.retrieveEmailCampaigns(paramValue);
         for (EmailCampaign emailCampaign : campaigns) {
             HashMap<String, String> campaignParams = new ObjectMapper().readValue(emailCampaign.getParamValue(),

@@ -40,8 +40,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Persistable;
-import org.springframework.lang.NonNull;
 
 public enum JavaType {
 

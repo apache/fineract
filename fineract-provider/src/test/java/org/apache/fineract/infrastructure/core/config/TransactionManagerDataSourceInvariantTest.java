@@ -27,7 +27,7 @@ import org.apache.fineract.infrastructure.core.persistence.TransactionLifecycleC
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
+import org.springframework.boot.transaction.autoconfigure.TransactionManagerCustomizers;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;

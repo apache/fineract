@@ -26,11 +26,11 @@ public interface PropertyService {
 
     Integer getRetryLimit(String jobName);
 
-    Integer getThreadPoolCorePoolSize(String jobName);
-
-    Integer getThreadPoolMaxPoolSize(String jobName);
-
-    Integer getThreadPoolQueueCapacity(String jobName);
+    /**
+     * Maximum number of skipped items tolerated per step execution (per partition). Configured independently of chunk
+     * size; falls back to {@code chunkSize + 1} when not set.
+     */
+    Integer getSkipLimit(String jobName);
 
     Integer getPollInterval(String jobName);
 }

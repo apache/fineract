@@ -87,8 +87,8 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanSchedul
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.apache.fineract.portfolio.loanproduct.domain.InterestRecalculationCompoundingMethod;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.lang.NonNull;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -205,6 +205,11 @@ public class LoanAccrualsProcessingServiceImpl implements LoanAccrualsProcessing
      */
     @Override
     public void reprocessExistingAccruals(@NonNull final Loan loan, final boolean addEvent) {
+        if (loan.getId() == null) {
+            // a not-yet-persisted loan cannot have accrual transactions; also, EclipseLink 5 types a
+            // null entity parameter as VARCHAR, which PostgreSQL rejects against the bigint FK column
+            return;
+        }
         List<LoanTransaction> accrualTransactions = retrieveListOfAccrualTransactions(loan);
         if (!accrualTransactions.isEmpty()) {
             if (loan.isPeriodicAccrualAccountingEnabledOnLoanProduct()) {
