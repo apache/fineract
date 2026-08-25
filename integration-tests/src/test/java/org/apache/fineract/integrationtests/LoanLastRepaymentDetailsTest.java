@@ -22,178 +22,94 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.util.HashMap;
 import java.util.UUID;
-import org.apache.fineract.client.models.DelinquencyBucketResponse;
-import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
-import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class LoanLastRepaymentDetailsTest {
+public class LoanLastRepaymentDetailsTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpecErr400;
-    private ResponseSpecification responseSpecErr503;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
-    private LoanTransactionHelper loanTransactionHelper;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecErr400 = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-    }
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void loanLastRepaymentDetailsTestClosedLoan() {
-        // Loan ExternalId
-        String loanExternalIdStr = UUID.randomUUID().toString();
+        final String loanExternalIdStr = UUID.randomUUID().toString();
+        final Long loanId = createClientWithLoan(loanExternalIdStr);
 
-        // Delinquency Bucket
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
-        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
+        makeLoanRepayment(loanExternalIdStr, repaymentOf("5 September 2022", 500.0));
 
-        // Client and Loan account creation
-
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                delinquencyBucketId);
-        assertNotNull(getLoanProductsProductResponse);
-
-        final Integer loanId = createLoanAccount(clientId, getLoanProductsProductResponse.getId(), loanExternalIdStr);
-
-        // make Repayments
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("5 September 2022").locale("en")
-                        .transactionAmount(500.0));
-
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
-
-        // verify loan is active and last repayment details
-        LocalDate lastRepaymentDate_1 = LocalDate.of(2022, 9, 5);
-        assertNotNull(loanDetails);
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
         assertTrue(loanDetails.getStatus().getActive());
-        assertNotNull(loanDetails.getDelinquent());
-        assertNotNull(loanDetails.getDelinquent().getLastRepaymentAmount());
-        assertEquals(500.00, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
-        assertNotNull(loanDetails.getDelinquent().getLastRepaymentDate());
-        assertEquals(loanDetails.getDelinquent().getLastRepaymentDate(), lastRepaymentDate_1);
+        verifyLastRepayment(loanDetails, 500.00, LocalDate.of(2022, 9, 5));
 
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("6 September 2022").locale("en")
-                        .transactionAmount(500.0));
+        makeLoanRepayment(loanExternalIdStr, repaymentOf("6 September 2022", 500.0));
 
-        // verify loan is closed and last repayment details
-
-        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
-
-        LocalDate lastRepaymentDate_2 = LocalDate.of(2022, 9, 6);
-        assertNotNull(loanDetails);
+        loanDetails = getLoanDetails(loanId);
         assertTrue(loanDetails.getStatus().getClosedObligationsMet());
-        assertNotNull(loanDetails.getDelinquent());
-        assertNotNull(loanDetails.getDelinquent().getLastRepaymentAmount());
-        assertEquals(500.00, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
-        assertNotNull(loanDetails.getDelinquent().getLastRepaymentDate());
-        assertEquals(loanDetails.getDelinquent().getLastRepaymentDate(), lastRepaymentDate_2);
-
+        verifyLastRepayment(loanDetails, 500.00, LocalDate.of(2022, 9, 6));
     }
 
     @Test
     public void loanLastRepaymentDetailsTestOverpaidLoan() {
-        // Loan ExternalId
-        String loanExternalIdStr = UUID.randomUUID().toString();
+        final String loanExternalIdStr = UUID.randomUUID().toString();
+        final Long loanId = createClientWithLoan(loanExternalIdStr);
 
-        // Delinquency Bucket
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
-        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
+        makeLoanRepayment(loanExternalIdStr, repaymentOf("5 September 2022", 500.0));
 
-        // Client and Loan account creation
-
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                delinquencyBucketId);
-        assertNotNull(getLoanProductsProductResponse);
-
-        final Integer loanId = createLoanAccount(clientId, getLoanProductsProductResponse.getId(), loanExternalIdStr);
-
-        // make Repayments
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("5 September 2022").locale("en")
-                        .transactionAmount(500.0));
-
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
-
-        // verify loan is active and last repayment details
-        LocalDate lastRepaymentDate_1 = LocalDate.of(2022, 9, 5);
-        assertNotNull(loanDetails);
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
         assertTrue(loanDetails.getStatus().getActive());
-        assertNotNull(loanDetails.getDelinquent());
-        assertNotNull(loanDetails.getDelinquent().getLastRepaymentAmount());
-        assertEquals(500.00, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
-        assertNotNull(loanDetails.getDelinquent().getLastRepaymentDate());
-        assertEquals(loanDetails.getDelinquent().getLastRepaymentDate(), lastRepaymentDate_1);
+        verifyLastRepayment(loanDetails, 500.00, LocalDate.of(2022, 9, 5));
 
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("6 September 2022").locale("en")
-                        .transactionAmount(600.0));
+        makeLoanRepayment(loanExternalIdStr, repaymentOf("6 September 2022", 600.0));
 
-        // verify loan is overpaid and last repayment details
-        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
-
-        LocalDate lastRepaymentDate_2 = LocalDate.of(2022, 9, 6);
-        assertNotNull(loanDetails);
+        loanDetails = getLoanDetails(loanId);
         assertTrue(loanDetails.getStatus().getOverpaid());
+        verifyLastRepayment(loanDetails, 600.00, LocalDate.of(2022, 9, 6));
+    }
+
+    private Long createClientWithLoan(final String loanExternalIdStr) {
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
+
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct(new LoanProductTestBuilder().buildRequest(null, delinquencyBucketId));
+        assertNotNull(loanProductId);
+
+        return createLoanAccount(clientId, loanProductId, loanExternalIdStr);
+    }
+
+    private void verifyLastRepayment(final GetLoansLoanIdResponse loanDetails, final Double expectedAmount, final LocalDate expectedDate) {
+        assertNotNull(loanDetails);
         assertNotNull(loanDetails.getDelinquent());
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentAmount());
-        assertEquals(600.00, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
+        assertEquals(expectedAmount, Utils.getDoubleValue(loanDetails.getDelinquent().getLastRepaymentAmount()));
         assertNotNull(loanDetails.getDelinquent().getLastRepaymentDate());
-        assertEquals(loanDetails.getDelinquent().getLastRepaymentDate(), lastRepaymentDate_2);
-
+        assertEquals(expectedDate, loanDetails.getDelinquent().getLastRepaymentDate());
     }
 
-    private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Long delinquencyBucketId) {
-        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().build(null, delinquencyBucketId);
-        final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
-        return loanTransactionHelper.getLoanProduct(loanProductId);
-    }
+    private Long createLoanAccount(final Long clientId, final Long loanProductId, final String externalId) {
+        final PostLoansRequest application = LoanRequestBuilders.applyLoan(clientId, loanProductId, "01 September 2022", 1000.0, 1)//
+                .expectedDisbursementDate("03 September 2022")//
+                .interestType(LoanTestData.InterestType.FLAT)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .externalId(externalId);
 
-    private Integer createLoanAccount(final Integer clientID, final Long loanProductID, final String externalId) {
-
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
-                .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
-
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan("02 September 2022", "1000", loanId, null);
-        loanTransactionHelper.disburseLoanWithNetDisbursalAmount("03 September 2022", loanId, "1000");
+        final Long loanId = loanHelper.applyForLoan(application).getLoanId();
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "02 September 2022"));
+        disburseLoan(loanId, "03 September 2022", 1000.0);
         return loanId;
+    }
+
+    private PostLoansLoanIdTransactionsRequest repaymentOf(final String transactionDate, final Double amount) {
+        return new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN).transactionDate(transactionDate)
+                .locale(LoanTestData.LOCALE).transactionAmount(amount);
     }
 }
