@@ -23,12 +23,21 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.GetGroupsGroupIdResponse;
+import org.apache.fineract.client.models.PostGroupsRequest;
+import org.apache.fineract.client.models.PostGroupsResponse;
+import org.apache.fineract.client.util.Calls;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.common.FineractClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.junit.jupiter.api.BeforeAll;
@@ -70,6 +79,46 @@ public class GroupTest extends FeignLoanTestBase {
         final String updatedGroupName = Utils.uniqueRandomStringGenerator("Group-", 5);
         groupHelper.updateGroup(groupId, updatedGroupName);
         assertEquals(updatedGroupName, groupHelper.retrieveGroup(groupId).getName(), "ERROR IN UPDATING THE GROUP NAME");
+    }
+
+    @Test
+    public void testGroupCreationWithoutExternalIdGeneratesOne() {
+        final GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
+        globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
+        try {
+            final PostGroupsRequest request = groupRequest(null);
+            final PostGroupsResponse response = Calls.ok(FineractClientHelper.getFineractClient().groups.createGroup(request));
+
+            final GetGroupsGroupIdResponse group = Calls
+                    .ok(FineractClientHelper.getFineractClient().groups.retrieveOneGroup(response.getGroupId(), false, null));
+            assertThat(group.getExternalId()).isNotBlank();
+            assertNotEquals("null", group.getExternalId());
+        } finally {
+            globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, false);
+        }
+    }
+
+    @Test
+    public void testGroupCreationWithExternalIdIsPersisted() {
+        final String externalId = UUID.randomUUID().toString();
+        final PostGroupsRequest request = groupRequest(externalId);
+        final PostGroupsResponse response = Calls.ok(FineractClientHelper.getFineractClient().groups.createGroup(request));
+
+        final GetGroupsGroupIdResponse group = Calls
+                .ok(FineractClientHelper.getFineractClient().groups.retrieveOneGroup(response.getGroupId(), false, null));
+        assertThat(group.getExternalId()).isEqualTo(externalId);
+    }
+
+    private static PostGroupsRequest groupRequest(final String externalId) {
+        final PostGroupsRequest request = new PostGroupsRequest();
+        request.officeId(1L);
+        request.name(GroupHelper.randomNameGenerator("Group_Name_", 5));
+        request.externalId(externalId);
+        request.active(true);
+        request.activationDate("04 March 2011");
+        request.dateFormat("dd MMMM yyyy");
+        request.locale("en");
+        return request;
     }
 
     @Test
