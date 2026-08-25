@@ -1,12 +1,69 @@
 = Validation
 
-TBD
+The legacy command path performed input validation inside the business logic services: each service injected a `DataValidatorBuilder`, walked the parsed JSON blob, and checked field presence, length and numeric ranges by hand. The checks were long, tedious to read, and effectively impossible to test in isolation from the surrounding service.
 
-Jakarta Validation...
+The new framework pushes validation out to the REST API boundary using https://jakarta.ee/specifications/bean-validation/[Jakarta Bean Validation] (Hibernate Validator as the implementation). The handler never sees an invalid payload — a request that fails validation never reaches the method body, and the framework returns the violations to the client as a `400 Bad Request` with the violated field names and resolved messages in the response body.
 
-.Validation Messages
+== Wiring
+
+Annotating the request parameter with `@Valid` on the JAX-RS method is the entire wiring step.
+
+.`@Valid` triggers the validator chain
+[source,java]
+----
+public StaffCreateResponse createStaff(
+        @RequestBody(required = true) @Valid StaffCreateRequest request) {
+    return dispatcher.dispatch(toCommand(request)).get();
+}
+----
+
+The DTO owns the constraints. Conventions carry over from xref:refactoring.adoc[the refactoring guide]: Lombok, `Serializable`, `serialVersionUID = 1L`, no records. URL-derived fields (`entityId`, path variables) stay on the DTO but carry `@Hidden` so they don't surface in OpenAPI.
+
+== Field-level constraints
+
+The annotations we tend to reach for cover almost every real case: `@NotNull`, `@NotBlank`, `@Positive` / `@PositiveOrZero`, `@Length(max = ...)` for strings (Hibernate Validator — it generates a nicer message key than Jakarta's `@Size`), `@Pattern` for simple format rules, and `@Valid` to cascade into a nested DTO.
+
+.Required-and-bounded string
+[source,java]
+----
+@NotNull(message = "{org.apache.fineract.organisation.staff.firstname.not-null}")
+@Length(max = 50, message = "{org.apache.fineract.organisation.staff.firstname.max}")
+private String firstname;
+----
+
+The `message` attribute never contains English prose — it holds a key, in `{braces}`, which Hibernate Validator resolves from the message bundle. This keeps the DTOs translatable and keeps the English wording in a single file.
+
+.Format rules go on `@Pattern`
+[source,java]
+----
+@Length(max = 50, message = "{org.apache.fineract.organisation.staff.mobile-no.max}")
+@Pattern(regexp = "^\\+?[0-9]{7,15}$",
+         message = "{org.apache.fineract.organisation.staff.mobile-no.invalid}")
+private String mobileNo;
+----
+
+See `StaffCreateRequest` in the staff module for a complete DTO that uses this pattern across seven fields.
+
+== Message keys
+
+Every message string lives in `fineract-validation/src/main/resources/ValidationMessages.properties`. The convention is `{package}.{entity}.{field}.{constraint}`, all lowercase, dashes for word boundaries, matching the fully-qualified package of the DTO.
+
 [source,properties]
 ----
-include::{rootdir}/fineract-validation/src/main/resources/ValidationMessages.properties[]
+org.apache.fineract.organisation.staff.firstname.not-null=The parameter 'firstname' is mandatory
+org.apache.fineract.organisation.staff.firstname.max=The parameter 'firstname' exceeds the maximum size of {max} characters
 ----
 
+Hibernate Validator substitutes `{max}` from the annotation value, so a single key covers every length constraint on that field. Keep the English wording aligned with the existing entries — the file reads as a dictionary, and inconsistent phrasing is a surprise for the next contributor who greps it.
+
+== Custom constraints
+
+When a rule doesn't fit a built-in annotation — cross-field validation, a lookup, a specific business shape — add a custom annotation and `ConstraintValidator` under the module's `validation` sub-package (see xref:refactoring.adoc[the refactoring guide] for the package layout). `StaffForceStatusValidator` in the staff module is a worked example. Keep custom constraints focused on the *shape* of the request. Business invariants (uniqueness, state-machine transitions, authorization) belong in the service layer, not here.
+
+NOTE: The legacy `DataValidatorBuilder` still exists because most un-migrated endpoints depend on it. New code paths should not use it.
+
+== Related
+
+* xref:refactoring.adoc[Refactoring guide] — DTO and package conventions
+* xref:idempotency.adoc[Command Idempotency] — the companion handler-side chapter
+* xref:observability.adoc[Command Observability] — what goes in the log when validation fails
