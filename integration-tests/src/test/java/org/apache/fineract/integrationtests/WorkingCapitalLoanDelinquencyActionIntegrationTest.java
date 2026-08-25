@@ -40,6 +40,8 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActio
 import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActionResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
+import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalEventHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
@@ -58,9 +60,12 @@ public class WorkingCapitalLoanDelinquencyActionIntegrationTest {
 
     private static final int PERIOD_FREQUENCY_DAYS = 30;
     private static final String OVERLAP_ERROR_MESSAGE = "Delinquency pause period cannot overlap with another pause period";
+    private static final String WC_DELINQUENCY_PAUSE_EVENT = "WorkingCapitalLoanDelinquencyPauseBusinessEvent";
 
     private final WorkingCapitalLoanHelper applicationHelper = new WorkingCapitalLoanHelper();
     private final WorkingCapitalLoanProductHelper productHelper = new WorkingCapitalLoanProductHelper();
+    private final FeignExternalEventHelper externalEventHelper = new FeignExternalEventHelper(
+            FineractFeignClientHelper.getFineractFeignClient());
 
     /**
      * Happy path: activate loan -> initial range period generated -> POST pause -> periods shifted by pause duration ->
@@ -108,6 +113,35 @@ public class WorkingCapitalLoanDelinquencyActionIntegrationTest {
         assertEquals(WorkingCapitalLoanDelinquencyActionData.ActionEnum.PAUSE, actions.getFirst().getAction());
         assertEquals(pauseStart, actions.getFirst().getStartDate());
         assertEquals(pauseEnd, actions.getFirst().getEndDate());
+    }
+
+    /**
+     * A pause action should publish a WorkingCapitalLoanDelinquencyPauseBusinessEvent for the loan.
+     */
+    @Test
+    public void testCreatePausePublishesExternalBusinessEvent() {
+        externalEventHelper.enableBusinessEvent(WC_DELINQUENCY_PAUSE_EVENT);
+        try {
+            final Long bucketId = createWorkingCapitalLoanDelinquencyBucket(PERIOD_FREQUENCY_DAYS);
+            final Long productId = createProduct(bucketId);
+            final Long clientId = createClient();
+            final Long loanId = submitAndApproveLoan(clientId, productId);
+
+            final LocalDate disbursementDate = LocalDate.now(ZoneId.systemDefault()).minusDays(5);
+            WorkingCapitalLoanDelinquencyActionHelper.activateLoan(loanId, disbursementDate);
+
+            externalEventHelper.deleteAllExternalEvents();
+            WorkingCapitalLoanDelinquencyActionHelper.createDelinquencyAction(loanId, "pause", disbursementDate,
+                    disbursementDate.plusDays(10));
+
+            final List<ExternalEventResponse> events = externalEventHelper.getExternalEventsByType(WC_DELINQUENCY_PAUSE_EVENT);
+            final ExternalEventResponse event = events.stream().filter(e -> loanId.equals(e.getAggregateRootId())).findFirst().orElse(null);
+            assertNotNull(event, "Expected delinquency pause external event for loan");
+            assertEquals(WC_DELINQUENCY_PAUSE_EVENT, event.getType());
+            assertEquals(loanId, event.getAggregateRootId());
+        } finally {
+            externalEventHelper.disableBusinessEvent(WC_DELINQUENCY_PAUSE_EVENT);
+        }
     }
 
     /**
