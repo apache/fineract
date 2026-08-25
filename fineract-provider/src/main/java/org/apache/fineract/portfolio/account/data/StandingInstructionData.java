@@ -40,31 +40,25 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
  * Immutable data object representing a savings account.
  */
 @SuppressWarnings("unused")
+@Getter
 public final class StandingInstructionData {
 
-    @Getter
     private final Long id;
-    @Getter
     private final Long accountDetailId;
-    @Getter
     private final String name;
     private final OfficeData fromOffice;
-    @Getter
     private final ClientData fromClient;
     // Jackson serialization: Explicit getter exposes EnumOptionData object {id, code, value} instead of domain enum
     // string
     @Getter
     private final EnumOptionData fromAccountType;
-    @Getter
     private final PortfolioAccountData fromAccount;
     private final OfficeData toOffice;
-    @Getter
     private final ClientData toClient;
     // Jackson serialization: Explicit getter exposes EnumOptionData object {id, code, value} instead of domain enum
     // string
     @Getter
     private final EnumOptionData toAccountType;
-    @Getter
     private final PortfolioAccountData toAccount;
     @Getter
     private final EnumOptionData transferType;
@@ -74,11 +68,8 @@ public final class StandingInstructionData {
     // string
     @Getter
     private final EnumOptionData instructionType;
-    @Getter
     private final EnumOptionData status;
-    @Getter
     private final BigDecimal amount;
-    @Getter
     private final LocalDate validFrom;
     @Getter
     private final LocalDate validTill;
@@ -86,7 +77,6 @@ public final class StandingInstructionData {
     private final EnumOptionData recurrenceType;
     @Getter
     private final EnumOptionData recurrenceFrequency;
-    @Getter
     private final Integer recurrenceInterval;
     private final MonthDay recurrenceOnMonthDay;
     private final Page<AccountTransferData> transactions;
@@ -346,4 +336,11 @@ public final class StandingInstructionData {
         return transferType;
     }
 
+    public Collection<EnumOptionData> getRecurrenceFrequencyOptions() {
+        if (this.recurrenceFrequencyOptions == null) {
+            return null;
+        }
+        return this.recurrenceFrequencyOptions.stream().filter(option -> option.getId() != null && option.getId() < 4)
+                .collect(java.util.stream.Collectors.toList());
+    }
 }
