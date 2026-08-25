@@ -209,7 +209,7 @@ allprojects  {
                     "SameNameButDifferent", // Until errorprone recognizes Lombok
                     "MultiVariableDeclaration", // Until errorprone recognizes Lombok
                     "UnnecessaryDefaultInEnumSwitch", // FINERACT-1911
-                    "StringConcatToTextBlock", // Error Prone 2.49.0 crashes on JDK 21, raised issue: https://github.com/google/error-prone/issues/5815
+                    "StringConcatToTextBlock", // Error Prone 2.49.0 crashes on JDK 25, raised issue: https://github.com/google/error-prone/issues/5815
                     "AssertEqualsArgumentOrderChecker",
                     "RemoveUnusedImports"  // For generated code
             )
@@ -397,7 +397,7 @@ configure(project.fineractJavaProjects) {
 
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(21)
+            languageVersion = JavaLanguageVersion.of(25)
         }
         withSourcesJar()
         withJavadocJar()
@@ -444,8 +444,8 @@ configure(project.fineractJavaProjects) {
     configurations.named('spotbugs').configure {
         resolutionStrategy.eachDependency {
             if (it.requested.group == 'org.ow2.asm') {
-                it.useVersion '9.5'
-                it.because "Asm 9.5 is required for JDK 21 support"
+                it.useVersion '9.8'
+                it.because "Asm 9.8 is required for JDK 25 support"
             }
         }
     }

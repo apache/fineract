@@ -319,7 +319,7 @@ This is the default execution mode. Performance is to be expected on par with th
 
 2. **Skip**: Async Execution
 
-Already included in the current implementation. Just needs a proper **configuration** in **application.properties** (see unit tests). One thing that might need some additional coding: the use of **thread local variables in multi threaded environments** needs some special care to properly work (we use this to identify the current tenant). Also: we should upgrade to JDK 21 and make use of virtual threads (very easy in Spring Boot, simple configuration property). This allows for massive parallel execution that is not bound by physical CPU cores without (take this with a pinch of salt) performance penalties (read: use millions of threads).
+Already included in the current implementation. Just needs a proper **configuration** in **application.properties** (see unit tests). One thing that might need some additional coding: the use of **thread local variables in multi threaded environments** needs some special care to properly work (we use this to identify the current tenant). Also: we should upgrade to JDK 25 and make use of virtual threads (very easy in Spring Boot, simple configuration property). This allows for massive parallel execution that is not bound by physical CPU cores without (take this with a pinch of salt) performance penalties (read: use millions of threads).
 
 3. **Skip**: Non-blocking Execution
 

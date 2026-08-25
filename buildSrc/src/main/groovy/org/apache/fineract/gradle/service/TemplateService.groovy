@@ -26,7 +26,7 @@ import freemarker.template.TemplateExceptionHandler
 import org.apache.fineract.gradle.FineractPluginExtension
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-
+import java.io.Reader;
 import java.nio.charset.Charset
 
 class TemplateService {
@@ -63,7 +63,7 @@ class TemplateService {
             template = new Template("template", new FileReader(new File(params.templateFile), Charset.forName("UTF-8")), this.config)
         }
         if(params.template) {
-            template = new Template("template", new StringReader(params.template), this.config)
+            template = new Template("template", Reader.of(params.template), this.config)
         }
 
         if(template) {
