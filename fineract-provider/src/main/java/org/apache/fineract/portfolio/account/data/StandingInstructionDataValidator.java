@@ -183,9 +183,9 @@ public class StandingInstructionDataValidator {
         }
 
         String errorCode = null;
-        AccountTransferType accountTransferType = AccountTransferType.fromInt(transferType);
         final Integer fromAccountType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(fromAccountTypeParamName, element);
-        if (fromAccountType != null && toAccountType != null) {
+        if (transferType != null && fromAccountType != null && toAccountType != null) {
+            AccountTransferType accountTransferType = AccountTransferType.fromInt(transferType);
             PortfolioAccountType fromPortfolioAccountType = PortfolioAccountType.fromInt(fromAccountType);
             PortfolioAccountType toPortfolioAccountType = PortfolioAccountType.fromInt(toAccountType);
             if (accountTransferType.isAccountTransfer() && (PortfolioAccountType.LOAN.equals(fromPortfolioAccountType)

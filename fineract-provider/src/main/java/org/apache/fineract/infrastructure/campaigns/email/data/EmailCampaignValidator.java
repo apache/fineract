@@ -106,7 +106,7 @@ public class EmailCampaignValidator {
         final Long campaignType = this.fromApiJsonHelper.extractLongNamed(EmailCampaignValidator.campaignType, element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.campaignType).value(campaignType).notNull().integerGreaterThanZero();
 
-        if (campaignType.intValue() == EmailCampaignType.SCHEDULE.getValue()) {
+        if (campaignType != null && campaignType.intValue() == EmailCampaignType.SCHEDULE.getValue()) {
             final String recurrenceParamName = this.fromApiJsonHelper.extractStringNamed(EmailCampaignValidator.recurrenceParamName,
                     element);
             baseDataValidator.reset().parameter(EmailCampaignValidator.recurrenceParamName).value(recurrenceParamName).notBlank();
@@ -157,7 +157,7 @@ public class EmailCampaignValidator {
         final Long campaignType = this.fromApiJsonHelper.extractLongNamed(EmailCampaignValidator.campaignType, element);
         baseDataValidator.reset().parameter(EmailCampaignValidator.campaignType).value(campaignType).notNull().integerGreaterThanZero();
 
-        if (campaignType.intValue() == EmailCampaignType.SCHEDULE.getValue()) {
+        if (campaignType != null && campaignType.intValue() == EmailCampaignType.SCHEDULE.getValue()) {
             final String recurrenceParamName = this.fromApiJsonHelper.extractStringNamed(EmailCampaignValidator.recurrenceParamName,
                     element);
             baseDataValidator.reset().parameter(EmailCampaignValidator.recurrenceParamName).value(recurrenceParamName).notBlank();
