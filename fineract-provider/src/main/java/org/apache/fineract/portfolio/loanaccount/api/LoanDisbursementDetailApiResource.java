@@ -69,8 +69,9 @@ public class LoanDisbursementDetailApiResource {
     @Path("{disbursementId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
+    @RequestBody(required = true, content = @Content(schema = @Schema(implementation = LoanDisbursementDetailApiResourceSwagger.PutLoansLoanIdDisbursementsDisbursementIdRequest.class)))
     public CommandProcessingResult updateDisbursementDate(@PathParam("loanId") final Long loanId,
-            @PathParam("disbursementId") final Long disbursementId, final String apiRequestBodyAsJson) {
+            @PathParam("disbursementId") final Long disbursementId, @Parameter(hidden = true) final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDisbusementDate(loanId, disbursementId)
                 .withJson(apiRequestBodyAsJson).build();

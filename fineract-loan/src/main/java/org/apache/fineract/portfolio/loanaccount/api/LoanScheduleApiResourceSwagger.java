@@ -19,6 +19,8 @@
 package org.apache.fineract.portfolio.loanaccount.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -32,6 +34,59 @@ final class LoanScheduleApiResourceSwagger {
     public static final class PostLoansLoanIdScheduleRequest {
 
         private PostLoansLoanIdScheduleRequest() {}
+
+        @Schema(description = "The installment changes to apply to the repayment schedule")
+        public static final class PostLoansLoanIdScheduleExceptions {
+
+            private PostLoansLoanIdScheduleExceptions() {}
+
+            @Schema(description = "Installments whose due date, principal or instalment amount changes")
+            public List<PostLoansLoanIdScheduleModifiedInstallment> modifiedinstallments;
+            @Schema(description = "Installments added to the schedule")
+            public List<PostLoansLoanIdScheduleNewInstallment> newinstallments;
+            @Schema(description = "Installments removed from the schedule")
+            public List<PostLoansLoanIdScheduleDeletedInstallment> deletedinstallments;
+        }
+
+        static final class PostLoansLoanIdScheduleModifiedInstallment {
+
+            private PostLoansLoanIdScheduleModifiedInstallment() {}
+
+            @Schema(example = "20 November 2011")
+            public String dueDate;
+            @Schema(example = "25 November 2011")
+            public String modifiedDueDate;
+            @Schema(example = "5000")
+            public BigDecimal principal;
+            @Schema(example = "30000")
+            public BigDecimal installmentAmount;
+        }
+
+        static final class PostLoansLoanIdScheduleNewInstallment {
+
+            private PostLoansLoanIdScheduleNewInstallment() {}
+
+            @Schema(example = "31 October 2011")
+            public String dueDate;
+            @Schema(example = "5000")
+            public BigDecimal principal;
+            @Schema(example = "5000")
+            public BigDecimal installmentAmount;
+        }
+
+        static final class PostLoansLoanIdScheduleDeletedInstallment {
+
+            private PostLoansLoanIdScheduleDeletedInstallment() {}
+
+            @Schema(example = "20 December 2011")
+            public String dueDate;
+        }
+
+        @Schema(example = "en")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        public PostLoansLoanIdScheduleExceptions exceptions;
     }
 
     @Schema(description = "PostLoansLoanIdScheduleResponse")
@@ -47,8 +102,35 @@ final class LoanScheduleApiResourceSwagger {
             public List<Long> removedEntityIds;
         }
 
+        @Schema(description = "A period of the schedule the calculateLoanSchedule command returns")
+        static final class PostLoansLoanIdSchedulePeriod {
+
+            private PostLoansLoanIdSchedulePeriod() {}
+
+            @Schema(example = "1")
+            public Integer period;
+            @Schema(example = "[2011, 10, 20]")
+            public LocalDate dueDate;
+            @Schema(example = "[2011, 9, 20]")
+            public LocalDate fromDate;
+            @Schema(example = "34675.47")
+            public BigDecimal principalDue;
+            @Schema(example = "34675.47")
+            public BigDecimal principalOriginalDue;
+            @Schema(example = "1972.60")
+            public BigDecimal interestOriginalDue;
+            @Schema(example = "36648.07")
+            public BigDecimal totalOriginalDueForPeriod;
+            @Schema(example = "36648.07")
+            public BigDecimal totalDueForPeriod;
+            @Schema(example = "36648.07")
+            public BigDecimal totalOutstandingForPeriod;
+        }
+
         @Schema(example = "1")
         public Long loanId;
         public PostLoanChanges changes;
+        @Schema(description = "Returned by the calculateLoanSchedule command: the schedule the variations produce")
+        public List<PostLoansLoanIdSchedulePeriod> periods;
     }
 }

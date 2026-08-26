@@ -1256,8 +1256,8 @@ final class LoansApiResourceSwagger {
         public GetLoansLoanIdRepaymentSchedule repaymentSchedule;
         @Schema(description = "Set of GetLoansLoanIdTransactions")
         public List<GetLoansLoanIdTransactions> transactions;
-        @Schema(description = "Set of GetLoansLoanIdDisbursementDetails")
-        public Set<GetLoansLoanIdDisbursementDetails> disbursementDetails;
+        @Schema(description = "List of GetLoansLoanIdDisbursementDetails")
+        public List<GetLoansLoanIdDisbursementDetails> disbursementDetails;
         @Schema(example = "false", description = "Allow full term length for each tranche disbursement")
         public Boolean allowFullTermForTranche;
         @Schema(description = "Delinquent data")
