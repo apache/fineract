@@ -1057,18 +1057,17 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         });
     }
 
-    protected Integer getLoanProductId(PostLoanProductsRequest request) {
-        return createLoanProduct(request).intValue();
+    protected Long getLoanProductId(PostLoanProductsRequest request) {
+        return createLoanProduct(request);
     }
 
-    protected PostLoansResponse applyForLoanApplication(Integer clientId, Integer loanProductId, String externalId) {
+    protected PostLoansResponse applyForLoanApplication(Long clientId, Long loanProductId, String externalId) {
         return applyForLoanApplication(clientId, loanProductId, externalId, null);
     }
 
-    protected PostLoansResponse applyForLoanApplication(Integer clientId, Integer loanProductId, String externalId, String linkAccountId) {
+    protected PostLoansResponse applyForLoanApplication(Long clientId, Long loanProductId, String externalId, String linkAccountId) {
         PostLoansRequest request = LoanRequestBuilders
-                .legacyIndividualApplication(clientId.longValue(), loanProductId.longValue(), "1000", 1, BigDecimal.ZERO,
-                        "03 September 2022")
+                .legacyIndividualApplication(clientId, loanProductId, "1000", 1, BigDecimal.ZERO, "03 September 2022")
                 .submittedOnDate("01 September 2022")//
                 .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
                 .inArrearsTolerance(new BigDecimal("1001"))//
@@ -1079,10 +1078,8 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         return applyForLoanResponse(request);
     }
 
-    /** Mirrors the old JSON path, which returned only an id and then read the external id back. */
     protected PostLoansResponse applyForLoanResponse(PostLoansRequest request) {
-        Long loanId = applyForLoan(request);
-        return new PostLoansResponse().resourceId(loanId).resourceExternalId(getLoanDetails(loanId).getExternalId());
+        return loanHelper.applyForLoan(request);
     }
 
     protected PostLoansLoanIdResponse disburseLoan(String date, Integer loanId, String transactionAmount, String externalId) {
