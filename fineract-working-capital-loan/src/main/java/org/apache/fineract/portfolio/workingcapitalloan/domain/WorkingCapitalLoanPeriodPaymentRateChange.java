@@ -59,7 +59,7 @@ public class WorkingCapitalLoanPeriodPaymentRateChange extends AbstractAuditable
     @Column(name = "reversed_on_date")
     private LocalDate reversedOnDate;
 
-    @Column(name = "submitted_on_date")
+    @Column(name = "submitted_on_date", nullable = false)
     private LocalDate submittedOnDate;
 
     @Version
