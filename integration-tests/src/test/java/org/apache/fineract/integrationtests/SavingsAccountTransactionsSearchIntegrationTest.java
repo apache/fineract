@@ -25,11 +25,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.fineract.client.feign.services.SavingsAccountTransactionsApi.SearchSavingsAccountTransactionsQueryParams;
 import org.apache.fineract.client.models.GetSavingsAccountTransactionsPageItem;
 import org.apache.fineract.client.models.PostSavingsProductsResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
@@ -72,7 +71,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest extends FeignSaving
         deposit(savingsId, "300", startDate);
 
         TransactionSearchRequest searchParameters = new TransactionSearchRequest().fromAmount(BigDecimal.valueOf(100));
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, null, null);
+        SearchSavingsAccountTransactionsQueryParams queryParams = buildTransactionsSearchQuery(searchParameters, null, null);
         SavingsAccountTransactionsSearchResponse transactionsResponse = savingsTransactionHelper.searchTransactions(savingsId, queryParams);
 
         assertNotNull(transactionsResponse);
@@ -92,7 +91,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest extends FeignSaving
 
         TransactionSearchRequest searchParameters = new TransactionSearchRequest().fromAmount(BigDecimal.valueOf(100))
                 .toAmount(BigDecimal.valueOf(200));
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, null, null);
+        SearchSavingsAccountTransactionsQueryParams queryParams = buildTransactionsSearchQuery(searchParameters, null, null);
         SavingsAccountTransactionsSearchResponse transactionsResponse = savingsTransactionHelper.searchTransactions(savingsId, queryParams);
 
         assertNotNull(transactionsResponse);
@@ -113,7 +112,8 @@ public class SavingsAccountTransactionsSearchIntegrationTest extends FeignSaving
 
         TransactionSearchRequest searchParameters = new TransactionSearchRequest()
                 .fromDate(firstDepositDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE).toDate(withdrawDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        SearchSavingsAccountTransactionsQueryParams queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT,
+                DEFAULT_LOCALE);
         SavingsAccountTransactionsSearchResponse transactionsResponse = savingsTransactionHelper.searchTransactions(savingsId, queryParams);
 
         assertNotNull(transactionsResponse);
@@ -147,7 +147,8 @@ public class SavingsAccountTransactionsSearchIntegrationTest extends FeignSaving
         TransactionSearchRequest searchParameters = new TransactionSearchRequest()
                 .fromSubmittedDate(submittedDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE)
                 .toSubmittedDate(submittedDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        SearchSavingsAccountTransactionsQueryParams queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT,
+                DEFAULT_LOCALE);
         SavingsAccountTransactionsSearchResponse transactionsResponse = savingsTransactionHelper.searchTransactions(savingsId, queryParams);
 
         assertNotNull(transactionsResponse);
@@ -170,7 +171,8 @@ public class SavingsAccountTransactionsSearchIntegrationTest extends FeignSaving
 
         int typeD = SavingsAccountTransactionType.DEPOSIT.getId();
         TransactionSearchRequest searchParameters = new TransactionSearchRequest().types(String.valueOf(typeD));
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        SearchSavingsAccountTransactionsQueryParams queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT,
+                DEFAULT_LOCALE);
         SavingsAccountTransactionsSearchResponse transactionsResponse = savingsTransactionHelper.searchTransactions(savingsId, queryParams);
 
         assertNotNull(transactionsResponse);
@@ -199,7 +201,8 @@ public class SavingsAccountTransactionsSearchIntegrationTest extends FeignSaving
         int typeD = SavingsAccountTransactionType.DEPOSIT.getId();
         int typeW = SavingsAccountTransactionType.WITHDRAWAL.getId();
         TransactionSearchRequest searchParameters = new TransactionSearchRequest().types(String.valueOf(typeD) + ',' + typeW);
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        SearchSavingsAccountTransactionsQueryParams queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT,
+                DEFAULT_LOCALE);
         SavingsAccountTransactionsSearchResponse transactionsResponse = savingsTransactionHelper.searchTransactions(savingsId, queryParams);
 
         assertNotNull(transactionsResponse);
@@ -224,7 +227,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest extends FeignSaving
         withdraw(savingsId, "100", withdrawDate);
 
         TransactionSearchRequest searchParameters = new TransactionSearchRequest().pageable(0, 2, null, null);
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, null, null);
+        SearchSavingsAccountTransactionsQueryParams queryParams = buildTransactionsSearchQuery(searchParameters, null, null);
         SavingsAccountTransactionsSearchResponse transactionsResponse = savingsTransactionHelper.searchTransactions(savingsId, queryParams);
 
         assertNotNull(transactionsResponse);
@@ -244,7 +247,8 @@ public class SavingsAccountTransactionsSearchIntegrationTest extends FeignSaving
         int typeD = SavingsAccountTransactionType.DEPOSIT.getId();
         TransactionSearchRequest searchParameters = new TransactionSearchRequest().types(String.valueOf(typeD)).pageable(null, null,
                 "amount", Sort.Direction.ASC);
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        SearchSavingsAccountTransactionsQueryParams queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT,
+                DEFAULT_LOCALE);
         SavingsAccountTransactionsSearchResponse transactionsResponse = savingsTransactionHelper.searchTransactions(savingsId, queryParams);
 
         assertNotNull(transactionsResponse);
@@ -278,7 +282,8 @@ public class SavingsAccountTransactionsSearchIntegrationTest extends FeignSaving
                 .toAmount(BigDecimal.valueOf(500)).fromDate("2023-05-06", DateUtils.DEFAULT_DATE_FORMAT, DEFAULT_LOCALE)
                 .toDate("2023-06-01", DateUtils.DEFAULT_DATE_FORMAT, DEFAULT_LOCALE).types(String.valueOf(typeD))
                 .pageable(0, 2, "amount", Sort.Direction.DESC);
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DateUtils.DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        SearchSavingsAccountTransactionsQueryParams queryParams = buildTransactionsSearchQuery(searchParameters,
+                DateUtils.DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
         SavingsAccountTransactionsSearchResponse transactionsResponse = savingsTransactionHelper.searchTransactions(savingsId, queryParams);
 
         assertNotNull(transactionsResponse);
@@ -308,7 +313,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest extends FeignSaving
 
         TransactionSearchRequest searchParameters = new TransactionSearchRequest().fromAmount(BigDecimal.valueOf(100))
                 .toAmount(BigDecimal.valueOf(500));
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, null, null);
+        SearchSavingsAccountTransactionsQueryParams queryParams = buildTransactionsSearchQuery(searchParameters, null, null);
         queryParams.put("fromDate", firstDepositDate); // wrong date format, no dateFormat parameter was sent
 
         assertEquals(BAD_REQUEST, savingsTransactionHelper.searchTransactionsExpectingErrorStatus(savingsId, queryParams));
@@ -324,7 +329,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest extends FeignSaving
         deposit(savingsId, "400", thirdDepositDate);
         deposit(savingsId, "200", fourthDepositDate);
 
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(new TransactionSearchRequest(), null, null);
+        SearchSavingsAccountTransactionsQueryParams queryParams = buildTransactionsSearchQuery(new TransactionSearchRequest(), null, null);
         queryParams.put("fromAmount", "test"); // not a number
 
         assertEquals(NOT_FOUND, savingsTransactionHelper.searchTransactionsExpectingErrorStatus(savingsId, queryParams));
@@ -353,51 +358,51 @@ public class SavingsAccountTransactionsSearchIntegrationTest extends FeignSaving
         return savingsId;
     }
 
-    private Map<String, Object> buildTransactionsSearchQuery(TransactionSearchRequest searchParams, String dateFormat, Locale locale) {
-        HashMap<String, Object> params = new HashMap<>();
+    private SearchSavingsAccountTransactionsQueryParams buildTransactionsSearchQuery(TransactionSearchRequest searchParams,
+            String dateFormat, Locale locale) {
+        SearchSavingsAccountTransactionsQueryParams params = new SearchSavingsAccountTransactionsQueryParams();
         if (searchParams.getFromDate() != null) {
-            params.put("fromDate", DateUtils.format(searchParams.getFromDate(), dateFormat, locale));
+            params.fromDate(DateUtils.format(searchParams.getFromDate(), dateFormat, locale));
         }
         if (searchParams.getToDate() != null) {
-            params.put("toDate", DateUtils.format(searchParams.getToDate(), dateFormat, locale));
+            params.toDate(DateUtils.format(searchParams.getToDate(), dateFormat, locale));
         }
         if (searchParams.getFromSubmittedDate() != null) {
-            params.put("fromSubmittedDate", DateUtils.format(searchParams.getFromSubmittedDate(), dateFormat, locale));
+            params.fromSubmittedDate(DateUtils.format(searchParams.getFromSubmittedDate(), dateFormat, locale));
         }
         if (searchParams.getToSubmittedDate() != null) {
-            params.put("toSubmittedDate", DateUtils.format(searchParams.getToSubmittedDate(), dateFormat, locale));
+            params.toSubmittedDate(DateUtils.format(searchParams.getToSubmittedDate(), dateFormat, locale));
         }
         if (searchParams.getFromAmount() != null) {
-            params.put("fromAmount", searchParams.getFromAmount());
+            params.fromAmount(searchParams.getFromAmount());
         }
         if (searchParams.getToAmount() != null) {
-            params.put("toAmount", searchParams.getToAmount());
+            params.toAmount(searchParams.getToAmount());
         }
         if (searchParams.getTypes() != null) {
-            params.put("types", String.join(",", searchParams.getTypes()));
+            params.types(String.join(",", searchParams.getTypes()));
         }
         if (searchParams.getCredit() != null) {
-            params.put("credit", searchParams.getCredit());
+            params.credit(searchParams.getCredit());
         }
         if (searchParams.getDebit() != null) {
-            params.put("debit", searchParams.getDebit());
+            params.debit(searchParams.getDebit());
         }
         PageRequest pageable = searchParams.getPageable();
         if (pageable != null) {
-            params.put("offset", pageable.getPageNumber());
-            params.put("limit", pageable.getPageSize());
+            params.offset(pageable.getPageNumber()).limit(pageable.getPageSize());
             Sort sort = pageable.getSort();
             if (sort.isSorted()) {
                 List<Sort.Order> orders = sort.toList();
-                params.put("sortOrder", orders.get(0).getDirection());
-                params.put("orderBy", orders.stream().map(Sort.Order::getProperty).collect(Collectors.joining(",")));
+                params.sortOrder(orders.get(0).getDirection().name())
+                        .orderBy(orders.stream().map(Sort.Order::getProperty).collect(Collectors.joining(",")));
             }
         }
         if (dateFormat != null) {
-            params.put("dateFormat", dateFormat);
+            params.dateFormat(dateFormat);
         }
         if (locale != null) {
-            params.put("locale", locale.toString());
+            params.locale(locale.toString());
         }
         return params;
     }

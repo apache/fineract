@@ -21,14 +21,13 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import feign.FeignException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
-import org.apache.fineract.client.feign.ObjectMapperFactory;
+import org.apache.fineract.client.feign.services.SavingsAccountTransactionsApi.SearchSavingsAccountTransactionsQueryParams;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.PostSavingsAccountBulkReversalTransactionsRequest;
@@ -108,14 +107,8 @@ public class FeignSavingsTransactionHelper {
                 command));
     }
 
-    /** The generated client types this response as a bare {@code String}, so the JSON is mapped here. */
     public SavingsAccountTransactionData getTransaction(Long savingsId, Long transactionId) {
-        String json = ok(() -> fineractClient.savingsAccountTransactions().retrieveOneSavingsAccountTransaction(savingsId, transactionId));
-        try {
-            return ObjectMapperFactory.getShared().readValue(json, SavingsAccountTransactionData.class);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Failed to parse savings transaction " + transactionId, e);
-        }
+        return ok(() -> fineractClient.savingsAccountTransactions().retrieveOneSavingsAccountTransaction(savingsId, transactionId));
     }
 
     public List<SavingsAccountTransactionData> getTransactions(Long savingsId) {
@@ -138,12 +131,13 @@ public class FeignSavingsTransactionHelper {
         return transaction.getTransactionType() != null && Boolean.TRUE.equals(transaction.getTransactionType().getAccrual());
     }
 
-    public SavingsAccountTransactionsSearchResponse searchTransactions(Long savingsId, Map<String, Object> queryParams) {
+    public SavingsAccountTransactionsSearchResponse searchTransactions(Long savingsId,
+            SearchSavingsAccountTransactionsQueryParams queryParams) {
         return ok(() -> fineractClient.savingsAccountTransactions().searchSavingsAccountTransactions(savingsId, queryParams));
     }
 
     /** The error decoder only builds a typed error when the response has a body, so a bodiless rejection needs both. */
-    public int searchTransactionsExpectingErrorStatus(Long savingsId, Map<String, Object> queryParams) {
+    public int searchTransactionsExpectingErrorStatus(Long savingsId, SearchSavingsAccountTransactionsQueryParams queryParams) {
         try {
             return fail(() -> fineractClient.savingsAccountTransactions().searchSavingsAccountTransactions(savingsId, queryParams))
                     .getStatus();

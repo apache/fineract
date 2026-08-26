@@ -84,6 +84,11 @@ public class FeignDatatableHelper {
         return ok(() -> fineractClient.dataTables().deleteDatatableEntries(datatableName, apptableId));
     }
 
+    /**
+     * A datatable's columns are defined at runtime, and the endpoint serves two different shapes depending on
+     * {@code genericResultSet}, so the server declares its response as {@code String} on purpose. The entries are
+     * therefore read as a tree rather than a generated model.
+     */
     public JsonNode getDatatableEntries(String datatableName, Long apptableId) {
         String json = ok(
                 () -> fineractClient.dataTables().getDatatableEntries(datatableName, apptableId, Map.of(GENERIC_RESULT_SET, Boolean.TRUE)));
