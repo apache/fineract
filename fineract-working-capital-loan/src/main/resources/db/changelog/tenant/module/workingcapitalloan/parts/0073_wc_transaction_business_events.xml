@@ -43,13 +43,6 @@
         </insert>
     </changeSet>
 
-    <changeSet author="fineract" id="wcl-0073-3-rename">
-        <update tableName="m_external_event_configuration">
-            <column name="type" value="WorkingCapitalLoanAdjustTransactionBusinessEvent"/>
-            <where>type = 'WorkingCapitalLoanTransactionReversedBusinessEvent'</where>
-        </update>
-    </changeSet>
-
     <changeSet author="fineract" id="wcl-0073-3">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanAdjustTransactionBusinessEvent'</sqlCheck>
@@ -58,13 +51,6 @@
             <column name="type" value="WorkingCapitalLoanAdjustTransactionBusinessEvent"/>
             <column name="enabled" valueBoolean="false"/>
         </insert>
-    </changeSet>
-
-    <changeSet author="fineract" id="wcl-0073-5-rename">
-        <update tableName="m_external_event_configuration">
-            <column name="type" value="WorkingCapitalLoanWriteOffTransactionBusinessEvent"/>
-            <where>type = 'WorkingCapitalLoanWrittenOffBusinessEvent'</where>
-        </update>
     </changeSet>
 
     <changeSet author="fineract" id="wcl-0073-5">
@@ -77,13 +63,6 @@
         </insert>
     </changeSet>
 
-    <changeSet author="fineract" id="wcl-0073-7-rename">
-        <update tableName="m_external_event_configuration">
-            <column name="type" value="WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent"/>
-            <where>type = 'WorkingCapitalLoanUndoWrittenOffBusinessEvent'</where>
-        </update>
-    </changeSet>
-
     <changeSet author="fineract" id="wcl-0073-7">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent'</sqlCheck>
@@ -94,13 +73,6 @@
         </insert>
     </changeSet>
 
-    <changeSet author="fineract" id="wcl-0073-9-rename">
-        <update tableName="m_external_event_configuration">
-            <column name="type" value="WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent"/>
-            <where>type = 'WorkingCapitalLoanChargeAdjustmentPostBusinessEvent'</where>
-        </update>
-    </changeSet>
-
     <changeSet author="fineract" id="wcl-0073-9">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent'</sqlCheck>
@@ -109,12 +81,6 @@
             <column name="type" value="WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent"/>
             <column name="enabled" valueBoolean="false"/>
         </insert>
-    </changeSet>
-
-    <changeSet author="fineract" id="wcl-0073-11">
-        <delete tableName="m_external_event_configuration">
-            <where>type = 'WorkingCapitalLoanChargeAdjustmentPreBusinessEvent'</where>
-        </delete>
     </changeSet>
 
 </databaseChangeLog>

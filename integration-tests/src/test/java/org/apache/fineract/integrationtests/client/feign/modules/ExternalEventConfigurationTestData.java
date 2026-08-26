@@ -164,6 +164,8 @@ public final class ExternalEventConfigurationTestData {
             "SavingsAccountForceWithdrawalBusinessEvent", //
             "WorkingCapitalLoanDiscountFeeTransactionBusinessEvent", //
             "WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent", //
+            "WorkingCapitalLoanChargeAdjustmentPreBusinessEvent", //
+            "WorkingCapitalLoanChargeAdjustmentPostBusinessEvent", //
             "WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent", //
             "WorkingCapitalLoanCreatedBusinessEvent", //
             "WorkingCapitalLoanApplicationModifiedBusinessEvent", //
@@ -175,6 +177,8 @@ public final class ExternalEventConfigurationTestData {
             "WorkingCapitalLoanStatusChangedBusinessEvent", //
             "WorkingCapitalLoanBalanceChangedBusinessEvent", //
             "WorkingCapitalLoanDelinquencyRangeChangeBusinessEvent", //
+            "WorkingCapitalLoanWrittenOffBusinessEvent", //
+            "WorkingCapitalLoanUndoWrittenOffBusinessEvent", //
             "WorkingCapitalLoanWriteOffTransactionBusinessEvent", //
             "WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent", //
             "WorkingCapitalLoanPeriodPaymentRateChangedBusinessEvent", //
@@ -188,6 +192,7 @@ public final class ExternalEventConfigurationTestData {
             "WorkingCapitalLoanFraudChangedBusinessEvent", //
             "WorkingCapitalLoanPayoutRefundTransactionBusinessEvent", //
             "WorkingCapitalLoanGoodwillCreditTransactionBusinessEvent", //
+            "WorkingCapitalLoanTransactionReversedBusinessEvent", //
             "WorkingCapitalLoanAdjustTransactionBusinessEvent", //
             "WorkingCapitalLoanChargeOffTransactionBusinessEvent", //
             "WorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEvent", //
