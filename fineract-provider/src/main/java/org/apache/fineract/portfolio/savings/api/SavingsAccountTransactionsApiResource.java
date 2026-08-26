@@ -125,6 +125,7 @@ public class SavingsAccountTransactionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a savings account transaction", operationId = "retrieveOneSavingsAccountTransaction")
     @AlternativeOperationId("retrieveOne_24")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionData.class)))
     public String retrieveOne(@PathParam("savingsId") final Long savingsId, @PathParam("transactionId") final Long transactionId,
             @Context final UriInfo uriInfo) {
         return retrieveOne(savingsId, null, transactionId, null, uriInfo);
@@ -134,6 +135,7 @@ public class SavingsAccountTransactionsApiResource {
     @Path("external-id/{savingsExternalId}/transactions/{transactionId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a savings account transaction", operationId = "retrieveOneSavingsAccountTransactionBySavingsExternalId")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionData.class)))
     public String retrieveOne(@PathParam("savingsExternalId") final String savingsExternalId,
             @PathParam("transactionId") final Long transactionId, @Context final UriInfo uriInfo) {
         return retrieveOne(null, savingsExternalId, transactionId, null, uriInfo);
@@ -162,6 +164,7 @@ public class SavingsAccountTransactionsApiResource {
     @Path("{savingsId}/transactions/external-id/{transactionExternalId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a savings account transaction by external ID", operationId = "retrieveOneSavingsAccountTransactionByExternalId")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionData.class)))
     public String retrieveOne(@PathParam("savingsId") final Long savingsId,
             @PathParam("transactionExternalId") final String transactionExternalId, @Context final UriInfo uriInfo) {
         return retrieveOne(savingsId, null, null, transactionExternalId, uriInfo);
@@ -171,6 +174,7 @@ public class SavingsAccountTransactionsApiResource {
     @Path("external-id/{savingsExternalId}/transactions/external-id/{transactionExternalId}")
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(summary = "Retrieve a savings account transaction by external ID", operationId = "retrieveOneSavingsAccountTransactionBySavingsAndTransactionExternalId")
+    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SavingsAccountTransactionData.class)))
     public String retrieveOne(@PathParam("savingsExternalId") final String savingsExternalId,
             @PathParam("transactionExternalId") final String transactionExternalId, @Context final UriInfo uriInfo) {
         return retrieveOne(null, savingsExternalId, null, transactionExternalId, uriInfo);
