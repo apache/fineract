@@ -29,6 +29,7 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdNearBreach
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRateRequest;
+import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.integrationtests.common.Utils;
 
 public final class WorkingCapitalLoanRequestBuilders {
@@ -48,6 +49,23 @@ public final class WorkingCapitalLoanRequestBuilders {
         return new PostWorkingCapitalLoansRequest().clientId(clientId).productId(productId).principalAmount(principal)
                 .periodPaymentRate(periodPaymentRate).submittedOnDate(submittedOnDate).expectedDisbursementDate(expectedDisbursementDate)
                 .totalPaymentVolume(BigDecimal.valueOf(100000)).locale(LOCALE).dateFormat(DATE_FORMAT);
+    }
+
+    /**
+     * Submit overload carrying the loan-level {@code discount}. Only usable on a product whose {@code discountDefault}
+     * attribute is overridable, otherwise the application validator rejects the override.
+     */
+    public static PostWorkingCapitalLoansRequest submitApplicationWithDiscount(Long clientId, Long productId, BigDecimal principal,
+            BigDecimal periodPaymentRate, String submittedOnDate, String expectedDisbursementDate, BigDecimal discount) {
+        return submitApplication(clientId, productId, principal, periodPaymentRate, submittedOnDate, expectedDisbursementDate)
+                .discount(discount);
+    }
+
+    /**
+     * Modify (PUT) request changing only the requested principal of a submitted application.
+     */
+    public static PutWorkingCapitalLoansLoanIdRequest modifyPrincipal(BigDecimal principalAmount) {
+        return new PutWorkingCapitalLoansLoanIdRequest().principalAmount(principalAmount).locale(LOCALE).dateFormat(DATE_FORMAT);
     }
 
     public static PostWorkingCapitalLoansLoanIdRequest approve(String approvedOnDate, BigDecimal approvedAmount,

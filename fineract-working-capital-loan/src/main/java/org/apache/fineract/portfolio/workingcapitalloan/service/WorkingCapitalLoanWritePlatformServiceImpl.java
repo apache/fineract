@@ -180,6 +180,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             loan.getDisbursementDetails().getFirst().setExpectedAmount(loan.getApprovedPrincipal());
         }
 
+        // The active contractual principal follows the approved amount from approval onwards.
+        loan.getLoanProductRelatedDetails().setPrincipal(loan.getApprovedPrincipal());
+
         this.loanRepository.saveAndFlush(loan);
 
         this.amortizationScheduleWriteService.generateAndSaveAmortizationScheduleOnApproval(loan);
@@ -226,6 +229,14 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // not the submission-time value, because we don't store a pre-approval snapshot.
         // The loan is back in SUBMITTED state and can be modified.
         loan.getLoanProductRelatedDetails().setDiscountApproved(null);
+
+        // The active contractual principal falls back to the proposed one while the loan is unapproved again.
+        loan.getLoanProductRelatedDetails().setPrincipal(loan.getProposedPrincipal());
+
+        // The expected disbursement amount follows it back, undoing the alignment done at approval.
+        if (!loan.getDisbursementDetails().isEmpty()) {
+            loan.getDisbursementDetails().getFirst().setExpectedAmount(loan.getProposedPrincipal());
+        }
 
         this.loanRepository.saveAndFlush(loan);
 
@@ -335,6 +346,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             loan.getDisbursementDetails().getFirst().setDisbursedBy(currentUser);
         }
 
+        // The active contractual principal becomes the amount actually disbursed.
+        loan.getLoanProductRelatedDetails().setPrincipal(transactionAmount);
+
         // Discount amount (optional, can only be reduced per requirement)
         BigDecimal discount = null;
         if (!loan.getLoanProduct().getConfigurableAttributes().isDiscountDefaultOverridable()) {
@@ -431,6 +445,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             }
         }
         loan.getLoanProductRelatedDetails().setDiscount(null);
+        // Nothing is disbursed any more, so the active contractual principal falls back to the approved one.
+        loan.getLoanProductRelatedDetails().setPrincipal(loan.getApprovedPrincipal());
         amortizationScheduleWriteService.regenerateAmortizationScheduleOnUndoDisbursal(loan);
 
         this.loanRepository.saveAndFlush(loan);
@@ -1227,9 +1243,14 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // recalculateRealizedIncome writes to, so all updates here apply to the same object that gets persisted.
         final WorkingCapitalLoanBalance balance = loan.getBalance();
         if (balance != null) {
-            // Restore balance to pre-disbursement state.
-            balance.setPrincipal(loan.getApprovedPrincipal() != null ? loan.getApprovedPrincipal() : loan.getProposedPrincipal());
+            // Restore balance to pre-disbursement state: nothing was paid out any more, so there is nothing
+            // repayable, exactly as on a loan that was approved but never disbursed.
+            balance.setPrincipal(BigDecimal.ZERO);
+            balance.setPrincipalAdjustment(BigDecimal.ZERO);
             balance.setPrincipalPaid(BigDecimal.ZERO);
+            balance.setTotalDisbursement(BigDecimal.ZERO);
+            balance.setTotalDiscountFee(BigDecimal.ZERO);
+            balance.setTotalDiscountFeeAdjustment(BigDecimal.ZERO);
             // All transactions were just reversed, so the single owner recomputes realized income to zero from them.
             discountFeeAmortizationService.recalculateRealizedIncome(loan);
             balance.setOverpaymentAmount(BigDecimal.ZERO);

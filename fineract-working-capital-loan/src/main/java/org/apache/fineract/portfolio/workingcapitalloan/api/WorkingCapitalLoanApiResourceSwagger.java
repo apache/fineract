@@ -205,9 +205,15 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public String loanProductDescription;
         public GetWorkingCapitalLoansLoanIdStatus status;
         public GetWorkingCapitalLoansLoanIdTimeline timeline;
+        @Schema(example = "10000.00", description = "Principal requested at submission; never changes afterwards")
         public BigDecimal proposedPrincipal;
+        @Schema(example = "10000.00", description = "Principal granted at approval; zero before approval and after undoing it "
+                + "(deliberate Working Capital divergence from classic loans)")
         public BigDecimal approvedPrincipal;
-        @Schema(example = "10000.00", description = "Active principal (loanProductRelatedDetails.principal)")
+        @Schema(example = "10000.00", description = "Active principal: the requested amount while the application is "
+                + "pending, the granted amount from approval, the actually disbursed amount from disbursement. Undoing "
+                + "approval or disbursal restores the previous stage's value. This is the contractual principal, not "
+                + "the outstanding balance - see summary.principalOutstanding for that.")
         public BigDecimal principal;
         @Schema(example = "10000.00", description = "Net disbursal amount from the amortization schedule; null if schedule not yet generated")
         public BigDecimal netDisbursalAmount;
@@ -334,6 +340,7 @@ public final class WorkingCapitalLoanApiResourceSwagger {
             public BigDecimal realizedIncomeFromDiscountFee;
             public BigDecimal unrealizedIncomeFromDiscountFee;
             public BigDecimal overpayment;
+            @Schema(description = "Total amount actually disbursed")
             public BigDecimal totalDisbursement;
             public BigDecimal totalDiscountFee;
             public BigDecimal totalDiscountFeeAdjustment;
@@ -389,7 +396,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
 
         @Schema(example = "1")
         public Long id;
-        @Schema(example = "10000.00")
+        @Schema(example = "10000.00", description = "Total repayable principal: the disbursed amount plus the discount fee. "
+                + "Zero until disbursement, and zero again once a disbursal is undone.")
         public BigDecimal principal;
         @Schema(example = "10000.00")
         public BigDecimal principalPaid;
@@ -421,7 +429,7 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal totalRepayment;
         @Schema(example = "10000.00")
         public BigDecimal totalOutstanding;
-        @Schema(example = "10000.00")
+        @Schema(example = "10000.00", description = "Total amount actually disbursed")
         public BigDecimal totalDisbursement;
         @Schema(example = "10000.00")
         public BigDecimal totalDiscountFee;
@@ -441,7 +449,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         @Schema(example = "1")
         public Long loanId;
         public LocalDate expectedDisbursementDate;
-        @Schema(example = "10000.00", description = "Expected (planned) disbursement principal")
+        @Schema(example = "10000.00", description = "Expected (planned) disbursement principal. Tracks the active "
+                + "principal, so modifying a pending application or undoing an approval moves it too.")
         public BigDecimal principal;
         public LocalDate expectedMaturityDate;
         public LocalDate actualDisbursementDate;
