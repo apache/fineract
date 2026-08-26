@@ -47,7 +47,6 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanRecoveryPaymentTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
@@ -79,7 +78,7 @@ import org.mockito.quality.Strictness;
  * Verifies what a recovery payment and its undo must do beyond recording the transaction: the running
  * {@code totalRecovered} moves by exactly the transaction amount, journal entries are posted only when the product's
  * accounting rule asks for them, and the business events are published - the undo alongside the generic
- * transaction-reversed event, so a consumer reconciling reversals generically does not miss recovery ones.
+ * adjust-transaction reversal event, so a consumer reconciling reversals generically does not miss recovery ones.
  * <p>
  * A loan without a balance row is rejected on both paths, and an undo whose amount exceeds the running total fails
  * loudly rather than clamping the figure at zero - both signal an account that became inconsistent.
@@ -112,6 +111,8 @@ class WorkingCapitalLoanRecoveryPaymentWriteServiceTest {
     private WorkingCapitalLoanAccountingProcessor accountingProcessor;
     @Mock
     private BusinessEventNotifierService businessEventNotifierService;
+    @Mock
+    private WorkingCapitalLoanAdjustTransactionEventPublisher adjustTransactionEventPublisher;
 
     @Mock
     private WorkingCapitalLoan loan;
@@ -189,8 +190,7 @@ class WorkingCapitalLoanRecoveryPaymentWriteServiceTest {
         assertThat(balance.getTotalRecovered()).isEqualByComparingTo("60");
         verify(balanceRepository).saveAndFlush(balance);
         verify(accountingProcessor).postReversalJournalEntries(loan, transaction);
-        final List<BusinessEvent<?>> events = publishedEvents(2);
-        assertThat(events.get(0)).isInstanceOf(WorkingCapitalLoanAdjustTransactionBusinessEvent.class);
+        verify(adjustTransactionEventPublisher).publishReversal(LOAN_ID, transaction);
     }
 
     @Test

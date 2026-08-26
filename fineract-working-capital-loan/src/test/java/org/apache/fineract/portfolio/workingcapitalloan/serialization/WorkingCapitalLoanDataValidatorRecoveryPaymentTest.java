@@ -95,6 +95,7 @@ class WorkingCapitalLoanDataValidatorRecoveryPaymentTest {
         balance.setPrincipalWrittenOff(new BigDecimal("100"));
 
         lenient().when(loan.getLoanStatus()).thenReturn(LoanStatus.CLOSED_WRITTEN_OFF);
+        lenient().when(loan.isClosedWrittenOff()).thenReturn(true);
         lenient().when(loan.getBalance()).thenReturn(balance);
         lenient().when(transactionFinder.getLastUserTransactionDate(loan)).thenReturn(Optional.of(WRITE_OFF_DATE));
     }
@@ -138,6 +139,7 @@ class WorkingCapitalLoanDataValidatorRecoveryPaymentTest {
     @Test
     void shouldRejectARecoveryOnALoanThatIsNotWrittenOff() {
         when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
+        when(loan.isClosedWrittenOff()).thenReturn(false);
         final PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
                 () -> validator.validateRecoveryPayment(recoveryCommand(BUSINESS_DATE, "40"), loan));
         assertThat(ex.getErrors())

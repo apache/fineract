@@ -133,6 +133,16 @@
         </insert>
     </changeSet>
 
+    <changeSet author="fineract" id="wcl-0069-12">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanTransactionReversedBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanTransactionReversedBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
     <changeSet author="fineract" id="wcl-0069-13">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanChargeOffTransactionBusinessEvent'</sqlCheck>

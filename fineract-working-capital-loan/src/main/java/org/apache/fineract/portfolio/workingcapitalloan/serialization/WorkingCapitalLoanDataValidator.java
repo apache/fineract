@@ -848,7 +848,7 @@ public class WorkingCapitalLoanDataValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
 
-        if (loan.getLoanStatus() == null || !loan.getLoanStatus().isClosedWrittenOff()) {
+        if (!loan.isClosedWrittenOff()) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
                     .failWithCode("error.msg.wc.loan.is.not.written.off");
         }
@@ -915,7 +915,7 @@ public class WorkingCapitalLoanDataValidator {
             baseDataValidator.reset().parameter("transaction").failWithCode("transaction.already.undone", transaction.getId());
         }
 
-        if (loan.getLoanStatus() == null || !loan.getLoanStatus().isClosedWrittenOff()) {
+        if (!loan.isClosedWrittenOff()) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
                     .failWithCode("error.msg.wc.loan.is.not.written.off");
         }

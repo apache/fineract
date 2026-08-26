@@ -1837,6 +1837,16 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         eventCheckHelper.workingCapitalLoanChargeOffTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
     }
 
+    @Then("a Working Capital Loan Undo Write-Off transaction business event is raised")
+    public void aWorkingCapitalLoanUndoWriteOffTransactionBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanUndoWriteOffTransactionEventCheck(getCreatedLoanId(), null);
+    }
+
+    @Then("a Working Capital Loan Recovery Payment transaction business event is raised with {string} EUR amount")
+    public void aWorkingCapitalLoanRecoveryPaymentTransactionBusinessEventIsRaised(final String amount) {
+        eventCheckHelper.workingCapitalLoanRecoveryPaymentTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
+    }
+
     @Then("a Working Capital Loan Discount Fee Amortization transaction business event is raised on {string}")
     public void aWorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEventIsRaised(final String transactionDate) {
         eventCheckHelper.workingCapitalLoanDiscountFeeAmortizationTransactionEventCheck(getCreatedLoanId(), transactionDate);

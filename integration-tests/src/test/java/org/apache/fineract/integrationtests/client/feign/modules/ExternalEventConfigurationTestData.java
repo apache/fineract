@@ -193,6 +193,7 @@ public final class ExternalEventConfigurationTestData {
             "WorkingCapitalLoanFraudChangedBusinessEvent", //
             "WorkingCapitalLoanPayoutRefundTransactionBusinessEvent", //
             "WorkingCapitalLoanGoodwillCreditTransactionBusinessEvent", //
+            "WorkingCapitalLoanTransactionReversedBusinessEvent", //
             "WorkingCapitalLoanAdjustTransactionBusinessEvent", //
             "WorkingCapitalLoanChargeOffTransactionBusinessEvent", //
             "WorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEvent", //
