@@ -543,11 +543,12 @@ public class LoanProductTestBuilder {
     }
 
     /**
-     * The map form carries every amount as a string, sometimes with thousands separators ("15,000.00"). Strip them the
-     * way the JSON path used to before parsing.
+     * The map form carries every amount as a string, the way a user types it ("15,000.00"). The builder's locale is
+     * always English, so every comma is a grouping separator - including the lakh grouping of "1,00,000.00", which is
+     * not in groups of three.
      */
     private static String stripThousandsSeparators(final String value) {
-        return value.replaceAll("(?<=\\d),(?=\\d{3}(?!\\d))", "");
+        return value.replace(",", "");
     }
 
     private static boolean isBlank(final String value) {
