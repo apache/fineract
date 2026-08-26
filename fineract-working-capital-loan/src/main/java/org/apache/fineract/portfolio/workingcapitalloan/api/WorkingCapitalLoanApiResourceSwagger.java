@@ -246,10 +246,7 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public Integer numberOfRepayments;
         @Schema(example = "116.67", description = "Daily expected payment amount from the amortization schedule; null if schedule not yet generated")
         public BigDecimal periodPaymentAmount;
-        @Schema(example = "0.000435", description = "Periodic (daily) effective interest rate computed via RATE(); null if schedule not yet generated")
-        public BigDecimal dailyEir;
-        @Schema(example = "0.1691", description = "Annualized EIR as a fraction (0.1691 = 16.91%): (1 + dailyEir)^npvDayCount − 1; null if schedule not yet generated. "
-                + "Note: periodPaymentRateHistory[].calculatedAnnualEir is a percentage")
+        @Schema(example = "0.468451", description = "Annual effective rate the loan was priced at, compounded over the product's NPV day count rather than a calendar year and rounded to six decimals, and the rate the base schedule's daily discounting is derived from. A payment rate change does not restate it - it stays the rate the loan was created with, matching the period payment rate beside it; null if schedule not yet generated")
         public BigDecimal calculatedAnnualEir;
         @Schema(description = "Period payment rate change history, most recently booked first - which for a backdated change is not "
                 + "the same as effective-date order. Each entry carries the annual EIR (as a percentage, e.g. 43.756245 - unlike the top-level calculatedAnnualEir, which is a fraction), daily payment "

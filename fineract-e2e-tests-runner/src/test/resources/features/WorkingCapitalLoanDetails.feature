@@ -45,7 +45,6 @@ Feature: Working Capital Loan Details
       | paymentRate                                    | 1.0                          |
       | periodPaymentAmount                            | 0.01                         |
       | numberOfRepayments                             | 10000                        |
-      | dailyEir                                       | 0.0                          |
       | calculatedAnnualEir                            | 0.0                          |
       | proposedDiscountFee                            | 0.0                          |
       | approvedDiscountFee                            | null                         |
@@ -269,16 +268,16 @@ Feature: Working Capital Loan Details
     When Admin successfully approves the working capital loan on "01 January 2026" with "450" amount and "45" discount amount and expected disbursement date on "01 January 2026"
     Then Working capital loan approval was successful
     Then Working capital loan details has the following field values:
-      | status.value                 | Approved |
-      | proposedPrincipal            | 500.0    |
-      | approvedPrincipal            | 450.0    |
-      | principal                    | 450.0    |
-      | approvedDiscountFee          | 45.0     |
-      | discountFee                  | null     |
-      | netDisbursalAmount           | 450.0    |
-      | balance.principal            | 0.0      |
-      | balance.totalDisbursement    | 0.0      |
-      | summary.totalDisbursement    | 0.0      |
+      | status.value              | Approved |
+      | proposedPrincipal         | 500.0    |
+      | approvedPrincipal         | 450.0    |
+      | principal                 | 450.0    |
+      | approvedDiscountFee       | 45.0     |
+      | discountFee               | null     |
+      | netDisbursalAmount        | 450.0    |
+      | balance.principal         | 0.0      |
+      | balance.totalDisbursement | 0.0      |
+      | summary.totalDisbursement | 0.0      |
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "250" EUR transaction amount and "25" discount amount
     Then Verify Working Capital loan disbursement was successful
     Then Working capital loan details has the following field values:
@@ -549,3 +548,19 @@ Feature: Working Capital Loan Details
     # Closing the loan
     When Admin closes the Working Capital loan with a full repayment on "15 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+
+  Scenario: Loan details GET returns the annual effective interest rate normalised to six decimal places
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    Then Working capital loan creation was successful
+    When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Working capital loan approval was successful
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Verify Working Capital loan disbursement was successful
+    Then Admin successfully add discount with "1000" amount on Working Capital loan account
+    Then Working capital loan details has the following exact decimal field values:
+      | calculatedAnnualEir | 0.468451 |
+    Then Admin closes the Working Capital loan with a full repayment on "01 January 2026"

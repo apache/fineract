@@ -113,12 +113,25 @@ public final class ProjectedAmortizationScheduleModel {
     private final int originalPaymentNumber;
 
     /**
-     * Periodic effective rate, solved as {@code IRR([-netDisbursement, expectedPayment x (n-1), finalPayment])}.
-     * Because the cash flow carries the smaller final remainder payment rather than assuming a uniform payment
-     * throughout, this is zero exactly when the loan carries no discount fee - and the declining-balance recursion
-     * built on it closes at exactly zero on the last day, with its daily accruals summing to exactly the discount fee.
+     * Periodic rate every balance and amortization is discounted by: {@link #annualEffectiveInterestRate} spread back
+     * over {@link #npvDayCount}. Models persisted before that field hold the solved IRR instead, left as it is.
+     * <p>
+     * Zero when the loan carries no discount fee, and when the annual rate rounds to zero.
      */
     private final BigDecimal effectiveInterestRate;
+
+    /**
+     * The rate the loan was priced at and the source {@link #effectiveInterestRate} is derived from, compounded over
+     * {@link #npvDayCount} rather than a calendar year.
+     * <p>
+     * Not restated by a payment rate change: the walk re-solves from the day a change takes effect, and the rate in
+     * force on a date comes from the rate-change history. Matches the period payment rate beside it, likewise as
+     * created.
+     * <p>
+     * Null on models written before it existed — read through {@link #annualEffectiveInterestRate()}.
+     */
+    @Getter(AccessLevel.NONE)
+    private final BigDecimal annualEffectiveInterestRate;
 
     @JsonExclude
     private final MathContext mc;
@@ -182,8 +195,8 @@ public final class ProjectedAmortizationScheduleModel {
     private ProjectedAmortizationScheduleModel(final Money discountFeeAmount, final Money netDisbursementAmount,
             final Money totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount,
             final LocalDate expectedDisbursementDate, final Money expectedPaymentAmount, final Money finalPaymentAmount,
-            final int originalPaymentNumber, final BigDecimal effectiveInterestRate, final MathContext mc, final CurrencyData currency,
-            final LocalDate currentBusinessDate) {
+            final int originalPaymentNumber, final BigDecimal effectiveInterestRate, final BigDecimal annualEffectiveInterestRate,
+            final MathContext mc, final CurrencyData currency, final LocalDate currentBusinessDate) {
         this.discountFeeAmount = discountFeeAmount;
         this.netDisbursementAmount = netDisbursementAmount;
         this.totalPaymentVolume = totalPaymentVolume;
@@ -194,6 +207,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.finalPaymentAmount = finalPaymentAmount;
         this.originalPaymentNumber = originalPaymentNumber;
         this.effectiveInterestRate = effectiveInterestRate;
+        this.annualEffectiveInterestRate = annualEffectiveInterestRate;
         this.mc = mc;
         this.currency = currency;
         this.actualPayments = new ArrayList<>();
@@ -224,6 +238,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.finalPaymentAmount = null;
         this.originalPaymentNumber = 0;
         this.effectiveInterestRate = null;
+        this.annualEffectiveInterestRate = null;
         this.mc = mc;
         this.currency = currency;
         this.actualPayments = new ArrayList<>();
@@ -372,6 +387,16 @@ public final class ProjectedAmortizationScheduleModel {
     }
 
     /**
+     * The base schedule's annual rate; see {@link #annualEffectiveInterestRate}. Models predating the field compound
+     * their stored periodic rate rather than re-solving, so they keep reporting the rate they were built on.
+     */
+    public BigDecimal annualEffectiveInterestRate() {
+        return Optional.ofNullable(annualEffectiveInterestRate)
+                .or(() -> Optional.ofNullable(effectiveInterestRate).map(rate -> AmortizationParams.annualRate(rate, npvDayCount, mc)))
+                .orElse(null);
+    }
+
+    /**
      * The day the rate currently in force was solved to close on - what the schedule would run to if the borrower paid
      * exactly to plan from here. Equals {@link #originalPaymentNumber} until a rate change moves it.
      */
@@ -424,7 +449,7 @@ public final class ProjectedAmortizationScheduleModel {
         return new ProjectedAmortizationScheduleModel(Money.of(currency, discountFeeAmount, mc),
                 Money.of(currency, netDisbursementAmount, mc), Money.of(currency, totalPaymentVolume, mc), periodPaymentRate, npvDayCount,
                 expectedDisbursementDate, Money.of(currency, solved.dailyPayment(), mc), Money.of(currency, solved.closingPayment(), mc),
-                solved.term(), solved.eir(), mc, currency, currentDate);
+                solved.term(), solved.eir(), solved.annualEir(), mc, currency, currentDate);
     }
 
     /** First-period offset: 0 when a disbursement-date repayment shifts the grid onto the disbursement date, else 1. */

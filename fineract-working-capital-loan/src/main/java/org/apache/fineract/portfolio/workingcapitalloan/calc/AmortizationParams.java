@@ -34,13 +34,29 @@ import java.util.List;
  * left at the day it starts.
  *
  * <p>
- * The rate is solved as the IRR of the exact cash flow the borrower will pay, closing remainder included. That is what
- * makes the declining-balance recursion close on zero on the last day and its daily accruals sum to exactly the
- * discount fee - the property the whole schedule is built on.
+ * The rate starts as the IRR of the exact cash flow the borrower will pay, closing remainder included, and is then put
+ * through the annual rate the loan is published at: rounded to the reported scale a year and spread back over the day
+ * count. The schedule therefore discounts on the rate the loan reports rather than on one a few digits away from it.
  */
 final class AmortizationParams {
 
+    private static final int ANNUAL_EIR_SCALE = 6;
+
+    /**
+     * Fixed rather than the tenant's money rounding mode: a rate is not money, and this one is spread back into the
+     * rate the whole schedule discounts on, so configuration would amortize the same loan differently per tenant.
+     */
+    private static final RoundingMode ANNUAL_EIR_ROUNDING = RoundingMode.HALF_EVEN;
+
     private AmortizationParams() {}
+
+    /**
+     * Single definition of the reported rate — the value stored on a schedule and the derive-on-read fallback for the
+     * schedules written before it was stored must round identically.
+     */
+    static BigDecimal annualRate(final BigDecimal periodicRate, final int npvDayCount, final MathContext mc) {
+        return TvmFunctions.annualize(periodicRate, npvDayCount, mc).setScale(ANNUAL_EIR_SCALE, ANNUAL_EIR_ROUNDING);
+    }
 
     /**
      * {@code (TPV x periodPaymentRate) / npvDayCount / 100}, rounded to the loan currency's decimal places. Rounding is
@@ -91,8 +107,9 @@ final class AmortizationParams {
         // The closing day pays only the remainder of the gross payable after the (term - 1) full daily payments. When
         // the schedule divides evenly this equals the daily payment.
         final BigDecimal closing = grossPayable.subtract(daily.multiply(BigDecimal.valueOf(term - 1L), mc), mc);
-        final BigDecimal eir = TvmFunctions.irr(cashFlows(balance, daily, closing, term), mc);
-        return new Solved(daily, closing, term, eir);
+        final BigDecimal solvedEir = TvmFunctions.irr(cashFlows(balance, daily, closing, term), mc);
+        final BigDecimal annualEir = annualRate(solvedEir, npvDayCount, mc);
+        return new Solved(daily, closing, term, TvmFunctions.deannualize(annualEir, npvDayCount, mc), annualEir);
     }
 
     /**
@@ -117,8 +134,11 @@ final class AmortizationParams {
      * @param term
      *            how many days the solve takes to close, and so how long the rate is solved over
      * @param eir
-     *            the periodic effective rate: the IRR of the cash flow above
+     *            the periodic effective rate the schedule discounts on: {@code annualEir} spread back over the day
+     *            count
+     * @param annualEir
+     *            the annual rate the schedule was priced at, compounded over the day count rather than a calendar year
      */
-    record Solved(BigDecimal dailyPayment, BigDecimal closingPayment, int term, BigDecimal eir) {
+    record Solved(BigDecimal dailyPayment, BigDecimal closingPayment, int term, BigDecimal eir, BigDecimal annualEir) {
     }
 }
