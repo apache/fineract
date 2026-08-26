@@ -50,7 +50,7 @@ public class ClientLoanChargeExternalIntegrationTest extends FeignLoanTestBase {
 
         final Long loanProductId = createLoanProduct(false, NONE);
 
-        final Long loanId = applyForLoanApplication(clientId, loanProductId, "12,000.00");
+        final Long loanId = applyForLoanWithPrincipal(clientId, loanProductId, "12,000.00");
         approveLoan(loanId, approveLoanRequest(12000.0, "20 September 2011"));
         disburseLoanWithNetDisbursalAmount(loanId, "20 September 2011", "12000.00");
 
@@ -72,7 +72,7 @@ public class ClientLoanChargeExternalIntegrationTest extends FeignLoanTestBase {
 
         final Long loanProductId = createLoanProduct(false, NONE);
 
-        final Long loanId = applyForLoanApplication(clientId, loanProductId, "12,000.00");
+        final Long loanId = applyForLoanWithPrincipal(clientId, loanProductId, "12,000.00");
         approveLoan(loanId, approveLoanRequest(12000.0, "20 September 2011"));
         disburseLoanWithNetDisbursalAmount(loanId, "20 September 2011", "12000.00");
 
@@ -109,7 +109,7 @@ public class ClientLoanChargeExternalIntegrationTest extends FeignLoanTestBase {
         return createLoanProduct(loanProductRequest);
     }
 
-    private Long applyForLoanApplication(final Long clientId, final Long loanProductId, String principal) {
+    private Long applyForLoanWithPrincipal(final Long clientId, final Long loanProductId, String principal) {
         return applyForLoan(LoanRequestBuilders.legacyIndividualApplication(clientId, loanProductId, principal, 4, new BigDecimal("2"),
                 "20 September 2011"));
     }

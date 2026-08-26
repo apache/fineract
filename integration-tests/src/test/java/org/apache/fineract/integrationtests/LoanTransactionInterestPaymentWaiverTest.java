@@ -762,7 +762,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
         final Long clientCollateralId = collateralHelper.createClientCollateral(clientId, collateralId).getResourceId();
         assertNotNull(clientCollateralId);
 
-        final Integer productId = getLoanProductId(loanProductRequest);
+        final Long productId = getLoanProductId(loanProductRequest);
 
         final Long createActiveClientRequestId = 4730L;
         final Long applyLoanRequestId = createActiveClientRequestId + 1;
