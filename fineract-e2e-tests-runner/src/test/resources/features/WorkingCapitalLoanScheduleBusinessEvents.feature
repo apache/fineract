@@ -1,5 +1,5 @@
 @WorkingCapital
-@WorkingCapitalLoanScheduleBusinessEventsFeature @WCCOBFeature
+@WorkingCapitalLoanScheduleBusinessEventsFeature
 @Order(1)
 Feature: Working Capital Loan Schedule Business Events
 

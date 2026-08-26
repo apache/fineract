@@ -1,6 +1,6 @@
 @WorkingCapital
 @WorkingCapitalBreach
-@WorkingCapitalBreachRescheduleActionFeature @WCCOBFeature
+@WorkingCapitalBreachRescheduleActionFeature
 Feature: Working Capital Breach Reschedule Action
 
   @TestRailId:C85272
