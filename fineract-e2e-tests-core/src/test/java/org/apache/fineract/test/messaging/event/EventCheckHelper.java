@@ -820,6 +820,11 @@ public class EventCheckHelper {
         });
     }
 
+    public void workingCapitalLoanBalanceChangedEventAnnualEirCheck(final Long loanId, final String expectedAnnualEir) {
+        workingCapitalLoanEventPayloadCheck(WorkingCapitalLoanBalanceChangedEvent.class, loanId,
+                event -> assertAmountEquals("calculatedAnnualEir", event.getCalculatedAnnualEir(), new BigDecimal(expectedAnnualEir)));
+    }
+
     public void workingCapitalLoanDelinquencyRangeChangeEventCheck(final Long loanId) {
         workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanDelinquencyRangeChangeEvent.class, loanId, (event, body) -> {
             assertWorkingCapitalLoanAccountData(event, body);

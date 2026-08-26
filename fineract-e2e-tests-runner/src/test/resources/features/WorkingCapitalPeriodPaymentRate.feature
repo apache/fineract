@@ -384,7 +384,7 @@ Feature: Working Capital Period Payment Rate
       | 18        | 2026-01-19 | 30.56                 | 8975.32         | 5.88                       | 994.12                     |
       | 19        | 2026-01-20 | 55.56                 | 8955.11         | 10.67                      | 989.33                     |
       | 20        | 2026-01-21 | 55.56                 | 8910.17         | 10.62                      | 978.71                     |
-      | 197       | 2026-07-17 | 55.56                 | 54.70           | 0.13                       | 0.10                       |
+      | 197       | 2026-07-17 | 55.56                 | 54.69           | 0.13                       | 0.10                       |
       | 198       | 2026-07-18 | 54.76                 | 0.00            | 0.10                       | 0.00                       |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
 
@@ -611,15 +611,15 @@ Feature: Working Capital Period Payment Rate
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin update Working Capital period payment rate with "15" value effective from "01 August 2026"
     Then Working Capital Loan Period Payment Rate changes history contains the following data:
-      | Effective Date  | Previous Rate | New Rate | Reversed |
-      | 01 August 2026  | 17.0          | 15.0     | false    |
+      | Effective Date | Previous Rate | New Rate | Reversed |
+      | 01 August 2026 | 17.0          | 15.0     | false    |
 #--- Every missed instalment pushes the last period out by a day, so a loan this far behind still matures well in the
 #--- future and both changes have periods left to re-rate.
     And Admin update Working Capital period payment rate with "19" value effective from "10 August 2026"
     Then Working Capital Loan Period Payment Rate changes history contains the following data:
-      | Effective Date  | Previous Rate | New Rate | Reversed |
-      | 01 August 2026  | 17.0          | 15.0     | false    |
-      | 10 August 2026  | 15.0          | 19.0     | false    |
+      | Effective Date | Previous Rate | New Rate | Reversed |
+      | 01 August 2026 | 17.0          | 15.0     | false    |
+      | 10 August 2026 | 15.0          | 19.0     | false    |
 #--- On 06 August the 01 August change is in force at 15; the 10 August one is recorded but still in the future.
     And Working Capital Loan period payment rate in effect is "15"
     And Admin retrieves the projected amortization schedule
@@ -668,10 +668,10 @@ Feature: Working Capital Period Payment Rate
 # --- add repayment on current biz date --- #
     And Customer makes repayment on "20 January 2026" with 100 transaction amount on Working Capital loan
     And Working Capital Loan has transactions:
-      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 20 January 2026 | Repayment                 | 100.0             | 100.0             | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 20 January 2026 | Repayment    | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
     And Admin retrieves the projected amortization schedule
     And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance | actualAmortizationAmount | actualDiscountFeeBalance |
@@ -733,9 +733,9 @@ Feature: Working Capital Period Payment Rate
       | Effective Date  | Previous Rate | New Rate | Reversed |
       | 20 January 2026 | 18.0          | 15.0     | false    |
     And Working Capital Loan has transactions:
-      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Repayment                 | 500.0             | 465.0            | 35.0              | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 500.0             | 465.0            | 35.0              | 0.0                   | false    |
     And Admin retrieves the projected amortization schedule
 # Rebuilding the whole schedule must not disturb what came before the change: the periods up to 09 January are a pure
 # function of the opening balance and the original rate, and the repayment on 05 January belongs to them.
@@ -782,10 +782,10 @@ Feature: Working Capital Period Payment Rate
       | 10 January 2026  | 18.0          | 21.0     | false    |
       | 01 February 2026 | 21.0          | 11.0     | false    |
     And Working Capital Loan has transactions:
-      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 15 January 2026 | Repayment                 | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Repayment    | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
     And Admin retrieves the projected amortization schedule
     And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance | actualAmortizationAmount | actualDiscountFeeBalance |
@@ -1649,141 +1649,141 @@ Feature: Working Capital Period Payment Rate
       | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
       | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 1000            | 100000       | 18                | 100      |
     Then Working Capital loan amortization schedule has 23 periods, with the following data for periods:
-      | paymentNo | paymentDate      | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance   | actualAmortizationAmount | actualDiscountFeeBalance |
-      | 0         | 01 January 2026  | -1000.00              | 1000.00         |                            | 100.00                     |                     | 1000.00         |                          | 100.00                   |
-      | 1         | 02 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      |                     |                 |                          |                          |
-      | 2         | 03 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      |                     |                 |                          |                          |
-      | 3         | 04 January 2026  | 50.00                 | 874.29          | 7.74                       | 75.71                      |                     |                 |                          |                          |
-      | 4         | 05 January 2026  | 50.00                 | 831.67          | 7.39                       | 68.32                      |                     |                 |                          |                          |
-      | 5         | 06 January 2026  | 50.00                 | 788.70          | 7.03                       | 61.29                      |                     |                 |                          |                          |
-      | 6         | 07 January 2026  | 50.00                 | 745.36          | 6.66                       | 54.63                      |                     |                 |                          |                          |
-      | 7         | 08 January 2026  | 50.00                 | 701.65          | 6.30                       | 48.33                      |                     |                 |                          |                          |
-      | 8         | 09 January 2026  | 50.00                 | 657.58          | 5.93                       | 42.40                      |                     |                 |                          |                          |
-      | 9         | 10 January 2026  | 50.00                 | 613.14          | 5.55                       | 36.85                      |                     |                 |                          |                          |
-      | 10        | 11 January 2026  | 50.00                 | 568.31          | 5.18                       | 31.67                      |                     |                 |                          |                          |
-      | 11        | 12 January 2026  | 50.00                 | 523.12          | 4.80                       | 26.87                      |                     |                 |                          |                          |
-      | 12        | 13 January 2026  | 50.00                 | 477.53          | 4.42                       | 22.45                      |                     |                 |                          |                          |
-      | 13        | 14 January 2026  | 50.00                 | 431.57          | 4.03                       | 18.42                      |                     |                 |                          |                          |
-      | 14        | 15 January 2026  | 50.00                 | 385.21          | 3.65                       | 14.77                      |                     |                 |                          |                          |
-      | 15        | 16 January 2026  | 50.00                 | 338.47          | 3.25                       | 11.52                      |                     |                 |                          |                          |
-      | 16        | 17 January 2026  | 50.00                 | 291.33          | 2.86                       | 8.66                       |                     |                 |                          |                          |
-      | 17        | 18 January 2026  | 50.00                 | 243.79          | 2.46                       | 6.20                       |                     |                 |                          |                          |
-      | 18        | 19 January 2026  | 50.00                 | 195.85          | 2.06                       | 4.14                       |                     |                 |                          |                          |
-      | 19        | 20 January 2026  | 50.00                 | 147.50          | 1.65                       | 2.49                       |                     |                 |                          |                          |
-      | 20        | 21 January 2026  | 50.00                 | 98.75           | 1.25                       | 1.24                       |                     |                 |                          |                          |
-      | 21        | 22 January 2026  | 50.00                 | 49.58           | 0.83                       | 0.41                       |                     |                 |                          |                          |
-      | 22        | 23 January 2026  | 50.00                 | 0.00            | 0.41                       | 0.00                       |                     |                 |                          |                          |
+      | paymentNo | paymentDate     | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance | actualAmortizationAmount | actualDiscountFeeBalance |
+      | 0         | 01 January 2026 | -1000.00              | 1000.00         |                            | 100.00                     |                     | 1000.00       |                          | 100.00                   |
+      | 1         | 02 January 2026 | 50.00                 | 958.45          | 8.45                       | 91.55                      |                     |               |                          |                          |
+      | 2         | 03 January 2026 | 50.00                 | 916.54          | 8.10                       | 83.45                      |                     |               |                          |                          |
+      | 3         | 04 January 2026 | 50.00                 | 874.29          | 7.74                       | 75.71                      |                     |               |                          |                          |
+      | 4         | 05 January 2026 | 50.00                 | 831.67          | 7.39                       | 68.32                      |                     |               |                          |                          |
+      | 5         | 06 January 2026 | 50.00                 | 788.70          | 7.03                       | 61.29                      |                     |               |                          |                          |
+      | 6         | 07 January 2026 | 50.00                 | 745.36          | 6.66                       | 54.63                      |                     |               |                          |                          |
+      | 7         | 08 January 2026 | 50.00                 | 701.65          | 6.30                       | 48.33                      |                     |               |                          |                          |
+      | 8         | 09 January 2026 | 50.00                 | 657.58          | 5.93                       | 42.40                      |                     |               |                          |                          |
+      | 9         | 10 January 2026 | 50.00                 | 613.14          | 5.55                       | 36.85                      |                     |               |                          |                          |
+      | 10        | 11 January 2026 | 50.00                 | 568.31          | 5.18                       | 31.67                      |                     |               |                          |                          |
+      | 11        | 12 January 2026 | 50.00                 | 523.12          | 4.80                       | 26.87                      |                     |               |                          |                          |
+      | 12        | 13 January 2026 | 50.00                 | 477.53          | 4.42                       | 22.45                      |                     |               |                          |                          |
+      | 13        | 14 January 2026 | 50.00                 | 431.57          | 4.03                       | 18.42                      |                     |               |                          |                          |
+      | 14        | 15 January 2026 | 50.00                 | 385.21          | 3.65                       | 14.77                      |                     |               |                          |                          |
+      | 15        | 16 January 2026 | 50.00                 | 338.47          | 3.25                       | 11.52                      |                     |               |                          |                          |
+      | 16        | 17 January 2026 | 50.00                 | 291.33          | 2.86                       | 8.66                       |                     |               |                          |                          |
+      | 17        | 18 January 2026 | 50.00                 | 243.79          | 2.46                       | 6.20                       |                     |               |                          |                          |
+      | 18        | 19 January 2026 | 50.00                 | 195.85          | 2.06                       | 4.14                       |                     |               |                          |                          |
+      | 19        | 20 January 2026 | 50.00                 | 147.50          | 1.65                       | 2.49                       |                     |               |                          |                          |
+      | 20        | 21 January 2026 | 50.00                 | 98.75           | 1.25                       | 1.24                       |                     |               |                          |                          |
+      | 21        | 22 January 2026 | 50.00                 | 49.58           | 0.83                       | 0.41                       |                     |               |                          |                          |
+      | 22        | 23 January 2026 | 50.00                 | 0.00            | 0.41                       | 0.00                       |                     |               |                          |                          |
     When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital loan amortization schedule has 25 periods, with the following data for periods:
-      | paymentNo | paymentDate      | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance   | actualAmortizationAmount | actualDiscountFeeBalance |
-      | 0         | 01 January 2026  | -1000.00              | 1000.00         |                            | 100.00                     |                     | 1000.00         |                          | 100.00                   |
-      | 1         | 02 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 2         | 03 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 3         | 04 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      |                     |                 |                          |                          |
-      | 4         | 05 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      |                     |                 |                          |                          |
-      | 5         | 06 January 2026  | 50.00                 | 874.29          | 7.74                       | 75.71                      |                     |                 |                          |                          |
-      | 6         | 07 January 2026  | 50.00                 | 831.67          | 7.39                       | 68.32                      |                     |                 |                          |                          |
-      | 7         | 08 January 2026  | 50.00                 | 788.70          | 7.03                       | 61.29                      |                     |                 |                          |                          |
-      | 8         | 09 January 2026  | 50.00                 | 745.36          | 6.66                       | 54.63                      |                     |                 |                          |                          |
-      | 9         | 10 January 2026  | 50.00                 | 701.65          | 6.30                       | 48.33                      |                     |                 |                          |                          |
-      | 10        | 11 January 2026  | 50.00                 | 657.58          | 5.93                       | 42.40                      |                     |                 |                          |                          |
-      | 11        | 12 January 2026  | 50.00                 | 613.14          | 5.55                       | 36.85                      |                     |                 |                          |                          |
-      | 12        | 13 January 2026  | 50.00                 | 568.31          | 5.18                       | 31.67                      |                     |                 |                          |                          |
-      | 13        | 14 January 2026  | 50.00                 | 523.12          | 4.80                       | 26.87                      |                     |                 |                          |                          |
-      | 14        | 15 January 2026  | 50.00                 | 477.53          | 4.42                       | 22.45                      |                     |                 |                          |                          |
-      | 15        | 16 January 2026  | 50.00                 | 431.57          | 4.03                       | 18.42                      |                     |                 |                          |                          |
-      | 16        | 17 January 2026  | 50.00                 | 385.21          | 3.65                       | 14.77                      |                     |                 |                          |                          |
-      | 17        | 18 January 2026  | 50.00                 | 338.47          | 3.25                       | 11.52                      |                     |                 |                          |                          |
-      | 18        | 19 January 2026  | 50.00                 | 291.33          | 2.86                       | 8.66                       |                     |                 |                          |                          |
-      | 19        | 20 January 2026  | 50.00                 | 243.79          | 2.46                       | 6.20                       |                     |                 |                          |                          |
-      | 20        | 21 January 2026  | 50.00                 | 195.85          | 2.06                       | 4.14                       |                     |                 |                          |                          |
-      | 21        | 22 January 2026  | 50.00                 | 147.50          | 1.65                       | 2.49                       |                     |                 |                          |                          |
-      | 22        | 23 January 2026  | 50.00                 | 98.75           | 1.24                       | 1.25                       |                     |                 |                          |                          |
-      | 23        | 24 January 2026  | 50.00                 | 49.58           | 0.83                       | 0.42                       |                     |                 |                          |                          |
-      | 24        | 25 January 2026  | 50.00                 | 0.00            | 0.42                       | 0.00                       |                     |                 |                          |                          |
+      | paymentNo | paymentDate     | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance | actualAmortizationAmount | actualDiscountFeeBalance |
+      | 0         | 01 January 2026 | -1000.00              | 1000.00         |                            | 100.00                     |                     | 1000.00       |                          | 100.00                   |
+      | 1         | 02 January 2026 | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 2         | 03 January 2026 | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 3         | 04 January 2026 | 50.00                 | 958.45          | 8.45                       | 91.55                      |                     |               |                          |                          |
+      | 4         | 05 January 2026 | 50.00                 | 916.54          | 8.10                       | 83.45                      |                     |               |                          |                          |
+      | 5         | 06 January 2026 | 50.00                 | 874.29          | 7.74                       | 75.71                      |                     |               |                          |                          |
+      | 6         | 07 January 2026 | 50.00                 | 831.67          | 7.39                       | 68.32                      |                     |               |                          |                          |
+      | 7         | 08 January 2026 | 50.00                 | 788.70          | 7.03                       | 61.29                      |                     |               |                          |                          |
+      | 8         | 09 January 2026 | 50.00                 | 745.36          | 6.66                       | 54.63                      |                     |               |                          |                          |
+      | 9         | 10 January 2026 | 50.00                 | 701.65          | 6.30                       | 48.33                      |                     |               |                          |                          |
+      | 10        | 11 January 2026 | 50.00                 | 657.58          | 5.93                       | 42.40                      |                     |               |                          |                          |
+      | 11        | 12 January 2026 | 50.00                 | 613.14          | 5.55                       | 36.85                      |                     |               |                          |                          |
+      | 12        | 13 January 2026 | 50.00                 | 568.31          | 5.18                       | 31.67                      |                     |               |                          |                          |
+      | 13        | 14 January 2026 | 50.00                 | 523.12          | 4.80                       | 26.87                      |                     |               |                          |                          |
+      | 14        | 15 January 2026 | 50.00                 | 477.53          | 4.42                       | 22.45                      |                     |               |                          |                          |
+      | 15        | 16 January 2026 | 50.00                 | 431.57          | 4.03                       | 18.42                      |                     |               |                          |                          |
+      | 16        | 17 January 2026 | 50.00                 | 385.21          | 3.65                       | 14.77                      |                     |               |                          |                          |
+      | 17        | 18 January 2026 | 50.00                 | 338.47          | 3.25                       | 11.52                      |                     |               |                          |                          |
+      | 18        | 19 January 2026 | 50.00                 | 291.33          | 2.86                       | 8.66                       |                     |               |                          |                          |
+      | 19        | 20 January 2026 | 50.00                 | 243.79          | 2.46                       | 6.20                       |                     |               |                          |                          |
+      | 20        | 21 January 2026 | 50.00                 | 195.85          | 2.06                       | 4.14                       |                     |               |                          |                          |
+      | 21        | 22 January 2026 | 50.00                 | 147.50          | 1.65                       | 2.49                       |                     |               |                          |                          |
+      | 22        | 23 January 2026 | 50.00                 | 98.75           | 1.24                       | 1.25                       |                     |               |                          |                          |
+      | 23        | 24 January 2026 | 50.00                 | 49.58           | 0.83                       | 0.42                       |                     |               |                          |                          |
+      | 24        | 25 January 2026 | 50.00                 | 0.00            | 0.42                       | 0.00                       |                     |               |                          |                          |
     And Working Capital Loan has transactions:
-      | transactionDate | type           | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement   | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee   | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
 # ---- make repayment --- #
     And Customer makes repayment by loan external ID on "04 January 2026" with 50.0 transaction amount on Working Capital loan
     Then Working Capital loan amortization schedule has 25 periods, with the following data for periods:
-      | paymentNo | paymentDate      | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance   | actualAmortizationAmount | actualDiscountFeeBalance |
-      | 0         | 01 January 2026  | -1000.00              | 1000.00         |                            | 100.00                     |                     | 1000.00         |                          | 100.00                   |
-      | 1         | 02 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 2         | 03 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 3         | 04 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 50.00               | 958.45          | 8.45                     | 91.55                    |
-      | 4         | 05 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      |                     |                 |                          |                          |
-      | 5         | 06 January 2026  | 50.00                 | 874.29          | 7.74                       | 75.71                      |                     |                 |                          |                          |
-      | 6         | 07 January 2026  | 50.00                 | 831.67          | 7.39                       | 68.32                      |                     |                 |                          |                          |
-      | 7         | 08 January 2026  | 50.00                 | 788.70          | 7.03                       | 61.29                      |                     |                 |                          |                          |
-      | 8         | 09 January 2026  | 50.00                 | 745.36          | 6.66                       | 54.63                      |                     |                 |                          |                          |
-      | 9         | 10 January 2026  | 50.00                 | 701.65          | 6.30                       | 48.33                      |                     |                 |                          |                          |
-      | 10        | 11 January 2026  | 50.00                 | 657.58          | 5.93                       | 42.40                      |                     |                 |                          |                          |
-      | 11        | 12 January 2026  | 50.00                 | 613.14          | 5.55                       | 36.85                      |                     |                 |                          |                          |
-      | 12        | 13 January 2026  | 50.00                 | 568.31          | 5.18                       | 31.67                      |                     |                 |                          |                          |
-      | 13        | 14 January 2026  | 50.00                 | 523.12          | 4.80                       | 26.87                      |                     |                 |                          |                          |
-      | 14        | 15 January 2026  | 50.00                 | 477.53          | 4.42                       | 22.45                      |                     |                 |                          |                          |
-      | 15        | 16 January 2026  | 50.00                 | 431.57          | 4.03                       | 18.42                      |                     |                 |                          |                          |
-      | 16        | 17 January 2026  | 50.00                 | 385.21          | 3.65                       | 14.77                      |                     |                 |                          |                          |
-      | 17        | 18 January 2026  | 50.00                 | 338.47          | 3.25                       | 11.52                      |                     |                 |                          |                          |
-      | 18        | 19 January 2026  | 50.00                 | 291.33          | 2.86                       | 8.66                       |                     |                 |                          |                          |
-      | 19        | 20 January 2026  | 50.00                 | 243.79          | 2.46                       | 6.20                       |                     |                 |                          |                          |
-      | 20        | 21 January 2026  | 50.00                 | 195.85          | 2.06                       | 4.14                       |                     |                 |                          |                          |
-      | 21        | 22 January 2026  | 50.00                 | 147.50          | 1.65                       | 2.49                       |                     |                 |                          |                          |
-      | 22        | 23 January 2026  | 50.00                 | 98.75           | 1.24                       | 1.25                       |                     |                 |                          |                          |
-      | 23        | 24 January 2026  | 50.00                 | 49.58           | 0.83                       | 0.42                       |                     |                 |                          |                          |
-      | 24        | 25 January 2026  | 50.00                 | 0.00            | 0.42                       | 0.00                       |                     |                 |                          |                          |
+      | paymentNo | paymentDate     | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance | actualAmortizationAmount | actualDiscountFeeBalance |
+      | 0         | 01 January 2026 | -1000.00              | 1000.00         |                            | 100.00                     |                     | 1000.00       |                          | 100.00                   |
+      | 1         | 02 January 2026 | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 2         | 03 January 2026 | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 3         | 04 January 2026 | 50.00                 | 958.45          | 8.45                       | 91.55                      | 50.00               | 958.45        | 8.45                     | 91.55                    |
+      | 4         | 05 January 2026 | 50.00                 | 916.54          | 8.10                       | 83.45                      |                     |               |                          |                          |
+      | 5         | 06 January 2026 | 50.00                 | 874.29          | 7.74                       | 75.71                      |                     |               |                          |                          |
+      | 6         | 07 January 2026 | 50.00                 | 831.67          | 7.39                       | 68.32                      |                     |               |                          |                          |
+      | 7         | 08 January 2026 | 50.00                 | 788.70          | 7.03                       | 61.29                      |                     |               |                          |                          |
+      | 8         | 09 January 2026 | 50.00                 | 745.36          | 6.66                       | 54.63                      |                     |               |                          |                          |
+      | 9         | 10 January 2026 | 50.00                 | 701.65          | 6.30                       | 48.33                      |                     |               |                          |                          |
+      | 10        | 11 January 2026 | 50.00                 | 657.58          | 5.93                       | 42.40                      |                     |               |                          |                          |
+      | 11        | 12 January 2026 | 50.00                 | 613.14          | 5.55                       | 36.85                      |                     |               |                          |                          |
+      | 12        | 13 January 2026 | 50.00                 | 568.31          | 5.18                       | 31.67                      |                     |               |                          |                          |
+      | 13        | 14 January 2026 | 50.00                 | 523.12          | 4.80                       | 26.87                      |                     |               |                          |                          |
+      | 14        | 15 January 2026 | 50.00                 | 477.53          | 4.42                       | 22.45                      |                     |               |                          |                          |
+      | 15        | 16 January 2026 | 50.00                 | 431.57          | 4.03                       | 18.42                      |                     |               |                          |                          |
+      | 16        | 17 January 2026 | 50.00                 | 385.21          | 3.65                       | 14.77                      |                     |               |                          |                          |
+      | 17        | 18 January 2026 | 50.00                 | 338.47          | 3.25                       | 11.52                      |                     |               |                          |                          |
+      | 18        | 19 January 2026 | 50.00                 | 291.33          | 2.86                       | 8.66                       |                     |               |                          |                          |
+      | 19        | 20 January 2026 | 50.00                 | 243.79          | 2.46                       | 6.20                       |                     |               |                          |                          |
+      | 20        | 21 January 2026 | 50.00                 | 195.85          | 2.06                       | 4.14                       |                     |               |                          |                          |
+      | 21        | 22 January 2026 | 50.00                 | 147.50          | 1.65                       | 2.49                       |                     |               |                          |                          |
+      | 22        | 23 January 2026 | 50.00                 | 98.75           | 1.24                       | 1.25                       |                     |               |                          |                          |
+      | 23        | 24 January 2026 | 50.00                 | 49.58           | 0.83                       | 0.42                       |                     |               |                          |                          |
+      | 24        | 25 January 2026 | 50.00                 | 0.00            | 0.42                       | 0.00                       |                     |               |                          |                          |
     And Working Capital Loan has transactions:
-      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee              | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
-      | 04 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 04 January 2026 | Repayment    | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
 # --- update period payment rate --- #
     When Admin sets the business date to "20 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin update Working Capital period payment rate with "20" value effective from "20 January 2026"
     Then Working Capital loan amortization schedule has 38 periods, with the following data for periods:
-      | paymentNo | paymentDate      | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance   | actualAmortizationAmount | actualDiscountFeeBalance |
-      | 0         | 01 January 2026  | -1000.00              | 1000.00         |                            | 100.00                     |                     | 1000.00         |                          | 100.00                   |
-      | 1         | 02 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 2         | 03 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 3         | 04 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 50.00               | 958.45          | 8.45                     | 91.55                    |
-      | 4         | 05 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 5         | 06 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 6         | 07 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 7         | 08 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 8         | 09 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 9         | 10 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 10        | 11 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 11        | 12 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 12        | 13 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 13        | 14 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 14        | 15 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 15        | 16 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 16        | 17 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 17        | 18 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 18        | 19 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45          | 0.00                     | 91.55                    |
-      | 19        | 20 January 2026  | 55.56                 | 911.84          | 8.95                       | 82.60                      |                     |                 |                          |                          |
-      | 20        | 21 January 2026  | 55.56                 | 864.80          | 8.52                       | 74.08                      |                     |                 |                          |                          |
-      | 21        | 22 January 2026  | 55.56                 | 817.31          | 8.08                       | 66.00                      |                     |                 |                          |                          |
-      | 22        | 23 January 2026  | 55.56                 | 769.39          | 7.63                       | 58.37                      |                     |                 |                          |                          |
-      | 23        | 24 January 2026  | 55.56                 | 721.01          | 7.19                       | 51.18                      |                     |                 |                          |                          |
-      | 24        | 25 January 2026  | 55.56                 | 672.19          | 6.73                       | 44.45                      |                     |                 |                          |                          |
-      | 25        | 26 January 2026  | 55.56                 | 622.91          | 6.28                       | 38.17                      |                     |                 |                          |                          |
-      | 26        | 27 January 2026  | 55.56                 | 573.16          | 5.82                       | 32.35                      |                     |                 |                          |                          |
-      | 27        | 28 January 2026  | 55.56                 | 522.96          | 5.35                       | 27.00                      |                     |                 |                          |                          |
-      | 28        | 29 January 2026  | 55.56                 | 472.28          | 4.88                       | 22.12                      |                     |                 |                          |                          |
-      | 29        | 30 January 2026  | 55.56                 | 421.13          | 4.41                       | 17.71                      |                     |                 |                          |                          |
-      | 30        | 31 January 2026  | 55.56                 | 369.50          | 3.93                       | 13.78                      |                     |                 |                          |                          |
-      | 31        | 01 February 2026 | 55.56                 | 317.40          | 3.45                       | 10.33                      |                     |                 |                          |                          |
-      | 32        | 02 February 2026 | 55.56                 | 264.80          | 2.96                       | 7.37                       |                     |                 |                          |                          |
-      | 33        | 03 February 2026 | 55.56                 | 211.71          | 2.47                       | 4.90                       |                     |                 |                          |                          |
-      | 34        | 04 February 2026 | 55.56                 | 158.13          | 1.98                       | 2.92                       |                     |                 |                          |                          |
-      | 35        | 05 February 2026 | 55.56                 | 104.05          | 1.48                       | 1.44                       |                     |                 |                          |                          |
-      | 36        | 06 February 2026 | 55.56                 | 49.46           | 0.97                       | 0.47                       |                     |                 |                          |                          |
-      | 37        | 07 February 2026 | 49.92                 | 0.00            | 0.47                       | 0.00                       |                     |                 |                          |                          |
+      | paymentNo | paymentDate      | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance | actualAmortizationAmount | actualDiscountFeeBalance |
+      | 0         | 01 January 2026  | -1000.00              | 1000.00         |                            | 100.00                     |                     | 1000.00       |                          | 100.00                   |
+      | 1         | 02 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 2         | 03 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 3         | 04 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 50.00               | 958.45        | 8.45                     | 91.55                    |
+      | 4         | 05 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 5         | 06 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 6         | 07 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 7         | 08 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 8         | 09 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 9         | 10 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 10        | 11 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 11        | 12 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 12        | 13 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 13        | 14 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 14        | 15 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 15        | 16 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 16        | 17 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 17        | 18 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 18        | 19 January 2026  | 50.00                 | 916.54          | 8.10                       | 83.45                      | 0.00                | 958.45        | 0.00                     | 91.55                    |
+      | 19        | 20 January 2026  | 55.56                 | 911.84          | 8.95                       | 82.60                      |                     |               |                          |                          |
+      | 20        | 21 January 2026  | 55.56                 | 864.80          | 8.52                       | 74.08                      |                     |               |                          |                          |
+      | 21        | 22 January 2026  | 55.56                 | 817.31          | 8.08                       | 66.00                      |                     |               |                          |                          |
+      | 22        | 23 January 2026  | 55.56                 | 769.39          | 7.63                       | 58.37                      |                     |               |                          |                          |
+      | 23        | 24 January 2026  | 55.56                 | 721.01          | 7.19                       | 51.18                      |                     |               |                          |                          |
+      | 24        | 25 January 2026  | 55.56                 | 672.19          | 6.73                       | 44.45                      |                     |               |                          |                          |
+      | 25        | 26 January 2026  | 55.56                 | 622.91          | 6.28                       | 38.17                      |                     |               |                          |                          |
+      | 26        | 27 January 2026  | 55.56                 | 573.16          | 5.82                       | 32.35                      |                     |               |                          |                          |
+      | 27        | 28 January 2026  | 55.56                 | 522.96          | 5.35                       | 27.00                      |                     |               |                          |                          |
+      | 28        | 29 January 2026  | 55.56                 | 472.28          | 4.88                       | 22.12                      |                     |               |                          |                          |
+      | 29        | 30 January 2026  | 55.56                 | 421.13          | 4.41                       | 17.71                      |                     |               |                          |                          |
+      | 30        | 31 January 2026  | 55.56                 | 369.50          | 3.93                       | 13.78                      |                     |               |                          |                          |
+      | 31        | 01 February 2026 | 55.56                 | 317.40          | 3.45                       | 10.33                      |                     |               |                          |                          |
+      | 32        | 02 February 2026 | 55.56                 | 264.80          | 2.96                       | 7.37                       |                     |               |                          |                          |
+      | 33        | 03 February 2026 | 55.56                 | 211.71          | 2.47                       | 4.90                       |                     |               |                          |                          |
+      | 34        | 04 February 2026 | 55.56                 | 158.13          | 1.98                       | 2.92                       |                     |               |                          |                          |
+      | 35        | 05 February 2026 | 55.56                 | 104.05          | 1.48                       | 1.44                       |                     |               |                          |                          |
+      | 36        | 06 February 2026 | 55.56                 | 49.46           | 0.97                       | 0.47                       |                     |               |                          |                          |
+      | 37        | 07 February 2026 | 49.92                 | 0.00            | 0.47                       | 0.00                       |                     |               |                          |                          |
 # ---- make repayment after updated period payment rate --- #
     When Admin sets the business date to "21 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -1850,46 +1850,46 @@ Feature: Working Capital Period Payment Rate
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin update Working Capital period payment rate with "20" value effective from "20 January 2026"
     Then Working Capital loan amortization schedule has 39 periods, with the following data for periods:
-      | paymentNo | paymentDate      | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance   | actualAmortizationAmount | actualDiscountFeeBalance |
-      | 0         | 01 January 2026  | -1000.00              | 1000.00         |                            | 100.00                     |                     | 1000.00         |                          | 100.00                   |
-      | 1         | 02 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 2         | 03 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 3         | 04 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 4         | 05 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 5         | 06 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 6         | 07 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 7         | 08 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 8         | 09 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 9         | 10 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 10        | 11 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 11        | 12 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 12        | 13 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 13        | 14 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 14        | 15 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 15        | 16 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 16        | 17 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 17        | 18 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 18        | 19 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00         | 0.00                     | 100.00                   |
-      | 19        | 20 January 2026  | 55.56                 | 953.78          | 9.34                       | 90.66                      |                     |                 |                          |                          |
-      | 20        | 21 January 2026  | 55.56                 | 907.13          | 8.91                       | 81.75                      |                     |                 |                          |                          |
-      | 21        | 22 January 2026  | 55.56                 | 860.04          | 8.47                       | 73.28                      |                     |                 |                          |                          |
-      | 22        | 23 January 2026  | 55.56                 | 812.52          | 8.03                       | 65.25                      |                     |                 |                          |                          |
-      | 23        | 24 January 2026  | 55.56                 | 764.55          | 7.59                       | 57.66                      |                     |                 |                          |                          |
-      | 24        | 25 January 2026  | 55.56                 | 716.13          | 7.14                       | 50.52                      |                     |                 |                          |                          |
-      | 25        | 26 January 2026  | 55.56                 | 667.26          | 6.69                       | 43.83                      |                     |                 |                          |                          |
-      | 26        | 27 January 2026  | 55.56                 | 617.93          | 6.23                       | 37.60                      |                     |                 |                          |                          |
-      | 27        | 28 January 2026  | 55.56                 | 568.14          | 5.77                       | 31.83                      |                     |                 |                          |                          |
-      | 28        | 29 January 2026  | 55.56                 | 517.89          | 5.31                       | 26.52                      |                     |                 |                          |                          |
-      | 29        | 30 January 2026  | 55.56                 | 467.16          | 4.84                       | 21.68                      |                     |                 |                          |                          |
-      | 30        | 31 January 2026  | 55.56                 | 415.97          | 4.36                       | 17.32                      |                     |                 |                          |                          |
-      | 31        | 01 February 2026 | 55.56                 | 364.29          | 3.89                       | 13.43                      |                     |                 |                          |                          |
-      | 32        | 02 February 2026 | 55.56                 | 312.14          | 3.40                       | 10.03                      |                     |                 |                          |                          |
-      | 33        | 03 February 2026 | 55.56                 | 259.49          | 2.92                       | 7.11                       |                     |                 |                          |                          |
-      | 34        | 04 February 2026 | 55.56                 | 206.35          | 2.42                       | 4.69                       |                     |                 |                          |                          |
-      | 35        | 05 February 2026 | 55.56                 | 152.72          | 1.93                       | 2.76                       |                     |                 |                          |                          |
-      | 36        | 06 February 2026 | 55.56                 | 98.59           | 1.43                       | 1.33                       |                     |                 |                          |                          |
-      | 37        | 07 February 2026 | 55.56                 | 43.95           | 0.92                       | 0.41                       |                     |                 |                          |                          |
-      | 38        | 08 February 2026 | 44.36                 | 0.00            | 0.41                       | 0.00                       |                     |                 |                          |                          |
+      | paymentNo | paymentDate      | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance | actualPaymentAmount | actualBalance | actualAmortizationAmount | actualDiscountFeeBalance |
+      | 0         | 01 January 2026  | -1000.00              | 1000.00         |                            | 100.00                     |                     | 1000.00       |                          | 100.00                   |
+      | 1         | 02 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 2         | 03 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 3         | 04 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 4         | 05 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 5         | 06 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 6         | 07 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 7         | 08 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 8         | 09 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 9         | 10 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 10        | 11 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 11        | 12 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 12        | 13 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 13        | 14 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 14        | 15 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 15        | 16 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 16        | 17 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 17        | 18 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 18        | 19 January 2026  | 50.00                 | 958.45          | 8.45                       | 91.55                      | 0.00                | 1000.00       | 0.00                     | 100.00                   |
+      | 19        | 20 January 2026  | 55.56                 | 953.78          | 9.34                       | 90.66                      |                     |               |                          |                          |
+      | 20        | 21 January 2026  | 55.56                 | 907.13          | 8.91                       | 81.75                      |                     |               |                          |                          |
+      | 21        | 22 January 2026  | 55.56                 | 860.04          | 8.47                       | 73.28                      |                     |               |                          |                          |
+      | 22        | 23 January 2026  | 55.56                 | 812.52          | 8.03                       | 65.25                      |                     |               |                          |                          |
+      | 23        | 24 January 2026  | 55.56                 | 764.55          | 7.59                       | 57.66                      |                     |               |                          |                          |
+      | 24        | 25 January 2026  | 55.56                 | 716.13          | 7.14                       | 50.52                      |                     |               |                          |                          |
+      | 25        | 26 January 2026  | 55.56                 | 667.26          | 6.69                       | 43.83                      |                     |               |                          |                          |
+      | 26        | 27 January 2026  | 55.56                 | 617.93          | 6.23                       | 37.60                      |                     |               |                          |                          |
+      | 27        | 28 January 2026  | 55.56                 | 568.14          | 5.77                       | 31.83                      |                     |               |                          |                          |
+      | 28        | 29 January 2026  | 55.56                 | 517.89          | 5.31                       | 26.52                      |                     |               |                          |                          |
+      | 29        | 30 January 2026  | 55.56                 | 467.16          | 4.84                       | 21.68                      |                     |               |                          |                          |
+      | 30        | 31 January 2026  | 55.56                 | 415.97          | 4.36                       | 17.32                      |                     |               |                          |                          |
+      | 31        | 01 February 2026 | 55.56                 | 364.29          | 3.89                       | 13.43                      |                     |               |                          |                          |
+      | 32        | 02 February 2026 | 55.56                 | 312.14          | 3.40                       | 10.03                      |                     |               |                          |                          |
+      | 33        | 03 February 2026 | 55.56                 | 259.49          | 2.92                       | 7.11                       |                     |               |                          |                          |
+      | 34        | 04 February 2026 | 55.56                 | 206.35          | 2.42                       | 4.69                       |                     |               |                          |                          |
+      | 35        | 05 February 2026 | 55.56                 | 152.72          | 1.93                       | 2.76                       |                     |               |                          |                          |
+      | 36        | 06 February 2026 | 55.56                 | 98.59           | 1.43                       | 1.33                       |                     |               |                          |                          |
+      | 37        | 07 February 2026 | 55.56                 | 43.95           | 0.92                       | 0.41                       |                     |               |                          |                          |
+      | 38        | 08 February 2026 | 44.36                 | 0.00            | 0.41                       | 0.00                       |                     |               |                          |                          |
 # ---- make repayment after updated period payment rate --- #
     When Admin sets the business date to "21 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -1938,10 +1938,10 @@ Feature: Working Capital Period Payment Rate
       | 39        | 09 February 2026 | 55.56                 | 0.12            | 0.52                       | 0.00                       |                     |                 |                          |                          |
       | 40        | 10 February 2026 | 0.12                  | 0.00            | 0.00                       | 0.00                       |                     |                 |                          |                          |
     And Working Capital Loan has transactions:
-      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee              | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
-      | 21 January 2026 | Repayment                 | 55.56             | 55.56            | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 21 January 2026 | Repayment    | 55.56             | 55.56            | 0.0               | 0.0                   | false    |
     Then Admin closes the Working Capital loan with a full repayment on "21 January 2026"
 
   @TestRailId:C94032
@@ -1952,9 +1952,9 @@ Feature: Working Capital Period Payment Rate
       | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 1000            | 100000       | 18                | 100      |
     When Admin sets the business date to "01 February 2026"
     And Working Capital Loan has transactions:
-      | transactionDate | type           | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement   | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee   | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
     And Admin update Working Capital period payment rate failed with "20" value on "01 February 2026" date cause after maturity date
     And Working capital loan account has the correct data:
       | product.name             | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |

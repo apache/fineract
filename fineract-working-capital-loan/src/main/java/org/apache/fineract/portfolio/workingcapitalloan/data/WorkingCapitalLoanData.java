@@ -85,7 +85,6 @@ public class WorkingCapitalLoanData implements Serializable {
     private BigDecimal approvedDiscountFee;
     private Integer numberOfRepayments;
     private BigDecimal periodPaymentAmount;
-    private BigDecimal dailyEir;
     private BigDecimal calculatedAnnualEir;
     private DelinquencyBucketData delinquencyBucket;
     private WorkingCapitalBreachData breach;

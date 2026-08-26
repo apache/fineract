@@ -28,6 +28,8 @@ import java.util.List;
  * <ul>
  * <li>{@link #irr} — internal rate of return via Newton-Raphson (Excel IRR equivalent), for an arbitrary cash-flow
  * series (e.g. a schedule whose final payment is a smaller remainder)</li>
+ * <li>{@link #annualize} — compounds a periodic rate over a year: {@code (1 + r)^n − 1}</li>
+ * <li>{@link #deannualize} — the inverse, solving the nth root by Newton-Raphson: {@code (1 + annual)^(1/n) − 1}</li>
  * <li>{@link #discountFactor} — present value discount factor: {@code 1 / (1 + r)^days}</li>
  * </ul>
  */
@@ -38,6 +40,8 @@ public final class TvmFunctions {
     private static final BigDecimal DEFAULT_GUESS = new BigDecimal("0.01");
     private static final BigDecimal MIN_GUESS = new BigDecimal("1E-9");
     private static final BigDecimal TWO = BigDecimal.valueOf(2);
+    private static final int NTH_ROOT_MAX_ITERATIONS = 50;
+    private static final BigDecimal NTH_ROOT_TOLERANCE = new BigDecimal("1E-15");
 
     private TvmFunctions() {}
 
@@ -160,6 +164,95 @@ public final class TvmFunctions {
             return DEFAULT_GUESS;
         }
         return estimate.abs().max(MIN_GUESS);
+    }
+
+    /**
+     * Compounds a periodic rate over a year: {@code (1 + periodicRate)^periodsPerYear − 1}.
+     *
+     * <p>
+     * The exponent is the caller's day-count convention, not a fixed 365: a loan priced on 360 days has to annualise on
+     * 360, or the rate it is reported at will not be the rate its schedule runs on.
+     *
+     * @param periodicRate
+     *            the periodic rate to compound, typically an {@link #irr} result
+     * @param periodsPerYear
+     *            number of periods in a year, i.e. the day-count convention
+     * @param mc
+     *            math context for precision
+     * @return the equivalent annual rate
+     * @throws IllegalArgumentException
+     *             if periodsPerYear is not positive, or periodicRate is not greater than -1
+     */
+    public static BigDecimal annualize(final BigDecimal periodicRate, final int periodsPerYear, final MathContext mc) {
+        if (periodsPerYear <= 0) {
+            throw new IllegalArgumentException("periodsPerYear must be positive, got: " + periodsPerYear);
+        }
+        final BigDecimal base = BigDecimal.ONE.add(periodicRate, mc);
+        if (base.signum() <= 0) {
+            throw new IllegalArgumentException("periodicRate must be greater than -1, got: " + periodicRate);
+        }
+        return base.pow(periodsPerYear, mc).subtract(BigDecimal.ONE, mc);
+    }
+
+    /**
+     * Inverts {@link #annualize}: {@code (1 + annualRate)^(1/periodsPerYear) − 1}, solved by Newton-Raphson from the
+     * seed in {@link #nthRootSeed}.
+     *
+     * @param annualRate
+     *            the annual rate to spread back across the year
+     * @param periodsPerYear
+     *            number of periods in a year, i.e. the day-count convention
+     * @param mc
+     *            math context for precision
+     * @return the equivalent periodic rate, exactly zero when annualRate is zero
+     * @throws IllegalArgumentException
+     *             if periodsPerYear is not positive, or annualRate is not greater than -1
+     * @throws IllegalStateException
+     *             if Newton-Raphson does not converge
+     */
+    public static BigDecimal deannualize(final BigDecimal annualRate, final int periodsPerYear, final MathContext mc) {
+        if (periodsPerYear <= 0) {
+            throw new IllegalArgumentException("periodsPerYear must be positive, got: " + periodsPerYear);
+        }
+        if (annualRate.signum() == 0) {
+            return BigDecimal.ZERO;
+        }
+        final BigDecimal base = BigDecimal.ONE.add(annualRate, mc);
+        if (base.signum() <= 0) {
+            throw new IllegalArgumentException("annualRate must be greater than -1, got: " + annualRate);
+        }
+
+        final BigDecimal n = BigDecimal.valueOf(periodsPerYear);
+        final BigDecimal nMinusOne = BigDecimal.valueOf(periodsPerYear - 1L);
+        BigDecimal root = nthRootSeed(base, periodsPerYear);
+
+        for (int iter = 0; iter < NTH_ROOT_MAX_ITERATIONS; iter++) {
+            final BigDecimal rootPower = root.pow(periodsPerYear - 1, mc);
+            final BigDecimal next = nMinusOne.multiply(root, mc).add(base.divide(rootPower, mc), mc).divide(n, mc);
+            final BigDecimal correction = next.subtract(root, mc);
+            root = next;
+
+            if (correction.abs().compareTo(NTH_ROOT_TOLERANCE) < 0) {
+                return root.subtract(BigDecimal.ONE, mc);
+            }
+        }
+
+        throw new IllegalStateException("nth root did not converge after " + NTH_ROOT_MAX_ITERATIONS + " iterations");
+    }
+
+    /**
+     * Starting point for the nth-root search, taken from {@code base}'s decimal exponent rather than from
+     * {@code base.doubleValue()}, which is Infinity once the annual rate outgrows a {@code double} — reachable on a
+     * schedule solved off a tiny balance against an unearned fee. Splitting the exponent by the root keeps every
+     * {@code double} step in range, and the whole part is applied exactly on the {@link BigDecimal}.
+     */
+    private static BigDecimal nthRootSeed(final BigDecimal base, final int periodsPerYear) {
+        final int exponent = base.precision() - base.scale() - 1;
+        final double mantissa = base.movePointLeft(exponent).doubleValue();
+        final int wholePart = Math.floorDiv(exponent, periodsPerYear);
+        final int remainder = Math.floorMod(exponent, periodsPerYear);
+        final double head = Math.pow(mantissa, 1.0 / periodsPerYear) * Math.pow(10.0, (double) remainder / periodsPerYear);
+        return BigDecimal.valueOf(head).scaleByPowerOfTen(wholePart);
     }
 
     /**
