@@ -138,6 +138,18 @@ public class FeignWorkingCapitalLoanHelper {
         return response.getResourceId();
     }
 
+    public Long makeDiscountFee(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "discountFee", request));
+        return response.getResourceId();
+    }
+
+    public Long makeDiscountFeeAdjustment(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "discountFeeAdjustment", request));
+        return response.getResourceId();
+    }
+
     public Long creditBalanceRefund(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
         PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionById(loanId, "creditBalanceRefund", request));

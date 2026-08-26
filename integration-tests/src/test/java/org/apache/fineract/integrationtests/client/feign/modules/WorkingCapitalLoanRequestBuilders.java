@@ -108,6 +108,17 @@ public final class WorkingCapitalLoanRequestBuilders {
                 .dateFormat(DATE_FORMAT);
     }
 
+    public static PostWorkingCapitalLoanTransactionsRequest discountFee(BigDecimal amount, Long relatedResourceId) {
+        return new PostWorkingCapitalLoanTransactionsRequest().transactionAmount(amount).relatedResourceId(relatedResourceId).locale(LOCALE)
+                .dateFormat(DATE_FORMAT);
+    }
+
+    public static PostWorkingCapitalLoanTransactionsRequest discountFeeAdjustment(BigDecimal amount, String transactionDate,
+            Long relatedResourceId) {
+        return new PostWorkingCapitalLoanTransactionsRequest().transactionAmount(amount).transactionDate(transactionDate)
+                .relatedResourceId(relatedResourceId).locale(LOCALE).dateFormat(DATE_FORMAT);
+    }
+
     public static ExecuteWorkingCapitalLoanTransactionCommandRequest undoTransaction() {
         return new ExecuteWorkingCapitalLoanTransactionCommandRequest();
     }

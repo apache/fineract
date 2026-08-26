@@ -519,3 +519,36 @@ Feature: Working Capital Loan Undo Transaction
       | 1            | 01 January 2026 | 30 January 2026 | 200            | 200        | 0                 | true                  |
       | 2            | 31 January 2026 | 01 March 2026   | 200            | 0          | 200               |                       |
     Then Admin closes the Working Capital loan with a full repayment on "28 February 2026"
+
+  @TestRailId:CXXXX # TODO: real id
+  Scenario: Verify undo of a repayment on a repaid loan with an active charge keeps the discount fee in the amortization schedule
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                |          |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin successfully add discount with "1000" amount on Working Capital loan account
+    When Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has the following summary fields:
+      | discountFeeAmount | netDisbursementAmount | totalPaymentVolume | periodPaymentRate | npvDayCount | expectedPaymentAmount | originalPaymentNumber |
+      | 1000.00           | 9000.00               | 100000.00          | 18                | 360         | 50.00                 | 200                   |
+    When Admin sets the business date to "05 January 2026"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "05 January 2026" due date and 100.0 transaction amount
+    When Admin sets the business date to "06 January 2026"
+    And Customer makes repayment on "06 January 2026" with 10100 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    When Admin sets the business date to "07 January 2026"
+    And Customer undo "1"th "REPAYMENT" transaction made on "06 January 2026" on Working Capital loan
+    Then Working Capital loan status will be "ACTIVE"
+    And Working capital loan account has the correct data:
+      | discount | principal | totalPaidPrincipal | totalDiscountFee |
+      | 1000.0   | 10000.0   | 0.0                | 1000.0           |
+    When Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has the following summary fields:
+      | discountFeeAmount | netDisbursementAmount | totalPaymentVolume | periodPaymentRate | npvDayCount | expectedPaymentAmount | originalPaymentNumber |
+      | 1000.00           | 9000.00               | 100000.00          | 18                | 360         | 50.00                 | 200                   |
+    And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | expectedPaymentAmount | expectedBalance | expectedDiscountFeeBalance |
+      | 0         | -9000.00              | 9000.00         | 1000.00                    |

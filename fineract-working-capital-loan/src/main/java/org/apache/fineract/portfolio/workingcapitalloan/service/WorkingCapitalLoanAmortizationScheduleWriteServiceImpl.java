@@ -220,15 +220,14 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         generateAndSaveForApprovedLoanState(loan);
     }
 
-    @Override
-    public BigDecimal getWorkingCapitalLoanDiscountAmount(WorkingCapitalLoan loan) {
+    private BigDecimal getWorkingCapitalLoanDiscountAmount(WorkingCapitalLoan loan) {
         BigDecimal discount = BigDecimal.ZERO;
         if (loan.getLoanProductRelatedDetails() != null) {
             if (loan.getLoanStatus().isSubmittedAndPendingApproval() && loan.getLoanProductRelatedDetails().getDiscountProposed() != null) {
                 discount = loan.getLoanProductRelatedDetails().getDiscountProposed();
             } else if (loan.getLoanStatus().isApproved() && loan.getLoanProductRelatedDetails().getDiscountApproved() != null) {
                 discount = loan.getLoanProductRelatedDetails().getDiscountApproved();
-            } else if (loan.getLoanStatus().isActive() && loan.getLoanProductRelatedDetails().getDiscount() != null) {
+            } else if (loan.getLoanProductRelatedDetails().getDiscount() != null) {
                 discount = loan.getLoanProductRelatedDetails().getDiscount();
             }
         }
