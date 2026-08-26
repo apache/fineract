@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.apache.fineract.integrationtests.client.feign.modules.FeignTestConstants.DATETIME_PATTERN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -27,37 +28,28 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.ChargeRequest;
-import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesResponse;
-import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
-import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
-import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
-import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesResponse;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.SavingsAccountData;
-import org.apache.fineract.client.util.CallFailedRuntimeException;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
-import org.apache.fineract.integrationtests.savings.base.BaseSavingsIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
+import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @Slf4j
-public class SavingsAccountChargeRoundingTest extends BaseSavingsIntegrationTest {
+public class SavingsAccountChargeRoundingTest extends FeignSavingsTestBase {
 
     private Long clientId;
-    private ChargesHelper chargesHelper;
     private static final String DATE = "01 January 2026";
 
     @BeforeEach
     public void setup() {
-        clientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
-        chargesHelper = new ChargesHelper();
+        clientId = createClient();
     }
 
     /** FLAT CHARGE **/
@@ -66,7 +58,7 @@ public class SavingsAccountChargeRoundingTest extends BaseSavingsIntegrationTest
         runAt(DATE, () -> {
 
             Long productId = createSavingsProduct(0, 1);
-            Long savingsId = createAndActivateSavingsAccount(productId, DATE);
+            Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
             PostChargesResponse charge = createFlatCharge(19.8);
             assertNotNull(charge.getResourceId());
@@ -86,7 +78,7 @@ public class SavingsAccountChargeRoundingTest extends BaseSavingsIntegrationTest
         runAt(DATE, () -> {
 
             Long productId = createSavingsProduct(0, 1);
-            Long savingsId = createAndActivateSavingsAccount(productId, DATE);
+            Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
             PostChargesResponse charge = createFlatCharge(0.6);
             assertNotNull(charge.getResourceId());
@@ -107,7 +99,7 @@ public class SavingsAccountChargeRoundingTest extends BaseSavingsIntegrationTest
         runAt(DATE, () -> {
 
             Long productId = createSavingsProduct(0, 1);
-            Long savingsId = createAndActivateSavingsAccount(productId, DATE);
+            Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
             PostChargesResponse charge = createFlatCharge(0.4);
             assertNotNull(charge.getResourceId());
@@ -115,8 +107,8 @@ public class SavingsAccountChargeRoundingTest extends BaseSavingsIntegrationTest
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                     () -> addFlatCharge(savingsId, charge.getResourceId(), 0.4, DATE));
 
-            assertEquals(400, exception.getResponse().code());
-            assertTrue(exception.getMessage().contains("error.msg.savings.charge.amount.rounded.to.zero"));
+            assertEquals(400, exception.getStatus());
+            assertTrue(exception.getResponseBody().contains("error.msg.savings.charge.amount.rounded.to.zero"));
             assertNoChargesPersisted(savingsId, charge.getResourceId());
         });
     }
@@ -126,17 +118,17 @@ public class SavingsAccountChargeRoundingTest extends BaseSavingsIntegrationTest
         runAt(DATE, () -> {
 
             Long productId = createSavingsProduct(0, 1);
-            Long savingsId = createAndActivateSavingsAccount(productId, DATE);
+            Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
             PostChargesResponse charge = createPercentageWithdrawalCharge(2.5);
 
             addPercentageWithdrawalCharge(savingsId, charge.getResourceId(), 2.5);
 
-            deposit(savingsId, DATE, BigDecimal.valueOf(1000));
+            deposit(savingsId, "1000", DATE);
 
-            withdraw(savingsId, DATE, BigDecimal.valueOf(615));
+            withdraw(savingsId, "615", DATE);
 
-            SavingsAccountData accountData = getSavingsAccount(savingsId);
+            SavingsAccountData accountData = getSavingsDetails(savingsId);
 
             BigDecimal actualChargeFees = getActualChargeAmount(accountData);
             assertNotNull(actualChargeFees);
@@ -158,17 +150,17 @@ public class SavingsAccountChargeRoundingTest extends BaseSavingsIntegrationTest
         runAt(DATE, () -> {
 
             Long productId = createSavingsProduct(0, 1);
-            Long savingsId = createAndActivateSavingsAccount(productId, DATE);
+            Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
             PostChargesResponse charge = createPercentageWithdrawalCharge(2.5);
 
             addPercentageWithdrawalCharge(savingsId, charge.getResourceId(), 2.5);
 
-            deposit(savingsId, DATE, BigDecimal.valueOf(1000));
+            deposit(savingsId, "1000", DATE);
 
-            withdraw(savingsId, DATE, BigDecimal.valueOf(24));
+            withdraw(savingsId, "24", DATE);
 
-            SavingsAccountData accountData = getSavingsAccount(savingsId);
+            SavingsAccountData accountData = getSavingsDetails(savingsId);
 
             BigDecimal actualChargeFees = getActualChargeAmount(accountData);
             assertNotNull(actualChargeFees);
@@ -191,17 +183,17 @@ public class SavingsAccountChargeRoundingTest extends BaseSavingsIntegrationTest
         runAt(DATE, () -> {
 
             Long productId = createSavingsProduct(0, 1);
-            Long savingsId = createAndActivateSavingsAccount(productId, DATE);
+            Long savingsId = createApproveActivateSavings(clientId, productId, DATE);
 
             PostChargesResponse charge = createPercentageWithdrawalCharge(2.5);
 
             addPercentageWithdrawalCharge(savingsId, charge.getResourceId(), 2.5);
 
-            deposit(savingsId, DATE, BigDecimal.valueOf(1000));
+            deposit(savingsId, "1000", DATE);
 
-            withdraw(savingsId, DATE, BigDecimal.valueOf(20));
+            withdraw(savingsId, "20", DATE);
 
-            SavingsAccountData accountData = getSavingsAccount(savingsId);
+            SavingsAccountData accountData = getSavingsDetails(savingsId);
 
             BigDecimal actualChargeFees = getActualChargeAmount(accountData);
             assertNull(actualChargeFees);
@@ -218,23 +210,21 @@ public class SavingsAccountChargeRoundingTest extends BaseSavingsIntegrationTest
     // -----------------------------
 
     private Long createSavingsProduct(int digitsAfterDecimal, int inMultiplesOf) {
-        return createProduct(baseSavingsProduct(digitsAfterDecimal, inMultiplesOf)).getResourceId();
+        return createSavingsProduct(baseSavingsProduct(digitsAfterDecimal, inMultiplesOf)).getResourceId();
     }
 
     private PostSavingsProductsRequest baseSavingsProduct(int digitsAfterDecimal, int inMultiplesOf) {
-        return dailyInterestPostingProduct().digitsAfterDecimal(digitsAfterDecimal).inMultiplesOf(inMultiplesOf).currencyCode("USD");
-    }
-
-    private Long createAndActivateSavingsAccount(Long productId, String date) {
-        Long savingsId = applySavingsAccount(applySavingsRequest(clientId, productId, date)).getSavingsId();
-        approveSavingsAccount(savingsId, date);
-        activateSavingsAccount(savingsId, date);
-        return savingsId;
+        return new PostSavingsProductsRequest().locale("en").name(Utils.uniqueRandomStringGenerator("DAILY_INTEREST", 6))
+                .shortName(Utils.uniqueRandomStringGenerator("", 4)).description("Daily interest posting product")
+                .nominalAnnualInterestRate(10.0).digitsAfterDecimal(digitsAfterDecimal).inMultiplesOf(inMultiplesOf).currencyCode("USD")
+                .accountingRule(1).interestCalculationDaysInYearType(365).interestCompoundingPeriodType(1).interestCalculationType(2)
+                .interestPostingPeriodType(1).withdrawalFeeForTransfers(false).enforceMinRequiredBalance(false).allowOverdraft(false)
+                .withHoldTax(false).isDormancyTrackingActive(false);
     }
 
     private PostChargesResponse createFlatCharge(double amount) {
         String uniqueChargeName = "Savings Account Flat Charge " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(2) // SAVINGS
+        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(2) // SAVINGS
                 .chargeTimeType(2) // SPECIFIED DUE DATE
                 .chargeCalculationType(1) // FLAT
                 .amount(amount).currencyCode("USD").locale("en").active(true).penalty(false));
@@ -242,7 +232,7 @@ public class SavingsAccountChargeRoundingTest extends BaseSavingsIntegrationTest
 
     private PostChargesResponse createPercentageWithdrawalCharge(double percentage) {
         String uniqueChargeName = "Savings Account Withdrawal Charge " + UUID.randomUUID().toString().replace("-", "");
-        return chargesHelper.createCharges(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(2) // SAVINGS
+        return chargesHelper.createCharge(new ChargeRequest().name(uniqueChargeName).chargeAppliesTo(2) // SAVINGS
                 .chargeTimeType(5) // WITHDRAWAL
                 .chargeCalculationType(2) // % OF AMOUNT
                 .amount(percentage).currencyCode("USD").locale("en").chargePaymentMode(0).active(true).penalty(false));
@@ -252,29 +242,14 @@ public class SavingsAccountChargeRoundingTest extends BaseSavingsIntegrationTest
         PostSavingsAccountsSavingsAccountIdChargesRequest request = new PostSavingsAccountsSavingsAccountIdChargesRequest()
                 .chargeId(chargeId).amount((float) amount).dateFormat(DATETIME_PATTERN).locale("en").dueDate(date);
 
-        PostSavingsAccountsSavingsAccountIdChargesResponse response = ok(
-                fineractClient().savingsAccountCharges.addSavingsAccountCharge(savingsId, request));
-
-        return response.getResourceId();
+        return addSavingsAccountCharge(savingsId, request).getResourceId();
     }
 
     private void addPercentageWithdrawalCharge(Long savingsId, Long chargeId, double amount) {
         PostSavingsAccountsSavingsAccountIdChargesRequest request = new PostSavingsAccountsSavingsAccountIdChargesRequest()
                 .chargeId(chargeId).amount((float) amount).locale("en");
 
-        ok(fineractClient().savingsAccountCharges.addSavingsAccountCharge(savingsId, request));
-    }
-
-    private PostSavingsAccountTransactionsResponse withdraw(Long savingsId, String date, BigDecimal amount) {
-        PostSavingsAccountTransactionsRequest request = new PostSavingsAccountTransactionsRequest().dateFormat(DATETIME_PATTERN)
-                .locale("en").paymentTypeId(1).transactionAmount(amount).transactionDate(date);
-
-        return ok(fineractClient().savingsTransactions.createSavingsAccountTransaction(savingsId, request, "withdrawal"));
-    }
-
-    private GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse getSavingsAccountCharge(Long savingsId,
-            Long savingsAccountChargeId) {
-        return ok(fineractClient().savingsAccountCharges.retrieveSavingsAccountCharge(savingsId, savingsAccountChargeId));
+        addSavingsAccountCharge(savingsId, request);
     }
 
     private BigDecimal applyRoundingRules(BigDecimal amount, int digitsAfterDecimal, int inMultiplesOf) {
@@ -337,10 +312,6 @@ public class SavingsAccountChargeRoundingTest extends BaseSavingsIntegrationTest
 
     private BigDecimal calculateExpectedBalance(String deposit, String withdraw, BigDecimal expectedChargeFees) {
         return new BigDecimal(deposit).subtract(new BigDecimal(withdraw)).subtract(expectedChargeFees);
-    }
-
-    private List<GetSavingsAccountsSavingsAccountIdChargesResponse> getSavingsCharges(Long savingsId) {
-        return ok(fineractClient().savingsAccountCharges.retrieveAllSavingsAccountCharges(savingsId, "all"));
     }
 
     private void assertNoChargesPersisted(Long savingsId, Long chargeId) {

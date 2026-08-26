@@ -21,23 +21,31 @@ package org.apache.fineract.integrationtests.client.feign;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.function.Function;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.DeleteSavingsAccountsAccountIdResponse;
+import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesResponse;
+import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse;
 import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsResponse;
+import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
+import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesResponse;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PostSavingsProductsResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
 import org.apache.fineract.client.models.SavingsAccountStatusEnumData;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignChargesHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignClientHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsLifecycleExtension;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsTransactionHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +57,8 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
     protected static FeignSavingsTransactionHelper savingsTransactionHelper;
     protected static FeignSavingsProductHelper savingsProductHelper;
     protected static FeignClientHelper clientHelper;
+    protected static FeignChargesHelper chargesHelper;
+    protected static FeignBusinessDateHelper businessDateHelper;
 
     @BeforeAll
     public static void setupSavingsHelpers() {
@@ -57,6 +67,8 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
         savingsTransactionHelper = new FeignSavingsTransactionHelper(client);
         savingsProductHelper = new FeignSavingsProductHelper(client);
         clientHelper = new FeignClientHelper(client);
+        chargesHelper = new FeignChargesHelper(client);
+        businessDateHelper = new FeignBusinessDateHelper(client);
     }
 
     protected Long createClient() {
@@ -119,5 +131,27 @@ public abstract class FeignSavingsTestBase extends FeignIntegrationTest {
         SavingsAccountData savings = getSavingsDetails(savingsId);
         assertNotNull(savings.getStatus(), "Savings status should not be null");
         assertTrue(statusExtractor.apply(savings.getStatus()), "Savings status check failed for account " + savingsId);
+    }
+
+    protected void runAt(String date, Runnable action) {
+        businessDateHelper.runAt(date, detectDateFormat(date), action);
+    }
+
+    private static String detectDateFormat(String date) {
+        return date.matches("\\d{4}-\\d{2}-\\d{2}") ? LoanTestData.ISO_DATE_PATTERN : LoanTestData.DATETIME_PATTERN;
+    }
+
+    protected PostSavingsAccountsSavingsAccountIdChargesResponse addSavingsAccountCharge(Long savingsId,
+            PostSavingsAccountsSavingsAccountIdChargesRequest request) {
+        return savingsHelper.addSavingsAccountCharge(savingsId, request);
+    }
+
+    protected GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse getSavingsAccountCharge(Long savingsId,
+            Long savingsAccountChargeId) {
+        return savingsHelper.getSavingsAccountCharge(savingsId, savingsAccountChargeId);
+    }
+
+    protected List<GetSavingsAccountsSavingsAccountIdChargesResponse> getSavingsCharges(Long savingsId) {
+        return savingsHelper.getSavingsCharges(savingsId);
     }
 }
