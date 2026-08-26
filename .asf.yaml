@@ -19,6 +19,8 @@ github:
     merge: true
     squash: false
     rebase: false
+  pull_requests:
+    allow_update_branch: false
   rulesets:
     - name: "Branch Protection"
       type: branch
