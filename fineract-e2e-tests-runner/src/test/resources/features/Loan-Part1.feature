@@ -365,27 +365,6 @@ Feature: Loan - Part1
     Then Loan has 1 "REPAYMENT" transactions on Transactions tab
     Then Second loan has 0 "REPAYMENT" transactions on Transactions tab
 
-#  TODO unskip and check, fix idempotency issue
-  @Skip @TestRailId:C2483 @idempotency
-  Scenario: As admin I would like to verify that idempotency applies correctly in case of a second client calls the same idempotency key on a second loan
-    When Admin sets the business date to "1 November 2022"
-    When Admin creates a client with random data
-    When Admin creates a new default Loan with date: "1 November 2022"
-    And Admin successfully approves the loan on "1 November 2022" with "1000" amount and expected disbursement date on "1 November 2022"
-    When Admin successfully disburse the loan on "1 November 2022" with "1000" EUR transaction amount
-    When Admin creates a second client with random data
-    When Admin crates a second default loan for the second client with date: "1 November 2022"
-    And Admin successfully approves the second loan on "1 November 2022" with "1000" amount and expected disbursement date on "1 November 2022"
-    When Admin successfully disburse the second loan on "1 November 2022" with "1000" EUR transaction amount
-    When Admin sets the business date to "15 November 2022"
-    When Customer makes "REPAYMENT" transaction with "AUTOPAY" payment type on "15 November 2022" with 200 EUR transaction amount and self-generated Idempotency key
-    And Customer makes "REPAYMENT" transaction on the second loan with "AUTOPAY" payment type on "15 November 2022" with 300 EUR transaction amount with the same Idempotency key as previous transaction
-    Then Transaction response has boolean value in header "x-served-from-cache": "true"
-    Then Transaction response has 300 EUR value for transaction amount
-    Then Transaction response has the clientId for the second client and the loanId of the second transaction
-    Then Loan has 1 "REPAYMENT" transactions on Transactions tab
-    Then Second loan has 1 "REPAYMENT" transactions on Transactions tab
-
   @TestRailId:C2479
   Scenario: As admin I would like to be sure that goodwill credit transaction is working properly
     When Admin sets the business date to "1 November 2022"

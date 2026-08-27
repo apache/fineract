@@ -226,6 +226,7 @@ Feature: COBFeature
     When Admin runs inline COB job for Loan
     Then LoanAccountCustomSnapshotBusinessEvent is created with business date "17 January 2022"
 
+  @TestRailId:C98223
   Scenario: COB removes an orphaned lock with no error on a loan already processed for that COB date
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -241,6 +242,7 @@ Feature: COBFeature
     And Customer makes "AUTOPAY" repayment on "02 January 2022" with 1000 EUR transaction amount
     Then Loan status will be "CLOSED_OBLIGATIONS_MET"
 
+  @TestRailId:C98224
   Scenario: COB keeps a lock that carries an error message
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -254,6 +256,7 @@ Feature: COBFeature
     When Admin runs COB job
     Then The loan account is locked by chunk processing
 
+  @TestRailId:C98225
   Scenario: COB keeps a lock when the loan's last closed business date does not match the lock's COB date
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -270,6 +273,7 @@ Feature: COBFeature
     When Admin runs COB job
     Then The loan account is locked by chunk processing
 
+  @TestRailId:C98226
   Scenario: COB removes an orphaned inline-COB lock with no error on a loan already processed for that COB date
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -283,6 +287,7 @@ Feature: COBFeature
     When Admin runs COB job
     Then The loan account is not locked
 
+  @TestRailId:C98227
   Scenario: COB keeps an inline-COB lock that carries an error message
     When Admin sets the business date to "01 January 2022"
     When Admin creates a client with random data
@@ -296,6 +301,7 @@ Feature: COBFeature
     When Admin runs COB job
     Then The loan account is locked by chunk processing
 
+  @TestRailId:C98228
   Scenario: COB keeps a lock with NULL cob business date
     # SQL filter requires `lock_placed_on_cob_business_date IS NOT NULL` — a lock with NULL date must never be removed
     # (no proof exists that the loan was already processed for that date).
@@ -311,6 +317,7 @@ Feature: COBFeature
     When Admin runs COB job
     Then The loan account is locked by chunk processing
 
+  @TestRailId:C98229
   Scenario: COB keeps a lock when cob business date is in the past relative to last closed date
     # SQL uses `last_closed_business_date = lock_placed_on_cob_business_date` (strict equality), so a stale lock
     # whose cob date already lags behind the loan's last_closed must remain — the date proves a *different* run.
@@ -330,6 +337,7 @@ Feature: COBFeature
     When Admin runs COB job
     Then The loan account is locked by chunk processing
 
+  @TestRailId:C98230
   Scenario: COB removes only orphaned locks among multiple loans in the same run
     # Two loans share the same COB run: the first one carries an orphaned lock (no error) and must be unlocked;
     # the second one carries a lock with an error message and must remain locked. Verifies DELETE selectivity.

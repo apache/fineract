@@ -1054,7 +1054,7 @@ Feature: Full Term Tranche - Schedule handling and Calculations - Part1
     When Loan Pay-off is made on "01 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @AdvancedPaymentAllocation
+  @TestRailId:C98232 @AdvancedPaymentAllocation
   Scenario: Verify that Loan full term tranche with interest pause transaction S11
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -2433,10 +2433,8 @@ Feature: Full Term Tranche - Schedule handling and Calculations - Part1
     When Loan Pay-off is made on "01 April 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-    #    TODO check and unSkip when WAIVE_INTEREST strategy is implemented
-
-  @Skip
-  @TestRailId:C4562 @AdvancedPaymentAllocation
+# TODO check and unSkip when WAIVE_INTEREST strategy is implemented
+  @Skip @TestRailId:C4562 @AdvancedPaymentAllocation
   Scenario: Verify full term tranche interest bearing progressive loan - re-amortization - waive interest behaviour - UC17.1
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data

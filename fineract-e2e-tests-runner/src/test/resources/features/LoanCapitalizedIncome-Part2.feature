@@ -720,7 +720,7 @@ Feature: Capitalized Income - Part2
     When Admin makes Credit Balance Refund transaction on "15 April 2024" with 15 EUR transaction amount
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @Skip @TestRailId:C3744
+  @TestRailId:C3744
   Scenario: Verify Capitalized income and Caplitalized income adjustment - Accounting and repayment schedule handling in case of loan is overpaid (Capitalized Income Scenarios - UC10)
     When Admin sets the business date to "1 January 2024"
     And Admin creates a client with random data
