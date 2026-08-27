@@ -24,6 +24,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -5480,5 +5481,46 @@ class ProgressiveEMICalculatorTest {
                 "The fully paid last period must keep its EMI");
         Assertions.assertEquals(70.16, toDouble(interestSchedule.getTotalDuePrincipal()), 0.001,
                 "The amortized principal must stay equal to the disbursed amount");
+    }
+
+    @Test
+    public void getDueAmountsThrowsNoSuchElementExceptionForAdditionalInstallment() {
+        // given
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(BigDecimal.valueOf(12));
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.isAllowFullTermForTranche()).thenReturn(false);
+
+        LocalDate start = LocalDate.of(2024, 1, 1);
+
+        // Normal installment 1: Jan 1 - Feb 1
+        RepaymentScheduleInstallmentData normal1 = RepaymentScheduleInstallmentData.of(start, start.plusMonths(1), false, false,
+                BigDecimal.ZERO, BigDecimal.ZERO);
+        // "Additional" installment inserted by a prior re-age: Feb 1 - Feb 15 (a stub period the model will NOT
+        // contain)
+        RepaymentScheduleInstallmentData additional = RepaymentScheduleInstallmentData.of(start.plusMonths(1),
+                start.plusMonths(1).plusDays(14), false, true, BigDecimal.ZERO, BigDecimal.ZERO);
+        // Normal installment 2 continues after the additional stub: Feb 15 - Mar 15
+        RepaymentScheduleInstallmentData normal2 = RepaymentScheduleInstallmentData.of(start.plusMonths(1).plusDays(14),
+                start.plusMonths(2).plusDays(14), false, false, BigDecimal.ZERO, BigDecimal.ZERO);
+
+        List<RepaymentScheduleInstallmentData> installments = List.of(normal1, additional, normal2);
+
+        // This mirrors generateInstallmentInterestScheduleModel(), which filters out isAdditional() installments
+        // when building the model's repaymentPeriods -- so "additional" never gets a RepaymentPeriod.
+        ProgressiveLoanInterestScheduleModel model = emiCalculator.generateInstallmentInterestScheduleModel(installments,
+                loanProductRelatedDetail, null, mc);
+
+        // then
+        // This mirrors updateRepaymentPeriodBalances() in AdvancedPaymentScheduleTransactionProcessor, which calls
+        // getDueAmounts() using the additional installment's own from/due dates when it is picked as the
+        // LAST_INSTALLMENT "in advance" target during a Merchant Issued Refund.
+        Assertions.assertThrows(NoSuchElementException.class,
+                () -> emiCalculator.getDueAmounts(model, additional.getFromDate(), additional.getDueDate(), additional.getDueDate()),
+                "Expected FINERACT-2790 to reproduce: getDueAmounts() should throw NoSuchElementException "
+                        + "when called with an 'additional' installment's dates, since such installments are excluded "
+                        + "from the model's repaymentPeriods.");
     }
 }

@@ -29,10 +29,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -787,4 +789,69 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Assertions.assertEquals(originalTransaction, repayment2);
     }
 
+    @Test
+    public void updateRepaymentPeriodBalancesSkipsAdditionalInstallmentAndAppliesPaymentDirectly() {
+        // given
+        LocalDate disbursementDate = LocalDate.of(2024, 1, 1);
+        LocalDate additionalFromDate = LocalDate.of(2024, 2, 1);
+        LocalDate additionalDueDate = LocalDate.of(2024, 2, 15);
+        LocalDate mirTransactionDate = LocalDate.of(2024, 2, 10);
+
+        Loan loan = mock(Loan.class, RETURNS_DEEP_STUBS);
+        LoanProductRelatedDetail loanProductRelatedDetail = mock(LoanProductRelatedDetail.class);
+        LoanPaymentAllocationRule loanPaymentAllocationRule = mock(LoanPaymentAllocationRule.class);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
+        when(loanProductRelatedDetail.getLoanScheduleProcessingType()).thenReturn(LoanScheduleProcessingType.HORIZONTAL);
+        when(loan.isInterestBearingAndInterestRecalculationEnabled()).thenReturn(Boolean.TRUE);
+        when(loan.getCurrency()).thenReturn(MONETARY_CURRENCY);
+        when(loan.getPaymentAllocationRules()).thenReturn(List.of(loanPaymentAllocationRule));
+        LoanInterestRecalculationDetails loanInterestRecalculationDetails = mock(LoanInterestRecalculationDetails.class);
+        when(loanInterestRecalculationDetails.disallowInterestCalculationOnPastDue()).thenReturn(false);
+        when(loan.getLoanInterestRecalculationDetails()).thenReturn(loanInterestRecalculationDetails);
+
+        when(loanPaymentAllocationRule.getTransactionType()).thenReturn(PaymentAllocationTransactionType.DEFAULT);
+        when(loanPaymentAllocationRule.getAllocationTypes())
+                .thenReturn(List.of(PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST));
+
+        // Real (not mocked) additional installment, so its own persisted balances are what actually change.
+        LoanRepaymentScheduleInstallment additionalInstallment = new LoanRepaymentScheduleInstallment(loan, 2, additionalFromDate,
+                additionalDueDate, BigDecimal.valueOf(50.00), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, true, false, false);
+
+        List<LoanRepaymentScheduleInstallment> installments = List.of(additionalInstallment);
+
+        LoanTransaction loanTransaction = mock(LoanTransaction.class);
+        when(loanTransaction.getTypeOf()).thenReturn(LoanTransactionType.MERCHANT_ISSUED_REFUND);
+        when(loanTransaction.getLoan()).thenReturn(loan);
+        when(loanTransaction.getTransactionDate()).thenReturn(mirTransactionDate);
+        BigDecimal transactionAmount = BigDecimal.valueOf(20.00);
+        Money transactionAmountMoney = Money.of(MONETARY_CURRENCY, transactionAmount);
+        when(loanTransaction.getAmount(MONETARY_CURRENCY)).thenReturn(transactionAmountMoney);
+        lenient().when(loanTransaction.isBefore(any(LocalDate.class))).thenReturn(false);
+        lenient().when(loanTransaction.isAfter(additionalDueDate)).thenReturn(true);
+        lenient().when(loanTransaction.isOn(any(LocalDate.class))).thenReturn(false);
+        lenient().when(loanTransaction.isRepaymentLikeType()).thenReturn(false);
+        lenient().when(loanTransaction.isNotReversed()).thenReturn(true);
+
+        MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(MONETARY_CURRENCY));
+        ProgressiveLoanInterestScheduleModel model = mock(ProgressiveLoanInterestScheduleModel.class);
+        lenient().when(model.getMaturityDate()).thenReturn(LocalDate.of(2024, 12, 31));
+        ChangedTransactionDetail changedTransactionDetail = mock(ChangedTransactionDetail.class);
+
+        ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(MONETARY_CURRENCY, installments, Set.of(), overpaymentHolder,
+                changedTransactionDetail, model, loan.getActiveLoanTermVariations());
+
+        // when
+        underTest.processLatestTransaction(loanTransaction, ctx);
+
+        // then
+        // FINERACT-2790: the model-based due-amount lookup that used to throw NoSuchElementException for an
+        // "additional" installment is never invoked for it.
+        Mockito.verify(emiCalculator, never()).getDueAmounts(any(), any(), any(), any());
+
+        // The money was not silently dropped -- it was applied straight to the installment's own persisted
+        // principal balance (paidPrincipal), the same mechanism already used for down-payment installments.
+        assertEquals(0, BigDecimal.valueOf(20.00).compareTo(additionalInstallment.getPrincipalCompleted(MONETARY_CURRENCY).getAmount()));
+        assertEquals(0, additionalInstallment.getPrincipalOutstanding(MONETARY_CURRENCY).getAmount().compareTo(BigDecimal.valueOf(30.00)));
+    }
 }

@@ -2894,7 +2894,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         ProgressiveLoanInterestScheduleModel model = ctx.getModel();
         LocalDate payDate = loanTransaction.getTransactionDate();
 
-        if (installment.isDownPayment() || installment.getDueDate().isAfter(ctx.getModel().getMaturityDate())) {
+        if (installment.isDownPayment() || installment.isAdditional()
+                || installment.getDueDate().isAfter(ctx.getModel().getMaturityDate())) {
             // Skip interest and principal payment processing for down payment period or periods after loan maturity
             // date
             ctx.getSkipRepaymentScheduleInstallments().add(installment);
