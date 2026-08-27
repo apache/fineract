@@ -310,6 +310,8 @@ jobs:
       TZ: Asia/Kolkata
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      ALLOWED_LICENSES_FILE: ${{ github.workspace }}/allowed-licenses.json
+      LICENSE_CHECK_INIT_SCRIPT: ${{ github.workspace }}/license-check-init.gradle
 
     steps:
       # This job diffs the PR head against its target branch, so it needs
@@ -334,10 +336,15 @@ jobs:
         with:
           validate-wrappers: true
 
-      - name: Write allowed-licenses.json
+      # Everything the Category X gate needs lives in this workflow file --
+      # no build.gradle changes. The allowlist and the init script that
+      # wires it into the already-applied dependency-license-report plugin
+      # are both written here, then injected at build time via
+      # `--init-script`, for both the PR head checkout and the target
+      # branch worktree below.
+      - name: Write allow-list and init script
         run: |
-          mkdir -p config/license
-          cat > config/license/allowed-licenses.json <<'EOF'
+          cat > "$ALLOWED_LICENSES_FILE" <<'EOF'
           {
             "allowedLicenses": [
               { "moduleLicense": "Apache-2.0" },
@@ -365,8 +372,18 @@ jobs:
           # `./gradlew generateLicenseReport` across all modules before
           # relying on this gate.
 
+          cat > "$LICENSE_CHECK_INIT_SCRIPT" <<'EOF'
+          allprojects {
+              plugins.withId('com.github.jk1.dependency-license-report') {
+                  licenseReport {
+                      allowedLicensesFile = new File(System.getenv('ALLOWED_LICENSES_FILE'))
+                  }
+              }
+          }
+          EOF
+
       - name: Check licenses on PR head
-        run: ./gradlew checkLicense --continue || true
+        run: ./gradlew checkLicense --init-script "$LICENSE_CHECK_INIT_SCRIPT" --continue || true
 
       - name: Collect head violations
         run: |
@@ -378,10 +395,7 @@ jobs:
         run: git worktree add ../pr-base "$BASE_SHA"
 
       - name: Check licenses on PR target branch
-        run: |
-          cp config/license/allowed-licenses.json ../pr-base/config/license/allowed-licenses.json 2>/dev/null || \
-            (mkdir -p ../pr-base/config/license && cp config/license/allowed-licenses.json ../pr-base/config/license/allowed-licenses.json)
-          (cd ../pr-base && ./gradlew checkLicense --continue) || true
+        run: (cd ../pr-base && ./gradlew checkLicense --init-script "$LICENSE_CHECK_INIT_SCRIPT" --continue) || true
 
       - name: Collect base violations
         run: |
