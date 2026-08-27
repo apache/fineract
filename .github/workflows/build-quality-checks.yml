@@ -300,3 +300,125 @@ jobs:
 
       - name: Run Spotless
         run: ./gradlew spotlessCheck
+
+  licenses:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    env:
+      TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
+    steps:
+      # This job diffs the PR head against its target branch, so it needs
+      # real git history for a worktree checkout of BASE_SHA -- the
+      # shared-workspace-tar shortcut the other jobs use doesn't carry
+      # .git, so a plain full checkout is used here instead.
+      - name: Checkout PR head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          java-version: '25'
+          distribution: 'zulu'
+
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+        with:
+          validate-wrappers: true
+
+      - name: Write allowed-licenses.json
+        run: |
+          mkdir -p config/license
+          cat > config/license/allowed-licenses.json <<'EOF'
+          {
+            "allowedLicenses": [
+              { "moduleLicense": "Apache-2.0" },
+              { "moduleLicense": "Apache License, Version 2.0" },
+              { "moduleLicense": "The Apache Software License, Version 2.0" },
+              { "moduleLicense": "Apache 2.0" },
+              { "moduleLicense": "MIT" },
+              { "moduleLicense": "MIT License" },
+              { "moduleLicense": "The MIT License" },
+              { "moduleLicense": "BSD-2-Clause" },
+              { "moduleLicense": "BSD-3-Clause" },
+              { "moduleLicense": "BSD License 3" },
+              { "moduleLicense": "Eclipse Public License - v 1.0" },
+              { "moduleLicense": "Eclipse Public License - v 2.0" },
+              { "moduleLicense": "Eclipse Distribution License - v 1.0" },
+              { "moduleLicense": "Common Development and Distribution License" },
+              { "moduleLicense": "CDDL/GPLv2+CE" },
+              { "moduleLicense": "Bouncy Castle Licence" },
+              { "moduleLicense": "Public Domain" },
+              { "moduleLicense": "ISC" }
+            ]
+          }
+          EOF
+          # PLACEHOLDER seed, not an audited baseline -- regenerate from
+          # `./gradlew generateLicenseReport` across all modules before
+          # relying on this gate.
+
+      - name: Check licenses on PR head
+        run: ./gradlew checkLicense --continue || true
+
+      - name: Collect head violations
+        run: |
+          find . -path '*/licenses/dependencies-without-allowed-license.json' -exec cat {} \; \
+            | jq -s '[.[].dependenciesWithoutAllowedLicenses[]?] | unique_by(.moduleName + "::" + .moduleLicense)' \
+            > head-violations.json
+
+      - name: Add worktree for PR target branch
+        run: git worktree add ../pr-base "$BASE_SHA"
+
+      - name: Check licenses on PR target branch
+        run: |
+          cp config/license/allowed-licenses.json ../pr-base/config/license/allowed-licenses.json 2>/dev/null || \
+            (mkdir -p ../pr-base/config/license && cp config/license/allowed-licenses.json ../pr-base/config/license/allowed-licenses.json)
+          (cd ../pr-base && ./gradlew checkLicense --continue) || true
+
+      - name: Collect base violations
+        run: |
+          find ../pr-base -path '*/licenses/dependencies-without-allowed-license.json' -exec cat {} \; \
+            | jq -s '[.[].dependenciesWithoutAllowedLicenses[]?] | unique_by(.moduleName + "::" + .moduleLicense)' \
+            > base-violations.json
+
+      - name: Gate on licenses that are new or changed relative to the target branch
+        run: |
+          jq -n --slurpfile head head-violations.json --slurpfile base base-violations.json '
+            ($base[0] | map(.moduleName + "::" + .moduleLicense)) as $baseKeys
+            | $head[0] | map(select((.moduleName + "::" + .moduleLicense) as $k | ($baseKeys | index($k)) == null))
+          ' > new-violations.json
+
+          COUNT=$(jq 'length' new-violations.json)
+          {
+            echo "## SBOM license check"
+            echo "New/changed dependency licenses not on the allowlist: $COUNT"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$COUNT" -gt 0 ]; then
+            echo "New/changed dependency licenses not on the allowlist, relative to the PR target branch:"
+            jq -r '.[] | "- \(.moduleName) \(.moduleVersion): \(.moduleLicense)"' new-violations.json | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "No new or changed dependency licenses require review." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Archive license reports
+        if: ${{ failure() || inputs.upload_artifacts }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: license-reports-quality-checks
+          path: |
+            **/licenses/
+            head-violations.json
+            base-violations.json
+            new-violations.json
+          if-no-files-found: ignore
+          retention-days: 5
+          compression-level: 9
