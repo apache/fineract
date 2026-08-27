@@ -48,6 +48,6 @@ public class WorkingCapitalLoanPeriodPaymentRateChangeReadServiceImpl implements
             final Long loanId) {
         return new WorkingCapitalLoanPeriodPaymentRateChangeData(entity.getId(), loanId, entity.getEffectiveDate(),
                 entity.getPreviousRate(), entity.getNewRate(), entity.isReversed(), entity.getReversedOnDate(),
-                entity.getCreatedDate().orElse(null));
+                entity.getCreatedDate().orElse(null), entity.getSubmittedOnDate());
     }
 }

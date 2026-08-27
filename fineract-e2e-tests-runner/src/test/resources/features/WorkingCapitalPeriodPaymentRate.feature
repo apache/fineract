@@ -1956,3 +1956,29 @@ Feature: Working Capital Period Payment Rate
       | product.name             | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Active | 1100.0    | 1000.0            | 100000.0           | 18.0              | 100.0    |
     Then Admin closes the Working Capital loan with a full repayment on "01 February 2026"
+
+  @TestRailId:C98201
+  Scenario: Verify Working Capital period payment rate change submitted on date follows the business date and stays immutable - UC24
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 | 0        |
+    Then Working capital loan creation was successful
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "100" amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
+    Then Working Capital loan status will be "ACTIVE"
+    #--- submitted on date is stamped with the business date in force at creation ---#
+    When Admin sets the business date to "10 January 2026"
+    And Admin update Working Capital period payment rate with "12.5" value
+    Then Working Capital Loan Period Payment Rate changes history contains the following data:
+      | Effective Date  | Previous Rate | New Rate | Reversed | Submitted On Date |
+      | 10 January 2026 | 1.0           | 12.5     | false    | 10 January 2026   |
+    #--- a later business date stamps only the new record, the earlier one is immutable ---#
+    When Admin sets the business date to "20 January 2026"
+    And Admin update Working Capital period payment rate with "15" value
+    Then Working Capital Loan Period Payment Rate changes history contains the following data:
+      | Effective Date  | Previous Rate | New Rate | Reversed | Submitted On Date |
+      | 10 January 2026 | 1.0           | 12.5     | false    | 10 January 2026   |
+      | 20 January 2026 | 12.5          | 15.0     | false    | 20 January 2026   |
+    Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"

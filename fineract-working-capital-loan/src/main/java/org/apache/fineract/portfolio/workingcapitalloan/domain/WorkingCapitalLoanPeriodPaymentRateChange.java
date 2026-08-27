@@ -31,6 +31,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Getter
 @Setter
@@ -58,6 +59,9 @@ public class WorkingCapitalLoanPeriodPaymentRateChange extends AbstractAuditable
     @Column(name = "reversed_on_date")
     private LocalDate reversedOnDate;
 
+    @Column(name = "submitted_on_date")
+    private LocalDate submittedOnDate;
+
     @Version
     private int version;
 
@@ -69,6 +73,7 @@ public class WorkingCapitalLoanPeriodPaymentRateChange extends AbstractAuditable
         change.previousRate = previousRate;
         change.newRate = newRate;
         change.reversed = false;
+        change.submittedOnDate = DateUtils.getBusinessLocalDate();
         return change;
     }
 

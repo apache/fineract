@@ -1194,3 +1194,30 @@ Feature: Working Capital Near Breach Evaluation
       | 1            | 2026-01-01 | 2026-02-11 | 42           | 250.00           | 250.00            | true       | null   |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "06 February 2026"
 
+  @TestRailId:C98199
+  Scenario: Verify near breach action submitted on date follows the business date and stays immutable
+    Given Global configuration "enable-business-date" is enabled
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with breach and near breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | nearBreachFrequency | nearBreachFrequencyType | nearBreachThreshold | delinquencyGraceDays |
+      | 9               | DAYS                | FLAT                        | 90           | 3                   | DAYS                    | 33.33               |                      |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    #--- submitted on date is stamped with the business date in force at creation ---#
+    When Admin sets the business date to "02 January 2026"
+    And Admin creates a near breach reschedule action with threshold "50" frequency 3 frequencyType "DAYS"
+    Then Near breach action history has the following data:
+      | action     | threshold | frequency | frequencyType | submittedOnDate |
+      | RESCHEDULE | 50        | 3         | DAYS          | 02 January 2026 |
+    #--- a later business date stamps only the new record, the earlier one is immutable ---#
+    When Admin sets the business date to "04 January 2026"
+    And Admin creates a near breach reschedule action with threshold "60" frequency 5 frequencyType "DAYS"
+    Then Near breach action history has the following data:
+      | action     | threshold | frequency | frequencyType | submittedOnDate |
+      | RESCHEDULE | 60        | 5         | DAYS          | 04 January 2026 |
+      | RESCHEDULE | 50        | 3         | DAYS          | 02 January 2026 |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2026"

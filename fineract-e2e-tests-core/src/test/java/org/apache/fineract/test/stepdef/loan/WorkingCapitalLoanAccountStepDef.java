@@ -110,6 +110,7 @@ import org.apache.fineract.test.helper.CodeHelper;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.helper.WorkingCapitalScheduleMatcher;
+import org.apache.fineract.test.helper.WorkingCapitalTenantDateHelper;
 import org.apache.fineract.test.messaging.event.EventCheckHelper;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.stepdef.common.JournalEntriesStepDef;
@@ -142,6 +143,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     private final EventCheckHelper eventCheckHelper;
     private final PaymentTypeResolver paymentTypeResolver;
     private final BusinessDateHelper businessDateHelper;
+    private final WorkingCapitalTenantDateHelper workingCapitalTenantDateHelper;
     private final JournalEntriesStepDef journalEntriesStepDef;
     private final ClientRequestFactory clientRequestFactory;
     private final CodeValueResolver codeValueResolver;
@@ -2475,6 +2477,23 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         checkPeriodPaymentRateChangeHistory(data, rateChangesResponse, header, resourceId);
     }
 
+    @Given("Admin captures the current tenant date for the Working Capital loan")
+    public void captureCurrentTenantDateForWorkingCapitalLoan() {
+        workingCapitalTenantDateHelper.captureCurrentTenantDateBeforeAction(getCreatedLoanId());
+    }
+
+    @Then("Working Capital Loan latest period payment rate change was submitted on the current tenant date")
+    public void latestPeriodPaymentRateChangeSubmittedOnTenantDate() {
+        final Long loanId = getCreatedLoanId();
+        final List<WorkingCapitalLoanPeriodPaymentRateChangeData> rateChanges = ok(
+                () -> fineractClient.workingCapitalLoans().getWorkingCapitalLoanRateChangeHistoryById(loanId));
+        final WorkingCapitalLoanPeriodPaymentRateChangeData latest = rateChanges.stream()//
+                .max(Comparator.comparing(WorkingCapitalLoanPeriodPaymentRateChangeData::getId))//
+                .orElseThrow(() -> new IllegalStateException(String.format("No rate change found on loan [%s]", loanId)));
+        workingCapitalTenantDateHelper.assertStampedOnCurrentTenantDate(latest.getSubmittedOnDate(), loanId,
+                String.format("submittedOnDate of latest rate change on loan %s", loanId));
+    }
+
     // ====================================
     // Private Helper Methods
     // ====================================
@@ -4150,6 +4169,8 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                         : new Utils.DoubleFormatter(rateChangeData.getNewRate().doubleValue()).format());
                 case "Reversed" ->
                     actualValues.add(rateChangeData.getReversed() == null ? null : String.valueOf(rateChangeData.getReversed()));
+                case "Submitted On Date" -> actualValues
+                        .add(rateChangeData.getSubmittedOnDate() == null ? null : FORMATTER.format(rateChangeData.getSubmittedOnDate()));
                 default -> throw new IllegalStateException(String.format("Header name %s cannot be found", headerName));
             }
         }
