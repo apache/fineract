@@ -1790,6 +1790,7 @@ Feature: Credit Balance Refund
       | 01 April 2025    | Down Payment           | 61.0   | 61.0      | 0.0      | 0.0  | 0.0       | 182.79       | false    | false    |
     Then Loan status will be "ACTIVE"
 
+  @TestRailId:C98231
   Scenario Outline: Verify that Loan ends in correct state after CBR + backdated GoodwillCredit cocktail (<rule> future-installment rule)
     When Admin sets the business date to "02 September 2025"
     And Admin creates a client with random data

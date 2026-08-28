@@ -76,7 +76,7 @@ Feature: Working Capital Loan Repayment Accounting Entries
       | ASSET     | 112601       | Loans Receivable          |         | 9000.0 |
       | LIABILITY | 245000       | Other Credit Liability    |         | 1000.0 |
 
-  @Skip @RepaymentGLEntriesFee
+  @TestRailId:C98235 @RepaymentGLEntriesFee
   Scenario: Verify Working Capital loan repayment GL entries - UC5: repayment allocates to fees
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -85,16 +85,16 @@ Feature: Working Capital Loan Repayment Accounting Entries
       | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
-#    TODO Add fee here to Working Capital loan
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "05 January 2026" due date and 50.0 transaction amount
     When Admin sets the business date to "10 January 2026"
     And Customer makes repayment on "10 January 2026" with 320.0 transaction amount on Working Capital loan
     Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
       | LIABILITY | 145023       | Suspense/Clearing account | 320.0 |        |
       | ASSET     | 112601       | Loans Receivable          |       | 270.0  |
-      | ASSET     | 112603       | Fee Receivable            |       | 50.0   |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 50.0   |
 
-  @Skip @RepaymentGLEntriesPenalty
+  @TestRailId:C98236 @RepaymentGLEntriesPenalty
   Scenario: Verify Working Capital loan repayment GL entries - UC6: repayment allocates to penalties
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -103,16 +103,16 @@ Feature: Working Capital Loan Repayment Accounting Entries
       | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
-#    TODO Add penalty here to Working Capital loan
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "05 January 2026" due date and 50.0 transaction amount
     When Admin sets the business date to "10 January 2026"
     And Customer makes repayment on "10 January 2026" with 300.0 transaction amount on Working Capital loan
     Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
       | LIABILITY | 145023       | Suspense/Clearing account | 300.0 |        |
-      | ASSET     | 112601       | Loans Receivable          |       | 270.0  |
-      | ASSET     | 112603       | Fee Receivable            |       | 50.0   |
+      | ASSET     | 112601       | Loans Receivable          |       | 250.0  |
+      | ASSET     | 112603       | Interest/Fee Receivable   |       | 50.0   |
 
-  @Skip @RepaymentGLEntriesFeePenaltyOverpayment
+  @TestRailId:C98237 @RepaymentGLEntriesFeePenaltyOverpayment
   Scenario: Verify Working Capital loan repayment GL entries - UC7: complex allocation with fees, penalties, and overpayment
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -121,15 +121,15 @@ Feature: Working Capital Loan Repayment Accounting Entries
       | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
-#    TODO Add fee + penalty here to Working Capital loan
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "05 January 2026" due date and 80.0 transaction amount
     When Admin sets the business date to "10 January 2026"
     And Customer makes repayment on "10 January 2026" with 10500.0 transaction amount on Working Capital loan
     Then Working Capital Loan Transactions tab has a "REPAYMENT" transaction with date "10 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit   | Credit |
       | LIABILITY | 145023       | Suspense/Clearing account | 10500.0 |        |
       | ASSET     | 112601       | Loans Receivable          |         | 9000.0 |
-      | ASSET     | 112603       | Fee Receivable            |         | 80.0   |
-      | LIABILITY | 245000       | Other Credit liability    |         | 1420.0 |
+      | ASSET     | 112603       | Interest/Fee Receivable   |         | 80.0   |
+      | LIABILITY | 245000       | Other Credit Liability    |         | 1420.0 |
 
   @TestRailId:C78874
   Scenario: Verify Working Capital loan repayment GL entries - UC8: partial repayment
@@ -170,7 +170,7 @@ Feature: Working Capital Loan Repayment Accounting Entries
       | ASSET     | 112601       | Loans Receivable          | 270.0 |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 270.0  |
 
-  @UndoRepaymentGLEntries2
+  @TestRailId:C98238 @UndoRepaymentGLEntries2
   Scenario: Verify Working Capital loan UNDO repayment GL entries - UC2: reversal with fees
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -192,7 +192,7 @@ Feature: Working Capital Loan Repayment Accounting Entries
       | ASSET     | 112603       | Interest/Fee Receivable   | 50.0  |        |
       | LIABILITY | 145023       | Suspense/Clearing account |       | 320.0  |
 
-  @UndoRepaymentGLEntries3
+  @TestRailId:C98239 @UndoRepaymentGLEntries3
   Scenario: Verify Working Capital loan UNDO repayment GL entries - UC3: reversal with penalties
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data

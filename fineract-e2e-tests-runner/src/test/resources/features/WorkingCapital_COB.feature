@@ -266,6 +266,7 @@ Feature: Working Capital COB Job
     Then Admin verifies all inserted WC loans have lastClosedBusinessDate "31 December 2023"
     Then Admin verifies all inserted WC loans have version 1
 
+  @TestRailId:C98240
   Scenario: WC COB removes an orphaned lock with no error on a loan already processed for that COB date
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -278,7 +279,7 @@ Feature: Working Capital COB Job
     When Admin runs WC COB job
     Then Admin verifies all inserted WC loans have no account locks
 
-
+  @TestRailId:C98241
   Scenario: WC COB keeps a lock that carries an error message
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -290,6 +291,7 @@ Feature: Working Capital COB Job
     When Admin runs WC COB job
     Then Admin verifies all inserted WC loans have at least one account lock
 
+  @TestRailId:C98242
   Scenario: WC COB keeps a lock when the loan's last closed business date does not match the lock's COB date
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -304,6 +306,7 @@ Feature: Working Capital COB Job
     When Admin runs WC COB job
     Then Admin verifies all inserted WC loans have at least one account lock
 
+  @TestRailId:C98243
   Scenario: WC COB removes an orphaned inline-COB lock with no error on a processed loan
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -315,6 +318,7 @@ Feature: Working Capital COB Job
     When Admin runs WC COB job
     Then Admin verifies all inserted WC loans have no account locks
 
+  @TestRailId:C98244
   Scenario: WC COB keeps an inline-COB lock that carries an error message
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data
@@ -326,6 +330,7 @@ Feature: Working Capital COB Job
     When Admin runs WC COB job
     Then Admin verifies all inserted WC loans have at least one account lock
 
+  @TestRailId:C98245
   Scenario: WC COB keeps a lock with NULL cob business date
     # SQL filter requires `lock_placed_on_cob_business_date IS NOT NULL` — a lock with NULL date must never be removed.
     When Admin sets the business date to "01 January 2024"
@@ -338,6 +343,7 @@ Feature: Working Capital COB Job
     When Admin runs WC COB job
     Then Admin verifies all inserted WC loans have at least one account lock
 
+  @TestRailId:C98246
   Scenario: WC COB keeps a lock when cob business date is in the past relative to last closed date
     # SQL uses strict equality on dates — a stale lock whose cob_date already lags behind last_closed must remain.
     When Admin sets the business date to "02 January 2024"
@@ -351,7 +357,7 @@ Feature: Working Capital COB Job
     When Admin runs WC COB job
     Then Admin verifies all inserted WC loans have at least one account lock
 
-
+  @TestRailId:C98247
   Scenario: WC COB removes only orphaned locks among multiple loans in the same run
     # Two loans share the same COB run: one carries an orphaned lock (no error) and must be unlocked;
     # the other carries a lock with an error message and must remain locked. Verifies DELETE selectivity.
@@ -367,6 +373,7 @@ Feature: Working Capital COB Job
     Then Admin verifies inserted WC loan 1 has no account locks
     Then Admin verifies inserted WC loan 2 has at least one account lock
 
+  @TestRailId:C98248
   Scenario: WC COB run properly uses .before/after listeners
     When Admin clears internal working capital cob last run data
     Then Admin verifies internal working capital cob last run data values are empty "true"
