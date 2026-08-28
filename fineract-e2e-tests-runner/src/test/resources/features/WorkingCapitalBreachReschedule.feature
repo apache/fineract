@@ -9,8 +9,8 @@ Feature: Working Capital Breach Reschedule Action
     And Admin creates a client with random data
     And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
     And Admin creates a working capital loan with the following data:
-      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LoanProduct       | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -41,7 +41,7 @@ Feature: Working Capital Breach Reschedule Action
     And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -69,7 +69,7 @@ Feature: Working Capital Breach Reschedule Action
     And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -97,7 +97,7 @@ Feature: Working Capital Breach Reschedule Action
     And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -128,7 +128,7 @@ Feature: Working Capital Breach Reschedule Action
     And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -157,7 +157,7 @@ Feature: Working Capital Breach Reschedule Action
     And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -171,7 +171,7 @@ Feature: Working Capital Breach Reschedule Action
     And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -185,7 +185,7 @@ Feature: Working Capital Breach Reschedule Action
     And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -218,7 +218,7 @@ Feature: Working Capital Breach Reschedule Action
       | 90              | DAYS                | PERCENTAGE                  | 9            | 3                    |
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2019 | 01 January 2019          | 9000            | 100000             | 18                | 1000     |
+      | LAST_CREATED_WCLP | 01 January 2019 | 01 January 2019          | 9000            | 100000             | 18                | 1000     |
     And Admin successfully approves the working capital loan on "01 January 2019" with "9000" amount and expected disbursement date on "01 January 2019"
     And Admin successfully disburse the Working Capital loan on "01 January 2019" with "9000" EUR transaction amount and "1000" discount amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -242,7 +242,7 @@ Feature: Working Capital Breach Reschedule Action
       | 90              | DAYS                | PERCENTAGE                  | 10           | 3                    |
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2019 | 01 January 2019          | 9000            | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2019 | 01 January 2019          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2019" with "9000" amount and expected disbursement date on "01 January 2019"
     And Admin successfully disburse the Working Capital loan on "01 January 2019" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -273,7 +273,7 @@ Feature: Working Capital Breach Reschedule Action
       | 90              | DAYS                | PERCENTAGE                  | 9            | 3                    |
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2019 | 01 January 2019          | 9000            | 100000             | 18                | 1000     |
+      | LAST_CREATED_WCLP | 01 January 2019 | 01 January 2019          | 9000            | 100000             | 18                | 1000     |
     And Admin successfully approves the working capital loan on "01 January 2019" with "9000" amount and expected disbursement date on "01 January 2019"
     And Admin successfully disburse the Working Capital loan on "01 January 2019" with "9000" EUR transaction amount and "1000" discount amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -307,7 +307,7 @@ Feature: Working Capital Breach Reschedule Action
       | 90              | DAYS                | PERCENTAGE                  | 9            | 3                    |
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2019 | 01 January 2019          | 9000            | 100000             | 18                | 1000     |
+      | LAST_CREATED_WCLP | 01 January 2019 | 01 January 2019          | 9000            | 100000             | 18                | 1000     |
     And Admin successfully approves the working capital loan on "01 January 2019" with "9000" amount and expected disbursement date on "01 January 2019"
     And Admin successfully disburse the Working Capital loan on "01 January 2019" with "9000" EUR transaction amount and "1000" discount amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -339,7 +339,7 @@ Feature: Working Capital Breach Reschedule Action
     And Admin creates a new Working Capital Loan Product with breachId and overrides enabled
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -376,7 +376,7 @@ Feature: Working Capital Breach Reschedule Action
       | 60              | DAYS                | PERCENTAGE                  | 50           | 0                    |
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -420,7 +420,7 @@ Feature: Working Capital Breach Reschedule Action
       | 60              | DAYS                | PERCENTAGE                  | 50           | 0                    |
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -452,7 +452,7 @@ Feature: Working Capital Breach Reschedule Action
       | 60              | DAYS                | PERCENTAGE                  | 50           | 0                    |
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -503,7 +503,7 @@ Feature: Working Capital Breach Reschedule Action
       | 60              | DAYS                | PERCENTAGE                  | 50           | 0                    |
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -544,7 +544,7 @@ Feature: Working Capital Breach Reschedule Action
       | 60              | DAYS                | PERCENTAGE                  | 50           | 0                    |
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -591,7 +591,7 @@ Feature: Working Capital Breach Reschedule Action
       | 60              | DAYS                | PERCENTAGE                  | 50           | 0                    |
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -638,7 +638,7 @@ Feature: Working Capital Breach Reschedule Action
       | 30              | DAYS                | PERCENTAGE                  | 50           | 0                    |
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -676,7 +676,7 @@ Feature: Working Capital Breach Reschedule Action
       | 30              | DAYS                | PERCENTAGE                  | 50           | 0                    |
     And Admin creates a working capital loan with the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 800             | 100000             | 18                | 0        |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     And Admin runs inline COB job for Working Capital Loan by loanId

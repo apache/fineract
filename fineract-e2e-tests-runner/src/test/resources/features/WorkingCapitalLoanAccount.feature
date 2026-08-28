@@ -968,7 +968,7 @@ Feature: WorkingCapitalLoanAccount
     And Admin creates a client with random data
     And Admin creates working capital loan with 2 "YEARS" breach override and the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 |
     Then Verify working capital loan account has been created with correct breach override data
 
   @TestRailId:C76688
@@ -995,13 +995,13 @@ Feature: WorkingCapitalLoanAccount
     And Admin creates a client with random data
     And Admin creates working capital loan with breach from WCLP while override is allowed and the following data:
       | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate |
-      | WCLP_BREACH | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 |
+      | LAST_CREATED_WCLP | 01 January 2026 | 01 January 2026          | 100             | 100                | 1                 |
     Then Verify working capital loan account has been created with correct breach data
     And Admin modifies the working capital loan with 3 "WEEKS" breach override data
     Then Verify working capital loan account has been created with correct breach override data
     Then Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | status                         | proposedPrincipal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discountProposed |
-      | WCLP_BREACH  | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 100.0             | 0.0               | 100.0              | 1.0               | 0.0              |
+      | LAST_CREATED_WCLP  | 2026-01-01      | 2026-01-01               | Submitted and pending approval | 100.0             | 0.0               | 100.0              | 1.0               | 0.0              |
 
   @TestRailId:C76748
   Scenario: Verify WC Loan account modify with breach value from WCLP is successful - UC7

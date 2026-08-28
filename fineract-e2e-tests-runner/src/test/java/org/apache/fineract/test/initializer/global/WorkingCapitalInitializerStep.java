@@ -82,6 +82,10 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
                         createWorkingCapitalLoanProductIdempotent(
                                 workingCapitalRequestFactory.defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest()
                                         .name(DefaultWorkingCapitalLoanProduct.WCLP.getName()))),
+                () -> TestContext.INSTANCE.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP,
+                        createWorkingCapitalLoanProductIdempotent(
+                                workingCapitalRequestFactory.defaultWorkingCapitalLoanProductNoAccountingRequest()
+                                        .name(DefaultWorkingCapitalLoanProduct.WCLP_NO_ACCOUNTING.getName()))),
                 () -> TestContext.INSTANCE.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_DISCOUNT,
                         createWorkingCapitalLoanProductIdempotent(
                                 workingCapitalRequestFactory.defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest()

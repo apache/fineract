@@ -505,7 +505,7 @@ Feature: Working Capital Loan Undo Transaction
     When Admin creates a new Working Capital Loan Product with delinquency bucket
     When Admin creates a working capital loan with the following data:
       | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 800             | 8000               | 1                 | 0.0      |
+      | WCLP | 01 January 2026 | 01 January 2026          | 800             | 8000               | 1                 | 0.0      |
     When Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
     When Admin runs inline COB job for Working Capital Loan

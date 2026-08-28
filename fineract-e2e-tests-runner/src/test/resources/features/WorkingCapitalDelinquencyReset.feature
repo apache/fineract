@@ -518,7 +518,7 @@ Feature: Working Capital Delinquency Reset Action
     And Admin creates a new Working Capital Loan Product with delinquency bucket
     And Admin creates a working capital loan with the following data:
       | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 800             | 800                | 1                  | 0.0      |
+      | WCLP | 01 January 2026 | 01 January 2026          | 800             | 800                | 1                  | 0.0      |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
 #  --- Backdated payments covering period 1 fully and period 2 partially ---
@@ -592,7 +592,7 @@ Feature: Working Capital Delinquency Reset Action
     And Admin creates a new Working Capital Loan Product with delinquency bucket
     And Admin creates a working capital loan with the following data:
       | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 800             | 800                | 1                  | 0.0      |
+      | WCLP | 01 January 2026 | 01 January 2026          | 800             | 800                | 1                  | 0.0      |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
 #  --- Period 1 overpaid, period 2 partially paid ---
@@ -649,7 +649,7 @@ Feature: Working Capital Delinquency Reset Action
     And Admin creates a new Working Capital Loan Product with delinquency bucket
     And Admin creates a working capital loan with the following data:
       | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 800             | 800                | 1                  | 0.0      |
+      | WCLP | 01 January 2026 | 01 January 2026          | 800             | 800                | 1                  | 0.0      |
     And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
 #  --- Period 1 fully paid, period 2 partially paid ---

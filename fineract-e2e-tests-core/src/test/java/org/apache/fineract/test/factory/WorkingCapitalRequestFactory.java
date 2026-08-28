@@ -88,27 +88,7 @@ public class WorkingCapitalRequestFactory {
     public static final BigDecimal DEFAULT_WC_NEAR_BREACH_THRESHOLD = new BigDecimal("70.23");
 
     public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductRequestWithAccrualAccounting() {
-        return defaultWorkingCapitalLoanProductRequest()//
-                .accountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)//
-                .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.SUSPENSE_CLEARING_ACCOUNT))//
-                .loanPortfolioAccountId(accountTypeResolver.resolve(DefaultAccountType.LOANS_RECEIVABLE))//
-                .transfersInSuspenseAccountId(accountTypeResolver.resolve(DefaultAccountType.TRANSFER_IN_SUSPENSE_ACCOUNT))//
-                .deferredIncomeLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.DEFERRED_INTEREST_REVENUE))//
-                .incomeFromDiscountFeeAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_INCOME))//
-                .incomeFromFeeAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_INCOME))//
-                .incomeFromPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_INCOME))//
-                .incomeFromRecoveryAccountId(accountTypeResolver.resolve(DefaultAccountType.RECOVERIES))//
-                .writeOffAccountId(accountTypeResolver.resolve(DefaultAccountType.WRITTEN_OFF))//
-                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OVERPAYMENT_ACCOUNT))//
-                .goodwillCreditAccountId(accountTypeResolver.resolve(DefaultAccountType.GOODWILL_EXPENSE_ACCOUNT))//
-                .incomeFromGoodwillCreditFeesAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF))//
-                .incomeFromGoodwillCreditPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF))//
-                .incomeFromChargeOffFeesAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF))//
-                .incomeFromChargeOffPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF))//
-                .chargeOffExpenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT))//
-                .chargeOffFraudExpenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT_FRAUD))//
-                .receivableFeeAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_FEE_RECEIVABLE))//
-                .receivablePenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_FEE_RECEIVABLE));//
+        return defaultWorkingCapitalLoanProductRequest();
     }
 
     /**
@@ -150,7 +130,26 @@ public class WorkingCapitalRequestFactory {
                 .delinquencyBucketId(delinquencyBucketResolver.resolve(DelinquencyBucket.WC_DELINQUENCY_BUCKET))//
                 .dateFormat(DATE_FORMAT)//
                 .locale(LOCALE_EN)//
-                .accountingRule(AccountingRuleEnum.NONE)//
+                .accountingRule(AccountingRuleEnum.ACC_DEF_REV_AM)//
+                .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.SUSPENSE_CLEARING_ACCOUNT))//
+                .loanPortfolioAccountId(accountTypeResolver.resolve(DefaultAccountType.LOANS_RECEIVABLE))//
+                .transfersInSuspenseAccountId(accountTypeResolver.resolve(DefaultAccountType.TRANSFER_IN_SUSPENSE_ACCOUNT))//
+                .deferredIncomeLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.DEFERRED_INTEREST_REVENUE))//
+                .incomeFromDiscountFeeAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_INCOME))//
+                .incomeFromFeeAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_INCOME))//
+                .incomeFromPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_INCOME))//
+                .incomeFromRecoveryAccountId(accountTypeResolver.resolve(DefaultAccountType.RECOVERIES))//
+                .writeOffAccountId(accountTypeResolver.resolve(DefaultAccountType.WRITTEN_OFF))//
+                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OVERPAYMENT_ACCOUNT))//
+                .goodwillCreditAccountId(accountTypeResolver.resolve(DefaultAccountType.GOODWILL_EXPENSE_ACCOUNT))//
+                .incomeFromGoodwillCreditFeesAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF))//
+                .incomeFromGoodwillCreditPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF))//
+                .incomeFromChargeOffFeesAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF))//
+                .incomeFromChargeOffPenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.FEE_CHARGE_OFF))//
+                .chargeOffExpenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT))//
+                .chargeOffFraudExpenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT_FRAUD))//
+                .receivableFeeAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_FEE_RECEIVABLE))//
+                .receivablePenaltyAccountId(accountTypeResolver.resolve(DefaultAccountType.INTEREST_FEE_RECEIVABLE))//
                 .paymentAllocation(List.of(//
                         createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.DEFAULT.getValue(),
                                 List.of(DUE_PENALTY, DUE_FEE, DUE_PRINCIPAL, IN_ADVANCE_PENALTY, IN_ADVANCE_FEE, IN_ADVANCE_PRINCIPAL))));//
@@ -166,6 +165,37 @@ public class WorkingCapitalRequestFactory {
         return defaultWorkingCapitalLoanProductRequest().name(name)//
                 .shortName(shortName)//
                 .allowAttributeOverrides(allowAttributeOverrides);
+    }
+
+    public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductNoAccountingRequest() {
+        String name = Utils.randomStringGenerator(WCLP_NAME_PREFIX, 10);
+        String shortName = loanProductsRequestFactory.generateShortNameSafely();
+
+        PostAllowAttributeOverrides allowAttributeOverrides = new PostAllowAttributeOverrides().delinquencyBucketClassification(true)
+                .breach(true).discountDefault(true).periodPaymentFrequencyType(true).periodPaymentFrequency(true);
+
+        return defaultWorkingCapitalLoanProductRequest().name(name)//
+                .shortName(shortName)//
+                .allowAttributeOverrides(allowAttributeOverrides).accountingRule(AccountingRuleEnum.NONE)//
+                .fundSourceAccountId(null)//
+                .loanPortfolioAccountId(null)//
+                .transfersInSuspenseAccountId(null)//
+                .deferredIncomeLiabilityAccountId(null)//
+                .incomeFromDiscountFeeAccountId(null)//
+                .incomeFromFeeAccountId(null)//
+                .incomeFromPenaltyAccountId(null)//
+                .incomeFromRecoveryAccountId(null)//
+                .writeOffAccountId(null)//
+                .overpaymentLiabilityAccountId(null)//
+                .goodwillCreditAccountId(null)//
+                .incomeFromGoodwillCreditFeesAccountId(null)//
+                .incomeFromGoodwillCreditPenaltyAccountId(null)//
+                .incomeFromChargeOffFeesAccountId(null)//
+                .incomeFromChargeOffPenaltyAccountId(null)//
+                .chargeOffExpenseAccountId(null)//
+                .chargeOffFraudExpenseAccountId(null)//
+                .receivableFeeAccountId(null)//
+                .receivablePenaltyAccountId(null);
     }
 
     public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductBreachRequest() {

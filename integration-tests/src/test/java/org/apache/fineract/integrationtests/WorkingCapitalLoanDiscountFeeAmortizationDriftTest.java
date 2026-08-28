@@ -38,13 +38,16 @@ import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetBalance;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.InlineJobRequest;
+import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest.AccountingRuleEnum;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.ProjectedAmortizationScheduleData;
 import org.apache.fineract.client.models.ProjectedAmortizationSchedulePaymentData;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDisbursementTestBuilder;
@@ -52,6 +55,7 @@ import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCap
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,6 +100,36 @@ public class WorkingCapitalLoanDiscountFeeAmortizationDriftTest {
     private final List<Long> createdLoanIds = new ArrayList<>();
     private final List<Long> createdProductIds = new ArrayList<>();
     private final Long createdClientId = ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+
+    private static Account fundSourceAccount;
+    private static Account loanPortfolioAccount;
+    private static Account transfersSuspenseAccount;
+    private static Account incomeFromDiscountFeeAccount;
+    private static Account feesReceivableAccount;
+    private static Account penaltiesReceivableAccount;
+    private static Account incomeFromFeeAccount;
+    private static Account incomeFromPenaltyAccount;
+    private static Account incomeFromRecoveryAccount;
+    private static Account writeOffAccount;
+    private static Account overpaymentAccount;
+    private static Account deferredIncomeAccount;
+
+    @BeforeAll
+    static void setupAccounts() {
+        final FeignAccountHelper accountHelper = new FeignAccountHelper(FineractFeignClientHelper.getFineractFeignClient());
+        fundSourceAccount = accountHelper.createLiabilityAccount("wcDriftFundSource");
+        loanPortfolioAccount = accountHelper.createAssetAccount("wcDriftLoanPortfolio");
+        transfersSuspenseAccount = accountHelper.createAssetAccount("wcDriftTransfersSuspense");
+        incomeFromDiscountFeeAccount = accountHelper.createIncomeAccount("wcDriftIncomeDiscountFee");
+        feesReceivableAccount = accountHelper.createAssetAccount("wcDriftFeesReceivable");
+        penaltiesReceivableAccount = accountHelper.createAssetAccount("wcDriftPenaltiesReceivable");
+        incomeFromFeeAccount = accountHelper.createIncomeAccount("wcDriftIncomeFee");
+        incomeFromPenaltyAccount = accountHelper.createIncomeAccount("wcDriftIncomePenalty");
+        incomeFromRecoveryAccount = accountHelper.createIncomeAccount("wcDriftIncomeRecovery");
+        writeOffAccount = accountHelper.createExpenseAccount("wcDriftWriteOff");
+        overpaymentAccount = accountHelper.createLiabilityAccount("wcDriftOverpayment");
+        deferredIncomeAccount = accountHelper.createLiabilityAccount("wcDriftDeferredIncome");
+    }
 
     @AfterEach
     void cleanupEntities() {
@@ -313,8 +347,19 @@ public class WorkingCapitalLoanDiscountFeeAmortizationDriftTest {
         final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
                 .withShortName(uniqueShortName).withRepaymentEvery(1).withRepaymentFrequencyType("DAYS")
-                .withPeriodPaymentRate(PERIOD_PAYMENT_RATE).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE)).build())
-                .getResourceId();
+                .withPeriodPaymentRate(PERIOD_PAYMENT_RATE).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE))
+                .withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM).withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
+                .withLoanPortfolioAccountId(loanPortfolioAccount.getAccountID().longValue())
+                .withTransfersInSuspenseAccountId(transfersSuspenseAccount.getAccountID().longValue())
+                .withIncomeFromDiscountFeeAccountId(incomeFromDiscountFeeAccount.getAccountID().longValue())
+                .withReceivableFeeAccountId(feesReceivableAccount.getAccountID().longValue())
+                .withReceivablePenaltyAccountId(penaltiesReceivableAccount.getAccountID().longValue())
+                .withIncomeFromFeeAccountId(incomeFromFeeAccount.getAccountID().longValue())
+                .withIncomeFromPenaltyAccountId(incomeFromPenaltyAccount.getAccountID().longValue())
+                .withIncomeFromRecoveryAccountId(incomeFromRecoveryAccount.getAccountID().longValue())
+                .withWriteOffAccountId(writeOffAccount.getAccountID().longValue())
+                .withOverpaymentLiabilityAccountId(overpaymentAccount.getAccountID().longValue())
+                .withDeferredIncomeLiabilityAccountId(deferredIncomeAccount.getAccountID().longValue()).build()).getResourceId();
         createdProductIds.add(productId);
         return productId;
     }

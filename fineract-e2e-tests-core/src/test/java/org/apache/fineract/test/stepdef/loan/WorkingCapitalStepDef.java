@@ -835,7 +835,25 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
                 + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
         final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest()//
                 .name(workingCapitalProductDefaultName)//
-                .accountingRule(AccountingRuleEnum.ACC_DEF_REV_AM);
+                .accountingRule(AccountingRuleEnum.ACC_DEF_REV_AM).fundSourceAccountId(null)//
+                .loanPortfolioAccountId(null)//
+                .transfersInSuspenseAccountId(null)//
+                .deferredIncomeLiabilityAccountId(null)//
+                .incomeFromDiscountFeeAccountId(null)//
+                .incomeFromFeeAccountId(null)//
+                .incomeFromPenaltyAccountId(null)//
+                .incomeFromRecoveryAccountId(null)//
+                .writeOffAccountId(null)//
+                .overpaymentLiabilityAccountId(null)//
+                .goodwillCreditAccountId(null)//
+                .incomeFromGoodwillCreditFeesAccountId(null)//
+                .incomeFromGoodwillCreditPenaltyAccountId(null)//
+                .incomeFromChargeOffFeesAccountId(null)//
+                .incomeFromChargeOffPenaltyAccountId(null)//
+                .chargeOffExpenseAccountId(null)//
+                .chargeOffFraudExpenseAccountId(null)//
+                .receivableFeeAccountId(null)//
+                .receivablePenaltyAccountId(null);
         // Missing all required GL account IDs
 
         final CallFailedRuntimeException exception = fail(() -> workingCapitalApi().createWorkingCapitalLoanProduct(request, Map.of()));

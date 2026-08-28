@@ -94,7 +94,7 @@ Feature: Working Capital Loan Schedule Business Events
       | 6               | DAYS                | PERCENTAGE                  | 50           |
     And Admin creates a working capital loan with the following data:
       | LoanProduct      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_DELINQUENCY | 01 January 2026 | 01 January 2026          | 10000           | 10000              | 1                 | 0.0      |
+      | WCLP | 01 January 2026 | 01 January 2026          | 10000           | 10000              | 1                 | 0.0      |
     And Admin successfully approves the working capital loan on "01 January 2026" with "10000" amount and expected disbursement date on "01 January 2026"
     And a Working Capital Loan Balance Changed business event is raised on approval
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "10000" EUR transaction amount

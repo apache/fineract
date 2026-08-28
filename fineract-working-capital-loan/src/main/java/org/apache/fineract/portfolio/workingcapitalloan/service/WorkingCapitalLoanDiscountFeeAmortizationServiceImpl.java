@@ -56,6 +56,10 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
     @Override
     @Transactional
     public void processDiscountFeeAmortization(final WorkingCapitalLoan loan, final LocalDate transactionDate) {
+        if (loan.getLoanProduct().getAccountingRule().isNone()) {
+            log.debug("Skipping discount fee amortization for WC loan [{}] - accounting is disabled", loan.getId());
+            return;
+        }
         // Evaluate the schedule target against the discount in force on the COB date being processed. During a COB
         // fast-forward (catch-up over skipped days) this keeps a replayed day that precedes a discount fee adjustment
         // from reacting to that not-yet-effective adjustment, so the resulting amortization adjustment is never dated

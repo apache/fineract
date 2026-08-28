@@ -2675,12 +2675,10 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     }
 
     private Long resolveLoanProductId(final String loanProductName) {
-        if ("WCLP_DELINQUENCY".equals(loanProductName) || "WCLP_BREACH".equals(loanProductName)) {
-            final PostWorkingCapitalLoanProductsResponse response = testContext()
+        if ("LAST_CREATED_WCLP".equals(loanProductName)) {
+            PostWorkingCapitalLoanProductsResponse workingCapitalLoanProductsResponse = testContext()
                     .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
-            if (response != null) {
-                return response.getResourceId();
-            }
+            return workingCapitalLoanProductsResponse.getResourceId();
         }
         final DefaultWorkingCapitalLoanProduct product = DefaultWorkingCapitalLoanProduct.valueOf(loanProductName);
         return workingCapitalLoanProductResolver.resolve(product);

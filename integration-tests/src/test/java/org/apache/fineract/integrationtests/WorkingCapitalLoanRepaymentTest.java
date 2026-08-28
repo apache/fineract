@@ -34,20 +34,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
+import org.apache.fineract.client.models.JournalEntryTransactionItem;
+import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest.AccountingRuleEnum;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
 import org.apache.fineract.client.models.ProjectedAmortizationScheduleData;
 import org.apache.fineract.client.models.ProjectedAmortizationSchedulePaymentData;
 import org.apache.fineract.infrastructure.event.external.data.ExternalEventResponse;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignAccountHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignExternalEventHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignJournalEntryHelper;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanDisbursementTestBuilder;
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanHelper;
@@ -108,7 +115,8 @@ public class WorkingCapitalLoanRepaymentTest {
 
     @Test
     public void testRepaymentUpdatesTransactionAllocationBalanceAndStatus() {
-        final Long productId = createProductWithDiscountAllowed();
+        final AccountingFixture accounting = createProductWithDiscountAllowedAndAccounting();
+        final Long productId = accounting.productId();
         final Long loanId = submitAndTrack(new WorkingCapitalLoanApplicationTestBuilder().withClientId(createdClientId)
                 .withProductId(productId).withPrincipal(BigDecimal.valueOf(5000))
                 .withPeriodPaymentRate(WorkingCapitalLoanProductTestBuilder.DEFAULT_PERIOD_PAYMENT_RATE_PERCENT)
@@ -120,9 +128,10 @@ public class WorkingCapitalLoanRepaymentTest {
         loanHelper.disburseById(loanId, WorkingCapitalLoanDisbursementTestBuilder.buildDisburseRequest(disbursementDate,
                 BigDecimal.valueOf(5000), BigDecimal.valueOf(100), null, null, null, null, null, null, null));
         final LocalDate repaymentDate = disbursementDate.plusDays(1);
+        final AtomicLong repaymentTransactionId = new AtomicLong();
         BusinessDateHelper.runAt(repaymentDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")),
-                () -> loanHelper.makeRepaymentByLoanId(loanId, WorkingCapitalLoanDisbursementTestBuilder
-                        .buildRepaymentRequest(repaymentDate, BigDecimal.valueOf(5200), null, "repayment", 1, "repayment-account")));
+                () -> repaymentTransactionId.set(loanHelper.makeRepaymentByLoanId(loanId, WorkingCapitalLoanDisbursementTestBuilder
+                        .buildRepaymentRequest(repaymentDate, BigDecimal.valueOf(5200), null, "repayment", 1, "repayment-account"))));
 
         final GetWorkingCapitalLoansLoanIdResponse loanData = loanHelper.retrieveById(loanId);
         assertStatus(loanData, "loanStatusType.overpaid");
@@ -141,6 +150,19 @@ public class WorkingCapitalLoanRepaymentTest {
         assertEqualBigDecimal(BigDecimal.valueOf(100), amortization.getTransactionAmount());
         assertEqualBigDecimal(BigDecimal.valueOf(100), loanData.getBalance().getRealizedIncomeFromDiscountFee());
         assertEqualBigDecimal(BigDecimal.ZERO, loanData.getBalance().getUnrealizedIncomeFromDiscountFee());
+
+        // The discount fee increases principal due to 5100, leaving 100 of the 5200 payment as overpayment.
+        final List<JournalEntryTransactionItem> repaymentEntries = getJournalEntriesForWCTransaction(repaymentTransactionId.get());
+        assertEquals(3, repaymentEntries.size(), "Expected repayment debit, portfolio credit and overpayment credit");
+        assertJournalEntry(repaymentEntries, "DEBIT", accounting.fundSourceAccount(), BigDecimal.valueOf(5200));
+        assertJournalEntry(repaymentEntries, "CREDIT", accounting.loanPortfolioAccount(), BigDecimal.valueOf(5100));
+        assertJournalEntry(repaymentEntries, "CREDIT", accounting.overpaymentAccount(), BigDecimal.valueOf(100));
+
+        // Settling the loan recognizes all deferred discount income inline.
+        final List<JournalEntryTransactionItem> amortizationEntries = getJournalEntriesForWCTransaction(amortization.getId());
+        assertEquals(2, amortizationEntries.size(), "Expected deferred-income debit and discount-income credit");
+        assertJournalEntry(amortizationEntries, "DEBIT", accounting.deferredIncomeAccount(), BigDecimal.valueOf(100));
+        assertJournalEntry(amortizationEntries, "CREDIT", accounting.incomeFromDiscountFeeAccount(), BigDecimal.valueOf(100));
     }
 
     @Test
@@ -663,14 +685,59 @@ public class WorkingCapitalLoanRepaymentTest {
         return productId;
     }
 
-    private Long createProductWithDiscountAllowed() {
+    private AccountingFixture createProductWithDiscountAllowedAndAccounting() {
+        final FeignAccountHelper accountHelper = new FeignAccountHelper(FineractFeignClientHelper.getFineractFeignClient());
+        final Account fundSourceAccount = accountHelper.createLiabilityAccount("wcRepayFundSource");
+        final Account loanPortfolioAccount = accountHelper.createAssetAccount("wcRepayLoanPortfolio");
+        final Account transfersSuspenseAccount = accountHelper.createAssetAccount("wcRepayTransfersSuspense");
+        final Account incomeFromDiscountFeeAccount = accountHelper.createIncomeAccount("wcRepayIncomeDiscountFee");
+        final Account feesReceivableAccount = accountHelper.createAssetAccount("wcRepayFeesReceivable");
+        final Account penaltiesReceivableAccount = accountHelper.createAssetAccount("wcRepayPenaltiesReceivable");
+        final Account incomeFromFeeAccount = accountHelper.createIncomeAccount("wcRepayIncomeFee");
+        final Account incomeFromPenaltyAccount = accountHelper.createIncomeAccount("wcRepayIncomePenalty");
+        final Account incomeFromRecoveryAccount = accountHelper.createIncomeAccount("wcRepayIncomeRecovery");
+        final Account writeOffAccount = accountHelper.createExpenseAccount("wcRepayWriteOff");
+        final Account overpaymentAccount = accountHelper.createLiabilityAccount("wcRepayOverpayment");
+        final Account deferredIncomeAccount = accountHelper.createLiabilityAccount("wcRepayDeferredIncome");
         final String uniqueName = "WCL Product " + UUID.randomUUID().toString().substring(0, 8);
         final String uniqueShortName = UUID.randomUUID().toString().replace("-", "").substring(0, 4);
         final Long productId = productHelper.createWorkingCapitalLoanProduct(new WorkingCapitalLoanProductTestBuilder().withName(uniqueName)
-                .withShortName(uniqueShortName).withAllowAttributeOverrides(java.util.Map.of("discountDefault", Boolean.TRUE)).build())
-                .getResourceId();
+                .withShortName(uniqueShortName).withAllowAttributeOverrides(Map.of("discountDefault", Boolean.TRUE))
+                .withAccountingRule(AccountingRuleEnum.ACC_DEF_REV_AM).withFundSourceAccountId(fundSourceAccount.getAccountID().longValue())
+                .withLoanPortfolioAccountId(loanPortfolioAccount.getAccountID().longValue())
+                .withTransfersInSuspenseAccountId(transfersSuspenseAccount.getAccountID().longValue())
+                .withIncomeFromDiscountFeeAccountId(incomeFromDiscountFeeAccount.getAccountID().longValue())
+                .withReceivableFeeAccountId(feesReceivableAccount.getAccountID().longValue())
+                .withReceivablePenaltyAccountId(penaltiesReceivableAccount.getAccountID().longValue())
+                .withIncomeFromFeeAccountId(incomeFromFeeAccount.getAccountID().longValue())
+                .withIncomeFromPenaltyAccountId(incomeFromPenaltyAccount.getAccountID().longValue())
+                .withIncomeFromRecoveryAccountId(incomeFromRecoveryAccount.getAccountID().longValue())
+                .withWriteOffAccountId(writeOffAccount.getAccountID().longValue())
+                .withOverpaymentLiabilityAccountId(overpaymentAccount.getAccountID().longValue())
+                .withDeferredIncomeLiabilityAccountId(deferredIncomeAccount.getAccountID().longValue()).build()).getResourceId();
         createdProductIds.add(productId);
-        return productId;
+        return new AccountingFixture(productId, fundSourceAccount, loanPortfolioAccount, incomeFromDiscountFeeAccount, overpaymentAccount,
+                deferredIncomeAccount);
+    }
+
+    private List<JournalEntryTransactionItem> getJournalEntriesForWCTransaction(final Long transactionId) {
+        final FeignJournalEntryHelper journalEntryHelper = new FeignJournalEntryHelper(FineractFeignClientHelper.getFineractFeignClient());
+        final GetJournalEntriesTransactionIdResponse response = journalEntryHelper.getJournalEntriesByTransactionId("WC" + transactionId);
+        return response == null || response.getPageItems() == null ? List.of() : response.getPageItems();
+    }
+
+    private static void assertJournalEntry(final List<JournalEntryTransactionItem> entries, final String expectedType,
+            final Account expectedAccount, final BigDecimal expectedAmount) {
+        final boolean found = entries.stream()
+                .anyMatch(entry -> entry != null && entry.getEntryType() != null && expectedType.equals(entry.getEntryType().getValue())
+                        && Objects.equals(expectedAccount.getAccountID().longValue(), entry.getGlAccountId()) && entry.getAmount() != null
+                        && expectedAmount.compareTo(BigDecimal.valueOf(entry.getAmount())) == 0);
+        assertTrue(found, () -> "Expected journal entry " + expectedType + " account=" + expectedAccount.getAccountID() + " amount="
+                + expectedAmount + ", actual=" + entries);
+    }
+
+    private record AccountingFixture(Long productId, Account fundSourceAccount, Account loanPortfolioAccount,
+            Account incomeFromDiscountFeeAccount, Account overpaymentAccount, Account deferredIncomeAccount) {
     }
 
     private Long createProductForReferenceSchedule() {
