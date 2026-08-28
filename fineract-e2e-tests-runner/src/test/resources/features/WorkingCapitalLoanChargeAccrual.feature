@@ -55,6 +55,7 @@ Feature: Working Capital Loan Charge Accrual
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
       | WCLP_ACC_DEF_REV_AM | 01 February 2026 | 01 February 2026         | 9000            | 100000       | 18                | 0        |
     When Global config "charge-accrual-date" value set to "submitted-date"
+    When Global config "wcl-charge-accrual-time" value set to "real-time"
     And Admin sets the business date to "10 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "20 February 2026" due date and 30.0 transaction amount
@@ -73,7 +74,6 @@ Feature: Working Capital Loan Charge Accrual
       | 01 February 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 February 2026 | Accrual      | 30.0              | 0.0              | 0.0               | 30.0                  | false    |
     And Admin sets the business date to "20 February 2026"
-    When Global config "charge-accrual-date" value set to "due-date"
     Then Admin closes the Working Capital loan with a full repayment on "20 February 2026"
 
   @TestRailId:C85591
@@ -83,6 +83,7 @@ Feature: Working Capital Loan Charge Accrual
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
       | WCLP_ACC_DEF_REV_AM | 01 March 2026   | 01 March 2026            | 9000            | 100000       | 18                | 0        |
     When Global config "charge-accrual-date" value set to "submitted-date"
+    When Global config "wcl-charge-accrual-time" value set to "real-time"
     And Admin sets the business date to "10 March 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 March 2026" due date and 40.0 transaction amount
@@ -99,7 +100,6 @@ Feature: Working Capital Loan Charge Accrual
       | ASSET  | 112603       | Interest/Fee Receivable | 25.0  |        |
       | INCOME | 404007       | Fee Income              |       | 25.0   |
     And Admin sets the business date to "25 March 2026"
-    When Global config "charge-accrual-date" value set to "due-date"
     Then Admin closes the Working Capital loan with a full repayment on "25 March 2026"
 
   @TestRailId:C85592
@@ -108,6 +108,7 @@ Feature: Working Capital Loan Charge Accrual
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
       | WCLP_ACC_DEF_REV_AM | 01 April 2026   | 01 April 2026            | 9000            | 100000       | 18                | 0        |
+    When Global config "wcl-charge-accrual-time" value set to "real-time"
     When Global config "charge-accrual-date" value set to "submitted-date"
     And Admin sets the business date to "10 April 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
@@ -128,7 +129,6 @@ Feature: Working Capital Loan Charge Accrual
       | 01 April 2026   | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 April 2026   | Accrual      | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
     And Admin sets the business date to "25 April 2026"
-    When Global config "charge-accrual-date" value set to "due-date"
     Then Admin closes the Working Capital loan with a full repayment on "25 April 2026"
 
   @TestRailId:C85593
@@ -409,6 +409,7 @@ Feature: Working Capital Loan Charge Accrual
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
       | WCLP_ACC_DEF_REV_AM | 01 March 2027   | 01 March 2027            | 9000            | 100000       | 18                | 0        |
     When Global config "charge-accrual-date" value set to "submitted-date"
+    When Global config "wcl-charge-accrual-time" value set to "real-time"
     And Admin sets the business date to "10 March 2027"
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 March 2027" due date and 100.0 transaction amount
     Then Working Capital Loan has transactions:
@@ -432,6 +433,7 @@ Feature: Working Capital Loan Charge Accrual
       | INCOME | 404007       | Fee Income              |       | 100.0  |
       | ASSET  | 112603       | Interest/Fee Receivable |       | 100.0  |
       | INCOME | 404007       | Fee Income              | 100.0 |        |
+    When Global config "wcl-charge-accrual-time" value set to "eod"
     When Global config "charge-accrual-date" value set to "due-date"
     And Admin successfully disburse the Working Capital loan on "10 March 2027" with "9000" EUR transaction amount
     And Admin sets the business date to "21 March 2027"
@@ -457,6 +459,7 @@ Feature: Working Capital Loan Charge Accrual
       | LoanProduct         | submittedOnDate   | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
       | WCLP_ACC_DEF_REV_AM | 01 September 2026 | 01 September 2026        | 9000            | 100000       | 18                | 0        |
     When Global config "charge-accrual-date" value set to "submitted-date"
+    When Global config "wcl-charge-accrual-time" value set to "real-time"
     And Admin sets the business date to "10 September 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 September 2026" due date and 100.0 transaction amount
@@ -482,7 +485,6 @@ Feature: Working Capital Loan Charge Accrual
       | INCOME | 404007       | Fee Income       | 100.0 |        |
       | ASSET  | 112601       | Loans Receivable |       | 100.0  |
     And Admin sets the business date to "25 September 2026"
-    When Global config "charge-accrual-date" value set to "due-date"
     Then Admin closes the Working Capital loan with a full repayment on "25 September 2026"
 
   @TestRailId:C85603
@@ -509,7 +511,6 @@ Feature: Working Capital Loan Charge Accrual
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 50.0       | 50.0            | 0.0      | 30.0           | 30.0                | 0.0          |
     And Admin sets the business date to "20 October 2026"
-    When Global config "charge-accrual-date" value set to "due-date"
     Then Admin closes the Working Capital loan with a full repayment on "20 October 2026"
 
   @TestRailId:C85643
@@ -542,9 +543,64 @@ Feature: Working Capital Loan Charge Accrual
       | LoanProduct         | submittedOnDate  | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
       | WCLP_ACC_DEF_REV_AM | 01 December 2027 | 01 December 2027         | 9000            | 100000       | 18                | 0        |
     When Global config "charge-accrual-date" value set to "submitted-date"
+    When Global config "wcl-charge-accrual-time" value set to "real-time"
     And Admin sets the business date to "05 December 2027"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 December 2027" due date and 100.0 transaction amount
+    And Admin sets the business date to "10 December 2027"
+    Then Admin closes the Working Capital loan with a full repayment on "10 December 2027"
+    And Working Capital Loan has transactions:
+      | transactionDate  | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 December 2027 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 December 2027 | Accrual      | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+      | 10 December 2027 | Repayment    | 9100.0            | 9000.0           | 100.0             | 0.0                   | false    |
+
+  @TestRailId:TODO_ADD_1
+  Scenario: Verify closure does not duplicate the accrual when the charge was already accrued in real time under wcl-charge-accrual-time real-time and charge-accrual-date due-date
+    Given Admin sets the business date to "01 December 2027"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate  | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 December 2027 | 01 December 2027         | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "due-date"
+    When Global config "wcl-charge-accrual-time" value set to "real-time"
+    And Admin sets the business date to "05 December 2027"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 December 2027" due date and 100.0 transaction amount
+    And Working Capital Loan has transactions:
+      | transactionDate  | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 December 2027 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 December 2027 | Accrual      | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+    And Admin sets the business date to "10 December 2027"
+    Then Admin closes the Working Capital loan with a full repayment on "10 December 2027"
+    And Working Capital Loan has transactions:
+      | transactionDate  | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 December 2027 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 December 2027 | Accrual      | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+      | 10 December 2027 | Repayment    | 9100.0            | 9000.0           | 100.0             | 0.0                   | false    |
+
+  @TestRailId:TODO_ADD_2
+  Scenario: Verify wcl-charge-accrual-time eod and charge-accrual-date submitted-date creates the accrual on COB run
+    Given Admin sets the business date to "01 December 2027"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate  | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 December 2027 | 01 December 2027         | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "submitted-date"
+    When Global config "wcl-charge-accrual-time" value set to "eod"
+    And Admin sets the business date to "05 December 2027"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 December 2027" due date and 100.0 transaction amount
+    And Working Capital Loan has transactions:
+      | transactionDate  | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 December 2027 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+
+    And Admin sets the business date to "06 December 2027"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+
+    And Working Capital Loan has transactions:
+      | transactionDate  | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 December 2027 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 05 December 2027 | Accrual      | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+
     And Admin sets the business date to "10 December 2027"
     Then Admin closes the Working Capital loan with a full repayment on "10 December 2027"
     And Working Capital Loan has transactions:
