@@ -43,7 +43,6 @@ public class FineractEntityAccessUtil {
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final CodeValueRepositoryWrapper codeValueRepository;
-    private final FineractEntityAccessWriteService fineractEntityAccessWriteService;
     private final FineractEntityAccessReadService fineractEntityAccessReadService;
     private final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper;
     private final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository;
@@ -51,14 +50,12 @@ public class FineractEntityAccessUtil {
     @Autowired
     public FineractEntityAccessUtil(final PlatformSecurityContext context,
             final GlobalConfigurationRepositoryWrapper globalConfigurationRepository,
-            final FineractEntityAccessWriteService fineractEntityAccessWriteService,
             final CodeValueReadPlatformService codeValueReadPlatformService, final CodeValueRepositoryWrapper codeValueRepository,
             final FineractEntityAccessReadService fineractEntityAccessReadService,
             final FineractEntityRelationRepositoryWrapper fineractEntityRelationRepositoryWrapper,
             final FineractEntityToEntityMappingRepository fineractEntityToEntityMappingRepository) {
         this.context = context;
         this.globalConfigurationRepository = globalConfigurationRepository;
-        this.fineractEntityAccessWriteService = fineractEntityAccessWriteService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.codeValueRepository = codeValueRepository;
         this.fineractEntityAccessReadService = fineractEntityAccessReadService;

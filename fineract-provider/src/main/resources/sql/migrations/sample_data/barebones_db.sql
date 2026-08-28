@@ -1624,25 +1624,6 @@ INSERT INTO `m_entity_relation` (`id`, `from_entity_type`, `to_entity_type`, `co
 /*!40000 ALTER TABLE `m_entity_relation` ENABLE KEYS */;
 
 
--- Dumping structure for table fineract_default.m_entity_to_entity_access
-DROP TABLE IF EXISTS `m_entity_to_entity_access`;
-CREATE TABLE IF NOT EXISTS `m_entity_to_entity_access` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT,
-  `entity_type` varchar(50) NOT NULL,
-  `entity_id` BIGINT NOT NULL,
-  `access_type_code_value_id` INT NOT NULL,
-  `second_entity_type` varchar(50) NOT NULL,
-  `second_entity_id` BIGINT NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_uniq_m_entity_to_entity_access` (`entity_type`,`entity_id`,`access_type_code_value_id`,`second_entity_type`,`second_entity_id`),
-  KEY `IDX_OFFICE` (`entity_type`,`entity_id`),
-  KEY `FK_access_type_code_m_code_value` (`access_type_code_value_id`),
-  CONSTRAINT `FK_access_type_code_m_code_value` FOREIGN KEY (`access_type_code_value_id`) REFERENCES `m_code_value` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
--- Dumping data for table fineract_default.m_entity_to_entity_access: ~0 rows (approximately)
-/*!40000 ALTER TABLE `m_entity_to_entity_access` DISABLE KEYS */;
-/*!40000 ALTER TABLE `m_entity_to_entity_access` ENABLE KEYS */;
 
 
 -- Dumping structure for table fineract_default.m_entity_to_entity_mapping
