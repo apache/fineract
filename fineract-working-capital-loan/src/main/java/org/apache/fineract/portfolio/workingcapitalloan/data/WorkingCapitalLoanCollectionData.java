@@ -41,7 +41,13 @@ public class WorkingCapitalLoanCollectionData {
 
     private BigDecimal delinquentPrincipal;
 
+    private LocalDate lastPaymentDate;
+    private BigDecimal lastPaymentAmount;
+    private LocalDate lastRepaymentDate;
+    private BigDecimal lastRepaymentAmount;
+
     public static WorkingCapitalLoanCollectionData initializeEmptyData() {
-        return new WorkingCapitalLoanCollectionData(0L, 0L, null, BigDecimal.ZERO, new ArrayList<>(), new ArrayList<>(), BigDecimal.ZERO);
+        return new WorkingCapitalLoanCollectionData(0L, 0L, null, BigDecimal.ZERO, new ArrayList<>(), new ArrayList<>(), BigDecimal.ZERO,
+                null, null, null, null);
     }
 }

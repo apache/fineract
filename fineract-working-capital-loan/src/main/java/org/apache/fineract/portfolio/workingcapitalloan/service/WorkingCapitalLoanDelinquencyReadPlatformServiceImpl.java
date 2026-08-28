@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCollectionData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDelinquencyTagHistoryData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanRangeScheduleDelinquencyData;
@@ -42,6 +43,8 @@ import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +58,7 @@ public class WorkingCapitalLoanDelinquencyReadPlatformServiceImpl implements Wor
     private final WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository delinquencyRangeScheduleTagHistoryRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleRepository delinquencyRangeScheduleRepository;
     private final WorkingCapitalLoanDelinquencyActionRepository delinquencyActionRepository;
+    private final WorkingCapitalLoanTransactionRepository transactionRepository;
 
     @Override
     public WorkingCapitalLoanCollectionData getCollectionData(Long loanId, LocalDate businessDate) {
@@ -82,6 +86,19 @@ public class WorkingCapitalLoanDelinquencyReadPlatformServiceImpl implements Wor
 
         template.setInstallmentLevelDelinquency(list);
         template.setDelinquencyPausePeriods(retrieveDelinquencyPausePeriods(loanId, businessDate));
+
+        transactionRepository
+                .findActiveByTypesOrderByDateDesc(loanId, LoanTransactionType.getRepaymentLikeTransactionTypes(), Pageable.ofSize(1))
+                .stream().findFirst().ifPresent(workingCapitalLoanTransaction -> {
+                    template.setLastPaymentDate(workingCapitalLoanTransaction.transactionDate());
+                    template.setLastPaymentAmount(workingCapitalLoanTransaction.transactionAmount());
+                });
+
+        transactionRepository.findActiveByTypesOrderByDateDesc(loanId, List.of(LoanTransactionType.REPAYMENT), Pageable.ofSize(1)).stream()
+                .findFirst().ifPresent(workingCapitalLoanTransaction -> {
+                    template.setLastRepaymentDate(workingCapitalLoanTransaction.transactionDate());
+                    template.setLastRepaymentAmount(workingCapitalLoanTransaction.transactionAmount());
+                });
 
         return template;
     }

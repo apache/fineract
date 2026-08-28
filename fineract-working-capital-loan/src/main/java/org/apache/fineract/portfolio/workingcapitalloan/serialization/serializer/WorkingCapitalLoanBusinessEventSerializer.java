@@ -39,10 +39,10 @@ import org.apache.fineract.infrastructure.event.external.service.serialization.s
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.ExternalEventCustomDataSerializer;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionDateAndAmountHolder;
 import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionTypeTotalHolder;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanBreachScheduleMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryMapper;
@@ -52,6 +52,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapita
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.mapper.WorkingCapitalLoanAccountDataMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanApplicationReadPlatformService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -163,18 +164,19 @@ public class WorkingCapitalLoanBusinessEventSerializer
             return;
         }
         findLastActiveTransaction(loan, LoanTransactionType.getRepaymentLikeTransactionTypes()).ifPresent(transaction -> {
-            delinquent.setLastPaymentDate(avroDateTimeMapper.mapLocalDate(transaction.getTransactionDate()));
-            delinquent.setLastPaymentAmount(transaction.getTransactionAmount());
+            delinquent.setLastPaymentDate(avroDateTimeMapper.mapLocalDate(transaction.transactionDate()));
+            delinquent.setLastPaymentAmount(transaction.transactionAmount());
         });
         findLastActiveTransaction(loan, List.of(LoanTransactionType.REPAYMENT)).ifPresent(transaction -> {
-            delinquent.setLastRepaymentDate(avroDateTimeMapper.mapLocalDate(transaction.getTransactionDate()));
-            delinquent.setLastRepaymentAmount(transaction.getTransactionAmount());
+            delinquent.setLastRepaymentDate(avroDateTimeMapper.mapLocalDate(transaction.transactionDate()));
+            delinquent.setLastRepaymentAmount(transaction.transactionAmount());
         });
     }
 
-    private Optional<WorkingCapitalLoanTransaction> findLastActiveTransaction(final WorkingCapitalLoan loan,
+    private Optional<TransactionDateAndAmountHolder> findLastActiveTransaction(final WorkingCapitalLoan loan,
             final List<LoanTransactionType> transactionTypes) {
-        return transactionRepository.findActiveByTypesOrderByDateDesc(loan.getId(), transactionTypes).stream().findFirst();
+        return transactionRepository.findActiveByTypesOrderByDateDesc(loan.getId(), transactionTypes, Pageable.ofSize(1)).stream()
+                .findFirst();
     }
 
     private void populateDelinquencySchedule(final WorkingCapitalLoan loan, final WorkingCapitalLoanAccountDataV1 result) {
