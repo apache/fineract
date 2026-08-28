@@ -1000,6 +1000,11 @@ public class EventCheckHelper {
         });
     }
 
+    public void workingCapitalLoanStatusChangedEventOverpaidOnDateCheck(final Long loanId) {
+        workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanStatusChangedEvent.class, loanId,
+                (event, body) -> assertEventDateEqualsApiDate("overpaidOnDate", event.getOverpaidOnDate(), body.getOverpaidOnDate()));
+    }
+
     public void workingCapitalLoanBalanceChangedEventPausePeriodsCheck(final Long loanId) {
         workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanBalanceChangedEvent.class, loanId, (event, body) -> {
             assertThat(event.getDelinquent()).isNotNull();

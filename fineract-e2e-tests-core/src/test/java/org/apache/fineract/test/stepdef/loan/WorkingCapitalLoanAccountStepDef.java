@@ -1851,6 +1851,11 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         eventCheckHelper.workingCapitalLoanStatusChangedEventTimelineCheck(getCreatedLoanId());
     }
 
+    @Then("a Working Capital Loan Status Changed business event is raised with overpaidOnDate matching the API")
+    public void aWorkingCapitalLoanStatusChangedBusinessEventIsRaisedWithOverpaidOnDateMatchingTheApi() {
+        eventCheckHelper.workingCapitalLoanStatusChangedEventOverpaidOnDateCheck(getCreatedLoanId());
+    }
+
     @Then("a Working Capital Loan Balance Changed business event is raised with the delinquency pause periods")
     public void aWorkingCapitalLoanBalanceChangedBusinessEventIsRaisedWithDelinquencyPausePeriods() {
         eventCheckHelper.workingCapitalLoanBalanceChangedEventPausePeriodsCheck(getCreatedLoanId());
