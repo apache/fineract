@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import org.apache.fineract.client.models.DelinquencyBucketResponse;
@@ -46,10 +45,11 @@ import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
@@ -1704,41 +1704,41 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
     private Integer createLoanAccountMultipleRepaymentsDisbursement(final Integer clientID, final Long loanProductID,
             final String externalId) {
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("30")
-                .withLoanTermFrequencyAsDays().withNumberOfRepayments("1").withRepaymentEveryAfter("30").withRepaymentFrequencyTypeAsDays()
-                .withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualPrincipalPayments()
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("03 March 2023")
-                .withSubmittedOnDate("03 March 2023").withLoanType("individual").withExternalId(externalId)
-                .build(clientID.toString(), loanProductID.toString(), null);
+        PostLoansRequest loanApplication = LoanRequestBuilders
+                .legacyDaysBasedApplication(clientID.longValue(), loanProductID.longValue(), "1000", 30, 1, 30, "03 March 2023",
+                        "03 March 2023")
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .externalId(externalId);
 
-        final Long loanId = applyForLoanFromJson(loanApplicationJSON);
+        final Long loanId = applyForLoan(loanApplication);
         approveLoan(loanId, approveLoanRequest(1000.0, "03 March 2023"));
         return loanId.intValue();
     }
 
     private GetLoanProductsProductIdResponse createLoanProductWithDownPaymentConfigurationAndAccrualAccounting(Boolean enableDownPayment,
             String disbursedAmountPercentageForDownPayment, boolean enableAutoRepaymentForDownPayment, final Account... accounts) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
                 .withAccountingRulePeriodicAccrual(accounts).withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30")
                 .withDaysInYear("365").withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment)
-                .build(null);
-        final Long loanProductId = createLoanProductFromJson(loanProductJSON);
+                .buildRequest(null);
+        final Long loanProductId = createLoanProduct(loanProductRequest);
         return retrieveLoanProduct(loanProductId);
     }
 
     private Integer createApproveAndDisburseLoanAccount(final Integer clientID, final Long loanProductID, final String externalId) {
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
-                .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
+        PostLoansRequest loanApplication = LoanRequestBuilders
+                .legacyIndividualApplication(clientID.longValue(), loanProductID.longValue(), "1000", 1, BigDecimal.ZERO,
+                        "03 September 2022")
+                .submittedOnDate("01 September 2022")//
+                .interestType(LoanTestData.InterestType.FLAT)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .externalId(externalId);
 
-        final Long loanId = applyForLoanFromJson(loanApplicationJSON);
+        final Long loanId = applyForLoan(loanApplication);
         approveLoan(loanId, approveLoanRequest(1000.0, "02 September 2022"));
         disburseLoanWithNetDisbursalAmount(loanId, "03 September 2022", "1000");
         return loanId.intValue();
@@ -1746,47 +1746,47 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
 
     private GetLoanProductsProductIdResponse createLoanProductWithEnableDownPaymentAndMultipleDisbursementsWithDisableRepaymentConfiguration(
             Boolean enableDownPayment, String disbursedAmountPercentageForDownPayment, boolean enableAutoRepaymentForDownPayment) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("3").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30").withDaysInYear("365")
                 .withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment)
-                .build(null);
-        final Long loanProductId = createLoanProductFromJson(loanProductJSON);
+                .buildRequest(null);
+        final Long loanProductId = createLoanProduct(loanProductRequest);
         return retrieveLoanProduct(loanProductId);
     }
 
     private Integer createLoanProductWithDownPaymentConfiguration(final Long delinquencyBucketId, Boolean enableDownPayment,
             String disbursedAmountPercentageForDownPayment, Boolean enableAutoRepaymentForDownPayment, boolean multiDisbursement) {
-        HashMap<String, Object> loanProductMap;
+        PostLoanProductsRequest loanProductRequest;
         if (multiDisbursement) {
-            loanProductMap = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments() //
+            loanProductRequest = new LoanProductTestBuilder().withAmortizationTypeAsEqualInstallments() //
                     .withInterestTypeAsDecliningBalance().withMoratorium("", "").withInterestCalculationPeriodTypeAsRepaymentPeriod(true)
                     .withInterestTypeAsDecliningBalance() //
                     .withMultiDisburse() //
                     .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment) //
                     .withDisallowExpectedDisbursements(true) //
-                    .build(null, delinquencyBucketId);
+                    .buildRequest(null, delinquencyBucketId);
         } else {
-            loanProductMap = new LoanProductTestBuilder() //
+            loanProductRequest = new LoanProductTestBuilder() //
                     .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment) //
-                    .build(null, delinquencyBucketId);
+                    .buildRequest(null, delinquencyBucketId);
         }
-        return createLoanProductFromJson(Utils.convertToJson(loanProductMap)).intValue();
+        return createLoanProduct(loanProductRequest).intValue();
     }
 
     private Integer createAndApproveLoanAccount(final Integer clientID, final Long loanProductID, final String externalId,
             final String numberOfRepayments, final String interestRate) {
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency(numberOfRepayments)
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments(numberOfRepayments).withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod(interestRate).withInterestTypeAsDecliningBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
-                .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
+        PostLoansRequest loanApplication = LoanRequestBuilders
+                .legacyIndividualApplication(clientID.longValue(), loanProductID.longValue(), "1000", Integer.parseInt(numberOfRepayments),
+                        new BigDecimal(interestRate), "03 September 2022")
+                .submittedOnDate("01 September 2022")//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .externalId(externalId);
 
-        final Long loanId = applyForLoanFromJson(loanApplicationJSON);
+        final Long loanId = applyForLoan(loanApplication);
         approveLoan(loanId, approveLoanRequest(1000.0, "02 September 2022"));
         return loanId.intValue();
     }
@@ -1802,14 +1802,14 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends FeignLoanTestBase 
     private Integer createApproveAndDisburseTwiceLoanAccount(final Integer clientID, final Long loanProductID, final String externalId,
             final String numberOfRepayments, final String interestRate) {
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency(numberOfRepayments)
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments(numberOfRepayments).withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod(interestRate).withInterestTypeAsDecliningBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("04 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
-                .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
+        PostLoansRequest loanApplication = LoanRequestBuilders
+                .legacyIndividualApplication(clientID.longValue(), loanProductID.longValue(), "1000", Integer.parseInt(numberOfRepayments),
+                        new BigDecimal(interestRate), "04 September 2022")
+                .submittedOnDate("01 September 2022")//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .externalId(externalId);
 
-        final Long loanId = applyForLoanFromJson(loanApplicationJSON);
+        final Long loanId = applyForLoan(loanApplication);
         approveLoan(loanId, approveLoanRequest(1000.0, "02 September 2022"));
         disburseLoanWithAmount(loanId, "03 September 2022", 700.0);
         disburseLoanWithAmount(loanId, "04 September 2022", 300.0);

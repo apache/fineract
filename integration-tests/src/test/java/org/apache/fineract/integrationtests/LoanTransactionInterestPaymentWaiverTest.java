@@ -743,7 +743,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
     @Test
     public void shouldReturnOkStatusForBatchInterestPaymentWaiver() {
 
-        final String loanProductJSON = new LoanProductTestBuilder() //
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder() //
                 .withPrincipal("1000.00") //
                 .withNumberOfRepayments("24") //
                 .withRepaymentAfterEvery("1") //
@@ -752,7 +752,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
                 .withInterestRateFrequencyTypeAsMonths() //
                 .withAmortizationTypeAsEqualPrincipalPayment() //
                 .withInterestTypeAsDecliningBalance() //
-                .currencyDetails("0", "100").build(null);
+                .currencyDetails("0", "100").buildRequest(null);
 
         final Long clientId = createClient();
         assertNotNull(clientId);
@@ -762,7 +762,7 @@ public class LoanTransactionInterestPaymentWaiverTest extends FeignLoanTestBase 
         final Long clientCollateralId = collateralHelper.createClientCollateral(clientId, collateralId).getResourceId();
         assertNotNull(clientCollateralId);
 
-        final Integer productId = getLoanProductId(loanProductJSON);
+        final Long productId = getLoanProductId(loanProductRequest);
 
         final Long createActiveClientRequestId = 4730L;
         final Long applyLoanRequestId = createActiveClientRequestId + 1;

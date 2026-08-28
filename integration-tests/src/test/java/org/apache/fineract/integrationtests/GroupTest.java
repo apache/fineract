@@ -148,9 +148,9 @@ public class GroupTest extends FeignLoanTestBase {
                 "Verify assigned staff id is the same as id sent");
 
         // create a client loan and disburse it (loan officer starts unset)
-        final Long loanProductId = createLoanProductFromJson(
+        final Long loanProductId = createLoanProduct(
                 new LoanProductTestBuilder().withPrincipal(PRINCIPAL).withNumberOfRepayments(NUMBER_OF_REPAYMENTS)
-                        .withinterestRatePerPeriod(INTEREST_RATE_PER_PERIOD).withInterestRateFrequencyTypeAsYear().build(null));
+                        .withinterestRatePerPeriod(INTEREST_RATE_PER_PERIOD).withInterestRateFrequencyTypeAsYear().buildRequest(null));
         final Long loanId = applyForLoan(LoanRequestBuilders.applyLoan(clientId, loanProductId, LOAN_DATE, 10000.0, 4));
         approveLoan(LOAN_DATE, loanId.intValue());
         disburseLoanWithNetDisbursalAmount(loanId, LOAN_DATE, getLoanDetails(loanId).getNetDisbursalAmount().toPlainString());

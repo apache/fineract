@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -27,10 +28,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -52,7 +55,7 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests extends FeignLoan
             AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
             AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
 
-            Long loanProductId = createLoanProductFromJson(createLoanJSON(assetAccount, expenseAccount, incomeAccount, overpaymentAccount,
+            Long loanProductId = createLoanProduct(createLoanProductRequest(assetAccount, expenseAccount, incomeAccount, overpaymentAccount,
                     feePenaltyAccount, defaultAllocation, repaymentPaymentAllocation));
             Assertions.assertNotNull(loanProductId);
             GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
@@ -90,15 +93,15 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests extends FeignLoan
         });
     }
 
-    private String createLoanJSON(Account assetAccount, Account expenseAccount, Account incomeAccount, Account overpaymentAccount,
-            Account feePenaltyAccount, AdvancedPaymentData... advancedPaymentData) {
+    private PostLoanProductsRequest createLoanProductRequest(Account assetAccount, Account expenseAccount, Account incomeAccount,
+            Account overpaymentAccount, Account feePenaltyAccount, AdvancedPaymentData... advancedPaymentData) {
         return new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4").withRepaymentAfterEvery("1")
                 .withRepaymentTypeAsMonth().withinterestRatePerPeriod("1").withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
                 .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, expenseAccount, incomeAccount, overpaymentAccount })
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withFeeAndPenaltyAssetAccount(feePenaltyAccount).addAdvancedPaymentAllocation(advancedPaymentData)
                 .withLoanScheduleType(LoanScheduleType.PROGRESSIVE).withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL)
-                .build();
+                .buildRequest();
     }
 
     private PutLoanProductsProductIdRequest updateLoanProductRequest(AdvancedPaymentData... advancedPaymentData) {
@@ -108,14 +111,28 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests extends FeignLoan
     }
 
     private Long createLoanAccount(Long clientId, Long loanProductId, String operationDate) {
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("15,000.00").withLoanTermFrequency("4")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("4").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withExpectedDisbursementDate(operationDate)
-                .withInterestTypeAsDecliningBalance().withSubmittedOnDate(operationDate)
-                .withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                .withLoanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString())
-                .build(clientId.toString(), loanProductId.toString(), null);
-        return applyForLoanFromJson(loanApplicationJSON);
+        return applyForLoan(new PostLoansRequest()//
+                .clientId(clientId)//
+                .productId(loanProductId)//
+                .principal(new BigDecimal("15000.00"))//
+                .loanTermFrequency(4)//
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .numberOfRepayments(4)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .interestRatePerPeriod(BigDecimal.ZERO)//
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString())//
+                .loanType("individual")//
+                .expectedDisbursementDate(operationDate)//
+                .submittedOnDate(operationDate)//
+                .maxOutstandingLoanBalance(new BigDecimal("36000"))//
+                .collateral(List.of())//
+                .locale("en_GB")//
+                .dateFormat(LoanTestData.DATETIME_PATTERN));
     }
 
     private AdvancedPaymentData createRepaymentPaymentAllocation() {

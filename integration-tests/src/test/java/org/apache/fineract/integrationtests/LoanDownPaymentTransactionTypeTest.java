@@ -21,19 +21,21 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.HashMap;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.junit.jupiter.api.Test;
@@ -106,21 +108,21 @@ public class LoanDownPaymentTransactionTypeTest extends FeignLoanTestBase {
     }
 
     private GetLoanProductsProductIdResponse createLoanProduct(final Long delinquencyBucketId) {
-        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().build(null, delinquencyBucketId);
-        final Long loanProductId = createLoanProductFromJson(Utils.convertToJson(loanProductMap));
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().buildRequest(null, delinquencyBucketId);
+        final Long loanProductId = createLoanProduct(loanProductRequest);
         return retrieveLoanProduct(loanProductId);
     }
 
     private Long createLoanAccount(final Long clientId, final Long loanProductId, final String externalId) {
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
-                .withExternalId(externalId).build(clientId.toString(), loanProductId.toString(), null);
+        PostLoansRequest loanApplication = LoanRequestBuilders
+                .legacyIndividualApplication(clientId, loanProductId, "1000", 1, BigDecimal.ZERO, "03 September 2022")
+                .submittedOnDate("01 September 2022")//
+                .interestType(LoanTestData.InterestType.FLAT)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .externalId(externalId);
 
-        final Long loanId = applyForLoanFromJson(loanApplicationJSON);
+        final Long loanId = applyForLoan(loanApplication);
         approveLoan(loanId, approveLoanRequest(1000.0, "02 September 2022"));
         disburseLoanWithNetDisbursalAmount(loanId, "03 September 2022", "1000");
         return loanId;

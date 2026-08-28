@@ -29,6 +29,7 @@ import org.apache.fineract.client.models.CreditAllocationData;
 import org.apache.fineract.client.models.CreditAllocationOrder;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -49,9 +50,10 @@ public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanT
         AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
 
         // when
-        String loanProductJSON = baseLoanProduct().addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation)
-                .addCreditAllocations(createChargebackAllocation()).build();
-        Long loanProductId = createLoanProductFromJson(loanProductJSON);
+        PostLoanProductsRequest loanProductRequest = baseLoanProduct()
+                .addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation)
+                .addCreditAllocations(createChargebackAllocation()).buildRequest();
+        Long loanProductId = createLoanProduct(loanProductRequest);
         Assertions.assertNotNull(loanProductId);
         GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
 
@@ -68,8 +70,9 @@ public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanT
         AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
 
         // create empty
-        String loanProductJSON = baseLoanProduct().addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation).build();
-        Long loanProductId = createLoanProductFromJson(loanProductJSON);
+        PostLoanProductsRequest loanProductRequest = baseLoanProduct()
+                .addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation).buildRequest();
+        Long loanProductId = createLoanProduct(loanProductRequest);
         Assertions.assertNotNull(loanProductId);
         GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
         Assertions.assertEquals(0, loanProduct.getCreditAllocation().size());
@@ -90,9 +93,10 @@ public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanT
         AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
 
         // when
-        String loanProductJSON = baseLoanProduct().addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation)
-                .addCreditAllocations(createChargebackAllocation()).build();
-        Long loanProductId = createLoanProductFromJson(loanProductJSON);
+        PostLoanProductsRequest loanProductRequest = baseLoanProduct()
+                .addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation)
+                .addCreditAllocations(createChargebackAllocation()).buildRequest();
+        Long loanProductId = createLoanProduct(loanProductRequest);
         Assertions.assertNotNull(loanProductId);
         GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
         Assertions.assertNotNull(loanProduct.getCreditAllocation());
@@ -117,9 +121,10 @@ public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanT
         AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
 
         // when
-        String loanProductJSON = baseLoanProduct().addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation)
-                .addCreditAllocations(createChargebackAllocation()).build();
-        Long loanProductId = createLoanProductFromJson(loanProductJSON);
+        PostLoanProductsRequest loanProductRequest = baseLoanProduct()
+                .addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation)
+                .addCreditAllocations(createChargebackAllocation()).buildRequest();
+        Long loanProductId = createLoanProduct(loanProductRequest);
         Assertions.assertNotNull(loanProductId);
         GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
         Assertions.assertNotNull(loanProduct.getCreditAllocation());
@@ -135,11 +140,11 @@ public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanT
     @Test
     public void testCreditAllocationIsNotAllowedWhenPaymentStrategyIsNotAdvancedPaymentStrategy() {
         // given
-        String loanProductJSON = baseLoanProduct().withRepaymentStrategy("mifos-standard-strategy")
-                .withLoanScheduleType(LoanScheduleType.CUMULATIVE).addCreditAllocations(createChargebackAllocation()).build();
+        PostLoanProductsRequest loanProductRequest = baseLoanProduct().withRepaymentStrategy("mifos-standard-strategy")
+                .withLoanScheduleType(LoanScheduleType.CUMULATIVE).addCreditAllocations(createChargebackAllocation()).buildRequest();
 
         // when
-        List<Map<String, String>> loanProductError = getLoanProductError(loanProductJSON, "errors");
+        List<Map<String, String>> loanProductError = getLoanProductError(loanProductRequest, "errors");
 
         // then
         Assertions.assertEquals("In case 'mifos-standard-strategy' payment strategy, creditAllocation must not be provided",
@@ -151,9 +156,10 @@ public class LoanProductWithCreditAllocationsIntegrationTests extends FeignLoanT
         // given
         AdvancedPaymentData defaultAllocation = createCustomDefaultPaymentAllocation();
         AdvancedPaymentData repaymentPaymentAllocation = createRepaymentPaymentAllocation();
-        String loanProductJSON = baseLoanProduct().addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation)
-                .addCreditAllocations(createChargebackAllocation()).build();
-        Long loanProductId = createLoanProductFromJson(loanProductJSON);
+        PostLoanProductsRequest loanProductRequest = baseLoanProduct()
+                .addAdvancedPaymentAllocation(defaultAllocation, repaymentPaymentAllocation)
+                .addCreditAllocations(createChargebackAllocation()).buildRequest();
+        Long loanProductId = createLoanProduct(loanProductRequest);
         Assertions.assertNotNull(loanProductId);
         GetLoanProductsProductIdResponse loanProduct = retrieveLoanProduct(loanProductId);
         Assertions.assertNotNull(loanProduct.getCreditAllocation());
