@@ -22,8 +22,33 @@ public final class SavingsTestData {
 
     public static final String DATETIME_PATTERN = FeignTestConstants.DATETIME_PATTERN;
     public static final String LOCALE = FeignTestConstants.LOCALE;
+    public static final String CURRENCY_CODE = "USD";
+    public static final Double DEFAULT_CHARGE_AMOUNT = 100.0;
 
     private SavingsTestData() {}
+
+    public static final class ChargeAppliesTo {
+
+        public static final int SAVINGS = 2;
+
+        private ChargeAppliesTo() {}
+    }
+
+    public static final class ChargeTimeType {
+
+        public static final int WITHDRAWAL_FEE = 5;
+        public static final int SAVINGS_ACTIVATION = 6;
+        public static final int ANNUAL_FEE = 7;
+
+        private ChargeTimeType() {}
+    }
+
+    public static final class ChargeCalculationType {
+
+        public static final int FLAT = 1;
+
+        private ChargeCalculationType() {}
+    }
 
     public static final class InterestCompoundingPeriodType {
 

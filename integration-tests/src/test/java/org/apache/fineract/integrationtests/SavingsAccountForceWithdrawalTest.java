@@ -18,99 +18,67 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.math.BigDecimal;
 import org.apache.fineract.client.models.GlobalConfigurationPropertyData;
-import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
+import org.apache.fineract.client.models.PostSavingsProductsResponse;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
+import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith({ SavingsTestLifecycleExtension.class })
-public class SavingsAccountForceWithdrawalTest {
+public class SavingsAccountForceWithdrawalTest extends FeignSavingsTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private SavingsProductHelper savingsProductHelper;
-    private SavingsAccountHelper savingsAccountHelper;
-    private GlobalConfigurationHelper globalConfigurationHelper;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.savingsProductHelper = new SavingsProductHelper();
-        this.globalConfigurationHelper = new GlobalConfigurationHelper();
-    }
+    private static final String DEPOSIT_DATE = "04 March 2013";
+    private static final String WITHDRAWAL_DATE = "05 March 2013";
+    private static final long FORCE_WITHDRAWAL_LIMIT = 5000L;
+    private static final long DISABLED_LIMIT = 0L;
 
     @Test
     public void testForceWithdrawal() {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT,
                 new PutGlobalConfigurationsRequest().enabled(true));
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT,
-                new PutGlobalConfigurationsRequest().value(5000L).enabled(true));
+                new PutGlobalConfigurationsRequest().value(FORCE_WITHDRAWAL_LIMIT).enabled(true));
 
         GlobalConfigurationPropertyData config = globalConfigurationHelper
                 .getGlobalConfigurationByName(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT);
-        Assertions.assertEquals(5000L, config.getValue());
+        assertEquals(FORCE_WITHDRAWAL_LIMIT, config.getValue());
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        final Integer savingsProductId = createSavingsProductDailyPosting();
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductId, "INDIVIDUAL");
-        this.savingsAccountHelper.approveSavings(savingsId);
-        this.savingsAccountHelper.activateSavings(savingsId);
+        Long clientId = createClient();
+        assertNotNull(clientId);
 
-        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", "04 March 2013", null);
+        PostSavingsProductsResponse savingsProduct = createSavingsProduct(
+                SavingsRequestBuilders.savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY,
+                        SavingsTestData.InterestPostingPeriodType.DAILY, SavingsTestData.InterestCalculationType.DAILY_BALANCE));
+        assertNotNull(savingsProduct.getResourceId());
 
-        PostSavingsAccountTransactionsRequest request = new PostSavingsAccountTransactionsRequest() //
-                .locale("en") //
-                .dateFormat("dd MMMM yyyy") //
-                .transactionDate("05 March 2013") //
-                .transactionAmount(java.math.BigDecimal.valueOf(200.0)) //
-                .paymentTypeId(1);
+        Long savingsId = submitSavingsApplication(clientId, savingsProduct.getResourceId(), DEPOSIT_DATE).getSavingsId();
+        approveSavings(savingsId, DEPOSIT_DATE);
+        activateSavings(savingsId, DEPOSIT_DATE);
+        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
 
-        retrofit2.Response<PostSavingsAccountTransactionsResponse> response = this.savingsAccountHelper
-                .forceWithdrawalFromSavingsAccount(savingsId.longValue(), request);
+        deposit(savingsId, "100", DEPOSIT_DATE);
 
-        Assertions.assertTrue(response.isSuccessful(), () -> "Force withdrawal failed with body: " + getErrorBody(response));
-    }
+        PostSavingsAccountTransactionsResponse response = savingsTransactionHelper.forceWithdraw(savingsId, "200", WITHDRAWAL_DATE);
 
-    private Integer createSavingsProductDailyPosting() {
-        final String savingsProductJSON = this.savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance().build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
-    }
-
-    private String getErrorBody(retrofit2.Response<?> response) {
-        try {
-            return response.errorBody() != null ? response.errorBody().string() : "No error body";
-        } catch (Exception e) {
-            return "Failed to read error body: " + e.getMessage();
-        }
+        assertNotNull(response.getResourceId(), "Force withdrawal did not create a transaction");
+        SavingsTestValidators.verifyAmount(new BigDecimal("-100"), savingsHelper.getSavingsSummary(savingsId).getAccountBalance(),
+                "Balance after forcing a withdrawal past the available balance");
     }
 
     @AfterEach
-    public void tearDown() {
+    public void resetForceWithdrawalConfiguration() {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT,
                 new PutGlobalConfigurationsRequest().enabled(false));
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.FORCE_WITHDRAWAL_ON_SAVINGS_ACCOUNT_LIMIT,
-                new PutGlobalConfigurationsRequest().value(0L).enabled(false));
+                new PutGlobalConfigurationsRequest().value(DISABLED_LIMIT).enabled(false));
     }
 }

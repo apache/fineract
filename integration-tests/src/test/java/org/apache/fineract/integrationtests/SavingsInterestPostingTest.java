@@ -18,22 +18,20 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.integrationtests.common.BusinessDateHelper.runAt;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -43,101 +41,67 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.IntStream;
-import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
-import org.apache.fineract.infrastructure.core.service.MathUtil;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.SavingsAccountTransactionData;
+import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
 import org.apache.fineract.integrationtests.common.ParallelExecutionHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
-import org.apache.fineract.portfolio.savings.SavingsAccountTransactionType;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Order(1)
-@ExtendWith({ SavingsTestLifecycleExtension.class })
-public class SavingsInterestPostingTest {
+public class SavingsInterestPostingTest extends FeignSavingsTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsInterestPostingTest.class);
-    private static final int DUPLICATE_PREVENTION_ACCOUNT_COUNT = 50;
-    private static ResponseSpecification responseSpec;
-    private static RequestSpecification requestSpec;
-    private AccountHelper accountHelper;
-    private SavingsAccountHelper savingsAccountHelper;
-    public static final String MINIMUM_OPENING_BALANCE = "1000.0";
-    private SavingsProductHelper productHelper;
 
     private static final String ACCRUALS_JOB_NAME = "Add Accrual Transactions For Savings";
     private static final String POST_INTEREST_JOB_NAME = "Post Interest For Savings";
-    private final Set<Long> createdSavingsAccountIds = Collections.synchronizedSet(new LinkedHashSet<>());
 
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-    }
+    private static final int DUPLICATE_PREVENTION_ACCOUNT_COUNT = 50;
+
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
+    private static final String CLIENT_ACTIVATION_DATE = "01 January 2025";
+
+    private static final Double INTEREST_RATE = 10.0;
+    private static final Double OVERDRAFT_INTEREST_RATE = 21.0;
+    private static final BigDecimal OVERDRAFT_LIMIT = new BigDecimal("100000");
+    private static final BigDecimal PERCENT = new BigDecimal("100.00");
+    private static final int DIGITS_AFTER_DECIMAL = 4;
+
+    private final Set<Long> createdSavingsAccountIds = Collections.synchronizedSet(new LinkedHashSet<>());
 
     @AfterEach
     public void cleanupAfterTest() {
-        cleanupSavingsAccountsFromDuplicatePreventionTest();
+        closeTrackedSavingsAccounts();
     }
 
     @Test
     public void testPostInterestWithOverdraftProduct() {
-        runAt("12 March 2025", () -> {
-            final String amount = "10000";
+        businessDateHelper.runAt("2025-03-12", () -> {
+            final BigDecimal amount = new BigDecimal("10000");
+            final LocalDate startDate = LocalDate.of(2025, Month.FEBRUARY, 1);
+            final LocalDate postingDate = LocalDate.of(2025, Month.MARCH, 2).minusDays(1);
 
-            final Account assetAccount = accountHelper.createAssetAccount();
-            final Account incomeAccount = accountHelper.createIncomeAccount();
-            final Account expenseAccount = accountHelper.createExpenseAccount();
-            final Account liabilityAccount = accountHelper.createLiabilityAccount();
-            final Account interestReceivableAccount = accountHelper.createAssetAccount("interestReceivableAccount");
-            final Account savingsControlAccount = accountHelper.createLiabilityAccount("Savings Control");
-            final Account interestPayableAccount = accountHelper.createLiabilityAccount("Interest Payable");
+            final Long accountId = createActiveOverdraftAccount(startDate);
+            deposit(accountId, amount.toPlainString(), DATE_FORMATTER.format(startDate));
 
-            final Integer productId = createSavingsProductWithAccrualAccountingWithOutOverdraftAllowed(
-                    interestPayableAccount.getAccountID().toString(), savingsControlAccount.getAccountID().toString(),
-                    interestReceivableAccount.getAccountID().toString(), assetAccount, incomeAccount, expenseAccount, liabilityAccount);
+            runAccrualAndPostInterestJobs();
 
-            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2025");
-            final LocalDate startDate = LocalDate.of(2025, 2, 1);
-            final String startDateString = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(startDate);
+            final long days = ChronoUnit.DAYS.between(startDate, postingDate);
+            final List<SavingsAccountTransactionData> interestTransactions = getInterestTransactions(accountId);
+            assertFalse(interestTransactions.isEmpty(), "No interest postings were found");
+            SavingsTestValidators.verifyAmount(interestForPeriod(INTEREST_RATE, amount, days), interestTransactions.get(0).getAmount(),
+                    "Verifying the posted interest");
 
-            final Integer accountId = createTrackedSavingsAccount(clientId, productId, startDateString);
-            savingsAccountHelper.approveSavingsOnDate(accountId, startDateString);
-            savingsAccountHelper.activateSavings(accountId, startDateString);
-            savingsAccountHelper.depositToSavingsAccount(accountId, amount, startDateString, CommonConstants.RESPONSE_RESOURCE_ID);
-
-            LocalDate marchDate = LocalDate.of(2025, 3, 2);
-
-            SchedulerJobHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
-            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
-
-            long days = ChronoUnit.DAYS.between(startDate, marchDate.minusDays(1));
-            BigDecimal expected = calcInterestPosting(productHelper, amount, days);
-
-            List<HashMap> txs = getInterestTransactions(accountId);
-            Assertions.assertEquals(expected, BigDecimal.valueOf(((Double) txs.get(0).get("amount"))), "ERROR in expected");
-
-            long interestCount = countInterestOnDate(accountId, marchDate.minusDays(1));
-            long overdraftCount = countOverdraftOnDate(accountId, marchDate.minusDays(1));
-            Assertions.assertEquals(1L, interestCount, "Expected exactly one INTEREST posting on posting date");
-            Assertions.assertEquals(0L, overdraftCount, "Expected NO OVERDRAFT posting on posting date");
+            assertEquals(1L, countInterestPostingsOn(accountId, postingDate), "Expected exactly one INTEREST posting on posting date");
+            assertEquals(0L, countOverdraftPostingsOn(accountId, postingDate), "Expected NO OVERDRAFT posting on posting date");
 
             assertNoAccrualReversals(accountId);
         });
@@ -145,48 +109,26 @@ public class SavingsInterestPostingTest {
 
     @Test
     public void testOverdraftInterestWithOverdraftProduct() {
-        runAt("12 March 2025", () -> {
-            final String amount = "10000";
+        businessDateHelper.runAt("2025-03-12", () -> {
+            final BigDecimal amount = new BigDecimal("10000");
+            final LocalDate startDate = LocalDate.of(2025, Month.FEBRUARY, 1);
+            final LocalDate postingDate = LocalDate.of(2025, Month.MARCH, 2).minusDays(1);
 
-            final Account assetAccount = accountHelper.createAssetAccount();
-            final Account incomeAccount = accountHelper.createIncomeAccount();
-            final Account expenseAccount = accountHelper.createExpenseAccount();
-            final Account liabilityAccount = accountHelper.createLiabilityAccount();
-            final Account interestReceivableAccount = accountHelper.createAssetAccount("interestReceivableAccount");
-            final Account savingsControlAccount = accountHelper.createLiabilityAccount("Savings Control");
-            final Account interestPayableAccount = accountHelper.createLiabilityAccount("Interest Payable");
+            final Long accountId = createActiveOverdraftAccount(startDate);
+            withdraw(accountId, amount.toPlainString(), DATE_FORMATTER.format(startDate));
 
-            final Integer productId = createSavingsProductWithAccrualAccountingWithOutOverdraftAllowed(
-                    interestPayableAccount.getAccountID().toString(), savingsControlAccount.getAccountID().toString(),
-                    interestReceivableAccount.getAccountID().toString(), assetAccount, incomeAccount, expenseAccount, liabilityAccount);
+            runAccrualAndPostInterestJobs();
 
-            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2025");
-            final LocalDate startDate = LocalDate.of(2025, 2, 1);
-            final String startDateString = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(startDate);
+            final long days = ChronoUnit.DAYS.between(startDate, postingDate);
+            final List<SavingsAccountTransactionData> interestTransactions = getInterestTransactions(accountId);
+            assertFalse(interestTransactions.isEmpty(), "No interest postings were found");
+            SavingsTestValidators.verifyAmount(interestForPeriod(OVERDRAFT_INTEREST_RATE, amount, days),
+                    interestTransactions.get(0).getAmount(), "Verifying the posted overdraft interest");
 
-            final Integer accountId = createTrackedSavingsAccount(clientId, productId, startDateString);
-            savingsAccountHelper.approveSavingsOnDate(accountId, startDateString);
-            savingsAccountHelper.activateSavings(accountId, startDateString);
-            savingsAccountHelper.withdrawalFromSavingsAccount(accountId, amount, startDateString, CommonConstants.RESPONSE_RESOURCE_ID);
+            assertTrue(interestTransactions.get(0).getRunningBalance().signum() < 0, "Running balance is not less than zero");
 
-            LocalDate marchDate = LocalDate.of(2025, 3, 2);
-
-            SchedulerJobHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
-            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
-
-            long days = ChronoUnit.DAYS.between(startDate, marchDate.minusDays(1));
-            BigDecimal expected = calcOverdraftPosting(productHelper, amount, days);
-
-            List<HashMap> txs = getInterestTransactions(accountId);
-            Assertions.assertEquals(expected, BigDecimal.valueOf(((Double) txs.get(0).get("amount"))));
-
-            BigDecimal runningBalance = BigDecimal.valueOf(((Double) txs.get(0).get("runningBalance")));
-            Assertions.assertTrue(MathUtil.isLessThanZero(runningBalance), "Running balance is not less than zero");
-
-            long interestCount = countInterestOnDate(accountId, marchDate.minusDays(1));
-            long overdraftCount = countOverdraftOnDate(accountId, marchDate.minusDays(1));
-            Assertions.assertEquals(0L, interestCount, "Expected NO INTEREST posting on posting date");
-            Assertions.assertEquals(1L, overdraftCount, "Expected exactly one OVERDRAFT posting on posting date");
+            assertEquals(0L, countInterestPostingsOn(accountId, postingDate), "Expected NO INTEREST posting on posting date");
+            assertEquals(1L, countOverdraftPostingsOn(accountId, postingDate), "Expected exactly one OVERDRAFT posting on posting date");
 
             assertNoAccrualReversals(accountId);
         });
@@ -194,64 +136,32 @@ public class SavingsInterestPostingTest {
 
     @Test
     public void testOverdraftAndInterestPosting_WithOverdraftProduct_WhitBalanceLessZero() {
-        runAt("12 March 2025", () -> {
-            final String amountDeposit = "10000";
-            final String amountWithdrawal = "20000";
+        businessDateHelper.runAt("2025-03-12", () -> {
+            final BigDecimal amountDeposit = new BigDecimal("10000");
+            final BigDecimal amountWithdrawal = new BigDecimal("20000");
+            final LocalDate startDate = LocalDate.of(2025, Month.FEBRUARY, 1);
+            final LocalDate withdrawalDate = LocalDate.of(2025, Month.FEBRUARY, 16);
+            final LocalDate postingDate = LocalDate.of(2025, Month.MARCH, 2).minusDays(1);
 
-            final Account assetAccount = accountHelper.createAssetAccount();
-            final Account incomeAccount = accountHelper.createIncomeAccount();
-            final Account expenseAccount = accountHelper.createExpenseAccount();
-            final Account liabilityAccount = accountHelper.createLiabilityAccount();
-            final Account interestReceivableAccount = accountHelper.createAssetAccount("interestReceivableAccount");
-            final Account savingsControlAccount = accountHelper.createLiabilityAccount("Savings Control");
-            final Account interestPayableAccount = accountHelper.createLiabilityAccount("Interest Payable");
+            final Long accountId = createActiveOverdraftAccount(startDate);
+            deposit(accountId, amountDeposit.toPlainString(), DATE_FORMATTER.format(startDate));
+            withdraw(accountId, amountWithdrawal.toPlainString(), DATE_FORMATTER.format(withdrawalDate));
 
-            final Integer productId = createSavingsProductWithAccrualAccountingWithOutOverdraftAllowed(
-                    interestPayableAccount.getAccountID().toString(), savingsControlAccount.getAccountID().toString(),
-                    interestReceivableAccount.getAccountID().toString(), assetAccount, incomeAccount, expenseAccount, liabilityAccount);
+            runAccrualAndPostInterestJobs();
 
-            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2025");
-            final LocalDate startDate = LocalDate.of(2025, 2, 1);
-            final String startStr = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(startDate);
-
-            final Integer accountId = createTrackedSavingsAccount(clientId, productId, startStr);
-            savingsAccountHelper.approveSavingsOnDate(accountId, startStr);
-            savingsAccountHelper.activateSavings(accountId, startStr);
-            savingsAccountHelper.depositToSavingsAccount(accountId, amountDeposit, startStr, CommonConstants.RESPONSE_RESOURCE_ID);
-
-            final LocalDate withdrawalDate = LocalDate.of(2025, 2, 16);
-            final String withdrawalStr = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(withdrawalDate);
-            savingsAccountHelper.withdrawalFromSavingsAccount(accountId, amountWithdrawal, withdrawalStr,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
-
-            LocalDate marchDate = LocalDate.of(2025, 3, 2);
-
-            SchedulerJobHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
-            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
-
-            List<HashMap> txs = getInterestTransactions(accountId);
-            for (HashMap tx : txs) {
-                BigDecimal amt = BigDecimal.valueOf(((Double) tx.get("amount")));
-                @SuppressWarnings("unchecked")
-                Map<String, Object> typeMap = (Map<String, Object>) tx.get("transactionType");
-                SavingsAccountTransactionType type = SavingsAccountTransactionType.fromInt(((Double) typeMap.get("id")).intValue());
-
-                if (type.isInterestPosting()) {
-                    long days = ChronoUnit.DAYS.between(startDate, withdrawalDate);
-                    BigDecimal expected = calcInterestPosting(productHelper, amountDeposit, days);
-                    Assertions.assertEquals(expected, amt);
+            for (SavingsAccountTransactionData transaction : getInterestTransactions(accountId)) {
+                final BigDecimal expected;
+                if (Boolean.TRUE.equals(transaction.getTransactionType().getInterestPosting())) {
+                    expected = interestForPeriod(INTEREST_RATE, amountDeposit, ChronoUnit.DAYS.between(startDate, withdrawalDate));
                 } else {
-                    long days = ChronoUnit.DAYS.between(withdrawalDate, marchDate.minusDays(1));
-                    BigDecimal overdraftBase = new BigDecimal(amountWithdrawal).subtract(new BigDecimal(amountDeposit));
-                    BigDecimal expected = calcOverdraftPosting(productHelper, overdraftBase.toString(), days);
-                    Assertions.assertEquals(expected, amt);
+                    expected = interestForPeriod(OVERDRAFT_INTEREST_RATE, amountWithdrawal.subtract(amountDeposit),
+                            ChronoUnit.DAYS.between(withdrawalDate, postingDate));
                 }
+                SavingsTestValidators.verifyAmount(expected, transaction.getAmount(), "Verifying the posting of " + transaction.getDate());
             }
 
-            Assertions.assertEquals(1L, countInterestOnDate(accountId, marchDate.minusDays(1)),
-                    "Expected exactly one INTEREST posting on posting date");
-            Assertions.assertEquals(1L, countOverdraftOnDate(accountId, marchDate.minusDays(1)),
-                    "Expected exactly one OVERDRAFT posting on posting date");
+            assertEquals(1L, countInterestPostingsOn(accountId, postingDate), "Expected exactly one INTEREST posting on posting date");
+            assertEquals(1L, countOverdraftPostingsOn(accountId, postingDate), "Expected exactly one OVERDRAFT posting on posting date");
 
             assertNoAccrualReversals(accountId);
         });
@@ -259,63 +169,33 @@ public class SavingsInterestPostingTest {
 
     @Test
     public void testOverdraftAndInterestPosting_WithOverdraftProduct_WhitBalanceGreaterZero() {
-        runAt("12 March 2025", () -> {
-            final String amountDeposit = "20000";
-            final String amountWithdrawal = "10000";
+        businessDateHelper.runAt("2025-03-12", () -> {
+            final BigDecimal amountDeposit = new BigDecimal("20000");
+            final BigDecimal amountWithdrawal = new BigDecimal("10000");
+            final LocalDate startDate = LocalDate.of(2025, Month.FEBRUARY, 1);
+            final LocalDate depositDate = LocalDate.of(2025, Month.FEBRUARY, 16);
+            final LocalDate postingDate = LocalDate.of(2025, Month.MARCH, 2).minusDays(1);
 
-            final Account assetAccount = accountHelper.createAssetAccount();
-            final Account incomeAccount = accountHelper.createIncomeAccount();
-            final Account expenseAccount = accountHelper.createExpenseAccount();
-            final Account liabilityAccount = accountHelper.createLiabilityAccount();
-            final Account interestReceivableAccount = accountHelper.createAssetAccount("interestReceivableAccount");
-            final Account savingsControlAccount = accountHelper.createLiabilityAccount("Savings Control");
-            final Account interestPayableAccount = accountHelper.createLiabilityAccount("Interest Payable");
+            final Long accountId = createActiveOverdraftAccount(startDate);
+            withdraw(accountId, amountWithdrawal.toPlainString(), DATE_FORMATTER.format(startDate));
+            deposit(accountId, amountDeposit.toPlainString(), DATE_FORMATTER.format(depositDate));
 
-            final Integer productId = createSavingsProductWithAccrualAccountingWithOutOverdraftAllowed(
-                    interestPayableAccount.getAccountID().toString(), savingsControlAccount.getAccountID().toString(),
-                    interestReceivableAccount.getAccountID().toString(), assetAccount, incomeAccount, expenseAccount, liabilityAccount);
+            runAccrualAndPostInterestJobs();
 
-            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2025");
-            final LocalDate startDate = LocalDate.of(2025, 2, 1);
-            final String startStr = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(startDate);
-
-            final Integer accountId = createTrackedSavingsAccount(clientId, productId, startStr);
-            savingsAccountHelper.approveSavingsOnDate(accountId, startStr);
-            savingsAccountHelper.activateSavings(accountId, startStr);
-            savingsAccountHelper.withdrawalFromSavingsAccount(accountId, amountWithdrawal, startStr, CommonConstants.RESPONSE_RESOURCE_ID);
-
-            final LocalDate depositDate = LocalDate.of(2025, 2, 16);
-            final String depositStr = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(depositDate);
-            savingsAccountHelper.depositToSavingsAccount(accountId, amountDeposit, depositStr, CommonConstants.RESPONSE_RESOURCE_ID);
-
-            LocalDate marchDate = LocalDate.of(2025, 3, 2);
-
-            SchedulerJobHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
-            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
-
-            List<HashMap> txs = getInterestTransactions(accountId);
-            for (HashMap tx : txs) {
-                BigDecimal amt = BigDecimal.valueOf(((Double) tx.get("amount")));
-                @SuppressWarnings("unchecked")
-                Map<String, Object> typeMap = (Map<String, Object>) tx.get("transactionType");
-                SavingsAccountTransactionType type = SavingsAccountTransactionType.fromInt(((Double) typeMap.get("id")).intValue());
-
-                if (type.isOverDraftInterestPosting()) {
-                    long days = ChronoUnit.DAYS.between(startDate, depositDate);
-                    BigDecimal expected = calcOverdraftPosting(productHelper, amountWithdrawal, days);
-                    Assertions.assertEquals(expected, amt);
+            for (SavingsAccountTransactionData transaction : getInterestTransactions(accountId)) {
+                final BigDecimal expected;
+                if (Boolean.TRUE.equals(transaction.getTransactionType().getOverDraftInterestPosting())) {
+                    expected = interestForPeriod(OVERDRAFT_INTEREST_RATE, amountWithdrawal,
+                            ChronoUnit.DAYS.between(startDate, depositDate));
                 } else {
-                    long days = ChronoUnit.DAYS.between(depositDate, marchDate.minusDays(1));
-                    BigDecimal positiveBase = new BigDecimal(amountDeposit).subtract(new BigDecimal(amountWithdrawal));
-                    BigDecimal expected = calcInterestPosting(productHelper, positiveBase.toString(), days);
-                    Assertions.assertEquals(expected, amt);
+                    expected = interestForPeriod(INTEREST_RATE, amountDeposit.subtract(amountWithdrawal),
+                            ChronoUnit.DAYS.between(depositDate, postingDate));
                 }
+                SavingsTestValidators.verifyAmount(expected, transaction.getAmount(), "Verifying the posting of " + transaction.getDate());
             }
 
-            Assertions.assertEquals(1L, countOverdraftOnDate(accountId, marchDate.minusDays(1)),
-                    "Expected exactly one OVERDRAFT posting on posting date");
-            Assertions.assertEquals(1L, countInterestOnDate(accountId, marchDate.minusDays(1)),
-                    "Expected exactly one INTEREST posting on posting date");
+            assertEquals(1L, countOverdraftPostingsOn(accountId, postingDate), "Expected exactly one OVERDRAFT posting on posting date");
+            assertEquals(1L, countInterestPostingsOn(accountId, postingDate), "Expected exactly one INTEREST posting on posting date");
 
             assertNoAccrualReversals(accountId);
         });
@@ -323,77 +203,44 @@ public class SavingsInterestPostingTest {
 
     @Test
     public void testPostInterestNotZero() {
-        runAt("12 March 2025", () -> {
-            final String amountDeposit = "1000";
-            final String amountWithdrawal = "1000";
+        businessDateHelper.runAt("2025-03-12", () -> {
+            final BigDecimal amountDeposit = new BigDecimal("1000");
+            final BigDecimal amountWithdrawal = new BigDecimal("1000");
+            final LocalDate startDate = LocalDate.of(2025, Month.JANUARY, 1);
+            final LocalDate februaryDate = LocalDate.of(2025, Month.FEBRUARY, 1);
+            final LocalDate marchDate = LocalDate.of(2025, Month.MARCH, 1);
 
-            final Account assetAccount = accountHelper.createAssetAccount();
-            final Account incomeAccount = accountHelper.createIncomeAccount();
-            final Account expenseAccount = accountHelper.createExpenseAccount();
-            final Account liabilityAccount = accountHelper.createLiabilityAccount();
-            final Account interestReceivableAccount = accountHelper.createAssetAccount("interestReceivableAccount");
-            final Account savingsControlAccount = accountHelper.createLiabilityAccount("Savings Control");
-            final Account interestPayableAccount = accountHelper.createLiabilityAccount("Interest Payable");
+            final Long accountId = createActiveOverdraftAccount(startDate);
+            deposit(accountId, amountDeposit.toPlainString(), DATE_FORMATTER.format(startDate));
 
-            final Integer productId = createSavingsProductWithAccrualAccountingWithOutOverdraftAllowed(
-                    interestPayableAccount.getAccountID().toString(), savingsControlAccount.getAccountID().toString(),
-                    interestReceivableAccount.getAccountID().toString(), assetAccount, incomeAccount, expenseAccount, liabilityAccount);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2025");
-            final LocalDate startDate = LocalDate.of(2025, 1, 1);
-            final String startStr = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(startDate);
+            final List<SavingsAccountTransactionData> februaryPostings = getInterestTransactions(accountId);
+            assertFalse(februaryPostings.isEmpty(), "No interest postings were found for February");
+            SavingsTestValidators.verifyAmount(
+                    interestForPeriod(INTEREST_RATE, amountDeposit, ChronoUnit.DAYS.between(startDate, februaryDate)),
+                    februaryPostings.get(0).getAmount(), "Verifying the February posting");
 
-            final Integer accountId = createTrackedSavingsAccount(clientId, productId, startStr);
-            savingsAccountHelper.approveSavingsOnDate(accountId, startStr);
-            savingsAccountHelper.activateSavings(accountId, startStr);
-            savingsAccountHelper.depositToSavingsAccount(accountId, amountDeposit, startStr, CommonConstants.RESPONSE_RESOURCE_ID);
+            // withdrawing the running balance leaves the account at zero, so the next withdrawal opens the overdraft
+            final BigDecimal runningBalance = februaryPostings.get(0).getRunningBalance();
+            final BigDecimal roundedRunningBalance = runningBalance.setScale(2, RoundingMode.HALF_UP);
+            final String withdrawalDateString = DATE_FORMATTER.format(februaryDate);
+            withdraw(accountId, roundedRunningBalance.toPlainString(), withdrawalDateString);
+            withdraw(accountId, amountWithdrawal.toPlainString(), withdrawalDateString);
 
-            LocalDate februaryDate = LocalDate.of(2025, 2, 1);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
-
-            List<HashMap> txsFebruary = getInterestTransactions(accountId);
-
-            long daysFebruary = ChronoUnit.DAYS.between(startDate, februaryDate);
-            BigDecimal expectedFebruary = calcInterestPosting(productHelper, amountDeposit, daysFebruary);
-            Assertions.assertEquals(expectedFebruary, BigDecimal.valueOf(((Double) txsFebruary.get(0).get("amount"))));
-
-            final LocalDate withdrawalDate = LocalDate.of(2025, 2, 1);
-            final String withdrawal = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(withdrawalDate);
-
-            BigDecimal runningBalance = new BigDecimal(txsFebruary.get(0).get("runningBalance").toString());
-            String withdrawalRunning = runningBalance.setScale(2, RoundingMode.HALF_UP).toString();
-
-            savingsAccountHelper.withdrawalFromSavingsAccount(accountId, withdrawalRunning, withdrawal,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
-            savingsAccountHelper.withdrawalFromSavingsAccount(accountId, amountWithdrawal, withdrawal,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
-
-            LocalDate marchDate = LocalDate.of(2025, 3, 1);
-
-            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
-
-            List<HashMap> txs = getInterestTransactions(accountId);
-
-            for (HashMap tx : txs) {
-                BigDecimal amt = BigDecimal.valueOf(((Double) tx.get("amount")));
-                @SuppressWarnings("unchecked")
-                Map<String, Object> typeMap = (Map<String, Object>) tx.get("transactionType");
-                SavingsAccountTransactionType type = SavingsAccountTransactionType.fromInt(((Double) typeMap.get("id")).intValue());
-                if (type.isOverDraftInterestPosting()) {
-                    long days = ChronoUnit.DAYS.between(withdrawalDate, marchDate);
-                    BigDecimal decimalsss = new BigDecimal(txsFebruary.get(0).get("runningBalance").toString())
-                            .subtract(runningBalance.setScale(2, RoundingMode.HALF_UP));
-                    BigDecimal withdraw = new BigDecimal(amountWithdrawal);
-                    BigDecimal res = withdraw.subtract(decimalsss);
-                    BigDecimal expected = calcOverdraftPosting(productHelper, res.toString(), days);
-                    Assertions.assertEquals(expected, amt);
+            final BigDecimal overdrawnBalance = amountWithdrawal.subtract(runningBalance.subtract(roundedRunningBalance));
+            for (SavingsAccountTransactionData transaction : getInterestTransactions(accountId)) {
+                if (Boolean.TRUE.equals(transaction.getTransactionType().getOverDraftInterestPosting())) {
+                    SavingsTestValidators.verifyAmount(
+                            interestForPeriod(OVERDRAFT_INTEREST_RATE, overdrawnBalance, ChronoUnit.DAYS.between(februaryDate, marchDate)),
+                            transaction.getAmount(), "Verifying the overdraft posting of " + transaction.getDate());
                 }
             }
 
-            Assertions.assertEquals(0L, countInterestOnDate(accountId, marchDate), "Expected exactly one INTEREST posting on posting date");
-            Assertions.assertEquals(1L, countOverdraftOnDate(accountId, marchDate),
-                    "Expected exactly one OVERDRAFT posting on posting date");
+            assertEquals(0L, countInterestPostingsOn(accountId, marchDate), "Expected NO INTEREST posting on posting date");
+            assertEquals(1L, countOverdraftPostingsOn(accountId, marchDate), "Expected exactly one OVERDRAFT posting on posting date");
 
             assertNoAccrualReversals(accountId);
         });
@@ -401,286 +248,202 @@ public class SavingsInterestPostingTest {
 
     @Test
     public void testPostInterestForDuplicatePrevention() {
-        runAt("18 March 2025", () -> {
+        businessDateHelper.runAt("2025-03-18", () -> {
             final String amount = "10000";
+            final LocalDate startDate = LocalDate.of(2025, Month.FEBRUARY, 1);
+            final String startDateString = DATE_FORMATTER.format(startDate);
 
-            final Account assetAccount = accountHelper.createAssetAccount();
-            final Account incomeAccount = accountHelper.createIncomeAccount();
-            final Account expenseAccount = accountHelper.createExpenseAccount();
-            final Account liabilityAccount = accountHelper.createLiabilityAccount();
-            final Account interestReceivableAccount = accountHelper.createAssetAccount("interestReceivableAccount");
-            final Account savingsControlAccount = accountHelper.createLiabilityAccount("Savings Control");
-            final Account interestPayableAccount = accountHelper.createLiabilityAccount("Interest Payable");
+            final Long productId = createOverdraftAccrualProduct();
 
-            final Integer productId = createSavingsProductWithAccrualAccountingWithOutOverdraftAllowed(
-                    interestPayableAccount.getAccountID().toString(), savingsControlAccount.getAccountID().toString(),
-                    interestReceivableAccount.getAccountID().toString(), assetAccount, incomeAccount, expenseAccount, liabilityAccount);
-
-            final LocalDate startDate = LocalDate.of(2025, 2, 1);
-
-            final String startDateString = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(startDate);
-            List<Integer> accountIdList = new CopyOnWriteArrayList<>();
+            final List<Long> accountIdList = new CopyOnWriteArrayList<>();
             ParallelExecutionHelper.runInParallel(IntStream.range(0, DUPLICATE_PREVENTION_ACCOUNT_COUNT).boxed().toList(), (i) -> {
-                final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2025");
-                final Integer accountId = createTrackedSavingsAccount(clientId, productId, startDateString);
+                final Long clientId = createClient(CLIENT_ACTIVATION_DATE);
+                final Long accountId = createTrackedSavingsAccount(clientId, productId, startDateString);
 
-                savingsAccountHelper.approveSavingsOnDate(accountId, startDateString);
-                savingsAccountHelper.activateSavings(accountId, startDateString);
-                savingsAccountHelper.depositToSavingsAccount(accountId, amount, startDateString, CommonConstants.RESPONSE_RESOURCE_ID);
+                approveSavings(accountId, startDateString);
+                activateSavings(accountId, startDateString);
+                deposit(accountId, amount, startDateString);
                 accountIdList.add(accountId);
             });
-            Assertions.assertEquals(DUPLICATE_PREVENTION_ACCOUNT_COUNT, accountIdList.size(),
-                    "ERROR: Expected " + DUPLICATE_PREVENTION_ACCOUNT_COUNT);
+            assertEquals(DUPLICATE_PREVENTION_ACCOUNT_COUNT, accountIdList.size(), "ERROR: Expected " + DUPLICATE_PREVENTION_ACCOUNT_COUNT);
 
-            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
-            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
             await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(2)).untilAsserted(() -> {
-                ParallelExecutionHelper.runInParallel(accountIdList, (accountId) -> {
-                    List<HashMap> txs = getInterestTransactions(accountId);
-                    Assertions.assertEquals(1, txs.size(), "ERROR: Duplicate interest postings exist for account " + accountId);
-                });
+                ParallelExecutionHelper.runInParallel(accountIdList, (accountId) -> assertEquals(1,
+                        getInterestTransactions(accountId).size(), "ERROR: Duplicate interest postings exist for account " + accountId));
             });
         });
     }
 
     @Test
     public void testNoDuplicateInterestPostingWhenMixingManualAndJobRunsAcrossBusinessDates() {
-        final Integer[] savingsAccountId = new Integer[1];
-        final int[] interestTxAfterFirstManualPost = new int[1];
-        final int[] interestTxAfterManualAsOnPost = new int[1];
         final String accountOpeningDate = "01 January 2025";
         final String firstManualPostingDate = "02 February 2025";
         final String manualAsOnPostingDate = "15 March 2025";
-        final String schedulerPostingDate = "02 April 2025";
         final String depositAmount = "10000";
 
-        runAt(accountOpeningDate, () -> {
-            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, accountOpeningDate);
+        final Long[] savingsAccountId = new Long[1];
+        final int[] interestTxAfterFirstManualPost = new int[1];
+        final int[] interestTxAfterManualAsOnPost = new int[1];
 
-            final String savingsProductJSON = new SavingsProductHelper() //
-                    .withInterestCompoundingPeriodTypeAsAnnually() //
-                    .withInterestPostingPeriodTypeAsMonthly() //
-                    .withInterestCalculationPeriodTypeAsDailyBalance() //
-                    .build();
-            final Integer productId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+        businessDateHelper.runAt("2025-01-01", () -> {
+            final Long clientId = createClient(accountOpeningDate);
+            final Long productId = createSavingsProduct(
+                    SavingsRequestBuilders.savingsProduct(SavingsTestData.InterestCompoundingPeriodType.ANNUAL,
+                            SavingsTestData.InterestPostingPeriodType.MONTHLY, SavingsTestData.InterestCalculationType.DAILY_BALANCE))
+                    .getResourceId();
 
-            final Integer accountId = createTrackedSavingsAccount(clientId, productId, accountOpeningDate);
-
-            savingsAccountHelper.approveSavingsOnDate(accountId, accountOpeningDate);
-            savingsAccountHelper.activateSavings(accountId, accountOpeningDate);
-            savingsAccountHelper.depositToSavingsAccount(accountId, depositAmount, accountOpeningDate,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
+            final Long accountId = createTrackedSavingsAccount(clientId, productId, accountOpeningDate);
+            approveSavings(accountId, accountOpeningDate);
+            activateSavings(accountId, accountOpeningDate);
+            deposit(accountId, depositAmount, accountOpeningDate);
             savingsAccountId[0] = accountId;
         });
 
-        runAt(firstManualPostingDate, () -> {
-            savingsAccountHelper.postInterestForSavings(savingsAccountId[0]);
+        businessDateHelper.runAt("2025-02-02", () -> {
+            savingsHelper.postInterest(savingsAccountId[0]);
             interestTxAfterFirstManualPost[0] = getActiveInterestTransactions(savingsAccountId[0]).size();
-            Assertions.assertTrue(interestTxAfterFirstManualPost[0] > 0, "Expected interest transactions after first manual posting");
+            assertTrue(interestTxAfterFirstManualPost[0] > 0, "Expected interest transactions after first manual posting");
         });
 
-        runAt(manualAsOnPostingDate, () -> {
-            savingsAccountHelper.postInterestAsOnSavings(savingsAccountId[0], manualAsOnPostingDate);
+        businessDateHelper.runAt("2025-03-15", () -> {
+            savingsTransactionHelper.postInterestAsOn(savingsAccountId[0], manualAsOnPostingDate);
             interestTxAfterManualAsOnPost[0] = getActiveInterestTransactions(savingsAccountId[0]).size();
-            Assertions.assertTrue(interestTxAfterManualAsOnPost[0] > interestTxAfterFirstManualPost[0],
+            assertTrue(interestTxAfterManualAsOnPost[0] > interestTxAfterFirstManualPost[0],
                     "Expected additional interest transaction(s) after manual post-as-on execution");
         });
 
-        runAt(schedulerPostingDate, () -> {
-            SchedulerJobHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+        businessDateHelper.runAt("2025-04-02", () -> {
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-            List<HashMap> activeInterestTransactions = getActiveInterestTransactions(savingsAccountId[0]);
-            Assertions.assertTrue(activeInterestTransactions.size() >= interestTxAfterManualAsOnPost[0],
+            final List<SavingsAccountTransactionData> activeInterestTransactions = getActiveInterestTransactions(savingsAccountId[0]);
+            assertTrue(activeInterestTransactions.size() >= interestTxAfterManualAsOnPost[0],
                     "Scheduler run should not reduce number of posted interest transactions");
 
-            Map<LocalDate, Integer> interestTransactionCountByDate = new HashMap<>();
-            for (HashMap tx : activeInterestTransactions) {
-                LocalDate transactionDate = coerceToLocalDate(tx);
-                Assertions.assertNotNull(transactionDate, "Could not determine date of an interest transaction");
-                interestTransactionCountByDate.merge(transactionDate, 1, Integer::sum);
+            final Map<LocalDate, Integer> interestTransactionCountByDate = new HashMap<>();
+            for (SavingsAccountTransactionData transaction : activeInterestTransactions) {
+                assertNotNull(transaction.getDate(), "Could not determine date of an interest transaction");
+                interestTransactionCountByDate.merge(transaction.getDate(), 1, Integer::sum);
             }
 
             interestTransactionCountByDate
-                    .forEach((txDate, txCount) -> Assertions.assertEquals(1, txCount, "Multiple interest postings found on " + txDate));
+                    .forEach((txDate, txCount) -> assertEquals(1, txCount, "Multiple interest postings found on " + txDate));
         });
     }
 
-    private void cleanupSavingsAccountsFromDuplicatePreventionTest() {
-        try {
-            LOG.info("Starting cleanup of savings accounts after duplicate prevention test");
-
-            if (!createdSavingsAccountIds.isEmpty()) {
-                LOG.info("Found {} tracked savings accounts to cleanup", createdSavingsAccountIds.size());
-
-                createdSavingsAccountIds.forEach(savingsId -> {
-                    try {
-
-                        savingsAccountHelper.postInterestForSavings(savingsId.intValue());
-
-                        savingsAccountHelper.closeSavingsAccount(savingsId,
-                                new PostSavingsAccountsAccountIdRequest().locale("en").dateFormat(Utils.DATE_FORMAT)
-                                        .closedOnDate(Utils.dateFormatter.format(Utils.getLocalDateOfTenant())).withdrawBalance(true));
-
-                        LOG.debug("Savings account {} closed successfully", savingsId);
-                    } catch (Exception e) {
-                        LOG.warn("Unable to close savings account {}: {}", savingsId, e.getMessage());
-                    }
-                });
-                createdSavingsAccountIds.clear();
-
-                LOG.info("Savings accounts cleanup completed");
-            } else {
-                LOG.info("No tracked savings accounts found to cleanup");
-            }
-        } catch (Exception e) {
-            LOG.error("Error during savings accounts cleanup: {}", e.getMessage(), e);
-        }
+    /** Ordered the way the server does it: the annual rate becomes a daily one before it meets the balance. */
+    private BigDecimal interestForPeriod(final Double annualRate, final BigDecimal balance, final long days) {
+        final BigDecimal rate = BigDecimal.valueOf(annualRate).divide(PERCENT);
+        final BigDecimal dayFactor = BigDecimal.ONE.divide(BigDecimal.valueOf(SavingsTestData.InterestCalculationDaysInYearType.DAYS_365),
+                MathContext.DECIMAL64);
+        final BigDecimal dailyRate = rate.multiply(dayFactor, MathContext.DECIMAL64);
+        final BigDecimal periodRate = dailyRate.multiply(BigDecimal.valueOf(days), MathContext.DECIMAL64);
+        return balance.multiply(periodRate, MathContext.DECIMAL64).setScale(DIGITS_AFTER_DECIMAL, RoundingMode.HALF_EVEN);
     }
 
-    private Integer createTrackedSavingsAccount(Integer clientId, Integer productId, String submittedOnDate) {
-        Integer accountId = savingsAccountHelper.applyForSavingsApplicationOnDate(clientId, productId,
-                SavingsAccountHelper.ACCOUNT_TYPE_INDIVIDUAL, submittedOnDate);
-        createdSavingsAccountIds.add(accountId.longValue());
-        return accountId;
+    private void runAccrualAndPostInterestJobs() {
+        schedulerHelper.executeAndAwaitJob(ACCRUALS_JOB_NAME);
+        schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
     }
 
-    private List<HashMap> getInterestTransactions(Integer savingsAccountId) {
-        List<HashMap> all = savingsAccountHelper.getSavingsTransactions(savingsAccountId);
-        List<HashMap> filtered = new ArrayList<>();
-        for (HashMap tx : all) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> txType = (Map<String, Object>) tx.get("transactionType");
-            SavingsAccountTransactionType type = SavingsAccountTransactionType.fromInt(((Double) txType.get("id")).intValue());
-            if (type.isInterestPosting() || type.isOverDraftInterestPosting()) {
-                filtered.add(tx);
-            }
-        }
-        return filtered;
+    private List<SavingsAccountTransactionData> getInterestTransactions(final Long savingsAccountId) {
+        return savingsTransactionHelper.getTransactions(savingsAccountId).stream().filter(SavingsInterestPostingTest::isInterestPosting)
+                .toList();
     }
 
-    private List<HashMap> getActiveInterestTransactions(Integer savingsAccountId) {
-        List<HashMap> activeInterestTransactions = new ArrayList<>();
-        for (HashMap tx : getInterestTransactions(savingsAccountId)) {
-            if (!isReversed(tx)) {
-                activeInterestTransactions.add(tx);
-            }
-        }
-        return activeInterestTransactions;
+    private List<SavingsAccountTransactionData> getActiveInterestTransactions(final Long savingsAccountId) {
+        return getInterestTransactions(savingsAccountId).stream().filter(transaction -> !Boolean.TRUE.equals(transaction.getReversed()))
+                .toList();
     }
 
-    public Integer createSavingsProductWithAccrualAccountingWithOutOverdraftAllowed(final String interestPayableAccount,
-            final String savingsControlAccount, final String interestReceivableAccount, final Account... accounts) {
-        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT WITHOUT OVERDRAFT ---------------------------------------");
-        this.productHelper = new SavingsProductHelper().withOverDraftRate("100000", "21")
-                .withAccountInterestReceivables(interestReceivableAccount).withSavingsControlAccountId(savingsControlAccount)
-                .withInterestPayableAccountId(interestPayableAccount).withInterestCompoundingPeriodTypeAsAnnually()
-                .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance()
-                .withAccountingRuleAsAccrualBased(accounts);
-
-        final String savingsProductJSON = this.productHelper.build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    private static boolean isInterestPosting(final SavingsAccountTransactionData transaction) {
+        return transaction.getTransactionType() != null && (Boolean.TRUE.equals(transaction.getTransactionType().getInterestPosting())
+                || Boolean.TRUE.equals(transaction.getTransactionType().getOverDraftInterestPosting()));
     }
 
-    private BigDecimal calcInterestPosting(SavingsProductHelper productHelper, String amount, long days) {
-        BigDecimal rate = productHelper.getNominalAnnualInterestRate().divide(new BigDecimal("100.00"));
-        BigDecimal principal = new BigDecimal(amount);
-        BigDecimal dayFactor = BigDecimal.ONE.divide(productHelper.getInterestCalculationDaysInYearType(), MathContext.DECIMAL64);
-        BigDecimal dailyRate = rate.multiply(dayFactor, MathContext.DECIMAL64);
-        BigDecimal periodRate = dailyRate.multiply(BigDecimal.valueOf(days), MathContext.DECIMAL64);
-        return principal.multiply(periodRate, MathContext.DECIMAL64).setScale(productHelper.getDecimalCurrency(), RoundingMode.HALF_EVEN);
+    private long countInterestPostingsOn(final Long savingsAccountId, final LocalDate date) {
+        return savingsTransactionHelper.getTransactions(savingsAccountId).stream().filter(t -> date.equals(t.getDate()))
+                .filter(t -> t.getTransactionType() != null && Boolean.TRUE.equals(t.getTransactionType().getInterestPosting())).count();
     }
 
-    private BigDecimal calcOverdraftPosting(SavingsProductHelper productHelper, String amount, long days) {
-        BigDecimal rate = productHelper.getNominalAnnualInterestRateOverdraft().divide(new BigDecimal("100.00"));
-        BigDecimal principal = new BigDecimal(amount);
-        BigDecimal dayFactor = BigDecimal.ONE.divide(productHelper.getInterestCalculationDaysInYearType(), MathContext.DECIMAL64);
-        BigDecimal dailyRate = rate.multiply(dayFactor, MathContext.DECIMAL64);
-        BigDecimal periodRate = dailyRate.multiply(BigDecimal.valueOf(days), MathContext.DECIMAL64);
-        return principal.multiply(periodRate, MathContext.DECIMAL64).setScale(productHelper.getDecimalCurrency(), RoundingMode.HALF_EVEN);
-    }
-
-    @SuppressWarnings("unchecked")
-    private LocalDate coerceToLocalDate(HashMap tx) {
-        String[] candidateKeys = new String[] { "date", "transactionDate", "submittedOnDate", "createdDate" };
-
-        for (String key : candidateKeys) {
-            Object v = tx.get(key);
-            if (v == null) {
-                continue;
-            }
-
-            if (v instanceof List<?>) {
-                List<?> arr = (List<?>) v;
-                if (arr.size() >= 3 && arr.get(0) instanceof Number && arr.get(1) instanceof Number && arr.get(2) instanceof Number) {
-                    int year = ((Number) arr.get(0)).intValue();
-                    int month = ((Number) arr.get(1)).intValue();
-                    int day = ((Number) arr.get(2)).intValue();
-                    return LocalDate.of(year, month, day);
-                }
-            }
-
-            if (v instanceof String) {
-                String s = (String) v;
-                DateTimeFormatter[] fmts = new DateTimeFormatter[] { DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US),
-                        DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.US), DateTimeFormatter.ofPattern("yyyy-MM-dd") };
-                for (DateTimeFormatter f : fmts) {
-                    try {
-                        return LocalDate.parse(s, f);
-                    } catch (Exception ignore) {
-                        // intentionally ignored
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    private boolean isDate(HashMap tx, LocalDate expected) {
-        LocalDate got = coerceToLocalDate(tx);
-        return got != null && got.isEqual(expected);
-    }
-
-    @SuppressWarnings("unchecked")
-    private SavingsAccountTransactionType txType(HashMap tx) {
-        Map<String, Object> typeMap = (Map<String, Object>) tx.get("transactionType");
-        return SavingsAccountTransactionType.fromInt(((Double) typeMap.get("id")).intValue());
-    }
-
-    private long countInterestOnDate(Integer accountId, LocalDate date) {
-        List<HashMap> all = savingsAccountHelper.getSavingsTransactions(accountId);
-        return all.stream().filter(tx -> isDate(tx, date)).map(this::txType).filter(SavingsAccountTransactionType::isInterestPosting)
+    private long countOverdraftPostingsOn(final Long savingsAccountId, final LocalDate date) {
+        return savingsTransactionHelper.getTransactions(savingsAccountId).stream().filter(t -> date.equals(t.getDate()))
+                .filter(t -> t.getTransactionType() != null && Boolean.TRUE.equals(t.getTransactionType().getOverDraftInterestPosting()))
                 .count();
     }
 
-    private long countOverdraftOnDate(Integer accountId, LocalDate date) {
-        List<HashMap> all = savingsAccountHelper.getSavingsTransactions(accountId);
-        return all.stream().filter(tx -> isDate(tx, date)).map(this::txType)
-                .filter(SavingsAccountTransactionType::isOverDraftInterestPosting).count();
+    private void assertNoAccrualReversals(final Long savingsAccountId) {
+        final long reversedAccruals = savingsTransactionHelper.getAccrualTransactions(savingsAccountId).stream()
+                .filter(transaction -> Boolean.TRUE.equals(transaction.getReversed())).count();
+        assertEquals(0L, reversedAccruals, "Accrual reversals were found in account transactions");
     }
 
-    @SuppressWarnings({ "rawtypes" })
-    private boolean isReversed(HashMap tx) {
-        Object v = tx.get("reversed");
-        if (v instanceof Boolean) {
-            return (Boolean) v;
-        }
-        if (v instanceof Number) {
-            return ((Number) v).intValue() != 0;
-        }
-        if (v instanceof String) {
-            return Boolean.parseBoolean((String) v);
-        }
-        return false;
+    private Long createActiveOverdraftAccount(final LocalDate startDate) {
+        final Long clientId = createClient(CLIENT_ACTIVATION_DATE);
+        assertNotNull(clientId);
+
+        final Long productId = createOverdraftAccrualProduct();
+        final String startDateString = DATE_FORMATTER.format(startDate);
+        final Long accountId = createTrackedSavingsAccount(clientId, productId, startDateString);
+
+        approveSavings(accountId, startDateString);
+        activateSavings(accountId, startDateString);
+        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(accountId));
+        return accountId;
     }
 
-    @SuppressWarnings("rawtypes")
-    private void assertNoAccrualReversals(Integer accountId) {
-        List<HashMap> all = savingsAccountHelper.getSavingsTransactions(accountId);
-        long reversedAccruals = all.stream().filter(tx -> {
-            SavingsAccountTransactionType t = txType(tx);
-            return t.isAccrual() && isReversed(tx);
-        }).count();
-        Assertions.assertEquals(0L, reversedAccruals, "Accrual reversals were found in account transactions");
+    private Long createOverdraftAccrualProduct() {
+        final Account assetAccount = accountHelper.createAssetAccount("assetAccount");
+        final Account incomeAccount = accountHelper.createIncomeAccount("incomeAccount");
+        final Account expenseAccount = accountHelper.createExpenseAccount("expenseAccount");
+        final Account liabilityAccount = accountHelper.createLiabilityAccount("liabilityAccount");
+        final Account interestReceivableAccount = accountHelper.createAssetAccount("interestReceivableAccount");
+        final Account savingsControlAccount = accountHelper.createLiabilityAccount("Savings Control");
+        final Account interestPayableAccount = accountHelper.createLiabilityAccount("Interest Payable");
+
+        final PostSavingsProductsRequest request = SavingsRequestBuilders
+                .savingsProduct(SavingsTestData.InterestCompoundingPeriodType.ANNUAL, SavingsTestData.InterestPostingPeriodType.MONTHLY,
+                        SavingsTestData.InterestCalculationType.DAILY_BALANCE)
+                .nominalAnnualInterestRate(INTEREST_RATE)//
+                .allowOverdraft(true)//
+                .accountingRule(SavingsTestData.AccountingRule.ACCRUAL_PERIODIC);
+
+        final PostSavingsProductsRequest product = SavingsRequestBuilders
+                .withAccrualAccountingMappings(request, assetAccount, liabilityAccount, incomeAccount, expenseAccount,
+                        interestReceivableAccount)
+                .savingsControlAccountId(SavingsRequestBuilders.accountId(savingsControlAccount))//
+                .interestPayableAccountId(SavingsRequestBuilders.accountId(interestPayableAccount))//
+                .overdraftLimit(OVERDRAFT_LIMIT)//
+                .nominalAnnualInterestRateOverdraft(BigDecimal.valueOf(OVERDRAFT_INTEREST_RATE));
+
+        final Long productId = savingsProductHelper.createSavingsProduct(product).getResourceId();
+        assertNotNull(productId, "Error creating savings product.");
+        return productId;
+    }
+
+    private Long createTrackedSavingsAccount(final Long clientId, final Long productId, final String submittedOnDate) {
+        final Long accountId = submitSavingsApplication(clientId, productId, submittedOnDate).getSavingsId();
+        assertNotNull(accountId, "Error applying for savings account.");
+        createdSavingsAccountIds.add(accountId);
+        return accountId;
+    }
+
+    /** Closing these keeps later runs of the interest posting job from having to walk them all. */
+    private void closeTrackedSavingsAccounts() {
+        if (createdSavingsAccountIds.isEmpty()) {
+            return;
+        }
+        final String today = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
+        createdSavingsAccountIds.forEach(savingsId -> {
+            try {
+                savingsHelper.postInterest(savingsId);
+                closeSavings(savingsId, today, true);
+            } catch (RuntimeException e) {
+                LOG.warn("Unable to close savings account {}: {}", savingsId, e.getMessage());
+            }
+        });
+        createdSavingsAccountIds.clear();
     }
 }
