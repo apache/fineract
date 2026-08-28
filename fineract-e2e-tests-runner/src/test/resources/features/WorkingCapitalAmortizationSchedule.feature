@@ -708,6 +708,8 @@ Feature: WorkingCapitalAmortizationSchedule
       | 210       | 2019-07-30 | 47.22                 | 83.68           | 0.13                       | 0.06                       |
       | 211       | 2019-07-31 | 47.22                 | 36.54           | 0.06                       | 0.00                       |
       | 212       | 2019-08-01 | 36.58                 | 0.00            | 0.00                       | 0.00                       |
+    And The retrieved amortization schedule has no negative amounts
+    And The retrieved amortization schedule expected amortization sums to the discount fee and both expected balances close to zero
     When Admin rejects the working capital loan on "01 January 2019"
     Then Working capital loan rejection was successful
 

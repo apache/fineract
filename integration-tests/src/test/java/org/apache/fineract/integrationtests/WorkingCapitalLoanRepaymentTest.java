@@ -36,6 +36,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
@@ -128,8 +129,18 @@ public class WorkingCapitalLoanRepaymentTest {
         assert loanData.getBalance() != null;
         assertEqualBigDecimal(BigDecimal.ZERO, loanData.getBalance().getPrincipalOutstanding());
         assertEqualBigDecimal(BigDecimal.valueOf(100), loanData.getBalance().getOverpaymentAmount());
-        // expected transactions: disburse, discount fee, repayment
-        assertEquals(3, Objects.requireNonNull(loanHelper.retrieveTransactionsByLoanId(loanId).getContent()).size());
+        // Overpaying settles the loan, and settling it recognizes the whole discount fee - the borrower has paid all of
+        // it - so alongside the disbursement, the discount fee and the repayment there is a closing amortization.
+        final List<GetWorkingCapitalLoanTransactionIdResponse> transactions = Objects
+                .requireNonNull(loanHelper.retrieveTransactionsByLoanId(loanId).getContent());
+        assertEquals(4, transactions.size(), () -> "unexpected transactions: " + transactions.stream()
+                .map(txn -> (txn.getType() == null ? "?" : txn.getType().getCode()) + ' ' + txn.getTransactionAmount()).toList());
+        final GetWorkingCapitalLoanTransactionIdResponse amortization = transactions.stream()
+                .filter(txn -> txn.getType() != null && "loanTransactionType.discountFeeAmortization".equals(txn.getType().getCode()))
+                .findFirst().orElseThrow(() -> new AssertionError("a settled loan must recognize its discount fee"));
+        assertEqualBigDecimal(BigDecimal.valueOf(100), amortization.getTransactionAmount());
+        assertEqualBigDecimal(BigDecimal.valueOf(100), loanData.getBalance().getRealizedIncomeFromDiscountFee());
+        assertEqualBigDecimal(BigDecimal.ZERO, loanData.getBalance().getUnrealizedIncomeFromDiscountFee());
     }
 
     @Test
