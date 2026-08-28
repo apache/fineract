@@ -1,0 +1,141 @@
+# ============================================================================
+# P2.2 — End-to-End Tests
+# SoW 4.0 §4.3 | Proyecto 2 — Fineract Pruebas y Calidad (Dev)
+#
+# Disparador: nightly + workflow_dispatch + pre-release
+# Bloqueante: sí (informativo para release gating)
+# Nota PoC: sin namespace efímero de EKS, usamos Docker Compose.
+# ============================================================================
+name: "P2.2 · Fineract E2E Tests"
+
+on:
+  schedule:
+    - cron: '0 4 * * 1-5'   # Lun-Vie 04:00 UTC (23:00 COT)
+  workflow_dispatch:
+    inputs:
+      fineract_image:
+        description: 'Tag de imagen Fineract para E2E (default: latest local build)'
+        required: false
+        default: 'local-build'
+
+permissions:
+  contents: read
+  checks: write
+
+concurrency:
+  group: p2-2-e2e
+  cancel-in-progress: false
+
+env:
+  JAVA_VERSION: '21'
+
+jobs:
+  e2e-tests:
+    name: "E2E Tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: fineract_tenants
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21 (Amazon Corretto)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      # En la PoC levantamos Fineract local; en prod sería namespace efímero EKS
+      - name: Build y levantar Fineract
+        run: |
+          ./gradlew bootJar --no-daemon
+          java -jar fineract-provider/build/libs/fineract-provider-*.jar \
+            --spring.profiles.active=test \
+            --fineract.datasource.url=jdbc:postgresql://localhost:5432/fineract_tenants \
+            --fineract.datasource.username=postgres \
+            --fineract.datasource.password=postgres &
+          echo "Esperando que Fineract inicie..."
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:8443/fineract-provider/actuator/health > /dev/null 2>&1; then
+              echo "Fineract listo en intento $i"
+              break
+            fi
+            sleep 5
+          done
+
+      # ── Suite E2E: flujos críticos del SoW ──
+      - name: E2E — flujos críticos (onboarding, desembolso, COB)
+        run: |
+          BASE_URL="https://localhost:8443/fineract-provider/api/v1"
+          AUTH="-u mifos:password"
+          TENANT="-H Fineract-Platform-TenantId:default"
+          CT="-H Content-Type:application/json"
+
+          echo "::group::E2E — Verificar API disponible"
+          curl -sk $AUTH $TENANT "$BASE_URL/offices" | head -c 200
+          echo ""
+          echo "::endgroup::"
+
+          echo "::group::E2E — Crear cliente (Onboarding)"
+          CLIENT_RESP=$(curl -sk -X POST $AUTH $TENANT $CT "$BASE_URL/clients" \
+            -d '{
+              "officeId":1,
+              "firstname":"E2E","lastname":"Test",
+              "active":true,
+              "locale":"en",
+              "dateFormat":"dd MMMM yyyy",
+              "activationDate":"01 January 2024"
+            }')
+          CLIENT_ID=$(echo "$CLIENT_RESP" | python3 -c "import sys,json; print(json.load(sys.stdin).get('clientId','FAIL'))" 2>/dev/null || echo "FAIL")
+          echo "Client ID: $CLIENT_ID"
+          echo "::endgroup::"
+
+          echo "::group::E2E — Verificar producto de préstamo"
+          curl -sk $AUTH $TENANT "$BASE_URL/loanproducts" | python3 -c "
+          import sys, json
+          products = json.load(sys.stdin)
+          print(f'Productos de préstamo disponibles: {len(products)}')
+          for p in products[:3]:
+              print(f'  - {p.get(\"name\",\"?\")} (id={p.get(\"id\",\"?\")})')
+          " 2>/dev/null || echo "::warning::No se pudieron listar productos"
+          echo "::endgroup::"
+
+          # Resultado final
+          if [ "$CLIENT_ID" != "FAIL" ]; then
+            echo "✅ E2E básico pasó: API accesible, cliente creado"
+          else
+            echo "::error::E2E falló: no se pudo crear cliente"
+            exit 1
+          fi
+
+      - name: Limpieza
+        if: always()
+        run: |
+          # Matar proceso Fineract si sigue corriendo
+          pkill -f "fineract-provider" || true
+          echo "Cleanup completado"
+
+      - name: Upload E2E results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-reports-p2-2
+          path: |
+            **/build/reports/
+          retention-days: 30

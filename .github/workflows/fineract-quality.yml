@@ -1,0 +1,76 @@
+# ============================================================================
+# P2.3 — Quality Check
+# SoW 4.0 §4.3 | Proyecto 2 — Fineract Pruebas y Calidad (Dev)
+#
+# Disparador: cada PR contra main (GitHub Flow)
+# Bloqueante: sí — cero vulnerabilidades críticas o altas en código nuevo
+# Referencia SCARE: B.5 §5.4
+#
+# Seguridad SAST/SCA: manejada por Aikido PR Checks App (nativa, sin workflow).
+# Este workflow cubre: Spotless (formato) + compilación limpia.
+# ============================================================================
+name: "P2.3 · Fineract Quality Check"
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: p2-3-quality-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  JAVA_VERSION: '21'
+
+jobs:
+  spotless:
+    name: "Spotless Format Check"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21 (Amazon Corretto)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Spotless check
+        run: ./gradlew spotlessCheck --no-daemon
+
+  compile-check:
+    name: "Compilation Check"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21 (Amazon Corretto)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Gradle compileJava (sin tests)
+        run: ./gradlew compileJava --no-daemon
+
+  # ────────────────────────────────────────────────────────────────
+  # NOTA: El check de SAST/SCA/Secrets (B.5 §5.4) lo ejecuta la
+  # Aikido PR Checks App automáticamente en cada PR.
+  # No requiere workflow — aparece como status check "Aikido" en el PR.
+  #
+  # Para que sea bloqueante, configurar en GitHub:
+  #   Settings → Branches → main → Branch protection rules:
+  #   ✔ Require status checks: "Aikido PR Scan" (o nombre similar)
+  # ────────────────────────────────────────────────────────────────

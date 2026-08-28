@@ -1,0 +1,17 @@
+# ZAP Baseline Rules — Qüida Fineract
+# Format: <rule_id>\t<action>\t<name>
+# Actions: IGNORE, WARN, FAIL
+10010	WARN	Cookie No HttpOnly Flag
+10011	WARN	Cookie Without Secure Flag
+10015	FAIL	Incomplete or No Cache-control Header Set
+10017	WARN	Cross-Domain JavaScript Source File Inclusion
+10020	FAIL	Anti-clickjacking Header
+10021	WARN	X-Content-Type-Options Header Missing
+10035	FAIL	Strict-Transport-Security Header Not Set
+10038	WARN	Content Security Policy (CSP) Header Not Set
+10098	WARN	Cross-Domain Misconfiguration
+40012	FAIL	Cross Site Scripting (Reflected)
+40014	FAIL	Cross Site Scripting (Persistent)
+90001	FAIL	Insecure JSF ViewState
+90011	WARN	Charset Mismatch
+90033	WARN	Loosely Scoped Cookie
