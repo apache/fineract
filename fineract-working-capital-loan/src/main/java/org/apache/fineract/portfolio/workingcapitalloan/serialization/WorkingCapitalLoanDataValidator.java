@@ -176,9 +176,7 @@ public class WorkingCapitalLoanDataValidator {
             validateDiscountAmountWithProductDiscount(discountAmount, loan.getLoanProduct().getRelatedDetail(), baseDataValidator);
         }
 
-        final LocalDate actualDisbursementDate = loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()
-                ? loan.getDisbursementDetails().getFirst().getActualDisbursementDate()
-                : null;
+        final LocalDate actualDisbursementDate = loan.getFirstActualDisbursementDate();
         if (actualDisbursementDate == null) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.actualDisbursementDateParamName)
                     .failWithCode("loan.not.disbursed");
@@ -685,10 +683,7 @@ public class WorkingCapitalLoanDataValidator {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
                         .failWithCode("cannot.be.a.future.date");
             }
-            final LocalDate disbursalDate = loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()
-                    ? loan.getDisbursementDetails().getFirst().getActualDisbursementDate()
-                    : null;
-            if (DateUtils.isBefore(transactionDate, disbursalDate)) {
+            if (DateUtils.isBefore(transactionDate, loan.getFirstActualDisbursementDate())) {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
                         .failWithCode("cannot.be.before.disbursal.date");
             }
@@ -848,10 +843,7 @@ public class WorkingCapitalLoanDataValidator {
                         .failWithCode("cannot.be.a.future.date");
             }
             final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-            final LocalDate disbursalDate = loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()
-                    ? loan.getDisbursementDetails().getFirst().getActualDisbursementDate()
-                    : null;
-            if (DateUtils.isBefore(transactionDate, disbursalDate)) {
+            if (DateUtils.isBefore(transactionDate, loan.getFirstActualDisbursementDate())) {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
                         .failWithCode("cannot.be.before.disbursal.date");
             } else if (DateUtils.isBefore(transactionDate, businessDate)) {
@@ -981,10 +973,7 @@ public class WorkingCapitalLoanDataValidator {
         final LocalDate effectiveDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.effectiveDateParamName,
                 element);
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.effectiveDateParamName).value(effectiveDate).notNull();
-        final LocalDate disbursalDate = loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()
-                ? loan.getDisbursementDetails().getFirst().getActualDisbursementDate()
-                : null;
-        if (DateUtils.isBefore(effectiveDate, disbursalDate)) {
+        if (DateUtils.isBefore(effectiveDate, loan.getFirstActualDisbursementDate())) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.effectiveDateParamName)
                     .failWithCode("cannot.be.before.disbursal.date");
         }

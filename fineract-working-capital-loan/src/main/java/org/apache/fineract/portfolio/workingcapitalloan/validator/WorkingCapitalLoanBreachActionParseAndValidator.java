@@ -394,13 +394,8 @@ public class WorkingCapitalLoanBreachActionParseAndValidator extends ParseAndVal
                 : details.getBreachStartType();
         final Optional<LocalDate> anchorDate = WorkingCapitalLoanBreachStartType.LOAN_CREATION.equals(breachStartType)
                 ? Optional.ofNullable(workingCapitalLoan.getSubmittedOnDate())
-                : firstActualDisbursementDate(workingCapitalLoan);
+                : Optional.ofNullable(workingCapitalLoan.getFirstActualDisbursementDate());
         return anchorDate.map(anchor -> anchor.plusDays(getBreachGraceDays(workingCapitalLoan)));
-    }
-
-    private Optional<LocalDate> firstActualDisbursementDate(final WorkingCapitalLoan workingCapitalLoan) {
-        return workingCapitalLoan.getDisbursementDetails().stream().map(WorkingCapitalLoanDisbursementDetails::getActualDisbursementDate)
-                .filter(Objects::nonNull).min(LocalDate::compareTo);
     }
 
     private int getBreachGraceDays(final WorkingCapitalLoan workingCapitalLoan) {
