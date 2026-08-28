@@ -24,7 +24,7 @@ import org.apache.avro.generic.GenericContainer;
 import org.apache.fineract.avro.generator.ByteBufferSerializable;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanChargeDataV1;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.charge.WorkingCapitalLoanChargeBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.charge.WorkingCapitalLoanAddChargeBusinessEvent;
 import org.apache.fineract.infrastructure.event.external.service.serialization.serializer.BusinessEventSerializer;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.mapper.WorkingCapitalLoanAccountDataMapper;
@@ -39,12 +39,12 @@ public class WorkingCapitalLoanChargeBusinessEventSerializer implements Business
 
     @Override
     public <T> boolean canSerialize(final BusinessEvent<T> event) {
-        return event instanceof WorkingCapitalLoanChargeBusinessEvent;
+        return event instanceof WorkingCapitalLoanAddChargeBusinessEvent;
     }
 
     @Override
     public <T> ByteBufferSerializable toAvroDTO(final BusinessEvent<T> rawEvent) {
-        final WorkingCapitalLoanChargeBusinessEvent event = (WorkingCapitalLoanChargeBusinessEvent) rawEvent;
+        final WorkingCapitalLoanAddChargeBusinessEvent event = (WorkingCapitalLoanAddChargeBusinessEvent) rawEvent;
         final WorkingCapitalLoanCharge charge = event.get();
         final WorkingCapitalLoanChargeDataV1 result = mapper.map(charge.toData());
         chargeEnricher.populateAccruals(charge.getLoan(), List.of(result));

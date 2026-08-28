@@ -1250,6 +1250,16 @@ public class EventCheckHelper {
                 .extractingBigDecimal(WorkingCapitalLoanChargeDataV1::getAmount).isEqualTo(expectedAmount);
     }
 
+    public void workingCapitalLoanAddChargeEventCheck(final Long loanId, final String isPenalty, final String chargeName,
+            final BigDecimal expectedAmount) {
+        waitForTransactionCommit();
+        eventAssertion.assertEvent(WorkingCapitalLoanAddChargeEvent.class, loanId)//
+                .extractingData(WorkingCapitalLoanChargeDataV1::getLoanId).isEqualTo(loanId)//
+                .extractingData(WorkingCapitalLoanChargeDataV1::getPenalty).isEqualTo(isPenalty.equalsIgnoreCase("penalty"))//
+                .extractingData(WorkingCapitalLoanChargeDataV1::getName).isEqualTo(chargeName)//
+                .extractingBigDecimal(WorkingCapitalLoanChargeDataV1::getAmount).isEqualTo(expectedAmount);
+    }
+
     public void workingCapitalLoanJournalEntriesEventCheck(final Long loanId) {
         if (eventProperties.isEventVerificationDisabled()) {
             return;

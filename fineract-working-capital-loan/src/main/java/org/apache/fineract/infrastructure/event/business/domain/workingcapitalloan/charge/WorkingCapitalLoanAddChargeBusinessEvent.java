@@ -18,18 +18,32 @@
  */
 package org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.charge;
 
+import org.apache.fineract.infrastructure.event.business.domain.AbstractBusinessEvent;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
 
-public class WorkingCapitalLoanAddChargeBusinessEvent extends WorkingCapitalLoanChargeBusinessEvent {
+public class WorkingCapitalLoanAddChargeBusinessEvent extends AbstractBusinessEvent<WorkingCapitalLoanCharge> {
 
+    private static final String CATEGORY = "WorkingCapitalLoan";
     private static final String TYPE = "WorkingCapitalLoanAddChargeBusinessEvent";
+    private final Long aggregateRootId;
 
     public WorkingCapitalLoanAddChargeBusinessEvent(final WorkingCapitalLoanCharge value) {
         super(value);
+        this.aggregateRootId = value != null && value.getLoan() != null ? value.getLoan().getId() : null;
+    }
+
+    @Override
+    public String getCategory() {
+        return CATEGORY;
     }
 
     @Override
     public String getType() {
         return TYPE;
+    }
+
+    @Override
+    public Long getAggregateRootId() {
+        return aggregateRootId;
     }
 }
