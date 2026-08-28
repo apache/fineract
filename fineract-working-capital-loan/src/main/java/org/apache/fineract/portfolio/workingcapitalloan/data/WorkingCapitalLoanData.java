@@ -114,4 +114,5 @@ public class WorkingCapitalLoanData implements Serializable {
     // carried by status == CLOSED_WRITTEN_OFF.
     private LocalDate writtenOffOnDate;
     private CodeValueData writeOffReason;
+    private LocalDate overpaidOnDate;
 }

@@ -25,7 +25,10 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
+import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionDateAndAmountHolder;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
@@ -38,6 +41,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapita
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionAllocationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -138,10 +142,23 @@ public class WorkingCapitalLoanTransactionProcessor {
         breachScheduleService.applyRepayment(loanId, transactionDate, transactionAmount);
 
         stateMachine.determineAndTransition(loan, transactionDate);
+        recalculateOverpaidOnDate(loan, transaction);
         triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
         // On early closure the loan leaves the COB scope, so any charge whose due-date accrual has not been posted yet
         // is accrued as of the closing date to make sure the income is recognized before the loan is closed.
         chargeAccrualService.accrueOnClosure(loan, transactionDate);
+    }
+
+    public void recalculateOverpaidOnDate(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction transaction) {
+        if (loan.getLoanStatus().isOverpaid()
+                && (loan.getOverpaidOnDate() == null || (!transaction.getTransactionDate().isAfter(loan.getOverpaidOnDate())
+                        && !transaction.getTransactionDate().isEqual(ThreadLocalContextUtil.getBusinessDate())))) {
+            List<TransactionDateAndAmountHolder> activeByTypesOrderByDateDesc = transactionRepository
+                    .findFirstActiveTransactionDateAndAmountByLoanIdWithOverpaidPortion(loan.getId(),
+                            LoanTransactionType.getRepaymentLikeTransactionTypes(), Pageable.ofSize(1));
+            activeByTypesOrderByDateDesc.stream().findFirst().map(TransactionDateAndAmountHolder::transactionDate)
+                    .ifPresent(loan::setOverpaidOnDate);
+        }
     }
 
     /**

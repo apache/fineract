@@ -98,4 +98,5 @@
   <include relativeToChangelogFile="true" file="parts/0074_wc_submitted_on_date_not_null.xml"/>
   <include relativeToChangelogFile="true" file="parts/0075_wc_loan_transaction_permissions.xml"/>
   <include relativeToChangelogFile="true" file="parts/0076_wc_loan_charge_remove_calculation_on_amount_field.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0077_wc_loan_overpaid_on_date.xml"/>
 </databaseChangeLog>
