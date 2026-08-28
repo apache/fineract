@@ -67,7 +67,7 @@ public interface WorkingCapitalLoanAccountDataMapper {
     @Mapping(source = "nearBreach", target = "breach.nearBreach")
     @Mapping(target = "breach.breachSchedule", ignore = true)
     @Mapping(target = "breach.breachPastDueAmount", ignore = true)
-    @Mapping(target = "overpaidOnDate", ignore = true)
+    @Mapping(target = "overpaidOnDate", source = "overpaidOnDate")
     @Mapping(target = "customData", ignore = true)
     WorkingCapitalLoanAccountDataV1 map(WorkingCapitalLoanData source);
 

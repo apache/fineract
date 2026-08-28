@@ -130,6 +130,17 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
     List<TransactionDateAndAmountHolder> findActiveByTypesOrderByDateDesc(@Param("wcLoanId") Long wcLoanId,
             @Param("transactionTypes") List<LoanTransactionType> transactionTypes, Pageable pageable);
 
+    @Query("""
+            SELECT t.transactionDate, t.transactionAmount FROM WorkingCapitalLoanTransaction t
+            WHERE t.wcLoan.id = :wcLoanId
+            AND t.reversed = FALSE
+            AND t.transactionType in :transactionTypes
+                        AND t.allocation.overpaymentPortion > 0
+            ORDER BY t.transactionDate ASC, t.submittedOnDate ASC, t.createdDate ASC, t.id DESC
+            """)
+    List<TransactionDateAndAmountHolder> findFirstActiveTransactionDateAndAmountByLoanIdWithOverpaidPortion(
+            @Param("wcLoanId") Long wcLoanId, @Param("transactionTypes") List<LoanTransactionType> transactionTypes, Pageable pageable);
+
     /**
      * Non-reversed transactions of the loan whose type is none of {@code excludedTypes}, latest first in the
      * (transaction date, id) order the replay uses. Used to find the last user transaction without loading the loan's

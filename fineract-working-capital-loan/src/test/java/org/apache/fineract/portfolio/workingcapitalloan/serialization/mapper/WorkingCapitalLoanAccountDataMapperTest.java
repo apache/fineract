@@ -135,8 +135,9 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals(1, result.getDisbursementDetails().size());
         assertEquals(1, result.getOriginators().size());
 
+        assertEquals("2024-02-14", result.getOverpaidOnDate());
+
         // serializer-only fields stay unmapped
-        assertNull(result.getOverpaidOnDate());
         assertNull(result.getCustomData());
     }
 
@@ -531,10 +532,10 @@ class WorkingCapitalLoanAccountDataMapperTest {
                 .totalPaymentVolume(new BigDecimal("5000.00")).breachGraceDays(3).delinquencyGraceDays(7)
                 .delinquencyStartType(stringEnum("1", "delinquencyStart.disbursement", "Disbursement"))
                 .delinquencyStartDate(LocalDate.of(2024, 1, 5)).breachStartDate(LocalDate.of(2024, 1, 6))
-                .lastClosedBusinessDate(LocalDate.of(2024, 2, 1)).chargedOff(Boolean.TRUE).enableInstallmentLevelDelinquency(Boolean.TRUE)
-                .currency(currency()).timeline(fullTimeline()).summary(fullSummary()).delinquent(fullCollection()).breach(fullBreach())
-                .nearBreach(fullNearBreach()).charges(List.of(fullCharge())).disbursementDetails(List.of(fullDisbursement()))
-                .originators(List.of(fullOriginator())).build();
+                .lastClosedBusinessDate(LocalDate.of(2024, 2, 1)).overpaidOnDate(LocalDate.of(2024, 2, 14)).chargedOff(Boolean.TRUE)
+                .enableInstallmentLevelDelinquency(Boolean.TRUE).currency(currency()).timeline(fullTimeline()).summary(fullSummary())
+                .delinquent(fullCollection()).breach(fullBreach()).nearBreach(fullNearBreach()).charges(List.of(fullCharge()))
+                .disbursementDetails(List.of(fullDisbursement())).originators(List.of(fullOriginator())).build();
     }
 
     private static LoanStatusEnumData fullStatus() {

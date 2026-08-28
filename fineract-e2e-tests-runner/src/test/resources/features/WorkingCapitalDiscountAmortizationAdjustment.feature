@@ -1170,7 +1170,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | transactionDate | type                                 | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement                         | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Discount Fee                         | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment                            | 9900.0            | 9900.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                            | 9900.0            | 9500.0           | 0.0               | 0.0                   | false    |
       | 02 January 2026 | Discount Fee Amortization            | 999.84            |                  |                   |                       | false    |
       | 03 January 2026 | Discount Fee Adjustment              | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
       | 03 January 2026 | Discount Fee Amortization Adjustment | 499.84            |                  |                   |                       | false    |
@@ -1183,7 +1183,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | transactionDate | type                                 | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement                         | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Discount Fee                         | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment                            | 9900.0            | 9900.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                            | 9900.0            | 9500.0           | 0.0               | 0.0                   | false    |
       | 02 January 2026 | Discount Fee Amortization            | 999.84            |                  |                   |                       | false    |
       | 03 January 2026 | Discount Fee Adjustment              | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
       | 03 January 2026 | Discount Fee Amortization Adjustment | 499.84            |                  |                   |                       | false    |
@@ -1197,7 +1197,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | transactionDate | type                                 | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement                         | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Discount Fee                         | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment                            | 9900.0            | 9900.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                            | 9900.0            | 9500.0           | 0.0               | 0.0                   | false    |
       | 02 January 2026 | Discount Fee Amortization            | 999.84            |                  |                   |                       | false    |
       | 03 January 2026 | Discount Fee Adjustment              | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
       | 03 January 2026 | Discount Fee Amortization Adjustment | 499.84            |                  |                   |                       | false    |

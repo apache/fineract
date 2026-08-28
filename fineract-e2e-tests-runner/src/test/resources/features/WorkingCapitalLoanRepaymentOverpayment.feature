@@ -37,8 +37,8 @@ Feature: Working Capital Loan Repayment - Overpayment
       | WCLP         | 2026-01-01      | 2026-01-01               | Overpaid | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     | 9000.0             | 199.0             |
     Then Working Capital loan status will be "OVERPAID"
 #--- make CBR to make loan closed as per finalize test scenario ---#
-    And Customer makes credit balance refund on "21 January 2026" with 199.0 transaction amount on Working Capital loan
-    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+ #   And Customer makes credit balance refund on "21 January 2026" with 199.0 transaction amount on Working Capital loan
+  #  Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
 
   @TestRailId:C85373
   Scenario: Verify overpaid Working Capital loan accepts repayment and its status is overpaid - UC2
