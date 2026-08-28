@@ -36,6 +36,8 @@ import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceMo
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper;
 import org.apache.fineract.infrastructure.jobs.filter.ProgressiveLoanModelCheckerFilter;
+import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBApiFilter;
+import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBFilterHelper;
 import org.apache.fineract.infrastructure.security.converter.FineractJwtAuthenticationTokenConverter;
 import org.apache.fineract.infrastructure.security.data.TenantAuthenticationDetails;
 import org.apache.fineract.infrastructure.security.filter.BusinessDateFilter;
@@ -102,6 +104,9 @@ public class AuthorizationServerConfig {
 
     @Autowired(required = false)
     private LoanCOBFilterHelper loanCOBFilterHelper;
+
+    @Autowired(required = false)
+    private WorkingCapitalLoanCOBFilterHelper workingCapitalLoanCOBFilterHelper;
 
     @Autowired
     private IdempotencyStoreHelper idempotencyStoreHelper;
@@ -180,6 +185,9 @@ public class AuthorizationServerConfig {
         } else {
             http.addFilterAfter(idempotencyStoreFilter(), FineractInstanceModeApiFilter.class); //
             http.addFilterAfter(progressiveLoanModelCheckerFilter, FineractInstanceModeApiFilter.class);
+        }
+        if (workingCapitalLoanCOBFilterHelper != null) {
+            http.addFilterAfter(workingCapitalLoanCOBApiFilter(), IdempotencyStoreFilter.class);
         }
 
         if (fineractProperties.getIpTracking().isEnabled()) {
@@ -274,6 +282,10 @@ public class AuthorizationServerConfig {
 
     public LoanCOBApiFilter loanCOBApiFilter() {
         return new LoanCOBApiFilter(loanCOBFilterHelper);
+    }
+
+    public WorkingCapitalLoanCOBApiFilter workingCapitalLoanCOBApiFilter() {
+        return new WorkingCapitalLoanCOBApiFilter(workingCapitalLoanCOBFilterHelper);
     }
 
     public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter() {

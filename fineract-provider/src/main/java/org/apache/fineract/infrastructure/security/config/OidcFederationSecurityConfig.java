@@ -31,6 +31,8 @@ import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceMo
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper;
 import org.apache.fineract.infrastructure.jobs.filter.ProgressiveLoanModelCheckerFilter;
+import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBApiFilter;
+import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBFilterHelper;
 import org.apache.fineract.infrastructure.security.converter.FineractOidcJwtAuthenticationConverter;
 import org.apache.fineract.infrastructure.security.filter.BusinessDateFilter;
 import org.apache.fineract.infrastructure.security.filter.OidcTenantAwareFilter;
@@ -117,6 +119,9 @@ public class OidcFederationSecurityConfig {
     @Autowired(required = false)
     private LoanCOBFilterHelper loanCOBFilterHelper;
 
+    @Autowired(required = false)
+    private WorkingCapitalLoanCOBFilterHelper workingCapitalLoanCOBFilterHelper;
+
     // Optional: only needed for browser-based OAuth2 login redirect flow.
     // Not required for Bearer token API authentication.
     @Autowired(required = false)
@@ -147,6 +152,9 @@ public class OidcFederationSecurityConfig {
         } else {
             http.addFilterAfter(idempotencyStoreFilter(), FineractInstanceModeApiFilter.class)
                     .addFilterAfter(progressiveLoanModelCheckerFilter, FineractInstanceModeApiFilter.class);
+        }
+        if (workingCapitalLoanCOBFilterHelper != null) {
+            http.addFilterAfter(workingCapitalLoanCOBApiFilter(), IdempotencyStoreFilter.class);
         }
 
         if (fineractProperties.getIpTracking().isEnabled()) {
@@ -207,6 +215,10 @@ public class OidcFederationSecurityConfig {
 
     public LoanCOBApiFilter loanCOBApiFilter() {
         return new LoanCOBApiFilter(loanCOBFilterHelper);
+    }
+
+    public WorkingCapitalLoanCOBApiFilter workingCapitalLoanCOBApiFilter() {
+        return new WorkingCapitalLoanCOBApiFilter(workingCapitalLoanCOBFilterHelper);
     }
 
     public IdempotencyStoreFilter idempotencyStoreFilter() {

@@ -92,7 +92,7 @@ public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher
     }
 
     private boolean isExternal(String pathInfo) {
-        return LOAN_PATH_PATTERN.matcher(pathInfo).matches() && pathInfo.contains("external-id");
+        return LOAN_PATH_PATTERN.matcher(pathInfo).matches() && pathInfo.contains("working-capital-loans/external-id");
     }
 
     @Override

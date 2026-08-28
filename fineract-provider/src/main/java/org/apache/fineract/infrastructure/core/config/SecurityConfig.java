@@ -39,6 +39,8 @@ import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceMo
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper;
 import org.apache.fineract.infrastructure.jobs.filter.ProgressiveLoanModelCheckerFilter;
+import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBApiFilter;
+import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBFilterHelper;
 import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
@@ -111,6 +113,8 @@ public class SecurityConfig {
     private FineractRequestContextHolder fineractRequestContextHolder;
     @Autowired(required = false)
     private LoanCOBFilterHelper loanCOBFilterHelper;
+    @Autowired(required = false)
+    private WorkingCapitalLoanCOBFilterHelper workingCapitalLoanCOBFilterHelper;
     @Autowired
     private IdempotencyStoreHelper idempotencyStoreHelper;
     @Autowired
@@ -413,6 +417,9 @@ public class SecurityConfig {
             http.addFilterAfter(idempotencyStoreFilter(), FineractInstanceModeApiFilter.class);
             http.addFilterAfter(progressiveLoanModelCheckerFilter, FineractInstanceModeApiFilter.class);
         }
+        if (workingCapitalLoanCOBFilterHelper != null) {
+            http.addFilterAfter(workingCapitalLoanCOBApiFilter(), IdempotencyStoreFilter.class);
+        }
         if (fineractProperties.getIpTracking().isEnabled()) {
             http.addFilterAfter(callerIpTrackingFilter(), RequestResponseFilter.class);
         }
@@ -442,6 +449,10 @@ public class SecurityConfig {
 
     public LoanCOBApiFilter loanCOBApiFilter() {
         return new LoanCOBApiFilter(loanCOBFilterHelper);
+    }
+
+    public WorkingCapitalLoanCOBApiFilter workingCapitalLoanCOBApiFilter() {
+        return new WorkingCapitalLoanCOBApiFilter(workingCapitalLoanCOBFilterHelper);
     }
 
     public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter() {
