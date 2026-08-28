@@ -442,8 +442,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
         if (action.getStartDate() == null) {
             return;
         }
-        final LocalDate firstDisbursementDate = workingCapitalLoan.getDisbursementDetails().stream()
-                .map(WorkingCapitalLoanDisbursementDetails::getActualDisbursementDate).filter(Objects::nonNull).findFirst().orElse(null);
+        final LocalDate firstDisbursementDate = workingCapitalLoan.getFirstActualDisbursementDate();
         if (firstDisbursementDate != null && firstDisbursementDate.isAfter(action.getStartDate())) {
             failParameterValidation(dataValidator, START_DATE, "must.be.after.first.disbursal.date",
                     "Start date of pause period must be after first disbursal date");

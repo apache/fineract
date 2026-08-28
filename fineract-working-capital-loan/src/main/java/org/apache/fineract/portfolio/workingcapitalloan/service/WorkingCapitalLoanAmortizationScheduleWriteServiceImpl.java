@@ -141,8 +141,8 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
     @NonNull
     private ProjectedAmortizationScheduleModel reconstructScheduleModel(final WorkingCapitalLoan loan,
             final List<PrincipalPayment> payments, final List<PrincipalAdjustment> adjustments) {
-        final BigDecimal disbursedAmount = resolveActualDisbursedAmount(loan);
-        final LocalDate disbursementDate = resolveActualDisbursementDate(loan);
+        final BigDecimal disbursedAmount = loan.getFirstActualDisbursementAmount();
+        final LocalDate disbursementDate = loan.getFirstActualDisbursementDate();
         final List<WorkingCapitalLoanPeriodPaymentRateChange> rateChanges = rateChangeRepository
                 .findByWorkingCapitalLoanIdAndReversedFalse(loan.getId());
         final ProjectedAmortizationScheduleModel model = generateBaseModel(loan, disbursedAmount, disbursementDate,
@@ -391,20 +391,5 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         model.recalculateNetAmortizationAndDeferredBalanceFrom(transactionDate);
 
         scheduleRepositoryWrapper.writeModel(loan, model);
-    }
-
-    private BigDecimal resolveActualDisbursedAmount(final WorkingCapitalLoan loan) {
-        if (loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()
-                && loan.getDisbursementDetails().getFirst().getActualAmount() != null) {
-            return loan.getDisbursementDetails().getFirst().getActualAmount();
-        }
-        return BigDecimal.ZERO;
-    }
-
-    private LocalDate resolveActualDisbursementDate(final WorkingCapitalLoan loan) {
-        if (loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()) {
-            return loan.getDisbursementDetails().getFirst().getActualDisbursementDate();
-        }
-        return null;
     }
 }

@@ -35,6 +35,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
@@ -227,6 +228,15 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     }
 
     /**
+     * The earliest non-null actual disbursement date, or {@code null} when nothing was disbursed yet.
+     */
+    public LocalDate getFirstActualDisbursementDate() {
+        return Optional.ofNullable(getFirstActualDisbursement()) //
+                .map(WorkingCapitalLoanDisbursementDetails::getActualDisbursementDate) //
+                .orElse(null);
+    }
+
+    /**
      * Marks the account as charged-off. The {@code chargeOffReason} is optional and may be {@code null}.
      */
     public void markAsChargedOff(final LocalDate chargedOffOnDate, final AppUser chargedOffBy, final CodeValue chargeOffReason) {
@@ -249,5 +259,29 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
 
     public Long fetchChargeOffReasonId() {
         return this.chargeOffReason != null ? this.chargeOffReason.getId() : null;
+    }
+
+    /**
+     * Returns the actual amount for the chronologically first disbursement, or zero when no disbursement amount is
+     * available. Undisbursed detail rows are ignored, just as they are for {@link #getFirstActualDisbursementDate()}.
+     */
+    public BigDecimal getFirstActualDisbursementAmount() {
+        return Optional.ofNullable(getFirstActualDisbursement()) //
+                .map(WorkingCapitalLoanDisbursementDetails::getActualAmount) //
+                .orElse(BigDecimal.ZERO);
+    }
+
+    /**
+     * Finds the disbursement detail with the earliest non-null actual disbursement date. When multiple persisted
+     * details share that date, the detail ID is used as a deterministic tie-breaker. The disbursement detail collection
+     * is otherwise unordered, so collection position is never used as the ordering rule.
+     *
+     * @return the earliest actual disbursement detail, or {@code null} when no detail has been disbursed
+     */
+    public WorkingCapitalLoanDisbursementDetails getFirstActualDisbursement() {
+        return disbursementDetails.stream() //
+                .filter(detail -> detail.getActualDisbursementDate() != null) //
+                .min(WorkingCapitalLoanDisbursementDetailsComparator.ACTUAL_DISBURSEMENT_ORDER) //
+                .orElse(null);
     }
 }
