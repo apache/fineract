@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -3374,16 +3375,20 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
     }
 
-    private void updateInstallmentsByModelForReAging(final LoanTransaction loanTransaction, final ProgressiveTransactionCtx ctx,
+    // visible for testing
+    void updateInstallmentsByModelForReAging(final LoanTransaction loanTransaction, final ProgressiveTransactionCtx ctx,
             final LocalDate reAgePeriodStartDate) {
         final List<LoanRepaymentScheduleInstallment> installments = ctx.getInstallments();
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
 
         final Optional<RepaymentPeriod> reAgeSpecialRepaymentPeriodOpt = ctx.getModel().repaymentPeriods().stream()
                 .filter(RepaymentPeriod::isReAgedEarlyRepaymentHolder).findFirst();
+        final Map<LoanTransactionToRepaymentScheduleMapping, LoanRepaymentScheduleInstallment> liftedMappingOrigins = new LinkedHashMap<>();
         final LoanRepaymentScheduleInstallment installmentWithMovedPaidAmounts = reAgeSpecialRepaymentPeriodOpt
-                .map(repaymentPeriod -> createInstallmentWithMovedPaidAmounts(ctx, loanTransaction, installments, repaymentPeriod))
+                .map(repaymentPeriod -> createInstallmentWithMovedPaidAmounts(ctx, loanTransaction, installments, repaymentPeriod,
+                        liftedMappingOrigins))
                 .orElse(null);
+        final AtomicBoolean movedPaidAmountsInstallmentUsed = new AtomicBoolean(false);
 
         final List<LoanCharge> liftedLoanCharges = new ArrayList<>();
         installments.stream().filter(installment -> !installment.getDueDate().isBefore(transactionDate))
@@ -3400,6 +3405,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             while (iterator.hasNext() && (installment == null || installment.isAdditional() || installment.isDownPayment())) {
                 installment = iterator.next();
                 installmentCounter.getAndIncrement();
+            }
+            // the loop above stops as soon as the installments run out, so the last one it looked at can still be an
+            // additional or down payment installment, which this repayment period must not be matched against
+            if (installment != null && (installment.isAdditional() || installment.isDownPayment())) {
+                installment = null;
             }
 
             if (installment != null) {
@@ -3422,8 +3432,9 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                     installment.updateObligationsMet(ctx.getCurrency(), transactionDate);
                 }
             } else {
-                if (rp.isReAgedEarlyRepaymentHolder()) {
+                if (rp.isReAgedEarlyRepaymentHolder() && installmentWithMovedPaidAmounts != null) {
                     iterator.add(installmentWithMovedPaidAmounts);
+                    movedPaidAmountsInstallmentUsed.set(true);
                 } else {
                     installmentCounter.getAndIncrement();
                     final LoanRepaymentScheduleInstallment newInstallment = LoanRepaymentScheduleInstallment.newReAgedInstallment(
@@ -3441,12 +3452,29 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             }
         });
 
+        if (installmentWithMovedPaidAmounts != null && !movedPaidAmountsInstallmentUsed.get()) {
+            restoreLiftedMappings(liftedMappingOrigins);
+        }
+
         for (LoanCharge loanCharge : liftedLoanCharges) {
             loanChargeRepaymentScheduleProcessing.reprocess(ctx.getCurrency(), loanTransaction.getLoan().getDisbursementDate(),
                     installments, loanCharge);
         }
 
         reApplyInterestPauseOnReAgedInstallments(loanTransaction, ctx, reAgePeriodStartDate, installments);
+    }
+
+    /**
+     * Puts the mappings back onto the installment they were lifted from. Both sides of the association are mapped with
+     * orphan removal, so a mapping that is left out of them is deleted when the changes are flushed.
+     */
+    private void restoreLiftedMappings(
+            final Map<LoanTransactionToRepaymentScheduleMapping, LoanRepaymentScheduleInstallment> liftedMappingOrigins) {
+        liftedMappingOrigins.forEach((mapping, originalInstallment) -> {
+            mapping.setInstallment(originalInstallment);
+            originalInstallment.getLoanTransactionToRepaymentScheduleMappings().add(mapping);
+            mapping.getLoanTransaction().getLoanTransactionToRepaymentScheduleMappings().add(mapping);
+        });
     }
 
     private void reApplyInterestPauseOnReAgedInstallments(final LoanTransaction loanTransaction, final ProgressiveTransactionCtx ctx,
@@ -3491,7 +3519,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
      * @return new installment with moved paid amounts
      */
     private LoanRepaymentScheduleInstallment createInstallmentWithMovedPaidAmounts(final ProgressiveTransactionCtx ctx,
-            final LoanTransaction loanTransaction, final List<LoanRepaymentScheduleInstallment> installments, final RepaymentPeriod rp) {
+            final LoanTransaction loanTransaction, final List<LoanRepaymentScheduleInstallment> installments, final RepaymentPeriod rp,
+            final Map<LoanTransactionToRepaymentScheduleMapping, LoanRepaymentScheduleInstallment> liftedMappingOrigins) {
         final MonetaryCurrency currency = loanTransaction.getLoan().loanCurrency();
         final LocalDate transactionDate = loanTransaction.getTransactionDate();
         final Optional<LoanRepaymentScheduleInstallment> firstReAgedInstallment = installments.stream()
@@ -3515,7 +3544,12 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
         newInstallment.setTotalPaidInAdvance(paidInAdvanceBalances.getPaidInAdvance().getAmount());
         newInstallment.setTotalPaidLate(paidInAdvanceBalances.getPaidLate());
-        paidInAdvanceBalances.loanTransactionToRepaymentScheduleMappings.forEach(m -> m.setInstallment(newInstallment));
+        paidInAdvanceBalances.loanTransactionToRepaymentScheduleMappings.forEach(m -> {
+            liftedMappingOrigins.put(m, m.getInstallment());
+            m.setInstallment(newInstallment);
+            newInstallment.getLoanTransactionToRepaymentScheduleMappings().add(m);
+            m.getLoanTransaction().getLoanTransactionToRepaymentScheduleMappings().add(m);
+        });
         newInstallment.setCreditedPrincipal(rp.getCreditedPrincipal().getAmount());
         newInstallment.updateObligationsMet(currency, transactionDate);
 
@@ -3920,7 +3954,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
                     created.setTotalPaidInAdvance(paidInAdvanceBalances.getPaidInAdvance().getAmount());
 
-                    paidInAdvanceBalances.loanTransactionToRepaymentScheduleMappings.forEach(m -> m.setInstallment(created));
+                    paidInAdvanceBalances.loanTransactionToRepaymentScheduleMappings.forEach(m -> {
+                        m.setInstallment(created);
+                        created.getLoanTransactionToRepaymentScheduleMappings().add(m);
+                        m.getLoanTransaction().getLoanTransactionToRepaymentScheduleMappings().add(m);
+                    });
                 } else {
                     created.setFeeChargesCharged(calculatedFees.calculateValueBigDecimal(reAgedInstallmentIndex));
                     created.setPenaltyCharges(calculatedPenalties.calculateValueBigDecimal(reAgedInstallmentIndex));
