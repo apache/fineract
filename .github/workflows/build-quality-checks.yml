@@ -310,8 +310,6 @@ jobs:
       TZ: Asia/Kolkata
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
       BASE_SHA: ${{ github.event.pull_request.base.sha }}
-      ALLOWED_LICENSES_FILE: ${{ github.workspace }}/allowed-licenses.json
-      LICENSE_CHECK_INIT_SCRIPT: ${{ github.workspace }}/license-check-init.gradle
 
     steps:
       # This job diffs the PR head against its target branch, so it needs
@@ -336,92 +334,8 @@ jobs:
         with:
           validate-wrappers: true
 
-      # Everything the Category X gate needs lives in this workflow file --
-      # no build.gradle changes. The allowlist and the init script that
-      # wires it into the already-applied dependency-license-report plugin
-      # are both written here, then injected at build time via
-      # `--init-script`, for both the PR head checkout and the target
-      # branch worktree below.
-      - name: Write allow-list and init script
-        run: |
-          cat > "$ALLOWED_LICENSES_FILE" <<'EOF'
-          {
-            "allowedLicenses": [
-              { "moduleLicense": "Apache-2.0" },
-              { "moduleLicense": "Apache License, Version 2.0" },
-              { "moduleLicense": "The Apache Software License, Version 2.0" },
-              { "moduleLicense": "Apache 2.0" },
-              { "moduleLicense": "MIT" },
-              { "moduleLicense": "MIT License" },
-              { "moduleLicense": "The MIT License" },
-              { "moduleLicense": "BSD-2-Clause" },
-              { "moduleLicense": "BSD-3-Clause" },
-              { "moduleLicense": "BSD License 3" },
-              { "moduleLicense": "Eclipse Public License - v 1.0" },
-              { "moduleLicense": "Eclipse Public License - v 2.0" },
-              { "moduleLicense": "Eclipse Distribution License - v 1.0" },
-              { "moduleLicense": "Common Development and Distribution License" },
-              { "moduleLicense": "CDDL/GPLv2+CE" },
-              { "moduleLicense": "Bouncy Castle Licence" },
-              { "moduleLicense": "Public Domain" },
-              { "moduleLicense": "ISC" }
-            ]
-          }
-          EOF
-          # PLACEHOLDER seed, not an audited baseline -- regenerate from
-          # `./gradlew generateLicenseReport` across all modules before
-          # relying on this gate.
-
-          cat > "$LICENSE_CHECK_INIT_SCRIPT" <<'EOF'
-          allprojects {
-              plugins.withId('com.github.jk1.dependency-license-report') {
-                  licenseReport {
-                      allowedLicensesFile = new File(System.getenv('ALLOWED_LICENSES_FILE'))
-                  }
-              }
-          }
-          EOF
-
-      - name: Check licenses on PR head
-        run: ./gradlew checkLicense --init-script "$LICENSE_CHECK_INIT_SCRIPT" --continue || true
-
-      - name: Collect head violations
-        run: |
-          find . -path '*/licenses/dependencies-without-allowed-license.json' -exec cat {} \; \
-            | jq -s '[.[].dependenciesWithoutAllowedLicenses[]?] | unique_by(.moduleName + "::" + .moduleLicense)' \
-            > head-violations.json
-
-      - name: Add worktree for PR target branch
-        run: git worktree add ../pr-base "$BASE_SHA"
-
-      - name: Check licenses on PR target branch
-        run: (cd ../pr-base && ./gradlew checkLicense --init-script "$LICENSE_CHECK_INIT_SCRIPT" --continue) || true
-
-      - name: Collect base violations
-        run: |
-          find ../pr-base -path '*/licenses/dependencies-without-allowed-license.json' -exec cat {} \; \
-            | jq -s '[.[].dependenciesWithoutAllowedLicenses[]?] | unique_by(.moduleName + "::" + .moduleLicense)' \
-            > base-violations.json
-
-      - name: Gate on licenses that are new or changed relative to the target branch
-        run: |
-          jq -n --slurpfile head head-violations.json --slurpfile base base-violations.json '
-            ($base[0] | map(.moduleName + "::" + .moduleLicense)) as $baseKeys
-            | $head[0] | map(select((.moduleName + "::" + .moduleLicense) as $k | ($baseKeys | index($k)) == null))
-          ' > new-violations.json
-
-          COUNT=$(jq 'length' new-violations.json)
-          {
-            echo "## SBOM license check"
-            echo "New/changed dependency licenses not on the allowlist: $COUNT"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-          if [ "$COUNT" -gt 0 ]; then
-            echo "New/changed dependency licenses not on the allowlist, relative to the PR target branch:"
-            jq -r '.[] | "- \(.moduleName) \(.moduleVersion): \(.moduleLicense)"' new-violations.json | tee -a "$GITHUB_STEP_SUMMARY"
-            exit 1
-          fi
-          echo "No new or changed dependency licenses require review." >> "$GITHUB_STEP_SUMMARY"
+      - name: Run dependency license check
+        run: ./scripts/check-dependency-licenses.sh --base-sha "$BASE_SHA"
 
       - name: Archive license reports
         if: ${{ failure() || inputs.upload_artifacts }}
