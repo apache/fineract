@@ -122,14 +122,11 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
         JsonArray gsimApplications = command.arrayOfParameterNamed("clientArray");
 
-        final Object lock = new Object();
-        synchronized (lock) {
-            for (JsonElement gsimApplication : gsimApplications) {
-                // result=submitApplication(JsonCommand.fromExistingCommand(command,
-                // gsimApplication));
-                result = submitApplication(JsonCommand.fromExistingCommand(command, gsimApplication,
-                        gsimApplication.getAsJsonObject().get("clientId").getAsLong()));
-            }
+        for (JsonElement gsimApplication : gsimApplications) {
+            // result=submitApplication(JsonCommand.fromExistingCommand(command,
+            // gsimApplication));
+            result = submitApplication(JsonCommand.fromExistingCommand(command, gsimApplication,
+                    gsimApplication.getAsJsonObject().get("clientId").getAsLong()));
         }
 
         return result;
