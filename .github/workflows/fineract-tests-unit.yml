@@ -1,0 +1,87 @@
+# ============================================================================
+# P2.1 - Unit Tests (JUnit)
+# SoW 4.0 - Proyecto 2 - Fineract Pruebas y Calidad (Dev)
+#
+# Disparador: PR contra main (GitHub Flow)
+# Bloqueante: si - status check requerido en branch protection
+# Cobertura: JaCoCo (G.2 seccion 6.1 - 90% funciones nuevas)
+#
+# Excluye (van en otros pipelines):
+#   - integration-tests, oauth2-tests, twofactor-tests: requieren Fineract corriendo
+#   - fineract-e2e-tests-*: E2E, corren en P2.2 con infra completa
+# ============================================================================
+name: "P2.1 - Fineract Unit Tests"
+
+on:
+    pull_request:
+        branches: [main]
+        paths:
+            - 'fineract-provider/**'
+            - 'fineract-core/**'
+            - 'fineract-loan/**'
+            - 'fineract-savings/**'
+            - 'fineract-investor/**'
+            - 'fineract-branch/**'
+            - 'fineract-accounting/**'
+            - 'fineract-command-test/**'
+            - 'build.gradle'
+            - 'settings.gradle'
+            - '**/build.gradle'
+    workflow_dispatch:
+
+permissions:
+    contents: read
+    checks: write
+
+concurrency:
+    group: p2-1-${{ github.head_ref || github.ref_name }}
+    cancel-in-progress: true
+
+jobs:
+    unit-tests:
+        name: "Unit Tests"
+        runs-on: ubuntu-latest
+        timeout-minutes: 25
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Fetch tags
+              run: git fetch --tags --force
+
+            - name: Setup JDK
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'temurin'
+                  java-version: '25'
+                  cache: 'gradle'
+
+            - name: Gradle test (solo unit, sin modulos que requieren infra)
+              run: |
+                  ./gradlew test --no-daemon --continue \
+                      -x :integration-tests:test \
+                      -x :oauth2-tests:test \
+                      -x :twofactor-tests:test \
+                      -x :fineract-e2e-tests-core:test \
+                      -x :fineract-e2e-tests-runner:test
+
+            - name: Publicar reporte JUnit
+              if: always()
+              uses: dorny/test-reporter@v1
+              with:
+                  name: JUnit Results (P2.1)
+                  path: '**/build/test-results/test/TEST-*.xml'
+                  reporter: java-junit
+                  fail-on-error: true
+
+            - name: Upload test artifacts
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: test-reports-p2-1
+                  path: |
+                      **/build/test-results/
+                      **/build/reports/tests/
+                  retention-days: 30
