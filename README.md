@@ -432,3 +432,5 @@ PLATFORM API
 Fineract does not provide a UI, but provides an API. Running Fineract locally, the Swagger documentation can be accessed under `https://localhost:8443/fineract-provider/swagger-ui/index.html`. A live version can be accessed via [this Sandbox](https://sandbox.mifos.community/fineract-provider/swagger-ui/index.html) (not hosted by us).
 
 Apache Fineract supports client code generation using [Swagger Codegen](https://github.com/swagger-api/swagger-codegen) based on the [OpenAPI Specification](https://swagger.io/specification/). For more instructions on how to generate client code, check [this section](https://fineract.apache.org/docs/develop/#_generate_api_client) of the Fineract documentation. [This video](https://www.youtube.com/watch?v=FlVd-0YAo6c) documents the use of the Swagger-UI.
+
+<!-- test P2.3 -->

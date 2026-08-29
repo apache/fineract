@@ -1,45 +1,41 @@
 # ============================================================================
-# P2.3 — Quality Check (Spotless)
-# SoW 4.0 §4.3 | Proyecto 2 — Fineract Pruebas y Calidad (Dev)
-#
-# Disparador: PR contra main (GitHub Flow)
-# Bloqueante: si — formato de codigo debe cumplir Spotless
-# SAST/SCA: cubierto por Aikido PR Checks App (nativo)
+# P2.3 - Quality Check (Spotless)
+# SoW 4.0 - Proyecto 2 - Fineract Pruebas y Calidad (Dev)
 # ============================================================================
-name: "P2.3 · Fineract Quality Check"
+name: "P2.3 - Fineract Quality Check"
 
 on:
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
 
 permissions:
-  contents: read
+    contents: read
 
 concurrency:
-  group: p2-3-${{ github.head_ref || github.ref_name }}
-  cancel-in-progress: true
+    group: p2-3-${{ github.head_ref || github.ref_name }}
+    cancel-in-progress: true
 
 jobs:
-  spotless:
-    name: "Spotless Format Check"
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    spotless:
+        name: "Spotless Format Check"
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
-      - name: Fetch tags
-        run: git fetch --tags --force
+            - name: Fetch tags
+              run: git fetch --tags --force
 
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '25'
-          cache: 'gradle'
+            - name: Setup JDK
+              uses: actions/setup-java@v4
+              with:
+                  distribution: 'temurin'
+                  java-version: '25'
+                  cache: 'gradle'
 
-      - name: Spotless check
-        run: ./gradlew spotlessCheck --no-daemon
+            - name: Spotless check
+              run: ./gradlew spotlessCheck --no-daemon
