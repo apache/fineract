@@ -869,7 +869,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
 
     /**
      * Runs the given action with batch requests issued as a user that lacks the loan-checker bypass permission, so
-     * loan-lock enforcement is not bypassed. Mirrors {@code BaseLoanIntegrationTest.runAsNonByPass}.
+     * loan-lock enforcement is not bypassed.
      */
     protected void runAsNonByPass(Runnable runnable) {
         FineractFeignClient previous = activeBatchClient;
