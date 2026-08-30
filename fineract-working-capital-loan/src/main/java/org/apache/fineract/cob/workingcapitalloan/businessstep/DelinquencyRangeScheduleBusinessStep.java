@@ -19,14 +19,12 @@
 package org.apache.fineract.cob.workingcapitalloan.businessstep;
 
 import java.time.LocalDate;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanDelinquencyScheduleChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanDelinquencyRangeScheduleService;
 import org.springframework.stereotype.Component;
 
@@ -40,9 +38,7 @@ public class DelinquencyRangeScheduleBusinessStep extends WorkingCapitalLoanCOBB
 
     @Override
     public WorkingCapitalLoan execute(WorkingCapitalLoan input) {
-        boolean isDisbursed = input.getDisbursementDetails().stream().map(WorkingCapitalLoanDisbursementDetails::getActualDisbursementDate)
-                .anyMatch(Objects::nonNull);
-        if (!isDisbursed) {
+        if (input.isNotDisbursed()) {
             log.debug("Skipping delinquency range schedule for WC loan {} - not yet disbursed", input.getId());
             return input;
         }

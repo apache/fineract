@@ -85,7 +85,7 @@ public class WorkingCapitalLoanChargeAccrualService {
      * operation. Mirrors how the term/progressive loan reacts to loan-closure events.
      */
     public void accrueOnClosure(final WorkingCapitalLoan loan, final LocalDate closingDate) {
-        if (!loan.getLoanStatus().isClosed() && !loan.getLoanStatus().isOverpaid()) {
+        if (!loan.isClosedObligationsMet() && !loan.isClosedWrittenOff() && !loan.isOverpaid()) {
             return;
         }
         processClosureAccruals(loan, closingDate);

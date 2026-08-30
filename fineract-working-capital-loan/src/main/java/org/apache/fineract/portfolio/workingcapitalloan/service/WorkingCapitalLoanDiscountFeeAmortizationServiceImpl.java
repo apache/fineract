@@ -65,7 +65,7 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
         // NPV residual that a lump-sum payoff never fully consumes, so close must recognize the full discount, not the
         // schedule amount. Written-off / charge-off states follow a separate write-off accounting path and are excluded
         // here.
-        final boolean fullyPaid = loan.getLoanStatus().isOverpaid() || loan.getLoanStatus().isClosedObligationsMet();
+        final boolean fullyPaid = loan.isOverpaid() || loan.isClosedObligationsMet();
         // Derive the already-amortized income from the (non-reversed) amortization transactions rather than the cached
         // balance, so the recalculation stays correct after backdated payments, reversals or schedule config changes.
         final BigDecimal alreadyPosted = queryNetAmortized(loan.getId());

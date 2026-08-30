@@ -43,7 +43,7 @@ public class NearBreachEvaluationBusinessStep extends WorkingCapitalLoanCOBBusin
 
     @Override
     public WorkingCapitalLoan execute(final WorkingCapitalLoan loan) {
-        if (!loan.getLoanStatus().isActive()) {
+        if (!loan.isOpen()) {
             log.debug("Skipping near breach evaluation for WC loan {} - loan status is {}", loan.getId(), loan.getLoanStatus());
             return loan;
         }

@@ -490,7 +490,7 @@ public class WorkingCapitalLoanDelinquencyRangeScheduleServiceImpl implements Wo
             final BigDecimal base = discount != null ? principal.add(discount) : principal;
             rawAmount = MathUtil.percentageOf(base, params.minimumPayment(), MoneyHelper.getMathContext());
         }
-        return Money.of(loan.getLoanProductRelatedDetails().getCurrency(), rawAmount).getAmount();
+        return Money.of(loan.getCurrency(), rawAmount).getAmount();
     }
 
     private WorkingCapitalLoanDelinquencyRangeSchedule buildPeriod(final WorkingCapitalLoan loan, final int periodNumber,

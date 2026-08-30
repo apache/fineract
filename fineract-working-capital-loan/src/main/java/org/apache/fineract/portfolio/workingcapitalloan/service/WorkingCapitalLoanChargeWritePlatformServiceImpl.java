@@ -397,8 +397,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
 
     private void chargeAdjustmentEntranceValidation(final WorkingCapitalLoan loan, final WorkingCapitalLoanCharge wcCharge,
             final BigDecimal amount) {
-        if (loan.getLoanStatus() != LoanStatus.ACTIVE && loan.getLoanStatus() != LoanStatus.CLOSED_OBLIGATIONS_MET
-                && loan.getLoanStatus() != LoanStatus.OVERPAID) {
+        if (!loan.isOpen() && !loan.isClosedObligationsMet() && !loan.isOverpaid()) {
             throw new WorkingCapitalLoanChargeAdjustmentException("wc.loan.charge.adjustment.invalid.status",
                     "Adjustment is not supported for the status of " + loan.getLoanStatus());
         }

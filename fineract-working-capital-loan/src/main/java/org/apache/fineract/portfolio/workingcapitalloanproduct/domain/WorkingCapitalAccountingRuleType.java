@@ -45,4 +45,8 @@ public enum WorkingCapitalAccountingRuleType {
     public boolean isAccrualWithDeferredRevenueAmortization() {
         return this == ACC_DEF_REV_AM;
     }
+
+    public boolean isNone() {
+        return this == NONE;
+    }
 }

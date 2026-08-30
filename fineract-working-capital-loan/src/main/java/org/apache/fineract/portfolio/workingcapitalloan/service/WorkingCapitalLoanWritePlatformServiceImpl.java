@@ -522,7 +522,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         validator.validateDiscountTransaction(loan, command.json(), amount, note);
 
-        if (loan.getLoanStatus() != LoanStatus.ACTIVE) {
+        if (!loan.isOpen()) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
                     "Add discount is allowed only for disbursed (active) loans", "loanStatus");
         }
@@ -843,7 +843,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         this.validator.validateCreditBalanceRefund(command.json(), loan);
 
         final LoanStatus oldStatus = loan.getLoanStatus();
-        if (loan.getLoanStatus() != LoanStatus.OVERPAID) {
+        if (!loan.isOverpaid()) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
                     "Credit balance refund is allowed only for overpaid loans", "loanStatus");
         }

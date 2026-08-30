@@ -223,9 +223,9 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
     private BigDecimal getWorkingCapitalLoanDiscountAmount(WorkingCapitalLoan loan) {
         BigDecimal discount = BigDecimal.ZERO;
         if (loan.getLoanProductRelatedDetails() != null) {
-            if (loan.getLoanStatus().isSubmittedAndPendingApproval() && loan.getLoanProductRelatedDetails().getDiscountProposed() != null) {
+            if (loan.isSubmittedAndPendingApproval() && loan.getLoanProductRelatedDetails().getDiscountProposed() != null) {
                 discount = loan.getLoanProductRelatedDetails().getDiscountProposed();
-            } else if (loan.getLoanStatus().isApproved() && loan.getLoanProductRelatedDetails().getDiscountApproved() != null) {
+            } else if (loan.isApproved() && loan.getLoanProductRelatedDetails().getDiscountApproved() != null) {
                 discount = loan.getLoanProductRelatedDetails().getDiscountApproved();
             } else if (loan.getLoanProductRelatedDetails().getDiscount() != null) {
                 discount = loan.getLoanProductRelatedDetails().getDiscount();
