@@ -16,12 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.test.messaging.event.workingcapitalloan.transaction;
+package org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction;
 
-public class WorkingCapitalLoanChargeAdjustmentPostBusinessEvent extends AbstractWorkingCapitalLoanTransactionEvent {
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
+
+public class WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent extends WorkingCapitalLoanTransactionBusinessEvent {
+
+    private static final String TYPE = "WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent";
+
+    public WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent(final WorkingCapitalLoanTransaction value) {
+        super(value);
+    }
+
+    public WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent(final WorkingCapitalLoanTransaction value, final Long aggregateRootId) {
+        super(value, aggregateRootId);
+    }
 
     @Override
-    public String getEventName() {
-        return "WorkingCapitalLoanChargeAdjustmentPostBusinessEvent";
+    public String getType() {
+        return TYPE;
     }
 }

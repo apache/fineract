@@ -18,10 +18,10 @@
  */
 package org.apache.fineract.test.messaging.event.workingcapitalloan.transaction;
 
-public class WorkingCapitalLoanTransactionReversedBusinessEvent extends AbstractWorkingCapitalLoanTransactionEvent {
+public class WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent extends AbstractWorkingCapitalLoanTransactionEvent {
 
     @Override
     public String getEventName() {
-        return "WorkingCapitalLoanTransactionReversedBusinessEvent";
+        return "WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent";
     }
 }

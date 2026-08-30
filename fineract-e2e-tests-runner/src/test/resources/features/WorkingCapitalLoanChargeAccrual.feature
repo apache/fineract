@@ -29,6 +29,7 @@ Feature: Working Capital Loan Charge Accrual
       | transactionDate  | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026  | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 15 January 2026  | Accrual      | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+    And a Working Capital Loan Accrual transaction business event is raised with "50.0" EUR amount
     And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "15 January 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 50.0  |        |
@@ -115,6 +116,7 @@ Feature: Working Capital Loan Charge Accrual
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 April 2026   | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 April 2026   | Accrual      | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+    And a Working Capital Loan Accrual transaction business event is raised with "50.0" EUR amount
     And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "10 April 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 50.0  |        |
@@ -389,6 +391,7 @@ Feature: Working Capital Loan Charge Accrual
       | 01 February 2027 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 15 February 2027 | Repayment    | 9100.0            | 9000.0           | 100.0             | 0.0                   | false    |
       | 15 February 2027 | Accrual      | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+    And a Working Capital Loan Accrual transaction business event is raised with "100.0" EUR amount
     And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "15 February 2027" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 100.0 |        |
@@ -412,6 +415,7 @@ Feature: Working Capital Loan Charge Accrual
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 March 2027   | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 March 2027   | Accrual      | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+    And a Working Capital Loan Accrual transaction business event is raised with "100.0" EUR amount
     And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "10 March 2027" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 100.0 |        |
@@ -421,6 +425,7 @@ Feature: Working Capital Loan Charge Accrual
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 March 2027   | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
       | 10 March 2027   | Accrual      | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
+    And a Working Capital Loan Accrual Adjustment transaction business event is raised with "100.0" EUR amount
     And Working Capital Loan Transactions tab has a reversed "ACCRUAL" transaction with date "10 March 2027" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 100.0 |        |
@@ -437,6 +442,7 @@ Feature: Working Capital Loan Charge Accrual
       | 10 March 2027   | Accrual      | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
       | 10 March 2027   | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 20 March 2027   | Accrual      | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+    And a Working Capital Loan Accrual transaction business event is raised with "100.0" EUR amount
     And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "20 March 2027" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 100.0 |        |

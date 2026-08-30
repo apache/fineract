@@ -1750,29 +1750,48 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         eventCheckHelper.workingCapitalLoanGoodwillCreditTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
     }
 
-    @Then("a Working Capital Loan Transaction Reversed business event is raised for the {string} transaction")
-    public void aWorkingCapitalLoanTransactionReversedBusinessEventIsRaised(final String transactionType) {
-        eventCheckHelper.workingCapitalLoanTransactionReversedEventCheck(getCreatedLoanId(), transactionType);
+    @Then("a Working Capital Loan Adjust Transaction business event is raised for the reversed {string} transaction")
+    public void aWorkingCapitalLoanAdjustTransactionBusinessEventIsRaisedForReversal(final String transactionType) {
+        eventCheckHelper.workingCapitalLoanAdjustTransactionReversalEventCheck(getCreatedLoanId(), transactionType);
+    }
+
+    @Then("a Working Capital Loan Adjust Transaction business event is raised for the {string} transaction on {string} with principal portion changed from {string} to {string} and fee portion changed from {string} to {string}")
+    public void aWorkingCapitalLoanAdjustTransactionBusinessEventIsRaisedForReprocess(final String transactionType,
+            final String transactionDate, final String previousPrincipalPortion, final String newPrincipalPortion,
+            final String previousFeeChargesPortion, final String newFeeChargesPortion) {
+        eventCheckHelper.workingCapitalLoanAdjustTransactionReprocessEventCheck(getCreatedLoanId(), transactionType, transactionDate,
+                new BigDecimal(previousPrincipalPortion), new BigDecimal(newPrincipalPortion), new BigDecimal(previousFeeChargesPortion),
+                new BigDecimal(newFeeChargesPortion));
+    }
+
+    @Then("a Working Capital Loan Accrual transaction business event is raised with {string} EUR amount")
+    public void aWorkingCapitalLoanAccrualTransactionBusinessEventIsRaised(final String amount) {
+        eventCheckHelper.workingCapitalLoanAccrualTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
+    }
+
+    @Then("a Working Capital Loan Accrual Adjustment transaction business event is raised with {string} EUR amount")
+    public void aWorkingCapitalLoanAccrualAdjustmentTransactionBusinessEventIsRaised(final String amount) {
+        eventCheckHelper.workingCapitalLoanAccrualAdjustmentTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
+    }
+
+    @Then("a Working Capital Loan Write Off transaction business event is raised with {string} EUR amount")
+    public void aWorkingCapitalLoanWriteOffTransactionBusinessEventIsRaised(final String amount) {
+        eventCheckHelper.workingCapitalLoanWriteOffTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
+    }
+
+    @Then("a Working Capital Loan Undo Write Off transaction business event is raised with {string} EUR amount")
+    public void aWorkingCapitalLoanUndoWriteOffTransactionBusinessEventIsRaised(final String amount) {
+        eventCheckHelper.workingCapitalLoanUndoWriteOffTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
+    }
+
+    @Then("a Working Capital Loan Charge Adjustment transaction business event is raised with {string} EUR amount")
+    public void aWorkingCapitalLoanChargeAdjustmentTransactionBusinessEventIsRaised(final String amount) {
+        eventCheckHelper.workingCapitalLoanChargeAdjustmentTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
     }
 
     @Then("a Working Capital Loan Charge Off transaction business event is raised with {string} EUR amount")
     public void aWorkingCapitalLoanChargeOffTransactionBusinessEventIsRaised(final String amount) {
         eventCheckHelper.workingCapitalLoanChargeOffTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
-    }
-
-    @Then("a Working Capital Loan Charge Adjustment Post transaction business event is raised with {string} EUR amount")
-    public void aWorkingCapitalLoanChargeAdjustmentPostTransactionBusinessEventIsRaised(final String amount) {
-        eventCheckHelper.workingCapitalLoanChargeAdjustmentTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
-    }
-
-    @Then("a Working Capital Loan Write-Off transaction business event is raised with {string} EUR amount")
-    public void aWorkingCapitalLoanWriteOffTransactionBusinessEventIsRaised(final String amount) {
-        eventCheckHelper.workingCapitalLoanWrittenOffTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
-    }
-
-    @Then("a Working Capital Loan Undo Write-Off transaction business event is raised")
-    public void aWorkingCapitalLoanUndoWriteOffTransactionBusinessEventIsRaised() {
-        eventCheckHelper.workingCapitalLoanUndoWrittenOffTransactionEventCheck(getCreatedLoanId());
     }
 
     @Then("a Working Capital Loan Discount Fee Amortization transaction business event is raised on {string}")

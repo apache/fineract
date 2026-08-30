@@ -16,13 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.infrastructure.event.business.service;
+package org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction;
 
-import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 
-public interface ExternalBusinessEventConfigurationService {
+public class WorkingCapitalLoanWriteOffTransactionBusinessEvent extends WorkingCapitalLoanTransactionBusinessEvent {
 
-    boolean isExternalEventConfiguredForPosting(BusinessEvent<?> businessEvent);
+    private static final String TYPE = "WorkingCapitalLoanWriteOffTransactionBusinessEvent";
 
-    boolean isExternalEventTypeConfiguredForPosting(String eventType);
+    public WorkingCapitalLoanWriteOffTransactionBusinessEvent(final WorkingCapitalLoanTransaction value) {
+        super(value);
+    }
+
+    public WorkingCapitalLoanWriteOffTransactionBusinessEvent(final WorkingCapitalLoanTransaction value, final Long aggregateRootId) {
+        super(value, aggregateRootId);
+    }
+
+    @Override
+    public String getType() {
+        return TYPE;
+    }
 }

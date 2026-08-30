@@ -166,6 +166,7 @@ public final class ExternalEventConfigurationTestData {
             "WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent", //
             "WorkingCapitalLoanChargeAdjustmentPreBusinessEvent", //
             "WorkingCapitalLoanChargeAdjustmentPostBusinessEvent", //
+            "WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent", //
             "WorkingCapitalLoanCreatedBusinessEvent", //
             "WorkingCapitalLoanApplicationModifiedBusinessEvent", //
             "WorkingCapitalLoanApprovedBusinessEvent", //
@@ -178,6 +179,8 @@ public final class ExternalEventConfigurationTestData {
             "WorkingCapitalLoanDelinquencyRangeChangeBusinessEvent", //
             "WorkingCapitalLoanWrittenOffBusinessEvent", //
             "WorkingCapitalLoanUndoWrittenOffBusinessEvent", //
+            "WorkingCapitalLoanWriteOffTransactionBusinessEvent", //
+            "WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent", //
             "WorkingCapitalLoanPeriodPaymentRateChangedBusinessEvent", //
             "WorkingCapitalLoanDelinquencyScheduleChangedBusinessEvent", //
             "WorkingCapitalLoanDelinquencyDisableBusinessEvent", //
@@ -190,6 +193,7 @@ public final class ExternalEventConfigurationTestData {
             "WorkingCapitalLoanPayoutRefundTransactionBusinessEvent", //
             "WorkingCapitalLoanGoodwillCreditTransactionBusinessEvent", //
             "WorkingCapitalLoanTransactionReversedBusinessEvent", //
+            "WorkingCapitalLoanAdjustTransactionBusinessEvent", //
             "WorkingCapitalLoanChargeOffTransactionBusinessEvent", //
             "WorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEvent", //
             "WorkingCapitalLoanDiscountFeeAmortizationAdjustmentTransactionBusinessEvent", //
@@ -208,7 +212,9 @@ public final class ExternalEventConfigurationTestData {
             "WorkingCapitalLoanDelinquencyResumeBusinessEvent", //
             "WorkingCapitalLoanDelinquencyRescheduleBusinessEvent", //
             "WorkingCapitalLoanDelinquencyResetBusinessEvent", //
-            "WorkingCapitalLoanDelinquencyUndoResetBusinessEvent"//
+            "WorkingCapitalLoanDelinquencyUndoResetBusinessEvent", //
+            "WorkingCapitalLoanAccrualTransactionBusinessEvent", //
+            "WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent"//
     );
 
     private ExternalEventConfigurationTestData() {}

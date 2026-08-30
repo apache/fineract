@@ -37,6 +37,14 @@ public interface BusinessEventNotifierService {
      */
     void notifyPostBusinessEvent(BusinessEvent<?> businessEvent);
 
+    boolean isExternalEventPostingEnabled(BusinessEvent<?> businessEvent);
+
+    /**
+     * Answers the same question as {@link #isExternalEventPostingEnabled(BusinessEvent)} without an event instance, for
+     * callers that need to know whether an event type is worth assembling a payload for.
+     */
+    boolean isExternalEventPostingEnabled(String eventType);
+
     /**
      * Method is to register a class as listener for pre-processing of any Business event
      */
