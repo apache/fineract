@@ -73,12 +73,6 @@ jobs:
     secrets:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
-  build-documentation:
-    needs: build-core
-    uses: ./.github/workflows/build-documentation.yml
-    secrets:
-      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-
   run-quality-checks:
     needs: build-core
     uses: ./.github/workflows/build-quality-checks.yml
