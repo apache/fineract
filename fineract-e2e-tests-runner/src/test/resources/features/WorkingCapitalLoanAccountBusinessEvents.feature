@@ -157,6 +157,7 @@ Feature: Working Capital Loan Account Business Events
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
     And a Working Capital Loan Status Changed business event is raised
 
+  @TestRailId:C102389
   Scenario: Working Capital loan Balance Changed event carries the annual effective interest rate normalised to six decimal places
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data

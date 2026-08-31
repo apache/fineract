@@ -158,6 +158,10 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
                                 .defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest().minPeriodPaymentRate(new BigDecimal(1))
                                 .maxPeriodPaymentRate(new BigDecimal(95)).periodPaymentRate(new BigDecimal(10))
                                 .name(DefaultWorkingCapitalLoanProduct.WCLP_PERIOD_PAYMENT_RATE.getName()))),
+                () -> TestContext.INSTANCE.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_365,
+                        createWorkingCapitalLoanProductIdempotent(
+                                workingCapitalRequestFactory.defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest()
+                                        .npvDayCount(365).name(DefaultWorkingCapitalLoanProduct.WCLP_365.getName()))),
                 () -> TestContext.INSTANCE.set(
                         TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_DUE_FEE_PENALTY_PRINCIPAL,
                         createWorkingCapitalLoanProductIdempotent(workingCapitalRequestFactory
