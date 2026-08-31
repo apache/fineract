@@ -229,7 +229,7 @@ Feature: Working Capital Loan Charge-off
     And Admin sets the business date to "20 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Initiating adding "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 January 2026" due date and 10.0 transaction amount results an error with the following data:
-      | httpCode | message                     |
+      | httpCode | message                          |
       | 403      | error.msg.wc.loan.is.charged.off |
 
   @TestRailId:C93934
@@ -243,7 +243,7 @@ Feature: Working Capital Loan Charge-off
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     Then Initiating an undo of the charge-off on the Working Capital loan results an error with the following data:
-      | httpCode | message                                  |
+      | httpCode | message                              |
       | 400      | error.msg.wc.loan.is.not.charged.off |
 
   @TestRailId:C93935

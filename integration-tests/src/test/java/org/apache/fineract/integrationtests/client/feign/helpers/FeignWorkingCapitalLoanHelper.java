@@ -149,6 +149,10 @@ public class FeignWorkingCapitalLoanHelper {
         return response.getResourceId();
     }
 
+    public void undoTransaction(Long loanId, Long transactionId) {
+        undoTransaction(loanId, transactionId, new ExecuteWorkingCapitalLoanTransactionCommandRequest());
+    }
+
     public Long makeGoodwillCredit(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
         PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionById(loanId, "goodwillCredit", request));
@@ -165,6 +169,33 @@ public class FeignWorkingCapitalLoanHelper {
         PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionById(loanId, "discountFeeAdjustment", request));
         return response.getResourceId();
+    }
+
+    public Long payoutRefund(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "payoutRefund", request));
+        return response.getResourceId();
+    }
+
+    public Long chargeOff(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "chargeOff", request));
+        return response.getResourceId();
+    }
+
+    public Long undoChargeOff(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "undoChargeOff", request));
+        return response.getResourceId();
+    }
+
+    public CallFailedRuntimeException chargeOffExpectingFailure(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId, "chargeOff",
+                request));
+    }
+
+    public GetWorkingCapitalLoanTransactionIdResponse getTransaction(Long loanId, Long transactionId) {
+        return ok(() -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanTransactionById(loanId, transactionId));
     }
 
     public Long creditBalanceRefund(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {

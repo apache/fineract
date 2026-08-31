@@ -497,19 +497,13 @@ public final class ErrorMessageHelper {
                 expected);
     }
 
-    public static String wrongValueInLineInJournalEntries(int line, List<List<List<String>>> actual, List<String> expected) {
-        return wrongValueInLineInJournalEntries(null, line, actual, expected);
+    public static String wrongValueInInJournalEntries(List<List<String>> expected, List<List<String>> actual) {
+        return String.format("%nWrong values in Journal entries." //
+                + "%nActual values are: %n%s %nExpected values are: %n%s", actual, expected);
     }
 
     public static String wrongValueInLineInJournalEntries(String resourceId, int line, List<List<List<String>>> actualList,
             List<String> expected) {
-        String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
-        return String.format("%nWrong value in Journal entries of resource %s line %s." //
-                + "%nActual values for the possible transactions in line (with the same date) are: %n%s %nExpected values in line: %n%s",
-                resourceId, line, actual, expected);
-    }
-
-    public static String wrongValueInLineInJournalEntry(String resourceId, int line, List<List<String>> actualList, List<String> expected) {
         String actual = actualList.stream().map(Object::toString).collect(Collectors.joining(System.lineSeparator()));
         return String.format("%nWrong value in Journal entries of resource %s line %s." //
                 + "%nActual values for the possible transactions in line (with the same date) are: %n%s %nExpected values in line: %n%s",

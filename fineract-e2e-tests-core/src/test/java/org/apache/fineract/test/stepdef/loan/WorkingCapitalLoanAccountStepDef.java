@@ -2073,6 +2073,21 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         executeDiscountFeeAdjustmentById(getCreatedLoanId(), request);
     }
 
+    @Then("Adding Discount fee adjustment with {string} amount on transaction date {string} on Working Capital loan account for last discount results an error with the following data:")
+    public void addingDiscountFeeAdjustmentWCLoanResultsAnError(final String adjustmentAmount, final String transactionDate,
+            final DataTable table) {
+        final PostWorkingCapitalLoanTransactionsResponse lastDiscountResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_DISCOUNT_FEE_RESPONSE);
+        Assertions.assertNotNull(lastDiscountResponse);
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().relatedResourceId(lastDiscountResponse.getResourceId())
+                .transactionAmount(new BigDecimal(adjustmentAmount)).transactionDate(transactionDate);
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "discountFeeAdjustment", request));
+        verifyErrorResponse(exception, table);
+    }
+
     @And("Admin loads discount fee transaction from Working Capital loan for adjustment")
     public void loadDiscountFeeTransactionFromLoanForAdjustment() {
         final GetWorkingCapitalLoanTransactionsResponse body = ok(
@@ -3314,6 +3329,12 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         validateRepaymentResponse(response, totalOutstanding.doubleValue(), transactionDate, loanId);
     }
 
+    @Then("Admin closes the Working Capital loan with all obligations met with a full repayment on {string}")
+    public void closeObligationsMetWorkingCapitalLoanWithFullRepayment(final String transactionDate) {
+        closeWorkingCapitalLoanWithFullRepayment(transactionDate);
+        loanWCStatus("CLOSED_OBLIGATIONS_MET");
+    }
+
     @Then("Customer fails to make repayment on {string} with {double} EUR transaction amount outcomes with error message")
     public void repaymentWCLoanFailure(final String transactionDate, final double transactionAmount) {
         final Long loanId = getCreatedLoanId();
@@ -3324,12 +3345,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .executeWorkingCapitalLoanTransactionById(loanId, "repayment", repaymentRequest));
         assertThat(exception.getStatus()).as(errorMessage).isEqualTo(400);
         assertThat(exception.getDeveloperMessage()).contains(errorMessage);
-    }
-
-    @Then("Admin closes the Working Capital loan with all obligations met with a full repayment on {string}")
-    public void closeObligationsMetWorkingCapitalLoanWithFullRepayment(final String transactionDate) {
-        closeWorkingCapitalLoanWithFullRepayment(transactionDate);
-        loanWCStatus("CLOSED_OBLIGATIONS_MET");
     }
 
     @Then("Customer makes credit balance refund on {string} with {double} transaction amount on Working Capital loan")
@@ -4027,9 +4042,6 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 () -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(
                         getCreatedLoanId(), transactionIdResponse.getId(), "undo", request));
         Assertions.assertNotNull(undo);
-
-        // testContext().set(TestContextKey.LOAN_TRANSACTION_UNDO_RESPONSE, transactionUndoResponse);
-
     }
 
     private void verifyTransactionsJournalEntries(final String transactionType, final String transactionDate, final boolean reversed,
@@ -4042,7 +4054,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
             assertThat(transactionsMatch.size()).as("The number of transactions does not match the expected count! Expected: "
                     + expectedCount + ", Actual: " + transactionsMatch.size()).isEqualTo(expectedCount);
         }
-        verifyJournalEntries(transactionsMatch, loanId, table);
+        verifyJournalEntries(transactionsMatch, table);
     }
 
     private TransactionType resolveTransactionType(String transactionType) {
@@ -4061,10 +4073,10 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .collect(Collectors.toList());
     }
 
-    private void verifyJournalEntries(List<GetWorkingCapitalLoanTransactionIdResponse> transactions, Long loanId, DataTable table) {
+    private void verifyJournalEntries(List<GetWorkingCapitalLoanTransactionIdResponse> transactions, DataTable table) {
         List<List<JournalEntryTransactionItem>> journalLinesActualList = getWorkingCapitalJournalLinesActualList(transactions);
         log.debug("journalLinesActualList: {}", journalLinesActualList);
-        journalEntriesStepDef.checkJournalEntryData(journalLinesActualList, loanId, table);
+        journalEntriesStepDef.checkJournalEntriesData(journalLinesActualList, table);
     }
 
     private List<List<JournalEntryTransactionItem>> getWorkingCapitalJournalLinesActualList(
@@ -4113,7 +4125,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
     @When("Customer tries to undo {string}th {string} transaction made on {string} on Working Capital loan and gets error:")
     public void undoWorkingCapitalLoanTransactionExpectError(String nthItemStr, String transactionType, String transactionDate,
-            DataTable table) throws IOException {
+            DataTable table) {
         final Long loanId = getCreatedLoanId();
         final GetWorkingCapitalLoanTransactionsResponse response = retrieveLoanTransactions(loanId);
         final List<GetWorkingCapitalLoanTransactionIdResponse> actualTransactions = response.getContent();
