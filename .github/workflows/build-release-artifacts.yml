@@ -1,0 +1,112 @@
+name: Fineract Release Artifacts
+
+on:
+  workflow_call:
+    inputs:
+      upload_artifacts:
+        description: Upload reports and logs even when the job succeeds
+        required: false
+        default: false
+        type: boolean
+    secrets:
+      DEVELOCITY_ACCESS_KEY:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  release-artifacts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+
+    env:
+      TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+    steps:
+      - name: Set up JDK 25
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          java-version: '25'
+          distribution: 'zulu'
+
+      - name: Download workspace
+        id: download-workspace
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        continue-on-error: true
+        with:
+          name: fineract-workspace-${{ github.run_id }}
+          path: .
+
+      - name: Extract workspace
+        if: steps.download-workspace.outcome == 'success'
+        run: tar -xf fineract-workspace.tar
+
+      - name: Checkout
+        if: steps.download-workspace.outcome != 'success'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Build workspace fallback
+        if: steps.download-workspace.outcome != 'success'
+        uses: ./.github/actions/setup-and-build-fineract
+        with:
+          cache-read-only: false
+
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+        with:
+          validate-wrappers: true
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: 22
+
+      - name: Configure vega-cli
+        run: |
+          VEGA_CLI_HOME="$RUNNER_TEMP/vega-cli"
+          mkdir -p "$VEGA_CLI_HOME"
+          cd "$VEGA_CLI_HOME"
+          npm init -y
+          npm pkg set private=true
+          npm pkg set devDependencies.vega-cli=6.2.0
+          npm install --package-lock-only --no-audit --fund=false
+          npm ci --no-audit --fund=false
+          echo "$VEGA_CLI_HOME/node_modules/.bin" >> "$GITHUB_PATH"
+
+      - name: Install additional software
+        run: |
+          sudo apt-get update
+          sudo apt-get install ghostscript graphviz -y
+
+      - name: Generate license report and build distribution tarballs
+        run: |
+          ./gradlew --no-daemon --console=plain generateLicenseReport srcDistTar binaryDistTar \
+            -x test -x cucumber -x rat \
+            -x checkstyleMain -x checkstyleTest -x checkstyleJmh \
+            -x spotbugsMain -x spotbugsTest \
+            -x spotlessCheck -x spotlessApply
+
+      - name: Archive distribution tarballs
+        if: ${{ failure() || inputs.upload_artifacts }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-artifacts-dist-tarballs
+          path: fineract-war/build/distributions/*.tar.gz
+          if-no-files-found: ignore
+          retention-days: 5
+          compression-level: 9
+
+      - name: Archive license report
+        if: ${{ failure() || inputs.upload_artifacts }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-artifacts-license-report
+          path: '**/build/reports/dependency-license/'
+          if-no-files-found: ignore
+          retention-days: 5
+          compression-level: 9

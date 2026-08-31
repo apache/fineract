@@ -87,6 +87,14 @@ jobs:
     secrets:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
+  run-release-artifacts:
+    needs: build-core
+    uses: ./.github/workflows/build-release-artifacts.yml
+    with:
+      upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
+    secrets:
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
   run-cucumber-tests:
     needs: build-core
     uses: ./.github/workflows/build-cucumber.yml
