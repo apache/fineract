@@ -87,9 +87,4 @@ jobs:
         run: ./gradlew --no-daemon --console=plain generateLicenseReport -x buildJavaSdk
 
       - name: Build distribution tarballs
-        run: |
-          ./gradlew --no-daemon --console=plain srcDistTar binaryDistTar \
-            -x buildJavaSdk -x test -x cucumber -x rat \
-            -x checkstyleMain -x checkstyleTest -x checkstyleJmh \
-            -x spotbugsMain -x spotbugsTest \
-            -x spotlessCheck -x spotlessApply
+        run: ./gradlew --no-daemon --console=plain srcDistTar binaryDistTar
