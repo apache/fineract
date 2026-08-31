@@ -81,8 +81,8 @@ jobs:
                       -x :twofactor-tests:test \
                       -x :fineract-e2e-tests-core:test \
                       -x :fineract-e2e-tests-runner:test \
-                      -x :fineract-client-feign:buildJavaSdk \
-                      -x :fineract-client-feign:test
+                      -x :fineract-client:buildJavaSdk \
+                      -x :fineract-client:test
 
             - name: Publicar reporte JUnit
               if: always()
