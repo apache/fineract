@@ -1,0 +1,270 @@
+= Feign Integration Tests
+
+== Overview
+
+Apache Fineract is migrating its integration tests from REST Assured to the generated Feign client (`fineract-client-feign`), so that tests drive the server through the same strongly typed, OpenAPI-derived models that API consumers use. A test written against the generated client stops compiling when the API contract changes, rather than failing at runtime — or, worse, continuing to pass against a payload the server no longer produces.
+
+The shared machinery is the `client/feign` package tree — the `FeignLoanTestBase` and `FeignSavingsTestBase` base classes and the helpers under `client/feign/helpers` — together with the `FeignIntegrationTest` root base class one directory above it and the `FineractFeignClientHelper` client factory in `common`. Most migrated tests sit alongside the unmigrated ones in the `org.apache.fineract.integrationtests` package and reach the client by extending one of those base classes.
+
+A Checkstyle rule keeps REST Assured out of that machinery rather than out of individual tests, because a leak there is inherited by every test extending a Feign base class, while a leak in one test file affects only that test.
+
+This chapter covers the guardrail and the conventions that apply to tests written against the Feign client. For prerequisites, database setup, and how to run a suite, see the <<_integration_testing,Integration Testing>> chapter.
+
+== The Guardrail
+
+=== How It Works
+
+An `IllegalImport` check in `config/checkstyle/checkstyle.xml` rejects any `io.restassured` import, and a `SuppressionSingleFilter` narrows it to the shared machinery:
+
+[source,xml]
+----
+<module name="SuppressionSingleFilter">
+    <property name="id" value="FeignNoRestAssured"/>
+    <property name="files"
+              value="^(?!.*[\\/]integrationtests[\\/](?:client[\\/]feign[\\/]|client[\\/]FeignIntegrationTest\.java|common[\\/]FineractFeignClientHelper\.java)).*$"/>
+</module>
+----
+
+[source,xml]
+----
+<module name="IllegalImport">
+    <property name="id" value="FeignNoRestAssured" />
+    <property name="regexp" value="true" />
+    <property name="illegalPkgs" value="^io\.restassured" />
+    <message key="import.illegal"
+             value="Feign integration tests must call the server through the generated Feign client, not REST Assured: ''{0}''" />
+</module>
+----
+
+The filter sits at `Checker` level and the check inside `TreeWalker`. Both carry the same `id`, so the filter applies to this check alone and leaves every other check untouched. The `files` pattern suppresses the check on every path that is not one of the three guarded locations, which is what limits its reach.
+
+The check runs as part of `checkstyleTest`, which the `build-quality-checks.yml` workflow executes on every pull request. A violation fails the build.
+
+Migrated tests outside those locations are not covered. They live in the root `org.apache.fineract.integrationtests` package next to the tests that still use REST Assured, and Checkstyle scopes by file path, not by supertype, so a rule covering them would fail on their unmigrated neighbours. The scope widens as the migration progresses.
+
+=== What the Check Does and Does Not Catch
+
+The `Utils.performServerGet`, `performServerPost`, `performServerPut` and `performServerDelete` helpers in `org.apache.fineract.integrationtests.common` are the other common route back to REST Assured. Every one of those overloads takes an `io.restassured.specification.RequestSpecification` as its first parameter, so reaching them normally requires the forbidden import.
+
+The check reads import statements only, so it is a deterrent rather than a proof. Two routes get past it: a fully qualified reference such as `io.restassured.RestAssured.baseURI`, and a `var` that infers a REST Assured type from another method's return value without ever naming it. Neither appears in the tree today, and neither is something a contributor writes by accident, but a reviewer should not treat a green build as evidence that no REST Assured call exists.
+
+Utility methods on `Utils` that do not touch the transport — `uniqueRandomStringGenerator`, `getLocalDateOfTenant`, `getDoubleValue`, `dateFormatter` — are unaffected and are used widely by migrated tests.
+
+=== Running Locally
+
+[source,bash]
+----
+./gradlew :integration-tests:checkstyleTest
+----
+
+The report is written to `integration-tests/build/reports/checkstyle/`.
+
+The task compiles the test sources first, which for this module means generating both clients. Cargo is not involved: `integration-tests/build.gradle` attaches it to the `test` task alone, so a static check never starts a container.
+
+=== When the Check Fires
+
+A violation means a call is being made outside the generated client. Resolve it in this order:
+
+. **The endpoint is in the generated client.** Use it. This is the common case — the generated client covers the public API surface, including the `/v1/internal` endpoints used by tests.
+. **The endpoint is in the client, but the generated model is missing a field you need.** Fix the schema at source. See <<feign-fix-model-at-source>>.
+. **The generated client cannot express the call.** Where an endpoint declares no response schema the generator types the result as a bare `String` — `retrieveOneSavingsAccountTransaction` is one example — and some multi-step commands are not modelled at all. Give the endpoint an `@ApiResponse` schema where you can (IT-06); otherwise call it over plain HTTP and add a Javadoc comment stating why the typed client cannot express it.
+
+Suppressing the rule, dropping the assertion, or substituting a different field are not resolutions. See rules IT-05 and IT-09.
+
+== Writing a Feign Integration Test
+
+=== Test Class Layout
+
+Loan tests extend `FeignLoanTestBase`, which supplies the client, the shared helpers, and the accounting and schedule verification methods. Savings tests extend `FeignSavingsTestBase`.
+
+[source,java]
+----
+package org.apache.fineract.integrationtests.client.feign.tests;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.GetLoansLoanIdStatus;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.common.Utils;
+import org.junit.jupiter.api.Test;
+
+public class FeignLoanCreationTest extends FeignLoanTestBase {
+
+    @Test
+    void testLoanRepayment_FullRepayment() {
+        Long clientId = createClient();
+        PostLoanProductsRequest productRequest = onePeriod30DaysNoInterest();
+        Long productId = createLoanProduct(productRequest);
+        String todayDate = Utils.dateFormatter.format(Utils.getLocalDateOfTenant());
+        Long loanId = createApproveAndDisburseLoan(clientId, productId, todayDate, 1000.0, 1);
+
+        Long repaymentId = addRepayment(loanId, repayment(1000.0, todayDate));
+        assertNotNull(repaymentId);
+
+        GetLoansLoanIdResponse loan = getLoanDetails(loanId);
+        verifyLoanStatus(loan, GetLoansLoanIdStatus::getClosedObligationsMet);
+        assertEquals(0.0, Utils.getDoubleValue(loan.getSummary().getTotalOutstanding()));
+    }
+}
+----
+
+`FeignLoanTestBase` assigns its helper fields in a `@BeforeAll` named `setupHelpers`. A subclass that declares its own `@BeforeAll` must give it a different name — a static method with the same signature hides the inherited one, and the helpers are then never assigned.
+
+=== Obtaining the Client Directly
+
+Inside a test, `fineractClient()` returns the client the base class is using. `FineractFeignClientHelper.getFineractFeignClient()` returns the same shared instance, authenticated with the default backend credentials, and is what helpers outside the base class use. Call `createNewFineractFeignClient(username, password)` when a test needs a different user.
+
+=== Calling the API
+
+Wrap calls in the `FeignCalls` helpers from `org.apache.fineract.client.feign.util` rather than invoking the API interface directly:
+
+[cols="1,3", options="header"]
+|===
+| Method | Use
+| `ok(...)` | A call expected to succeed, returning a typed body.
+| `executeVoid(...)` | A call expected to succeed with no response body.
+| `fail(...)` | A call expected to fail; returns the `CallFailedRuntimeException` for assertion.
+| `failVoid(...)` | As `fail(...)`, for a call with no response body.
+| `execute(...)` | A call whose raw `FeignException` the test handles itself.
+|===
+
+A direct invocation throws a raw `FeignException`, which carries the HTTP status but not the wrapped error detail the assertion helpers expect. `ok(...)` and `fail(...)` translate it into `CallFailedRuntimeException`.
+
+=== Asserting Failures
+
+`FeignLoanTestBase.assertErrorGlobalisationCode(exception, expectedCode)` asserts the specific error code. The top-level `userMessageGlobalisationCode` is often a generic wrapper — `validation.msg.validation.errors.exist` for a validation failure, `validation.msg.domain.rule.violation` for a domain rule — with the meaningful code in the first element of the `errors` array. The helper returns the top-level code unless it is one of those two wrappers, in which case it descends into `errors[0]`. Expect the specific code in both cases.
+
+[source,java]
+----
+CallFailedRuntimeException exception = fail(
+        () -> fineractClient().loans().handleCommandsLoan(loanId, request, Map.of("command", "approve")));
+assertEquals(403, exception.getStatus());
+assertErrorGlobalisationCode(exception, "error.msg.loan.approval.cannot.be.a.future.date");
+----
+
+== Conventions
+
+The following rules are drawn from review feedback on the migration pull requests. They are referenced by identifier in code review.
+
+=== Transport
+
+[cols="1,3", options="header"]
+|===
+| Rule | Description
+| IT-01 | Call the server through the generated Feign client. REST Assured is not permitted in the `...client.feign` package tree; the Checkstyle rule above enforces this.
+| IT-02 | Use the `FeignCalls` helpers rather than invoking the generated API interface directly, so failures arrive as `CallFailedRuntimeException`.
+| IT-03 | Use the Feign client, not the legacy Retrofit client's `Calls` or `.legacy` accessors.
+| IT-04 | Plain HTTP is acceptable only where the generated client cannot express the call, and only with a Javadoc comment recording why.
+|===
+
+CAUTION: The Retrofit and Feign SDKs both publish models under `org.apache.fineract.client.models`. In `integration-tests` both are on the test classpath, and the one declared first in `dependencies.gradle` wins. When a model change appears to have no effect at runtime, check which SDK supplied the class.
+
+[#feign-schema-and-sdk]
+=== Schema and SDK
+
+[cols="1,3", options="header"]
+|===
+| Rule | Description
+| IT-05 | When a generated model lacks a field the test needs, add it to the corresponding `*ApiResourceSwagger` DTO and regenerate. Do not work around the gap in the test.
+| IT-06 | Where an endpoint declares no response schema, give it one via `@ApiResponse` rather than introducing a hand-written client interface.
+| IT-07 | Schema changes must respect the API compatibility rules. See <<_api_backward_compatibility,API Backward Compatibility>>, including its guidance on intentional breaking changes.
+| IT-08 | To send an explicit JSON `null`, mark the property `nullable` in the schema; the generator emits `JsonNullable<T>`. Do not hand-roll a request model.
+|===
+
+After changing a Swagger DTO, regenerate the client and compile every module that consumes it, not only the one under test:
+
+[source,bash]
+----
+# Regenerate both clients
+./gradlew :fineract-client:cleanupGeneratedJavaFiles \
+          :fineract-client-feign:cleanupGeneratedJavaFiles
+
+# Then compile the consumers
+./gradlew :fineract-provider:compileTestJava \
+          :integration-tests:compileTestJava \
+          -PcargoDisabled
+----
+
+`cleanupGeneratedJavaFiles` depends on `buildJavaSdk`, so it regenerates and then copies the result into `build/generated/java`. Running `buildJavaSdk` on its own stops before that copy and leaves the sources the compiler actually uses unchanged. Neither task compiles anything downstream, which is why the second command is needed — a schema change that breaks a consumer is otherwise found only in CI.
+
+Regenerate both clients together. `integration-tests` compiles against both, and changing one alone leaves the two disagreeing about the same model class.
+
+=== Assertions
+
+[cols="1,3", options="header"]
+|===
+| Rule | Description
+| IT-09 | Never weaken or delete a verification because the generated model does not expose the field. Fix the model (IT-05) or keep the check by another route.
+| IT-10 | Assert the specific status code and error code, not merely that the call threw.
+| IT-11 | Verify an unordered collection by removing each expected element from a mutable copy of the actual collection, then asserting the copy is empty. A size check combined with `anyMatch` passes on duplicates.
+| IT-12 | A `null` expected value means "assert this is null". Do not redefine it to mean "skip this check".
+| IT-13 | A migration must not change an expected value. If a migrated test needs a different number to pass, establish which value the server actually produces before changing it.
+|===
+
+.Verifying an unordered collection
+[source,java]
+----
+List<JournalEntry> remaining = new ArrayList<>(actualEntries);
+for (JournalEntry expected : expectedEntries) {
+    Optional<JournalEntry> match = remaining.stream().filter(a -> matches(a, expected)).findFirst();
+    assertTrue(match.isPresent(), "Missing entry: " + expected);
+    remaining.remove(match.get());
+}
+assertTrue(remaining.isEmpty(), "Unexpected entries: " + remaining);
+----
+
+=== Test Structure
+
+[cols="1,3", options="header"]
+|===
+| Rule | Description
+| IT-14 | A helper used by one test class belongs in that class. Only behaviour shared across classes belongs on the base class or in a helper under `client/feign/helpers`.
+| IT-15 | Return the response model from a helper, not just the identifier, so callers can assert on the rest of the response without a second request.
+| IT-16 | Use the generated enums and the shared constants in `client/feign/modules/FeignTestConstants`. Do not repeat literal codes and identifiers.
+| IT-17 | Name variables and helper methods for what they hold or do in domain terms, not for their type.
+|===
+
+[#feign-fix-model-at-source]
+== Fixing a Generated Model at Source
+
+When a field the server accepts or returns is absent from the generated model, the fix belongs in the Swagger DTO on the server, not in the test.
+
+. Locate the `*ApiResourceSwagger` class for the resource — for example `LoanProductsApiResourceSwagger` for `/loanproducts`.
+. Add the field to the request or response DTO, matching the name and type the server already reads or writes.
+. Regenerate both SDKs and compile every consuming module, using the command under <<feign-schema-and-sdk>>.
+. Confirm the API compatibility check still passes, or document the breaking change as described in <<_api_backward_compatibility,API Backward Compatibility>>.
+. Replace the workaround in the test with the generated accessor.
+
+Adding a field to a response schema and widening a request type are both additive from the perspective of an existing consumer, but the compatibility checker reports some widening changes as violations. <<_api_backward_compatibility,API Backward Compatibility>> describes how to handle a violation that is deliberate.
+
+== Verifying a Change
+
+[cols="1,3", options="header"]
+|===
+| Rule | Description
+| IT-18 | Compilation and `spotlessCheck` are not verification. Run the tests you touched against a running instance.
+| IT-19 | Pass `-PcargoDisabled` when running against an instance you started yourself, otherwise the Cargo plugin starts a second Tomcat.
+| IT-20 | Before attributing a failure to your change, run the test at the base commit on the same instance. Some tests fail independently of the change under review.
+|===
+
+Against a locally running instance:
+
+[source,bash]
+----
+./gradlew :integration-tests:test -PcargoDisabled \
+  --tests FeignLoanCreationTest
+----
+
+Without `-PcargoDisabled` the Cargo plugin downloads Tomcat, deploys `fineract-provider.war`, and runs the suite against that container instead.
+
+== Tool Reference
+
+* **Checkstyle**: https://checkstyle.org/[checkstyle] 13.4.2, configured in `config/checkstyle/checkstyle.xml`
+* **IllegalImport**: https://checkstyle.org/checks/imports/illegalimport.html[check reference]
+* **SuppressionSingleFilter**: https://checkstyle.org/filters/suppressionsinglefilter.html[filter reference]
+* **Workflow**: `.github/workflows/build-quality-checks.yml`
+* **Generated client**: `fineract-client-feign`
+* **Migrated tests**: `integration-tests/src/test/java/org/apache/fineract/integrationtests/client/feign`
