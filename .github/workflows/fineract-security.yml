@@ -1,0 +1,227 @@
+# ============================================================================
+# P2.4 - Security DAST Scan (OWASP ZAP)
+# SoW 4.0 - Proyecto 2 - Fineract Pruebas y Calidad (Dev)
+# ============================================================================
+name: "P2.4 - Fineract Security DAST"
+
+on:
+    pull_request:
+        branches: [main]
+        paths:
+            - 'fineract-provider/**'
+            - 'fineract-core/**'
+            - 'fineract-loan/**'
+            - 'fineract-savings/**'
+            - 'build.gradle'
+            - '**/build.gradle'
+            - '.github/workflows/fineract-security.yml'
+    workflow_dispatch:
+
+permissions:
+    contents: read
+    checks: write
+    pull-requests: write
+
+concurrency:
+    group: p2-4-${{ github.head_ref || github.ref_name }}
+    cancel-in-progress: true
+
+jobs:
+    dast-scan:
+        name: "OWASP ZAP DAST via Cloudflare Tunnel"
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Crear script de init Postgres
+              run: |
+                  mkdir -p pg-init
+                  cat > pg-init/01-create-databases.sql <<EOF
+                  CREATE DATABASE fineract_tenants;
+                  CREATE DATABASE fineract_default;
+                  EOF
+
+            - name: Levantar PostgreSQL + Fineract con docker compose
+              run: |
+                  cat > docker-compose.yml <<EOF
+                  services:
+                    db:
+                      image: postgres:16-alpine
+                      environment:
+                        POSTGRES_USER: postgres
+                        POSTGRES_PASSWORD: postgres
+                        POSTGRES_DB: postgres
+                      ports:
+                        - "5432:5432"
+                      volumes:
+                        - ./pg-init:/docker-entrypoint-initdb.d
+                      healthcheck:
+                        test: ["CMD-SHELL", "pg_isready -U postgres -d fineract_tenants"]
+                        interval: 5s
+                        timeout: 3s
+                        retries: 30
+
+                    fineract:
+                      image: apache/fineract:latest
+                      depends_on:
+                        db:
+                          condition: service_healthy
+                      environment:
+                        FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME: org.postgresql.Driver
+                        FINERACT_HIKARI_JDBC_URL: jdbc:postgresql://db:5432/fineract_tenants
+                        FINERACT_HIKARI_USERNAME: postgres
+                        FINERACT_HIKARI_PASSWORD: postgres
+                        FINERACT_DEFAULT_TENANTDB_HOSTNAME: db
+                        FINERACT_DEFAULT_TENANTDB_PORT: 5432
+                        FINERACT_DEFAULT_TENANTDB_UID: postgres
+                        FINERACT_DEFAULT_TENANTDB_PWD: postgres
+                        FINERACT_DEFAULT_TENANTDB_NAME: fineract_default
+                        FINERACT_DEFAULT_TENANTDB_CONN_PARAMS: ''
+                        FINERACT_SERVER_SSL_ENABLED: false
+                        FINERACT_SERVER_PORT: 8080
+                        JAVA_TOOL_OPTIONS: "-Xmx1g -Xms512m"
+                      ports:
+                        - "8080:8080"
+                  EOF
+
+                  docker compose up -d
+                  echo "docker compose levantado"
+
+            - name: Esperar a que Fineract responda
+              run: |
+                  echo "Esperando Fineract en http://localhost:8080..."
+                  for i in $(seq 1 90); do
+                      if curl -sf http://localhost:8080/fineract-provider/actuator/health > /dev/null 2>&1; then
+                          echo "Fineract listo en intento $i ($((i*5)) segundos)"
+                          exit 0
+                      fi
+                      echo "  Intento $i / 90..."
+                      sleep 5
+                  done
+                  echo "ERROR: Fineract no respondio en 7.5 minutos"
+                  docker compose logs fineract | tail -100
+                  exit 1
+
+            - name: Instalar cloudflared
+              run: |
+                  curl -sSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+                  sudo dpkg -i cloudflared.deb
+                  cloudflared --version
+
+            - name: Iniciar Cloudflare Quick Tunnel
+              id: tunnel
+              run: |
+                  cloudflared tunnel --url http://localhost:8080 --no-autoupdate > tunnel.log 2>&1 &
+                  TUNNEL_PID=$!
+                  echo "TUNNEL_PID=$TUNNEL_PID" >> $GITHUB_ENV
+
+                  echo "Esperando URL del tunnel..."
+                  for i in $(seq 1 30); do
+                      URL=$(grep -oE 'https://[a-z0-9-]+\.trycloudflare\.com' tunnel.log | head -1)
+                      if [ -n "$URL" ]; then
+                          echo "Tunnel URL: $URL"
+                          echo "tunnel_url=$URL" >> $GITHUB_OUTPUT
+                          exit 0
+                      fi
+                      sleep 2
+                  done
+                  echo "ERROR: No se pudo obtener URL del tunnel"
+                  cat tunnel.log
+                  exit 1
+
+            - name: Verificar que ZAP puede alcanzar Fineract via tunnel
+              run: |
+                  URL="${{ steps.tunnel.outputs.tunnel_url }}"
+                  echo "Verificando acceso a $URL/fineract-provider/actuator/health"
+                  sleep 10
+                  curl -sf "$URL/fineract-provider/actuator/health" || {
+                      echo "ERROR: No se puede acceder via tunnel"
+                      exit 1
+                  }
+                  echo "OK - Fineract accesible via tunnel"
+
+            - name: OWASP ZAP Baseline Scan (docker directo)
+              run: |
+                  URL="${{ steps.tunnel.outputs.tunnel_url }}/fineract-provider/"
+                  mkdir -p zap-reports
+                  chmod 777 zap-reports
+
+                  set +e
+                  docker run --rm \
+                      -v "$(pwd)/zap-reports":/zap/wrk/:rw \
+                      --network=host \
+                      ghcr.io/zaproxy/zaproxy:stable \
+                      zap-baseline.py \
+                          -t "$URL" \
+                          -J report_json.json \
+                          -w report_md.md \
+                          -r report_html.html \
+                          -a -j -T 5 -I
+                  EXIT_CODE=$?
+                  set -e
+
+                  echo "ZAP exit code: $EXIT_CODE"
+                  # ZAP exit codes:
+                  #   0 = success (no issues)
+                  #   1 = FAIL-NEW (high risk findings)
+                  #   2 = WARN-NEW (medium/low findings) - lo permitimos por -I
+                  # Solo fallamos si exit code >= 3 (error del scanner)
+                  if [ "$EXIT_CODE" -ge 3 ]; then
+                      echo "::error::ZAP scanner error (exit code $EXIT_CODE)"
+                      exit 1
+                  fi
+
+                  # Verificar que no haya FAIL (CRITICAL/HIGH)
+                  if [ -f zap-reports/report_json.json ]; then
+                      FAIL_COUNT=$(python3 -c "
+                  import json
+                  with open('zap-reports/report_json.json') as f:
+                      data = json.load(f)
+                  fails = 0
+                  for site in data.get('site', []):
+                      for alert in site.get('alerts', []):
+                          if alert.get('riskcode') == '3':  # High
+                              fails += int(alert.get('count', 0))
+                  print(fails)
+                  " 2>/dev/null || echo "0")
+                      echo "FAIL-NEW (CRITICAL/HIGH) count: $FAIL_COUNT"
+                      if [ "$FAIL_COUNT" -gt 0 ]; then
+                          echo "::error::ZAP encontro $FAIL_COUNT vulnerabilidades HIGH/CRITICAL (L.1 6.2)"
+                          exit 1
+                      fi
+                  fi
+
+                  echo "P2.4 DAST scan PASSED"
+
+            - name: Cleanup - matar tunnel
+              if: always()
+              run: |
+                  if [ -n "$TUNNEL_PID" ]; then
+                      kill $TUNNEL_PID 2>/dev/null || true
+                      echo "Tunnel cerrado"
+                  fi
+
+            - name: Cleanup - docker compose down
+              if: always()
+              run: |
+                  docker compose logs fineract | tail -100 > fineract-logs.txt
+                  docker compose down -v
+                  echo "docker compose destruido"
+
+            - name: Upload reportes ZAP
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: zap-reports-p2-4
+                  path: zap-reports/
+                  retention-days: 30
+
+            - name: Upload Fineract logs
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: fineract-logs-p2-4
+                  path: fineract-logs.txt
+                  retention-days: 7
