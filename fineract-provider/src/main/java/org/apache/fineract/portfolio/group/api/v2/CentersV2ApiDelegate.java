@@ -16,27 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.commands.service;
+package org.apache.fineract.portfolio.group.api.v2;
 
-import java.util.List;
-import org.apache.fineract.commands.data.AuditData;
-import org.apache.fineract.commands.data.AuditSearchData;
-import org.apache.fineract.commands.data.request.AuditRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.portfolio.group.data.CenterData;
+import org.apache.fineract.portfolio.group.service.CenterReadPlatformService;
+import org.springframework.stereotype.Component;
 
-public interface AuditReadPlatformService {
+@Component
+@RequiredArgsConstructor
+public class CentersV2ApiDelegate implements CentersV2Api {
 
-    List<AuditData> retrieveAuditEntries(SQLBuilder extraCriteria, boolean includeJson);
+    private final CenterReadPlatformService centerReadPlatformService;
 
-    Page<AuditData> retrievePaginatedAuditEntries(SQLBuilder extraCriteria, boolean includeJson, PaginationParameters parameters);
-
-    List<AuditData> retrieveAllEntriesToBeChecked(SQLBuilder extraCriteria, boolean includeJson);
-
-    AuditData retrieveAuditEntry(Long auditId);
-
-    AuditSearchData retrieveSearchTemplate(String useType);
-
-    SQLBuilder getExtraCriteria(AuditRequest auditRequest);
+    @Override
+    public Page<CenterData> retrieveAllCenters(SearchParameters searchParameters, PaginationParameters parameters) {
+        return centerReadPlatformService.retrievePagedAll(searchParameters, parameters);
+    }
 }

@@ -16,27 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.commands.service;
+package org.apache.fineract.commands.api.v2;
 
-import java.util.List;
+import jakarta.ws.rs.core.UriInfo;
 import org.apache.fineract.commands.data.AuditData;
-import org.apache.fineract.commands.data.AuditSearchData;
 import org.apache.fineract.commands.data.request.AuditRequest;
-import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
 
-public interface AuditReadPlatformService {
+public interface AuditsV2Api {
 
-    List<AuditData> retrieveAuditEntries(SQLBuilder extraCriteria, boolean includeJson);
-
-    Page<AuditData> retrievePaginatedAuditEntries(SQLBuilder extraCriteria, boolean includeJson, PaginationParameters parameters);
-
-    List<AuditData> retrieveAllEntriesToBeChecked(SQLBuilder extraCriteria, boolean includeJson);
-
-    AuditData retrieveAuditEntry(Long auditId);
-
-    AuditSearchData retrieveSearchTemplate(String useType);
-
-    SQLBuilder getExtraCriteria(AuditRequest auditRequest);
+    Page<AuditData> retrieveAllAudits(UriInfo uriInfo, AuditRequest auditRequest, Integer offset, Integer limit, String orderBy,
+            String sortOrder, boolean includeJson);
 }

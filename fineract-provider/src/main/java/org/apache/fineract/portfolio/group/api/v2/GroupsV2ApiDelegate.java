@@ -16,27 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.commands.service;
+package org.apache.fineract.portfolio.group.api.v2;
 
-import java.util.List;
-import org.apache.fineract.commands.data.AuditData;
-import org.apache.fineract.commands.data.AuditSearchData;
-import org.apache.fineract.commands.data.request.AuditRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.service.Page;
-import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
+import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.portfolio.group.data.GroupGeneralData;
+import org.apache.fineract.portfolio.group.service.GroupReadPlatformService;
+import org.springframework.stereotype.Component;
 
-public interface AuditReadPlatformService {
+@Component
+@RequiredArgsConstructor
+public class GroupsV2ApiDelegate implements GroupsV2Api {
 
-    List<AuditData> retrieveAuditEntries(SQLBuilder extraCriteria, boolean includeJson);
+    private final GroupReadPlatformService groupReadPlatformService;
 
-    Page<AuditData> retrievePaginatedAuditEntries(SQLBuilder extraCriteria, boolean includeJson, PaginationParameters parameters);
-
-    List<AuditData> retrieveAllEntriesToBeChecked(SQLBuilder extraCriteria, boolean includeJson);
-
-    AuditData retrieveAuditEntry(Long auditId);
-
-    AuditSearchData retrieveSearchTemplate(String useType);
-
-    SQLBuilder getExtraCriteria(AuditRequest auditRequest);
+    @Override
+    public Page<GroupGeneralData> retrieveAllGroups(SearchParameters searchParameters, PaginationParameters parameters) {
+        return groupReadPlatformService.retrievePagedAll(searchParameters, parameters);
+    }
 }
