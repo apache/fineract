@@ -38,7 +38,8 @@ public enum DefaultWorkingCapitalLoanProduct implements WorkingCapitalLoanProduc
     WCLP_DUE_FEE_PRINCIPAL_PENALTY, //
     WCLP_DUE_PRINCIPAL_FEE_PENALTY, //
     WCLP_GOODWILL_CREDIT_ALLOCATION, //
-    WCLP_REPAYMENT_DIFF_DEFAULT; //
+    WCLP_REPAYMENT_DIFF_DEFAULT, //
+    WCLP_365; //
 
     @Override
     public String getName() {
