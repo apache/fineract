@@ -1,0 +1,161 @@
+# ============================================================================
+# P3.1 - Build Fineract
+# SoW 4.0 - Proyecto 3 - Fineract Build y Despliegue (Dev+QA)
+#
+# Disparador: push a main (post-merge, GitHub Flow)
+# Trigger implicito: solo corre si el PR paso los gates de P2.1, P2.3, P2.4
+#   (Branch Protection garantiza que no hay push a main sin esos checks)
+#
+# Produce:
+#   - Docker image (tag main-<sha>)
+#   - Cosign signature (keyless via GitHub OIDC)
+#   - SBOM SPDX y CycloneDX (Syft)
+#   - Todo publicado como artifact de GitHub Actions
+#
+# PoC modo local (sin ECR):
+#   - Push a registry queda condicionado al secret ECR_REGISTRY
+# ============================================================================
+name: "P3.1 - Fineract Build"
+
+on:
+    push:
+        branches: [main]
+        paths-ignore:
+            - '*.md'
+            - 'docs/**'
+    workflow_dispatch:
+
+permissions:
+    contents: read
+    packages: write
+    id-token: write
+
+concurrency:
+    group: p3-1-build
+    cancel-in-progress: false
+
+env:
+    JAVA_VERSION: '25'
+    IMAGE_NAME: quida/fineract
+
+jobs:
+    build:
+        name: "Build + Docker + Sign + SBOM"
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  fetch-depth: 0
+
+            - name: Fetch tags
+              run: git fetch --tags --force
+
+            - name: Generar tag semantico
+              id: meta
+              run: |
+                  IMAGE_TAG="main-${GITHUB_SHA::7}"
+                  echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+                  echo "Image tag: $IMAGE_TAG"
+
+            - name: Setup JDK
+              uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+              with:
+                  distribution: 'temurin'
+                  java-version: ${{ env.JAVA_VERSION }}
+                  cache: 'gradle'
+
+            - name: Gradle build (bootJar sin tests)
+              run: |
+                  ./gradlew :fineract-provider:bootJar --no-daemon -x test
+                  echo "JAR generado:"
+                  find . -name "*.jar" -path "*/build/libs/*" -not -name "*plain*" | head -5
+
+            - name: Docker build
+              id: build
+              run: |
+                  IMAGE_FULL="${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }}"
+
+                  if [ -f "fineract-provider/Dockerfile" ]; then
+                      DOCKERFILE="fineract-provider/Dockerfile"
+                  elif [ -f "Dockerfile" ]; then
+                      DOCKERFILE="Dockerfile"
+                  else
+                      echo "::error::No hay Dockerfile en fineract-provider/ ni en root"
+                      exit 1
+                  fi
+
+                  echo "Usando Dockerfile: $DOCKERFILE"
+                  docker build -t "$IMAGE_FULL" -t "${{ env.IMAGE_NAME }}:latest" -f "$DOCKERFILE" .
+
+                  DIGEST=$(docker inspect --format='{{.Id}}' "$IMAGE_FULL")
+                  echo "image_digest=$DIGEST" >> $GITHUB_OUTPUT
+                  echo "Imagen construida: $IMAGE_FULL"
+
+            - name: Guardar imagen como tar
+              run: |
+                  docker save ${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }} \
+                      | gzip > fineract-image.tar.gz
+                  ls -lh fineract-image.tar.gz
+
+            - name: Push a Amazon ECR (condicional)
+              if: env.ECR_REGISTRY != ''
+              env:
+                  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+              run: |
+                  echo "::notice::PoC - push a ECR omitido (sin secret ECR_REGISTRY configurado)"
+
+            - name: Instalar Cosign
+              uses: sigstore/cosign-installer@d7d6bc7722e3daa8354c50bcb52f4837da5e9b6a # v3.8.1
+
+            - name: Firmar imagen (Cosign keyless via GitHub OIDC)
+              env:
+                  COSIGN_EXPERIMENTAL: 1
+              run: |
+                  cosign sign-blob --yes fineract-image.tar.gz \
+                      --output-signature fineract-image.tar.gz.sig \
+                      --output-certificate fineract-image.tar.gz.cert
+                  echo "Firma generada:"
+                  ls -lh fineract-image.tar.gz.sig fineract-image.tar.gz.cert
+
+            - name: Instalar Syft
+              uses: anchore/sbom-action/download-syft@9246b90769f852b3a8921f330c59e0b3f439d6e9 # v0.20.1
+
+            - name: Generar SBOM SPDX
+              run: |
+                  syft "${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }}" \
+                      -o spdx-json=sbom-spdx.json
+                  echo "SBOM SPDX: $(wc -l < sbom-spdx.json) lineas"
+
+            - name: Generar SBOM CycloneDX
+              run: |
+                  syft "${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }}" \
+                      -o cyclonedx-json=sbom-cyclonedx.json
+                  echo "SBOM CycloneDX: $(wc -l < sbom-cyclonedx.json) lineas"
+
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+              with:
+                  name: fineract-build-${{ steps.meta.outputs.image_tag }}
+                  path: |
+                      fineract-image.tar.gz
+                      fineract-image.tar.gz.sig
+                      fineract-image.tar.gz.cert
+                      sbom-spdx.json
+                      sbom-cyclonedx.json
+                  retention-days: 90
+
+            - name: Resumen del build
+              run: |
+                  echo "## P3.1 Build Summary" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "| Campo | Valor |" >> $GITHUB_STEP_SUMMARY
+                  echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+                  echo "| Image tag | ${{ steps.meta.outputs.image_tag }} |" >> $GITHUB_STEP_SUMMARY
+                  echo "| Commit SHA | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+                  echo "| Cosign | Signed (keyless via GitHub OIDC) |" >> $GITHUB_STEP_SUMMARY
+                  echo "| SBOM SPDX | Generado |" >> $GITHUB_STEP_SUMMARY
+                  echo "| SBOM CycloneDX | Generado |" >> $GITHUB_STEP_SUMMARY
+                  echo "| Push ECR | No (PoC sin ECR) |" >> $GITHUB_STEP_SUMMARY
