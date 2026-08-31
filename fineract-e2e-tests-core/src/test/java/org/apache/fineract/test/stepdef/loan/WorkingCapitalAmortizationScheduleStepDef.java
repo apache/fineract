@@ -19,6 +19,7 @@
 package org.apache.fineract.test.stepdef.loan;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
@@ -51,6 +52,8 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
 
     private static final String WC_AMORT_SCHEDULE_KEY = "WC_AMORT_SCHEDULE_RESPONSE";
     private static final String WC_AMORT_SCHEDULE_REMEMBERED_SEGMENT_KEY = "WC_AMORT_SCHEDULE_REMEMBERED_SEGMENT";
+    private static final String WC_AMORT_SCHEDULE_SNAPSHOT_KEY_PREFIX = "WC_AMORT_SCHEDULE_SNAPSHOT_";
+    private static final String WC_AMORT_EXPECTED_PROJECTION_SNAPSHOT_KEY_PREFIX = "WC_AMORT_EXPECTED_PROJECTION_SNAPSHOT_";
 
     private final FineractFeignClient fineractFeignClient;
 
@@ -80,6 +83,124 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
         final ProjectedAmortizationScheduleData response = api.retrieveAmortizationSchedule(loanId);
         log.info("Retrieved amortization schedule for loan {}: netDisbursementAmount={}", loanId, response.getNetDisbursementAmount());
         TestContext.INSTANCE.set(WC_AMORT_SCHEDULE_KEY, response);
+    }
+
+    @Then("Admin remembers the retrieved amortization schedule as {string}")
+    public void rememberAmortizationSchedule(final String snapshotName) {
+        final ProjectedAmortizationScheduleData response = getRetrievedSchedule();
+        TestContext.INSTANCE.set(WC_AMORT_SCHEDULE_SNAPSHOT_KEY_PREFIX + snapshotName, response);
+    }
+
+    @Then("The retrieved amortization schedule exactly matches the remembered schedule {string}")
+    public void verifyAmortizationScheduleMatchesRemembered(final String snapshotName) {
+        final ProjectedAmortizationScheduleData actual = getRetrievedSchedule();
+        final ProjectedAmortizationScheduleData expected = TestContext.INSTANCE.get(WC_AMORT_SCHEDULE_SNAPSHOT_KEY_PREFIX + snapshotName);
+
+        assertThat(expected).as("remembered amortization schedule '%s'", snapshotName).isNotNull();
+        assertThat(actual).as("amortization schedule after replay").usingRecursiveComparison() //
+                .isEqualTo(expected);
+    }
+
+    @Then("Admin remembers the retrieved amortization schedule expected projection as {string}")
+    public void rememberAmortizationScheduleExpectedProjection(final String snapshotName) {
+        final ExpectedProjectionSnapshot snapshot = ExpectedProjectionSnapshot.from(getRetrievedSchedule());
+        TestContext.INSTANCE.set(WC_AMORT_EXPECTED_PROJECTION_SNAPSHOT_KEY_PREFIX + snapshotName, snapshot);
+    }
+
+    @Then("The retrieved amortization schedule expected projection matches the remembered projection {string}")
+    public void verifyAmortizationScheduleExpectedProjectionMatchesRemembered(final String snapshotName) {
+        final ExpectedProjectionSnapshot actual = ExpectedProjectionSnapshot.from(getRetrievedSchedule());
+        final ExpectedProjectionSnapshot expected = TestContext.INSTANCE
+                .get(WC_AMORT_EXPECTED_PROJECTION_SNAPSHOT_KEY_PREFIX + snapshotName);
+
+        assertThat(expected).as("remembered expected projection '%s'", snapshotName).isNotNull();
+        assertThat(actual.withoutPayments()).as("expected projection summary after exact on-time repayments") //
+                .usingRecursiveComparison().isEqualTo(expected.withoutPayments());
+        assertThat(actual.payments()).as("expected projection payment count").hasSameSizeAs(expected.payments());
+        for (int i = 0; i < actual.payments().size(); i++) {
+            assertThat(actual.payments().get(i)).as("expected projection payment[%s] after exact on-time repayments", i) //
+                    .usingRecursiveComparison().isEqualTo(expected.payments().get(i));
+        }
+    }
+
+    @Then("Every fully paid amortization schedule period has actual amortization equal to expected amortization")
+    public void verifyFullyPaidPeriodsHaveExpectedAmortization() {
+        final List<ProjectedAmortizationSchedulePaymentData> fullyPaidPeriods = getRetrievedSchedule().getPayments().stream() //
+                .filter(payment -> payment.getPaymentNo() != 0) //
+                .filter(payment -> payment.getExpectedPaymentAmount() != null && payment.getActualPaymentAmount() != null) //
+                .filter(payment -> payment.getActualPaymentAmount().compareTo(payment.getExpectedPaymentAmount()) == 0) //
+                .toList();
+        assertThat(fullyPaidPeriods).as("fully paid amortization periods").isNotEmpty();
+
+        // Within one unit of the currency, not to the exact figure. Two things stop these being the same number.
+        //
+        // A period is picked out as fully paid by comparing the amounts as they are reported, and those are rounded to
+        // the currency - so an instalment of 47.2222 collected as 47.22 looks exactly paid while it is a fraction
+        // short. And the reported amortization is the step the running fee total took that period, where the total is
+        // carried exactly and rounded once; the expected column rounds every period before adding it. The two
+        // therefore sit up to a unit apart on any given period even though the running totals track each other, and
+        // that is the intended trade: the total is what has to close on the fee exactly, so it is the total that is
+        // measured accurately and the periods that are its differences.
+        final SoftAssertions assertions = new SoftAssertions();
+        for (final ProjectedAmortizationSchedulePaymentData payment : fullyPaidPeriods) {
+            final BigDecimal expectedAmortization = payment.getExpectedAmortizationAmount();
+            final BigDecimal oneCurrencyUnit = BigDecimal.ONE.movePointLeft(expectedAmortization.scale());
+            assertions.assertThat(payment.getActualAmortizationAmount()) //
+                    .as("payment[%s].actualAmortizationAmount", payment.getPaymentNo()) //
+                    .isCloseTo(expectedAmortization, within(oneCurrencyUnit));
+        }
+        assertions.assertAll();
+    }
+
+    @Then("The retrieved amortization schedule has no negative monetary amounts")
+    public void verifyAmortizationScheduleHasNoNegativeMonetaryAmounts() {
+        final ProjectedAmortizationScheduleData response = getRetrievedSchedule();
+        final SoftAssertions assertions = new SoftAssertions();
+
+        for (final ProjectedAmortizationSchedulePaymentData payment : response.getPayments()) {
+            final String prefix = "payment[" + payment.getPaymentNo() + "].";
+            assertNonNegativeIfPresent(assertions, prefix + "expectedBalance", payment.getExpectedBalance());
+            assertNonNegativeIfPresent(assertions, prefix + "actualBalance", payment.getActualBalance());
+            assertNonNegativeIfPresent(assertions, prefix + "expectedAmortizationAmount", payment.getExpectedAmortizationAmount());
+            assertNonNegativeIfPresent(assertions, prefix + "actualAmortizationAmount", payment.getActualAmortizationAmount());
+            assertNonNegativeIfPresent(assertions, prefix + "expectedDiscountFeeBalance", payment.getExpectedDiscountFeeBalance());
+            assertNonNegativeIfPresent(assertions, prefix + "actualDiscountFeeBalance", payment.getActualDiscountFeeBalance());
+            assertNonNegativeIfPresent(assertions, prefix + "actualPaymentAmount", payment.getActualPaymentAmount());
+            if (payment.getPaymentNo() != 0) {
+                assertNonNegativeIfPresent(assertions, prefix + "expectedPaymentAmount", payment.getExpectedPaymentAmount());
+            }
+        }
+
+        assertions.assertAll();
+    }
+
+    @Then("The retrieved amortization schedule actual amortization total is {string}")
+    public void verifyActualAmortizationTotal(final String expectedTotal) {
+        final BigDecimal actualTotal = getRetrievedSchedule().getPayments().stream() //
+                .map(ProjectedAmortizationSchedulePaymentData::getActualAmortizationAmount) //
+                .filter(amount -> amount != null) //
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        assertThat(actualTotal).as("total actual discount-fee amortization").isEqualByComparingTo(expectedTotal);
+    }
+
+    @Then("The retrieved amortization schedule actual payments plus future expected payments total {string}")
+    public void verifyActualAndFutureExpectedPaymentsTotal(final String expectedTotal) {
+        final List<ProjectedAmortizationSchedulePaymentData> payments = getRetrievedSchedule().getPayments();
+        final BigDecimal actualPayments = payments.stream() //
+                .filter(payment -> payment.getPaymentNo() != 0) //
+                .map(ProjectedAmortizationSchedulePaymentData::getActualPaymentAmount) //
+                .filter(amount -> amount != null) //
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        final BigDecimal futureExpectedPayments = payments.stream() //
+                .filter(payment -> payment.getPaymentNo() != 0 && payment.getActualPaymentAmount() == null) //
+                .map(ProjectedAmortizationSchedulePaymentData::getExpectedPaymentAmount) //
+                .filter(amount -> amount != null) //
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        assertThat(actualPayments.add(futureExpectedPayments)) //
+                .as("actual payments (%s) plus future expected payments (%s)", actualPayments, futureExpectedPayments) //
+                .isEqualByComparingTo(expectedTotal);
     }
 
     @Then("Admin remembers the retrieved amortization schedule payments before {string}")
@@ -404,6 +525,47 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
             return;
         }
         assertions.assertThat(WorkingCapitalScheduleMatcher.matchesDate(actual, expectedStr)).as(field).isTrue();
+    }
+
+    private static void assertNonNegativeIfPresent(final SoftAssertions assertions, final String field, final BigDecimal amount) {
+        if (amount != null) {
+            assertions.assertThat(amount).as(field).isGreaterThanOrEqualTo(BigDecimal.ZERO);
+        }
+    }
+
+    private static ProjectedAmortizationScheduleData getRetrievedSchedule() {
+        final ProjectedAmortizationScheduleData response = TestContext.INSTANCE.get(WC_AMORT_SCHEDULE_KEY);
+        assertThat(response).as("Amortization schedule response").isNotNull();
+        assertThat(response.getPayments()).as("Amortization schedule payments").isNotNull();
+        return response;
+    }
+
+    private record ExpectedProjectionSnapshot(BigDecimal discountFeeAmount, BigDecimal effectiveInterestRate,
+            LocalDate expectedDisbursementDate, BigDecimal expectedPaymentAmount, BigDecimal netDisbursementAmount, Integer npvDayCount,
+            Integer originalPaymentNumber, BigDecimal periodPaymentRate, BigDecimal totalPaymentVolume,
+            List<ExpectedPaymentSnapshot> payments) {
+
+        private static ExpectedProjectionSnapshot from(final ProjectedAmortizationScheduleData schedule) {
+            final List<ExpectedPaymentSnapshot> payments = schedule.getPayments().stream().map(ExpectedPaymentSnapshot::from).toList();
+            return new ExpectedProjectionSnapshot(schedule.getDiscountFeeAmount(), schedule.getEffectiveInterestRate(),
+                    schedule.getExpectedDisbursementDate(), schedule.getExpectedPaymentAmount(), schedule.getNetDisbursementAmount(),
+                    schedule.getNpvDayCount(), schedule.getOriginalPaymentNumber(), schedule.getPeriodPaymentRate(),
+                    schedule.getTotalPaymentVolume(), payments);
+        }
+
+        private ExpectedProjectionSnapshot withoutPayments() {
+            return new ExpectedProjectionSnapshot(discountFeeAmount, effectiveInterestRate, expectedDisbursementDate, expectedPaymentAmount,
+                    netDisbursementAmount, npvDayCount, originalPaymentNumber, periodPaymentRate, totalPaymentVolume, List.of());
+        }
+    }
+
+    private record ExpectedPaymentSnapshot(Integer paymentNo, LocalDate paymentDate, BigDecimal expectedPaymentAmount,
+            BigDecimal expectedBalance, BigDecimal expectedAmortizationAmount, BigDecimal expectedDiscountFeeBalance) {
+
+        private static ExpectedPaymentSnapshot from(final ProjectedAmortizationSchedulePaymentData payment) {
+            return new ExpectedPaymentSnapshot(payment.getPaymentNo(), payment.getPaymentDate(), payment.getExpectedPaymentAmount(),
+                    payment.getExpectedBalance(), payment.getExpectedAmortizationAmount(), payment.getExpectedDiscountFeeBalance());
+        }
     }
 
     private Long extractLoanId() {

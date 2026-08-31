@@ -784,6 +784,21 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
     }
 
+    @When("Admin creates a new Working Capital Loan Product with {int} decimal places and NPV day count {int}")
+    public void createWorkingCapitalLoanProductWithDecimalPlacesAndNpvDayCount(final int decimalPlaces, final int npvDayCount) {
+        final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
+        final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory
+                .defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest() //
+                .name(name) //
+                .digitsAfterDecimal(decimalPlaces) //
+                .npvDayCount(npvDayCount);
+
+        final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+        checkWorkingCapitalLoanProductCreate();
+    }
+
     @When("Admin creates a new Working Capital Loan Product with Accrual with deferred revenue amortization accounting for GL mapping verification")
     public void createWorkingCapitalLoanProductWithAccrualAccountingForGLMappingVerification() {
         final String workingCapitalProductDefaultName = DefaultWorkingCapitalLoanProduct.WCLP.getName()

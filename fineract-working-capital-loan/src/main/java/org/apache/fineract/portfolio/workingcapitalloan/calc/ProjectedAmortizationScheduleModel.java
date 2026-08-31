@@ -25,7 +25,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -826,9 +825,9 @@ public final class ProjectedAmortizationScheduleModel {
         result.add(createDisbursementPayment());
 
         BigDecimal cumulativeActualAmort = BigDecimal.ZERO;
-        // The same total before it is rounded to the currency. Kept alongside so each period's rounding is taken off
-        // the exact running figure rather than compounded onto the previous period's rounding.
-        BigDecimal exactCumulativeActualAmort = BigDecimal.ZERO;
+        // Carried alongside the rounded total because only the total may be rounded: rounding each period before
+        // adding it drops a fraction of a cent every time, and the fee then closes short of itself.
+        BigDecimal unroundedCumulativeActualAmort = BigDecimal.ZERO;
         // And the same total again, measured the way the expected column measures itself - every period rounded before
         // it is added. Nothing reports this figure; it exists only to rewind the expected column at a settled period,
         // and it has to share that column's units or the rewind stops being a no-op for an instalment paid in full and
@@ -860,21 +859,17 @@ public final class ProjectedAmortizationScheduleModel {
             // than what they had really paid down.
             if (hasPositivePayment) {
                 // The period earns whatever the running total moved by, so the figure shown, the figure accumulated
-                // and the figure the balance is carried on are all one number.
-                //
-                // The running total is kept exact and rounded once, rather than accumulated from periods rounded one by
-                // one. Both are a cent apart on any given day, but only this one stays a cent apart from the truth: a
-                // per-period rounding is a fresh half-cent error every period, and over a few hundred of them the sum
-                // wanders several cents off - far enough that a fully repaid loan closed six cents over the fee in one
-                // direction and seven cents short of it in the other. Rounding the cumulative figure instead holds the
-                // whole column to within half a cent of the fee the payments have really earned, so a loan that has
-                // paid off its term earns exactly the fee.
-                //
-                // Still capped at the fee: past maturity the projection keeps accruing on a balance nothing is paying
-                // down, so the plan the column is consumed from can offer more fee than there is to earn.
+                // and the figure the balance is carried on are all one number. The running total is kept exact and
+                // rounded once, rather than accumulated from periods rounded one by one: a per-period rounding drops a
+                // fraction of a cent every period, and over a few hundred of them the sum wanders several cents off,
+                // which is what left a large payment short of the fee. The rewind below reads rewindBasis rather than
+                // this figure precisely because the two are measured differently - see its comment.
+                // Capped at the fee, so the periods sum to exactly the fee however the rounding falls: the last one
+                // absorbs the residual instead of the loan booking a cent of income it never held, and a balance
+                // carried on the same figures closes at exactly zero.
                 final BigDecimal cumulativeActualBefore = cumulativeActualAmort;
-                exactCumulativeActualAmort = exactCumulativeActualAmort.add(actualAmortizations.get(i), mc);
-                cumulativeActualAmort = money(exactCumulativeActualAmort).getAmount().min(discountFee);
+                unroundedCumulativeActualAmort = unroundedCumulativeActualAmort.add(actualAmortizations.get(i), mc).min(discountFee);
+                cumulativeActualAmort = money(unroundedCumulativeActualAmort).getAmount();
                 actualAmortization = cumulativeActualAmort.subtract(cumulativeActualBefore, mc);
                 rewindBasis = rewindBasis.add(money(actualAmortizations.get(i)).getAmount(), mc).min(discountFee);
                 runningActualBalance = runningActualBalance.subtract(periodPayment, mc).add(actualAmortization, mc);
@@ -1031,7 +1026,9 @@ public final class ProjectedAmortizationScheduleModel {
                         (a, b) -> a.add(b, mc));
         final BigDecimal unearned = unearnedFeeAt(ba.expectedAmortizations().size(), settledPaymentsByDate, ba.expectedAmortizations(),
                 ba.planAmortizations());
-        settleAmortizationOntoFinalPeriods(ba.expectedAmortizations(), unearned.subtract(earnedByTail, mc));
+        final int closingPeriod = ba.balances().isEmpty() ? ba.expectedAmortizations().size() - 1 : findClosingPeriod(ba.balances());
+        final List<Money> settleTarget = ba.expectedAmortizations().subList(0, closingPeriod + 1);
+        settleAmortizationOntoFinalPeriods(settleTarget, unearned.subtract(earnedByTail, mc));
         return ba;
     }
 
@@ -1048,12 +1045,10 @@ public final class ProjectedAmortizationScheduleModel {
             final List<Money> amortizations, final List<BigDecimal> planAmortizations) {
         final List<BigDecimal> amounts = amortizations.stream().map(Money::getAmount).toList();
         final BigDecimal fee = discountFeeAmount.getAmount();
+        final List<BigDecimal> actualAmortizationsByDay = settledPaymentsByDate == null ? List.of()
+                : computeActualAmortizations(planAmortizations, paymentsByDay(settledPaymentsByDate, period), period);
         BigDecimal cumulativeExpected = BigDecimal.ZERO;
-        BigDecimal cumulativeActual = BigDecimal.ZERO;
-        BigDecimal cursor = BigDecimal.ZERO;
-        BigDecimal paidSoFar = BigDecimal.ZERO;
-        final BigDecimal totalBilled = totalBilledIfAnyMoneyPaid(settledPaymentsByDate == null ? List.of() : settledPaymentsByDate.values(),
-                planAmortizations.size());
+        BigDecimal rewindBasis = BigDecimal.ZERO;
         for (int dayIndex = 1; dayIndex <= period; dayIndex++) {
             cumulativeExpected = cumulativeExpected.add(amounts.get(dayIndex - 1), mc);
             final LocalDate periodDate = dateOfPeriod(dayIndex);
@@ -1061,22 +1056,17 @@ public final class ProjectedAmortizationScheduleModel {
             if (paid == null) {
                 continue;
             }
-            final BigDecimal periodsConsumed = periodsWorthOf(paid, expectedPaymentForDay(dayIndex));
-            paidSoFar = paidSoFar.add(MathUtil.negativeToZero(paid), mc);
-            final BigDecimal reached = settlePositionIfFullyPaid(cursor.add(periodsConsumed, mc), paidSoFar, totalBilled,
-                    planAmortizations.size());
-            // Rounded per period, exactly as the rewind this is predicting measures the same running total: the settle
-            // works from this residual, so measuring it any other way than the rewind leaves the deferred balance
-            // closing off zero.
+            // Every period rounded before it is added, which is how the rewind in buildPayments measures the same
+            // running total: this is the residual the settle works from, so measuring it any other way than the rewind
+            // it is predicting leaves the deferred balance closing off zero, and an instalment paid in full and on time
+            // stops being the no-op it has to be.
             //
             // Deliberately uncapped, though. Capping what the payments have earned at the fee looks harmless - they can
-            // never earn more than there is - but rounding each period can put their sum a cent either side of it.
-            // Holding the total down to the fee swallows an overshoot the settle exists to take back off, and the
-            // schedule then closes on a negative deferred balance.
-            cumulativeActual = cumulativeActual
-                    .add(money(consumeExpectedAmortization(planAmortizations, cursor, reached.subtract(cursor, mc))).getAmount(), mc);
-            cursor = reached;
-            cumulativeExpected = cumulativeActual;
+            // never earn more than there is - but rounding can put their sum a cent either side of it. Holding the
+            // total down to the fee swallows an overshoot the settle exists to take back off, and the schedule then
+            // closes on a negative deferred balance.
+            rewindBasis = rewindBasis.add(money(actualAmortizationsByDay.get(dayIndex - 1)).getAmount(), mc);
+            cumulativeExpected = rewindBasis;
         }
         // Signed on purpose. Rounding each period to the currency scale can push the booked amortization a cent past
         // the fee, and the settle below needs to see that overshoot to take it back off; clamping here would hide it
@@ -1111,17 +1101,14 @@ public final class ProjectedAmortizationScheduleModel {
 
         BigDecimal prevBalance = netDisbursementAmount.getAmount();
         BigDecimal actualBalance = netDisbursementAmount.getAmount();
-        BigDecimal amortizationCursor = BigDecimal.ZERO;
-        BigDecimal paidSoFar = BigDecimal.ZERO;
         // The plan for the whole span, computed before a single payment is applied. The walk below used to consume
         // from the list it was still building, so a payment covering 198 periods could only find the one period walked
         // so far and collected a fraction of the fee it had earned - which drove the balance below zero and took the
         // rest of the schedule negative with it.
         final List<BigDecimal> planAmortizations = settledPaymentsByDate == null ? exactAmortizations
                 : computeBalancesAndAmortizations(upToDayIndex, null).planAmortizations();
-
-        final BigDecimal totalBilled = totalBilledIfAnyMoneyPaid(settledPaymentsByDate == null ? List.of() : settledPaymentsByDate.values(),
-                planAmortizations.size());
+        final List<BigDecimal> actualAmortizationsByDay = settledPaymentsByDate == null ? List.of()
+                : computeActualAmortizations(planAmortizations, paymentsByDay(settledPaymentsByDate, upToDayIndex), upToDayIndex);
 
         for (int i = 0; i < upToDayIndex; i++) {
             final int dayIndex = i + 1;
@@ -1154,26 +1141,38 @@ public final class ProjectedAmortizationScheduleModel {
             if (paid == null) {
                 continue;
             }
-            // Reality only moves when money does, so a day with nothing on it leaves the actual balance standing. The
-            // fee a payment earns is consumed from the plan exactly as computeActualAmortizations consumes it - the
-            // same list, walked by the same cursor - so the balance this walk re-bases from and the one buildPayments
-            // reports are converting the payment at the same rate rather than at two independently derived ones.
-            final BigDecimal periodsConsumed = periodsWorthOf(paid, payment);
-            paidSoFar = paidSoFar.add(MathUtil.negativeToZero(paid), mc);
-            final BigDecimal reached = settlePositionIfFullyPaid(amortizationCursor.add(periodsConsumed, mc), paidSoFar, totalBilled,
-                    planAmortizations.size());
-            actualBalance = actualBalance.subtract(paid, mc)
-                    .add(consumeExpectedAmortization(planAmortizations, amortizationCursor, reached.subtract(amortizationCursor, mc)), mc);
-            amortizationCursor = reached;
+            // Reality only moves when money does, so a day with nothing on it leaves the actual balance standing.
+            actualBalance = actualBalance.subtract(paid, mc).add(actualAmortizationsByDay.get(i), mc);
 
             // Every settled period re-bases what follows it. A day that elapsed with nothing on it is settled just as
             // firmly as one that was paid - it says the instalment was not collected - so from here the projection
             // continues from what the borrower actually owes rather than from instalments the plan merely assumed. Only
             // periods that have not come round yet keep the schedule they were written with. A backdated payment lands
             // earlier in this same walk and takes the periods after it with it.
-            prevBalance = actualBalance;
+            //
+            // Never from less than nothing, though. A borrower who has handed over more than the payable owes nothing,
+            // and nothing is what the periods after that have to project: accruing on a negative balance grows it
+            // further from zero every period and makes each one amortize a negative amount, which is a period
+            // un-earning fee the payments have already earned. Summed back up as the fee still outstanding, that
+            // phantom lands on the closing period and drives the deferred fee balance below zero. The allocator caps
+            // the principal it hands over here at what is owed, so a real loan does not reach this; the projection
+            // should not depend on that to stay coherent.
+            prevBalance = MathUtil.negativeToZero(actualBalance);
         }
         return new BalancesAndAmortizations(balances, expectedAmortizations, prevBalance, billedPayments, planAmortizations);
+    }
+
+    /**
+     * Finds the closing period index where the balance first reaches zero or becomes negative. Periods beyond this are
+     * tail periods and should not receive rounding adjustments.
+     */
+    private int findClosingPeriod(final List<Money> balances) {
+        for (int i = 0; i < balances.size(); i++) {
+            if (balances.get(i).getAmount().signum() <= 0) {
+                return i;
+            }
+        }
+        return balances.size() - 1;
     }
 
     /**
@@ -1212,104 +1211,60 @@ public final class ProjectedAmortizationScheduleModel {
         return new PaymentAnalysis(shortfall, excess);
     }
 
-    /** Each payment consumes its worth of the plan from where the previous one stopped, earning the fee it passes. */
-    private List<BigDecimal> computeActualAmortizations(final List<BigDecimal> expectedAmortizations, final List<BigDecimal> payments,
+    /**
+     * What each payment amortizes off the discount fee, walking the plan's periods at the price each one actually
+     * bills: a period amortizes its whole share once its instalment is covered, and a pro-rata part of it while the
+     * instalment is only partly covered.
+     *
+     * <p>
+     * A declining-balance schedule does not price every period alike - the closing one bills whatever is left rather
+     * than a full instalment - so dividing a payment by a single period's instalment measures it against a price most
+     * of the periods do not carry. A payment large enough to clear the loan then earns slightly less fee than the
+     * periods it cleared actually hold, and the deferred balance closes a cent off zero.
+     *
+     * <p>
+     * Computed for the whole span in one walk, for the same reason the plan itself is: every caller that converts money
+     * into fee needs this same conversion, and deriving it separately in each of them is what let them drift apart.
+     */
+    private List<BigDecimal> computeActualAmortizations(final List<BigDecimal> planAmortizations, final List<BigDecimal> payments,
             final int appliedCount) {
-        final List<BigDecimal> result = new ArrayList<>(appliedCount);
-        BigDecimal cursor = BigDecimal.ZERO;
-        BigDecimal paidSoFar = BigDecimal.ZERO;
-        final BigDecimal totalBilled = totalBilledIfAnyMoneyPaid(payments.subList(0, Math.min(appliedCount, payments.size())),
-                expectedAmortizations.size());
+        final List<BigDecimal> actualAmortizations = new ArrayList<>(appliedCount);
+        int period = 0;
+        BigDecimal amountAlreadyPaidIntoPeriod = BigDecimal.ZERO;
         for (int i = 0; i < appliedCount; i++) {
-            final BigDecimal periodPayment = payments.get(i);
-            final BigDecimal expectedPayment = expectedPaymentForDay(i + 1);
-            final BigDecimal periodsConsumed = periodsWorthOf(periodPayment, expectedPayment);
-            paidSoFar = paidSoFar.add(MathUtil.negativeToZero(periodPayment), mc);
-            final BigDecimal reached = settlePositionIfFullyPaid(cursor.add(periodsConsumed, mc), paidSoFar, totalBilled,
-                    expectedAmortizations.size());
-            result.add(consumeExpectedAmortization(expectedAmortizations, cursor, reached.subtract(cursor, mc)));
-            cursor = reached;
+            final BigDecimal payment = payments.get(i);
+            BigDecimal paymentNotYetApplied = payment == null ? BigDecimal.ZERO : MathUtil.negativeToZero(payment);
+            BigDecimal amortizationFromPayment = BigDecimal.ZERO;
+            while (paymentNotYetApplied.signum() > 0 && period < planAmortizations.size()) {
+                final BigDecimal periodExpectedPayment = expectedPaymentForDay(period + 1);
+                if (periodExpectedPayment.signum() <= 0) {
+                    period++;
+                    amountAlreadyPaidIntoPeriod = BigDecimal.ZERO;
+                    continue;
+                }
+                final BigDecimal amountAppliedToPeriod = paymentNotYetApplied
+                        .min(periodExpectedPayment.subtract(amountAlreadyPaidIntoPeriod, mc));
+                final BigDecimal fractionOfPeriodPaid = amountAppliedToPeriod.divide(periodExpectedPayment, mc);
+                amortizationFromPayment = amortizationFromPayment.add(planAmortizations.get(period).multiply(fractionOfPeriodPaid, mc), mc);
+                paymentNotYetApplied = paymentNotYetApplied.subtract(amountAppliedToPeriod, mc);
+                amountAlreadyPaidIntoPeriod = amountAlreadyPaidIntoPeriod.add(amountAppliedToPeriod, mc);
+                if (amountAlreadyPaidIntoPeriod.compareTo(periodExpectedPayment) >= 0) {
+                    period++;
+                    amountAlreadyPaidIntoPeriod = BigDecimal.ZERO;
+                }
+            }
+            actualAmortizations.add(amortizationFromPayment);
         }
-        return result;
+        return actualAmortizations;
     }
 
-    /**
-     * How many periods' worth of the schedule a payment covers - a full instalment is one period, half of one is half a
-     * period. This is the yardstick the fee is earned against: paying two instalments in a day earns two days of fee.
-     */
-    private BigDecimal periodsWorthOf(final BigDecimal paid, final BigDecimal expectedPayment) {
-        if (paid == null || paid.signum() <= 0 || expectedPayment.signum() == 0) {
-            return BigDecimal.ZERO;
+    /** The recorded payments laid out by day index, the shape {@link #computeActualAmortizations} reads them in. */
+    private List<BigDecimal> paymentsByDay(final Map<LocalDate, BigDecimal> settledPaymentsByDate, final int upToDayIndex) {
+        final List<BigDecimal> payments = new ArrayList<>(upToDayIndex);
+        for (int dayIndex = 1; dayIndex <= upToDayIndex; dayIndex++) {
+            payments.add(settledPaymentsByDate.get(dateOfPeriod(dayIndex)));
         }
-        return paid.divide(expectedPayment, mc);
-    }
-
-    /**
-     * Everything the plan ever asks for across its periods - what the borrower has to hand over to be square.
-     *
-     * <p>
-     * This walks the whole plan, so it is worked out once per walk and carried into the payment loop rather than asked
-     * for per payment. A slow-amortizing product runs to tens of thousands of periods and COB records a nil payment on
-     * every elapsed day, so a per-payment call turns one walk into a quadratic one: on a 35715 period schedule 151 days
-     * in, that alone took a rebuild from a tenth of a second to nearly half, and COB catches up a day at a time.
-     */
-    private BigDecimal totalBilledByPlan(final int planLength) {
-        BigDecimal total = BigDecimal.ZERO;
-        for (int dayIndex = 1; dayIndex <= planLength; dayIndex++) {
-            total = total.add(MathUtil.negativeToZero(expectedPaymentForDay(dayIndex)), mc);
-        }
-        return total;
-    }
-
-    /**
-     * Where the payments have reached in the plan once {@code paidSoFar} has been handed over, given the position the
-     * period-by-period conversion arrived at.
-     *
-     * <p>
-     * The conversion prices every period at the instalment of the period the money arrived on, and the plan's last
-     * period asks for less than the others - the remainder of the payable rather than a full instalment. Pricing the
-     * term at a flat instalment therefore values it above what the borrower actually owes, so paying every penny of the
-     * payable still left the position short of the end: the last sliver of fee was never earned, the deferred balance
-     * kept a cent of it for good and the actual balance went below zero to pay for it. Once the payments cover
-     * everything the plan bills there is nothing left to earn it with, so the position is the end of the plan.
-     */
-    private BigDecimal settlePositionIfFullyPaid(final BigDecimal position, final BigDecimal paidSoFar, final BigDecimal totalBilled,
-            final int planLength) {
-        return totalBilled != null && paidSoFar.compareTo(totalBilled) >= 0 ? BigDecimal.valueOf(planLength) : position;
-    }
-
-    /**
-     * What the plan bills in total, or {@code null} when not a penny has been handed over - nothing can have been
-     * settled then, so the caller never needs the figure.
-     *
-     * <p>
-     * Worth the check because working the total out walks the whole plan, while this walks the payments. COB records a
-     * nil payment on every elapsed day, so a loan that has never paid arrives here with a long list of zeroes against a
-     * schedule that can run to tens of thousands of periods - and those are exactly the loans that spend the longest in
-     * COB.
-     */
-    private BigDecimal totalBilledIfAnyMoneyPaid(final Collection<BigDecimal> paidAmounts, final int planLength) {
-        return paidAmounts.stream().anyMatch(amount -> amount != null && amount.signum() > 0) ? totalBilledByPlan(planLength) : null;
-    }
-
-    private BigDecimal consumeExpectedAmortization(final List<BigDecimal> expectedAmortizations, final BigDecimal startPos,
-            final BigDecimal count) {
-        if (count.signum() <= 0) {
-            return BigDecimal.ZERO;
-        }
-        BigDecimal sum = BigDecimal.ZERO;
-        BigDecimal pos = startPos;
-        BigDecimal remaining = count;
-        while (remaining.signum() > 0 && pos.intValue() < expectedAmortizations.size()) {
-            final int periodIndex = pos.intValue();
-            final BigDecimal posInPeriod = pos.subtract(BigDecimal.valueOf(periodIndex), mc);
-            final BigDecimal availableInPeriod = BigDecimal.ONE.subtract(posInPeriod, mc);
-            final BigDecimal toConsume = remaining.min(availableInPeriod);
-            sum = sum.add(toConsume.multiply(expectedAmortizations.get(periodIndex), mc), mc);
-            pos = pos.add(toConsume, mc);
-            remaining = remaining.subtract(toConsume, mc);
-        }
-        return sum;
+        return payments;
     }
 
     private List<BigDecimal> computeRunningExpectedPayments(final BigDecimal excess) {
