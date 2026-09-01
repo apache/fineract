@@ -73,22 +73,19 @@ jobs:
                   echo "JAR generado:"
                   find . -name "*.jar" -path "*/build/libs/*" -not -name "*plain*" | head -5
 
+            - name: Preparar contexto para Docker build
+              run: |
+                  # El .dockerignore de Fineract excluye build/ - copiamos el JAR aparte
+                  mkdir -p docker-context
+                  cp fineract-provider/build/libs/fineract-provider-*.jar docker-context/app.jar
+                  cp fineract-provider/Dockerfile docker-context/Dockerfile
+                  ls -lh docker-context/
+
             - name: Docker build
               id: build
               run: |
                   IMAGE_FULL="${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }}"
-
-                  if [ -f "fineract-provider/Dockerfile" ]; then
-                      DOCKERFILE="fineract-provider/Dockerfile"
-                  elif [ -f "Dockerfile" ]; then
-                      DOCKERFILE="Dockerfile"
-                  else
-                      echo "::error::No hay Dockerfile en fineract-provider/ ni en root"
-                      exit 1
-                  fi
-
-                  echo "Usando Dockerfile: $DOCKERFILE"
-                  docker build -t "$IMAGE_FULL" -t "${{ env.IMAGE_NAME }}:latest" -f "$DOCKERFILE" .
+                  docker build -t "$IMAGE_FULL" -t "${{ env.IMAGE_NAME }}:latest" docker-context/
 
                   DIGEST=$(docker inspect --format='{{.Id}}' "$IMAGE_FULL")
                   echo "image_digest=$DIGEST" >> $GITHUB_OUTPUT
