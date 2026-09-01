@@ -87,7 +87,7 @@ Incorrect default Java-related executables may cause test failures.
 To fix this on Debian and Ubuntu systems, run the following:
 
 ```bash
-export JAVA_HOME=/usr/lib/jvm/zulu21
+export JAVA_HOME=/usr/lib/jvm/zulu25
 sudo update-alternatives --set java $JAVA_HOME/bin/java
 sudo update-alternatives --set javac $JAVA_HOME/bin/javac
 sudo update-alternatives --set javadoc $JAVA_HOME/bin/javadoc
