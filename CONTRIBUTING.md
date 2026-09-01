@@ -209,21 +209,6 @@ IntelliJ IDEA provides strong Gradle integration and is recommended for most new
 - IntelliJ may take several minutes to index the project on first open
 - If you encounter build issues, try running `./gradlew clean build` from the terminal
 
-How to download Gradle wrapper
----
-The file gradle/wrapper/gradle-wrapper.jar binary is checked into this projects Git source repository,
-but won't exist in your copy of the Fineract codebase if you downloaded a released source archive from apache.org.
-In that case, you need to download it using the commands below:
-```bash
-wget -P gradle/wrapper https://github.com/apache/fineract/raw/develop/gradle/wrapper/gradle-wrapper.jar
-```
-or
-```bash
-curl -L https://github.com/apache/fineract/raw/develop/gradle/wrapper/gradle-wrapper.jar > \
-    gradle/wrapper/gradle-wrapper.jar
-```
-
-
 ## How We Code
 
 ### Checkstyle and Spotless
