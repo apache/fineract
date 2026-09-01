@@ -26,6 +26,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZonedDateTime;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -63,6 +64,18 @@ public final class JdbcSupport {
             localTime = timeValue.toLocalDateTime().toLocalTime();
         }
         return localTime;
+    }
+
+    public static OffsetTime getOffsetTime(final ResultSet rs, final String columnName) throws SQLException {
+        try {
+            return rs.getObject(columnName, OffsetTime.class);
+        } catch (SQLException exception) {
+            if (exception.getMessage() == null || !exception.getMessage().contains("java.time.OffsetTime not supported")) {
+                throw exception;
+            }
+            final LocalTime localTime = rs.getObject(columnName, LocalTime.class);
+            return localTime == null ? null : localTime.atOffset(java.time.ZoneOffset.UTC);
+        }
     }
 
     public static Long getLong(final ResultSet rs, final String columnName) throws SQLException {
