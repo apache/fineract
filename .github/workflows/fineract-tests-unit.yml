@@ -82,6 +82,11 @@ jobs:
                       -x :fineract-e2e-tests-core:test \
                       -x :fineract-e2e-tests-runner:test \
                       -x :fineract-client:buildJavaSdk \
+                      -x :fineract-client:openApiGenerate \
+                      -x :fineract-client:build \
+                      -x :fineract-client:compileJava \
+                      -x :fineract-client:jar \
+                      -x :fineract-client:assemble \
                       -x :fineract-client:test
 
             - name: Publicar reporte JUnit
