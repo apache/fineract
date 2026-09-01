@@ -10,6 +10,14 @@ The [JIRA Dashboard](https://issues.apache.org/jira/secure/Dashboard.jspa?select
 
 You don't need to be a committer to provide pull requests, but [Becoming a Committer](https://cwiki.apache.org/confluence/display/FINERACT/Becoming+a+Committer) explains the process of becoming one - just in case...
 
+## AI Policy
+
+1. AI tools MAY assist contribution work.
+1. AI tools MUST NOT replace contributor accountability.
+1. The human submitter is responsible for correctness, safety, performance, and maintainability of all submitted changes.
+
+For more ideas on properly submitting AI-assisted contributions, see https://github.com/apache/fory/blob/main/AI_POLICY.md
+
 ## Non-code contributions
 
 We need a lot of help besides code changes. For example, we also welcome wiki edits! If you wish to make non-code contributions, please first get involved on the [developer mailing list](https://lists.apache.org/list.html?dev@fineract.apache.org) and in [chat](https://app.element.io/#/room/#apache-fineract-home:matrix.org). Around the time you [request wiki access](https://selfserve.apache.org/confluence-account.html), tell us something like:
