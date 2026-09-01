@@ -96,4 +96,5 @@
   <include relativeToChangelogFile="true" file="parts/0072_wc_loan_near_breach_action_submitted_on_date.xml"/>
   <include relativeToChangelogFile="true" file="parts/0073_wc_transaction_business_events.xml"/>
   <include relativeToChangelogFile="true" file="parts/0074_wc_submitted_on_date_not_null.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0075_wc_loan_transaction_permissions.xml"/>
 </databaseChangeLog>

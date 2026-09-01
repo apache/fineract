@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.security.config;
 
+import jakarta.servlet.Filter;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
@@ -178,17 +179,21 @@ public class AuthorizationServerConfig {
                 .addFilterAfter(requestResponseFilter(), ExceptionTranslationFilter.class) //
                 .addFilterAfter(correlationHeaderFilter(), RequestResponseFilter.class) //
                 .addFilterAfter(fineractInstanceModeApiFilter(), CorrelationHeaderFilter.class); //
+
+        Class<? extends Filter> lastCobFilter;
         if (!Objects.isNull(loanCOBFilterHelper)) {
-            http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class) //
-                    .addFilterAfter(idempotencyStoreFilter(), LoanCOBApiFilter.class); //
+            http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class); //
             http.addFilterBefore(progressiveLoanModelCheckerFilter, LoanCOBApiFilter.class);
+            lastCobFilter = LoanCOBApiFilter.class;
         } else {
-            http.addFilterAfter(idempotencyStoreFilter(), FineractInstanceModeApiFilter.class); //
             http.addFilterAfter(progressiveLoanModelCheckerFilter, FineractInstanceModeApiFilter.class);
+            lastCobFilter = ProgressiveLoanModelCheckerFilter.class;
         }
         if (workingCapitalLoanCOBFilterHelper != null) {
-            http.addFilterAfter(workingCapitalLoanCOBApiFilter(), IdempotencyStoreFilter.class);
+            http.addFilterAfter(workingCapitalLoanCOBApiFilter(), lastCobFilter);
+            lastCobFilter = WorkingCapitalLoanCOBApiFilter.class;
         }
+        http.addFilterAfter(idempotencyStoreFilter(), lastCobFilter); //
 
         if (fineractProperties.getIpTracking().isEnabled()) {
             http.addFilterAfter(callerIpTrackingFilter(), RequestResponseFilter.class);

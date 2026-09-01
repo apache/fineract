@@ -22,6 +22,7 @@ package org.apache.fineract.infrastructure.core.config;
 import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.fullyAuthenticated;
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
 
+import jakarta.servlet.Filter;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
@@ -409,17 +410,20 @@ public class SecurityConfig {
                 .addFilterAfter(correlationHeaderFilter(), RequestResponseFilter.class)
                 .addFilterAfter(fineractInstanceModeApiFilter(), CorrelationHeaderFilter.class);
 
+        Class<? extends Filter> lastCobFilter;
         if (loanCOBFilterHelper != null) {
-            http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class).addFilterAfter(idempotencyStoreFilter(),
-                    LoanCOBApiFilter.class);
+            http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class);
             http.addFilterBefore(progressiveLoanModelCheckerFilter, LoanCOBApiFilter.class);
+            lastCobFilter = LoanCOBApiFilter.class;
         } else {
-            http.addFilterAfter(idempotencyStoreFilter(), FineractInstanceModeApiFilter.class);
             http.addFilterAfter(progressiveLoanModelCheckerFilter, FineractInstanceModeApiFilter.class);
+            lastCobFilter = ProgressiveLoanModelCheckerFilter.class;
         }
         if (workingCapitalLoanCOBFilterHelper != null) {
-            http.addFilterAfter(workingCapitalLoanCOBApiFilter(), IdempotencyStoreFilter.class);
+            http.addFilterAfter(workingCapitalLoanCOBApiFilter(), lastCobFilter);
+            lastCobFilter = WorkingCapitalLoanCOBApiFilter.class;
         }
+        http.addFilterAfter(idempotencyStoreFilter(), lastCobFilter);
         if (fineractProperties.getIpTracking().isEnabled()) {
             http.addFilterAfter(callerIpTrackingFilter(), RequestResponseFilter.class);
         }

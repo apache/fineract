@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.security.config;
 
+import jakarta.servlet.Filter;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractRequestContextHolder;
@@ -144,18 +145,20 @@ public class OidcFederationSecurityConfig {
                 .addFilterAfter(correlationHeaderFilter(), RequestResponseFilter.class)
                 .addFilterAfter(fineractInstanceModeApiFilter(), CorrelationHeaderFilter.class);
 
-        // LoanCOB and idempotency filters (same ordering as SecurityConfig and AuthorizationServerConfig)
+        Class<? extends Filter> lastCobFilter;
         if (loanCOBFilterHelper != null) {
-            http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class)
-                    .addFilterAfter(idempotencyStoreFilter(), LoanCOBApiFilter.class)
-                    .addFilterBefore(progressiveLoanModelCheckerFilter, LoanCOBApiFilter.class);
+            http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class).addFilterBefore(progressiveLoanModelCheckerFilter,
+                    LoanCOBApiFilter.class);
+            lastCobFilter = LoanCOBApiFilter.class;
         } else {
-            http.addFilterAfter(idempotencyStoreFilter(), FineractInstanceModeApiFilter.class)
-                    .addFilterAfter(progressiveLoanModelCheckerFilter, FineractInstanceModeApiFilter.class);
+            http.addFilterAfter(progressiveLoanModelCheckerFilter, FineractInstanceModeApiFilter.class);
+            lastCobFilter = ProgressiveLoanModelCheckerFilter.class;
         }
         if (workingCapitalLoanCOBFilterHelper != null) {
-            http.addFilterAfter(workingCapitalLoanCOBApiFilter(), IdempotencyStoreFilter.class);
+            http.addFilterAfter(workingCapitalLoanCOBApiFilter(), lastCobFilter);
+            lastCobFilter = WorkingCapitalLoanCOBApiFilter.class;
         }
+        http.addFilterAfter(idempotencyStoreFilter(), lastCobFilter);
 
         if (fineractProperties.getIpTracking().isEnabled()) {
             http.addFilterAfter(callerIpTrackingFilter(), RequestResponseFilter.class);

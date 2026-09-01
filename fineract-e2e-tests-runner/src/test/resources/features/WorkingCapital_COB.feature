@@ -379,3 +379,72 @@ Feature: Working Capital COB Job
     Then Admin verifies internal working capital cob last run data values are empty "true"
     When Admin runs WC COB job
     Then Admin verifies internal working capital cob last run data values are empty "false"
+
+  @TestRailId:C102396
+  Scenario: Verify inline WC COB before monetary activity - UC1: repayment triggers inline COB on a behind loan
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    # --- Seed the loan with an initial inline COB so it has a non-null lastClosedBusinessDate ---
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "31 December 2025"
+    And Admin verifies all inserted WC loans have no account locks
+    When Admin sets the business date to "02 January 2026"
+    When Admin creates new user with "NO_BYPASS_WC" username, "NO_BYPASS_WC_ROLE" role name and given permissions:
+      | REPAYMENT_WORKINGCAPITALLOAN |
+    # --- Repayment by a non-bypass user: should trigger inline COB first ---
+    And Created user makes repayment on "02 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "01 January 2026"
+    And Admin verifies all inserted WC loans have no account locks
+    # --- Closing the loan ---
+    And Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
+
+  @TestRailId:C102397
+  Scenario: Verify inline WC COB before monetary activity - UC2: repayment by external ID triggers inline COB on a behind loan
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "31 December 2025"
+    And Admin verifies all inserted WC loans have no account locks
+    When Admin sets the business date to "02 January 2026"
+    When Admin creates new user with "NO_BYPASS_WC" username, "NO_BYPASS_WC_ROLE" role name and given permissions:
+      | REPAYMENT_WORKINGCAPITALLOAN |
+    # --- Repayment by external ID as a non-bypass user: tests the external-id path wiring ---
+    And Created user makes repayment by loan external ID on "02 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "01 January 2026"
+    And Admin verifies all inserted WC loans have no account locks
+    # --- Closing the loan ---
+    And Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
+
+  @TestRailId:C102398
+  Scenario: Verify inline WC COB before monetary activity - UC3: transaction updates COB date after date advance without re-running COB
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "31 December 2025"
+    And Admin verifies all inserted WC loans have no account locks
+    When Admin sets the business date to "02 January 2026"
+    When Admin creates new user with "NO_BYPASS_WC" username, "NO_BYPASS_WC_ROLE" role name and given permissions:
+      | REPAYMENT_WORKINGCAPITALLOAN |
+    # --- Advancing the business date alone must not change the COB date ---
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "31 December 2025"
+    # --- Repayment on the new date should trigger inline COB and move the COB date forward ---
+    And Created user makes repayment on "02 January 2026" with 50.0 transaction amount on Working Capital loan
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "01 January 2026"
+    And Admin verifies all inserted WC loans have no account locks
+    # --- Closing the loan ---
+    And Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"

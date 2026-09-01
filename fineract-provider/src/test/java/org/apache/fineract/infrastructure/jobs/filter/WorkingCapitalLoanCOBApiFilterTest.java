@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.jobs.filter;
 
+import static org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBFilterHelperImpl.EXTERNAL_ID_LOAN_PATH_PATTERN;
 import static org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBFilterHelperImpl.LOAN_PATH_PATTERN;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,6 +41,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
@@ -66,6 +68,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -80,6 +84,7 @@ import org.springframework.security.authentication.AuthenticationCredentialsNotF
 class WorkingCapitalLoanCOBApiFilterTest {
 
     private static final String INLINE_WC_JOB = "INLINE_WORKING_CAPITAL_LOAN_COB";
+    private static final String SOME_EXTERNAL_ID = "7f3a9c11-2b6e-4c8d-9f10-abcdef123456";
 
     private WorkingCapitalLoanCOBApiFilter testObj;
     @InjectMocks
@@ -119,25 +124,279 @@ class WorkingCapitalLoanCOBApiFilterTest {
     }
 
     private static MockHttpServletRequest request(String pathInfo) throws IOException {
+        return request(pathInfo, "");
+    }
+
+    private static MockHttpServletRequest request(String pathInfo, String body) throws IOException {
         MockHttpServletRequest request = mock(MockHttpServletRequest.class);
         given(request.getPathInfo()).willReturn(pathInfo);
         given(request.getMethod()).willReturn(HTTPMethods.POST.value());
-        given(request.getInputStream())
-                .willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(new ByteArrayInputStream(new byte[0])));
+        given(request.getInputStream()).willReturn(new BodyCachingHttpServletRequestWrapper.CachedBodyServletInputStream(
+                new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8))));
         return request;
     }
 
+    private static String batchEntry(String relativeUrl, String body) {
+        String entry = "{\"requestId\":1,\"relativeUrl\":\"" + relativeUrl + "\",\"method\":\"POST\"";
+        if (body != null) {
+            entry += ",\"body\":\"" + body.replace("\"", "\\\"") + "\"";
+        }
+        return entry + "}";
+    }
+
+    private static String batchBody(String... entries) {
+        return "[" + String.join(",", entries) + "]";
+    }
+
     @Test
-    void shouldWorkingCapitalLoanExternalAndRescheduleMatch() {
+    public void shouldWorkingCapitalLoanAndExternalIdMatch() {
         String externalId = UUID.randomUUID().toString();
         Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/working-capital-loans/12").matches());
         Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/working-capital-loans/12?correct=parameter").matches());
-        Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/rescheduleworking-capital-loans/12").matches());
         Assertions.assertTrue(LOAN_PATH_PATTERN.matcher("/v1/working-capital-loans/external-id/" + externalId).matches());
         Assertions.assertEquals("12", LOAN_PATH_PATTERN.matcher("/v1/working-capital-loans/12").replaceAll("$1"));
-        Assertions.assertEquals("12", LOAN_PATH_PATTERN.matcher("/v1/rescheduleworking-capital-loans/12").replaceAll("$1"));
         Assertions.assertEquals(externalId,
-                LOAN_PATH_PATTERN.matcher("/v1/working-capital-loans/external-id/" + externalId).replaceAll("$1"));
+                EXTERNAL_ID_LOAN_PATH_PATTERN.matcher("/v1/working-capital-loans/external-id/" + externalId).replaceAll("$1"));
+    }
+
+    @Test
+    public void shouldOnlyTreatLoanLevelExternalIdSegmentAsExternal() {
+        String externalId = UUID.randomUUID().toString();
+
+        Assertions.assertTrue(EXTERNAL_ID_LOAN_PATH_PATTERN.matcher("/v1/working-capital-loans/external-id/" + externalId).matches());
+        Assertions.assertTrue(
+                EXTERNAL_ID_LOAN_PATH_PATTERN.matcher("/v1/working-capital-loans/external-id/" + externalId + "/transactions").matches());
+
+        Assertions.assertFalse(
+                EXTERNAL_ID_LOAN_PATH_PATTERN.matcher("/v1/working-capital-loans/2/transactions/external-id/" + externalId).matches());
+        Assertions.assertFalse(
+                EXTERNAL_ID_LOAN_PATH_PATTERN.matcher("/v1/working-capital-loans/2/charges/external-id/" + externalId).matches());
+        Assertions.assertEquals("2",
+                LOAN_PATH_PATTERN.matcher("/v1/working-capital-loans/2/transactions/external-id/" + externalId).replaceAll("$1"));
+    }
+
+    @Test
+    public void shouldUseNumericLoanIdWhenOnlyTheTransactionIsAddressedByExternalId() throws ServletException, IOException {
+        setBusinessDates();
+        MockHttpServletRequest request = request("/v1/working-capital-loans/2/transactions/external-id/" + SOME_EXTERNAL_ID);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        LocalDate cobDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
+        COBIdAndLastClosedBusinessDate result = mock(COBIdAndLastClosedBusinessDate.class);
+        given(result.getId()).willReturn(2L);
+        given(context.authenticatedUser()).willReturn(mock(AppUser.class));
+        given(loanAccountLockService.isAnyLoanHardLocked(List.of(2L))).willReturn(false);
+        given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
+        given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
+        given(retrieveIdService.retrieveLoanIdsBehindDate(eq(cobDate), anyList())).willReturn(Collections.singletonList(result));
+        given(retrieveIdService.retrieveLoanBehindOnDisbursementDate(eq(cobDate), anyList())).willReturn(Collections.emptyList());
+
+        testObj.doFilterInternal(request, response, filterChain);
+
+        verifyNoInteractions(loanRepository);
+        verify(inlineLoanCOBExecutorService, times(1)).execute(Collections.singletonList(2L), INLINE_WC_JOB);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
+    }
+
+    @Test
+    public void shouldRejectWhenTransactionExternalIdPathTargetsHardLockedLoan() throws ServletException, IOException {
+        MockHttpServletRequest request = request("/v1/working-capital-loans/2/transactions/external-id/" + SOME_EXTERNAL_ID);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        PrintWriter writer = mock(PrintWriter.class);
+        given(context.authenticatedUser()).willReturn(mock(AppUser.class));
+        given(loanAccountLockService.isAnyLoanHardLocked(List.of(2L))).willReturn(true);
+        given(loanAccountLockService.isAnyLockOverrulable(List.of(2L))).willReturn(false);
+        given(response.getWriter()).willReturn(writer);
+
+        testObj.doFilterInternal(request, response, filterChain);
+
+        verify(response, times(1)).setStatus(HttpStatus.SC_CONFLICT);
+        verifyNoInteractions(filterChain);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", "/transactions", "/transactions/3", "/transactions/external-id/" + SOME_EXTERNAL_ID, "/charges",
+            "/charges/3", "/charges/external-id/" + SOME_EXTERNAL_ID, "/breach-actions", "/delinquency-actions", "/near-breach-actions",
+            "/discount", "/mark-as-fraud", "/payment-rate", "/originators/3", "/originators/external-id/" + SOME_EXTERNAL_ID })
+    public void shouldRunInlineCOBForEveryWriteOnALoanAddressedByNumericId(String subResource) throws ServletException, IOException {
+        setBusinessDates();
+        MockHttpServletRequest request = request("/v1/working-capital-loans/7" + subResource);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        LocalDate cobDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
+        COBIdAndLastClosedBusinessDate behind = mock(COBIdAndLastClosedBusinessDate.class);
+        given(behind.getId()).willReturn(7L);
+        given(context.authenticatedUser()).willReturn(mock(AppUser.class));
+        given(loanAccountLockService.isAnyLoanHardLocked(List.of(7L))).willReturn(false);
+        given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
+        given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
+        given(retrieveIdService.retrieveLoanIdsBehindDate(eq(cobDate), anyList())).willReturn(Collections.singletonList(behind));
+        given(retrieveIdService.retrieveLoanBehindOnDisbursementDate(eq(cobDate), anyList())).willReturn(Collections.emptyList());
+
+        testObj.doFilterInternal(request, response, filterChain);
+
+        verify(inlineLoanCOBExecutorService, times(1)).execute(List.of(7L), INLINE_WC_JOB);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", "/transactions", "/transactions/3", "/charges", "/charges/3", "/breach-actions", "/delinquency-actions",
+            "/near-breach-actions", "/discount", "/mark-as-fraud", "/payment-rate", "/originators/3" })
+    public void shouldRunInlineCOBForEveryWriteOnALoanAddressedByExternalId(String subResource) throws ServletException, IOException {
+        setBusinessDates();
+        MockHttpServletRequest request = request("/v1/working-capital-loans/external-id/" + SOME_EXTERNAL_ID + subResource);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        LocalDate cobDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
+        COBIdAndLastClosedBusinessDate behind = mock(COBIdAndLastClosedBusinessDate.class);
+        given(behind.getId()).willReturn(7L);
+        given(context.authenticatedUser()).willReturn(mock(AppUser.class));
+        given(loanRepository.findIdByExternalId(any())).willReturn(7L);
+        given(loanAccountLockService.isAnyLoanHardLocked(List.of(7L))).willReturn(false);
+        given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
+        given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
+        given(retrieveIdService.retrieveLoanIdsBehindDate(eq(cobDate), anyList())).willReturn(Collections.singletonList(behind));
+        given(retrieveIdService.retrieveLoanBehindOnDisbursementDate(eq(cobDate), anyList())).willReturn(Collections.emptyList());
+
+        testObj.doFilterInternal(request, response, filterChain);
+
+        verify(inlineLoanCOBExecutorService, times(1)).execute(List.of(7L), INLINE_WC_JOB);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "v1/working-capital-loans/7", "working-capital-loans/7", "v1/working-capital-loans/7?command=approve",
+            "v1/working-capital-loans/7/transactions?command=repayment", "working-capital-loans/7/transactions?command=repayment",
+            "v1/working-capital-loans/external-id/" + SOME_EXTERNAL_ID,
+            "v1/working-capital-loans/external-id/" + SOME_EXTERNAL_ID + "?command=disburse",
+            "v1/working-capital-loans/external-id/" + SOME_EXTERNAL_ID + "/transactions?command=repayment",
+            "working-capital-loans/external-id/" + SOME_EXTERNAL_ID + "/transactions?command=repayment" })
+    public void shouldRunInlineCOBForEveryConcreteWorkingCapitalWriteInABatch(String relativeUrl) throws ServletException, IOException {
+        setBusinessDates();
+        MockHttpServletRequest request = request("/v1/batches", batchBody(batchEntry(relativeUrl, "{}")));
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        LocalDate cobDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
+        COBIdAndLastClosedBusinessDate behind = mock(COBIdAndLastClosedBusinessDate.class);
+        given(behind.getId()).willReturn(7L);
+        given(context.authenticatedUser()).willReturn(mock(AppUser.class));
+        given(loanRepository.findIdByExternalId(any())).willReturn(7L);
+        given(loanAccountLockService.isAnyLoanHardLocked(List.of(7L))).willReturn(false);
+        given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
+        given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
+        given(retrieveIdService.retrieveLoanIdsBehindDate(eq(cobDate), anyList())).willReturn(Collections.singletonList(behind));
+        given(retrieveIdService.retrieveLoanBehindOnDisbursementDate(eq(cobDate), anyList())).willReturn(Collections.emptyList());
+
+        testObj.doFilterInternal(request, response, filterChain);
+
+        verify(inlineLoanCOBExecutorService, times(1)).execute(List.of(7L), INLINE_WC_JOB);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "/v1/working-capital-loans", "/v1/working-capital-loans/", "/v1/working-capital-loans/catch-up" })
+    public void shouldNotRunInlineCOBForWritesThatAddressNoExistingLoan(String pathInfo) throws ServletException, IOException {
+        MockHttpServletRequest request = request(pathInfo);
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        given(context.authenticatedUser()).willReturn(mock(AppUser.class));
+
+        testObj.doFilterInternal(request, response, filterChain);
+
+        verifyNoInteractions(inlineLoanCOBExecutorService);
+        verifyNoInteractions(loanAccountLockService);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
+    }
+
+    @Test
+    public void shouldResolveOnlyTheConcreteLoanIdFromARealWorkingCapitalBatch() throws ServletException, IOException {
+        setBusinessDates();
+        MockHttpServletRequest request = request("/v1/batches",
+                batchBody(batchEntry("v1/working-capital-loans", "{\"principalAmount\":9000}"),
+                        batchEntry("v1/working-capital-loans/$.resourceId?command=approve", "{\"approvedOnDate\":\"01 January 2026\"}"),
+                        batchEntry("v1/working-capital-loans/$.resourceId?command=disburse", "{\"transactionAmount\":9000}"),
+                        batchEntry("v1/working-capital-loans/7/transactions?command=repayment", "{\"transactionAmount\":50}")));
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        LocalDate cobDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
+        COBIdAndLastClosedBusinessDate result = mock(COBIdAndLastClosedBusinessDate.class);
+        given(result.getId()).willReturn(7L);
+        given(context.authenticatedUser()).willReturn(mock(AppUser.class));
+        given(loanAccountLockService.isAnyLoanHardLocked(anyList())).willReturn(false);
+        given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
+        given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
+        given(retrieveIdService.retrieveLoanIdsBehindDate(eq(cobDate), anyList())).willReturn(Collections.singletonList(result));
+        given(retrieveIdService.retrieveLoanBehindOnDisbursementDate(eq(cobDate), anyList())).willReturn(Collections.emptyList());
+
+        testObj.doFilterInternal(request, response, filterChain);
+
+        verify(retrieveIdService, times(1)).retrieveLoanIdsBehindDate(cobDate, List.of(7L));
+        verify(inlineLoanCOBExecutorService, times(1)).execute(List.of(7L), INLINE_WC_JOB);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
+    }
+
+    @Test
+    public void shouldIgnoreBodyLoanIdOfNonWorkingCapitalBatchSubRequests() throws ServletException, IOException {
+        setBusinessDates();
+        MockHttpServletRequest request = request("/v1/batches",
+                batchBody(batchEntry("working-capital-loans/7/transactions?command=repayment", null),
+                        batchEntry("loans/5/transactions?command=repayment", "{\"loanId\":5}")));
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        LocalDate cobDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
+        given(context.authenticatedUser()).willReturn(mock(AppUser.class));
+        given(loanAccountLockService.isAnyLoanHardLocked(anyList())).willReturn(false);
+        given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
+        given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
+        given(retrieveIdService.retrieveLoanIdsBehindDate(eq(cobDate), anyList())).willReturn(Collections.emptyList());
+        given(retrieveIdService.retrieveLoanBehindOnDisbursementDate(eq(cobDate), anyList())).willReturn(Collections.emptyList());
+
+        testObj.doFilterInternal(request, response, filterChain);
+
+        verify(retrieveIdService, times(1)).retrieveLoanIdsBehindDate(cobDate, List.of(7L));
+        verify(inlineLoanCOBExecutorService, times(0)).execute(anyList(), eq(INLINE_WC_JOB));
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
+    }
+
+    @Test
+    public void shouldNotRejectBatchForHardLockOfNonWorkingCapitalBodyLoanId() throws ServletException, IOException {
+        setBusinessDates();
+        MockHttpServletRequest request = request("/v1/batches",
+                batchBody(batchEntry("working-capital-loans/7/transactions?command=repayment", null),
+                        batchEntry("loans/5/transactions?command=repayment", "{\"loanId\":5}")));
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        LocalDate cobDate = ThreadLocalContextUtil.getBusinessDateByType(BusinessDateType.COB_DATE);
+        given(context.authenticatedUser()).willReturn(mock(AppUser.class));
+        given(loanAccountLockService.isAnyLoanHardLocked(List.of(7L))).willReturn(false);
+
+        given(loanAccountLockService.isAnyLoanHardLocked(List.of(5L))).willReturn(true);
+        given(loanAccountLockService.isAnyLockOverrulable(List.of(5L))).willReturn(false);
+        given(fineractProperties.getQuery()).willReturn(fineractQueryProperties);
+        given(fineractQueryProperties.getInClauseParameterSizeLimit()).willReturn(65000);
+        given(retrieveIdService.retrieveLoanIdsBehindDate(eq(cobDate), anyList())).willReturn(Collections.emptyList());
+        given(retrieveIdService.retrieveLoanBehindOnDisbursementDate(eq(cobDate), anyList())).willReturn(Collections.emptyList());
+
+        testObj.doFilterInternal(request, response, filterChain);
+
+        verify(response, times(0)).setStatus(HttpStatus.SC_CONFLICT);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
+    }
+
+    @Test
+    public void shouldProceedWhenBatchApiHasNoWorkingCapitalLoanSubRequest() throws ServletException, IOException {
+        MockHttpServletRequest request = request("/v1/batches",
+                batchBody(batchEntry("loans/5/transactions?command=repayment", "{\"loanId\":5}")));
+        MockHttpServletResponse response = mock(MockHttpServletResponse.class);
+        FilterChain filterChain = mock(FilterChain.class);
+        given(context.authenticatedUser()).willReturn(mock(AppUser.class));
+
+        testObj.doFilterInternal(request, response, filterChain);
+
+        verifyNoInteractions(inlineLoanCOBExecutorService);
+        verifyNoInteractions(loanAccountLockService);
+        verify(filterChain, times(1)).doFilter(any(HttpServletRequest.class), eq(response));
     }
 
     @Test
