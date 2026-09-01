@@ -107,6 +107,12 @@ public class FeignSavingsTransactionHelper {
                 command));
     }
 
+    public CommandProcessingResult modifyTransaction(Long savingsId, Long transactionId,
+            PostSavingsAccountBulkReversalTransactionsRequest request) {
+        return ok(() -> fineractClient.savingsAccountTransactions().adjustSavingsAccountTransaction(savingsId, transactionId, request,
+                "modify"));
+    }
+
     public SavingsAccountTransactionData getTransaction(Long savingsId, Long transactionId) {
         return ok(() -> fineractClient.savingsAccountTransactions().retrieveOneSavingsAccountTransaction(savingsId, transactionId));
     }

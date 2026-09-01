@@ -159,6 +159,8 @@ final class SavingsAccountTransactionsApiResourceSwagger {
             public String externalId;
             @Schema(example = "[2023, 05, 01]")
             public LocalDate date;
+            @Schema(example = "09:00:00Z")
+            public String transactionTime;
             public GetTransactionsCurrency currency;
             public GetTransactionsPaymentDetailData paymentDetailData;
             @Schema(example = "500")
@@ -204,6 +206,8 @@ final class SavingsAccountTransactionsApiResourceSwagger {
 
         @Schema(example = "27 March 2022")
         public String transactionDate;
+        @Schema(example = "14:30:00+05:30")
+        public String transactionTime;
         @Schema(example = "1000")
         public BigDecimal transactionAmount;
         @Schema(example = "en")
@@ -250,5 +254,17 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         public String externalId;
         @Schema(example = "true")
         public String isBulk;
+        @Schema(example = "27 March 2022")
+        public String transactionDate;
+        @Schema(example = "02:00:00+05:30")
+        public String transactionTime;
+        @Schema(example = "1000")
+        public BigDecimal transactionAmount;
+        @Schema(example = "en")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "1")
+        public Long paymentTypeId;
     }
 }

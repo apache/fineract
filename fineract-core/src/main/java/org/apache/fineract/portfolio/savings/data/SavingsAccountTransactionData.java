@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.portfolio.savings.data;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -64,6 +66,8 @@ public class SavingsAccountTransactionData implements Serializable {
     private final String accountNo;
     private final ExternalId externalId;
     private final LocalDate date;
+    @Schema(type = "string", example = "09:00:00Z")
+    private OffsetTime transactionTime;
     private final CurrencyData currency;
     private final PaymentDetailData paymentDetailData;
     private final BigDecimal amount;
@@ -246,6 +250,11 @@ public class SavingsAccountTransactionData implements Serializable {
                 savingsAccountTransactionData.getLienTransaction());
     }
 
+    public SavingsAccountTransactionData withTransactionTime(final OffsetTime transactionTime) {
+        this.transactionTime = transactionTime;
+        return this;
+    }
+
     public static SavingsAccountTransactionData template(final Long savingsId, final String savingsAccountNo,
             final LocalDate defaultLocalDate, final CurrencyData currency) {
         return createData(null, null, null, savingsId, savingsAccountNo, defaultLocalDate, currency, null, null, null, false, null, null,
@@ -262,7 +271,8 @@ public class SavingsAccountTransactionData implements Serializable {
                 savingsAccountTransactionData.getRunningBalance(), savingsAccountTransactionData.isReversed(),
                 savingsAccountTransactionData.getTransfer(), paymentTypeOptions, savingsAccountTransactionData.getSubmittedOnDate(),
                 savingsAccountTransactionData.isInterestedPostedAsOn(), savingsAccountTransactionData.getSubmittedByUsername(),
-                savingsAccountTransactionData.getNote(), savingsAccountTransactionData.getLienTransaction());
+                savingsAccountTransactionData.getNote(), savingsAccountTransactionData.getLienTransaction())
+                .withTransactionTime(savingsAccountTransactionData.getTransactionTime());
     }
 
     private static SavingsAccountTransactionData createImport(final SavingsAccountTransactionEnumData transactionType,

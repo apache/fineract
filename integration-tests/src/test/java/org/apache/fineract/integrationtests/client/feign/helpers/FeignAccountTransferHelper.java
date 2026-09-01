@@ -22,6 +22,7 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.AccountTransferRequest;
+import org.apache.fineract.client.models.GetAccountTransfersPageItems;
 import org.apache.fineract.client.models.PostAccountTransfersRefundByTransferResponse;
 import org.apache.fineract.client.models.PostAccountTransfersResponse;
 import org.apache.fineract.integrationtests.client.feign.modules.AccountTransferRequestBuilders;
@@ -37,6 +38,10 @@ public class FeignAccountTransferHelper {
 
     public PostAccountTransfersResponse createAccountTransfer(AccountTransferRequest request) {
         return ok(() -> fineractClient.accountTransfers().createAccountTransfer(request));
+    }
+
+    public GetAccountTransfersPageItems getAccountTransfer(Long transferId) {
+        return ok(() -> fineractClient.accountTransfers().retrieveOneAccountTransfer(transferId));
     }
 
     /**

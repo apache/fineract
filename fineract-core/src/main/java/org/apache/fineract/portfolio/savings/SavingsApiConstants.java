@@ -147,6 +147,7 @@ public class SavingsApiConstants {
 
     // transaction parameters
     public static final String transactionDateParamName = "transactionDate";
+    public static final String transactionTimeParamName = "transactionTime";
     public static final String lienParamName = "lien";
     public static final String transactionAmountParamName = "transactionAmount";
     public static final String paymentDetailDataParamName = "paymentDetailData";
