@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.savings.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
@@ -34,9 +35,17 @@ public interface SavingsAccountDomainService {
             BigDecimal transactionAmount, PaymentDetail paymentDetail, SavingsTransactionBooleanValues transactionBooleanValues,
             boolean backdatedTxnsAllowedTill);
 
+    SavingsAccountTransaction handleWithdrawal(SavingsAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
+            OffsetTime transactionTime, BigDecimal transactionAmount, PaymentDetail paymentDetail,
+            SavingsTransactionBooleanValues transactionBooleanValues, boolean backdatedTxnsAllowedTill);
+
     SavingsAccountTransaction handleDeposit(SavingsAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean isAccountTransfer, boolean isRegularTransaction,
             boolean backdatedTxnsAllowedTill);
+
+    SavingsAccountTransaction handleDeposit(SavingsAccount account, DateTimeFormatter fmt, LocalDate transactionDate,
+            OffsetTime transactionTime, BigDecimal transactionAmount, PaymentDetail paymentDetail, boolean isAccountTransfer,
+            boolean isRegularTransaction, boolean backdatedTxnsAllowedTill);
 
     void postJournalEntries(SavingsAccount savingsAccount, Set<Long> existingTransactionIds, Set<Long> existingReversedTransactionIds,
             boolean backdatedTxnsAllowedTill);
