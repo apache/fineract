@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.infrastructure.event.business.service;
 
+import java.util.function.Supplier;
 import org.apache.fineract.infrastructure.event.business.BusinessEventListener;
 import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 
@@ -55,9 +56,15 @@ public interface BusinessEventNotifierService {
      */
     <T extends BusinessEvent<?>> void addPostBusinessEventListener(Class<T> eventType, BusinessEventListener<T> listener);
 
-    void startExternalEventRecording();
+    /**
+     * Runs {@code action} inside an external event recording window: the external events it raises are buffered and
+     * posted together as a single {@link org.apache.fineract.infrastructure.event.business.domain.BulkBusinessEvent}
+     * once the outermost window closes.
+     */
+    <T> T withExternalEventRecording(Supplier<T> action);
 
-    void stopExternalEventRecording();
-
-    void resetEventRecording();
+    /**
+     * The value-less form of {@link #withExternalEventRecording(Supplier)}, with the same semantics.
+     */
+    void withExternalEventRecording(Runnable action);
 }

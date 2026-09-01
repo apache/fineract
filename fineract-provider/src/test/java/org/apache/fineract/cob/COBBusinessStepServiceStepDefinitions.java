@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
 import org.apache.fineract.cob.domain.BatchBusinessStep;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
@@ -74,6 +75,11 @@ public class COBBusinessStepServiceStepDefinitions implements En {
     public COBBusinessStepServiceStepDefinitions() throws Exception {
         businessStepService = new COBBusinessStepServiceImpl(batchBusinessStepRepository, applicationContext, beanFactory,
                 businessEventNotifierService, configurationDomainService, reloaderService);
+
+        // The notifier owns opening and closing the recording window; here it just has to run what it was handed and
+        // hand back the result, otherwise the business step chain never executes at all.
+        lenient().doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(businessEventNotifierService)
+                .withExternalEventRecording(Mockito.<Supplier<Object>>any());
 
         Given("/^The COBBusinessStepService.run method with executeMap (.*)$/", (String executionMap) -> {
             if ("null".equals(executionMap)) {
@@ -165,7 +171,7 @@ public class COBBusinessStepServiceStepDefinitions implements En {
             assertThrows(BusinessStepException.class, () -> {
                 resultItem = this.businessStepService.run(this.executionMap, this.item);
             });
-            verify(businessEventNotifierService, Mockito.times(1)).resetEventRecording();
+            verify(businessEventNotifierService, Mockito.times(1)).withExternalEventRecording(Mockito.<Supplier<Object>>any());
             ThreadLocalContextUtil.setActionContext(ActionContext.DEFAULT);
         });
 

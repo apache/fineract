@@ -57,21 +57,18 @@ public class WorkingCapitalLoanAdjustTransactionEventPublisher {
         return businessEventNotifierService.isExternalEventPostingEnabled(WorkingCapitalLoanAdjustTransactionBusinessEvent.TYPE);
     }
 
-    /** The recording window makes the whole replay reach the consumer as one bulk event instead of N separate ones. */
+    /**
+     * The recording window makes the whole replay reach the consumer as one bulk event instead of N separate ones. If a
+     * window is already open further up the stack - a COB run, say - these events join that one instead.
+     */
     public void publishReprocessed(final Long wcLoanId, final List<WorkingCapitalLoanTransactionAdjustment> adjustments) {
         if (adjustments.isEmpty()) {
             return;
         }
-        try {
-            businessEventNotifierService.startExternalEventRecording();
-            adjustments.forEach(adjustment -> businessEventNotifierService.notifyPostBusinessEvent(
-                    new WorkingCapitalLoanAdjustTransactionBusinessEvent(new WorkingCapitalLoanAdjustTransactionBusinessEvent.Data(
-                            adjustment.previousState(), adjustment.currentState()), wcLoanId)));
-            businessEventNotifierService.stopExternalEventRecording();
-        } catch (Exception e) {
-            businessEventNotifierService.resetEventRecording();
-            throw e;
-        }
+        businessEventNotifierService.withExternalEventRecording(() -> adjustments.forEach(
+                adjustment -> businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanAdjustTransactionBusinessEvent(
+                        new WorkingCapitalLoanAdjustTransactionBusinessEvent.Data(adjustment.previousState(), adjustment.currentState()),
+                        wcLoanId))));
     }
 
     public record WorkingCapitalLoanTransactionAdjustment(WorkingCapitalLoanTransactionData previousState,

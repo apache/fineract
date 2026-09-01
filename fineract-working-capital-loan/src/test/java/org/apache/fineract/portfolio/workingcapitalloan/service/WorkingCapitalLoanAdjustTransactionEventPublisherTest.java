@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -39,6 +40,7 @@ import org.apache.fineract.infrastructure.event.business.service.BusinessEventNo
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanAdjustTransactionEventPublisher.WorkingCapitalLoanTransactionAdjustment;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -60,6 +62,15 @@ class WorkingCapitalLoanAdjustTransactionEventPublisherTest {
 
     @InjectMocks
     private WorkingCapitalLoanAdjustTransactionEventPublisher publisher;
+
+    @BeforeEach
+    void runTheRecordingWindowAction() {
+        // The notifier owns opening and closing the window; here it just has to run what it was handed.
+        lenient().doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(businessEventNotifierService).withExternalEventRecording(any(Runnable.class));
+    }
 
     @Test
     void snapshotsReturnsEmptyMapWithoutBuildingPayloadsWhenPostingIsDisabled() {
@@ -136,15 +147,13 @@ class WorkingCapitalLoanAdjustTransactionEventPublisherTest {
         assertThat(events.get(1).get().getNewTransactionDetail()).isSameAs(secondAfter);
 
         final InOrder inOrder = inOrder(businessEventNotifierService);
-        inOrder.verify(businessEventNotifierService).startExternalEventRecording();
+        inOrder.verify(businessEventNotifierService).withExternalEventRecording(any(Runnable.class));
         inOrder.verify(businessEventNotifierService, times(2)).notifyPostBusinessEvent(any());
-        inOrder.verify(businessEventNotifierService).stopExternalEventRecording();
-        verify(businessEventNotifierService, never()).resetEventRecording();
         verifyNoMoreInteractions(businessEventNotifierService);
     }
 
     @Test
-    void publishReprocessedResetsTheRecordingWindowAndRethrowsWhenPublishingFails() {
+    void publishReprocessedRethrowsWhenPublishingFails() {
         final RuntimeException failure = new RuntimeException("boom");
         doThrow(failure).when(businessEventNotifierService).notifyPostBusinessEvent(any());
 
@@ -152,10 +161,8 @@ class WorkingCapitalLoanAdjustTransactionEventPublisherTest {
                 List.of(new WorkingCapitalLoanTransactionAdjustment(transaction(1L), transaction(1L))))).isSameAs(failure);
 
         final InOrder inOrder = inOrder(businessEventNotifierService);
-        inOrder.verify(businessEventNotifierService).startExternalEventRecording();
+        inOrder.verify(businessEventNotifierService).withExternalEventRecording(any(Runnable.class));
         inOrder.verify(businessEventNotifierService).notifyPostBusinessEvent(any());
-        inOrder.verify(businessEventNotifierService).resetEventRecording();
-        verify(businessEventNotifierService, never()).stopExternalEventRecording();
     }
 
     private void postingEnabled(final boolean enabled) {
