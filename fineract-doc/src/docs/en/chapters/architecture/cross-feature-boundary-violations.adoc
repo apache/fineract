@@ -14,8 +14,7 @@ A feature's *boundary* is that published set. Code inside the feature may use an
 
 Two shared modules sit beneath every feature and are deliberately outside this rule:
 
-* `fineract-core` — shared domain primitives, contracts and abstractions that any
-  feature may depend on.
+* `fineract-core` — shared domain primitives, contracts and abstractions that any feature may depend on.
 * `fineract-command` — the command/handler infrastructure through which state changes flow.
 
 A dependency on either is not a violation. It is the mechanism by which features are meant to reach one another.
@@ -29,20 +28,14 @@ A *cross-feature violation* (CFV) is a compile-time reference from a class owned
 Counted as a violation:
 
 * Importing a concrete class, entity or service implementation from another feature.
-* A JPA association that maps directly onto another feature's entity — for example
-  `ProductToGLAccountMapping` in the accounting module holding a `Charge` field
-  (see `ProductToGLAccountMapping.java`), which binds the accounting object model to
-  the charge object model at compile time.
-* Injecting another feature's `…ReadPlatformService` implementation rather than a
-  contract published for the purpose.
+* A JPA association that maps directly onto another feature's entity — for example `ProductToGLAccountMapping` in the accounting module holding a `Charge` field (see `ProductToGLAccountMapping.java`), which binds the accounting object model to the charge object model at compile time.
+* Injecting another feature's `…ReadPlatformService` implementation rather than a contract published for the purpose.
 * Reading another feature's tables directly in hand-written SQL.
 
 Not counted as a violation:
 
 * Any dependency on `fineract-core` or `fineract-command`.
-* A feature *implementing* a contract that another feature owns. This is the inversion
-  that fixes a violation rather than an instance of one, and it is the shape every fix in
-  <<_how_a_violation_is_fixed>> takes.
+* A feature *implementing* a contract that another feature owns. This is the inversion that fixes a violation rather than an instance of one, and it is the shape every fix in <<_how_a_violation_is_fixed>> takes.
 * Dependencies on platform infrastructure — security, event framework, jobs, Liquibase.
 
 The distinction between the second and third bullets of the two lists matters more than it may appear. Accounting depending on charge is a violation. Charge implementing an interface that accounting owns is not — the compile-time arrow now points from charge into accounting-owned contracts, and accounting no longer needs to know charge exists. That single reversal is the core move used throughout this chapter.
@@ -89,17 +82,11 @@ It is recorded here because it is the boundary of what the work achieves: the ou
 
 The measured position — 115 cross-feature dependency pairs across 13,887 class-level edges, with only 2 of 20 features clean — has concrete consequences:
 
-* *Change amplification.* A change to a charge entity can force recompilation and
-  retesting of accounting, loan, savings and shareaccounts, because all four reference it
-  directly.
-* *No independent testing.* A feature cannot be exercised without standing up most of the
-  platform, which pushes work into slow integration tests.
-* *Dependency cycles.* Mutual dependencies between features mean there is no ordering in
-  which they can be built or reasoned about separately.
-* *Onboarding cost.* A contributor cannot form a working mental model of one feature
-  without also learning several others.
-* *Modularisation is blocked.* Extracting any feature into its own module is impossible
-  while its compile-time reach is unbounded, so the module structure cannot advance.
+* *Change amplification.* A change to a charge entity can force recompilation and retesting of accounting, loan, savings and shareaccounts, because all four reference it directly.
+* *No independent testing.* A feature cannot be exercised without standing up most of the platform, which pushes work into slow integration tests.
+* *Dependency cycles.* Mutual dependencies between features mean there is no ordering in which they can be built or reasoned about separately.
+* *Onboarding cost.* A contributor cannot form a working mental model of one feature without also learning several others.
+* *Modularisation is blocked.* Extracting any feature into its own module is impossible while its compile-time reach is unbounded, so the module structure cannot advance.
 
 === Scope of This Analysis
 
@@ -111,13 +98,8 @@ Fineract runs on MariaDB and PostgreSQL, and the analysis is *engine-independent
 
 What matters is the schema layout, which is identical on both engines:
 
-* A single *tenant schema* holds the tables of every feature. There is no per-feature
-  schema, and no per-feature database.
-* Schema evolution is driven by one Liquibase master changelog, with the bulk of the
-  feature tables created in `0001_initial_schema.xml`. Some newer modules
-  (`fineract-savings`, `fineract-progressive-loan`, `fineract-rates`,
-  `fineract-working-capital-loan`) carry their own changelog directories, so migration
-  ownership is partially distributed already.
+* A single *tenant schema* holds the tables of every feature. There is no per-feature schema, and no per-feature database.
+* Schema evolution is driven by one Liquibase master changelog, with the bulk of the feature tables created in `0001_initial_schema.xml`. Some newer modules (`fineract-savings`, `fineract-progressive-loan`, `fineract-rates`, `fineract-working-capital-loan`) carry their own changelog directories, so migration ownership is partially distributed already.
 * Cross-feature foreign keys exist throughout that shared schema.
 
 In scope: identifying the foreign keys and shared tables that constrain a proposed extraction, and reporting them as part of each case study's impact assessment.
@@ -136,13 +118,9 @@ Application runtime infrastructure — deployment topology, messaging, caching, 
 
 ==== What This Chapter Does Not Cover
 
-* *Microservice extraction.* The target is a modular monolith. Nothing here proposes
-  separate deployables.
+* *Microservice extraction.* The target is a modular monolith. Nothing here proposes separate deployables.
 * *Runtime or transactional isolation*, as set out above.
-* *A complete directed dependency graph from MetricsTree alone.* MetricsTree measures
-  coupling magnitude, never direction: `Ce = 11` says a package reaches out to eleven
-  outside classes, never which ones. Directed feature-to-feature edges are derived from
-  the import graph; MetricsTree supplies magnitude and feature-envy evidence.
+* *A complete directed dependency graph from MetricsTree alone.* MetricsTree measures coupling magnitude, never direction: `Ce = 11` says a package reaches out to eleven outside classes, never which ones. Directed feature-to-feature edges are derived from the import graph; MetricsTree supplies magnitude and feature-envy evidence.
 
 === How to Read This Chapter
 
@@ -160,42 +138,28 @@ Essential complexity is inherent in the domain and will survive any refactoring.
 
 Accidental complexity is how those relationships are currently *expressed in code*:
 
-* Accounting knows the `Charge` *class* when all it requires is a charge *identifier*
-  and a small amount of charge metadata.
-* The client feature imports concrete types from loan, savings, charge, collateral,
-  note, accounting, staff, working days, holidays and data queries in order to assemble
-  what is ultimately a read-only view.
-* A feature that needs one field from a neighbour takes a compile-time dependency on
-  that neighbour's entire object graph.
+* Accounting knows the `Charge` *class* when all it requires is a charge *identifier* and a small amount of charge metadata.
+* The client feature imports concrete types from loan, savings, charge, collateral, note, accounting, staff, working days, holidays and data queries in order to assemble what is ultimately a read-only view.
+* A feature that needs one field from a neighbour takes a compile-time dependency on that neighbour's entire object graph.
 
 In each case the *dependency is real* but the *coupling is far stronger than the dependency requires*. That gap — between what a feature genuinely needs and what it currently imports — is the complexity this work removes.
 
 === Where the Complexity Shows Up
 
-* *Build and test cycles.* Touching a widely-referenced entity triggers rebuilds far
-  beyond the feature that owns it.
-* *Cyclic reasoning.* With 115 cross-feature pairs among 20 features, dependency cycles
-  are the norm rather than the exception, and no feature can be understood in isolation.
-* *Misleading module structure.* Gradle modules imply boundaries that the code does not
-  respect, so the build files actively mislead newcomers.
-* *Hidden coupling.* Because 159 packages are split across modules, some cross-module
-  dependencies appear as ordinary intra-package references and are invisible to
-  package-level metrics — the coupling is worse than a naive `Ce` reading suggests.
+* *Build and test cycles.* Touching a widely-referenced entity triggers rebuilds far beyond the feature that owns it.
+* *Cyclic reasoning.* With 115 cross-feature pairs among 20 features, dependency cycles are the norm rather than the exception, and no feature can be understood in isolation.
+* *Misleading module structure.* Gradle modules imply boundaries that the code does not respect, so the build files actively mislead newcomers.
+* *Hidden coupling.* Because 159 packages are split across modules, some cross-module dependencies appear as ordinary intra-package references and are invisible to package-level metrics — the coupling is worse than a naive `Ce` reading suggests.
 
 === What Decoupling Will Not Simplify
 
 Stated plainly, so the expected benefit is not oversold:
 
-* *Domain complexity is unchanged.* The same business rules, in the same number, after
-  the work as before.
-* *Class count rises.* Interfaces and DTOs in `fineract-core` are added, not removed.
-  Decoupling trades a smaller number of tightly-bound types for a larger number of
-  loosely-bound ones.
-* *Indirection increases.* Navigating from a caller to the implementation now passes
-  through a contract, which is a real cost to readability at the call site.
+* *Domain complexity is unchanged.* The same business rules, in the same number, after the work as before.
+* *Class count rises.* Interfaces and DTOs in `fineract-core` are added, not removed. Decoupling trades a smaller number of tightly-bound types for a larger number of loosely-bound ones.
+* *Indirection increases.* Navigating from a caller to the implementation now passes through a contract, which is a real cost to readability at the call site.
 * *The database is untouched.* Cross-feature foreign keys remain.
-* *Runtime behaviour is unchanged.* The same calls happen in the same order in the same
-  transaction.
+* *Runtime behaviour is unchanged.* The same calls happen in the same order in the same transaction.
 
 The trade is deliberate: more types, more indirection, and in exchange a module structure that can be enforced automatically and evolved independently.
 
@@ -261,29 +225,16 @@ The diagram task declares the report as its input and the three specifications a
 
 Three practical notes:
 
-* The component classifier is a closure, which Gradle cannot fingerprint as a task input.
-  After changing it the task reports `UP-TO-DATE` and leaves the previous report in place,
-  so re-run it with `--rerun`.
-* The generated API SDK modules are excluded from the scan. They are emitted by the
-  OpenAPI generator rather than written by hand, so they are not features.
-* Rendering the diagrams during a documentation build requires the Vega command line
-  tools on the path. The Asciidoctor Vega converter shells out to `vl2vg` to translate
-  each Vega-Lite specification into Vega before rendering it, so `npm install -g vega
-  vega-lite vega-cli` is a prerequisite of the documentation build, not of the metrics
-  run.
+* The component classifier is a closure, which Gradle cannot fingerprint as a task input. After changing it the task reports `UP-TO-DATE` and leaves the previous report in place, so re-run it with `--rerun`.
+* The generated API SDK modules are excluded from the scan. They are emitted by the OpenAPI generator rather than written by hand, so they are not features.
+* Rendering the diagrams during a documentation build requires the Vega command line tools on the path. The Asciidoctor Vega converter shells out to `vl2vg` to translate each Vega-Lite specification into Vega before rendering it, so `npm install -g vega vega-lite vega-cli` is a prerequisite of the documentation build, not of the metrics run.
 +
-IMPORTANT: When `vl2vg` is absent the build *still succeeds*. Asciidoctor logs
-`Failed to generate image` for each diagram, emits the captions with no image, and
-returns success, so a continuous integration job without the Vega tooling will publish
-documentation with three missing figures and report nothing wrong. Asciidoctor Diagram
-also caches rendered output under `.asciidoctor/diagram` in the output directory, so a
-stale cache can mask the problem locally — clear it when verifying.
+IMPORTANT: When `vl2vg` is absent the build *still succeeds*. Asciidoctor logs `Failed to generate image` for each diagram, emits the captions with no image, and returns success, so a continuous integration job without the Vega tooling will publish documentation with three missing figures and report nothing wrong. Asciidoctor Diagram also caches rendered output under `.asciidoctor/diagram` in the output directory, so a stale cache can mask the problem locally — clear it when verifying.
 
 Two invariants confirm a correct run. If either fails, the edge derivation is wrong rather than the code having changed:
 
 * The `Ce` column sums to the total cross-feature pair count — 115 in the baseline below.
-* The `Ca` column sums to the same total, because every pair is counted once as efferent
-  and once as afferent.
+* The `Ca` column sums to the same total, because every pair is counted once as efferent and once as afferent.
 
 === Metrics Used
 
@@ -394,37 +345,22 @@ Worked example: `charge` at `D = 0.66` falls in *needs attention*; `loan` at `D 
 
 Two derived figures appear alongside the Martin set:
 
-* *CFV* — cross-feature violations, the number of other features this one depends on.
-  Identical to feature-level `Ce`.
-* *IS* — independence score, `1 - Ce / 19`, with 19 being the number of other features. A
-  feature at `IS = 1.00` depends on nothing else; the scale makes progress legible as a
-  single number per feature.
+* *CFV* — cross-feature violations, the number of other features this one depends on. Identical to feature-level `Ce`.
+* *IS* — independence score, `1 - Ce / 19`, with 19 being the number of other features. A feature at `IS = 1.00` depends on nothing else; the scale makes progress legible as a single number per feature.
 
 `DD` and `TC` record transitive reach through the dependency graph — how much of the platform a feature pulls in once indirect dependencies are followed. They explain why the direct counts matter: a feature with `Ce = 5` that transitively reaches fifteen others cannot be built or tested in isolation despite its modest direct count.
 
 Reading guidance, in the order the metrics are worth consulting:
 
-* *Read direction before magnitude.* High `Ca` with low `Ce` is a stable foundation and
-  needs no work. Only outward reach — high `Ce` and high CFV — indicates a feature that has
-  escaped its boundary.
-* *Treat high `I` with high `Ca` as the dangerous combination*: many things depend on it,
-  and it is itself unstable.
-* *Use `D` to judge position, `CFV` to judge reach.* They rank differently and mean
-  different things. A component can be badly positioned without reaching out far, and the
-  remedy differs in each case.
-* *Lead with `ATFD`, `FDP` and `LAA` when looking for specific classes to move.* High mean
-  `ATFD` with low `LAA` means a module systematically reads data it does not own. `FDP`
-  then separates one leaky neighbour from diffuse entanglement.
+* *Read direction before magnitude.* High `Ca` with low `Ce` is a stable foundation and needs no work. Only outward reach — high `Ce` and high CFV — indicates a feature that has escaped its boundary.
+* *Treat high `I` with high `Ca` as the dangerous combination*: many things depend on it, and it is itself unstable.
+* *Use `D` to judge position, `CFV` to judge reach.* They rank differently and mean different things. A component can be badly positioned without reaching out far, and the remedy differs in each case.
+* *Lead with `ATFD`, `FDP` and `LAA` when looking for specific classes to move.* High mean `ATFD` with low `LAA` means a module systematically reads data it does not own. `FDP` then separates one leaky neighbour from diffuse entanglement.
 * *Check the split-package list before trusting any package-level `Ce`.*
 
 === Baseline Measurements Across Modules
 
-IMPORTANT: *The figures and diagrams in this section are a snapshot taken on 2026-08-20.*
-They describe the platform as it stood on that date and do not update themselves. Nothing
-in the normal build recalculates them, so a reader arriving later should assume they have
-drifted. To see the current position, run `./gradlew architectureMetricsReport` — the
-`generatedAt` field at the top of the generated report always carries the date its figures
-were measured.
+IMPORTANT: *The figures and diagrams in this section are a snapshot taken on 2026-08-20.* They describe the platform as it stood on that date and do not update themselves. Nothing in the normal build recalculates them, so a reader arriving later should assume they have drifted. To see the current position, run `./gradlew architectureMetricsReport` — the `generatedAt` field at the top of the generated report always carries the date its figures were measured.
 
 [cols="3,>1,>1,>1,>1,>1,>1,>1,2", options="header"]
 |===
@@ -479,11 +415,8 @@ The dashed diagonal is the *main sequence*, the line `A + I = 1`. It encodes one
 
 Which side matters:
 
-* *Below-left of the line* — concrete and heavily depended upon. This is the *zone of
-  pain*: changing it is expensive because everything binds to its implementation. Every
-  Fineract feature that needs work is here.
-* *Above-right of the line* — abstract but nothing depends on it. This is the *zone of
-  uselessness*: effort spent on abstraction nobody uses.
+* *Below-left of the line* — concrete and heavily depended upon. This is the *zone of pain*: changing it is expensive because everything binds to its implementation. Every Fineract feature that needs work is here.
+* *Above-right of the line* — abstract but nothing depends on it. This is the *zone of uselessness*: effort spent on abstraction nobody uses.
 
 *2. Distance from the main sequence.* The same information as a sorted bar chart, one bar per feature. *Longer bar and deeper colour mean further from the line, so worse.* This is the diagram to read when deciding what to work on first — it is the first chart flattened into a priority order.
 
@@ -513,15 +446,9 @@ include::{diagramsdir}/cross-feature-matrix.vl.json[]
 
 Three readings are worth drawing out before the classification:
 
-* *`notifications` has `Ce = 8` and `Ca = 0`* — it depends on eight features and nothing
-  depends on it. A pure consumer, and therefore removable from every other feature's build
-  without affecting them.
-* *`useradministration` inverts that shape* — `Ca = 15` against `Ce = 2`, with `I = 0.12`.
-  Fifteen features depend on it while it depends on almost nothing. That is what a shared
-  foundation looks like, not a violation, even though its `D = 0.75` is among the worst.
-* *`organisation` and `client` combine high `Ca` with substantial `Ce`* — depended upon by
-  fourteen features each while reaching out to seven and eight respectively. High blast
-  radius and high outward reach together is the costliest combination to leave in place.
+* *`notifications` has `Ce = 8` and `Ca = 0`* — it depends on eight features and nothing depends on it. A pure consumer, and therefore removable from every other feature's build without affecting them.
+* *`useradministration` inverts that shape* — `Ca = 15` against `Ce = 2`, with `I = 0.12`. Fifteen features depend on it while it depends on almost nothing. That is what a shared foundation looks like, not a violation, even though its `D = 0.75` is among the worst.
+* *`organisation` and `client` combine high `Ca` with substantial `Ce`* — depended upon by fourteen features each while reaching out to seven and eight respectively. High blast radius and high outward reach together is the costliest combination to leave in place.
 
 === Classifying Violations by Severity
 
@@ -585,14 +512,9 @@ A package failing criteria 1 or 5 should not be scheduled regardless of how it s
 
 Applying the criteria to the twenty measured features produces three groups:
 
-* *Strong candidates* — a small contract surface and high blast radius. Charge and
-  organisation lead here: both are depended upon widely, and much of what their
-  dependants need is data rather than behaviour.
-* *High value, high cost* — loan and savings (`Ce = 11`, `CFV = 11` each). The largest
-  contributors to the total, but the broadest contract surface and the deepest database
-  entanglement. These need the pattern proven elsewhere first.
-* *Not candidates* — features that are already clean, or whose coupling runs inward
-  rather than outward. See below.
+* *Strong candidates* — a small contract surface and high blast radius. Charge and organisation lead here: both are depended upon widely, and much of what their dependants need is data rather than behaviour.
+* *High value, high cost* — loan and savings (`Ce = 11`, `CFV = 11` each). The largest contributors to the total, but the broadest contract surface and the deepest database entanglement. These need the pattern proven elsewhere first.
+* *Not candidates* — features that are already clean, or whose coupling runs inward rather than outward. See below.
 
 === Correcting the Earlier Estimates
 
@@ -639,11 +561,7 @@ Two conclusions follow. First, the earlier assessment identified six packages as
 
 * `F15 report` (`CFV = 0`) and `F20 template` (`CFV = 0`) — already compliant. No work.
 * `F17 mix` (`CFV = 1`) — a single edge; the contract would cost more than the coupling.
-* `F16 useradministration` (`Ce = 2`, `Ca = 15`) — the clearest case of coupling that
-  should *not* be attacked. Fifteen features depend on it while it depends on almost
-  nothing, which is exactly the shape a shared foundation should have. Its low
-  instability (`I = 0.12`) reflects a stable dependency, not a violation. The correct
-  treatment is to keep it stable, and possibly to formalise it as core.
+* `F16 useradministration` (`Ce = 2`, `Ca = 15`) — the clearest case of coupling that should *not* be attacked. Fifteen features depend on it while it depends on almost nothing, which is exactly the shape a shared foundation should have. Its low instability (`I = 0.12`) reflects a stable dependency, not a violation. The correct treatment is to keep it stable, and possibly to formalise it as core.
 * `F11 rate` (`CFV = 2`) — genuinely coupled, but too little to prioritise.
 
 The general rule: *high `Ca` with low `Ce` is a foundation, not a problem.* Only outward reach — high `Ce` and high CFV — indicates a feature that has escaped its boundary.
@@ -718,16 +636,12 @@ That leaves three contracts and one reclassification, taking teller from `CFV = 
 
 ==== Refactoring Steps
 
-. Enumerate every foreign type teller imports and record the fields actually read from
-  each. This determines the contract surface and should be done before any code moves.
-. Define the three read/write contracts in `fineract-core`, carrying identifiers and the
-  minimal data found in step 1.
+. Enumerate every foreign type teller imports and record the fields actually read from each. This determines the contract surface and should be done before any code moves.
+. Define the three read/write contracts in `fineract-core`, carrying identifiers and the minimal data found in step 1.
 . Implement each contract in its owning feature — organisation, client, accounting.
-. Replace teller's direct imports with the contracts; replace entity associations with
-  identifier fields.
+. Replace teller's direct imports with the contracts; replace entity associations with identifier fields.
 . Route the acting-user lookup through the existing security abstraction.
-. Add `TellerCrossFeatureBoundaryTest` asserting that `teller` depends on `fineract-core`
-  and `fineract-command` only.
+. Add `TellerCrossFeatureBoundaryTest` asserting that `teller` depends on `fineract-core` and `fineract-command` only.
 
 === Estimated Effort
 
@@ -760,14 +674,9 @@ No data migration. No Liquibase changeset.
 === Risks and Trade-offs
 
 * *Low risk overall.* One dependant, no API change, no schema change.
-* *Indirection cost.* Four call sites that previously navigated an entity association now
-  go through a contract. Readability at those sites is slightly worse.
-* *Contract drift.* Three interfaces owned by teller but implemented elsewhere must stay
-  in step. The boundary test catches dependency regressions but not a contract that has
-  grown to expose more than teller needs.
-* *Limited direct benefit.* Removing four of 115 pairs changes little on its own. The value
-  is in proving the pattern end to end — including the boundary test — on a case small
-  enough to review in a single sitting.
+* *Indirection cost.* Four call sites that previously navigated an entity association now go through a contract. Readability at those sites is slightly worse.
+* *Contract drift.* Three interfaces owned by teller but implemented elsewhere must stay in step. The boundary test catches dependency regressions but not a contract that has grown to expose more than teller needs.
+* *Limited direct benefit.* Removing four of 115 pairs changes little on its own. The value is in proving the pattern end to end — including the boundary test — on a case small enough to review in a single sitting.
 
 == Case Study: Medium Severity
 
@@ -847,14 +756,11 @@ This takes charge from `CFV = 6` to `CFV = 1` — the `useradministration` edge 
 
 ==== Refactoring Steps
 
-. Inventory every dependant's use of `Charge` and record the fields read. Expect a small,
-  repetitive set.
+. Inventory every dependant's use of `Charge` and record the fields read. Expect a small, repetitive set.
 . Define `AccountingChargeReadService` and `ProductChargeReadService` in `fineract-core`.
 . Implement both in the charge module.
-. Replace `Charge` associations with `Long chargeId` in accounting and the product
-  features; rewrite the JPQL that navigated those associations to join on the identifier.
-. Define `ChargeProductReadService` in `fineract-core`, implement it in loan, savings and
-  shareaccounts, and remove charge's imports of product types.
+. Replace `Charge` associations with `Long chargeId` in accounting and the product features; rewrite the JPQL that navigated those associations to join on the identifier.
+. Define `ChargeProductReadService` in `fineract-core`, implement it in loan, savings and shareaccounts, and remove charge's imports of product types.
 . Add `ChargeCrossFeatureBoundaryTest`.
 
 Steps 2–4 are independently shippable and can land before steps 5–6.
@@ -891,17 +797,10 @@ No data migration. No Liquibase changeset.
 
 === Risks and Trade-offs
 
-* *Query rewrites are the real risk.* Association navigation and an explicit join are easy
-  to make subtly different, particularly around null handling and fetch behaviour. Test at
-  query level, not only through the API.
-* *Charge is on many hot paths.* Replacing association navigation with a contract call can
-  introduce an extra query per charge if the implementation is naive. Watch for N+1 in the
-  read services.
-* *Five cycles broken.* The benefit is larger than the six-pair reduction suggests, because
-  charge and its neighbours become independently buildable for the first time.
-* *Highest value per unit of effort on the platform.* Charge combines a high `D`, a broad
-  dependant set, a narrow contract surface, and no database blocker. It is the case the
-  criteria in <<_the_criteria>> select.
+* *Query rewrites are the real risk.* Association navigation and an explicit join are easy to make subtly different, particularly around null handling and fetch behaviour. Test at query level, not only through the API.
+* *Charge is on many hot paths.* Replacing association navigation with a contract call can introduce an extra query per charge if the implementation is naive. Watch for N+1 in the read services.
+* *Five cycles broken.* The benefit is larger than the six-pair reduction suggests, because charge and its neighbours become independently buildable for the first time.
+* *Highest value per unit of effort on the platform.* Charge combines a high `D`, a broad dependant set, a narrow contract surface, and no database blocker. It is the case the criteria in <<_the_criteria>> select.
 
 == Case Study: High Severity
 
@@ -967,12 +866,9 @@ The target ordering matters more than the target shape. Loan should end as a *st
 
 ==== Refactoring Steps
 
-. Split the work by neighbour, not by layer. Each of the nine mutual pairs is a separate
-  unit of work with its own contract, review and boundary assertion.
-. For each pair, decide the *canonical direction* first — which side genuinely owns the
-  relationship. This is a design decision and the most valuable output of the exercise.
-. Define the contract on the depending side, implement it on the owning side, and convert
-  entity associations to identifier references.
+. Split the work by neighbour, not by layer. Each of the nine mutual pairs is a separate unit of work with its own contract, review and boundary assertion.
+. For each pair, decide the *canonical direction* first — which side genuinely owns the relationship. This is a design decision and the most valuable output of the exercise.
+. Define the contract on the depending side, implement it on the owning side, and convert entity associations to identifier references.
 . Extend the boundary test after each pair so the improvement is locked in incrementally.
 
 ==== Incremental Migration Path
@@ -1026,18 +922,11 @@ No data migration is expected in stages 1–3 or 5.
 
 === Risks and Trade-offs
 
-* *Highest risk in the chapter, by a wide margin.* Loan is the most business-critical code
-  on the platform, and a regression is a financial-correctness bug, not a display defect.
-* *Reviewer fatigue is a real failure mode.* Large mechanical diffs get approved without
-  scrutiny. Keeping stages small is a correctness measure, not just a convenience.
-* *Stage 4 may not be tractable as specified* and should be re-planned once stages 1–3 have
-  clarified the transfer semantics.
-* *Sequencing risk.* Loan will attract attention first precisely because it is the worst
-  number in the table. Starting here, before the pattern is proven and enforcement exists,
-  is the most likely way for the whole effort to stall.
-* *Largest payoff.* Eleven pairs removed and nine cycles broken is roughly a tenth of the
-  platform total, and it converts the central domain object from an unstable hub into a
-  stable one — the single change that most improves what the module structure can express.
+* *Highest risk in the chapter, by a wide margin.* Loan is the most business-critical code on the platform, and a regression is a financial-correctness bug, not a display defect.
+* *Reviewer fatigue is a real failure mode.* Large mechanical diffs get approved without scrutiny. Keeping stages small is a correctness measure, not just a convenience.
+* *Stage 4 may not be tractable as specified* and should be re-planned once stages 1–3 have clarified the transfer semantics.
+* *Sequencing risk.* Loan will attract attention first precisely because it is the worst number in the table. Starting here, before the pattern is proven and enforcement exists, is the most likely way for the whole effort to stall.
+* *Largest payoff.* Eleven pairs removed and nine cycles broken is roughly a tenth of the platform total, and it converts the central domain object from an unstable hub into a stable one — the single change that most improves what the module structure can express.
 
 == Comparative Analysis
 
@@ -1055,13 +944,9 @@ The last of these is the one to weight most heavily. Reducing an edge count impr
 
 === Recommended Order of Work
 
-. *Prove the pattern on a small, well-bounded case* — a package whose dependants need
-  data rather than behaviour, where a contract in `fineract-core` and an identifier
-  reference are sufficient.
-. *Repeat it on a widely-depended-upon feature* to confirm the pattern holds as blast
-  radius grows.
-. *Apply it to the largest offenders* — loan and savings — only once the pattern is
-  established and enforcement is in place.
+. *Prove the pattern on a small, well-bounded case* — a package whose dependants need data rather than behaviour, where a contract in `fineract-core` and an identifier reference are sufficient.
+. *Repeat it on a widely-depended-upon feature* to confirm the pattern holds as blast radius grows.
+. *Apply it to the largest offenders* — loan and savings — only once the pattern is established and enforcement is in place.
 
 Sequencing matters more than it might appear. Loan and savings account for the largest share of the total and will attract attention first, but attempting them before the pattern is proven risks a large, hard-to-review change that stalls, discouraging further work.
 
@@ -1069,16 +954,10 @@ Sequencing matters more than it might appear. Loan and savings account for the l
 
 Every violation in this chapter is fixed by the same five-step move, regardless of severity. The case studies differ in how much work each step involves, not in what the steps are.
 
-. *Identify the minimum the depending feature actually needs.* Almost always an
-  identifier plus a few fields, not the neighbour's behaviour. This step determines the
-  cost of the whole change, so it is worth doing carefully before any code moves.
-. *Define a contract for exactly that, owned by the depending feature*, and place it in
-  `fineract-core` so both sides can see it.
-. *Have the owning feature implement the contract.* This is the step that reverses the
-  compile-time arrow: the owning feature now points at a contract belonging to the
-  feature that used to depend on it.
-. *Replace direct object associations with identifier references.* A JPA association onto
-  a foreign entity becomes a plain `Long` id, and reads go through the contract.
+. *Identify the minimum the depending feature actually needs.* Almost always an identifier plus a few fields, not the neighbour's behaviour. This step determines the cost of the whole change, so it is worth doing carefully before any code moves.
+. *Define a contract for exactly that, owned by the depending feature*, and place it in `fineract-core` so both sides can see it.
+. *Have the owning feature implement the contract.* This is the step that reverses the compile-time arrow: the owning feature now points at a contract belonging to the feature that used to depend on it.
+. *Replace direct object associations with identifier references.* A JPA association onto a foreign entity becomes a plain `Long` id, and reads go through the contract.
 . *Add a boundary test* so the build fails if the dependency returns.
 
 ==== Replacing an Association with an Identifier
@@ -1115,11 +994,8 @@ The mechanism is a declared module structure plus an automated check: Spring Mod
 
 Two properties make this work as an enforcement strategy:
 
-* *It is incremental.* A test is added per feature as that feature is cleaned up, so
-  enforcement grows with the work instead of requiring the whole platform to be correct
-  before anything can be enforced.
-* *It fails at build time*, where the cost of the mistake is a red build rather than a
-  merged regression.
+* *It is incremental.* A test is added per feature as that feature is cleaned up, so enforcement grows with the work instead of requiring the whole platform to be correct before anything can be enforced.
+* *It fails at build time*, where the cost of the mistake is a red build rather than a merged regression.
 
 Every case study in this chapter should therefore end with a boundary test, and no decoupling should be considered complete without one.
 
@@ -1133,33 +1009,18 @@ Two cautions apply when re-measuring. Metrics must be gathered the same way each
 
 === Summary of Findings
 
-* Fineract's module structure states an intent the code does not yet honour. Only 2 of
-  20 features are free of cross-feature dependencies.
-* The measured position is 115 cross-feature dependency pairs across 13,887 class-level
-  edges, with 12 of 20 features classified CRITICAL.
-* The earlier assessment was materially wrong in both directions: four of the six
-  packages it called independent are among the worst offenders, one package it scheduled
-  for work is already compliant, and its total understates the measured figure by roughly
-  half.
-* Coupling is not uniform, and the direction matters. High `Ca` with low `Ce`
-  — `useradministration` — is a stable foundation and should be left alone. Only outward
-  reach indicates a feature that has escaped its boundary.
-* The binding constraint on cost is contract surface, not edge count: features whose
-  dependants need *data* are far cheaper to decouple than those whose dependants need
-  *behaviour*.
-* Every violation is fixed by the same move — invert the dependency through a contract in
-  `fineract-core`, replace object associations with identifier references, and enforce
-  the result with a boundary test. Severity changes the size of the change, not its shape.
-* Compile-time decoupling is achievable now and independent of the database. The shared
-  tenant schema and its cross-feature foreign keys remain, and separating them is
-  separate work.
+* Fineract's module structure states an intent the code does not yet honour. Only 2 of 20 features are free of cross-feature dependencies.
+* The measured position is 115 cross-feature dependency pairs across 13,887 class-level edges, with 12 of 20 features classified CRITICAL.
+* The earlier assessment was materially wrong in both directions: four of the six packages it called independent are among the worst offenders, one package it scheduled for work is already compliant, and its total understates the measured figure by roughly half.
+* Coupling is not uniform, and the direction matters. High `Ca` with low `Ce` — `useradministration` — is a stable foundation and should be left alone. Only outward reach indicates a feature that has escaped its boundary.
+* The binding constraint on cost is contract surface, not edge count: features whose dependants need *data* are far cheaper to decouple than those whose dependants need *behaviour*.
+* Every violation is fixed by the same move — invert the dependency through a contract in `fineract-core`, replace object associations with identifier references, and enforce the result with a boundary test. Severity changes the size of the change, not its shape.
+* Compile-time decoupling is achievable now and independent of the database. The shared tenant schema and its cross-feature foreign keys remain, and separating them is separate work.
 
 === Next Steps
 
-. Apply the criteria in <<_the_criteria>> to the full measured set and publish a ranked
-  candidate list.
-. Land the low-severity case study to establish the pattern end to end, boundary test
-  included.
+. Apply the criteria in <<_the_criteria>> to the full measured set and publish a ranked candidate list.
+. Land the low-severity case study to establish the pattern end to end, boundary test included.
 . Extend Spring Modulith coverage feature by feature as each is cleaned.
 . Re-measure and publish the trend, so the direction of travel is visible.
 . Revisit loan and savings once the pattern is proven and enforcement is in place.
