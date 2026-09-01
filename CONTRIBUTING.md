@@ -10,15 +10,6 @@ The [JIRA Dashboard](https://issues.apache.org/jira/secure/Dashboard.jspa?select
 
 You don't need to be a committer to provide pull requests, but [Becoming a Committer](https://cwiki.apache.org/confluence/display/FINERACT/Becoming+a+Committer) explains the process of becoming one - just in case...
 
-## AI Policy
-
-- AI tools may assist contribution work.
-- AI tools must not replace contributor accountability.
-- The human submitter is responsible for correctness, safety, performance, and maintainability of all submitted changes.
-- Follow the [Generative Tooling Guidance by the ASF](https://www.apache.org/legal/generative-tooling.html).
-
-In general: Own your contributions, don't vibe code them. Be transparent. Share your env/tooling/experiences. Ask for help as you scour docs, code, PRs, issues, check with actual users, chat, email, write spikes, run builds/tests, write new tests, and all that with and without AI.
-
 ## Non-code contributions
 
 We need a lot of help besides code changes. For example, we also welcome wiki edits! If you wish to make non-code contributions, please first get involved on the [developer mailing list](https://lists.apache.org/list.html?dev@fineract.apache.org) and in [chat](https://app.element.io/#/room/#apache-fineract-home:matrix.org). Around the time you [request wiki access](https://selfserve.apache.org/confluence-account.html), tell us something like:
@@ -151,6 +142,25 @@ This is useful for repeated test runs (say, for timing) when gradle would otherw
 
 See the next section for testing in Eclipse and [here](https://fineract-academy.com) for testing in IntelliJ.
 
+### How to run Apache RAT (Release Audit Tool)
+
+1. Extract the archive file to your local directory.
+2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
+
+### How to build documentation
+
+Run the following command:
+
+```bash
+./gradlew doc
+```
+
+Some dependencies are required (e.g. Ghostscript, Graphviz), see [.github/workflows/build-documentation.yml](https://github.com/apache/fineract/tree/develop/.github/workflows/build-documentation.yml) for hints.
+
+IDEs such as IntelliJ are useful for editing the AsciiDoc source files while providing a live rendered preview.
+
+HTML rendered from the AsciiDoc source files is also available online at [https://fineract.apache.org/docs/current/](https://fineract.apache.org/docs/current/).
+
 ## Recommended IDEs
 
 Apache Fineract can be developed using multiple IDEs. The most commonly used and supported IDEs are:
@@ -212,26 +222,6 @@ or
 curl -L https://github.com/apache/fineract/raw/develop/gradle/wrapper/gradle-wrapper.jar > \
     gradle/wrapper/gradle-wrapper.jar
 ```
-
-### How to run Apache RAT (Release Audit Tool)
-
-1. Extract the archive file to your local directory.
-2. Run `./gradlew rat`. A report will be generated under build/reports/rat/rat-report.txt
-
-
-### How to build documentation
-
-Run the following command:
-
-```bash
-./gradlew doc
-```
-
-Some dependencies are required (e.g. Ghostscript, Graphviz), see [.github/workflows/build-documentation.yml](https://github.com/apache/fineract/tree/develop/.github/workflows/build-documentation.yml) for hints.
-
-IDEs such as IntelliJ are useful for editing the AsciiDoc source files while providing a live rendered preview.
-
-HTML rendered from the AsciiDoc source files is also available online at [https://fineract.apache.org/docs/current/](https://fineract.apache.org/docs/current/).
 
 
 ## How We Code
@@ -296,6 +286,15 @@ The project uses [Lombok](https://projectlombok.org/) to reduce boilerplate code
     * `LOG.info()` can be used notably for one-time actions taken during start-up.  It should typically NOT be used to print out "regular" application usage information.  The default logging configuration always outputs the application INFO logs, and in production under load, there's really no point to constantly spew out lots of information from frequently traversed paths in the code about what's going on.  (Metrics are a better way.)  `LOG.info()` *can* be used freely in tests though.
     * `LOG.debug()` can be used anywhere in the code to log things that may be useful during investigations of specific problems.  They are not shown in the default logging configuration, but can be enabled for troubleshooting.  Developers should typically "turn down" most `LOG.info()` which they used while writing a new feature to "follow along what happens during local testing" to `LOG.debug()` for production before we merge their PRs.
     * `LOG.trace()` is not used in Fineract.
+
+### AI Policy
+
+- AI tools may assist contribution work.
+- AI tools must not replace contributor accountability.
+- The human submitter is responsible for correctness, safety, performance, and maintainability of all submitted changes.
+- Follow the [Generative Tooling Guidance by the ASF](https://www.apache.org/legal/generative-tooling.html).
+
+In general: Own your contributions, don't vibe code them. Be transparent. Share your env/tooling/experiences. Ask for help as you scour docs, code, PRs, issues, check with actual users, chat, email, write spikes, run builds/tests, write new tests, and all that with and without AI.
 
 ## Change Process
 
