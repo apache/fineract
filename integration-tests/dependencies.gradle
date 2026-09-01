@@ -21,7 +21,8 @@ dependencies {
     // Do NOT repeat dependencies which are ALREADY in implementation or runtimeOnly!
     //
     tomcat 'org.apache.tomcat:tomcat:10.1.55@zip'
-    def providerMainOutput = project(':fineract-provider').extensions.getByType(SourceSetContainer).named('main').get().output
+    def providerMainOutput = rootProject.project(':fineract-provider')
+            .extensions.getByType(SourceSetContainer).named('main').get().output
     testImplementation( providerMainOutput,
             project(path: ':fineract-core', configuration: 'runtimeElements'),
             project(path: ':fineract-accounting', configuration: 'runtimeElements'),

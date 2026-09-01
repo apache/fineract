@@ -52,8 +52,8 @@ tasks.named('compileTestJava') {
         .withPropertyName("testClassesDir")
 
     // Track annotation processor outputs
-    options.annotationProcessorGeneratedSourcesDirectory = 
-        layout.buildDirectory.dir('generated/sources/annotationProcessor/java/test').get().asFile
+    options.generatedSourceOutputDirectory =
+        layout.buildDirectory.dir('generated/sources/annotationProcessor/java/test')
 }
 
 dependencies {
@@ -81,8 +81,6 @@ dependencies {
     testImplementation 'io.cucumber:cucumber-junit'
     testImplementation 'io.cucumber:cucumber-spring'
     testImplementation 'io.cucumber:cucumber-junit-platform-engine'
-
-    testImplementation 'io.qameta.allure:allure-cucumber7-jvm:2.34.0'
 
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
