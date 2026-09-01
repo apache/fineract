@@ -130,6 +130,8 @@ final class AccountTransfersApiResourceSwagger {
         public Long transferAmount;
         @Schema(example = "[2013, 8, 15]")
         public LocalDate transferDate;
+        @Schema(example = "09:00:00Z")
+        public String transferTime;
         public GetAccountTransfersFromOffice fromOffice;
         public GetAccountTransfersFromAccountType fromAccountType;
         public Set<GetAccountTransfersFromOfficeOptions> fromOfficeOptions;
@@ -166,6 +168,8 @@ final class AccountTransfersApiResourceSwagger {
         public String locale;
         @Schema(example = "01 August 2011")
         public String transferDate;
+        @Schema(example = "14:30:00+05:30")
+        public String transferTime;
         @Schema(example = "112.45")
         public Float transferAmount;
         @Schema(example = "A description of the transfer")
@@ -292,6 +296,8 @@ final class AccountTransfersApiResourceSwagger {
             public Float transferAmount;
             @Schema(example = "[2013, 4, 1]")
             public LocalDate transferDate;
+            @Schema(example = "09:00:00Z")
+            public String transferTime;
             @Schema(example = "pay off loan from savings.")
             public String transferDescription;
             public GetAccountTransfersPageItemsFromOffice fromOffice;

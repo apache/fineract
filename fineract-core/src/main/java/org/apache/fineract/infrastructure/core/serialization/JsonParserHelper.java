@@ -32,6 +32,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.MonthDay;
+import java.time.OffsetTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -422,6 +424,37 @@ public class JsonParserHelper {
         if (element.isJsonObject()) {
             final JsonObject object = element.getAsJsonObject();
             value = extractLocalDateTimeNamed(parameterName, element, extractDateFormatParameter(object), parametersPassedInCommand);
+        }
+        return value;
+    }
+
+    public OffsetTime extractOffsetTimeNamed(final String parameterName, final JsonElement element,
+            final Set<String> parametersPassedInCommand) {
+        OffsetTime value = null;
+        String timeValueAsString = null;
+        if (element.isJsonObject()) {
+            final JsonObject object = element.getAsJsonObject();
+            if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
+                parametersPassedInCommand.add(parameterName);
+
+                try {
+                    final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
+                    timeValueAsString = primitive.getAsString();
+                    if (StringUtils.isNotBlank(timeValueAsString)) {
+                        value = OffsetTime.parse(timeValueAsString, DateTimeFormatter.ISO_OFFSET_TIME)
+                                .withOffsetSameInstant(ZoneOffset.UTC);
+                    }
+                } catch (IllegalArgumentException | DateTimeParseException e) {
+                    final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+                    final ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.time.format",
+                            "The parameter `" + parameterName
+                                    + "` is invalid. Expected ISO offset time format, for example: HH:mm:ss+05:30",
+                            parameterName, timeValueAsString);
+                    dataValidationErrors.add(error);
+                    throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                            dataValidationErrors, e);
+                }
+            }
         }
         return value;
     }

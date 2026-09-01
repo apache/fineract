@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.MonthDay;
+import java.time.OffsetTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
@@ -355,6 +356,10 @@ public final class JsonCommand {
 
     public LocalTime localTimeValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractLocalTimeNamed(parameterName, this.parsedCommand);
+    }
+
+    public OffsetTime offsetTimeValueOfParameterNamed(final String parameterName) {
+        return this.fromApiJsonHelper.extractOffsetTimeNamed(parameterName, this.parsedCommand);
     }
 
     public MonthDay extractMonthDayNamed(final String parameterName) {
