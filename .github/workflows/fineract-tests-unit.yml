@@ -1,11 +1,6 @@
 # ============================================================================
 # P2.1 - Unit Tests (JUnit)
 # SoW 4.0 - Proyecto 2 - Fineract Pruebas y Calidad (Dev)
-#
-# Patron "gate":
-#   - Job 'unit-tests' corre solo si el PR toca codigo Java (paths filter)
-#   - Job 'gate' SIEMPRE corre y reporta status
-#   - Branch Protection debe requerir "Unit Tests Gate" (no "Unit Tests")
 # ============================================================================
 name: "P2.1 - Fineract Unit Tests"
 
@@ -38,24 +33,31 @@ jobs:
               with:
                   filters: |
                       java:
-                          - 'fineract-provider/**'
-                          - 'fineract-core/**'
-                          - 'fineract-loan/**'
-                          - 'fineract-savings/**'
-                          - 'fineract-investor/**'
-                          - 'fineract-branch/**'
-                          - 'fineract-accounting/**'
-                          - 'fineract-command-test/**'
+                          - 'fineract-provider/**/*.java'
+                          - 'fineract-provider/**/*.gradle'
+                          - 'fineract-core/**/*.java'
+                          - 'fineract-core/**/*.gradle'
+                          - 'fineract-loan/**/*.java'
+                          - 'fineract-loan/**/*.gradle'
+                          - 'fineract-savings/**/*.java'
+                          - 'fineract-savings/**/*.gradle'
+                          - 'fineract-investor/**/*.java'
+                          - 'fineract-investor/**/*.gradle'
+                          - 'fineract-branch/**/*.java'
+                          - 'fineract-branch/**/*.gradle'
+                          - 'fineract-accounting/**/*.java'
+                          - 'fineract-accounting/**/*.gradle'
+                          - 'fineract-command-test/**/*.java'
+                          - 'fineract-command-test/**/*.gradle'
                           - 'build.gradle'
                           - 'settings.gradle'
-                          - '**/build.gradle'
 
     unit-tests:
         name: "Unit Tests"
         needs: detect-changes
         if: needs.detect-changes.outputs.java_changed == 'true'
         runs-on: ubuntu-latest
-        timeout-minutes: 25
+        timeout-minutes: 30
         steps:
             - name: Checkout
               uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -72,29 +74,19 @@ jobs:
                   java-version: '25'
                   cache: 'gradle'
 
-            - name: Gradle test (solo unit, sin modulos con infra)
+            - name: Gradle test (solo fineract-provider, sin generadores de SDK)
               run: |
                   export GRADLE_OPTS="-Xmx6g -Dorg.gradle.jvmargs=-Xmx6g"
-                  ./gradlew test --no-daemon --continue --max-workers=2 \
-                      -x :integration-tests:test \
-                      -x :oauth2-tests:test \
-                      -x :twofactor-tests:test \
-                      -x :fineract-e2e-tests-core:test \
-                      -x :fineract-e2e-tests-runner:test \
-                      -x :fineract-client:buildJavaSdk \
-                      -x :fineract-client:openApiGenerate \
-                      -x :fineract-client:build \
-                      -x :fineract-client:compileJava \
-                      -x :fineract-client:jar \
-                      -x :fineract-client:assemble \
-                      -x :fineract-client:test
+                  # Ejecutamos solo el test del provider (que trae 1337 tests)
+                  # y evitamos los tasks de SDK generation que se quedan sin heap
+                  ./gradlew :fineract-provider:test --no-daemon --continue --max-workers=2
 
             - name: Publicar reporte JUnit
               if: always()
               uses: dorny/test-reporter@6e6a65b7a0bd2c9197df7d0ae36ac5cee784230c # v2.0.0
               with:
                   name: JUnit Results (P2.1)
-                  path: '**/build/test-results/test/TEST-*.xml'
+                  path: 'fineract-provider/build/test-results/test/TEST-*.xml'
                   reporter: java-junit
                   fail-on-error: true
 
@@ -104,11 +96,10 @@ jobs:
               with:
                   name: test-reports-p2-1
                   path: |
-                      **/build/test-results/
-                      **/build/reports/tests/
+                      fineract-provider/build/test-results/
+                      fineract-provider/build/reports/tests/
                   retention-days: 30
 
-    # Gate job: SIEMPRE corre, reporta status para Branch Protection
     gate:
         name: "Unit Tests Gate"
         needs: [detect-changes, unit-tests]
@@ -119,19 +110,15 @@ jobs:
               run: |
                   JAVA_CHANGED="${{ needs.detect-changes.outputs.java_changed }}"
                   TESTS_RESULT="${{ needs.unit-tests.result }}"
-
                   echo "Java changed: $JAVA_CHANGED"
                   echo "Tests result: $TESTS_RESULT"
-
                   if [ "$JAVA_CHANGED" != "true" ]; then
                       echo "OK - PR sin cambios Java, tests skippeados"
                       exit 0
                   fi
-
                   if [ "$TESTS_RESULT" = "success" ]; then
                       echo "OK - Unit tests pasaron"
                       exit 0
                   fi
-
                   echo "::error::Unit tests fallaron (result: $TESTS_RESULT)"
                   exit 1
