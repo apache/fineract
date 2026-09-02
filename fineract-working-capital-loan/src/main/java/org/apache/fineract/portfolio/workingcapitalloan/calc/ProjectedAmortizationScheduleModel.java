@@ -21,7 +21,6 @@ package org.apache.fineract.portfolio.workingcapitalloan.calc;
 import com.google.gson.annotations.SerializedName;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -84,13 +83,6 @@ public final class ProjectedAmortizationScheduleModel {
      */
     public static final int MAX_CALCULABLE_TOTAL_DAYS = 100_000;
 
-    /**
-     * Scale the annual EIR percentage is persisted at, applied when it is computed so the event and the API read the
-     * same value.
-     */
-    public static final int ANNUAL_EIR_SCALE = 6;
-    public static final RoundingMode ANNUAL_EIR_ROUNDING = RoundingMode.HALF_EVEN;
-
     @SerializedName(value = "discountFeeAmount", alternate = "originationFeeAmount")
     private final Money discountFeeAmount;
     private final Money netDisbursementAmount;
@@ -113,8 +105,8 @@ public final class ProjectedAmortizationScheduleModel {
     private final int originalPaymentNumber;
 
     /**
-     * Periodic rate every balance and amortization is discounted by: {@link #annualEffectiveInterestRate} spread back
-     * over {@link #npvDayCount}. Models persisted before that field hold the solved IRR instead, left as it is.
+     * Periodic rate every balance and amortization is discounted by: {@link #calculatedAnnualEir()} spread back over
+     * {@link #npvDayCount}. Models persisted before that field hold the solved IRR instead, left as it is.
      * <p>
      * Zero when the loan carries no discount fee, and when the annual rate rounds to zero.
      */
@@ -122,16 +114,16 @@ public final class ProjectedAmortizationScheduleModel {
 
     /**
      * The rate the loan was priced at and the source {@link #effectiveInterestRate} is derived from, compounded over
-     * {@link #npvDayCount} rather than a calendar year.
+     * {@link #npvDayCount} rather than a calendar year, and held as a percentage like {@link #periodPaymentRate}.
      * <p>
      * Not restated by a payment rate change: the walk re-solves from the day a change takes effect, and the rate in
      * force on a date comes from the rate-change history. Matches the period payment rate beside it, likewise as
      * created.
      * <p>
-     * Null on models written before it existed — read through {@link #annualEffectiveInterestRate()}.
+     * Null on models written before it existed — read through {@link #calculatedAnnualEir()}.
      */
     @Getter(AccessLevel.NONE)
-    private final BigDecimal annualEffectiveInterestRate;
+    private final BigDecimal calculatedAnnualEir;
 
     @JsonExclude
     private final MathContext mc;
@@ -163,9 +155,10 @@ public final class ProjectedAmortizationScheduleModel {
     private List<ProjectedPayment> projectedPayments;
 
     /**
-     * The day the rate currently in force was solved to close on. Derived by the walk and cached because the date
-     * arithmetic that clamps a payment or an adjustment into the term needs it before any period is read, and
-     * materialising the schedule to answer it would recurse.
+     * The day the rate currently in force was solved to close on. Produced by the walk alongside the payment list and
+     * cached beside it, so it is only ever as fresh as that list is: a model read back from JSON has no term of its own
+     * until it rebuilds, which is why every read of it goes through {@link #materializeDerivedPayments()}. That cannot
+     * recurse - the rebuild clears the staleness flag before it walks anything.
      */
     @JsonExclude
     @Getter(AccessLevel.NONE)
@@ -180,11 +173,12 @@ public final class ProjectedAmortizationScheduleModel {
     private Map<LocalDate, RateChangeSolve> rateChangeSolves;
 
     /**
-     * Set whenever the list above is known to be out of date - on load, and when an elapsed-period acknowledgement
-     * moves {@link #calculatedTillDate}. The rebuild is deferred until something actually reads a period, because most
-     * callers want only the scalars beside it (the rate, the term, the payment amount) and a same-date acknowledgement
-     * changes nothing at all. On a 35716-period schedule an eager rebuild costs a quarter of a second, so doing it for
-     * readers that never look at a period is what made COB time out.
+     * Set whenever the list above is known to be out of date - on load, and whenever {@link #calculatedTillDate} moves
+     * without a rebuild behind it: an elapsed-period acknowledgement, or the date a rate change reaches before it reads
+     * the schedule back. The rebuild is deferred until something actually reads a period, because most callers want
+     * only the stored scalars beside it (the rate, the payment amount) and a same-date acknowledgement changes nothing
+     * at all. On a 35716-period schedule an eager rebuild costs a quarter of a second, so doing it for readers that
+     * never look at a period is what made COB time out.
      */
     @JsonExclude
     @Getter(AccessLevel.NONE)
@@ -195,7 +189,7 @@ public final class ProjectedAmortizationScheduleModel {
     private ProjectedAmortizationScheduleModel(final Money discountFeeAmount, final Money netDisbursementAmount,
             final Money totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount,
             final LocalDate expectedDisbursementDate, final Money expectedPaymentAmount, final Money finalPaymentAmount,
-            final int originalPaymentNumber, final BigDecimal effectiveInterestRate, final BigDecimal annualEffectiveInterestRate,
+            final int originalPaymentNumber, final BigDecimal effectiveInterestRate, final BigDecimal calculatedAnnualEir,
             final MathContext mc, final CurrencyData currency, final LocalDate currentBusinessDate) {
         this.discountFeeAmount = discountFeeAmount;
         this.netDisbursementAmount = netDisbursementAmount;
@@ -207,7 +201,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.finalPaymentAmount = finalPaymentAmount;
         this.originalPaymentNumber = originalPaymentNumber;
         this.effectiveInterestRate = effectiveInterestRate;
-        this.annualEffectiveInterestRate = annualEffectiveInterestRate;
+        this.calculatedAnnualEir = calculatedAnnualEir;
         this.mc = mc;
         this.currency = currency;
         this.actualPayments = new ArrayList<>();
@@ -238,7 +232,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.finalPaymentAmount = null;
         this.originalPaymentNumber = 0;
         this.effectiveInterestRate = null;
-        this.annualEffectiveInterestRate = null;
+        this.calculatedAnnualEir = null;
         this.mc = mc;
         this.currency = currency;
         this.actualPayments = new ArrayList<>();
@@ -387,12 +381,17 @@ public final class ProjectedAmortizationScheduleModel {
     }
 
     /**
-     * The base schedule's annual rate; see {@link #annualEffectiveInterestRate}. Models predating the field compound
+     * The base schedule's annual rate, as the field of the same name holds it. Models predating that field compound
      * their stored periodic rate rather than re-solving, so they keep reporting the rate they were built on.
+     *
+     * @return null when neither rate is stored
+     * @throws IllegalArgumentException
+     *             when only the periodic rate is stored and {@link #npvDayCount} is not positive, which no schedule
+     *             this module writes can be - a model that reached that state is not one the walk could rebuild either
      */
-    public BigDecimal annualEffectiveInterestRate() {
-        return Optional.ofNullable(annualEffectiveInterestRate)
-                .or(() -> Optional.ofNullable(effectiveInterestRate).map(rate -> AmortizationParams.annualRate(rate, npvDayCount, mc)))
+    public BigDecimal calculatedAnnualEir() {
+        return Optional.ofNullable(calculatedAnnualEir).or(
+                () -> Optional.ofNullable(effectiveInterestRate).map(rate -> AmortizationParams.calculatedAnnualEir(rate, npvDayCount, mc)))
                 .orElse(null);
     }
 
@@ -401,6 +400,10 @@ public final class ProjectedAmortizationScheduleModel {
      * exactly to plan from here. Equals {@link #originalPaymentNumber} until a rate change moves it.
      */
     public int effectiveTotalTerm() {
+        if (rateChanges == null || rateChanges.isEmpty()) {
+            return originalPaymentNumber;
+        }
+        materializeDerivedPayments();
         return contractualTerm > 0 ? contractualTerm : originalPaymentNumber;
     }
 
@@ -449,7 +452,7 @@ public final class ProjectedAmortizationScheduleModel {
         return new ProjectedAmortizationScheduleModel(Money.of(currency, discountFeeAmount, mc),
                 Money.of(currency, netDisbursementAmount, mc), Money.of(currency, totalPaymentVolume, mc), periodPaymentRate, npvDayCount,
                 expectedDisbursementDate, Money.of(currency, solved.dailyPayment(), mc), Money.of(currency, solved.closingPayment(), mc),
-                solved.term(), solved.eir(), solved.annualEir(), mc, currency, currentDate);
+                solved.term(), solved.eir(), solved.calculatedAnnualEir(), mc, currency, currentDate);
     }
 
     /** First-period offset: 0 when a disbursement-date repayment shifts the grid onto the disbursement date, else 1. */
@@ -575,23 +578,6 @@ public final class ProjectedAmortizationScheduleModel {
         return rateChangeSolves.get(effectiveDate);
     }
 
-    /** {@code (1 + dailyEir)^npvDayCount - 1}: the year is measured in the day count that prices the daily payment. */
-    public static BigDecimal annualiseEir(final BigDecimal dailyEir, final int npvDayCount, final MathContext mc) {
-        if (dailyEir == null || npvDayCount <= 0) {
-            return null;
-        }
-        return BigDecimal.ONE.add(dailyEir, mc).pow(npvDayCount, mc).subtract(BigDecimal.ONE, mc);
-    }
-
-    /**
-     * {@link #annualiseEir} as a percentage, the unit the period payment rates themselves are expressed in, rounded to
-     * {@link #ANNUAL_EIR_SCALE} decimals before it is stored rather than leaving the rounding to the column.
-     */
-    public static BigDecimal annualEirPercentage(final BigDecimal dailyEir, final int npvDayCount, final MathContext mc) {
-        final BigDecimal annualEir = annualiseEir(dailyEir, npvDayCount, mc);
-        return annualEir == null ? null : annualEir.movePointRight(2).setScale(ANNUAL_EIR_SCALE, ANNUAL_EIR_ROUNDING);
-    }
-
     /**
      * Records a rate change taking effect on {@code rateChangeDate} and rebuilds.
      *
@@ -711,8 +697,8 @@ public final class ProjectedAmortizationScheduleModel {
         final AmortizationWalk.Result walked = amortizationWalk.walk();
         this.contractualTerm = walked.contractualTerm();
         final Map<LocalDate, RateChangeSolve> solves = new LinkedHashMap<>();
-        walked.rateChangeSolves().forEach((effectiveDate, solved) -> solves.put(effectiveDate,
-                new RateChangeSolve(effectiveDate, money(solved.dailyPayment()), solved.term(), solved.eir())));
+        walked.rateChangeSolves().forEach((effectiveDate, solved) -> solves.put(effectiveDate, new RateChangeSolve(effectiveDate,
+                money(solved.dailyPayment()), solved.term(), solved.eir(), solved.calculatedAnnualEir())));
         this.rateChangeSolves = Collections.unmodifiableMap(solves);
         this.projectedPayments = List.copyOf(buildPayments(walked.days()));
     }
@@ -872,7 +858,7 @@ public final class ProjectedAmortizationScheduleModel {
      * The solve the schedule bills by from the change's day on, as it was then: a later re-solve on divergence does not
      * restate it.
      */
-    public record RateChangeSolve(LocalDate effectiveDate, Money dailyPayment, int term, BigDecimal eir) {
+    public record RateChangeSolve(LocalDate effectiveDate, Money dailyPayment, int term, BigDecimal eir, BigDecimal calculatedAnnualEir) {
     }
 
     /** Principal re-injected on a date by an over-refunding credit balance refund. */

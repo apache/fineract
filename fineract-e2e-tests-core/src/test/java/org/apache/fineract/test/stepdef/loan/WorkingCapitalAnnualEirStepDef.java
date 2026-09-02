@@ -55,7 +55,7 @@ public class WorkingCapitalAnnualEirStepDef extends AbstractStepDef {
     private static final long ROUNDING_MODE_HALF_EVEN = 6L;
     private static final String WCL_BASE_URL = "v1/working-capital-loans";
     private static final String AMORTIZATION_MODEL_TABLE = "m_wc_loan_amortization_model";
-    private static final String ANNUAL_EIR_JSON_FIELD = "annualEffectiveInterestRate";
+    private static final String ANNUAL_EIR_JSON_FIELD = "calculatedAnnualEir";
 
     private final FineractFeignClient fineractClient;
     private final EventAssertion eventAssertion;

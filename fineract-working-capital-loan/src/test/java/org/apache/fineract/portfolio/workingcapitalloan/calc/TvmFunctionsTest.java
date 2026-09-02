@@ -121,6 +121,24 @@ class TvmFunctionsTest {
         assertCloseTo(new BigDecimal("4978.9183503647691"), TvmFunctions.deannualize(annualRate, DAY_COUNT, MC), "1E-9");
     }
 
+    /**
+     * Two neighbouring representable roots in the thousands are already 1E-15 apart, so a convergence test against a
+     * fixed 1E-15 could only ever be met by landing exactly on a fixed point: an iteration left cycling between the two
+     * neighbours ran out of iterations and threw instead. Convergence is measured against the working precision for
+     * that reason, and this band is one the fixed figure did not survive.
+     */
+    @Test
+    void deannualize_rootTooLargeForAFixedTolerance_stillConverges() {
+        IntStream.rangeClosed(1090, 1130).forEach(exponent -> {
+            final BigDecimal annualRate = BigDecimal.ONE.scaleByPowerOfTen(exponent).subtract(BigDecimal.ONE);
+
+            final BigDecimal periodicRate = TvmFunctions.deannualize(annualRate, DAY_COUNT, MC);
+
+            final BigDecimal ratio = TvmFunctions.annualize(periodicRate, DAY_COUNT, MC).divide(annualRate, MC);
+            assertCloseTo(BigDecimal.ONE, ratio, "1E-15");
+        });
+    }
+
     /** The same seed underflowed to zero at the other end, and the iteration then divided by it. */
     @Test
     void deannualize_annualRateBelowDoubleRange_solvesWithoutUnderflowing() {

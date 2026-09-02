@@ -65,7 +65,6 @@ import org.apache.fineract.infrastructure.event.business.domain.workingcapitallo
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
@@ -1068,9 +1067,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                     rateChange.getId(), rateChange.getEffectiveDate());
             return;
         }
-        rateChange.applyCalculatedValues(
-                ProjectedAmortizationScheduleModel.annualEirPercentage(solve.eir(), model.npvDayCount(), MoneyHelper.getMathContext()),
-                solve.dailyPayment().getAmount(), solve.term());
+        rateChange.applyCalculatedValues(solve.calculatedAnnualEir(), solve.dailyPayment().getAmount(), solve.term());
         this.rateChangeRepository.save(rateChange);
     }
 

@@ -173,7 +173,7 @@ Feature: Working Capital Loan Account Business Events
     And a Working Capital Loan Status Changed business event is raised
     And a Working Capital Loan Balance Changed business event is raised
     When Admin successfully add discount with "1000" amount on Working Capital loan account
-    Then a Working Capital Loan Balance Changed business event is raised with annual effective interest rate "0.468451"
+    Then a Working Capital Loan Balance Changed business event is raised with annual effective interest rate "46.845102"
     When Admin closes the Working Capital loan with a full repayment on "01 January 2026"
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
     And a Working Capital Loan Status Changed business event is raised
