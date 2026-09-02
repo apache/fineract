@@ -222,7 +222,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal netDisbursalAmount;
 
         public CurrencyData currency;
-        @Schema(example = "1.0")
+        @Schema(example = "1.0", description = "The loan's own period payment rate. A rate change does not move it - the rate in force on "
+                + "a given date comes from the rate-change history")
         public BigDecimal paymentRate;
         @Schema(example = "30")
         public Integer repaymentEvery;
@@ -242,16 +243,25 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         @Schema(example = "0.0", description = "Approved discount fee set during loan approval")
         public BigDecimal approvedDiscountFee;
         @Schema(example = "90", description = "Number of repayments (effectiveTotalTerm from the amortization schedule; for WC this is the "
-                + "loan term in days); null if schedule not yet generated")
+                + "loan term in days). Unlike the priced figures beside it a rate change does move it, to the day the rate now in force is "
+                + "solved to close the schedule on - a day the amounts here cannot be used to derive, because it falls out of the balance "
+                + "and the fee still unearned when the change takes effect. Null if schedule not yet generated")
         public Integer numberOfRepayments;
-        @Schema(example = "116.67", description = "Daily expected payment amount from the amortization schedule; null if schedule not yet generated")
+        @Schema(example = "0.29", description = "Daily payment amount the loan was priced at: totalPaymentVolume x paymentRate / 100 / "
+                + "npvDayCount, rounded to the currency. A rate change does not restate it, no more than it restates paymentRate or "
+                + "calculatedAnnualEir - what is billed from the day a change takes effect follows the rate then in force, and is read "
+                + "off the amortization schedule rows. Null if schedule not yet generated")
         public BigDecimal periodPaymentAmount;
-        @Schema(example = "0.468451", description = "Annual effective rate the loan was priced at, compounded over the product's NPV day count rather than a calendar year and rounded to six decimals, and the rate the base schedule's daily discounting is derived from. A payment rate change does not restate it - it stays the rate the loan was created with, matching the period payment rate beside it; null if schedule not yet generated")
+        @Schema(example = "46.845102", description = "Annual effective rate the loan was priced at, as a percentage: compounded over "
+                + "the product's NPV day count, not a calendar year, and rounded to six decimals. The base schedule's daily "
+                + "discounting derives from it. A rate change does not restate it - the schedule re-solves its own rate from the day "
+                + "the change takes effect. Comes from discount-fee pricing, not a lending interest rate. Null if schedule not yet "
+                + "generated")
         public BigDecimal calculatedAnnualEir;
         @Schema(description = "Period payment rate change history, most recently booked first - which for a backdated change is not "
-                + "the same as effective-date order. Each entry carries the annual EIR (as a percentage, e.g. 43.756245 - unlike the top-level calculatedAnnualEir, which is a fraction), daily payment "
-                + "amount and segment term the amortization schedule computed when that change was booked; those are null for changes "
-                + "booked before the snapshot was introduced")
+                + "the same as effective-date order. Each entry carries the annual EIR (as a percentage, e.g. 43.756245, the unit the "
+                + "top-level calculatedAnnualEir is expressed in as well), daily payment amount and segment term the amortization "
+                + "schedule computed when that change was booked; those are null for changes booked before the snapshot was introduced")
         public List<WorkingCapitalLoanPeriodPaymentRateChangeData> periodPaymentRateHistory;
         @Schema(description = "Working capital breach)")
         public WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanProductsResponse.GetWorkingCapitalLoanBreach breach;

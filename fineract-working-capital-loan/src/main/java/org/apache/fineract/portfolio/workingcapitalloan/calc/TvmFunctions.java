@@ -42,6 +42,7 @@ public final class TvmFunctions {
     private static final BigDecimal TWO = BigDecimal.valueOf(2);
     private static final int NTH_ROOT_MAX_ITERATIONS = 50;
     private static final BigDecimal NTH_ROOT_TOLERANCE = new BigDecimal("1E-15");
+    private static final BigDecimal NTH_ROOT_RELATIVE_TOLERANCE = new BigDecimal("1E-17");
 
     private TvmFunctions() {}
 
@@ -232,7 +233,8 @@ public final class TvmFunctions {
             final BigDecimal correction = next.subtract(root, mc);
             root = next;
 
-            if (correction.abs().compareTo(NTH_ROOT_TOLERANCE) < 0) {
+            final BigDecimal tolerance = NTH_ROOT_TOLERANCE.max(root.abs().multiply(NTH_ROOT_RELATIVE_TOLERANCE, mc));
+            if (correction.abs().compareTo(tolerance) < 0) {
                 return root.subtract(BigDecimal.ONE, mc);
             }
         }

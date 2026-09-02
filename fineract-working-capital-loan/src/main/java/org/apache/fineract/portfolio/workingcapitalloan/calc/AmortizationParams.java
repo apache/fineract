@@ -40,22 +40,36 @@ import java.util.List;
  */
 final class AmortizationParams {
 
-    private static final int ANNUAL_EIR_SCALE = 6;
+    /**
+     * Six decimals of a <em>percentage</em>, so a {@code DECIMAL(19,6)} rate resolves to 1E-8 as a fraction. The
+     * schedule's daily rate is spread back from the rounded value, so the two digits the percentage buys are
+     * amortization accuracy rather than presentation.
+     */
+    private static final int CALCULATED_ANNUAL_EIR_SCALE = 6;
 
     /**
      * Fixed rather than the tenant's money rounding mode: a rate is not money, and this one is spread back into the
      * rate the whole schedule discounts on, so configuration would amortize the same loan differently per tenant.
      */
-    private static final RoundingMode ANNUAL_EIR_ROUNDING = RoundingMode.HALF_EVEN;
+    private static final RoundingMode CALCULATED_ANNUAL_EIR_ROUNDING = RoundingMode.HALF_EVEN;
 
     private AmortizationParams() {}
 
     /**
-     * Single definition of the reported rate — the value stored on a schedule and the derive-on-read fallback for the
-     * schedules written before it was stored must round identically.
+     * Single definition of the reported rate — the value stored on a schedule, the derive-on-read fallback for the
+     * schedules written before it was stored, and the value a payment rate change records as its snapshot. The fraction
+     * {@link TvmFunctions#annualize} returns is moved onto a percentage before rounding; see
+     * {@link #CALCULATED_ANNUAL_EIR_SCALE}. Rounding here rather than in the {@code DECIMAL(19,6)} column is what makes
+     * the API, the business event and the stored snapshot read the same digits.
      */
-    static BigDecimal annualRate(final BigDecimal periodicRate, final int npvDayCount, final MathContext mc) {
-        return TvmFunctions.annualize(periodicRate, npvDayCount, mc).setScale(ANNUAL_EIR_SCALE, ANNUAL_EIR_ROUNDING);
+    static BigDecimal calculatedAnnualEir(final BigDecimal periodicRate, final int npvDayCount, final MathContext mc) {
+        return TvmFunctions.annualize(periodicRate, npvDayCount, mc).movePointRight(2).setScale(CALCULATED_ANNUAL_EIR_SCALE,
+                CALCULATED_ANNUAL_EIR_ROUNDING);
+    }
+
+    /** Inverse of {@link #calculatedAnnualEir}: back onto a fraction, then spread over the day count. */
+    private static BigDecimal periodicRateFrom(final BigDecimal calculatedAnnualEir, final int npvDayCount, final MathContext mc) {
+        return TvmFunctions.deannualize(calculatedAnnualEir.movePointLeft(2), npvDayCount, mc);
     }
 
     /**
@@ -108,8 +122,8 @@ final class AmortizationParams {
         // the schedule divides evenly this equals the daily payment.
         final BigDecimal closing = grossPayable.subtract(daily.multiply(BigDecimal.valueOf(term - 1L), mc), mc);
         final BigDecimal solvedEir = TvmFunctions.irr(cashFlows(balance, daily, closing, term), mc);
-        final BigDecimal annualEir = annualRate(solvedEir, npvDayCount, mc);
-        return new Solved(daily, closing, term, TvmFunctions.deannualize(annualEir, npvDayCount, mc), annualEir);
+        final BigDecimal calculatedAnnualEir = calculatedAnnualEir(solvedEir, npvDayCount, mc);
+        return new Solved(daily, closing, term, periodicRateFrom(calculatedAnnualEir, npvDayCount, mc), calculatedAnnualEir);
     }
 
     /**
@@ -134,11 +148,12 @@ final class AmortizationParams {
      * @param term
      *            how many days the solve takes to close, and so how long the rate is solved over
      * @param eir
-     *            the periodic effective rate the schedule discounts on: {@code annualEir} spread back over the day
-     *            count
-     * @param annualEir
+     *            the periodic effective rate the schedule discounts on: {@code calculatedAnnualEir} spread back over
+     *            the day count
+     * @param calculatedAnnualEir
      *            the annual rate the schedule was priced at, compounded over the day count rather than a calendar year
+     *            and held as a percentage
      */
-    record Solved(BigDecimal dailyPayment, BigDecimal closingPayment, int term, BigDecimal eir, BigDecimal annualEir) {
+    record Solved(BigDecimal dailyPayment, BigDecimal closingPayment, int term, BigDecimal eir, BigDecimal calculatedAnnualEir) {
     }
 }

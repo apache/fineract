@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
@@ -55,7 +57,14 @@ public class WorkingCapitalAnnualEirStepDef extends AbstractStepDef {
     private static final long ROUNDING_MODE_HALF_EVEN = 6L;
     private static final String WCL_BASE_URL = "v1/working-capital-loans";
     private static final String AMORTIZATION_MODEL_TABLE = "m_wc_loan_amortization_model";
-    private static final String ANNUAL_EIR_JSON_FIELD = "annualEffectiveInterestRate";
+    private static final String ANNUAL_EIR_JSON_FIELD = "calculatedAnnualEir";
+
+    /**
+     * Matched in Java rather than in SQL. The regex dialects diverge - Postgres spells the extraction
+     * {@code substring(x from '...')} where MariaDB spells it {@code REGEXP_SUBSTR} - and the suite points at whichever
+     * database {@code TESTDB_PROTOCOL} names, so the SQL here stays plain SELECT and UPDATE.
+     */
+    private static final Pattern ANNUAL_EIR_PATTERN = Pattern.compile("\"" + ANNUAL_EIR_JSON_FIELD + "\":([0-9.E-]+),");
 
     private final FineractFeignClient fineractClient;
     private final EventAssertion eventAssertion;
@@ -63,10 +72,11 @@ public class WorkingCapitalAnnualEirStepDef extends AbstractStepDef {
     private final JdbcTemplate testJdbcTemplate;
 
     /**
-     * The rounding-mode scenario switches the tenant to CEILING; every scenario of the feature restores HALF_EVEN so a
-     * failure mid-way cannot leak a foreign rounding mode into the rest of the suite.
+     * Restores HALF_EVEN after the one scenario that switches the tenant to CEILING, so a failure mid-way cannot leak a
+     * foreign rounding mode into the rest of the suite. Tagged to that scenario rather than the whole feature: writing
+     * the global configuration after every scenario would impose HALF_EVEN on a suite whose baseline is something else.
      */
-    @After("@WorkingCapitalAnnualEirFeature")
+    @After("@WorkingCapitalRoundingModeScenario")
     public void restoreTenantRoundingMode() {
         fineractClient.defaultApi().updateInternalGlobalConfiguration(ROUNDING_MODE_CONFIG, ROUNDING_MODE_HALF_EVEN);
     }
@@ -132,18 +142,23 @@ public class WorkingCapitalAnnualEirStepDef extends AbstractStepDef {
     /** Turns the persisted model into one written before PS-3218: no annual rate, daily rate left as it is. */
     @When("Admin removes the stored annual effective interest rate from the persisted amortization model of the Working Capital loan")
     public void removeAnnualEirFromPersistedModel() {
-        final int updated = testJdbcTemplate.update("UPDATE " + AMORTIZATION_MODEL_TABLE
-                + " SET json_model = regexp_replace(json_model, '\"" + ANNUAL_EIR_JSON_FIELD + "\":[0-9.E-]+,', '') WHERE loan_id = ?",
-                getCreatedLoanId());
+        final String stripped = ANNUAL_EIR_PATTERN.matcher(persistedJsonModel()).replaceFirst("");
+        final int updated = testJdbcTemplate.update("UPDATE " + AMORTIZATION_MODEL_TABLE + " SET json_model = ? WHERE loan_id = ?",
+                stripped, getCreatedLoanId());
         assertThat(updated).as("amortization model rows updated for loan %s", getCreatedLoanId()).isEqualTo(1);
         assertThat(persistedAnnualEirLiteral()).as("fixture must not carry the field any more").isNull();
     }
 
     // --- helpers -----------------------------------------------------------------------------------------------------
 
+    private String persistedJsonModel() {
+        return testJdbcTemplate.queryForObject("SELECT json_model FROM " + AMORTIZATION_MODEL_TABLE + " WHERE loan_id = ?", String.class,
+                getCreatedLoanId());
+    }
+
     private String persistedAnnualEirLiteral() {
-        return testJdbcTemplate.queryForObject("SELECT substring(json_model from '\"" + ANNUAL_EIR_JSON_FIELD + "\":([0-9.E-]+)') FROM "
-                + AMORTIZATION_MODEL_TABLE + " WHERE loan_id = ?", String.class, getCreatedLoanId());
+        final Matcher matcher = ANNUAL_EIR_PATTERN.matcher(persistedJsonModel());
+        return matcher.find() ? matcher.group(1) : null;
     }
 
     private static Schema.Field avroField(final String field) {

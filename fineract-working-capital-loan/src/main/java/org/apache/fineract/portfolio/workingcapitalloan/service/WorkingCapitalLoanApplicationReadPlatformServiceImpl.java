@@ -231,7 +231,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
             data.setNumberOfRepayments(model.effectiveTotalTerm());
             data.setPeriodPaymentAmount(model.expectedPaymentAmount() != null ? model.expectedPaymentAmount().getAmount() : null);
             data.setNetDisbursalAmount(model.netDisbursementAmount() != null ? model.netDisbursementAmount().getAmount() : null);
-            data.setCalculatedAnnualEir(model.annualEffectiveInterestRate());
+            data.setCalculatedAnnualEir(model.calculatedAnnualEir());
         });
     }
 
