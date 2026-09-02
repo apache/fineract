@@ -42,6 +42,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionComparator;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBalanceRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargePaidByRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
@@ -72,6 +73,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
     private final WorkingCapitalLoanAmortizationScheduleWriteService amortizationScheduleWriteService;
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final WorkingCapitalLoanTransactionRelationRepository transactionRelationRepository;
     private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     private final WorkingCapitalLoanAdjustTransactionEventPublisher adjustTransactionEventPublisher;
 
@@ -399,10 +401,20 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
             final WorkingCapitalLoanTransaction chargeOffTransaction, final boolean accountingEnabled,
             final List<WorkingCapitalLoanTransactionAllocation> updatedAllocations,
             final List<WorkingCapitalLoanTransaction> adjustedTransactions) {
-        final BigDecimal chargeOffAmount = balance.getTotalOutstanding();
+        // A waiver that sorts after the charge-off is not part of what that charge-off had to write off, but its
+        // buckets are in the balance all the same - they survive the reset that rebuilds the paid distribution. Adding
+        // them back restores the outstanding as of the charge-off's own position in the replay, which is the order the
+        // waiver's journal entries are routed on too. Waivers sorting before it stay subtracted: they had already
+        // reduced the outstanding when the charge-off was first booked.
+        final BigDecimal feeWaivedAfterChargeOff = transactionRelationRepository.sumAmountForChargesSortingAfter(loan.getId(),
+                LoanTransactionType.WAIVE_CHARGES, chargeOffTransaction.getTransactionDate(), chargeOffTransaction.getId(), false);
+        final BigDecimal penaltyWaivedAfterChargeOff = transactionRelationRepository.sumAmountForChargesSortingAfter(loan.getId(),
+                LoanTransactionType.WAIVE_CHARGES, chargeOffTransaction.getTransactionDate(), chargeOffTransaction.getId(), true);
+
         final BigDecimal principalPortion = balance.getPrincipalOutstanding();
-        final BigDecimal feePortion = balance.getFeeOutstanding();
-        final BigDecimal penaltyPortion = balance.getPenaltyOutstanding();
+        final BigDecimal feePortion = MathUtil.add(balance.getFeeOutstanding(), feeWaivedAfterChargeOff);
+        final BigDecimal penaltyPortion = MathUtil.add(balance.getPenaltyOutstanding(), penaltyWaivedAfterChargeOff);
+        final BigDecimal chargeOffAmount = MathUtil.add(principalPortion, feePortion, penaltyPortion);
         final BigDecimal overpaymentPortion = MathUtil.nullToZero(balance.getOverpaymentAmount());
 
         if (!MathUtil.isGreaterThanZero(chargeOffAmount)) {
