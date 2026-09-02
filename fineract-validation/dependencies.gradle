@@ -31,9 +31,6 @@ dependencies {
             'com.ibm.icu:icu4j',
             'org.yakworks:spring-icu4j',
             )
-    api('org.glassfish.jersey.ext:jersey-bean-validation') {
-        exclude group: 'jakarta.el', module: 'jakarta.el-api'
-    }
     compileOnly 'com.github.spotbugs:spotbugs-annotations'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

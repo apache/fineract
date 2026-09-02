@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.apache.fineract.portfolio.TransactionEntryType;
 
@@ -188,7 +189,12 @@ final class SavingsAccountTransactionsApiResourceSwagger {
 
         @Schema(example = "2")
         public Long total;
-        public Set<GetSavingsAccountTransactionsPageItem> content;
+        /**
+         * A page of search results is ordered by the request's {@code orderBy}/{@code sortOrder} (defaulting to most
+         * recent first), so it is documented as an ordered list. Declaring it as a set made generated clients drop that
+         * ordering. The serialized response is a JSON array either way, so the wire format is unchanged.
+         */
+        public List<GetSavingsAccountTransactionsPageItem> content;
     }
 
     @Schema(description = "PostSavingsAccountTransactionsRequest")
@@ -209,11 +215,15 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         @Schema(example = "true")
         public Boolean isPostInterestAsOn;
         @Schema(example = "true")
+        public Boolean postInterestManualOrAutomatic;
+        @Schema(example = "true")
         public String lienAllowed;
         @Schema(example = "String")
         public String reasonForBlock;
         @Schema(example = "1")
         public Integer paymentTypeId;
+        @Schema(example = "A note about this transaction")
+        public String note;
     }
 
     @Schema(description = "PostSavingsAccountTransactionsResponse")

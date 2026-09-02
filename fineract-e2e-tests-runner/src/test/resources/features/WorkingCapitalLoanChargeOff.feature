@@ -229,7 +229,7 @@ Feature: Working Capital Loan Charge-off
     And Admin sets the business date to "20 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Initiating adding "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 January 2026" due date and 10.0 transaction amount results an error with the following data:
-      | httpCode | message                     |
+      | httpCode | message                          |
       | 403      | error.msg.wc.loan.is.charged.off |
 
   @TestRailId:C93934
@@ -243,7 +243,7 @@ Feature: Working Capital Loan Charge-off
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     Then Initiating an undo of the charge-off on the Working Capital loan results an error with the following data:
-      | httpCode | message                                  |
+      | httpCode | message                              |
       | 400      | error.msg.wc.loan.is.not.charged.off |
 
   @TestRailId:C93935
@@ -414,7 +414,7 @@ Feature: Working Capital Loan Charge-off
     Then a Working Capital Loan Charge Off business event is raised with "15 January 2026" charge off date
     When Admin undoes the charge-off on the Working Capital loan
     Then a Working Capital Loan Undo Charge Off business event is raised
-    And a Working Capital Loan Transaction Reversed business event is raised for the "chargeOff" transaction
+    And a Working Capital Loan Adjust Transaction business event is raised for the reversed "chargeOff" transaction
     Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
   @TestRailId:C98193
@@ -434,15 +434,18 @@ Feature: Working Capital Loan Charge-off
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin charges off the Working Capital loan on "15 January 2026" with charge-off reason "Fraud"
     Then a Working Capital Loan Charge Off business event is raised with "15 January 2026" charge off date
-    When Customer makes "REPAYMENT" transaction on "10 January 2026" with 100.0 transaction amount on Working Capital loan
+    When Customer makes "REPAYMENT" transaction on "10 January 2026" with 40.0 transaction amount on Working Capital loan
+    Then a Working Capital Loan Adjust Transaction business event is raised for the "chargeOff" transaction on "15 January 2026" with principal portion changed from "100.0" to "60.0" and fee portion changed from "0.0" to "0.0"
+    When Customer makes "REPAYMENT" transaction on "10 January 2026" with 60.0 transaction amount on Working Capital loan
     Then a Working Capital Loan Undo Charge Off business event is raised
-    And a Working Capital Loan Transaction Reversed business event is raised for the "chargeOff" transaction
+    And a Working Capital Loan Adjust Transaction business event is raised for the reversed "chargeOff" transaction
     And Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount | chargedOff | chargedOffOnDate | chargeOffReason.name |
       | WCLP         | 2026-01-01      | 2026-01-01               | 100.0     | 100.0             | 1000.0             | 18.0              | null     | false      | null             | null                 |
     And Working Capital Loan has transactions:
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Repayment    | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
-      | 15 January 2026 | Charge-off   | 100.0             | 100.0            | 0.0               | 0.0                   | true     |
+      | 10 January 2026 | Repayment    | 40.0              | 40.0             | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment    | 60.0              | 60.0             | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Charge-off   | 60.0              | 60.0             | 0.0               | 0.0                   | true     |
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"

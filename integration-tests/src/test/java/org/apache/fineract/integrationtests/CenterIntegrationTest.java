@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,12 +43,14 @@ import org.apache.fineract.client.models.GetCentersGroupMembers;
 import org.apache.fineract.client.models.GetCentersPageItems;
 import org.apache.fineract.client.models.PutCentersCenterIdRequest;
 import org.apache.fineract.client.models.PutCentersChanges;
+import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignCenterHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
 import org.apache.fineract.integrationtests.common.CenterHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
+import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -162,6 +165,25 @@ public class CenterIntegrationTest {
 
         final Object response = CenterHelper.listCentersRaw("id", maliciousSortOrder, true, requestSpec, expectBadRequest);
         assertNotNull(response, "Expected a validation-error response body, not a silent 200");
+    }
+
+    @Test
+    public void testCenterCreationWithoutExternalIdGeneratesOne() {
+        final GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
+        globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
+        try {
+            Long officeId = officeHelper.createOffice(OFFICE_OPENING_DATE).getResourceId();
+            String name = "TestNoExternalId" + new Timestamp(new Date().getTime());
+            Long resourceId = centerHelper.createCenter(name, officeId).getResourceId();
+            GetCentersCenterIdResponse center = centerHelper.retrieveCenter(resourceId);
+
+            assertNotNull(center);
+            assertNotNull(center.getExternalId());
+            assertFalse(center.getExternalId().isBlank());
+            assertNotEquals("null", center.getExternalId());
+        } finally {
+            globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, false);
+        }
     }
 
     @Test

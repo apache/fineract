@@ -20,7 +20,6 @@ package org.apache.fineract.portfolio.workingcapitalloan.mapper;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 import org.apache.fineract.infrastructure.core.config.MapstructMapperConfig;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.accountdetails.data.WorkingCapitalLoanAccountSummaryData;
@@ -29,7 +28,6 @@ import org.apache.fineract.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -75,9 +73,7 @@ public interface WorkingCapitalLoanSummaryMapper {
         final LocalDate expectedDisbursementDate = loan.getDisbursementDetails().isEmpty() ? null
                 : loan.getDisbursementDetails().getFirst().getExpectedDisbursementDate();
         timeline.setExpectedDisbursementDate(expectedDisbursementDate);
-        final LocalDate actualDisbursementDate = loan.getDisbursementDetails().stream()
-                .map(WorkingCapitalLoanDisbursementDetails::getActualDisbursementDate).filter(Objects::nonNull).findFirst().orElse(null);
-        timeline.setActualDisbursementDate(actualDisbursementDate);
+        timeline.setActualDisbursementDate(loan.getFirstActualDisbursementDate());
         timeline.setClosedOnDate(loan.getClosedOnDate());
         timeline.setExpectedMaturityDate(loan.getExpectedMaturityDate());
         timeline.setActualMaturityDate(loan.getMaturedOnDate());

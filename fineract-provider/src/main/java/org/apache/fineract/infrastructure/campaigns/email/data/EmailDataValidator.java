@@ -24,8 +24,6 @@ import com.google.common.base.Splitter;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,8 +33,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.fineract.infrastructure.campaigns.email.ScheduledEmailConstants;
-import org.apache.fineract.infrastructure.campaigns.email.domain.ScheduledEmailAttachmentFileFormat;
+import org.apache.fineract.infrastructure.campaigns.email.EmailApiConstants;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
@@ -59,7 +56,7 @@ public final class EmailDataValidator {
     }
 
     /**
-     * validate the request to create a new report mailing job
+     * validate the request to create a new email message
      *
      * @param jsonCommand
      *            -- the JSON command object (instance of the JsonCommand class)
@@ -67,82 +64,38 @@ public final class EmailDataValidator {
      **/
     public void validateCreateRequest(final JsonCommand jsonCommand) {
         final String jsonString = jsonCommand.json();
-        final JsonElement jsonElement = jsonCommand.parsedJson();
 
         if (StringUtils.isBlank(jsonString)) {
             throw new InvalidJsonException();
         }
 
         final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, ScheduledEmailConstants.CREATE_REQUEST_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, EmailApiConstants.CREATE_REQUEST_DATA_PARAMETERS);
 
+        final JsonElement element = this.fromApiJsonHelper.parse(jsonString);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors)
-                .resource(StringUtils.lowerCase(ScheduledEmailConstants.SCHEDULED_EMAIL_ENTITY_NAME));
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(StringUtils.lowerCase(EmailApiConstants.RESOURCE_NAME));
 
-        final String name = this.fromApiJsonHelper.extractStringNamed(ScheduledEmailConstants.NAME_PARAM_NAME, jsonElement);
-        dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.NAME_PARAM_NAME).value(name).notBlank().notExceedingLengthOf(100);
+        final String emailSubject = this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.subjectParamName, element);
+        baseDataValidator.reset().parameter(EmailApiConstants.subjectParamName).value(emailSubject).notBlank().notExceedingLengthOf(50);
 
-        final String startDateTime = this.fromApiJsonHelper.extractStringNamed(ScheduledEmailConstants.START_DATE_TIME_PARAM_NAME,
-                jsonElement);
-        dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.START_DATE_TIME_PARAM_NAME).value(startDateTime).notBlank();
+        final String emailMessage = this.fromApiJsonHelper.extractStringNamed(EmailApiConstants.messageParamName, element);
+        baseDataValidator.reset().parameter(EmailApiConstants.messageParamName).value(emailMessage).notBlank();
 
-        final Integer stretchyReportId = this.fromApiJsonHelper
-                .extractIntegerWithLocaleNamed(ScheduledEmailConstants.STRETCHY_REPORT_ID_PARAM_NAME, jsonElement);
-        dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.STRETCHY_REPORT_ID_PARAM_NAME).value(stretchyReportId).notNull()
-                .integerGreaterThanZero();
-
-        final String emailRecipients = this.fromApiJsonHelper.extractStringNamed(ScheduledEmailConstants.EMAIL_RECIPIENTS_PARAM_NAME,
-                jsonElement);
-        dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.EMAIL_RECIPIENTS_PARAM_NAME).value(emailRecipients).notBlank();
-
-        final String emailSubject = this.fromApiJsonHelper.extractStringNamed(ScheduledEmailConstants.EMAIL_SUBJECT_PARAM_NAME,
-                jsonElement);
-        dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.EMAIL_SUBJECT_PARAM_NAME).value(emailSubject).notBlank()
-                .notExceedingLengthOf(100);
-
-        final String emailMessage = this.fromApiJsonHelper.extractStringNamed(ScheduledEmailConstants.EMAIL_MESSAGE_PARAM_NAME,
-                jsonElement);
-        dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.EMAIL_MESSAGE_PARAM_NAME).value(emailMessage).notBlank();
-
-        if (this.fromApiJsonHelper.parameterExists(ScheduledEmailConstants.IS_ACTIVE_PARAM_NAME, jsonElement)) {
-            final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(ScheduledEmailConstants.IS_ACTIVE_PARAM_NAME, jsonElement);
-            dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.IS_ACTIVE_PARAM_NAME).value(isActive).notNull();
-        }
-
-        final Integer emailAttachmentFileFormatId = this.fromApiJsonHelper
-                .extractIntegerSansLocaleNamed(ScheduledEmailConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME, jsonElement);
-        dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME)
-                .value(emailAttachmentFileFormatId).notNull();
-
-        if (emailAttachmentFileFormatId != null) {
-            dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME)
-                    .value(emailAttachmentFileFormatId).isOneOfTheseValues(ScheduledEmailAttachmentFileFormat.validValues());
-        }
-
-        final String dateFormat = jsonCommand.dateFormat();
-        dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.DATE_FORMAT_PARAM_NAME).value(dateFormat).notBlank();
-
-        if (StringUtils.isNotEmpty(dateFormat)) {
-
-            try {
-                final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(dateFormat).withLocale(jsonCommand.extractLocale());
-
-                // try to parse the date time string
-                LocalDateTime.parse(startDateTime, dateTimeFormatter);
-            }
-
-            catch (IllegalArgumentException ex) {
-                dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.DATE_FORMAT_PARAM_NAME).value(dateFormat)
-                        .failWithCode("invalid.date.format");
-            }
+        final Long clientId = this.fromApiJsonHelper.extractLongNamed(EmailApiConstants.clientIdParamName, element);
+        final Long staffId = this.fromApiJsonHelper.extractLongNamed(EmailApiConstants.staffIdParamName, element);
+        if (clientId == null && staffId == null) {
+            baseDataValidator.reset().parameter(EmailApiConstants.clientIdParamName).value(clientId)
+                    .failWithCode("either.clientId.or.staffId.must.be.provided", "Either `" + EmailApiConstants.clientIdParamName + "` or `"
+                            + EmailApiConstants.staffIdParamName + "` must be provided.");
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     /**
-     * validate the request to update a report mailing job
+     * validate the request to update an email message
      *
      * @param jsonCommand
      *            -- the JSON command object (instance of the JsonCommand class)
@@ -150,94 +103,13 @@ public final class EmailDataValidator {
      **/
     public void validateUpdateRequest(final JsonCommand jsonCommand) {
         final String jsonString = jsonCommand.json();
-        final JsonElement jsonElement = jsonCommand.parsedJson();
 
         if (StringUtils.isBlank(jsonString)) {
             throw new InvalidJsonException();
         }
 
         final Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, ScheduledEmailConstants.UPDATE_REQUEST_PARAMETERS);
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
-        final DataValidatorBuilder dataValidatorBuilder = new DataValidatorBuilder(dataValidationErrors)
-                .resource(StringUtils.lowerCase(ScheduledEmailConstants.SCHEDULED_EMAIL_ENTITY_NAME));
-
-        if (this.fromApiJsonHelper.parameterExists(ScheduledEmailConstants.NAME_PARAM_NAME, jsonElement)) {
-            final String name = this.fromApiJsonHelper.extractStringNamed(ScheduledEmailConstants.NAME_PARAM_NAME, jsonElement);
-            dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.NAME_PARAM_NAME).value(name).notBlank()
-                    .notExceedingLengthOf(100);
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(ScheduledEmailConstants.STRETCHY_REPORT_ID_PARAM_NAME, jsonElement)) {
-            final Integer stretchyReportId = this.fromApiJsonHelper
-                    .extractIntegerWithLocaleNamed(ScheduledEmailConstants.STRETCHY_REPORT_ID_PARAM_NAME, jsonElement);
-            dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.STRETCHY_REPORT_ID_PARAM_NAME).value(stretchyReportId).notNull()
-                    .integerGreaterThanZero();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(ScheduledEmailConstants.EMAIL_RECIPIENTS_PARAM_NAME, jsonElement)) {
-            final String emailRecipients = this.fromApiJsonHelper.extractStringNamed(ScheduledEmailConstants.EMAIL_RECIPIENTS_PARAM_NAME,
-                    jsonElement);
-            dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.EMAIL_RECIPIENTS_PARAM_NAME).value(emailRecipients).notBlank();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(ScheduledEmailConstants.EMAIL_SUBJECT_PARAM_NAME, jsonElement)) {
-            final String emailSubject = this.fromApiJsonHelper.extractStringNamed(ScheduledEmailConstants.EMAIL_SUBJECT_PARAM_NAME,
-                    jsonElement);
-            dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.EMAIL_SUBJECT_PARAM_NAME).value(emailSubject).notBlank()
-                    .notExceedingLengthOf(100);
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(ScheduledEmailConstants.EMAIL_MESSAGE_PARAM_NAME, jsonElement)) {
-            final String emailMessage = this.fromApiJsonHelper.extractStringNamed(ScheduledEmailConstants.EMAIL_MESSAGE_PARAM_NAME,
-                    jsonElement);
-            dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.EMAIL_MESSAGE_PARAM_NAME).value(emailMessage).notBlank();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(ScheduledEmailConstants.IS_ACTIVE_PARAM_NAME, jsonElement)) {
-            final Boolean isActive = this.fromApiJsonHelper.extractBooleanNamed(ScheduledEmailConstants.IS_ACTIVE_PARAM_NAME, jsonElement);
-            dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.IS_ACTIVE_PARAM_NAME).value(isActive).notNull();
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(ScheduledEmailConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME, jsonElement)) {
-            final Integer emailAttachmentFileFormatId = this.fromApiJsonHelper
-                    .extractIntegerSansLocaleNamed(ScheduledEmailConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME, jsonElement);
-            dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME)
-                    .value(emailAttachmentFileFormatId).notNull();
-
-            if (emailAttachmentFileFormatId != null) {
-                dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.EMAIL_ATTACHMENT_FILE_FORMAT_ID_PARAM_NAME)
-                        .value(emailAttachmentFileFormatId).isOneOfTheseValues(ScheduledEmailAttachmentFileFormat.validValues());
-            }
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(ScheduledEmailConstants.START_DATE_TIME_PARAM_NAME, jsonElement)) {
-            final String dateFormat = jsonCommand.dateFormat();
-            dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.DATE_FORMAT_PARAM_NAME).value(dateFormat).notBlank();
-
-            final String startDateTime = this.fromApiJsonHelper.extractStringNamed(ScheduledEmailConstants.START_DATE_TIME_PARAM_NAME,
-                    jsonElement);
-            dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.START_DATE_TIME_PARAM_NAME).value(startDateTime).notBlank();
-
-            if (StringUtils.isNotEmpty(dateFormat)) {
-
-                try {
-                    final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(dateFormat)
-                            .withLocale(jsonCommand.extractLocale());
-
-                    // try to parse the date time string
-                    LocalDateTime.parse(startDateTime, dateTimeFormatter);
-                }
-
-                catch (IllegalArgumentException ex) {
-                    dataValidatorBuilder.reset().parameter(ScheduledEmailConstants.DATE_FORMAT_PARAM_NAME).value(dateFormat)
-                            .failWithCode("invalid.date.format");
-                }
-            }
-        }
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeToken, jsonString, EmailApiConstants.UPDATE_REQUEST_DATA_PARAMETERS);
     }
 
     /**

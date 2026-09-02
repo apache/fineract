@@ -2,6 +2,12 @@ name: Fineract Docker Builds
 
 on:
   workflow_call:
+    inputs:
+      upload_artifacts:
+        description: Upload reports and logs even when the job succeeds
+        required: false
+        default: false
+        type: boolean
     secrets:
       DEVELOCITY_ACCESS_KEY:
         required: false
@@ -29,10 +35,10 @@ jobs:
       DOCKER_LOG_DIR: ci-logs/docker-${{ matrix.db_type }}
 
     steps:
-      - name: Set up JDK 21
+      - name: Set up JDK 25
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'zulu'
 
       - name: Download workspace
@@ -89,7 +95,7 @@ jobs:
           jq -e '.git | type == "object"' actuator-info.json
 
       - name: Collect Docker logs
-        if: failure()
+        if: ${{ failure() || inputs.upload_artifacts }}
         run: |
           mkdir -p "$DOCKER_LOG_DIR"
           docker ps -a > "$DOCKER_LOG_DIR/docker-ps.txt" 2>&1 || true
@@ -106,7 +112,7 @@ jobs:
           done
 
       - name: Upload Docker logs
-        if: failure()
+        if: ${{ failure() || inputs.upload_artifacts }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: docker-logs-${{ matrix.db_type }}-attempt-${{ github.run_attempt }}

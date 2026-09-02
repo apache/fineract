@@ -22,6 +22,7 @@ package org.apache.fineract.infrastructure.core.config;
 import static org.springframework.security.authorization.AuthenticatedAuthorizationManager.fullyAuthenticated;
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAuthority;
 
+import jakarta.servlet.Filter;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.infrastructure.businessdate.service.BusinessDateReadPlatformService;
@@ -39,6 +40,8 @@ import org.apache.fineract.infrastructure.instancemode.filter.FineractInstanceMo
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBApiFilter;
 import org.apache.fineract.infrastructure.jobs.filter.LoanCOBFilterHelper;
 import org.apache.fineract.infrastructure.jobs.filter.ProgressiveLoanModelCheckerFilter;
+import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBApiFilter;
+import org.apache.fineract.infrastructure.jobs.filter.WorkingCapitalLoanCOBFilterHelper;
 import org.apache.fineract.infrastructure.security.data.PlatformRequestLog;
 import org.apache.fineract.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter;
 import org.apache.fineract.infrastructure.security.filter.TwoFactorAuthenticationFilter;
@@ -111,6 +114,8 @@ public class SecurityConfig {
     private FineractRequestContextHolder fineractRequestContextHolder;
     @Autowired(required = false)
     private LoanCOBFilterHelper loanCOBFilterHelper;
+    @Autowired(required = false)
+    private WorkingCapitalLoanCOBFilterHelper workingCapitalLoanCOBFilterHelper;
     @Autowired
     private IdempotencyStoreHelper idempotencyStoreHelper;
     @Autowired
@@ -405,14 +410,20 @@ public class SecurityConfig {
                 .addFilterAfter(correlationHeaderFilter(), RequestResponseFilter.class)
                 .addFilterAfter(fineractInstanceModeApiFilter(), CorrelationHeaderFilter.class);
 
+        Class<? extends Filter> lastCobFilter;
         if (loanCOBFilterHelper != null) {
-            http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class).addFilterAfter(idempotencyStoreFilter(),
-                    LoanCOBApiFilter.class);
+            http.addFilterAfter(loanCOBApiFilter(), FineractInstanceModeApiFilter.class);
             http.addFilterBefore(progressiveLoanModelCheckerFilter, LoanCOBApiFilter.class);
+            lastCobFilter = LoanCOBApiFilter.class;
         } else {
-            http.addFilterAfter(idempotencyStoreFilter(), FineractInstanceModeApiFilter.class);
             http.addFilterAfter(progressiveLoanModelCheckerFilter, FineractInstanceModeApiFilter.class);
+            lastCobFilter = ProgressiveLoanModelCheckerFilter.class;
         }
+        if (workingCapitalLoanCOBFilterHelper != null) {
+            http.addFilterAfter(workingCapitalLoanCOBApiFilter(), lastCobFilter);
+            lastCobFilter = WorkingCapitalLoanCOBApiFilter.class;
+        }
+        http.addFilterAfter(idempotencyStoreFilter(), lastCobFilter);
         if (fineractProperties.getIpTracking().isEnabled()) {
             http.addFilterAfter(callerIpTrackingFilter(), RequestResponseFilter.class);
         }
@@ -442,6 +453,10 @@ public class SecurityConfig {
 
     public LoanCOBApiFilter loanCOBApiFilter() {
         return new LoanCOBApiFilter(loanCOBFilterHelper);
+    }
+
+    public WorkingCapitalLoanCOBApiFilter workingCapitalLoanCOBApiFilter() {
+        return new WorkingCapitalLoanCOBApiFilter(workingCapitalLoanCOBFilterHelper);
     }
 
     public TwoFactorAuthenticationFilter twoFactorAuthenticationFilter() {

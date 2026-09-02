@@ -15,6 +15,7 @@ Feature: Working Capital Loan Write-off
 # --- write-off the working capital loan account--- #
     And Admin sets the business date to "15 January 2026"
     And Admin writes off the Working Capital loan on "15 January 2026"
+    Then a Working Capital Loan Write Off transaction business event is raised with "100.0" EUR amount
     Then Working Capital loan status will be "CLOSED_WRITTEN_OFF"
     And Working Capital loan balance principalOutstanding is "0.0"
     And Working Capital Loan has transactions:
@@ -46,6 +47,7 @@ Feature: Working Capital Loan Write-off
     And Working Capital loan balance principalOutstanding is "0.0"
 # --- undo write-off the working capital loan account--- #
     When Admin undoes the write-off on the Working Capital loan
+    Then a Working Capital Loan Undo Write Off transaction business event is raised with "100.0" EUR amount
     And Working Capital Loan has transactions:
       | transactionDate | type                   | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement           | 100.0             | 100.0            | 0.0               | 0.0                   | false    |

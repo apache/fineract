@@ -155,8 +155,8 @@ Feature: Working Capital Discount Adjustment Backdated and Undo
     When Admin runs inline COB job for Working Capital Loan
     Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT" transaction with date "05 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
-      | INCOME    | 404000       | Interest Income           | 28.70 |        |
-      | LIABILITY | 240005       | Deferred Interest Revenue |       | 28.70  |
+      | INCOME    | 404000       | Interest Income           | 28.7  |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |       | 28.7   |
     When Admin undo the last Discount fee adjustment on Working Capital loan account
     And Working capital loan account has the correct data:
       | discount | principal | totalPaidPrincipal |
@@ -173,10 +173,10 @@ Feature: Working Capital Discount Adjustment Backdated and Undo
       | 05 January 2026 | Discount Fee Amortization Adjustment | 28.70             |                  |                   |                       | true     |
     Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT" transaction with date "05 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
-      | INCOME    | 404000       | Interest Income           | 28.70 |        |
-      | LIABILITY | 240005       | Deferred Interest Revenue |       | 28.70  |
-      | LIABILITY | 240005       | Deferred Interest Revenue | 28.70 |        |
-      | INCOME    | 404000       | Interest Income           |       | 28.70  |
+      | INCOME    | 404000       | Interest Income           | 28.7  |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |       | 28.7   |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 28.7  |        |
+      | INCOME    | 404000       | Interest Income           |       | 28.7   |
 
   @TestRailId:C83068
   Scenario: Multiple backdated discount fee adjustments are allowed; undo of the last one restores its share of the discount

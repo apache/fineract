@@ -1408,6 +1408,14 @@ final class LoansApiResourceSwagger {
         public String daysInYearCustomStrategy;
         @Schema(example = "individual")
         public String loanType;
+        @Schema(example = "false", description = "Take the rate from the product's floating rate instead of interestRatePerPeriod")
+        public Boolean isFloatingInterestRate;
+        @Schema(example = "0", description = "Added to the floating rate when isFloatingInterestRate is true")
+        public BigDecimal interestRateDifferential;
+        @Schema(example = "1", description = "Meeting calendar to attach the loan to; required for jlg loans")
+        public Long calendarId;
+        @Schema(example = "true", description = "Sync the disbursement date with the attached meeting")
+        public Boolean syncDisbursementWithMeeting;
         @Schema(example = "20 September 2011")
         public String submittedOnDate;
         @Schema(example = "786444UUUYYH7")
@@ -1418,10 +1426,12 @@ final class LoansApiResourceSwagger {
         public Boolean allowFullTermForTranche;
         @Schema(description = "Maximum allowed outstanding balance")
         public BigDecimal maxOutstandingLoanBalance;
-        @Schema(example = "[2011, 10, 20]")
-        public LocalDate repaymentsStartingFromDate;
+        @Schema(example = "20 September 2011")
+        public String repaymentsStartingFromDate;
         @Schema(example = "1")
         public Integer graceOnInterestCharged;
+        @Schema(example = "20 September 2011")
+        public String interestChargedFromDate;
         @Schema(example = "1")
         public Integer graceOnPrincipalPayment;
         @Schema(example = "1")
@@ -1467,6 +1477,8 @@ final class LoansApiResourceSwagger {
         public List<PostLoansRequestCollateralData> collateral;
         @Schema(example = "1")
         public Long linkAccountId;
+        @Schema(example = "true", description = "Requires linkAccountId when true")
+        public Boolean createStandingInstructionAtDisbursement;
 
         @Schema(description = """
                 Optional array of originators to associate with this loan. \
@@ -1803,8 +1815,10 @@ final class LoansApiResourceSwagger {
 
             private PostLoansLoanIdDisbursementData() {}
 
-            @Schema(example = "[2012, 4, 3]")
-            public LocalDate expectedDisbursementDate;
+            // Parsed with the request's dateFormat, like every other date on this DTO. Declaring it
+            // LocalDate made a generated client serialise ISO into a body declaring "dd MMMM yyyy".
+            @Schema(example = "1 November 2023")
+            public String expectedDisbursementDate;
             @Schema(example = "22000")
             public BigDecimal principal;
         }

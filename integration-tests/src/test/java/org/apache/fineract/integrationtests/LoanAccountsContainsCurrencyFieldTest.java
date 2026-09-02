@@ -21,16 +21,20 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 import org.apache.fineract.client.models.GetClientsClientIdAccountsResponse;
 import org.apache.fineract.client.models.GetClientsLoanAccounts;
 import org.apache.fineract.client.models.PostClientsResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -56,7 +60,7 @@ public class LoanAccountsContainsCurrencyFieldTest extends FeignLoanTestBase {
         globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID,
                 new PutGlobalConfigurationsRequest().enabled(false));
 
-        final Long loanProductId = createLoanProductFromJson(buildLoanProductJson());
+        final Long loanProductId = createLoanProduct(buildLoanProductRequest());
         // Create Loan Account
         final Long loanId = createAndApproveLoan(clientId, loanProductId, activationDate);
         assertNotNull(loanId);
@@ -72,21 +76,35 @@ public class LoanAccountsContainsCurrencyFieldTest extends FeignLoanTestBase {
     }
 
     private Long createAndApproveLoan(Long clientId, Long loanProductId, String operationDate) {
-        final String loanApplicationJson = new LoanApplicationTestBuilder().withPrincipal(PRINCIPAL_AMOUNT).withLoanTermFrequency("1")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
-                .build(clientId.toString(), loanProductId.toString(), null);
-        final Long loanId = applyForLoanFromJson(loanApplicationJson);
+        final Long loanId = applyForLoan(new PostLoansRequest()//
+                .clientId(clientId)//
+                .productId(loanProductId)//
+                .principal(new BigDecimal(PRINCIPAL_AMOUNT))//
+                .loanTermFrequency(1)//
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .numberOfRepayments(1)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .interestRatePerPeriod(BigDecimal.ZERO)//
+                .interestType(LoanTestData.InterestType.FLAT)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                .transactionProcessingStrategyCode(LoanTestData.TransactionProcessingStrategyCode.MIFOS_STANDARD_STRATEGY)//
+                .expectedDisbursementDate("03 September 2022")//
+                .submittedOnDate("01 September 2022")//
+                .loanType("individual")//
+                .maxOutstandingLoanBalance(new BigDecimal("36000"))//
+                .collateral(List.of())//
+                .locale("en_GB")//
+                .dateFormat(LoanTestData.DATETIME_PATTERN));
         approveLoan(loanId, approveLoanRequest(Double.valueOf(PRINCIPAL_AMOUNT), operationDate));
         return loanId;
     }
 
-    private String buildLoanProductJson() {
+    private PostLoanProductsRequest buildLoanProductRequest() {
         return new LoanProductTestBuilder().withPrincipal("12,000.00").withNumberOfRepayments("4").withRepaymentAfterEvery("1")
                 .withRepaymentTypeAsMonth().withinterestRatePerPeriod("1").withInterestRateFrequencyTypeAsMonths()
                 .withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance().withTranches(false)
-                .withAccounting(NONE, new Account[] {}).build(null);
+                .withAccounting(NONE, new Account[] {}).buildRequest(null);
     }
 }

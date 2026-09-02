@@ -23,7 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -48,6 +47,7 @@ import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.test.data.TransactionType;
 import org.apache.fineract.test.factory.LoanRequestFactory;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
+import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +72,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
     }
 
     @Then("Loan Transactions tab has a {string} transaction with date {string} which has the following Journal entries:")
-    public void journalEntryDataCheck(String transactionType, String transactionDate, DataTable table) throws IOException {
+    public void journalEntryDataCheck(String transactionType, String transactionDate, DataTable table) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
@@ -91,77 +91,23 @@ public class JournalEntriesStepDef extends AbstractStepDef {
                 .collect(Collectors.toList());
 
         List<List<JournalEntryTransactionItem>> journalLinesActualList = getJournalLinesActualList(transactionsMatch);
-        checkJournalEntryData(journalLinesActualList, loanId, table);
+        checkJournalEntriesData(journalLinesActualList, table);
     }
 
-    public void checkJournalEntryData(List<List<JournalEntryTransactionItem>> journalLinesActualList, long loanId, DataTable table) {
-        String resourceId = String.valueOf(loanId);
-
+    public void checkJournalEntriesData(List<List<JournalEntryTransactionItem>> journalLinesActualList, DataTable table) {
         List<List<String>> data = table.asLists();
         final int expectedCount = data.size() - 1;
+
+        List<List<String>> expectedJournalEntries = data.subList(1, data.size());
+        List<List<String>> actualJournalEntries = getActualJournalEntriesListFromLists(journalLinesActualList);
+
         final int actualCount = journalLinesActualList.stream().mapToInt(List::size).sum();
         assertThat(actualCount).as("The number of journal entries for the transaction does not match the expected count! Expected: "
                 + expectedCount + ", Actual: " + actualCount).isEqualTo(expectedCount);
-        for (int i = 1; i < data.size(); i++) {
-            List<List<List<String>>> possibleActualValuesList = new ArrayList<>();
-            List<String> expectedValues = data.get(i);
-            boolean containsAnyExpected = false;
 
-            for (int j = 0; j < journalLinesActualList.size(); j++) {
-                List<JournalEntryTransactionItem> journalLinesActual = journalLinesActualList.get(j);
-
-                List<List<String>> actualValuesList = journalLinesActual.stream().map(t -> {
-                    List<String> actualValues = new ArrayList<>();
-                    actualValues.add(t.getGlAccountType().getValue() == null ? null : t.getGlAccountType().getValue());
-                    actualValues.add(t.getGlAccountCode() == null ? null : t.getGlAccountCode());
-                    actualValues.add(t.getGlAccountName() == null ? null : t.getGlAccountName());
-                    actualValues.add("DEBIT".equals(t.getEntryType().getValue()) ? String.valueOf(t.getAmount()) : null);
-                    actualValues.add("CREDIT".equals(t.getEntryType().getValue()) ? String.valueOf(t.getAmount()) : null);
-
-                    return actualValues;
-                }).collect(Collectors.toList());
-                possibleActualValuesList.add(actualValuesList);
-
-                boolean containsExpectedValues = actualValuesList.stream()
-                        .anyMatch(actualValues -> matchesWithBigDecimalComparison(actualValues, expectedValues));
-                if (containsExpectedValues) {
-                    containsAnyExpected = true;
-                }
-            }
-            assertThat(containsAnyExpected)
-                    .as(ErrorMessageHelper.wrongValueInLineInJournalEntries(resourceId, i, possibleActualValuesList, expectedValues))
-                    .isTrue();
-        }
-    }
-
-    private boolean matchesWithBigDecimalComparison(List<String> actualValues, List<String> expectedValues) {
-        if (actualValues.size() != expectedValues.size()) {
-            return false;
-        }
-        for (int i = 0; i < actualValues.size(); i++) {
-            String actual = actualValues.get(i);
-            String expected = expectedValues.get(i);
-            if (!valuesMatch(actual, expected)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean valuesMatch(String actual, String expected) {
-        if (Objects.equals(actual, expected)) {
-            return true;
-        }
-        if (actual == null || expected == null) {
-            return false;
-        }
-        try {
-            BigDecimal actualDecimal = new BigDecimal(actual);
-            BigDecimal expectedDecimal = new BigDecimal(expected);
-            return actualDecimal.compareTo(expectedDecimal) == 0;
-        } catch (NumberFormatException e) {
-            return actual.equals(expected);
-        }
+        boolean containsExpectedValues = Utils.isEqualLists(expectedJournalEntries, actualJournalEntries);
+        assertThat(containsExpectedValues).as(ErrorMessageHelper.wrongValueInInJournalEntries(expectedJournalEntries, actualJournalEntries))
+                .isTrue();
     }
 
     public List<List<JournalEntryTransactionItem>> getJournalLinesActualList(List<GetLoansLoanIdTransactions> transactionsMatch) {
@@ -181,8 +127,68 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         }).collect(Collectors.toList());
     }
 
+    public List<List<String>> getActualJournalEntriesListFromLists(List<List<JournalEntryTransactionItem>> journalLinesActualList) {
+        List<List<String>> actualJournalEntries = new ArrayList<>();
+        for (int j = 0; j < journalLinesActualList.size(); j++) {
+            List<JournalEntryTransactionItem> journalLinesActual = journalLinesActualList.get(j);
+
+            List<List<String>> actualValuesList = journalLinesActual.stream().map(t -> {
+                List<String> actualValues = new ArrayList<>();
+                actualValues.add(t.getGlAccountType().getValue() == null ? null : t.getGlAccountType().getValue());
+                actualValues.add(t.getGlAccountCode() == null ? null : t.getGlAccountCode());
+                actualValues.add(t.getGlAccountName() == null ? null : t.getGlAccountName());
+                actualValues.add("DEBIT".equals(t.getEntryType().getValue()) ? String.valueOf(t.getAmount()) : null);
+                actualValues.add("CREDIT".equals(t.getEntryType().getValue()) ? String.valueOf(t.getAmount()) : null);
+
+                return actualValues;
+            }).toList();
+            actualJournalEntries.addAll(actualValuesList);
+        }
+        return actualJournalEntries;
+    }
+
+    public List<List<String>> getActualJournalEntriesListFromList(List<JournalEntryTransactionItem> journalLinesActualList) {
+        List<List<String>> actualJournalEntries = new ArrayList<>();
+
+        for (int j = 0; j < Objects.requireNonNull(journalLinesActualList).size(); j++) {
+            final JournalEntryTransactionItem journalLinesActual = journalLinesActualList.get(j);
+
+            final List<String> actualValues = new ArrayList<>();
+            assert journalLinesActual.getGlAccountType() != null;
+            actualValues.add(
+                    journalLinesActual.getGlAccountType().getValue() == null ? null : journalLinesActual.getGlAccountType().getValue());
+            actualValues.add(journalLinesActual.getGlAccountCode() == null ? null : journalLinesActual.getGlAccountCode());
+            actualValues.add(journalLinesActual.getGlAccountName() == null ? null : journalLinesActual.getGlAccountName());
+            assert journalLinesActual.getEntryType() != null;
+            actualValues.add(
+                    "DEBIT".equals(journalLinesActual.getEntryType().getValue()) ? String.valueOf(journalLinesActual.getAmount()) : null);
+            actualValues.add(
+                    "CREDIT".equals(journalLinesActual.getEntryType().getValue()) ? String.valueOf(journalLinesActual.getAmount()) : null);
+            actualJournalEntries.add(actualValues);
+        }
+        return actualJournalEntries;
+    }
+
+    public List<List<String>> getActualJournalEntriesListWithAssetExternalOwner(List<JournalEntryTransactionItem> journalLinesActual,
+            String externalAssetOwnerEnabled) {
+        List<List<String>> actualValuesList = journalLinesActual.stream().map(t -> {
+            List<String> actualValues = new ArrayList<>();
+            actualValues.add(t.getGlAccountType().getValue() == null ? null : t.getGlAccountType().getValue());
+            actualValues.add(t.getGlAccountCode() == null ? null : t.getGlAccountCode());
+            actualValues.add(t.getGlAccountName() == null ? null : t.getGlAccountName());
+            actualValues.add("DEBIT".equals(t.getEntryType().getValue()) ? String.valueOf(t.getAmount()) : null);
+            actualValues.add("CREDIT".equals(t.getEntryType().getValue()) ? String.valueOf(t.getAmount()) : null);
+            actualValues.add(String.valueOf(t.getManualEntry()).toLowerCase(Locale.ROOT));
+            if (Boolean.parseBoolean(externalAssetOwnerEnabled)) {
+                actualValues.add(t.getExternalAssetOwner() == null ? null : t.getExternalAssetOwner());
+            }
+            return actualValues;
+        }).toList();
+        return new ArrayList<>(actualValuesList);
+    }
+
     @Then("Loan Transactions tab has {int} a {string} transactions with date {string} which has the following Journal entries:")
-    public void journalEntryDataCheck(int numberTrns, String transactionType, String transactionDate, DataTable table) throws IOException {
+    public void journalEntryDataCheck(int numberTrns, String transactionType, String transactionDate, DataTable table) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
@@ -205,7 +211,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
                 .isEqualTo(numberTrns);
 
         List<List<JournalEntryTransactionItem>> journalLinesActualList = getJournalLinesActualList(transactionsMatch);
-        checkJournalEntryData(journalLinesActualList, loanId, table);
+        checkJournalEntriesData(journalLinesActualList, table);
     }
 
     @Then("Reversed loan capitalized income amortization transaction has the following Journal entries:")
@@ -213,7 +219,6 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         final long capitalizedIncomeAmortizationId = testContext().get(TestContextKey.LOAN_CAPITALIZED_INCOME_AMORTIZATION_ID);
         final PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         final long loanId = loanResponse.getLoanId();
-        final String resourceId = String.valueOf(loanId);
 
         final String transactionId = "L" + capitalizedIncomeAmortizationId;
         GetJournalEntriesTransactionIdResponse journalEntryDataResponse = null;
@@ -232,46 +237,19 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         }
 
         final List<List<String>> data = table.asLists();
-        for (int i = 1; i < data.size(); i++) {
-            final List<List<String>> possibleActualValuesList = new ArrayList<>();
-            final List<String> expectedValues = data.get(i);
-            boolean containsAnyExpected = false;
+        List<List<String>> expectedJournalEntries = data.subList(1, data.size());
+        List<List<String>> actualJournalEntries = getActualJournalEntriesListFromList(journalLinesActualList);
 
-            for (int j = 0; j < Objects.requireNonNull(journalLinesActualList).size(); j++) {
-                final JournalEntryTransactionItem journalLinesActual = journalLinesActualList.get(j);
-                final List<String> actualValues = new ArrayList<>();
-                assert journalLinesActual.getGlAccountType() != null;
-                actualValues.add(
-                        journalLinesActual.getGlAccountType().getValue() == null ? null : journalLinesActual.getGlAccountType().getValue());
-                actualValues.add(journalLinesActual.getGlAccountCode() == null ? null : journalLinesActual.getGlAccountCode());
-                actualValues.add(journalLinesActual.getGlAccountName() == null ? null : journalLinesActual.getGlAccountName());
-                assert journalLinesActual.getEntryType() != null;
-                actualValues
-                        .add("DEBIT".equals(journalLinesActual.getEntryType().getValue()) ? String.valueOf(journalLinesActual.getAmount())
-                                : null);
-                actualValues
-                        .add("CREDIT".equals(journalLinesActual.getEntryType().getValue()) ? String.valueOf(journalLinesActual.getAmount())
-                                : null);
-                possibleActualValuesList.add(actualValues);
-
-                final boolean containsExpectedValues = possibleActualValuesList.stream()
-                        .anyMatch(actualValue -> matchesWithBigDecimalComparison(actualValue, expectedValues));
-                if (containsExpectedValues) {
-                    containsAnyExpected = true;
-                }
-            }
-            assertThat(containsAnyExpected)
-                    .as(ErrorMessageHelper.wrongValueInLineInJournalEntry(resourceId, i, possibleActualValuesList, expectedValues))
-                    .isTrue();
-        }
+        boolean containsExpectedValues = Utils.isEqualLists(expectedJournalEntries, actualJournalEntries);
+        assertThat(containsExpectedValues).as(ErrorMessageHelper.wrongValueInInJournalEntries(expectedJournalEntries, actualJournalEntries))
+                .isTrue();
     }
 
     @Then("In Loan transactions the replayed {string} transaction with date {string} has a reverted transaction pair with the following Journal entries:")
-    public void revertedJournalEntryDataCheck(String transactionType, String transactionDate, DataTable table) throws IOException {
+    public void revertedJournalEntryDataCheck(String transactionType, String transactionDate, DataTable table) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
-        String resourceId = String.valueOf(loanId);
 
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("staffInSelectedOfficeOnly", false);
@@ -306,40 +284,16 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         }).collect(Collectors.toList());
 
         List<List<String>> data = table.asLists();
-        for (int i = 1; i < data.size(); i++) {
-            List<List<List<String>>> possibleActualValuesList = new ArrayList<>();
-            List<String> expectedValues = data.get(i);
-            boolean containsAnyExpected = false;
+        List<List<String>> expectedJournalEntries = data.subList(1, data.size());
+        List<List<String>> actualJournalEntries = getActualJournalEntriesListFromLists(journalLinesActualList);
 
-            for (int j = 0; j < journalLinesActualList.size(); j++) {
-                List<JournalEntryTransactionItem> journalLinesActual = journalLinesActualList.get(j);
-
-                List<List<String>> actualValuesList = journalLinesActual.stream().map(t -> {
-                    List<String> actualValues = new ArrayList<>();
-                    actualValues.add(t.getGlAccountType().getValue() == null ? null : t.getGlAccountType().getValue());
-                    actualValues.add(t.getGlAccountCode() == null ? null : t.getGlAccountCode());
-                    actualValues.add(t.getGlAccountName() == null ? null : t.getGlAccountName());
-                    actualValues.add("DEBIT".equals(t.getEntryType().getValue()) ? String.valueOf(t.getAmount()) : null);
-                    actualValues.add("CREDIT".equals(t.getEntryType().getValue()) ? String.valueOf(t.getAmount()) : null);
-
-                    return actualValues;
-                }).collect(Collectors.toList());
-                possibleActualValuesList.add(actualValuesList);
-
-                boolean containsExpectedValues = actualValuesList.stream()
-                        .anyMatch(actualValues -> matchesWithBigDecimalComparison(actualValues, expectedValues));
-                if (containsExpectedValues) {
-                    containsAnyExpected = true;
-                }
-            }
-            assertThat(containsAnyExpected)
-                    .as(ErrorMessageHelper.wrongValueInLineInJournalEntries(resourceId, i, possibleActualValuesList, expectedValues))
-                    .isTrue();
-        }
+        boolean containsExpectedValues = Utils.isEqualLists(expectedJournalEntries, actualJournalEntries);
+        assertThat(containsExpectedValues).as(ErrorMessageHelper.wrongValueInInJournalEntries(expectedJournalEntries, actualJournalEntries))
+                .isTrue();
     }
 
     @Then("Loan Transactions tab has a {string} transaction with date {string} has no the Journal entries")
-    public void journalEntryNoDataCheck(String transactionType, String transactionDate) throws IOException {
+    public void journalEntryNoDataCheck(String transactionType, String transactionDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
         PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
         long loanId = loanResponse.getLoanId();
@@ -375,7 +329,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         assertThat(journalLinesActualList.stream().findFirst().get().size()).isZero();
     }
 
-    public PostJournalEntriesResponse addManualJournalEntryWithoutExternalAssetOwner(String amount, String date) throws IOException {
+    public PostJournalEntriesResponse addManualJournalEntryWithoutExternalAssetOwner(String amount, String date) {
         LocalDate transactionDate = LocalDate.parse(date, FORMATTER_EN);
         JournalEntryCommand journalEntriesRequest = loanRequestFactory.defaultManualJournalEntryRequest(new BigDecimal(amount))
                 .transactionDate(transactionDate);
@@ -387,8 +341,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         return journalEntriesResponse;
     }
 
-    public PostJournalEntriesResponse addManualJournalEntryWithExternalAssetOwner(String amount, String date, String externalAssetOwner)
-            throws IOException {
+    public PostJournalEntriesResponse addManualJournalEntryWithExternalAssetOwner(String amount, String date, String externalAssetOwner) {
         LocalDate transactionDate = LocalDate.parse(date, FORMATTER_EN);
         JournalEntryCommand journalEntriesRequest = loanRequestFactory
                 .defaultManualJournalEntryRequest(new BigDecimal(amount), externalAssetOwner).transactionDate(transactionDate);
@@ -401,7 +354,7 @@ public class JournalEntriesStepDef extends AbstractStepDef {
     }
 
     @Then("Admin creates manual Journal entry with {string} amount and {string} date and unique External Asset Owner")
-    public void createManualJournalEntryWithExternalAssetOwner(String amount, String date) throws IOException {
+    public void createManualJournalEntryWithExternalAssetOwner(String amount, String date) {
         String ownerExternalIdStored = testContext().get(TestContextKey.ASSET_EXTERNALIZATION_OWNER_EXTERNAL_ID);
         PostJournalEntriesResponse journalEntriesResponse = addManualJournalEntryWithExternalAssetOwner(amount, date,
                 ownerExternalIdStored);
@@ -410,14 +363,14 @@ public class JournalEntriesStepDef extends AbstractStepDef {
     }
 
     @Then("Admin creates manual Journal entry with {string} amount and {string} date and empty External Asset Owner")
-    public void createManualJournalEntryWithEmptyExternalAssetOwner(String amount, String date) throws IOException {
+    public void createManualJournalEntryWithEmptyExternalAssetOwner(String amount, String date) {
         PostJournalEntriesResponse journalEntriesResponse = addManualJournalEntryWithExternalAssetOwner(amount, date, "");
 
         testContext().set(TestContextKey.MANUAL_JOURNAL_ENTRIES_RESPONSE, journalEntriesResponse);
     }
 
     @Then("Admin creates manual Journal entry with {string} amount and {string} date and without External Asset Owner")
-    public void createManualJournalEntryWithoutExternalAssetOwner(String amount, String date) throws IOException {
+    public void createManualJournalEntryWithoutExternalAssetOwner(String amount, String date) {
         PostJournalEntriesResponse journalEntriesResponse = addManualJournalEntryWithoutExternalAssetOwner(amount, date);
 
         testContext().set(TestContextKey.MANUAL_JOURNAL_ENTRIES_RESPONSE, journalEntriesResponse);
@@ -442,46 +395,24 @@ public class JournalEntriesStepDef extends AbstractStepDef {
         }
 
         List<List<String>> data = table.asLists();
-        for (int i = 1; i < data.size(); i++) {
-            List<List<List<String>>> possibleActualValuesList = new ArrayList<>();
-            List<String> expectedValues = data.get(i);
+        List<List<String>> expectedJournalEntries = data.subList(1, data.size());
+        expectedJournalEntries.forEach(expectedJournalEntry -> {
             if (Boolean.parseBoolean(externalAssetOwnerEnabled)) {
-                expectedValues
+                expectedJournalEntry
                         .add(journalEntriesRequest.getExternalAssetOwner() == null ? null : journalEntriesRequest.getExternalAssetOwner());
             }
-            boolean containsAnyExpected = false;
+        });
+        GetJournalEntriesTransactionIdResponse journalEntryData = journalEntryDataResponse;
 
-            GetJournalEntriesTransactionIdResponse journalEntryData = journalEntryDataResponse;
+        assert journalEntryData != null;
+        List<JournalEntryTransactionItem> journalLinesActual = journalEntryData.getPageItems();
+        assert journalLinesActual != null;
+        List<List<String>> actualJournalEntries = getActualJournalEntriesListWithAssetExternalOwner(journalLinesActual,
+                externalAssetOwnerEnabled);
 
-            List<JournalEntryTransactionItem> journalLinesActual = journalEntryData.getPageItems();
-
-            List<List<String>> actualValuesList = journalLinesActual.stream().map(t -> {
-                List<String> actualValues = new ArrayList<>();
-                actualValues.add(t.getGlAccountType().getValue() == null ? null : t.getGlAccountType().getValue());
-                actualValues.add(t.getGlAccountCode() == null ? null : t.getGlAccountCode());
-                actualValues.add(t.getGlAccountName() == null ? null : t.getGlAccountName());
-                actualValues.add("DEBIT".equals(t.getEntryType().getValue()) ? String.valueOf(t.getAmount()) : null);
-                actualValues.add("CREDIT".equals(t.getEntryType().getValue()) ? String.valueOf(t.getAmount()) : null);
-                actualValues.add(String.valueOf(t.getManualEntry()).toLowerCase(Locale.ROOT));
-                if (Boolean.parseBoolean(externalAssetOwnerEnabled)) {
-                    actualValues.add(t.getExternalAssetOwner() == null ? null : t.getExternalAssetOwner());
-                }
-
-                return actualValues;
-            }).collect(Collectors.toList());
-
-            possibleActualValuesList.add(actualValuesList);
-
-            boolean containsExpectedValues = actualValuesList.stream()
-                    .anyMatch(actualValues -> matchesWithBigDecimalComparison(actualValues, expectedValues));
-            if (containsExpectedValues) {
-                containsAnyExpected = true;
-            }
-
-            assertThat(containsAnyExpected)
-                    .as(ErrorMessageHelper.wrongValueInLineInJournalEntries(transactionId, i, possibleActualValuesList, expectedValues))
-                    .isTrue();
-        }
+        boolean containsExpectedValues = Utils.isEqualLists(expectedJournalEntries, actualJournalEntries);
+        assertThat(containsExpectedValues).as(ErrorMessageHelper.wrongValueInInJournalEntries(expectedJournalEntries, actualJournalEntries))
+                .isTrue();
     }
 
 }

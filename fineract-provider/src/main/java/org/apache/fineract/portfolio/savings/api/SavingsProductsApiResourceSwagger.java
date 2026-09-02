@@ -84,6 +84,41 @@ final class SavingsProductsApiResourceSwagger {
         public Boolean withHoldTax;
         @Schema(example = "false")
         public Boolean isDormancyTrackingActive;
+        /*
+         * The overdraft settings and the GL account mappings below have always been accepted by the endpoint - they are
+         * part of SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS - but were never documented, so a typed client could not
+         * create an accrual-based or overdraft-enabled product at all.
+         */
+        @Schema(example = "10000")
+        public BigDecimal overdraftLimit;
+        @Schema(example = "21.0")
+        public BigDecimal nominalAnnualInterestRateOverdraft;
+        @Schema(example = "1")
+        public Long savingsReferenceAccountId;
+        @Schema(example = "1")
+        public Long savingsControlAccountId;
+        @Schema(example = "1")
+        public Long transfersInSuspenseAccountId;
+        @Schema(example = "1")
+        public Long interestOnSavingsAccountId;
+        @Schema(example = "1")
+        public Long writeOffAccountId;
+        @Schema(example = "1")
+        public Long incomeFromFeeAccountId;
+        @Schema(example = "1")
+        public Long incomeFromPenaltyAccountId;
+        @Schema(example = "1")
+        public Long incomeFromInterestId;
+        @Schema(example = "1")
+        public Long overdraftPortfolioControlId;
+        @Schema(example = "1")
+        public Long feesReceivableAccountId;
+        @Schema(example = "1")
+        public Long penaltiesReceivableAccountId;
+        @Schema(example = "1")
+        public Long interestPayableAccountId;
+        @Schema(example = "1")
+        public Long interestReceivableAccountId;
     }
 
     @Schema(description = "PostSavingsProductsResponse")
@@ -95,6 +130,11 @@ final class SavingsProductsApiResourceSwagger {
         public Long resourceId;
     }
 
+    /**
+     * An update is validated against the same {@code SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS} set as a create, so it
+     * accepts the whole product body rather than the three fields that used to be documented here. The extra fields are
+     * listed so a typed client can repoint an accounting mapping or an overdraft setting without hand-building JSON.
+     */
     @Schema(description = "PutSavingsProductsProductIdRequest")
     public static final class PutSavingsProductsProductIdRequest {
 
@@ -106,6 +146,68 @@ final class SavingsProductsApiResourceSwagger {
         public String locale;
         @Schema(example = "5.73")
         public Double interestRate;
+        @Schema(example = "Passbook Savings")
+        public String name;
+        @Schema(example = "PBSV")
+        public String shortName;
+        @Schema(example = "USD")
+        public String currencyCode;
+        @Schema(example = "2")
+        public Integer digitsAfterDecimal;
+        @Schema(example = "0")
+        public Integer inMultiplesOf;
+        @Schema(example = "5.0")
+        public Double nominalAnnualInterestRate;
+        @Schema(example = "10000.0")
+        public BigDecimal minRequiredOpeningBalance;
+        @Schema(example = "1")
+        public Integer interestCompoundingPeriodType;
+        @Schema(example = "4")
+        public Integer interestPostingPeriodType;
+        @Schema(example = "1")
+        public Integer interestCalculationType;
+        @Schema(example = "365")
+        public Integer interestCalculationDaysInYearType;
+        @Schema(example = "1")
+        public Integer accountingRule;
+        @Schema(example = "false")
+        public Boolean withdrawalFeeForTransfers;
+        @Schema(example = "false")
+        public Boolean enforceMinRequiredBalance;
+        @Schema(example = "false")
+        public Boolean allowOverdraft;
+        @Schema(example = "false")
+        public Boolean withHoldTax;
+        @Schema(example = "10000")
+        public BigDecimal overdraftLimit;
+        @Schema(example = "21.0")
+        public BigDecimal nominalAnnualInterestRateOverdraft;
+        @Schema(example = "1")
+        public Long savingsReferenceAccountId;
+        @Schema(example = "1")
+        public Long savingsControlAccountId;
+        @Schema(example = "1")
+        public Long transfersInSuspenseAccountId;
+        @Schema(example = "1")
+        public Long interestOnSavingsAccountId;
+        @Schema(example = "1")
+        public Long writeOffAccountId;
+        @Schema(example = "1")
+        public Long incomeFromFeeAccountId;
+        @Schema(example = "1")
+        public Long incomeFromPenaltyAccountId;
+        @Schema(example = "1")
+        public Long incomeFromInterestId;
+        @Schema(example = "1")
+        public Long overdraftPortfolioControlId;
+        @Schema(example = "1")
+        public Long feesReceivableAccountId;
+        @Schema(example = "1")
+        public Long penaltiesReceivableAccountId;
+        @Schema(example = "1")
+        public Long interestPayableAccountId;
+        @Schema(example = "1")
+        public Long interestReceivableAccountId;
     }
 
     @Schema(description = "PutSavingsProductsProductIdResponse")

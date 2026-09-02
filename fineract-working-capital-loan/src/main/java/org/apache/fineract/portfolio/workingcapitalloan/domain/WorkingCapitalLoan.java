@@ -35,11 +35,16 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -145,10 +150,16 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     @Column(name = "maturedon_date")
     private LocalDate maturedOnDate;
 
+    /** Principal requested on the application. Set at submission, updated on modification, never changed afterwards. */
     @Setter
     @Column(name = "principal_amount_proposed", scale = 6, precision = 19, nullable = false)
     private BigDecimal proposedPrincipal;
 
+    /**
+     * Principal granted at approval, defaulting to the proposed one. Zero before approval and after undoing it, which
+     * is a deliberate divergence from classic Fineract, where the approved principal mirrors the proposed one until it
+     * is actually approved.
+     */
     @Setter
     @Column(name = "approved_principal", scale = 6, precision = 19, nullable = false)
     private BigDecimal approvedPrincipal;
@@ -221,6 +232,128 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     }
 
     /**
+     * Mirrors {@code Loan.getOffice()} minus the group branch: working capital loans are client-only, so there is no
+     * {@code group} to fall back on.
+     */
+    public Office getOffice() {
+        return client != null ? client.getOffice() : null;
+    }
+
+    public Long productId() {
+        return loanProduct != null ? loanProduct.getId() : null;
+    }
+
+    /**
+     * The {@code Loan} spelling of the status accessor. Lombok generates {@code getLoanStatus()} from the field; this
+     * is the same value under the name the {@code Loan}-shaped call sites use.
+     */
+    public LoanStatus getStatus() {
+        return loanStatus;
+    }
+
+    /**
+     * Mirrors {@code Loan.getCurrency()}: {@code loanProductRelatedDetails} is WC's counterpart of
+     * {@code loanRepaymentScheduleDetail}, the copy of the product terms the loan owns.
+     */
+    public MonetaryCurrency getCurrency() {
+        return loanProductRelatedDetails != null ? loanProductRelatedDetails.getCurrency() : null;
+    }
+
+    public String getCurrencyCode() {
+        final MonetaryCurrency currency = getCurrency();
+        return currency != null ? currency.getCode() : null;
+    }
+
+    /**
+     * Mirrors {@code Loan.getPrincipal()}: the principal currently in force, which the write service keeps in step with
+     * the lifecycle - the proposed amount on submission, the approved amount on approval, the disbursed amount on
+     * disbursement. Not the outstanding principal, which lives on {@link WorkingCapitalLoanBalance}.
+     */
+    public Money getPrincipal() {
+        final MonetaryCurrency currency = getCurrency();
+        return currency != null ? Money.of(currency, loanProductRelatedDetails.getPrincipal()) : null;
+    }
+
+    public boolean isSubmittedAndPendingApproval() {
+        return loanStatus != null && loanStatus.isSubmittedAndPendingApproval();
+    }
+
+    public boolean isNotSubmittedAndPendingApproval() {
+        return !isSubmittedAndPendingApproval();
+    }
+
+    public boolean isApproved() {
+        return loanStatus != null && loanStatus.isApproved();
+    }
+
+    /**
+     * Mirrors {@code Loan.isOpen()}: the loan is in the {@code ACTIVE} state.
+     */
+    public boolean isOpen() {
+        return loanStatus != null && loanStatus.isActive();
+    }
+
+    public boolean isClosed() {
+        return (loanStatus != null && loanStatus.isClosed()) || isCancelled();
+    }
+
+    public boolean isClosedObligationsMet() {
+        return loanStatus != null && loanStatus.isClosedObligationsMet();
+    }
+
+    public boolean isClosedWrittenOff() {
+        return loanStatus != null && loanStatus.isClosedWrittenOff();
+    }
+
+    public boolean isOverpaid() {
+        return loanStatus != null && loanStatus.isOverpaid();
+    }
+
+    /**
+     * Mirrors {@code Loan.isCancelled()}. Working capital loans have no transition to {@code WITHDRAWN_BY_CLIENT}
+     * today, so only the rejected half is reachable; the two-term definition is kept so the predicate stays correct if
+     * withdrawal is ever added.
+     */
+    public boolean isCancelled() {
+        return loanStatus != null && (loanStatus.isRejected() || loanStatus.isWithdrawnByClient());
+    }
+
+    /**
+     * Disbursement is decided by the disbursement detail rows, never by the status: a written-off loan is
+     * {@code CLOSED_WRITTEN_OFF} yet is still disbursed.
+     */
+    public boolean isDisbursed() {
+        return disbursementDetails.stream() //
+                .map(WorkingCapitalLoanDisbursementDetails::getActualDisbursementDate) //
+                .anyMatch(Objects::nonNull);
+    }
+
+    public boolean isNotDisbursed() {
+        return !isDisbursed();
+    }
+
+    /**
+     * Mirrors {@code Loan.getDisbursedLoanDisbursementDetails()}: the detail rows that were actually disbursed, in no
+     * guaranteed order - {@code disbursementDetails} is an unordered bag.
+     */
+    public List<WorkingCapitalLoanDisbursementDetails> getDisbursedLoanDisbursementDetails() {
+        return disbursementDetails.stream() //
+                .filter(it -> it.getActualDisbursementDate() != null) //
+                .toList();
+    }
+
+    /**
+     * The earliest non-null actual disbursement date, or {@code null} when nothing was disbursed yet.
+     */
+    public LocalDate getFirstActualDisbursementDate() {
+        return disbursementDetails.stream() //
+                .map(WorkingCapitalLoanDisbursementDetails::getActualDisbursementDate) //
+                .filter(Objects::nonNull) //
+                .min(LocalDate::compareTo) //
+                .orElse(null);
+    }
+
+    /**
      * Marks the account as charged-off. The {@code chargeOffReason} is optional and may be {@code null}.
      */
     public void markAsChargedOff(final LocalDate chargedOffOnDate, final AppUser chargedOffBy, final CodeValue chargeOffReason) {
@@ -243,5 +376,29 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
 
     public Long fetchChargeOffReasonId() {
         return this.chargeOffReason != null ? this.chargeOffReason.getId() : null;
+    }
+
+    /**
+     * Returns the actual amount for the chronologically first disbursement, or zero when no disbursement amount is
+     * available. Undisbursed detail rows are ignored, just as they are for {@link #getFirstActualDisbursementDate()}.
+     */
+    public BigDecimal getFirstActualDisbursementAmount() {
+        return Optional.ofNullable(getFirstActualDisbursement()) //
+                .map(WorkingCapitalLoanDisbursementDetails::getActualAmount) //
+                .orElse(BigDecimal.ZERO);
+    }
+
+    /**
+     * Finds the disbursement detail with the earliest non-null actual disbursement date. When multiple persisted
+     * details share that date, the detail ID is used as a deterministic tie-breaker. The disbursement detail collection
+     * is otherwise unordered, so collection position is never used as the ordering rule.
+     *
+     * @return the earliest actual disbursement detail, or {@code null} when no detail has been disbursed
+     */
+    public WorkingCapitalLoanDisbursementDetails getFirstActualDisbursement() {
+        return disbursementDetails.stream() //
+                .filter(detail -> detail.getActualDisbursementDate() != null) //
+                .min(WorkingCapitalLoanDisbursementDetailsComparator.ACTUAL_DISBURSEMENT_ORDER) //
+                .orElse(null);
     }
 }

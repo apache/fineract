@@ -32,16 +32,20 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignRawHttpHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
 import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
@@ -147,22 +151,27 @@ public class LoanTransactionAuditingIntegrationTest extends FeignLoanTestBase {
 
     private Long applyForLoanApplication(final Long clientId, final Long loanProductId, String principal, final String submittedOnDate,
             final String disbursementDate) {
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal(principal) //
-                .withLoanTermFrequency("6") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("6") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsFlatBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate(disbursementDate) //
-                .withSubmittedOnDate(submittedOnDate) //
-                .withRepaymentStrategy(LoanApplicationTestBuilder.DEFAULT_STRATEGY) //
-                .build(clientId.toString(), loanProductId.toString(), null);
-        return applyForLoanFromJson(loanApplicationJSON);
+        return applyForLoan(new PostLoansRequest()//
+                .clientId(clientId)//
+                .productId(loanProductId)//
+                .principal(new BigDecimal(principal))//
+                .loanTermFrequency(6)//
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .numberOfRepayments(6)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .interestRatePerPeriod(new BigDecimal("2"))//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS)//
+                .interestType(LoanTestData.InterestType.FLAT)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                .expectedDisbursementDate(disbursementDate)//
+                .submittedOnDate(submittedOnDate)//
+                .transactionProcessingStrategyCode(LoanTestData.TransactionProcessingStrategyCode.MIFOS_STANDARD_STRATEGY)//
+                .loanType("individual")//
+                .maxOutstandingLoanBalance(new BigDecimal("36000"))//
+                .collateral(List.of())//
+                .locale("en_GB")//
+                .dateFormat(LoanTestData.DATETIME_PATTERN));
     }
 
     private Long createLoanProduct(final String inMultiplesOf, final String digitsAfterDecimal, final String repaymentStrategy,
@@ -172,7 +181,7 @@ public class LoanTransactionAuditingIntegrationTest extends FeignLoanTestBase {
         final org.apache.fineract.integrationtests.common.accounting.Account expenseAccount = getAccounts().getChargeOffExpenseAccount();
         final org.apache.fineract.integrationtests.common.accounting.Account overpaymentAccount = getAccounts().getOverpaymentAccount();
 
-        final String loanProductJSON = new LoanProductTestBuilder() //
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder() //
                 .withPrincipal("10000000.00") //
                 .withNumberOfRepayments("24") //
                 .withRepaymentAfterEvery("1") //
@@ -185,7 +194,7 @@ public class LoanTransactionAuditingIntegrationTest extends FeignLoanTestBase {
                 .currencyDetails(digitsAfterDecimal, inMultiplesOf)
                 .withAccounting(accountingRule, new org.apache.fineract.integrationtests.common.accounting.Account[] { assetAccount,
                         incomeAccount, expenseAccount, overpaymentAccount })
-                .build(null);
-        return createLoanProductFromJson(loanProductJSON);
+                .buildRequest(null);
+        return createLoanProduct(loanProductRequest);
     }
 }

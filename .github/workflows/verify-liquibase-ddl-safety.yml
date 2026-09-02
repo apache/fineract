@@ -2,6 +2,12 @@ name: Verify Liquibase DDL Safety
 
 on:
   workflow_call:
+    inputs:
+      upload_artifacts:
+        description: Upload reports and logs even when the job succeeds
+        required: false
+        default: false
+        type: boolean
     secrets:
       DEVELOCITY_ACCESS_KEY:
         required: false
@@ -111,7 +117,7 @@ jobs:
           fi
 
       - name: Archive report
-        if: failure() && steps.changes.outputs.has_changes == 'true'
+        if: ${{ (failure() || inputs.upload_artifacts) && steps.changes.outputs.has_changes == 'true' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ddl-safety-report

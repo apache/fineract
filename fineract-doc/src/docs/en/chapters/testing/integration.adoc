@@ -7,10 +7,11 @@ Integration tests in Apache Fineract validate the complete API layer and busines
 === Architecture
 
 * *Location*: `integration-tests/src/test/java/org/apache/fineract/integrationtests`
-* *Framework*: JUnit 5 with REST Assured for HTTP communication
-* *Base Class*: Most tests extend `BaseLoanIntegrationTest` or `IntegrationTest`
-* *Client Library*: Uses Fineract client library for type-safe API interactions
+* *Framework*: JUnit 5. Tests under `client/feign` drive the server through the generated Feign client; the remainder still use REST Assured for HTTP communication
+* *Base Class*: Most tests extend `BaseLoanIntegrationTest` or `IntegrationTest`; Feign tests extend `FeignLoanTestBase` or `FeignSavingsTestBase`
 * *Prerequisites*: Running Apache Fineract instance (default: https://localhost:8443)
+
+New tests should be written against the generated Feign client, which is covered in <<_feign_integration_tests,Feign Integration Tests>>. The rest of this chapter describes the setup shared by both, and the REST Assured pattern used by the tests that have not yet been migrated.
 
 === Key Characteristics
 
@@ -25,26 +26,33 @@ Integration tests in Apache Fineract validate the complete API layer and busines
 
 === Required Software
 
-* *Java 21*: Apache Fineract requires Java 21 (Azul Zulu JDK recommended)
-* *Database*: MariaDB 12.2, PostgreSQL 18.3, or MySQL 9.1
-* *Git*: For source code management
-* *Gradle 8.14.3*: Included via wrapper
-* *12GB RAM*: Recommended for test execution
+See <<Fineract Development Environment>>.
 
 === Database Setup
 
 Before running integration tests, ensure the databases are created:
 
+There is a separate task per database engine: `createPGDB` for PostgreSQL, `createDB` for MariaDB, and `createMySQLDB` for MySQL.
+
 [source,bash]
 ----
-# Create required databases
-./gradlew createDB -PdbName=fineract_tenants
-./gradlew createDB -PdbName=fineract_default
+# Create required databases (PostgreSQL)
+./gradlew createPGDB -PdbName=fineract_tenants
+./gradlew createPGDB -PdbName=fineract_default
 ----
 
 === Fineract Instance
 
-Integration tests run fineract instance from cargo plugin by default.
+Integration tests run fineract instance from cargo plugin by default. The `test` task starts a Tomcat container, deploys `fineract-provider.war` into it, waits for the instance to come up, and stops it afterwards.
+
+Pass `-PcargoDisabled` to skip all of that and run against an instance you started yourself:
+
+[source,bash]
+----
+./gradlew :integration-tests:test -PcargoDisabled --tests ClientLoanIntegrationTest
+----
+
+Without it, the suite runs against the Cargo-managed container regardless of any instance already listening on the configured port.
 
 == Configuration
 
@@ -157,39 +165,35 @@ Navigate to the project root and execute tests:
 
 ==== Run with Test Filtering
 
+`--tests` is the only filter the `test` task accepts. Repeat it to select several patterns; there is no corresponding exclude option.
+
 [source,bash]
 ----
-# Run tests excluding specific packages
-./gradlew :integration-tests:test --tests "*" \
-  --exclude "*Deprecated*"
-
-# Run only fast tests (custom tag)
-./gradlew :integration-tests:test --tests "*Fast*"
+# Select several patterns
+./gradlew :integration-tests:test \
+  --tests "*Loan*" \
+  --tests "*Savings*"
 ----
+
+To skip a test permanently, annotate it with `@Disabled` rather than filtering it on the command line.
 
 ==== Parallel Execution
 
-[source,bash]
-----
-# Run tests in parallel
-./gradlew :integration-tests:test --parallel --max-workers=4
+`--max-workers` limits Gradle's own worker count; it does not fork the test JVM. Within-task parallelism is controlled by `maxParallelForks` on the `test` task, which `integration-tests` does not set — the suite runs in a single JVM.
 
-# Set custom thread count
-./gradlew :integration-tests:test --parallel --max-workers=8
-----
-
-WARNING: Some integration tests may have dependencies on shared state. Use parallel execution carefully and ensure tests are properly isolated.
+WARNING: Integration tests share the database of the instance under test. Raising `maxParallelForks` requires the tests to be isolated from one another first.
 
 ==== Run with Custom JVM Arguments
 
 [source,bash]
 ----
-# Increase heap size for large test suites
-./gradlew :integration-tests:test -Xmx4g
-
-# Enable debugging
+# Attach a debugger to the test JVM (suspends until the debugger connects)
 ./gradlew :integration-tests:test --debug-jvm
 ----
+
+The Gradle daemon's own heap is set by `org.gradle.jvmargs` in `gradle.properties`.
+
+CAUTION: Overriding it on the command line with `-Dorg.gradle.jvmargs` replaces the whole value, including the `--add-exports` and `--add-opens` flags the build needs. Repeat those flags if you override it.
 
 ==== Generate Test Reports
 
@@ -257,19 +261,20 @@ WARNING: Some integration tests may have dependencies on shared state. Use paral
 
 == Test Structure
 
-=== BaseLoanIntegrationTest Overview
+=== Loan Test Base Class Overview
 
-`BaseLoanIntegrationTest` is the comprehensive base test class for loan-related integration tests. It provides:
+`FeignLoanTestBase` is the base class for loan-related integration tests, and provides the helpers described below. `BaseLoanIntegrationTest` offers the same surface for the REST Assured tests that have not yet been migrated.
 
 ==== Pre-configured Loan Product Creation
 
+These methods return a `PostLoanProductsRequest` describing the product. Pass it to `createLoanProduct` to create the product and obtain its identifier.
+
 [source,java]
 ----
-// Create standard loan products
 createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct()
-create4IProgressive() // Progressive loan products
-create4IProgressiveWithCapitalizedIncome() // With capitalized income
-createOnePeriod30DaysPeriodicAccrualProductWithAdvancedPaymentAllocation()
+create4IProgressive()
+create4IProgressiveWithCapitalizedIncome()
+createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
 ----
 
 ==== Transaction Management
@@ -351,6 +356,10 @@ verifyArrears(loanId, expectedArrears);
 
 ==== Test Setup Pattern
 
+A test extending `FeignLoanTestBase` needs no setup block; the base class builds the client and its helpers.
+
+The REST Assured tests that have not yet been migrated build a request specification per test:
+
 [source,java]
 ----
 @BeforeEach
@@ -366,6 +375,8 @@ public void setup() {
         .build();
 }
 ----
+
+Do not copy this into a new test. `loginIntoServerAndGetBase64EncodedAuthenticationKey` authenticates against the server on every test method.
 
 ==== Date-Specific Operations
 
@@ -412,19 +423,14 @@ verifyJournalEntries(loanId,
 
 ==== Progressive Loan Testing
 
+The `create*` methods return a `PostLoanProductsRequest` describing the product, not a product identifier. Pass the request to `createLoanProduct` to obtain the identifier, customising it first if the test needs to.
+
 [source,java]
 ----
-// Create progressive loan product
-Long productId = create4IProgressive();
+Long productId = createLoanProduct(create4IProgressive());
 
-// Apply and approve
-Long loanId = applyAndApproveProgressiveLoan(clientId, productId,
-    amount, numberOfRepayments, interestRate);
-
-// Test advanced features
-testCapitalizedIncome(loanId);
-testDownPayment(loanId);
-testAdvancedPaymentAllocation(loanId);
+Long loanId = applyAndApproveProgressiveLoan(clientId, productId, "01 January 2024",
+    1000.0, 10.0, 12, request -> request.setLoanTermFrequency(12));
 ----
 
 == Writing Integration Tests
@@ -433,30 +439,16 @@ testAdvancedPaymentAllocation(loanId);
 
 ==== 1. Create Test Class
 
-Create a new test class in `integration-tests/src/test/java/org/apache/fineract/integrationtests/`:
+Create a new test class in `integration-tests/src/test/java/org/apache/fineract/integrationtests/` and extend `FeignLoanTestBase`:
 
 [source,java]
 ----
 package org.apache.fineract.integrationtests;
 
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
 
-public class MyNewFeatureIntegrationTest extends BaseLoanIntegrationTest {
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder()
-            .setContentType(ContentType.JSON)
-            .build();
-        this.requestSpec.header("Authorization", "Basic " +
-            Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder()
-            .expectStatusCode(200)
-            .build();
-    }
+public class MyNewFeatureIntegrationTest extends FeignLoanTestBase {
 
     @Test
     public void testMyNewFeature() {
@@ -465,31 +457,27 @@ public class MyNewFeatureIntegrationTest extends BaseLoanIntegrationTest {
 }
 ----
 
+The conventions that apply to the body of such a test — how to call the API, how to assert failures, and what to do when a generated model is missing a field — are covered in <<_feign_integration_tests,Feign Integration Tests>>.
+
 ==== 2. Use Helper Classes
 
-Leverage existing helper classes:
+`FeignLoanTestBase` exposes the helpers as fields, already constructed against the shared client. There is no request specification to pass around:
 
 [source,java]
 ----
-// Client operations
-ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
 Long clientId = clientHelper.createClient(...);
-
-// Loan operations
-LoanTransactionHelper loanHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-Long loanId = loanHelper.applyLoan(...);
-
-// Account operations
-AccountHelper accountHelper = new AccountHelper(requestSpec, responseSpec);
-
-// Business date operations
-BusinessDateHelper businessDateHelper = new BusinessDateHelper();
+PostLoansResponse loan = loanHelper.applyForLoan(request);
 businessDateHelper.updateBusinessDate(...);
-
-// COB operations
-InlineLoanCOBHelper cobHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
-cobHelper.executeInlineCOB(loanId);
 ----
+
+Helpers that the base class does not expose are constructed with the client:
+
+[source,java]
+----
+FeignOfficeHelper officeHelper = new FeignOfficeHelper(FineractFeignClientHelper.getFineractFeignClient());
+----
+
+The full set lives in `integration-tests/src/test/java/org/apache/fineract/integrationtests/client/feign/helpers`.
 
 ==== 3. Follow Best Practices
 
@@ -577,11 +565,11 @@ netstat -tulpn | grep 8443
 # Check Fineract logs (logs go to console/stdout)
 # If running in background with output redirection:
 # tail -f build/bootRun.log
-
-# Restart Fineract if needed
-pkill -f bootRun
-./gradlew bootRun &
 ----
+
+CAUTION: Do not stop the instance with `pkill -f bootRun` or by pattern-matching Gradle daemons. The server is a child of the daemon that launched it, so those patterns take the daemon down with it. Stop it from the terminal running it.
+
+Rebuilding while an instance is running replaces the classes it loaded from `build/`. Reads may continue to work while writes start failing. Build first, then start the server.
 
 ==== Authentication Failures
 
@@ -590,20 +578,18 @@ pkill -f bootRun
 *Solutions*:
 [source,bash]
 ----
-# Check default credentials
-mysql -u root -pmysql fineract_default -e \
-  "SELECT username, password FROM m_appuser WHERE username = 'mifos';"
-
-# Reset credentials if needed
-mysql -u root -pmysql fineract_default -e \
-  "UPDATE m_appuser SET password = '5jdQ3dNQXHPzCuBbZVdQZ2XnVlPc3l2l' \
-   WHERE username = 'mifos';"
+# Check the user exists and is not locked
+psql -U root -d fineract_default \
+  -c "SELECT username, nonlocked FROM m_appuser WHERE username = 'mifos';"
 
 # Verify connection settings
 echo "Protocol: ${BACKEND_PROTOCOL:-https}"
 echo "Host: ${BACKEND_HOST:-localhost}"
 echo "Port: ${BACKEND_PORT:-8443}"
+echo "Tenant: ${BACKEND_TENANT:-default}"
 ----
+
+Check `BACKEND_TENANT` as well as the credentials. The tenant identifier is resolved before the user is authenticated, so an unknown tenant fails every test in the same way a bad password does.
 
 ==== Data Inconsistency
 
@@ -612,52 +598,62 @@ echo "Port: ${BACKEND_PORT:-8443}"
 *Solutions*:
 [source,bash]
 ----
-# Reset database
-mysql -u root -pmysql -e "DROP DATABASE fineract_default;"
-mysql -u root -pmysql -e "DROP DATABASE fineract_tenants;"
+# 1. Stop the running instance first: PostgreSQL refuses to drop a database
+#    while the server still holds connections to it. Stop it from the
+#    terminal it is running in.
 
-# Recreate databases
-./gradlew createDB -PdbName=fineract_tenants
-./gradlew createDB -PdbName=fineract_default
+# 2. Reset the databases
+psql -U root -d postgres -c "DROP DATABASE fineract_default;"
+psql -U root -d postgres -c "DROP DATABASE fineract_tenants;"
 
-# Restart Fineract
-pkill -f bootRun
-./gradlew bootRun &
+./gradlew createPGDB -PdbName=fineract_tenants
+./gradlew createPGDB -PdbName=fineract_default
+
+# 3. Start Fineract again
+./gradlew bootRun
 ----
+
+`createPGDB` is the PostgreSQL task. `createDB` targets MariaDB and `createMySQLDB` targets MySQL; using the wrong one leaves the instance without the databases it expects.
+
+A long-lived development database is itself a source of failures. Tests that generate short random names begin to collide once the table holds enough rows, and tests that page through a listing stop finding what they created. A collision clears on a re-run; a paging miss does not. Reset the databases rather than re-running repeatedly.
 
 ==== Test Timeout
 
 *Symptom*: Tests hang or timeout
 
+Timeouts are declared per test with JUnit's `@Timeout`, or by the awaiting helper a test uses; there is no global timeout property.
+
 *Solutions*:
 [source,bash]
 ----
-# Increase test timeout
-./gradlew :integration-tests:test -Dtest.timeout=600
+# Check for blocked queries
+psql -U root -d fineract_default \
+  -c "SELECT pid, state, wait_event, query FROM pg_stat_activity WHERE state <> 'idle';"
 
-# Check for database locks
-mysql -u root -pmysql fineract_default -e "SHOW PROCESSLIST;"
-
-# Kill long-running queries
-mysql -u root -pmysql fineract_default -e "KILL <process_id>;"
+# Cancel a long-running query
+psql -U root -d fineract_default -c "SELECT pg_cancel_backend(<pid>);"
 ----
+
+A test that waits on a scheduled job can exceed its budget simply because the job is slow on a database with accumulated data, rather than because of a regression. Re-run the class on its own before treating it as a failure.
 
 ==== Memory Issues
 
 *Symptom*: OutOfMemoryError during test execution
 
 *Solutions*:
-[source,bash]
-----
-# Increase heap size
-./gradlew :integration-tests:test -Xmx4g -Xms2g
 
-# Run fewer tests in parallel
-./gradlew :integration-tests:test --max-workers=2
+The `test` task always forks its own JVM, and its heap comes from `maxHeapSize` on that task rather than from `org.gradle.jvmargs`. `integration-tests` does not set it, so the fork runs at Gradle's default. Raise it in `integration-tests/build.gradle`:
 
-# Clean build directory
-./gradlew clean
+[source,groovy]
 ----
+tasks.named('test') {
+    maxHeapSize = '2g'
+}
+----
+
+`org.gradle.jvmargs` in `gradle.properties` sizes the Gradle daemon, which is a separate process. Raise that only for an out-of-memory failure in the build itself, such as during client generation.
+
+NOTE: "Gradle build daemon disappeared unexpectedly" is not the same failure. It is usually the operating system's out-of-memory killer, meaning `org.gradle.jvmargs` asks for more heap than the machine has; lower it.
 
 === Debugging Tips
 
@@ -701,38 +697,42 @@ Generate Gradle build scan:
 [source,bash]
 ----
 # Check loan status
-mysql -u root -pmysql fineract_default -e \
+psql -U root -d fineract_default -c \
   "SELECT id, account_no, loan_status_id, principal_amount \
    FROM m_loan ORDER BY id DESC LIMIT 10;"
 
 # Check transactions
-mysql -u root -pmysql fineract_default -e \
+psql -U root -d fineract_default -c \
   "SELECT loan_id, transaction_type_enum, amount, transaction_date \
    FROM m_loan_transaction WHERE loan_id = <loan_id>;"
 
 # Check journal entries
-mysql -u root -pmysql fineract_default -e \
+psql -U root -d fineract_default -c \
   "SELECT entry_date, account_id, type_enum, amount \
    FROM acc_gl_journal_entry WHERE loan_id = <loan_id>;"
 
 # Check configurations
-mysql -u root -pmysql fineract_default -e \
+psql -U root -d fineract_default -c \
   "SELECT name, enabled FROM c_configuration \
    WHERE name LIKE '%business%' OR name LIKE '%enable%';"
 ----
 
 ==== API Response Debugging
 
-Add logging to test methods:
+A failed Feign call raises `CallFailedRuntimeException`, which carries the status, the developer message and the raw response body:
 
 [source,java]
 ----
-Response response = loanHelper.applyLoan(...);
-System.out.println("Response: " + response.asString());
-System.out.println("Status Code: " + response.getStatusCode());
+CallFailedRuntimeException exception = fail(() -> loanHelper.applyForLoan(request));
+log.info("status={} body={}", exception.getStatus(), exception.getResponseBody());
+----
 
-// Or use logger
-log.info("Response: {}", response.asString());
+To see the requests and responses themselves, build a client with debug logging enabled:
+
+[source,java]
+----
+FineractFeignClient debugClient = FineractFeignClientHelper
+        .createNewFineractFeignClient(username, password, true);
 ----
 
 ==== Isolate Failing Tests
@@ -753,10 +753,10 @@ log.info("Response: {}", response.asString());
 
 === Test Organization
 
-* Extend appropriate base classes (`BaseLoanIntegrationTest`, `IntegrationTest`)
+* Extend `FeignLoanTestBase` for loan tests, or `FeignSavingsTestBase` for savings tests
 * Use descriptive test method names that explain what is being tested
 * Group related tests in the same test class
-* Use `@BeforeEach` for setup and `@AfterEach` for cleanup
+* Rely on the base class for setup; a Feign test needs no `@BeforeEach` block to build a client
 * Follow existing naming conventions
 
 === Test Isolation

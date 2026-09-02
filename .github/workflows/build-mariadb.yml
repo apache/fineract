@@ -2,6 +2,12 @@ name: Fineract Docker & Unit- & Integration tests - MariaDB
 
 on:
   workflow_call:
+    inputs:
+      upload_artifacts:
+        description: Upload reports and logs even when the job succeeds
+        required: false
+        default: false
+        type: boolean
     secrets:
       DEVELOCITY_ACCESS_KEY:
         required: false
@@ -37,10 +43,10 @@ jobs:
       FINERACT_TEST_EXTERNAL_HOST: host.docker.internal
 
     steps:
-      - name: Set up JDK 21
+      - name: Set up JDK 25
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'zulu'
 
       - name: Download workspace
@@ -203,7 +209,7 @@ jobs:
           fi
 
       - name: Archive test results
-        if: failure()
+        if: ${{ failure() || inputs.upload_artifacts }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-results-mariadb-shard-${{ matrix.shard_index }}-attempt-${{ github.run_attempt }}
@@ -229,7 +235,7 @@ jobs:
           done
 
       - name: Archive server logs
-        if: failure()
+        if: ${{ failure() || inputs.upload_artifacts }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: server-logs-mariadb-shard-${{ matrix.shard_index }}-attempt-${{ github.run_attempt }}

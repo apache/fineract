@@ -49,6 +49,11 @@ public class GlobalConfigurationStepDef {
         globalConfigurationHelper.setGlobalConfigValueString("charge-accrual-date", "due-date");
     }
 
+    @After("@BusinessDateDisabledCheck")
+    public void restoreBusinessDateConfig() {
+        globalConfigurationHelper.enableGlobalConfiguration("enable-business-date", 0L);
+    }
+
     @Given("Global configuration {string} is disabled")
     public void disableGlobalConfiguration(String configKey) {
         globalConfigurationHelper.disableGlobalConfiguration(configKey, 0L);

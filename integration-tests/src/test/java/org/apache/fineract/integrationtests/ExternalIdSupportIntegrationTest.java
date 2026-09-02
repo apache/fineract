@@ -45,6 +45,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTemplateRespo
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
@@ -66,10 +67,11 @@ import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationC
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.ChargeRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
@@ -96,18 +98,18 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             Long penalty2 = chargesHelper.createCharge(ChargeRequestBuilders.loanSpecifiedDueDateAccountTransferFee(10.0, true))
                     .getResourceId();
 
-            final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+            final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                     .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                     .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
                     .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
                     .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
-                    .withFeeAndPenaltyAssetAccount(assetFeeAndPenaltyAccount).build(null);
-            final Integer loanProductID = getLoanProductId(loanProductJSON);
+                    .withFeeAndPenaltyAssetAccount(assetFeeAndPenaltyAccount).buildRequest(null);
+            final Long loanProductID = getLoanProductId(loanProductRequest);
 
             final Long clientId = createClient();
 
             String loanExternalIdStr = UUID.randomUUID().toString();
-            final PostLoansResponse loan = applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr);
+            final PostLoansResponse loan = applyForLoanApplication(clientId, loanProductID, loanExternalIdStr);
             Integer loanId = loan.getResourceId().intValue();
 
             approveLoan("02 September 2022", loanId);
@@ -398,11 +400,11 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
 
             // Create a loan with interest and test the rest of the transactions
 
-            final String loanProductWithInterestJSON = new LoanProductTestBuilder().withPrincipal("10000.0").withRepaymentTypeAsMonth()
-                    .withRepaymentAfterEvery("2").withNumberOfRepayments("5").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
-                    .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
-                    .withAccounting("1", null).build(null);
-            final Integer loanProductWithInterestID = getLoanProductId(loanProductWithInterestJSON);
+            final PostLoanProductsRequest loanProductWithInterestRequest = new LoanProductTestBuilder().withPrincipal("10000.0")
+                    .withRepaymentTypeAsMonth().withRepaymentAfterEvery("2").withNumberOfRepayments("5").withRepaymentTypeAsMonth()
+                    .withinterestRatePerPeriod("1").withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment()
+                    .withInterestTypeAsFlat().withAccounting("1", null).buildRequest(null);
+            final Long loanProductWithInterestID = getLoanProductId(loanProductWithInterestRequest);
 
             LocalDate aMonthBefore = LocalDate.of(2022, 8, 7);
             String formattedDate = dateFormatter.format(aMonthBefore);
@@ -410,14 +412,15 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             final Integer savingsId = openSavingsAccount(clientId, "10000.0", "01 August 2022");
 
             loanExternalIdStr = UUID.randomUUID().toString();
-            final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("10000.0").withLoanTermFrequency("10")
-                    .withLoanTermFrequencyAsMonths().withNumberOfRepayments("5").withRepaymentEveryAfter("2")
-                    .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("1").withInterestTypeAsFlatBalance()
-                    .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                    .withExpectedDisbursementDate(formattedDate).withSubmittedOnDate(formattedDate).withLoanType("individual")
-                    .withExternalId(loanExternalIdStr)
-                    .build(clientId.toString(), loanProductWithInterestID.toString(), savingsId.toString());
-            final PostLoansResponse loanWithInterest = getLoanIdFromApplication(loanApplicationJSON);
+            final PostLoansResponse loanWithInterest = applyForLoanResponse(LoanRequestBuilders
+                    .legacyIndividualApplication(clientId.longValue(), loanProductWithInterestID.longValue(), "10000.0", 5,
+                            new BigDecimal("1"), formattedDate)
+                    .loanTermFrequency(10)//
+                    .repaymentEvery(2)//
+                    .interestType(LoanTestData.InterestType.FLAT)//
+                    .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                    .externalId(loanExternalIdStr)//
+                    .linkAccountId(savingsId.longValue()));
             Integer loanWithInterestId = loanWithInterest.getResourceId().intValue();
 
             String chargeExternalId = UUID.randomUUID().toString();
@@ -664,18 +667,18 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             final Account expenseAccount = accountHelper.createExpenseAccount("extIdExpense");
             final Account overpaymentAccount = accountHelper.createLiabilityAccount("extIdOverpayment");
 
-            final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+            final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                     .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                     .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
                     .withAccountingRulePeriodicAccrual(new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
                     .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
-                    .withFeeAndPenaltyAssetAccount(assetFeeAndPenaltyAccount).build(null);
-            final Integer loanProductID = getLoanProductId(loanProductJSON);
+                    .withFeeAndPenaltyAssetAccount(assetFeeAndPenaltyAccount).buildRequest(null);
+            final Long loanProductID = getLoanProductId(loanProductRequest);
 
             final Long clientId = createClient();
 
             String loanExternalIdStr = UUID.randomUUID().toString();
-            final PostLoansResponse loan = applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr);
+            final PostLoansResponse loan = applyForLoanApplication(clientId, loanProductID, loanExternalIdStr);
             Integer loanId = loan.getResourceId().intValue();
 
             approveLoan("02 September 2022", loanId);
@@ -686,7 +689,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             assertEquals(txnExternalIdStr, disbursedLoanResult.getSubResourceExternalId());
 
             // Second loan
-            final PostLoansResponse loan2 = applyForLoanApplication(clientId.intValue(), loanProductID, null);
+            final PostLoansResponse loan2 = applyForLoanApplication(clientId, loanProductID, null);
             Integer loan2Id = loan2.getResourceId().intValue();
             approveLoan("02 September 2022", loan2Id);
             final PostLoansLoanIdResponse disbursedLoan2Result = disburseLoan("03 September 2022", loan2Id, "1000", null);
@@ -824,21 +827,21 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             PostDelinquencyBucketResponse delinquencyBucketResponse = DelinquencyBucketsHelper
                     .createBucket(new DelinquencyBucketRequest().name(Utils.randomStringGenerator("DLQ_B_", 10)).ranges(rangeIds));
 
-            final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+            final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                     .withRepaymentAfterEvery("1").withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                     .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment()
                     .withInterestTypeAsDecliningBalance().withAccountingRuleAsNone()
                     .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30").withDaysInYear("365")
                     .withMoratorium("0", "0").withDelinquencyBucket(delinquencyBucketResponse.getResourceId())
-                    .withInArrearsTolerance("1001").withMultiDisburse().withDisallowExpectedDisbursements(true).build(null);
-            final Integer loanProductID = getLoanProductId(loanProductJSON);
+                    .withInArrearsTolerance("1001").withMultiDisburse().withDisallowExpectedDisbursements(true).buildRequest(null);
+            final Long loanProductID = getLoanProductId(loanProductRequest);
 
             final Long clientId = createClient();
 
             String loanExternalIdStr = UUID.randomUUID().toString();
-            final PostLoansResponse loan = applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr);
+            final PostLoansResponse loan = applyForLoanApplication(clientId, loanProductID, loanExternalIdStr);
             Integer loanId = loan.getResourceId().intValue();
-            String resourceExternalId = (String) loan.getResourceExternalId();
+            String resourceExternalId = loan.getResourceExternalId();
             assertEquals(loanExternalIdStr, resourceExternalId);
 
             LocalDate actualDate = LocalDate.of(2022, 10, 10);
@@ -884,7 +887,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             assertEquals((long) loanId, delinquencyTagHistoryResponseResult.get(0).getLoanId());
 
             String loanExternalIdStr2 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr2);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr2);
 
             PutLoansLoanIdResponse modifyLoanApplicationResult = modifyLoanApplication(loanExternalIdStr2, "modify",
                     new PutLoansLoanIdRequest().submittedOnDate("31 August 2022").dateFormat("dd MMMM yyyy").locale("en")
@@ -900,19 +903,19 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             assertEquals(loanExternalIdStr2, deleteLoanApplicationResult.getResourceExternalId());
 
             String loanExternalIdStr3 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr3);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr3);
             PostLoansLoanIdResponse result = rejectLoan(loanExternalIdStr3,
                     new PostLoansLoanIdRequest().rejectedOnDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
             assertEquals(loanExternalIdStr3, result.getResourceExternalId());
 
             String loanExternalIdStr4 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr4);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr4);
             result = withdrawnByApplicantLoan(loanExternalIdStr4,
                     new PostLoansLoanIdRequest().withdrawnOnDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
             assertEquals(loanExternalIdStr4, result.getResourceExternalId());
 
             String loanExternalIdStr5 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr5);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr5);
             approveLoan(loanExternalIdStr5,
                     new PostLoansLoanIdRequest().approvedOnDate("2 September 2022").approvedLoanAmount(new BigDecimal("1000"))
                             .expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
@@ -922,7 +925,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             // assertEquals(loanExternalIdStr5, result.getResourceExternalId());
 
             String loanExternalIdStr6 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr6);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr6);
             approveLoan(loanExternalIdStr6,
                     new PostLoansLoanIdRequest().approvedOnDate("2 September 2022").approvedLoanAmount(new BigDecimal("1000"))
                             .expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
@@ -932,7 +935,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             final Integer savingsId = openSavingsAccount(clientId, "10000.0", "02 September 2022");
 
             String loanExternalIdStr7 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr7, savingsId.toString());
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr7, savingsId.toString());
             approveLoan(loanExternalIdStr7,
                     new PostLoansLoanIdRequest().approvedOnDate("2 September 2022").approvedLoanAmount(new BigDecimal("1000"))
                             .expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
@@ -941,7 +944,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             assertEquals(loanExternalIdStr7, result.getResourceExternalId());
 
             String loanExternalIdStr8 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr8);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr8);
             approveLoan(loanExternalIdStr8,
                     new PostLoansLoanIdRequest().approvedOnDate("2 September 2022").approvedLoanAmount(new BigDecimal("1000"))
                             .expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
@@ -951,7 +954,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             assertEquals(loanExternalIdStr8, result.getResourceExternalId());
 
             String loanExternalIdStr9 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr9);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr9);
             approveLoan(loanExternalIdStr9,
                     new PostLoansLoanIdRequest().approvedOnDate("2 September 2022").approvedLoanAmount(new BigDecimal("1000"))
                             .expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
@@ -965,7 +968,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             Integer loanOfficerId = new FeignStaffHelper(FineractFeignClientHelper.getFineractFeignClient())
                     .createStaff(1L, "20 September 2011").getResourceId().intValue();
             String loanExternalIdStr10 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr10);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr10);
             result = assignLoanOfficerLoan(loanExternalIdStr10, new PostLoansLoanIdRequest().assignmentDate("2 September 2022").locale("en")
                     .dateFormat("dd MMMM yyyy").toLoanOfficerId(loanOfficerId.longValue()));
             assertEquals(loanExternalIdStr10, result.getResourceExternalId());
@@ -974,17 +977,17 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             assertEquals(loanExternalIdStr10, result.getResourceExternalId());
 
             String loanExternalIdStr11 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr11);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr11);
             result = recoverGuaranteesLoan(loanExternalIdStr11, new PostLoansLoanIdRequest());
             assertEquals(loanExternalIdStr11, result.getResourceExternalId());
 
             String loanExternalIdStr12 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr12);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr12);
             result = assignDelinquencyLoan(loanExternalIdStr12, new PostLoansLoanIdRequest());
             assertEquals(loanExternalIdStr12, result.getResourceExternalId());
 
             String loanExternalIdStr13 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr13);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr13);
             result = approveLoan(loanExternalIdStr13,
                     new PostLoansLoanIdRequest().approvedOnDate("2 September 2022").approvedLoanAmount(new BigDecimal("1000"))
                             .expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
@@ -995,7 +998,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
             assertEquals(loanExternalIdStr13, closeRescheduleResult.getResourceExternalId());
 
             String loanExternalIdStr14 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr14);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr14);
             String transactionExternalId = UUID.randomUUID().toString();
             result = approveLoan(loanExternalIdStr14,
                     new PostLoansLoanIdRequest().approvedOnDate("2 September 2022").approvedLoanAmount(new BigDecimal("1000"))
@@ -1009,7 +1012,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
 
             String loanExternalIdStr15 = UUID.randomUUID().toString();
             String transactionExternalId2 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr15);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr15);
             result = approveLoan(loanExternalIdStr15,
                     new PostLoansLoanIdRequest().approvedOnDate("2 September 2022").approvedLoanAmount(new BigDecimal("1000"))
                             .expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
@@ -1023,7 +1026,7 @@ public class ExternalIdSupportIntegrationTest extends FeignLoanTestBase {
 
             String loanExternalIdStr16 = UUID.randomUUID().toString();
             String transactionExternalId3 = UUID.randomUUID().toString();
-            applyForLoanApplication(clientId.intValue(), loanProductID, loanExternalIdStr16);
+            applyForLoanApplication(clientId, loanProductID, loanExternalIdStr16);
             approveLoan(loanExternalIdStr16,
                     new PostLoansLoanIdRequest().approvedOnDate("2 September 2022").approvedLoanAmount(new BigDecimal("1000"))
                             .expectedDisbursementDate("2 September 2022").locale("en").dateFormat("dd MMMM yyyy"));

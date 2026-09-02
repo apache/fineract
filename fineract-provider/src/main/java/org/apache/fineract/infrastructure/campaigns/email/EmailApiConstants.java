@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.campaigns.email;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -45,10 +46,12 @@ public final class EmailApiConstants {
     // response parameters
     public static final String statusParamName = "status";
 
-    public static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = new HashSet<>(
-            Arrays.asList(localeParamName, dateFormatParamName, groupIdParamName, clientIdParamName, staffIdParamName, messageParamName));
+    public static final Set<String> CREATE_REQUEST_DATA_PARAMETERS = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList(localeParamName, dateFormatParamName, groupIdParamName, clientIdParamName,
+                    staffIdParamName, subjectParamName, messageParamName)));
 
-    public static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(messageParamName));
+    public static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = Collections
+            .unmodifiableSet(new HashSet<>(Arrays.asList(messageParamName)));
 
     public static final String SMTP_SERVER = "SMTP_SERVER";
     public static final String SMTP_PORT = "SMTP_PORT";

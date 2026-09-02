@@ -21,7 +21,9 @@ package org.apache.fineract.test.helper;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public final class Utils {
 
@@ -87,7 +89,10 @@ public final class Utils {
         public String format() {
             boolean isWholeNumber = (value % 1.0 == 0);
 
-            String result = isWholeNumber ? String.format("%.1f", value) : String.format("%.2f", value);
+            // Locale.ROOT, because the feature files are written with a dot for the decimal point. Formatting with the
+            // JVM's default locale made the assertions pass or fail on the machine's language rather than on the
+            // figures: a run on a comma-decimal locale reported 10000,0 against an expected 10000.0.
+            String result = isWholeNumber ? String.format(Locale.ROOT, "%.1f", value) : String.format(Locale.ROOT, "%.2f", value);
 
             // For non-whole numbers, remove trailing '0' if it exists
             if (!isWholeNumber && result.endsWith("0")) {
@@ -95,5 +100,19 @@ public final class Utils {
             }
             return result;
         }
+    }
+
+    public static boolean isEqualLists(List a, List b) {
+        if (a.size() != b.size()) {
+            return false;
+        }
+
+        List copyB = new ArrayList(b);
+        for (Object obj : a) {
+            if (!copyB.remove(obj)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

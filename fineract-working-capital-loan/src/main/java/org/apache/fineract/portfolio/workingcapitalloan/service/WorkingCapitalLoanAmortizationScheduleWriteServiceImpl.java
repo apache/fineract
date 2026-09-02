@@ -141,8 +141,8 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
     @NonNull
     private ProjectedAmortizationScheduleModel reconstructScheduleModel(final WorkingCapitalLoan loan,
             final List<PrincipalPayment> payments, final List<PrincipalAdjustment> adjustments) {
-        final BigDecimal disbursedAmount = resolveActualDisbursedAmount(loan);
-        final LocalDate disbursementDate = resolveActualDisbursementDate(loan);
+        final BigDecimal disbursedAmount = loan.getFirstActualDisbursementAmount();
+        final LocalDate disbursementDate = loan.getFirstActualDisbursementDate();
         final List<WorkingCapitalLoanPeriodPaymentRateChange> rateChanges = rateChangeRepository
                 .findByWorkingCapitalLoanIdAndReversedFalse(loan.getId());
         final ProjectedAmortizationScheduleModel model = generateBaseModel(loan, disbursedAmount, disbursementDate,
@@ -220,15 +220,14 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         generateAndSaveForApprovedLoanState(loan);
     }
 
-    @Override
-    public BigDecimal getWorkingCapitalLoanDiscountAmount(WorkingCapitalLoan loan) {
+    private BigDecimal getWorkingCapitalLoanDiscountAmount(WorkingCapitalLoan loan) {
         BigDecimal discount = BigDecimal.ZERO;
         if (loan.getLoanProductRelatedDetails() != null) {
-            if (loan.getLoanStatus().isSubmittedAndPendingApproval() && loan.getLoanProductRelatedDetails().getDiscountProposed() != null) {
+            if (loan.isSubmittedAndPendingApproval() && loan.getLoanProductRelatedDetails().getDiscountProposed() != null) {
                 discount = loan.getLoanProductRelatedDetails().getDiscountProposed();
-            } else if (loan.getLoanStatus().isApproved() && loan.getLoanProductRelatedDetails().getDiscountApproved() != null) {
+            } else if (loan.isApproved() && loan.getLoanProductRelatedDetails().getDiscountApproved() != null) {
                 discount = loan.getLoanProductRelatedDetails().getDiscountApproved();
-            } else if (loan.getLoanStatus().isActive() && loan.getLoanProductRelatedDetails().getDiscount() != null) {
+            } else if (loan.getLoanProductRelatedDetails().getDiscount() != null) {
                 discount = loan.getLoanProductRelatedDetails().getDiscount();
             }
         }
@@ -391,20 +390,5 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         model.recalculateNetAmortizationAndDeferredBalanceFrom(transactionDate);
 
         scheduleRepositoryWrapper.writeModel(loan, model);
-    }
-
-    private BigDecimal resolveActualDisbursedAmount(final WorkingCapitalLoan loan) {
-        if (loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()
-                && loan.getDisbursementDetails().getFirst().getActualAmount() != null) {
-            return loan.getDisbursementDetails().getFirst().getActualAmount();
-        }
-        return BigDecimal.ZERO;
-    }
-
-    private LocalDate resolveActualDisbursementDate(final WorkingCapitalLoan loan) {
-        if (loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()) {
-            return loan.getDisbursementDetails().getFirst().getActualDisbursementDate();
-        }
-        return null;
     }
 }

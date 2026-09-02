@@ -158,8 +158,7 @@ public class WorkingCapitalLoanTransactionProcessor {
     }
 
     public void triggerInlineAmortizationIfLoanClosed(final WorkingCapitalLoan loan, final LocalDate transactionDate) {
-        if ((loan.getLoanStatus().isClosed() || loan.getLoanStatus().isOverpaid())
-                && loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+        if (loan.isClosedWrittenOff() || loan.isClosedObligationsMet() || loan.isOverpaid()) {
             final BigDecimal discount = loan.getLoanProductRelatedDetails() != null ? loan.getLoanProductRelatedDetails().getDiscount()
                     : null;
             final boolean adjustmentNeeded = loan.getBalance() != null

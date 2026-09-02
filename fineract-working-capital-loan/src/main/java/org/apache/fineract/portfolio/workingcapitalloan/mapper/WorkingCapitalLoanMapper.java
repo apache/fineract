@@ -166,13 +166,14 @@ public interface WorkingCapitalLoanMapper {
             timelineData.setApprovedByLastname(loan.getApprovedBy().getLastname());
             timelineData.setApprovedOnDate(loan.getApprovedOnDate());
         }
-        final WorkingCapitalLoanDisbursementDetails firstDisbursement = loan.getDisbursementDetails().stream()
-                .filter(d -> d.getActualDisbursementDate() != null).findFirst().orElse(null);
-        if (firstDisbursement != null && firstDisbursement.getDisbursedBy() != null) {
-            timelineData.setDisbursedByUsername(firstDisbursement.getDisbursedBy().getUsername());
-            timelineData.setDisbursedByFirstname(firstDisbursement.getDisbursedBy().getFirstname());
-            timelineData.setDisbursedByLastname(firstDisbursement.getDisbursedBy().getLastname());
+        final WorkingCapitalLoanDisbursementDetails firstDisbursement = loan.getFirstActualDisbursement();
+        if (firstDisbursement != null) {
             timelineData.setActualDisbursementDate(firstDisbursement.getActualDisbursementDate());
+            if (firstDisbursement.getDisbursedBy() != null) {
+                timelineData.setDisbursedByUsername(firstDisbursement.getDisbursedBy().getUsername());
+                timelineData.setDisbursedByFirstname(firstDisbursement.getDisbursedBy().getFirstname());
+                timelineData.setDisbursedByLastname(firstDisbursement.getDisbursedBy().getLastname());
+            }
         }
         timelineData.setClosedOnDate(loan.getClosedOnDate());
         if (loan.getClosedBy() != null) {

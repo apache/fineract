@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import org.apache.fineract.client.models.DelinquencyRangeRequest;
 import org.apache.fineract.client.models.GetBalance;
@@ -41,6 +42,8 @@ import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
 import org.apache.fineract.client.models.PostDelinquencyRangeResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanProductsRequest.AccountingRuleEnum;
+import org.apache.fineract.client.models.ProjectedAmortizationScheduleData;
+import org.apache.fineract.client.models.ProjectedAmortizationSchedulePaymentData;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.client.models.WorkingCapitalLoanChargeData;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
@@ -90,6 +93,18 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
     private static final String BREACH_FREQUENCY_TYPE = "MONTHS";
     private static final String BREACH_AMOUNT_CALCULATION_TYPE = "FLAT";
     private static final BigDecimal BREACH_MIN_PAYMENT_AMOUNT = new BigDecimal("500");
+
+    private static final BigDecimal NET_DISBURSEMENT = new BigDecimal("9000");
+    private static final BigDecimal DISCOUNT = new BigDecimal("1000");
+    private static final BigDecimal GROSS_OWED = new BigDecimal("10000");
+    private static final BigDecimal TOTAL_PAYMENT_VOLUME = new BigDecimal("100000");
+    private static final BigDecimal PERIOD_PAYMENT_RATE = new BigDecimal("18");
+    private static final int NPV_DAY_COUNT = 360;
+    private static final BigDecimal DAILY_PAYMENT = new BigDecimal("50");
+    private static final int TERM_WITH_DISCOUNT = 200;
+    private static final int TERM_WITHOUT_DISCOUNT = 180;
+    private static final double SCHEDULE_CHARGE_AMOUNT = 100.0;
+    private static final String SCHEDULE_DISBURSEMENT_DATE = "01 January 2026";
 
     private FeignWorkingCapitalLoanHelper wcLoanHelper;
     private FeignClientHelper clientHelper;
@@ -317,6 +332,173 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
                             + adjustments.size());
             assertEqualBigDecimal(BigDecimal.ZERO, netAmortization(loanId),
                     "Net amortized income (amortization - adjustment) must return to 0 after undoing the only repayment");
+        });
+    }
+
+    @Test
+    @DisplayName("undoing a discount fee adjustment that closed the loan gives the schedule its discount back")
+    void undoDiscountFeeAdjustment_onClosedLoan_restoresScheduleDiscount() {
+        businessDateHelper.runAt("2026-01-01", () -> {
+            final DiscountedLoan loan = disburseLoanAndAddDiscountFee();
+            assertBaselineSummary(wcLoanHelper.getAmortizationSchedule(loan.loanId()), "when the discount is first added");
+
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-02");
+            wcLoanHelper.makeRepayment(loan.loanId(), WorkingCapitalLoanRequestBuilders.repayment(NET_DISBURSEMENT, "02 January 2026"));
+            assertEquals(Boolean.TRUE, wcLoanHelper.getLoanDetails(loan.loanId()).getStatus().getActive(),
+                    "the loan still owes the 1000 discount fee, so it must stay active");
+
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-03");
+            final Long adjustmentId = wcLoanHelper.makeDiscountFeeAdjustment(loan.loanId(),
+                    WorkingCapitalLoanRequestBuilders.discountFeeAdjustment(DISCOUNT, "03 January 2026", loan.discountFeeTransactionId()));
+            assertEquals(Boolean.TRUE, wcLoanHelper.getLoanDetails(loan.loanId()).getStatus().getClosedObligationsMet(),
+                    "the adjustment settles the last 1000, so the loan must close as obligations met");
+
+            wcLoanHelper.undoTransaction(loan.loanId(), adjustmentId, WorkingCapitalLoanRequestBuilders.undoTransaction());
+
+            final GetWorkingCapitalLoansLoanIdResponse reopened = wcLoanHelper.getLoanDetails(loan.loanId());
+            assertEquals(Boolean.TRUE, reopened.getStatus().getActive(), "undoing the adjustment must reopen the loan");
+            assertEqualBigDecimal(DISCOUNT, reopened.getDiscountFee(), "the loan must carry its 1000 discount again");
+            assertNotNull(reopened.getBalance(), "balance should exist after the undo");
+            assertEqualBigDecimal(GROSS_OWED, reopened.getBalance().getPrincipal(), "the loan's principal must be the 10000 gross again");
+
+            final ProjectedAmortizationScheduleData schedule = wcLoanHelper.getAmortizationSchedule(loan.loanId());
+            assertEqualBigDecimal(DISCOUNT, schedule.getDiscountFeeAmount(),
+                    "the schedule must carry the restored discount" + render(schedule));
+            assertEqualBigDecimal(NET_DISBURSEMENT, schedule.getNetDisbursementAmount(),
+                    "the net disbursement cannot move when an adjustment is undone" + render(schedule));
+            assertEqualBigDecimal(DAILY_PAYMENT, schedule.getExpectedPaymentAmount(),
+                    "the daily payment is (100000 x 18%) / 360 and never depends on the discount" + render(schedule));
+            assertEquals(TERM_WITH_DISCOUNT, schedule.getOriginalPaymentNumber(),
+                    "a 10000 gross at 50 a day is a 200 payment term" + render(schedule));
+
+            final ProjectedAmortizationSchedulePaymentData disbursementRow = payment(schedule, 0);
+            assertEqualBigDecimal(NET_DISBURSEMENT.negate(), disbursementRow.getExpectedPaymentAmount(),
+                    "the disbursement row pays out the 9000" + render(schedule));
+            assertEqualBigDecimal(NET_DISBURSEMENT, disbursementRow.getExpectedBalance(),
+                    "the loan opens owing the 9000 handed over" + render(schedule));
+            assertEqualBigDecimal(DISCOUNT, disbursementRow.getExpectedDiscountFeeBalance(),
+                    "the whole discount fee is unearned at disbursement" + render(schedule));
+            assertEqualBigDecimal(DISCOUNT, disbursementRow.getActualDiscountFeeBalance(),
+                    "the actual fee column reads the same restored fee as the expected one" + render(schedule));
+
+            assertAmortizationIsPopulatedPerPeriod(schedule, "after undoing the adjustment that closed the loan");
+
+            final ProjectedAmortizationSchedulePaymentData coveredRow = payment(schedule, 1);
+            assertNotNull(coveredRow.getActualAmortizationAmount(),
+                    "the actual amortization column must be populated on a period the surviving repayment covers" + render(schedule));
+            assertEquals(1, coveredRow.getActualAmortizationAmount().signum(),
+                    "a period the surviving repayment covers must earn some of the fee, not 0.00" + render(schedule));
+            assertNotNull(coveredRow.getActualDiscountFeeBalance(),
+                    "the actual fee balance column must be populated on a covered period" + render(schedule));
+            assertTrue(coveredRow.getActualDiscountFeeBalance().compareTo(DISCOUNT) < 0,
+                    "the actual fee balance must have come down from 1000 once a period is covered, but was "
+                            + coveredRow.getActualDiscountFeeBalance() + render(schedule));
+            assertEqualBigDecimal(DISCOUNT, coveredRow.getActualAmortizationAmount().add(coveredRow.getActualDiscountFeeBalance()),
+                    "what the covered period earned plus what it left unearned is the whole 1000 fee" + render(schedule));
+
+            assertScheduleClosesCleanly(schedule, "after undoing the adjustment that closed the loan");
+        });
+    }
+
+    @Test
+    @DisplayName("undoing a repayment that closed a loan with an active charge gives the schedule its discount back")
+    void undoRepayment_onClosedLoanWithCharge_restoresScheduleDiscount() {
+        businessDateHelper.runAt("2026-01-01", () -> {
+            final DiscountedLoan loan = disburseLoanAndAddDiscountFee();
+            assertBaselineSummary(wcLoanHelper.getAmortizationSchedule(loan.loanId()), "when the discount is first added");
+
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-05");
+            addCharge(loan.loanId(), false, SCHEDULE_CHARGE_AMOUNT, "05 January 2026");
+
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-06");
+            final Long repaymentId = wcLoanHelper.makeRepayment(loan.loanId(),
+                    WorkingCapitalLoanRequestBuilders.repayment(new BigDecimal("10100"), "06 January 2026"));
+            assertEquals(Boolean.TRUE, wcLoanHelper.getLoanDetails(loan.loanId()).getStatus().getClosedObligationsMet(),
+                    "10100 settles the 10000 gross and the 100 fee, so the loan must close as obligations met");
+
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-07");
+            wcLoanHelper.undoTransaction(loan.loanId(), repaymentId, WorkingCapitalLoanRequestBuilders.undoTransaction());
+
+            final GetWorkingCapitalLoansLoanIdResponse reopened = wcLoanHelper.getLoanDetails(loan.loanId());
+            assertEquals(Boolean.TRUE, reopened.getStatus().getActive(), "undoing the closing repayment must reopen the loan");
+            assertEqualBigDecimal(DISCOUNT, reopened.getDiscountFee(), "the loan must still carry its 1000 discount");
+            assertNotNull(reopened.getBalance(), "balance should exist after the undo");
+            assertEqualBigDecimal(GROSS_OWED, reopened.getBalance().getPrincipal(), "the loan's principal must be the 10000 gross");
+            assertEqualBigDecimal(BigDecimal.ZERO, reopened.getBalance().getPrincipalPaid(),
+                    "the only repayment has been undone, so nothing is paid");
+            assertEqualBigDecimal(DISCOUNT, reopened.getBalance().getTotalDiscountFee(), "the whole 1000 discount fee stands again");
+
+            final ProjectedAmortizationScheduleData schedule = wcLoanHelper.getAmortizationSchedule(loan.loanId());
+            assertBaselineSummary(schedule, "after undoing the repayment that closed the loan");
+
+            final ProjectedAmortizationSchedulePaymentData disbursementRow = payment(schedule, 0);
+            assertEqualBigDecimal(NET_DISBURSEMENT.negate(), disbursementRow.getExpectedPaymentAmount(),
+                    "the disbursement row pays out the 9000" + render(schedule));
+            assertEqualBigDecimal(NET_DISBURSEMENT, disbursementRow.getExpectedBalance(),
+                    "the loan opens owing the 9000 handed over" + render(schedule));
+            assertEqualBigDecimal(DISCOUNT, disbursementRow.getExpectedDiscountFeeBalance(),
+                    "the whole discount fee is unearned again once the repayment is gone" + render(schedule));
+
+            assertAmortizationIsPopulatedPerPeriod(schedule, "after undoing the repayment that closed the loan");
+            assertAmortizationEarnsTheWholeDiscount(schedule, "after undoing the repayment that closed the loan");
+
+            assertScheduleClosesCleanly(schedule, "after undoing the repayment that closed the loan");
+        });
+    }
+
+    @Test
+    @DisplayName("undoing a repayment that closed a charge-free loan leaves the schedule's discount untouched")
+    void undoRepayment_onClosedChargeFreeLoan_keepsScheduleDiscount() {
+        businessDateHelper.runAt("2026-01-01", () -> {
+            final DiscountedLoan loan = disburseLoanAndAddDiscountFee();
+            assertBaselineSummary(wcLoanHelper.getAmortizationSchedule(loan.loanId()), "when the discount is first added");
+
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-06");
+            final Long repaymentId = wcLoanHelper.makeRepayment(loan.loanId(),
+                    WorkingCapitalLoanRequestBuilders.repayment(GROSS_OWED, "06 January 2026"));
+            assertEquals(Boolean.TRUE, wcLoanHelper.getLoanDetails(loan.loanId()).getStatus().getClosedObligationsMet(),
+                    "10000 settles the whole gross, so the loan must close as obligations met");
+
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-07");
+            wcLoanHelper.undoTransaction(loan.loanId(), repaymentId, WorkingCapitalLoanRequestBuilders.undoTransaction());
+
+            final GetWorkingCapitalLoansLoanIdResponse reopened = wcLoanHelper.getLoanDetails(loan.loanId());
+            assertEquals(Boolean.TRUE, reopened.getStatus().getActive(), "undoing the closing repayment must reopen the loan");
+            assertEqualBigDecimal(DISCOUNT, reopened.getDiscountFee(), "the loan must still carry its 1000 discount");
+
+            final ProjectedAmortizationScheduleData schedule = wcLoanHelper.getAmortizationSchedule(loan.loanId());
+            assertEqualBigDecimal(DISCOUNT, schedule.getDiscountFeeAmount(),
+                    "an in-place undo must not touch the schedule's discount" + render(schedule));
+            assertEquals(TERM_WITH_DISCOUNT, schedule.getOriginalPaymentNumber(),
+                    "a 10000 gross at 50 a day is a 200 payment term" + render(schedule));
+            assertEqualBigDecimal(DISCOUNT, payment(schedule, 0).getExpectedDiscountFeeBalance(),
+                    "the whole discount fee is unearned again once the repayment is gone" + render(schedule));
+        });
+    }
+
+    @Test
+    @DisplayName("a discount fee adjustment that closes the loan really does leave it with no discount")
+    void discountFeeAdjustment_closesLoan_leavesScheduleWithoutDiscount() {
+        businessDateHelper.runAt("2026-01-01", () -> {
+            final DiscountedLoan loan = disburseLoanAndAddDiscountFee();
+            assertBaselineSummary(wcLoanHelper.getAmortizationSchedule(loan.loanId()), "when the discount is first added");
+
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-02");
+            wcLoanHelper.makeRepayment(loan.loanId(), WorkingCapitalLoanRequestBuilders.repayment(NET_DISBURSEMENT, "02 January 2026"));
+
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-03");
+            wcLoanHelper.makeDiscountFeeAdjustment(loan.loanId(),
+                    WorkingCapitalLoanRequestBuilders.discountFeeAdjustment(DISCOUNT, "03 January 2026", loan.discountFeeTransactionId()));
+
+            final GetWorkingCapitalLoansLoanIdResponse closed = wcLoanHelper.getLoanDetails(loan.loanId());
+            assertEquals(Boolean.TRUE, closed.getStatus().getClosedObligationsMet(), "the adjustment must close the loan");
+            assertEqualBigDecimal(BigDecimal.ZERO, closed.getDiscountFee(), "the whole discount has been given back");
+
+            final ProjectedAmortizationScheduleData schedule = wcLoanHelper.getAmortizationSchedule(loan.loanId());
+            assertEqualBigDecimal(BigDecimal.ZERO, schedule.getDiscountFeeAmount(),
+                    "the loan's own discount is zero, so the schedule's must be too" + render(schedule));
+            assertEquals(TERM_WITHOUT_DISCOUNT, schedule.getOriginalPaymentNumber(),
+                    "9000 at 50 a day is a 180 payment term once the discount is gone" + render(schedule));
         });
     }
 
@@ -565,6 +747,24 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
         return loanId;
     }
 
+    private record DiscountedLoan(Long loanId, Long discountFeeTransactionId) {
+    }
+
+    private DiscountedLoan disburseLoanAndAddDiscountFee() {
+        final Long clientId = clientHelper.createClient(SCHEDULE_DISBURSEMENT_DATE);
+        final Long productId = createAccrualProductWithDiscount();
+        final Long loanId = wcLoanHelper.submitApplication(WorkingCapitalLoanRequestBuilders.submitApplication(clientId, productId,
+                NET_DISBURSEMENT, PERIOD_PAYMENT_RATE, SCHEDULE_DISBURSEMENT_DATE, SCHEDULE_DISBURSEMENT_DATE));
+        createdLoanIds.add(loanId);
+        wcLoanHelper.approve(loanId,
+                WorkingCapitalLoanRequestBuilders.approve(SCHEDULE_DISBURSEMENT_DATE, NET_DISBURSEMENT, SCHEDULE_DISBURSEMENT_DATE));
+        final Long disbursementTransactionId = wcLoanHelper.disburse(loanId,
+                WorkingCapitalLoanRequestBuilders.disburse(SCHEDULE_DISBURSEMENT_DATE, NET_DISBURSEMENT));
+        final Long discountFeeTransactionId = wcLoanHelper.makeDiscountFee(loanId,
+                WorkingCapitalLoanRequestBuilders.discountFee(DISCOUNT, disbursementTransactionId));
+        return new DiscountedLoan(loanId, discountFeeTransactionId);
+    }
+
     private Long createPlainProduct() {
         final Long productId = productHelper.createWorkingCapitalLoanProduct(
                 new WorkingCapitalLoanProductTestBuilder().withName("WCL UndoBackdate " + Utils.uniqueRandomStringGenerator("", 8))
@@ -686,5 +886,74 @@ public class FeignWorkingCapitalLoanRepaymentBackdatedUndoTest extends FeignInte
                 "Expected journal entry " + expectedType + " account=" + expectedAccount.getAccountID() + " amount=" + expectedAmount
                         + " reversed=" + expectedReversed + " not found in: " + entries.stream().map(e -> e.getEntryType().getValue()
                                 + " acct=" + e.getGlAccountId() + " amt=" + e.getAmount() + " reversed=" + e.getReversed()).toList());
+    }
+
+    private static void assertBaselineSummary(final ProjectedAmortizationScheduleData schedule, final String context) {
+        assertEqualBigDecimal(DISCOUNT, schedule.getDiscountFeeAmount(), "discountFeeAmount " + context + render(schedule));
+        assertEqualBigDecimal(NET_DISBURSEMENT, schedule.getNetDisbursementAmount(), "netDisbursementAmount " + context + render(schedule));
+        assertEqualBigDecimal(TOTAL_PAYMENT_VOLUME, schedule.getTotalPaymentVolume(), "totalPaymentVolume " + context + render(schedule));
+        assertEqualBigDecimal(PERIOD_PAYMENT_RATE, schedule.getPeriodPaymentRate(), "periodPaymentRate " + context + render(schedule));
+        assertEquals(NPV_DAY_COUNT, schedule.getNpvDayCount(), "npvDayCount " + context + render(schedule));
+        assertEqualBigDecimal(DAILY_PAYMENT, schedule.getExpectedPaymentAmount(), "expectedPaymentAmount " + context + render(schedule));
+        assertEquals(TERM_WITH_DISCOUNT, schedule.getOriginalPaymentNumber(), "originalPaymentNumber " + context + render(schedule));
+    }
+
+    private static void assertAmortizationIsPopulatedPerPeriod(final ProjectedAmortizationScheduleData schedule, final String context) {
+        BigDecimal total = BigDecimal.ZERO;
+        for (final ProjectedAmortizationSchedulePaymentData row : schedule.getPayments()) {
+            if (row.getPaymentNo() == null || row.getPaymentNo() == 0) {
+                continue;
+            }
+            assertNotNull(row.getExpectedAmortizationAmount(),
+                    "period " + row.getPaymentNo() + " states no amortization amount " + context + render(schedule));
+            total = total.add(row.getExpectedAmortizationAmount());
+        }
+        assertEquals(1, total.signum(),
+                "the amortization column must earn some of the fee, not read 0.00 in every row " + context + render(schedule));
+    }
+
+    private static void assertAmortizationEarnsTheWholeDiscount(final ProjectedAmortizationScheduleData schedule, final String context) {
+        final BigDecimal amortized = schedule.getPayments().stream().filter(row -> row.getPaymentNo() != null && row.getPaymentNo() > 0)
+                .map(ProjectedAmortizationSchedulePaymentData::getExpectedAmortizationAmount).filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertEqualBigDecimal(DISCOUNT, amortized,
+                "the amortization column must earn the whole 1000 discount across the term " + context + render(schedule));
+    }
+
+    private static void assertScheduleClosesCleanly(final ProjectedAmortizationScheduleData schedule, final String context) {
+        final ProjectedAmortizationSchedulePaymentData last = schedule.getPayments().getLast();
+        assertNotNull(last.getExpectedBalance(), "the last period must state a balance " + context + render(schedule));
+        assertEquals(0, last.getExpectedBalance().signum(), "the schedule must end on a cleared balance " + context + render(schedule));
+        assertNotNull(last.getExpectedDiscountFeeBalance(), "the last period must state a fee balance " + context + render(schedule));
+        assertEquals(0, last.getExpectedDiscountFeeBalance().signum(),
+                "the fee must be fully earned by the time the balance clears " + context + render(schedule));
+    }
+
+    private static ProjectedAmortizationSchedulePaymentData payment(final ProjectedAmortizationScheduleData schedule, final int paymentNo) {
+        return schedule.getPayments().stream().filter(row -> row.getPaymentNo() != null && row.getPaymentNo() == paymentNo).findFirst()
+                .orElseThrow(() -> new AssertionError("no payment " + paymentNo + " in" + render(schedule)));
+    }
+
+    private static String render(final ProjectedAmortizationScheduleData schedule) {
+        final List<ProjectedAmortizationSchedulePaymentData> payments = schedule.getPayments();
+        final StringBuilder out = new StringBuilder("\nschedule: discountFeeAmount=").append(schedule.getDiscountFeeAmount())
+                .append(" netDisbursementAmount=").append(schedule.getNetDisbursementAmount()).append(" expectedPaymentAmount=")
+                .append(schedule.getExpectedPaymentAmount()).append(" originalPaymentNumber=").append(schedule.getOriginalPaymentNumber())
+                .append(" periods=").append(payments.size()).append('\n');
+        for (final ProjectedAmortizationSchedulePaymentData row : payments.subList(0, Math.min(4, payments.size()))) {
+            out.append(renderRow(row));
+        }
+        if (payments.size() > 4) {
+            out.append("  ...\n").append(renderRow(payments.getLast()));
+        }
+        return out.toString();
+    }
+
+    private static String renderRow(final ProjectedAmortizationSchedulePaymentData row) {
+        return new StringBuilder("  #").append(row.getPaymentNo()).append(' ').append(row.getPaymentDate()).append(" payment=")
+                .append(row.getExpectedPaymentAmount()).append(" balance=").append(row.getExpectedBalance()).append(" amort=")
+                .append(row.getExpectedAmortizationAmount()).append(" feeBalance=").append(row.getExpectedDiscountFeeBalance())
+                .append(" actualAmort=").append(row.getActualAmortizationAmount()).append(" actualFeeBalance=")
+                .append(row.getActualDiscountFeeBalance()).append('\n').toString();
     }
 }

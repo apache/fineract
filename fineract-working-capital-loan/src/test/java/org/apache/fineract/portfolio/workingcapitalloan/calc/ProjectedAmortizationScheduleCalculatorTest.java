@@ -30,6 +30,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
@@ -1353,7 +1354,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
         checkInst(model, 198, 198, LocalDate.of(2019, 7, 18), 196, 50.00, null, 0.81124922, 40.56, 49.95, null, 0.11, null, null, 0.06,
                 null);
         // Same reason: what is left to close, not a full instalment, which had driven the balance to -16.49.
-        checkInst(model, 199, 199, LocalDate.of(2019, 7, 19), 197, 50.00, null, 0.81038388, 40.52, 0.00, null, 0.05, null, null, 0.01,
+        checkInst(model, 199, 199, LocalDate.of(2019, 7, 19), 197, 50.00, null, 0.81038388, 40.52, 0.00, null, 0.06, null, null, 0.00,
                 null);
 
         assertEquals(200, model.projectedPayments().size(), "disbursement + 199 regular (period 200 removed, forecast was 0)");
@@ -2348,6 +2349,98 @@ class ProjectedAmortizationScheduleCalculatorTest {
         assertMoneyValue(expectedIncomeModification, inst.incomeModification(), 2, p + "incomeModification");
         assertMoneyValue(expectedExpectedDiscountFeeBalance, inst.expectedDiscountFeeBalance(), 2, p + "expectedDiscountFeeBalance");
         assertMoneyValue(expectedActualDiscountFeeBalance, inst.actualDiscountFeeBalance(), 2, p + "actualDiscountFeeBalance");
+    }
+
+    /**
+     * An instalment paid in full and on time tells the projection nothing it did not already assume, so recording one
+     * must leave every period after it exactly where it was.
+     *
+     * <p>
+     * The settled-period rewind is what puts that at risk: it assigns the fee the payments have really earned onto the
+     * expected column, and the two are only the same number if they are measured the same way. The expected column adds
+     * up periods that are each rounded to the currency first; a total that is instead kept exact and rounded once sits
+     * a cent away from it, and assigning that across shifts the deferred fee balance of every remaining period. It
+     * takes a few dozen periods of rounding to accumulate, which is why the fixed-schedule tests above do not see it -
+     * at 25 on-time payments it moves 175 periods.
+     */
+    @Test
+    void testOnTimePayments_doNotMoveTheProjectionOfLaterPeriods() {
+        for (final int paidDays : new int[] { 5, 25, 50, 100, 150 }) {
+            final List<ProjectedPayment> untouched = generateModel().projectedPayments();
+
+            final ProjectedAmortizationScheduleModel model = generateModel();
+            for (int day = 1; day <= paidDays; day++) {
+                model.acknowledgeElapsedPeriods(EXPECTED_DISBURSEMENT_DATE.plusDays(day));
+                model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(day), new BigDecimal("50"));
+            }
+            final List<ProjectedPayment> afterPaying = model.projectedPayments();
+
+            assertEquals(untouched.size(), afterPaying.size(), "paying on time should not change the number of periods");
+            for (int i = paidDays + 1; i < untouched.size(); i++) {
+                final ProjectedPayment before = untouched.get(i);
+                final ProjectedPayment after = afterPaying.get(i);
+                final String where = "period " + i + " after " + paidDays + " on-time payments";
+                assertMoneyValue(
+                        before.expectedAmortizationAmount() == null ? null : before.expectedAmortizationAmount().getAmount().doubleValue(),
+                        after.expectedAmortizationAmount(), 2, where + " expectedAmortizationAmount");
+                assertMoneyValue(before.expectedBalance() == null ? null : before.expectedBalance().getAmount().doubleValue(),
+                        after.expectedBalance(), 2, where + " expectedBalance");
+                assertMoneyValue(
+                        before.expectedDiscountFeeBalance() == null ? null : before.expectedDiscountFeeBalance().getAmount().doubleValue(),
+                        after.expectedDiscountFeeBalance(), 2, where + " expectedDiscountFeeBalance");
+            }
+        }
+    }
+
+    /**
+     * A borrower who hands over more than the payable owes nothing, and the periods after that must project nothing -
+     * not a balance growing further below zero.
+     *
+     * <p>
+     * The projection re-bases on the borrower's actual balance at every settled period. Left unfloored, an overpaid
+     * balance accrues away from zero and each later period amortizes a <em>negative</em> amount, which reads as a
+     * period un-earning fee the payments have already earned. Gathered back up as the fee still outstanding, that
+     * phantom is settled onto the closing period and takes the deferred fee balance below zero - a loan reporting that
+     * it has un-earned nine euros of income it holds.
+     *
+     * <p>
+     * The transaction allocator caps the principal it hands the schedule at what is actually owed, so a loan booked
+     * through the platform does not reach this. The projection should not have to rely on that to stay coherent.
+     */
+    @Test
+    void testOverpaidLoanProjectsNothingRatherThanUnEarningFee() {
+        for (final String overpayment : new String[] { "9950", "9990", "10000", "10500", "11000" }) {
+            final ProjectedAmortizationScheduleModel model = generateModel();
+            model.acknowledgeElapsedPeriods(EXPECTED_DISBURSEMENT_DATE.plusDays(2));
+            model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(2), new BigDecimal("46"));
+            model.acknowledgeElapsedPeriods(EXPECTED_DISBURSEMENT_DATE.plusDays(3));
+            model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(3), new BigDecimal("46"));
+            model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal(overpayment));
+            model.recalculateNetAmortizationAndDeferredBalanceFrom(EXPECTED_DISBURSEMENT_DATE.plusDays(1));
+
+            final List<ProjectedPayment> payments = model.projectedPayments();
+            BigDecimal earned = BigDecimal.ZERO;
+            for (final ProjectedPayment payment : payments) {
+                final String where = "overpaid by " + overpayment + ", period " + payment.paymentNo();
+                assertNonNegative(payment.expectedDiscountFeeBalance(), where + " expectedDiscountFeeBalance");
+                assertNonNegative(payment.expectedAmortizationAmount(), where + " expectedAmortizationAmount");
+                assertNonNegative(payment.expectedBalance(), where + " expectedBalance");
+                if (payment.actualAmortizationAmount() != null) {
+                    earned = earned.add(payment.actualAmortizationAmount().getAmount());
+                }
+            }
+            assertMoneyValue(0.00, payments.getLast().expectedDiscountFeeBalance(), 2,
+                    "overpaid by " + overpayment + ": deferred fee should close at zero");
+            assertEquals(0, DISCOUNT_FEE.compareTo(earned),
+                    "overpaid by " + overpayment + ": the whole fee should be earned, was " + earned);
+        }
+    }
+
+    private void assertNonNegative(final Money value, final String msg) {
+        if (value == null) {
+            return;
+        }
+        assertTrue(value.getAmount().signum() >= 0, msg + " should not be negative, was " + value.getAmount());
     }
 
     private void assertMoneyValue(final Double expected, final Money actual, final int scale, final String msg) {

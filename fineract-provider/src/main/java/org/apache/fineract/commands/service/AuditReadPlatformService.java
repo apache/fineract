@@ -21,6 +21,7 @@ package org.apache.fineract.commands.service;
 import java.util.List;
 import org.apache.fineract.commands.data.AuditData;
 import org.apache.fineract.commands.data.AuditSearchData;
+import org.apache.fineract.commands.data.request.AuditRequest;
 import org.apache.fineract.infrastructure.core.data.PaginationParameters;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.security.utils.SQLBuilder;
@@ -36,4 +37,6 @@ public interface AuditReadPlatformService {
     AuditData retrieveAuditEntry(Long auditId);
 
     AuditSearchData retrieveSearchTemplate(String useType);
+
+    SQLBuilder getExtraCriteria(AuditRequest auditRequest);
 }

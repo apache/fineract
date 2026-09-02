@@ -52,7 +52,6 @@ import org.apache.fineract.portfolio.client.domain.ClientRepository;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.client.exception.ClientNotFoundException;
 import org.apache.fineract.portfolio.loanaccount.domain.ExpectedDisbursementDateValidator;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
@@ -310,13 +309,12 @@ public class WorkingCapitalLoanApplicationDataValidator {
      * Validates for modify using the existing loan. Ensures loan is in submitted state, then runs parameter validation.
      */
     public void validateForUpdate(final JsonCommand command, final WorkingCapitalLoan loan) {
-        if (loan.getLoanStatus() != LoanStatus.SUBMITTED_AND_PENDING_APPROVAL) {
+        if (loan.isNotSubmittedAndPendingApproval()) {
             throw new WorkingCapitalLoanApplicationNotInSubmittedStateCannotBeModifiedException(loan.getId());
         }
         final LocalDate expectedDisbursementDate = loan.getDisbursementDetails().isEmpty() ? null
                 : loan.getDisbursementDetails().getFirst().getExpectedDisbursementDate();
-        validateForUpdate(command, loan.getLoanProduct() != null ? loan.getLoanProduct().getId() : null,
-                loan.getClient() != null ? loan.getClient().getId() : null,
+        validateForUpdate(command, loan.productId(), loan.getClient() != null ? loan.getClient().getId() : null,
                 loan.getExternalId() != null ? loan.getExternalId().getValue() : null, loan.getAccountNumber(), loan.getSubmittedOnDate(),
                 expectedDisbursementDate);
     }

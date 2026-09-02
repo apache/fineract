@@ -1908,7 +1908,7 @@ Feature: LoanReAmortization - Part1
     When Loan Pay-off is made on "15 May 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
 
-  @AdvancedPaymentAllocation @MultiReAmortization
+  @TestRailId:C98233 @AdvancedPaymentAllocation @MultiReAmortization
   Scenario: Verify multiple Re-amortizations on the same loan - Interest calculation: Equal Amortization Behavior - Multiple Re-amortizations on the same loan
     When Admin sets the business date to "01 January 2024"
     When Admin creates a client with random data

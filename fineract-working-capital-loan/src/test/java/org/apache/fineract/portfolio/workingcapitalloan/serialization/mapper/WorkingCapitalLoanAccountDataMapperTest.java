@@ -358,11 +358,12 @@ class WorkingCapitalLoanAccountDataMapperTest {
         assertEquals("2024-01-10", result.getDelinquencyPausePeriods().getFirst().getPausePeriodStart());
         assertEquals("2024-01-20", result.getDelinquencyPausePeriods().getFirst().getPausePeriodEnd());
 
+        assertEquals("2024-01-10", result.getLastPaymentDate());
+        assertEquals(new BigDecimal("10.0"), result.getLastPaymentAmount());
+        assertEquals("2024-01-09", result.getLastRepaymentDate());
+        assertEquals(new BigDecimal("15.0"), result.getLastRepaymentAmount());
+
         // serializer-only fields stay unmapped
-        assertNull(result.getLastPaymentDate());
-        assertNull(result.getLastPaymentAmount());
-        assertNull(result.getLastRepaymentDate());
-        assertNull(result.getLastRepaymentAmount());
         assertNull(result.getDelinquencySchedule());
     }
 
@@ -569,8 +570,20 @@ class WorkingCapitalLoanAccountDataMapperTest {
 
     private static WorkingCapitalLoanCollectionData fullCollection() {
         final DelinquencyPausePeriod pause = new DelinquencyPausePeriod(true, LocalDate.of(2024, 1, 10), LocalDate.of(2024, 1, 20));
-        return new WorkingCapitalLoanCollectionData(5L, 3L, LocalDate.of(2024, 2, 1), new BigDecimal("100"), List.of(pause), List.of(),
-                new BigDecimal("80"));
+        final WorkingCapitalLoanCollectionData collection = new WorkingCapitalLoanCollectionData();
+        collection.setPastDueDays(5L);
+        collection.setDelinquentDays(3L);
+        collection.setDelinquentDate(LocalDate.of(2024, 2, 1));
+        collection.setDelinquentAmount(new BigDecimal("100"));
+        collection.setDelinquencyPausePeriods(List.of(pause));
+        collection.setInstallmentLevelDelinquency(List.of());
+        collection.setDelinquentPrincipal(new BigDecimal("80"));
+        // deliberately different dates and amounts, so a payment/repayment mix-up in the mapping cannot pass
+        collection.setLastPaymentDate(LocalDate.of(2024, 1, 10));
+        collection.setLastPaymentAmount(new BigDecimal("10.0"));
+        collection.setLastRepaymentDate(LocalDate.of(2024, 1, 9));
+        collection.setLastRepaymentAmount(new BigDecimal("15.0"));
+        return collection;
     }
 
     private static WorkingCapitalLoanDelinquencyRangeScheduleData fullSchedulePeriod() {

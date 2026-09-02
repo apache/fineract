@@ -121,14 +121,14 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
             @Param("transactionTypes") List<LoanTransactionType> transactionTypes);
 
     @Query("""
-            SELECT t FROM WorkingCapitalLoanTransaction t
+            SELECT t.transactionDate, t.transactionAmount FROM WorkingCapitalLoanTransaction t
             WHERE t.wcLoan.id = :wcLoanId
             AND t.reversed = FALSE
             AND t.transactionType in :transactionTypes
             ORDER BY t.transactionDate DESC, t.id DESC
             """)
-    List<WorkingCapitalLoanTransaction> findActiveByTypesOrderByDateDesc(@Param("wcLoanId") Long wcLoanId,
-            @Param("transactionTypes") List<LoanTransactionType> transactionTypes);
+    List<TransactionDateAndAmountHolder> findActiveByTypesOrderByDateDesc(@Param("wcLoanId") Long wcLoanId,
+            @Param("transactionTypes") List<LoanTransactionType> transactionTypes, Pageable pageable);
 
     /**
      * Non-reversed transactions of the loan whose type is none of {@code excludedTypes}, latest first in the

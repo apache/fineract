@@ -2,6 +2,12 @@ name: Verify API Backward Compatibility
 
 on:
   workflow_call:
+    inputs:
+      upload_artifacts:
+        description: Upload reports and logs even when the job succeeds
+        required: false
+        default: false
+        type: boolean
     secrets:
       DEVELOCITY_ACCESS_KEY:
         required: false
@@ -57,11 +63,11 @@ jobs:
 
           git merge --no-commit --no-ff FETCH_HEAD
 
-      - name: Set up JDK 21
+      - name: Set up JDK 25
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: 'zulu'
-          java-version: '21'
+          java-version: '25'
 
       - name: Generate baseline spec
         working-directory: baseline
@@ -211,7 +217,7 @@ jobs:
           echo "The API contract is backward compatible." >> $GITHUB_STEP_SUMMARY
 
       - name: Archive breaking change report
-        if: failure()
+        if: ${{ failure() || inputs.upload_artifacts }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: api-compatibility-report

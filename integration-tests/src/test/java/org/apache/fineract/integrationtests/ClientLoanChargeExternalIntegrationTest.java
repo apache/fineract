@@ -22,12 +22,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.math.BigDecimal;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,9 +50,9 @@ public class ClientLoanChargeExternalIntegrationTest extends FeignLoanTestBase {
 
         final Long loanProductId = createLoanProduct(false, NONE);
 
-        final Long loanId = applyForLoanApplication(clientId, loanProductId, "12,000.00");
+        final Long loanId = applyForLoanWithPrincipal(clientId, loanProductId, "12,000.00");
         approveLoan(loanId, approveLoanRequest(12000.0, "20 September 2011"));
-        disburseLoanWithNetDisbursalAmount(loanId, "20 September 2011", "12,000.00");
+        disburseLoanWithNetDisbursalAmount(loanId, "20 September 2011", "12000.00");
 
         final Long chargeDefId = chargesHelper.createLoanSpecifiedDueDatePercentageOfInterestFee(1.0).getResourceId();
 
@@ -70,9 +72,9 @@ public class ClientLoanChargeExternalIntegrationTest extends FeignLoanTestBase {
 
         final Long loanProductId = createLoanProduct(false, NONE);
 
-        final Long loanId = applyForLoanApplication(clientId, loanProductId, "12,000.00");
+        final Long loanId = applyForLoanWithPrincipal(clientId, loanProductId, "12,000.00");
         approveLoan(loanId, approveLoanRequest(12000.0, "20 September 2011"));
-        disburseLoanWithNetDisbursalAmount(loanId, "20 September 2011", "12,000.00");
+        disburseLoanWithNetDisbursalAmount(loanId, "20 September 2011", "12000.00");
 
         final Long chargeDefId = chargesHelper.createLoanSpecifiedDueDatePercentageOfInterestFee(1.0).getResourceId();
 
@@ -103,25 +105,12 @@ public class ClientLoanChargeExternalIntegrationTest extends FeignLoanTestBase {
         if (multiDisburseLoan) {
             builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
         }
-        final String loanProductJSON = builder.build(null);
-        return createLoanProductFromJson(loanProductJSON);
+        final PostLoanProductsRequest loanProductRequest = builder.buildRequest(null);
+        return createLoanProduct(loanProductRequest);
     }
 
-    private Long applyForLoanApplication(final Long clientId, final Long loanProductId, String principal) {
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal(principal) //
-                .withLoanTermFrequency("4") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("4") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate("20 September 2011") //
-                .withSubmittedOnDate("20 September 2011") //
-                .build(clientId.toString(), loanProductId.toString(), null);
-        return applyForLoanFromJson(loanApplicationJSON);
+    private Long applyForLoanWithPrincipal(final Long clientId, final Long loanProductId, String principal) {
+        return applyForLoan(LoanRequestBuilders.legacyIndividualApplication(clientId, loanProductId, principal, 4, new BigDecimal("2"),
+                "20 September 2011"));
     }
 }

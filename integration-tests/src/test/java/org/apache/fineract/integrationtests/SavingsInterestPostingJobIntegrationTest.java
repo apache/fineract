@@ -19,354 +19,218 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.time.Month;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
+import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.SavingsAccountTransactionData;
+import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
-import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-@Order(2)
-@ExtendWith({ SavingsTestLifecycleExtension.class })
-public class SavingsInterestPostingJobIntegrationTest {
+public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBase {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsInterestPostingJobIntegrationTest.class);
-    public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    public static final String POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME = "SA_PINT";
+    private static final String POST_INTEREST_JOB_NAME = "Post Interest For Savings";
 
-    private static ResponseSpecification responseSpec;
-    private static RequestSpecification requestSpec;
-    private SavingsProductHelper savingsProductHelper;
-    private SavingsAccountHelper savingsAccountHelper;
-    private JournalEntryHelper journalEntryHelper;
-    private AccountHelper accountHelper;
-    private GlobalConfigurationHelper globalConfigurationHelper;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.savingsProductHelper = new SavingsProductHelper();
-        this.globalConfigurationHelper = new GlobalConfigurationHelper();
-    }
+    private static final String START_DATE = "10 April 2022";
+    private static final String JULY_START_DATE = "01 July 2022";
+    private static final String CHARGE_START_DATE = "21 June 2022";
+    private static final String DEPOSIT_AMOUNT = "10000";
+    private static final BigDecimal OVERDRAFT_LIMIT = new BigDecimal("10000.0");
+    private static final BigDecimal OVERDRAFT_INTEREST_RATE = new BigDecimal("10");
 
     @Test
     public void testSavingsBalanceCheckAfterDailyInterestPostingJob() {
-        final String startDate = "10 April 2022";
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
-        Assertions.assertNotNull(clientID);
+        final Long savingsId = createActiveDailyPostingSavings(START_DATE);
+        deposit(savingsId, DEPOSIT_AMOUNT, START_DATE);
 
-        final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+        schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
-
-        SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
-        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
-        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
-        HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 48);
-        for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
-            LOG.info("{} - {}", entry.getKey(), String.valueOf(entry.getValue()));
-        }
-        assertEquals("10129.582", interestPostingTransaction.get("runningBalance").toString(), "Equality check for Balance");
+        final List<SavingsAccountTransactionData> transactions = savingsTransactionHelper.getTransactions(savingsId);
+        // The RestAssured version read this through JsonPath, which narrowed it to a float and saw "10129.582".
+        SavingsTestValidators.verifyAmount(new BigDecimal("10129.5818"), transactions.get(transactions.size() - 48).getRunningBalance(),
+                "Equality check for Balance");
     }
 
     @Test
     public void testSavingsDailyInterestPostingJobWithAccountingNone() {
-        final String startDate = "10 April 2022";
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
-        Assertions.assertNotNull(clientID);
-        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
-        this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
+        final Long savingsId = createActiveSavings(START_DATE, minimumOpeningBalanceProduct());
 
-        final Integer savingsId = createSavingsAccountDailyPostingWithAccounting(clientID, startDate);
+        final Long transactionId = deposit(savingsId, "1000", START_DATE).getResourceId();
+        assertNotNull(transactionId);
 
-        Integer transactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000", startDate,
-                CommonConstants.RESPONSE_RESOURCE_ID);
-        ArrayList<HashMap> journalEntries = this.journalEntryHelper.getJournalEntriesByTransactionId(String.valueOf(transactionId));
-        assertEquals(0, journalEntries.size());
+        assertEquals(0, journalEntryHelper.getJournalEntriesByTransactionId(String.valueOf(transactionId)).getPageItems().size(),
+                "A product with no accounting should not post journal entries");
     }
 
     @Test
     public void testDuplicateOverdraftInterestPostingJob() {
-        final String startDate = "01 July 2022";
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
-        Assertions.assertNotNull(clientID);
+        final Long savingsId = createActiveSavings(JULY_START_DATE, overdraftDailyPostingProduct());
 
-        final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
+        withdraw(savingsId, "1000", JULY_START_DATE);
+        schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+        withdraw(savingsId, "1000", JULY_START_DATE);
 
-        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
-
-        SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
-        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
-        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
-        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
-        Integer dateCount = 0;
-        for (HashMap<String, Object> transaction : transactions) {
-            if (transaction.get("date").toString().equals("[2022, 7, 10]") && transaction.get("reversed").toString().equals("false")) {
-                dateCount++;
-            }
-        }
-        assertEquals(1, dateCount, "No Duplicate Overdraft Interest Posting");
+        assertEquals(1, countActiveTransactionsOn(savingsId, LocalDate.of(2022, Month.JULY, 10)),
+                "No Duplicate Overdraft Interest Posting");
     }
 
     @Test
     public void testSavingsDailyInterestPostingJob() {
-        LocalDate today = Utils.getLocalDateOfTenant();
-        try {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, today);
-            final String startDate = "10 April 2022";
-            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
-            Assertions.assertNotNull(clientID);
+        final LocalDate today = Utils.getLocalDateOfTenant();
 
-            final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
+        businessDateHelper.runAt(today.toString(), () -> {
+            final Long savingsId = createActiveDailyPostingSavings(START_DATE);
+            deposit(savingsId, DEPOSIT_AMOUNT, START_DATE);
 
-            this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-            SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
-            Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
-            ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
-            HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 3);
-            for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
-                LOG.info("{} - {}", entry.getKey(), String.valueOf(entry.getValue()));
-            }
-            assertEquals("2.7405", interestPostingTransaction.get("amount").toString(), "Equality check for interest posted amount");
-            assertEquals("[2022, 4, 12]", interestPostingTransaction.get("date").toString(), "Date check for Interest Posting transaction");
-            List<Integer> submittedOnDateStringList = (List<Integer>) interestPostingTransaction.get("submittedOnDate");
-            LocalDate submittedOnDate = submittedOnDateStringList.stream().collect(
-                    Collectors.collectingAndThen(Collectors.toList(), list -> LocalDate.of(list.get(0), list.get(1), list.get(2))));
-            assertTrue(DateUtils.isEqual(submittedOnDate, today), "Submitted On Date check for Interest Posting transaction");
-        } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(false));
-        }
+            final List<SavingsAccountTransactionData> transactions = savingsTransactionHelper.getTransactions(savingsId);
+            final SavingsAccountTransactionData interestPosting = transactions.get(transactions.size() - 3);
+
+            SavingsTestValidators.verifyAmount(new BigDecimal("2.7405"), interestPosting.getAmount(),
+                    "Equality check for interest posted amount");
+            assertEquals(LocalDate.of(2022, Month.APRIL, 12), interestPosting.getDate(), "Date check for Interest Posting transaction");
+            assertEquals(today, interestPosting.getSubmittedOnDate(), "Submitted On Date check for Interest Posting transaction");
+        });
     }
 
     @Test
     public void testSavingsDailyOverdraftInterestPostingJob() {
-        final String startDate = "10 April 2022";
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
-        Assertions.assertNotNull(clientID);
+        final Long savingsId = createActiveSavings(START_DATE, overdraftDailyPostingProduct());
 
-        final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
+        withdraw(savingsId, DEPOSIT_AMOUNT, START_DATE);
+        schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        final List<SavingsAccountTransactionData> transactions = savingsTransactionHelper.getTransactions(savingsId);
+        final SavingsAccountTransactionData interestPosting = transactions.get(transactions.size() - 2);
 
-        SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
-        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
-        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
-        HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 2);
-        for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
-            LOG.info("{} - {}", entry.getKey(), String.valueOf(entry.getValue()));
-        }
-        assertEquals("2.7397", interestPostingTransaction.get("amount").toString(), "Equality check for overdatft interest posted amount");
-        assertEquals("[2022, 4, 11]", interestPostingTransaction.get("date").toString(),
+        SavingsTestValidators.verifyAmount(new BigDecimal("2.7397"), interestPosting.getAmount(),
+                "Equality check for overdatft interest posted amount");
+        assertEquals(LocalDate.of(2022, Month.APRIL, 11), interestPosting.getDate(),
                 "Date check for overdraft Interest Posting transaction");
     }
 
     @Test
     public void testAccountBalanceWithWithdrawalFeeAfterInterestPostingJob() {
-        final String startDate = "21 June 2022";
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
-        Assertions.assertNotNull(clientID);
+        final Long savingsId = createActiveDailyPostingSavingsWithWithdrawalFee();
 
-        final Integer savingsId = createSavingsAccountDailyPostingWithCharge(clientID, startDate);
-        this.savingsAccountHelper.depositToSavingsAccount(savingsId, "1000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+        deposit(savingsId, "1000", CHARGE_START_DATE);
+        withdraw(savingsId, "100", CHARGE_START_DATE);
+        SavingsTestValidators.verifyAmount(new BigDecimal("800.0"), savingsHelper.getSavingsSummary(savingsId).getAccountBalance(),
+                "Verifying account balance is 800");
 
-        this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
-        HashMap summary = this.savingsAccountHelper.getSavingsSummary(savingsId);
-        Float balance = Float.parseFloat("800.0");
-        assertEquals(balance, summary.get("accountBalance"), "Verifying account balance is 800");
+        schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-        SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
-        Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
-        ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
-        HashMap<String, Object> interestPostingTransaction = transactions.get(transactions.size() - 5);
-        for (Map.Entry<String, Object> entry : interestPostingTransaction.entrySet()) {
-            LOG.info("{} - {}", entry.getKey(), String.valueOf(entry.getValue()));
-        }
-        assertEquals("800.4384", interestPostingTransaction.get("runningBalance").toString(), "Equality check for Balance");
+        final List<SavingsAccountTransactionData> transactions = savingsTransactionHelper.getTransactions(savingsId);
+        SavingsTestValidators.verifyAmount(new BigDecimal("800.4384"), transactions.get(transactions.size() - 5).getRunningBalance(),
+                "Equality check for Balance");
     }
 
     @Test
     public void testRunningPostInterestJobTwiceDoesNotCreateDuplicateInterest() {
-        final LocalDate businessDate = LocalDate.of(2022, 4, 13);
-        try {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+        businessDateHelper.runAt("2022-04-13", () -> {
+            final Long savingsId = createActiveDailyPostingSavings(START_DATE);
+            deposit(savingsId, DEPOSIT_AMOUNT, START_DATE);
 
-            final String startDate = "10 April 2022";
-            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
-            Assertions.assertNotNull(clientID);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-            final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
-            this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
-
-            SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
-            SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
-
-            Object transactionObj = this.savingsAccountHelper.getSavingsDetails(savingsId, "transactions");
-            ArrayList<HashMap<String, Object>> transactions = (ArrayList<HashMap<String, Object>>) transactionObj;
-
-            long interestPostingsCount = transactions.stream().filter(t -> t.get("date").toString().equals("[2022, 4, 12]"))
-                    .filter(t -> t.get("reversed").toString().equals("false")).count();
-
-            assertEquals(1, interestPostingsCount, "Running job twice must not create duplicate interest postings on the same date");
-        } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(false));
-        }
+            assertEquals(1, countActiveTransactionsOn(savingsId, LocalDate.of(2022, Month.APRIL, 12)),
+                    "Running job twice must not create duplicate interest postings on the same date");
+        });
     }
 
     @Test
     public void testAccountBalanceUnchangedAfterRunningPostInterestJobTwice() {
-        final LocalDate businessDate = LocalDate.of(2022, 4, 13);
-        try {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+        businessDateHelper.runAt("2022-04-13", () -> {
+            final Long savingsId = createActiveDailyPostingSavings(START_DATE);
+            deposit(savingsId, DEPOSIT_AMOUNT, START_DATE);
 
-            final String startDate = "10 April 2022";
-            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
-            Assertions.assertNotNull(clientID);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            final BigDecimal balanceAfterFirstRun = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
 
-            final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
-            this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", startDate, CommonConstants.RESPONSE_RESOURCE_ID);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            final BigDecimal balanceAfterSecondRun = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
 
-            SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
-            HashMap summaryAfterFirstRun = this.savingsAccountHelper.getSavingsSummary(savingsId);
-            Float balanceAfterFirstRun = Float.parseFloat(summaryAfterFirstRun.get("accountBalance").toString());
-            LOG.info("Balance after first run: {}", balanceAfterFirstRun);
-
-            SchedulerJobHelper.executeAndAwaitJobByShortName(POST_INTEREST_FOR_SAVINGS_JOB_SHORT_NAME);
-            HashMap summaryAfterSecondRun = this.savingsAccountHelper.getSavingsSummary(savingsId);
-            Float balanceAfterSecondRun = Float.parseFloat(summaryAfterSecondRun.get("accountBalance").toString());
-            LOG.info("Balance after second run: {}", balanceAfterSecondRun);
-
-            assertEquals(balanceAfterFirstRun, balanceAfterSecondRun, 0.001f,
+            SavingsTestValidators.verifyAmount(balanceAfterFirstRun, balanceAfterSecondRun,
                     "Account balance must not change when job runs twice on the same business date");
-        } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(false));
-        }
+        });
     }
 
-    private Integer createSavingsAccountDailyPosting(final Integer clientID, final String startDate) {
-        final Integer savingsProductID = createSavingsProductDailyPosting();
-        Assertions.assertNotNull(savingsProductID);
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL, startDate);
-        Assertions.assertNotNull(savingsId);
-        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+    private long countActiveTransactionsOn(final Long savingsId, final LocalDate date) {
+        return savingsTransactionHelper.getTransactions(savingsId).stream().filter(t -> date.equals(t.getDate()))
+                .filter(t -> !Boolean.TRUE.equals(t.getReversed())).count();
+    }
+
+    private Long createActiveDailyPostingSavings(final String startDate) {
+        return createActiveSavings(startDate, dailyPostingProduct());
+    }
+
+    private Long createActiveSavings(final String startDate, final Long productId) {
+        final Long clientId = createClient(startDate);
+        assertNotNull(clientId);
+
+        final Long savingsId = submitSavingsApplication(clientId, productId, startDate).getSavingsId();
+        assertNotNull(savingsId);
+
+        approveSavings(savingsId, startDate);
+        SavingsTestValidators.verifySavingsIsApproved(savingsHelper.getSavingsStatus(savingsId));
+
+        activateSavings(savingsId, startDate);
+        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
         return savingsId;
     }
 
-    private Integer createSavingsAccountDailyPostingWithAccounting(final Integer clientID, final String startDate) {
-        final Integer savingsProductID = createSavingsProduct("1000");
-        Assertions.assertNotNull(savingsProductID);
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL, startDate);
-        Assertions.assertNotNull(savingsId);
-        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+    /** The charge has to be attached while the account is still pending. */
+    private Long createActiveDailyPostingSavingsWithWithdrawalFee() {
+        final Long clientId = createClient(CHARGE_START_DATE);
+        assertNotNull(clientId);
+
+        final Long savingsId = submitSavingsApplication(clientId, dailyPostingProduct(), CHARGE_START_DATE).getSavingsId();
+        assertNotNull(savingsId);
+
+        final Long withdrawalChargeId = savingsChargeHelper.createWithdrawalFeeCharge().getResourceId();
+        assertNotNull(withdrawalChargeId);
+        savingsChargeHelper.addChargeToSavings(savingsId, withdrawalChargeId, SavingsTestData.DEFAULT_CHARGE_AMOUNT.floatValue());
+
+        approveSavings(savingsId, CHARGE_START_DATE);
+        SavingsTestValidators.verifySavingsIsApproved(savingsHelper.getSavingsStatus(savingsId));
+
+        activateSavings(savingsId, CHARGE_START_DATE);
+        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
         return savingsId;
     }
 
-    private Integer createSavingsAccountDailyPostingWithCharge(final Integer clientID, final String startDate) {
-        final Integer savingsProductID = createSavingsProductDailyPosting();
-        Assertions.assertNotNull(savingsProductID);
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL, startDate);
-        Assertions.assertNotNull(savingsId);
-
-        final Integer withdrawalChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
-                ChargesHelper.getSavingsWithdrawalFeeJSON());
-        Assertions.assertNotNull(withdrawalChargeId);
-
-        this.savingsAccountHelper.addChargesForSavings(savingsId, withdrawalChargeId, false);
-        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
-        return savingsId;
+    private Long dailyPostingProduct() {
+        return createSavingsProduct(dailyPostingProductRequest()).getResourceId();
     }
 
-    private Integer createSavingsAccountDailyPostingOverdraft(final Integer clientID, final String startDate) {
-        final Integer savingsProductID = createSavingsProductDailyPostingOverdraft();
-        Assertions.assertNotNull(savingsProductID);
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientID, savingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL, startDate);
-        Assertions.assertNotNull(savingsId);
-        HashMap savingsStatusHashMap = this.savingsAccountHelper.approveSavingsOnDate(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavingsAccount(savingsId, startDate);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
-        return savingsId;
+    /** Monthly posting: the legacy builder never overrode the posting period, so it kept the monthly default. */
+    private Long minimumOpeningBalanceProduct() {
+        return createSavingsProduct(dailyPostingProductRequest()//
+                .interestPostingPeriodType(SavingsTestData.InterestPostingPeriodType.MONTHLY)//
+                .minRequiredOpeningBalance(new BigDecimal("1000"))//
+                .accountingRule(SavingsTestData.AccountingRule.NONE)).getResourceId();
     }
 
-    private Integer createSavingsProductDailyPosting() {
-        final String savingsProductJSON = this.savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance().build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    private Long overdraftDailyPostingProduct() {
+        return savingsProductHelper.createSavingsProduct(dailyPostingProductRequest()//
+                .allowOverdraft(true)//
+                .overdraftLimit(OVERDRAFT_LIMIT)//
+                .nominalAnnualInterestRateOverdraft(OVERDRAFT_INTEREST_RATE)).getResourceId();
     }
 
-    private Integer createSavingsProductDailyPostingOverdraft() {
-        final String overDraftLimit = "10000.0";
-        final String nominalAnnualInterestRateOverdraft = "10";
-        final String savingsProductJSON = this.savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestPostingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance()
-                .withOverDraftRate(overDraftLimit, nominalAnnualInterestRateOverdraft).build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
-    }
-
-    public static Integer createSavingsProduct(final String minOpenningBalance) {
-        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
-        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily()
-                .withInterestCompoundingPeriodTypeAsDaily().withInterestCalculationPeriodTypeAsDailyBalance()
-                .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsNone().build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    private PostSavingsProductsRequest dailyPostingProductRequest() {
+        return SavingsRequestBuilders.savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY,
+                SavingsTestData.InterestPostingPeriodType.DAILY, SavingsTestData.InterestCalculationType.DAILY_BALANCE);
     }
 
     @AfterEach

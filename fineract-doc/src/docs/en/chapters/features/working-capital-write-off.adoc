@@ -226,8 +226,8 @@ For a loan that was charged off, the mirrors flip the reclassification instead: 
 
 == Business Events
 
-* `WorkingCapitalLoanWrittenOffBusinessEvent` — emitted after a write-off.
-* `WorkingCapitalLoanUndoWrittenOffBusinessEvent` — emitted after an undo write-off.
+* `WorkingCapitalLoanWriteOffTransactionBusinessEvent` — emitted after a write-off.
+* `WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent` — emitted after an undo write-off.
 * `WorkingCapitalLoanBalanceChangedBusinessEvent` — emitted by both operations, since the write-off zeroes the
 outstanding balance and the undo restores it.
 * `WorkingCapitalLoanStatusChangedBusinessEvent` — emitted by both operations, for the transition to

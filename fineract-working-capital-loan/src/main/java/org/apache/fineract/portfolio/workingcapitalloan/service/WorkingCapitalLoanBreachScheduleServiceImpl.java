@@ -430,7 +430,7 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
         final BigDecimal discount = loan.getLoanProductRelatedDetails() != null ? loan.getLoanProductRelatedDetails().getDiscount() : null;
         final BigDecimal base = discount != null ? principal.add(discount) : principal;
         final BigDecimal rawAmount = MathUtil.percentageOf(base, breachAmount, MoneyHelper.getMathContext());
-        return Money.of(loan.getLoanProductRelatedDetails().getCurrency(), rawAmount).getAmount();
+        return Money.of(loan.getCurrency(), rawAmount).getAmount();
     }
 
     private EffectiveBreachRescheduleParams resolveEffectiveRescheduleParams(final Long loanId, final WorkingCapitalBreach breach) {

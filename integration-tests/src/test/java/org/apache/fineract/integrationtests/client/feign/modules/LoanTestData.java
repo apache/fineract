@@ -201,6 +201,7 @@ public final class LoanTestData {
     public static final class TransactionProcessingStrategyCode {
 
         public static final String ADVANCED_PAYMENT_ALLOCATION_STRATEGY = "advanced-payment-allocation-strategy";
+        public static final String MIFOS_STANDARD_STRATEGY = "mifos-standard-strategy";
 
         private TransactionProcessingStrategyCode() {}
     }
