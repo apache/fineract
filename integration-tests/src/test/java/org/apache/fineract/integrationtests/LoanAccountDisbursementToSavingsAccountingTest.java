@@ -76,9 +76,8 @@ public class LoanAccountDisbursementToSavingsAccountingTest extends FeignLoanTes
             approveLoan(loanId, LoanRequestBuilders.approveLoan(PRINCIPAL, DISBURSEMENT_DATE));
 
             BigDecimal netDisbursalAmount = getLoanDetails(loanId).getNetDisbursalAmount();
-            disburseToSavings(loanId,
-                    new PostLoansLoanIdRequest().actualDisbursementDate(DISBURSEMENT_DATE).netDisbursalAmount(netDisbursalAmount)
-                            .locale(LoanTestData.LOCALE).dateFormat(LoanTestData.DATETIME_PATTERN));
+            disburseToSavings(loanId, new PostLoansLoanIdRequest().actualDisbursementDate(DISBURSEMENT_DATE)
+                    .netDisbursalAmount(netDisbursalAmount).locale(LoanTestData.LOCALE).dateFormat(LoanTestData.DATETIME_PATTERN));
 
             Long feeTransactionId = getTransactionId(loanId, REPAYMENT_AT_DISBURSEMENT, DISBURSEMENT_DATE);
             List<JournalEntryTransactionItem> feeJournalEntries = journalHelper.getJournalEntries("L" + feeTransactionId).getPageItems();
