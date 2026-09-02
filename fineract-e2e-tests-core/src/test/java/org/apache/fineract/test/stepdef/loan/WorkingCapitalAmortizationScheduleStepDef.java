@@ -373,10 +373,10 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
     }
 
     /**
-     * Ledger/schedule consistency guard (PS-3313 "amortization amounts + not yet amortized amounts matches discount
-     * fee"): the actual amortization rows must add up to the realized discount-fee income booked on the loan, the last
-     * paid row's actual discount fee balance must equal the loan's unrealized income, and realized + unrealized must
-     * equal the discount fee the schedule was built with.
+     * Ledger/schedule consistency guard ("amortization amounts + not yet amortized amounts matches discount fee"): the
+     * actual amortization rows must add up to the realized discount-fee income booked on the loan, the last paid row's
+     * actual discount fee balance must equal the loan's unrealized income, and realized + unrealized must equal the
+     * discount fee the schedule was built with.
      *
      * <p>
      * Precondition: use it right after a close of business on a loan that is still active. The ledger only follows the
