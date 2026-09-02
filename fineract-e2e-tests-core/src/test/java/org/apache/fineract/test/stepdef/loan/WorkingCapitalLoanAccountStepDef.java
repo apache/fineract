@@ -91,6 +91,7 @@ import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanCommandTemplateData;
 import org.apache.fineract.client.models.WorkingCapitalLoanPeriodPaymentRateChangeData;
+import org.apache.fineract.test.api.FineractClientConfiguration;
 import org.apache.fineract.test.data.FundId;
 import org.apache.fineract.test.data.LoanStatus;
 import org.apache.fineract.test.data.TransactionType;
@@ -147,6 +148,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     private final JournalEntriesStepDef journalEntriesStepDef;
     private final ClientRequestFactory clientRequestFactory;
     private final CodeValueResolver codeValueResolver;
+    private final FineractClientConfiguration fineractClientConfiguration;
 
     @Given("Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:")
     public void createClientAndDisburseWorkingCapitalLoanWithData(final DataTable table) {
@@ -3303,6 +3305,25 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         validateRepaymentResponse(response, transactionAmount, transactionDate, loanExternalId);
     }
 
+    @Then("Created user makes repayment on {string} with {double} transaction amount on Working Capital loan")
+    public void makeWorkingCapitalLoanRepaymentWithCreatedUser(final String transactionDate, final double transactionAmount) {
+        final Long loanId = getCreatedLoanId();
+        final PostWorkingCapitalLoanTransactionsRequest repaymentRequest = buildRepaymentRequest(transactionDate, transactionAmount, null);
+        final PostWorkingCapitalLoanTransactionsResponse response = executeRepaymentLikeById(userClient(), loanId,
+                TransactionType.REPAYMENT.getValue(), repaymentRequest);
+        validateRepaymentResponse(response, transactionAmount, transactionDate, loanId);
+    }
+
+    @Then("Created user makes repayment by loan external ID on {string} with {double} transaction amount on Working Capital loan")
+    public void makeWorkingCapitalLoanRepaymentByExternalIdWithCreatedUser(final String transactionDate, final double transactionAmount) {
+        final Long loanId = getCreatedLoanId();
+        final String loanExternalId = retrieveLoanExternalId(loanId);
+        final PostWorkingCapitalLoanTransactionsRequest repaymentRequest = buildRepaymentRequest(transactionDate, transactionAmount, null);
+        final PostWorkingCapitalLoanTransactionsResponse response = executeRepaymentByExternalId(userClient(), loanExternalId,
+                repaymentRequest);
+        validateRepaymentResponse(response, transactionAmount, transactionDate, loanExternalId);
+    }
+
     @Then("Customer makes repayment on {string} with {double} transaction amount on Working Capital loan with the following payment details:")
     public void makeWorkingCapitalLoanRepaymentWithPaymentDetails(final String transactionDate, final double transactionAmount,
             final DataTable table) {
@@ -3476,10 +3497,15 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
     private PostWorkingCapitalLoanTransactionsResponse executeRepaymentLikeById(final Long loanId, final String transactionType,
             final PostWorkingCapitalLoanTransactionsRequest repaymentRequest) {
+        return executeRepaymentLikeById(fineractClient, loanId, transactionType, repaymentRequest);
+    }
+
+    private PostWorkingCapitalLoanTransactionsResponse executeRepaymentLikeById(final FineractFeignClient client, final Long loanId,
+            final String transactionType, final PostWorkingCapitalLoanTransactionsRequest repaymentRequest) {
         log.debug("Making {} for loan ID: {}, transactionDate: {}, transactionAmount: {}", transactionType, loanId,
                 repaymentRequest.getTransactionDate(), repaymentRequest.getTransactionAmount());
 
-        final PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+        final PostWorkingCapitalLoanTransactionsResponse response = ok(() -> client.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionById(loanId, transactionType, repaymentRequest));
         rememberLastWorkingCapitalTransaction(transactionType, repaymentRequest.getTransactionDate(),
                 repaymentRequest.getTransactionAmount());
@@ -3488,12 +3514,19 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
     private PostWorkingCapitalLoanTransactionsResponse executeRepaymentByExternalId(final String loanExternalId,
             final PostWorkingCapitalLoanTransactionsRequest repaymentRequest) {
+        return executeRepaymentByExternalId(fineractClient, loanExternalId, repaymentRequest);
+    }
+
+    private PostWorkingCapitalLoanTransactionsResponse executeRepaymentByExternalId(final FineractFeignClient client,
+            final String loanExternalId, final PostWorkingCapitalLoanTransactionsRequest repaymentRequest) {
         log.debug("Making repayment for loan externalId: {}, transactionDate: {}, transactionAmount: {}", loanExternalId,
                 repaymentRequest.getTransactionDate(), repaymentRequest.getTransactionAmount());
 
-        final PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
-                .executeWorkingCapitalLoanTransactionByExternalId(loanExternalId, "repayment", repaymentRequest));
-        rememberLastWorkingCapitalTransaction("repayment", repaymentRequest.getTransactionDate(), repaymentRequest.getTransactionAmount());
+        final String transactionType = TransactionType.REPAYMENT.getValue();
+        final PostWorkingCapitalLoanTransactionsResponse response = ok(() -> client.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionByExternalId(loanExternalId, transactionType, repaymentRequest));
+        rememberLastWorkingCapitalTransaction(transactionType, repaymentRequest.getTransactionDate(),
+                repaymentRequest.getTransactionAmount());
         return response;
     }
 
@@ -4355,5 +4388,12 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .retrieveAllCodeValuesByCodeName(CodeNames.CHARGE_OFF.getValue());
         return codeValues.stream().filter(v -> chargeOffReasonName.equals(v.getName())).map(GetCodeValuesDataResponse::getId).findFirst()
                 .orElseThrow(() -> new IllegalStateException("Charge-off reason not found: " + chargeOffReasonName));
+    }
+
+    private FineractFeignClient userClient() {
+        final String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
+        final String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
+        Assertions.assertNotNull(username, "User must be created");
+        return fineractClientConfiguration.fineractFeignClientForUser(username, password);
     }
 }
