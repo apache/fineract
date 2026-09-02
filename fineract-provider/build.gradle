@@ -220,7 +220,8 @@ tasks.register('copyDatabaseDriverPlugins', Copy) {
     into rootProject.layout.buildDirectory.dir('fineract/plugins')
 }
 
-URLClassLoader loader = GroovyObject.class.classLoader
+// Gradle 9 loads groovy-sql separately, so add JDBC drivers to the classloader that loads Sql itself.
+URLClassLoader loader = Sql.class.classLoader
 configurations.driver.each {File file ->
     loader.addURL(file.toURL())
 }

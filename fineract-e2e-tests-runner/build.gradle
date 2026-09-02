@@ -19,7 +19,7 @@
 
 plugins {
     id 'se.thinkcode.cucumber-runner' version '0.0.14'
-    id 'io.qameta.allure' version '3.2.0'
+    id 'io.qameta.allure' version '4.1.0'
 }
 
 apply plugin: 'java'
@@ -29,10 +29,13 @@ repositories {
     mavenCentral()
 }
 
+def e2eTestsCoreTestOutput = project(':fineract-e2e-tests-core')
+        .extensions.getByType(SourceSetContainer).named('test').get().output
+
 dependencies {
     testImplementation(project(':fineract-avro-schemas'))
     testImplementation(project(':fineract-client-feign'))
-    testImplementation(project(':fineract-e2e-tests-core').sourceSets.test.output)
+    testImplementation(e2eTestsCoreTestOutput)
 
     testImplementation 'org.springframework:spring-context'
     implementation 'org.springframework:spring-test'
@@ -54,7 +57,7 @@ dependencies {
     testImplementation 'io.cucumber:cucumber-spring'
     testImplementation 'io.cucumber:cucumber-junit-platform-engine'
 
-    testImplementation 'io.qameta.allure:allure-cucumber7-jvm:2.34.0'
+    testImplementation 'io.qameta.allure:allure-cucumber7-jvm'
 
     testImplementation 'org.assertj:assertj-core'
 
@@ -76,14 +79,24 @@ dependencies {
     testImplementation 'org.mariadb.jdbc:mariadb-java-client'
 }
 
+allure {
+    // Pins the Allure 2 commandline for allureReport/allureServe. This must stay set: with no
+    // version the plugin defaults to Allure 3, which pulls a Node.js toolchain instead.
+    // 2.42.1 is the plugin's own Allure 2 default. The io.qameta.allure:* adapters are a separate
+    // release stream (no shared version number exists) and are left unpinned so the plugin keeps
+    // the whole adapter family on one version.
+    version = '2.42.1'
+}
+
 tasks.named('test') {
     useJUnitPlatform()
     systemProperty("cucumber.junit-platform.naming-strategy", "long")
 }
 
-tasks.named('cucumber').get().finalizedBy 'allureReport'
-
-tasks.named('cucumber').get().dependsOn 'spotlessCheck'
+tasks.named('cucumber') {
+    dependsOn 'spotlessCheck'
+    finalizedBy 'allureReport'
+}
 
 cucumber {
     // Use -Pcucumber.features=... if passed, otherwise default
@@ -103,12 +116,4 @@ cucumber {
     }
 
     plugin = ['pretty', 'io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm']
-}
-
-allure {
-    version = '2.17.3'
-}
-
-test {
-    useJUnitPlatform()
 }
