@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -95,14 +96,9 @@ public class WorkingCapitalLoanChargeAccrualService {
     }
 
     /**
-     * Posts, on early closure, any pending charge accrual that has not been recognized yet. Once the loan is closed it
-     * is no longer picked up by the end-of-day job, so the accrual is accelerated to the closing date to make sure the
-     * income is recognized. This runs regardless of the {@code charge-accrual-date} mode: the idempotency guard skips
-     * charges already accrued (the common case in submitted-date mode, where charges are accrued when added), while
-     * charges that slipped through every accrual step are caught here. That gap is real when the mode changes between
-     * the charge being added and the loan closing: a charge added under due-date with a future due date is never
-     * accrued on add, never reached by the due-date COB step, and would be missed at closure if this were gated on the
-     * mode.
+     * A closed loan is no longer picked up by the end-of-day job, so any accrual it still owes is accelerated to the
+     * closing date. Not gated on the {@code charge-accrual-date} mode: under due-date a charge the loan closed before
+     * reaching was accrued by nothing, and a charge that already reached its target is left alone anyway.
      */
     public void processClosureAccruals(final WorkingCapitalLoan loan, final LocalDate closingDate) {
         if (isAccrualPostingDisabled(loan)) {
@@ -118,14 +114,20 @@ public class WorkingCapitalLoanChargeAccrualService {
 
     private void createChargeAccrualIfMissing(final WorkingCapitalLoan loan, final WorkingCapitalLoanCharge charge,
             final LocalDate accrualDate) {
-        // The accrual recognizes the full charge income regardless of whether the charge was already paid or adjusted;
-        // gating on the outstanding amount would skip fully-settled charges and leave income unrecognized (and the
-        // receivable/income pair un-netted). Waived charges are excluded upstream via the active-charge filter.
-        if (accrualDate == null || isAlreadyAccrued(charge) || !MathUtil.isGreaterThanZero(charge.getAmount())) {
+        // Not gated on the outstanding amount: that would skip fully-settled charges and leave their income
+        // unrecognized, with the receivable/income pair un-netted. Only the waived part is left out of the target:
+        // nothing further is recognized on a debt the borrower no longer owes. Income recognized before the waiver
+        // is not unwound here.
+        //
+        // Chasing a target rather than gating on "already accrued": undoing a waiver raises the target again, so the
+        // next run tops the recognized income back up instead of leaving it unrecognized forever.
+        final BigDecimal target = MathUtil.subtractToZero(charge.getAmount(), charge.getAmountWaived());
+        final BigDecimal toAccrue = MathUtil.subtractToZero(target, getAccruedAmount(charge));
+        if (accrualDate == null || !MathUtil.isGreaterThanZero(toAccrue)) {
             return;
         }
-        final WorkingCapitalLoanTransaction accrualTransaction = WorkingCapitalLoanTransaction.accrual(loan, ExternalId.empty(),
-                charge.getAmount(), accrualDate);
+        final WorkingCapitalLoanTransaction accrualTransaction = WorkingCapitalLoanTransaction.accrual(loan, ExternalId.empty(), toAccrue,
+                accrualDate);
         final WorkingCapitalLoanTransactionRelation relation = WorkingCapitalLoanTransactionRelation.linkToCharge(accrualTransaction,
                 charge, LoanTransactionRelationTypeEnum.RELATED);
         accrualTransaction.getLoanTransactionRelations().add(relation);
@@ -133,7 +135,7 @@ public class WorkingCapitalLoanChargeAccrualService {
         transactionRepository.saveAndFlush(accrualTransaction);
 
         final WorkingCapitalLoanTransactionAllocation allocation = WorkingCapitalLoanTransactionAllocation
-                .forChargeAccrual(accrualTransaction, charge.getAmount(), charge.isPenaltyCharge());
+                .forChargeAccrual(accrualTransaction, toAccrue, charge.isPenaltyCharge());
         allocationRepository.saveAndFlush(allocation);
         accountingProcessor.postJournalEntries(loan, accrualTransaction, allocation,
                 transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, accrualTransaction));
@@ -142,10 +144,8 @@ public class WorkingCapitalLoanChargeAccrualService {
                 .notifyPostBusinessEvent(new WorkingCapitalLoanAccrualTransactionBusinessEvent(accrualTransaction, loan.getId()));
     }
 
-    private boolean isAlreadyAccrued(final WorkingCapitalLoanCharge charge) {
-        return !relationRepository
-                .findAllByToChargeAndFromTransactionReversedAndFromTransactionTransactionType(charge, false, LoanTransactionType.ACCRUAL)
-                .isEmpty();
+    public BigDecimal getAccruedAmount(final WorkingCapitalLoanCharge charge) {
+        return MathUtil.nullToZero(relationRepository.fetchTransactionAmountForCharge(charge, LoanTransactionType.ACCRUAL));
     }
 
     private String retrieveChargeAccrualDateConfig() {

@@ -143,7 +143,7 @@ public class ExternalEventConfigurationValidationServiceTest {
                 "WorkingCapitalLoanDelinquencyPauseBusinessEvent", "WorkingCapitalLoanDelinquencyResumeBusinessEvent",
                 "WorkingCapitalLoanDelinquencyRescheduleBusinessEvent", "WorkingCapitalLoanDelinquencyResetBusinessEvent",
                 "WorkingCapitalLoanDelinquencyUndoResetBusinessEvent", "WorkingCapitalLoanAccrualTransactionBusinessEvent",
-                "WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent");
+                "WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent", "WorkingCapitalLoanChargeWaiverTransactionBusinessEvent");
 
         List<FineractPlatformTenant> tenants = List
                 .of(new FineractPlatformTenant(1L, "default", "Default Tenant", "Europe/Budapest", null));

@@ -130,6 +130,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             case LoanTransactionType.ACCRUAL -> chargeAccrualPostings(feesPortion, penaltiesPortion);
             case LoanTransactionType.CHARGE_OFF -> chargeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion);
             case LoanTransactionType.WRITEOFF -> writeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion, isChargedOff);
+            case LoanTransactionType.WAIVE_CHARGES -> chargeWaiverPostings(feesPortion, penaltiesPortion, isChargedOff);
             default -> throw new NotImplementedException(
                     "Post Journal Entries is not implemented yet for " + txn.getTypeOf().getCode() + " for Working Capital Loan");
         };
@@ -229,6 +230,24 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                 LedgerPosting.credit(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion),
                 LedgerPosting.credit(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion),
                 LedgerPosting.credit(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion));
+    }
+
+    /**
+     * Only the recognized part of the waiver reaches the allocation, so a charge whose income was never accrued books
+     * nothing - crediting a receivable that does not exist would drive it negative. A waiver addresses exactly one
+     * charge, so one credit leg is always zero, and it carries no write-off reason to map the debit onto. On a
+     * charged-off loan the receivables are already off the books, so the credits go to the charged-off income accounts,
+     * as in {@link #writeOffPostings}.
+     */
+    private List<LedgerPosting> chargeWaiverPostings(final BigDecimal feesPortion, final BigDecimal penaltiesPortion,
+            final boolean isChargedOff) {
+        final CashAccountsForLoan feesAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_FEES
+                : CashAccountsForLoan.FEES_RECEIVABLE;
+        final CashAccountsForLoan penaltiesAccount = isChargedOff ? CashAccountsForLoan.INCOME_FROM_CHARGE_OFF_PENALTY
+                : CashAccountsForLoan.PENALTIES_RECEIVABLE;
+
+        return List.of(LedgerPosting.debit(CashAccountsForLoan.LOSSES_WRITTEN_OFF, MathUtil.add(feesPortion, penaltiesPortion)),
+                LedgerPosting.credit(feesAccount, feesPortion), LedgerPosting.credit(penaltiesAccount, penaltiesPortion));
     }
 
     /**

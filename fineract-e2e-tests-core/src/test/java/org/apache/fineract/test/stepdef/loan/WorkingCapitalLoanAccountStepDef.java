@@ -1791,6 +1791,11 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         eventCheckHelper.workingCapitalLoanChargeAdjustmentTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
     }
 
+    @Then("a Working Capital Loan Charge Waiver transaction business event is raised with {string} EUR amount")
+    public void aWorkingCapitalLoanChargeWaiverTransactionBusinessEventIsRaised(final String amount) {
+        eventCheckHelper.workingCapitalLoanChargeWaiverTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
+    }
+
     @Then("a Working Capital Loan Charge Off transaction business event is raised with {string} EUR amount")
     public void aWorkingCapitalLoanChargeOffTransactionBusinessEventIsRaised(final String amount) {
         eventCheckHelper.workingCapitalLoanChargeOffTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));

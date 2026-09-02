@@ -155,6 +155,7 @@ import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.W
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanAdjustTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanChargeOffTransactionBusinessEvent;
+import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanChargeWaiverTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanDisbursalTransactionBusinessEvent;
 import org.apache.fineract.test.messaging.event.workingcapitalloan.transaction.WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent;
@@ -1257,6 +1258,14 @@ public class EventCheckHelper {
         final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "chargeAdjustment",
                 false, "Charge adjustment transaction not found");
         workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent.class, loanId, transaction,
+                expectedAmount, false);
+    }
+
+    public void workingCapitalLoanChargeWaiverTransactionEventCheck(final Long loanId, final BigDecimal expectedAmount) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse transaction = findLastWorkingCapitalLoanTransaction(loanId, "waiveCharges", false,
+                "Charge waiver transaction not found");
+        workingCapitalLoanTransactionEventCheck(WorkingCapitalLoanChargeWaiverTransactionBusinessEvent.class, loanId, transaction,
                 expectedAmount, false);
     }
 

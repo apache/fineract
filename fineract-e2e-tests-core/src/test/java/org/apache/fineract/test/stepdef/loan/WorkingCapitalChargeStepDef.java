@@ -315,6 +315,13 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
                 case "Due Date" -> actualValues.add(charge.getDueDate() == null ? null : FORMATTER.format(charge.getDueDate()));
                 case "Amount" -> actualValues
                         .add(charge.getAmount() == null ? null : new Utils.DoubleFormatter(charge.getAmount().doubleValue()).format());
+                case "Amount Paid" -> actualValues.add(
+                        charge.getAmountPaid() == null ? null : new Utils.DoubleFormatter(charge.getAmountPaid().doubleValue()).format());
+                case "Amount Waived" -> actualValues.add(charge.getAmountWaived() == null ? null
+                        : new Utils.DoubleFormatter(charge.getAmountWaived().doubleValue()).format());
+                case "Amount Outstanding" -> actualValues.add(charge.getAmountOutstanding() == null ? null
+                        : new Utils.DoubleFormatter(charge.getAmountOutstanding().doubleValue()).format());
+                case "Paid" -> actualValues.add(charge.getPaid() == null ? null : String.valueOf(charge.getPaid()));
                 case "Currency" -> actualValues.add(charge.getCurrency() == null ? null : charge.getCurrency().getCode());
                 case "isPenalty" -> actualValues.add(charge.getPenalty() == null ? null : String.valueOf(charge.getPenalty()));
                 case "Charge Time Type" ->
@@ -471,6 +478,66 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         log.info("Verified WC charge adjustment failed with status {} and message: {}", exception.getStatus(), expectedErrorMessage);
     }
 
+    @When("Admin waives the last added charge on working capital loan")
+    public void waiveLastAddedWcCharge() {
+        final Long loanId = getLoanId();
+        final Long loanChargeId = getLastAddedLoanChargeId();
+        final PostWorkingCapitalLoansLoanIdChargesChargeIdRequest request = new PostWorkingCapitalLoansLoanIdChargesChargeIdRequest()
+                .locale("en");
+        final PostWorkingCapitalLoansLoanIdChargesChargeIdResponse response = ok(
+                () -> fineractClient.workingCapitalLoanCharges().adjustLoanCharge(loanId, loanChargeId, request, "waive"));
+        Assertions.assertNotNull(response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_CHARGE_WAIVER_RESPONSE, response);
+        log.debug("WC charge waiver response: {}", response);
+    }
+
+    @Then("Waiving the last added charge on working capital loan results an error with the following data:")
+    public void waiveLastAddedWcChargeFails(final DataTable table) {
+        final Long loanId = getLoanId();
+        final Long loanChargeId = getLastAddedLoanChargeId();
+        final PostWorkingCapitalLoansLoanIdChargesChargeIdRequest request = new PostWorkingCapitalLoansLoanIdChargesChargeIdRequest()
+                .locale("en");
+        final Map<String, String> expectedData = table.asMaps().get(0);
+        final int expectedHttpCode = Integer.parseInt(expectedData.get("httpCode"));
+        final String expectedErrorMessage = expectedData.get("errorMessage").trim();
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoanCharges().adjustLoanCharge(loanId, loanChargeId, request, "waive"));
+        assertHttpStatus(exception, expectedHttpCode);
+        assertErrorMessage(exception, expectedErrorMessage);
+        log.info("Verified WC charge waiver failed with status {} and message: {}", exception.getStatus(), expectedErrorMessage);
+    }
+
+    /**
+     * A separate step because every other waive step sends a body without an amount; this one sends one, to prove a
+     * partial waiver cannot be asked for.
+     */
+    @Then("Waiving the last added charge on working capital loan with an amount results an error with the following data:")
+    public void waiveLastAddedWcChargeWithAmountFails(final DataTable table) {
+        final Long loanId = getLoanId();
+        final Long loanChargeId = getLastAddedLoanChargeId();
+        final PostWorkingCapitalLoansLoanIdChargesChargeIdRequest request = new PostWorkingCapitalLoansLoanIdChargesChargeIdRequest()
+                .amount(BigDecimal.ONE).locale("en");
+        final Map<String, String> expectedData = table.asMaps().get(0);
+        final int expectedHttpCode = Integer.parseInt(expectedData.get("httpCode"));
+        final String expectedErrorMessage = expectedData.get("errorMessage").trim();
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoanCharges().adjustLoanCharge(loanId, loanChargeId, request, "waive"));
+        assertHttpStatus(exception, expectedHttpCode);
+        assertErrorMessage(exception, expectedErrorMessage);
+        log.info("Verified WC charge waiver with an amount failed with status {} and message: {}", exception.getStatus(),
+                expectedErrorMessage);
+    }
+
+    @When("Admin reverts the last charge waiver on working capital loan")
+    public void revertLastWcChargeWaiver() {
+        final Long loanId = getLoanId();
+        final GetWorkingCapitalLoanTransactionIdResponse waiverTxn = getLastChargeWaiverTransaction(loanId, false);
+        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest();
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId,
+                waiverTxn.getId(), "undo", request));
+        log.debug("Reverted WC charge waiver transaction id={} on loan {}", waiverTxn.getId(), loanId);
+    }
+
     @When("Admin reverts the last charge adjustment on working capital loan")
     public void revertLastWcChargeAdjustment() {
         final Long loanId = getLoanId();
@@ -542,6 +609,17 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         return charges.stream().filter(c -> isPenalty == Boolean.TRUE.equals(c.getPenalty()))
                 .max(Comparator.comparing(WorkingCapitalLoanChargeData::getId)).map(WorkingCapitalLoanChargeData::getId)
                 .orElseThrow(() -> new IllegalStateException("No active " + chargeType + " charge found on loan " + loanId));
+    }
+
+    private GetWorkingCapitalLoanTransactionIdResponse getLastChargeWaiverTransaction(final Long loanId, final Boolean excludeReversed) {
+        final GetWorkingCapitalLoanTransactionsResponse body = ok(
+                () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanTransactionsById(loanId));
+        Assertions.assertNotNull(body.getContent(), "No WC loan transactions found");
+        return body.getContent().stream()
+                .filter(t -> t.getType() != null && "loanTransactionType.waiveCharges".equals(t.getType().getCode()))
+                .filter(t -> excludeReversed == null || !Boolean.TRUE.equals(t.getReversed()))
+                .max(Comparator.comparing(GetWorkingCapitalLoanTransactionIdResponse::getId))
+                .orElseThrow(() -> new IllegalStateException("No charge waiver transaction found on loan " + loanId));
     }
 
     private GetWorkingCapitalLoanTransactionIdResponse getLastChargeAdjustmentTransaction(final Long loanId,

@@ -304,6 +304,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
             @Schema(example = "0")
             public BigDecimal amountWrittenOff;
             @Schema(example = "0")
+            public BigDecimal amountWaived;
+            @Schema(example = "0")
             public BigDecimal amountOutstanding;
             @Schema(example = "false")
             public boolean penalty;

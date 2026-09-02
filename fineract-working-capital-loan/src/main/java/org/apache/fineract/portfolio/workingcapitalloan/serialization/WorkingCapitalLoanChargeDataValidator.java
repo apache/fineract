@@ -75,6 +75,23 @@ public class WorkingCapitalLoanChargeDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
+    /**
+     * An amount is rejected as an unsupported parameter rather than silently ignored - that is what makes "no partial
+     * waiver option" enforceable.
+     */
+    public void validateChargeWaiverRequest(final String json) {
+        if (StringUtils.isBlank(json)) {
+            throw new InvalidJsonException();
+        }
+
+        final Set<String> allowedParameters = new HashSet<>(
+                Arrays.asList(WorkingCapitalLoanChargeConstants.externalIdParamName, WorkingCapitalLoanChargeConstants.localeParamName,
+                        WorkingCapitalLoanChargeConstants.dateFormatParamName, WorkingCapitalLoanChargeConstants.noteParamName));
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        fromJsonHelper.checkForUnsupportedParameters(typeOfMap, json, allowedParameters);
+    }
+
     public void validateCreateLoanCharge(final String json) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();

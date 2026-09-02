@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet author="fineract" id="wcl-0076-charge-waived">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_charge"/>
+            <not>
+                <columnExists tableName="m_wc_loan_charge" columnName="amount_waived"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_charge">
+            <column name="amount_waived" type="DECIMAL(19,6)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0076-balance-waived">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_balance"/>
+            <not>
+                <columnExists tableName="m_wc_loan_balance" columnName="fee_waived"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_balance">
+            <column name="fee_waived" type="DECIMAL(19,6)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="penalty_waived" type="DECIMAL(19,6)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0076-waiver-event">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*)
+                                         FROM m_external_event_configuration
+                                         WHERE type = 'WorkingCapitalLoanChargeWaiverTransactionBusinessEvent'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanChargeWaiverTransactionBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <!-- Without these rows no role other than a super user (ALL_FUNCTIONS) can be granted the permission. -->
+    <changeSet author="fineract" id="wcl-0076-waive-permission">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_permission
+                                         WHERE code = 'WAIVE_WORKINGCAPITALLOANCHARGE'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="transaction_loan"/>
+            <column name="code" value="WAIVE_WORKINGCAPITALLOANCHARGE"/>
+            <column name="entity_name" value="WORKINGCAPITALLOANCHARGE"/>
+            <column name="action_name" value="WAIVE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0076-waive-permission-checker">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_permission
+                                         WHERE code = 'WAIVE_WORKINGCAPITALLOANCHARGE_CHECKER'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="transaction_loan"/>
+            <column name="code" value="WAIVE_WORKINGCAPITALLOANCHARGE_CHECKER"/>
+            <column name="entity_name" value="WORKINGCAPITALLOANCHARGE"/>
+            <column name="action_name" value="WAIVE_CHECKER"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

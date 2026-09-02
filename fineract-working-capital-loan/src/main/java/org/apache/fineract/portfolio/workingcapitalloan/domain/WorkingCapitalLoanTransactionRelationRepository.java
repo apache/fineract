@@ -19,6 +19,7 @@
 
 package org.apache.fineract.portfolio.workingcapitalloan.domain;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -59,5 +60,19 @@ public interface WorkingCapitalLoanTransactionRelationRepository
             GROUP BY r.toCharge.id
             """)
     List<ChargeIdAndAmountHolder> fetchTransactionAmountPerCharge(@Param("wcLoanId") Long wcLoanId,
+            @Param("transactionType") LoanTransactionType transactionType);
+
+    /**
+     * Single-charge counterpart of {@link #fetchTransactionAmountPerCharge}. Aggregated in the query rather than in
+     * Java because a charge can carry several rows of one type - an accrual is topped up in steps as the target moves.
+     */
+    @Query("""
+            SELECT COALESCE(SUM(r.fromTransaction.transactionAmount), 0)
+            FROM WorkingCapitalLoanTransactionRelation r
+            WHERE r.toCharge = :charge
+            AND r.fromTransaction.reversed = FALSE
+            AND r.fromTransaction.transactionType = :transactionType
+            """)
+    BigDecimal fetchTransactionAmountForCharge(@Param("charge") WorkingCapitalLoanCharge charge,
             @Param("transactionType") LoanTransactionType transactionType);
 }
