@@ -792,6 +792,15 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         @Schema(description = "Delinquent principal amount", example = "1000.00")
         public BigDecimal delinquentPrincipal;
 
+        @Schema(description = "Date the loan was last paid by any repayment like transaction (repayment, goodwill credit, payout refund or charge adjustment)", example = "[2024, 1, 15]")
+        public LocalDate lastPaymentDate;
+        @Schema(description = "Amount of the last payment made on the loan", example = "123.45")
+        public BigDecimal lastPaymentAmount;
+        @Schema(description = "Date the loan was last repaid by a repayment transaction", example = "[2024, 1, 15]")
+        public LocalDate lastRepaymentDate;
+        @Schema(description = "Amount of the last repayment made on the loan", example = "123.45")
+        public BigDecimal lastRepaymentAmount;
+
         @Schema(description = "Delinquency amount for a specific age range")
         public static final class WorkingCapitalCollectionRangeScheduleDelinquency {
 
