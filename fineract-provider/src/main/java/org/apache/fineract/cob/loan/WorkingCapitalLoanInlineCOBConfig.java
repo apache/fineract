@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanModelProcessingService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
@@ -68,6 +69,7 @@ public class WorkingCapitalLoanInlineCOBConfig {
     @Qualifier("workingCapitalLoanLockingService")
     private final LockingService loanLockingService;
     private final WorkingCapitalLoanRepository loanRepository;
+    private final WorkingCapitalLoanModelProcessingService workingCapitalLoanModelProcessingService;
 
     @Bean
     public InlineLoanCOBBuildExecutionContextTasklet<WorkingCapitalLoan, WorkingCapitalLoanCOBBusinessStep> inlineWorkingCapitalLoanCOBBuildExecutionContextTasklet() {
@@ -116,7 +118,7 @@ public class WorkingCapitalLoanInlineCOBConfig {
     @JobScope
     @Bean
     public WorkingCapitalLoanInlineCOBWorkerItemProcessor inlineWorkingCapitalLoanCobWorkerItemProcessor() {
-        return new WorkingCapitalLoanInlineCOBWorkerItemProcessor(cobBusinessStepService);
+        return new WorkingCapitalLoanInlineCOBWorkerItemProcessor(cobBusinessStepService, workingCapitalLoanModelProcessingService);
     }
 
     @Bean

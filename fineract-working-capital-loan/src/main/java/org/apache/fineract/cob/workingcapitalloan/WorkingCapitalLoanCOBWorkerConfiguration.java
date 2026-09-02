@@ -35,6 +35,7 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanModelProcessingService;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.SimpleStepBuilder;
@@ -75,13 +76,14 @@ public class WorkingCapitalLoanCOBWorkerConfiguration {
     private final ResetContextTasklet resetContextTasklet;
 
     @Bean(WORKING_CAPITAL_LOAN_COB_WORKER_STEP)
-    public Step workingCapitalLoanCOBWorkerStep(final COBBusinessStepService cobBusinessStepService) {
+    public Step workingCapitalLoanCOBWorkerStep(final COBBusinessStepService cobBusinessStepService,
+            final WorkingCapitalLoanModelProcessingService modelProcessingService) {
         final SimpleStepBuilder<WorkingCapitalLoan, WorkingCapitalLoan> stepBuilder = stepBuilderFactory
                 .get(WORKING_CAPITAL_LOAN_COB_WORKER_STEP).inputChannel(inboundRequests)
                 .<WorkingCapitalLoan, WorkingCapitalLoan>chunk(propertyService.getChunkSize(JobName.LOAN_COB.name()), transactionManager) //
                 .reader(new WorkingCapitalLoanCOBWorkerItemReader(workingCapitalLoanRepository,
                         new BeforeStepLockingItemReaderHelper(retrieveIdService, wpcLoanLockingService))) //
-                .processor(new WorkingCapitalLoanCOBWorkerItemProcessor(cobBusinessStepService)) //
+                .processor(new WorkingCapitalLoanCOBWorkerItemProcessor(cobBusinessStepService, modelProcessingService)) //
                 .writer(new WorkingCapitalLoanCOBWorkerItemWriter(wpcLoanLockingService, workingCapitalLoanRepository)) //
                 .faultTolerant() //
                 .retry(Exception.class) //

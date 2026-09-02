@@ -83,9 +83,10 @@ public class WorkingCapitalLoanDiscountFeeAmortizationDriftTest {
      * fee whenever the day it belongs to is closed.
      *
      * <p>
-     * A cent may sit on a different day than in a schedule that rounds the cumulative total instead of accumulating
-     * rounded periods - 8.92 / 8.88 here rather than 8.91 / 8.89 - but the two conventions agree on the cumulative
-     * figure by day 6 (54.41), and every property asserted below holds under either. Do not "correct" a single day here
+     * These are the figures of a schedule that rounds its cumulative total rather than accumulating separately rounded
+     * days, which is the only convention the model has: a day's reported fee is the difference between two rounded
+     * totals. So a cent can sit a day either side of where per-day rounding would have put it - 8.92 / 8.88 here rather
+     * than 8.91 / 8.89 - while the cumulative figure by day 6 (54.41) is exact. Do not "correct" a single day here
      * without checking the cumulative column along with it.
      */
     private static final String[] EXPECTED_AMORTIZATION_OVERPAY = { "9.61", "9.04", "9.00", "8.96", "8.92", "8.88" };
