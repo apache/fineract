@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -79,6 +80,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizati
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanChargeWaiverDomainService;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanEvent;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanLifecycleStateMachine;
@@ -135,6 +137,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     private final WorkingCapitalLoanTransactionProcessor transactionProcessor;
     private final WorkingCapitalLoanChargeAccrualService chargeAccrualService;
     private final WorkingCapitalLoanTransactionFinder transactionFinder;
+    private final WorkingCapitalLoanChargeWaiverDomainService chargeWaiverDomainService;
 
     @Override
     public CommandProcessingResult approveApplication(final Long loanId, final JsonCommand command) {
@@ -719,11 +722,68 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             // A recovery payment never entered the balance, so the generic undo (which rewinds an allocation and
             // replays the schedule) does not apply: it has its own reversal, allowed while the loan is written off.
             case RECOVERY_REPAYMENT -> recoveryPaymentWriteService.undoRecoveryPayment(loan, transaction, command);
+            case WAIVE_CHARGES -> undoChargeWaiver(loan, transaction, command);
             case REPAYMENT, GOODWILL_CREDIT, CHARGE_ADJUSTMENT, PAYOUT_REFUND -> undoTransaction(loan, transaction, command);
             default -> throw new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.undo.not.supported",
                     "Undo is not supported for transaction type " + transaction.getTypeOf(),
                     WorkingCapitalLoanConstants.transactionTypeParamName);
         };
+    }
+
+    /**
+     * Deliberately not routed through the generic {@code undoTransaction}: none of its branches gives the waived bucket
+     * back, and the two that rewind a balance reach {@code updateBalanceAfterUndo}, which throws on any type outside
+     * the money-movers it knows.
+     */
+    private CommandProcessingResult undoChargeWaiver(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction waiverTransaction,
+            final JsonCommand command) {
+        validator.validateUndoTransaction(command, loan, waiverTransaction);
+
+        reverseTransaction(waiverTransaction);
+
+        final WorkingCapitalLoanCharge charge = waiverTransaction.getLoanTransactionRelations().stream()
+                .map(WorkingCapitalLoanTransactionRelation::getToCharge).filter(Objects::nonNull).findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Charge waiver transaction " + waiverTransaction.getId() + " is missing its link to the waived charge"));
+        final WorkingCapitalLoanBalance balance = balanceRepository.findByWcLoan_Id(loan.getId())
+                .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.wc.loan.balance.not.found",
+                        "No balance found for Working Capital Loan " + loan.getId(), loan.getId()));
+
+        chargeWaiverDomainService.undoWaive(charge, balance, waiverTransaction.getTransactionAmount());
+        chargeRepository.saveAndFlush(charge);
+        balanceRepository.saveAndFlush(balance);
+
+        // Giving the waived amount back raises the outstanding the charge-off snapshot is built from, so the
+        // charge-off has to cover the restored charge again. Mirrors undoDiscountFeeAdjustment.
+        if (loan.isChargedOff()) {
+            transactionReprocessingService.reprocessTransactions(loan);
+        }
+
+        final LocalDate reversedOnDate = waiverTransaction.getReversedOnDate();
+        final LoanStatus oldStatus = loan.getLoanStatus();
+        stateMachine.determineAndTransition(loan, reversedOnDate);
+        transactionProcessor.recalculateOverpaidOnDate(loan, waiverTransaction);
+        loanRepository.saveAndFlush(loan);
+
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            accountingProcessor.postReversalJournalEntries(loan, waiverTransaction);
+        }
+
+        final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName);
+        createNote(noteText, loan);
+
+        adjustTransactionEventPublisher.publishReversal(loan.getId(), waiverTransaction);
+        notifyBalanceChanged(loan);
+        notifyStatusChanged(loan, oldStatus);
+
+        final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put("status", loan.getLoanStatus());
+        if (StringUtils.isNotBlank(noteText)) {
+            changes.put(WorkingCapitalLoanConstants.noteParamName, noteText);
+        }
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(waiverTransaction.getId())
+                .withEntityExternalId(waiverTransaction.getExternalId()).withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId())
+                .withLoanId(loan.getId()).with(changes).build();
     }
 
     private CommandProcessingResult undoDiscountFeeAdjustment(final WorkingCapitalLoan loan,

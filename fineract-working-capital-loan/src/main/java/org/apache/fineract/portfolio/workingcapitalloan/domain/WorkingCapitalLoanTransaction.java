@@ -245,6 +245,17 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         return transaction;
     }
 
+    /**
+     * Like a write-off, a waiver moves no money, so it carries no payment detail. The amount is the relieved
+     * outstanding regardless of how much of it was ever accrued.
+     */
+    public static WorkingCapitalLoanTransaction chargeWaiver(final WorkingCapitalLoan loan, final BigDecimal amount,
+            final LocalDate transactionDate, final ExternalId externalId) {
+        final WorkingCapitalLoanTransaction txn = new WorkingCapitalLoanTransaction();
+        txn.initialize(loan, LoanTransactionType.WAIVE_CHARGES, transactionDate, amount, null, null, externalId);
+        return txn;
+    }
+
     public static WorkingCapitalLoanTransaction writeOff(final WorkingCapitalLoan loan, final BigDecimal amount,
             final LocalDate transactionDate, final ExternalId externalId) {
         final WorkingCapitalLoanTransaction txn = new WorkingCapitalLoanTransaction();
