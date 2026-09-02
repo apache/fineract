@@ -1070,13 +1070,13 @@ Feature: WorkingCapitalAmortizationSchedule
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualBalance | actualDiscountFeeBalance |
       | 0         | 2026-01-01 | -9000.00              | 9000.00         |                            |                     |                          | 1000.00                    | 9000.00       | 1000.00                  |
       | 1         | 2026-01-02 | 13.89                 | 8988.79         | 2.68                       | 0.00                | 0.00                     | 997.32                     | 9000.00       | 1000.00                  |
-      | 2         | 2026-01-03 | 13.89                 | 8988.79         | 2.68                       | 9970.00             | 999.99                   | 997.32                     | 29.99         | 0.01                     |
-      | 3         | 2026-01-04 | 13.89                 | 16.10           | 0.01                       |                     |                          | 0.00                       |               |                          |
-      | 5         | 2026-01-06 | 2.22                  | 0.00            | 0.00                       |                     |                          | 0.00                       |               |                          |
+      | 2         | 2026-01-03 | 13.89                 | 8988.79         | 2.68                       | 9970.00             | 999.98                   | 997.32                     | 29.98         | 0.02                     |
+      | 3         | 2026-01-04 | 13.89                 | 16.10           | 0.01                       |                     |                          | 0.01                       |               |                          |
+      | 5         | 2026-01-06 | 2.22                  | 0.00            | 0.01                       |                     |                          | 0.00                       |               |                          |
     Then Admin closes the Working Capital loan with a full repayment on "03 January 2026"
 
   @TestRailId:C98252
-  Scenario: Verify near-payoff repayment after rate decrease earns the full discount fee
+  Scenario: Verify near-payoff repayment after rate decrease leaves the last cent of the discount fee to the next period
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
     And Admin creates a working capital loan with the following data:
@@ -1093,8 +1093,8 @@ Feature: WorkingCapitalAmortizationSchedule
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualBalance | actualDiscountFeeBalance |
       | 0         | 2026-01-01 | -9000.00              | 9000.00         |                            |                     |                          | 1000.00                    | 9000.00       | 1000.00                  |
       | 1         | 2026-01-02 | 13.89                 | 8988.79         | 2.68                       | 0.00                | 0.00                     | 997.32                     | 9000.00       | 1000.00                  |
-      | 2         | 2026-01-03 | 13.89                 | 8988.79         | 2.68                       | 9987.00             | 1000.00                  | 997.32                     | 13.00         | 0.00                     |
-      | 3         | 2026-01-04 | 13.00                 | 0.00            | 0.00                       |                     |                          | 0.00                       |               |                          |
+      | 2         | 2026-01-03 | 13.89                 | 8988.79         | 2.68                       | 9987.00             | 999.99                   | 997.32                     | 12.99         | 0.01                     |
+      | 3         | 2026-01-04 | 13.00                 | 0.00            | 0.01                       |                     |                          | 0.00                       |               |                          |
     Then Admin closes the Working Capital loan with a full repayment on "03 January 2026"
 
   @TestRailId:C98253
@@ -1114,8 +1114,8 @@ Feature: WorkingCapitalAmortizationSchedule
     Then The retrieved amortization schedule has payments with the following details for the listed payment numbers:
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualBalance | actualDiscountFeeBalance |
       | 0         | 2026-01-01 | -9000.00              | 9000.00         |                            |                     |                          | 1000.00                    | 9000.00       | 1000.00                  |
-      | 1         | 2026-01-02 | 47.22                 | 8961.86         | 9.08                       | 46.00               | 8.84                     | 990.92                     | 8962.84       | 991.16                  |
-      | 2         | 2026-01-03 | 47.22                 | 8924.66         | 9.04                       | 46.00               | 8.81                     | 982.12                     | 8925.65       | 982.35                  |
+      | 1         | 2026-01-02 | 47.22                 | 8961.86         | 9.08                       | 46.00               | 8.84                     | 990.92                     | 8962.84       | 991.16                   |
+      | 2         | 2026-01-03 | 47.22                 | 8924.66         | 9.04                       | 46.00               | 8.81                     | 982.12                     | 8925.65       | 982.35                   |
     Then Admin closes the Working Capital loan with a full repayment on "03 January 2026"
 
   @TestRailId:C98254
@@ -1296,7 +1296,7 @@ Feature: WorkingCapitalAmortizationSchedule
     And Customer makes repayment on "02 January 2026" with <largeRepayment> transaction amount on Working Capital loan
     And Admin retrieves the projected amortization schedule
     Then The retrieved amortization schedule has the following summary fields:
-      | npvDayCount  |
+      | npvDayCount   |
       | <npvDayCount> |
     And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
       | paymentNo | expectedPaymentAmount | expectedBalance | actualBalance | actualDiscountFeeBalance |
@@ -1336,9 +1336,9 @@ Feature: WorkingCapitalAmortizationSchedule
     And The retrieved amortization schedule has no negative monetary amounts
 
     Examples:
-      | payment | residual | status                  |
-      | 10000   | 0.00     | CLOSED_OBLIGATIONS_MET  |
-      | 9999    | 1.00     | ACTIVE                  |
+      | payment | residual | status                 |
+      | 10000   | 0.00     | CLOSED_OBLIGATIONS_MET |
+      | 9999    | 1.00     | ACTIVE                 |
 
   @TestRailId:C98262
   Scenario: Verify two payments on consecutive days earn the whole discount fee and close the balance at zero
@@ -1355,8 +1355,8 @@ Feature: WorkingCapitalAmortizationSchedule
     Then The retrieved amortization schedule has payments with the following details:
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualBalance | actualDiscountFeeBalance |
       | 0         | 2026-01-01 | -9000.00              | 9000.00         |                            |                     |                          | 1000.00                    | 9000.00       | 1000.00                  |
-      | 1         | 2026-01-02 | 47.22                 | 8961.86         | 9.08                       | 6000.00             | 832.02                   | 990.92                     | 3832.02       | 167.98                   |
-      | 2         | 2026-01-03 | 47.22                 | 3788.66         | 3.87                       | 4000.00             | 167.98                   | 164.11                     | 0.00          | 0.00                     |
+      | 1         | 2026-01-02 | 47.22                 | 8961.86         | 9.08                       | 6000.00             | 832.01                   | 990.92                     | 3832.01       | 167.99                   |
+      | 2         | 2026-01-03 | 47.22                 | 3788.66         | 3.87                       | 4000.00             | 167.99                   | 164.12                     | 0.00          | 0.00                     |
       | 3         | 2026-01-04 | 0.00                  | 0.00            | 0.00                       |                     |                          | 0.00                       |               |                          |
     And The retrieved amortization schedule actual amortization total is "1000.00"
     And The retrieved amortization schedule actual payments plus future expected payments total "10000.00"

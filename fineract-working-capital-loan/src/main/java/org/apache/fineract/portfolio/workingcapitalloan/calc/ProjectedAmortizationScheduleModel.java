@@ -1129,10 +1129,11 @@ public final class ProjectedAmortizationScheduleModel {
      * along, which is all the re-processing that case needs.
      *
      * <p>
-     * The returned amortization list is <em>not</em> settled — the caller that needs the full schedule applies
+     * The expected amortization list comes back <em>not</em> settled — the caller that needs the full schedule applies
      * {@link #settleAmortizationOntoFinalPeriods}; a bounded prefix used to read the balance at a rate-change split
-     * does not. Pass {@code null} for {@code settledPaymentsByDate} to walk the pure projection throughout, which is
-     * what the unchanging original schedule is built from.
+     * does not. The plan does come back settled, by {@link #settlePlanOntoTerm}, unless the walk stops short of the
+     * term. Pass {@code null} for {@code settledPaymentsByDate} to walk the pure projection throughout, which is what
+     * the unchanging original schedule is built from.
      */
     private BalancesAndAmortizations computeBalancesAndAmortizations(final int upToDayIndex,
             final Map<LocalDate, BigDecimal> settledPaymentsByDate) {
@@ -1201,6 +1202,9 @@ public final class ProjectedAmortizationScheduleModel {
             // should not depend on that to stay coherent.
             prevBalance = MathUtil.negativeToZero(actualBalance);
         }
+        if (settledPaymentsByDate == null) {
+            settlePlanOntoTerm(exactAmortizations, upToDayIndex);
+        }
         return new BalancesAndAmortizations(balances, expectedAmortizations, prevBalance, billedPayments, planAmortizations);
     }
 
@@ -1229,6 +1233,30 @@ public final class ProjectedAmortizationScheduleModel {
             final BigDecimal current = amortizations.get(i).getAmount();
             final BigDecimal settled = current.add(drift, mc).max(BigDecimal.ZERO);
             amortizations.set(i, money(settled));
+            drift = drift.subtract(settled.subtract(current, mc), mc);
+        }
+    }
+
+    /**
+     * The schedule runs on the rounded published rate, not the exact one solved for it, so its periods no longer add up
+     * to the discount fee. The difference goes on the last periods of the term instead of being shared across all of
+     * them: payments take their share of the fee from these same numbers, so touching a period a payment has already
+     * passed would let an on-time payment shift the schedule. Periods past the term are left out - they earn their fee
+     * separately - and a partial walk is left alone, since it only covers part of the fee. Rate segments still add up
+     * to the whole fee, because a rate change hands what is unearned to the next one.
+     */
+    private void settlePlanOntoTerm(final List<BigDecimal> planAmortizations, final int upToDayIndex) {
+        final int term = effectiveTotalTerm();
+        if (upToDayIndex < term || planAmortizations.isEmpty()) {
+            return;
+        }
+        final List<BigDecimal> termPeriods = planAmortizations.subList(0, term);
+        final BigDecimal planned = termPeriods.stream().reduce(BigDecimal.ZERO, (running, next) -> running.add(next, mc));
+        BigDecimal drift = discountFeeAmount.getAmount().subtract(planned, mc);
+        for (int i = termPeriods.size() - 1; i >= 0 && drift.signum() != 0; i--) {
+            final BigDecimal current = termPeriods.get(i);
+            final BigDecimal settled = current.add(drift, mc).max(BigDecimal.ZERO);
+            termPeriods.set(i, settled);
             drift = drift.subtract(settled.subtract(current, mc), mc);
         }
     }
