@@ -74,6 +74,10 @@ cd fineract
 ```
 
 After a minute or two, Fineract will be listening for API requests on port 8443.
+Wait for the `APACHE FINERACT IS READY` message in the log before sending requests.
+
+Stopping a `bootRun` or `devRun` process is reported by Gradle as `Build cancelled while executing task`, but that does not mean that Fineract failed.
+A graceful shutdown is also logged, as `APACHE FINERACT IS SHUTTING DOWN GRACEFULLY`.
 
 > [!TIP]
 > Java properties or environment variables can be used to override default settings. See `fineract-provider/src/main/resources/application.properties`.
