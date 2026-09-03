@@ -60,6 +60,7 @@ import org.apache.fineract.portfolio.loanaccount.data.TransactionChangeData;
 import org.apache.fineract.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargePaidBy;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanCreditAllocationRule;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanInterestRecalculationDetails;
@@ -787,4 +788,44 @@ class AdvancedPaymentScheduleTransactionProcessorTest {
         Assertions.assertEquals(originalTransaction, repayment2);
     }
 
+    @Test
+    public void handleZeroInterestChargeOffSkipsAdditionalInstallmentStraddlingChargeOffDate() {
+        // given
+        final LocalDate chargeOffDate = LocalDate.of(2024, 2, 10);
+        final LocalDate additionalFromDate = LocalDate.of(2024, 2, 1);
+        final LocalDate additionalDueDate = LocalDate.of(2024, 2, 15);
+
+        final Loan loan = mock(Loan.class);
+        final LoanProductRelatedDetail loanProductRelatedDetail = mock(LoanProductRelatedDetail.class);
+        when(loan.getLoanProductRelatedDetail()).thenReturn(loanProductRelatedDetail);
+        when(loanProductRelatedDetail.getChargeOffBehaviour()).thenReturn(LoanChargeOffBehaviour.ZERO_INTEREST);
+        when(loan.isInterestBearingAndInterestRecalculationEnabled()).thenReturn(true);
+        when(loan.isNpa()).thenReturn(true);
+        when(loan.getCurrency()).thenReturn(MONETARY_CURRENCY);
+        // Money.of() reads the statically mocked MoneyHelper, so it must not be evaluated inside a when() call
+        final Money loanPrincipal = Money.of(MONETARY_CURRENCY, BigDecimal.valueOf(1000.00));
+        when(loan.getPrincipal()).thenReturn(loanPrincipal);
+
+        final LoanRepaymentScheduleInstallment additionalInstallment = new LoanRepaymentScheduleInstallment(loan, 3, additionalFromDate,
+                additionalDueDate, BigDecimal.valueOf(50.00), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, true, false, false);
+        final List<LoanRepaymentScheduleInstallment> installments = List.of(additionalInstallment);
+
+        final LoanTransaction chargeOffTransaction = mock(LoanTransaction.class);
+        when(chargeOffTransaction.getTypeOf()).thenReturn(LoanTransactionType.CHARGE_OFF);
+        when(chargeOffTransaction.getLoan()).thenReturn(loan);
+        when(chargeOffTransaction.getTransactionDate()).thenReturn(chargeOffDate);
+        lenient().when(chargeOffTransaction.isRepaymentLikeType()).thenReturn(false);
+        lenient().when(chargeOffTransaction.isNotReversed()).thenReturn(true);
+
+        final ProgressiveLoanInterestScheduleModel model = mock(ProgressiveLoanInterestScheduleModel.class);
+
+        final MoneyHolder overpaymentHolder = new MoneyHolder(Money.zero(MONETARY_CURRENCY));
+        final ChangedTransactionDetail changedTransactionDetail = mock(ChangedTransactionDetail.class);
+        final ProgressiveTransactionCtx ctx = new ProgressiveTransactionCtx(MONETARY_CURRENCY, installments, Set.of(), overpaymentHolder,
+                changedTransactionDetail, model, loan.getActiveLoanTermVariations());
+
+        // then
+        Assertions.assertDoesNotThrow(() -> underTest.processLatestTransaction(chargeOffTransaction, ctx));
+    }
 }
