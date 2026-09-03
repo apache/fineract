@@ -172,10 +172,6 @@ public class TaxComponent extends AbstractAuditableCustom {
         return DateUtils.isAfter(target, startDate());
     }
 
-    public Set<TaxComponentHistory> getTaxComponentHistories() {
-        return this.taxComponentHistories;
-    }
-
     public Set<TaxGroupMappings> getTaxGroupMappings() {
         return this.taxGroupMappings;
     }

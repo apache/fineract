@@ -317,10 +317,6 @@ public class Charge extends AbstractPersistableCustom<Long> {
         return ChargeTimeType.fromInt(this.chargeTimeType).isAllowedLoanChargeTime();
     }
 
-    public boolean isAllowedClientChargeTime() {
-        return ChargeTimeType.fromInt(this.chargeTimeType).isAllowedClientChargeTime();
-    }
-
     public boolean isSavingsCharge() {
         return ChargeAppliesTo.fromInt(this.chargeAppliesTo).isSavingsCharge();
     }

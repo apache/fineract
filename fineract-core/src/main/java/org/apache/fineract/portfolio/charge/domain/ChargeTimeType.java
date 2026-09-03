@@ -70,11 +70,6 @@ public enum ChargeTimeType {
         return validWorkingCapitalLoan().stream().map(ChargeTimeType::getValue).toArray();
     }
 
-    public static Object[] validLoanChargeValues() {
-        return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue(),
-                ChargeTimeType.INSTALMENT_FEE.getValue() };
-    }
-
     public static Object[] validSavingsValues() {
         return new Integer[] { ChargeTimeType.SPECIFIED_DUE_DATE.getValue(), ChargeTimeType.SAVINGS_ACTIVATION.getValue(),
                 ChargeTimeType.SAVINGS_CLOSURE.getValue(), ChargeTimeType.WITHDRAWAL_FEE.getValue(), ChargeTimeType.ANNUAL_FEE.getValue(),
@@ -201,10 +196,6 @@ public enum ChargeTimeType {
 
     public boolean isAllowedLoanChargeTime() {
         return isTimeOfDisbursement() || isOnSpecifiedDueDate() || isInstalmentFee() || isOverdueInstallment() || isTrancheDisbursement();
-    }
-
-    public boolean isAllowedClientChargeTime() {
-        return isOnSpecifiedDueDate();
     }
 
     public boolean isAllowedSavingsChargeTime() {

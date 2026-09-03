@@ -36,7 +36,6 @@ import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.SimpleStepBuilder;
 import org.springframework.batch.integration.partition.RemotePartitioningWorkerStepBuilderFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -55,13 +54,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 @RequiredArgsConstructor
 public class WorkingCapitalLoanCOBWorkerConfiguration {
 
-    private final JobRepository jobRepository;
     private final RemotePartitioningWorkerStepBuilderFactory stepBuilderFactory;
     private final MessageChannel inboundRequests;
     private final PropertyService propertyService;
     private final PlatformTransactionManager transactionManager;
-    @Qualifier("jdbcTransactionManager")
-    private final PlatformTransactionManager jdbcTransactionManager;
     @Qualifier("requiresNewTransactionJdbcTemplate")
     private final TransactionTemplate requiresNewTransactionJdbcTemplate;
     @Qualifier("workingCapitalLoanLockingService")

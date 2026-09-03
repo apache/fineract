@@ -18,13 +18,10 @@
  */
 package org.apache.fineract.portfolio.collateral.starter;
 
-import org.apache.fineract.infrastructure.codes.domain.CodeValueRepository;
 import org.apache.fineract.infrastructure.codes.domain.CodeValueRepositoryWrapper;
-import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.collateral.domain.LoanCollateralRepository;
 import org.apache.fineract.portfolio.collateral.serialization.CollateralCommandFromApiJsonDeserializer;
-import org.apache.fineract.portfolio.collateral.service.CollateralAssembler;
 import org.apache.fineract.portfolio.collateral.service.CollateralReadPlatformService;
 import org.apache.fineract.portfolio.collateral.service.CollateralReadPlatformServiceImpl;
 import org.apache.fineract.portfolio.collateral.service.CollateralWritePlatformService;
@@ -37,13 +34,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 public class CollateralConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean(CollateralAssembler.class)
-    public CollateralAssembler collateralAssembler(FromJsonHelper fromApiJsonHelper, CodeValueRepositoryWrapper codeValueRepository,
-            CodeValueRepository codeValueRepositoryDirect, LoanCollateralRepository loanCollateralRepository) {
-        return new CollateralAssembler(fromApiJsonHelper, codeValueRepository, codeValueRepositoryDirect, loanCollateralRepository);
-    }
 
     @Bean
     @ConditionalOnMissingBean(CollateralReadPlatformService.class)
