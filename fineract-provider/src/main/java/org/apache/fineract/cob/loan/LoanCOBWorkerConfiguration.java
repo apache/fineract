@@ -36,7 +36,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanModelProcessingService;
 import org.apache.fineract.useradministration.domain.AppUserRepositoryWrapper;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.ChunkOrientedStepBuilder;
 import org.springframework.batch.integration.partition.RemotePartitioningWorkerStepBuilderFactory;
@@ -54,12 +53,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class LoanCOBWorkerConfiguration {
 
     @Autowired
-    private JobRepository jobRepository;
-    @Autowired
     private PlatformTransactionManager transactionManager;
-    @Autowired
-    @Qualifier("jdbcTransactionManager")
-    private PlatformTransactionManager jdbcTransactionManager;
     @Autowired
     @Qualifier("requiresNewTransactionJdbcTemplate")
     private TransactionTemplate requiresNewTransactionJdbcTemplate;
