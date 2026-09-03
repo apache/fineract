@@ -25,7 +25,6 @@ import static org.apache.fineract.infrastructure.contentstore.processor.DataUrlE
 import static org.apache.fineract.infrastructure.contentstore.processor.ImageResizeContentProcessor.IMAGE_RESIZE_PARAM_FORMAT;
 import static org.apache.fineract.infrastructure.contentstore.processor.ImageResizeContentProcessor.IMAGE_RESIZE_PARAM_MAX_HEIGHT;
 import static org.apache.fineract.infrastructure.contentstore.processor.ImageResizeContentProcessor.IMAGE_RESIZE_PARAM_MAX_WIDTH;
-import static org.apache.fineract.infrastructure.contentstore.processor.SizeContentProcessor.SIZE_RESULT_VALUE;
 
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
@@ -56,9 +55,6 @@ class ContentProcessorTest {
 
     @Autowired
     private ImageResizeContentProcessor imageResizeContentProcessor;
-
-    @Autowired
-    private SizeContentProcessor sizeContentProcessor;
 
     static final byte[] DATA_BASE64 = """
             iVBORw0KGgoAAAANSUhEUgAAANwAAADcCAYAAAAbWs+BAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJ
@@ -93,28 +89,26 @@ class ContentProcessorTest {
     @Test
     void process() {
 
-        final var ctx = sizeContentProcessor.then(base64DecoderContentProcessor).process(new ByteArrayInputStream(DATA_BASE64));
+        final var ctx = base64DecoderContentProcessor.process(new ByteArrayInputStream(DATA_BASE64));
 
         write(ctx, "process.png");
 
         String type = ctx.getResult(DATA_URL_DECODE_RESULT_CONTENT_TYPE, String.class);
-        Long size = ctx.getResult(SIZE_RESULT_VALUE, Long.class);
 
-        log.info("Result: {} of size  {}", type, size);
+        log.info("Result: {}", type);
     }
 
     @Test
     void dataUrlDecode() {
         final var ctx = dataUrlDecoderContentProcessor.then(base64DecoderContentProcessor).then(imageResizeContentProcessor)
-                .then(sizeContentProcessor).process(new ContentProcessorContext(new ByteArrayInputStream(DATA_URL),
+                .process(new ContentProcessorContext(new ByteArrayInputStream(DATA_URL),
                         Map.of(IMAGE_RESIZE_PARAM_MAX_WIDTH, 110, IMAGE_RESIZE_PARAM_MAX_HEIGHT, 110, IMAGE_RESIZE_PARAM_FORMAT, "png")));
 
         write(ctx, "data-url-decode.png");
 
         String type = ctx.getResult(DATA_URL_DECODE_RESULT_CONTENT_TYPE, String.class);
-        Long size = ctx.getResult(SIZE_RESULT_VALUE, Long.class);
 
-        log.info("Result: {} of size  {}", type, size);
+        log.info("Result: {}", type);
     }
 
     @Test
@@ -127,9 +121,8 @@ class ContentProcessorTest {
         write(ctx, "data-url-encode-png.txt");
 
         String type = ctx.getResult(DATA_URL_DECODE_RESULT_CONTENT_TYPE, String.class);
-        Long size = ctx.getResult(SIZE_RESULT_VALUE, Long.class);
 
-        log.info("Result: {} of size  {}", type, size);
+        log.info("Result: {}", type);
     }
 
     @Test
@@ -142,21 +135,19 @@ class ContentProcessorTest {
         write(ctx, "data-url-encode-jpg.txt");
 
         String type = ctx.getResult(DATA_URL_DECODE_RESULT_CONTENT_TYPE, String.class);
-        Long size = ctx.getResult(SIZE_RESULT_VALUE, Long.class);
 
-        log.info("Result: {} of size  {}", type, size);
+        log.info("Result: {}", type);
     }
 
     @Test
     void base64() {
-        final var ctx = base64DecoderContentProcessor.then(sizeContentProcessor).process(new ByteArrayInputStream(DATA_BASE64));
+        final var ctx = base64DecoderContentProcessor.process(new ByteArrayInputStream(DATA_BASE64));
 
         write(ctx, "base64.png");
 
         String type = ctx.getResult(DATA_URL_DECODE_RESULT_CONTENT_TYPE, String.class);
-        Long size = ctx.getResult(SIZE_RESULT_VALUE, Long.class);
 
-        log.info("Result: {} of size  {}", type, size);
+        log.info("Result: {}", type);
     }
 
     private void write(ContentProcessorContext ctx, String fileName) {
