@@ -94,8 +94,4 @@ public final class TellerData implements Serializable {
                 .setName(name).setDescription(description).setStartDate(startDate).setEndDate(endDate).setStatus(status)
                 .setOfficeName(officeName).setHasTransactions(hasTransactions).setHasMappedCashiers(hasMappedCashiers);
     }
-
-    public static TellerData lookup(final Long id, final String name) {
-        return new TellerData().setId(id).setName(name);
-    }
 }
