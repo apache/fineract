@@ -91,6 +91,7 @@ import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanCommandTemplateData;
 import org.apache.fineract.client.models.WorkingCapitalLoanPeriodPaymentRateChangeData;
+import org.apache.fineract.client.models.WorkingCapitalLoanTransactionTemplateResponse;
 import org.apache.fineract.test.api.FineractClientConfiguration;
 import org.apache.fineract.test.data.FundId;
 import org.apache.fineract.test.data.LoanStatus;
@@ -3338,16 +3339,14 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @Then("Admin closes the Working Capital loan with a full repayment on {string}")
     public void closeWorkingCapitalLoanWithFullRepayment(final String transactionDate) {
         final Long loanId = getCreatedLoanId();
-        final GetWorkingCapitalLoansLoanIdResponse loanDetails = ok(
-                () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
-        Assertions.assertNotNull(loanDetails.getBalance());
-        Assertions.assertNotNull(loanDetails.getBalance().getTotalOutstanding());
-        final BigDecimal totalOutstanding = loanDetails.getBalance().getTotalOutstanding();
+        WorkingCapitalLoanTransactionTemplateResponse templateResponse = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .getWorkingCapitalLoanTransactionTemplateById(loanId, "prepayLoan", DATE_FORMAT, transactionDate, "en"));
+        Assertions.assertNotNull(templateResponse);
+        final BigDecimal transactionAmount = templateResponse.getTransactionAmount();
         final PostWorkingCapitalLoanTransactionsRequest repaymentRequest = workingCapitalProductRequestFactory
-                .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate).transactionAmount(totalOutstanding);
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate).transactionAmount(transactionAmount);
         final PostWorkingCapitalLoanTransactionsResponse response = executeRepaymentLikeById(loanId, "repayment", repaymentRequest);
-        Assertions.assertNotNull(loanDetails.getBalance());
-        validateRepaymentResponse(response, totalOutstanding.doubleValue(), transactionDate, loanId);
+        validateRepaymentResponse(response, transactionAmount.doubleValue(), transactionDate, loanId);
     }
 
     @Then("Admin closes the Working Capital loan with all obligations met with a full repayment on {string}")

@@ -213,6 +213,7 @@ Feature: Working Capital Loan Repayment
       | 182       | 02 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
       | 183       | 03 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
       | 184       | 04 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C76618
   Scenario: Verify working capital loan repayment - UC2: simple repayment by loan external ID: pay less than expected
@@ -430,6 +431,7 @@ Feature: Working Capital Loan Repayment
       | 187       | 07 July 2026     | 50.00                 |                     | 70.00           |               | 0.00                       |                          | 0.00                       |
       | 188       | 08 July 2026     | 50.00                 |                     | 20.00           |               | 0.00                       |                          | 0.00                       |
       | 189       | 09 July 2026     | 20.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C76619
   Scenario: Verify working capital loan repayment - UC3: simple repayment with zero amount results an error (Negative)
@@ -454,6 +456,7 @@ Feature: Working Capital Loan Repayment
     Then Initiating a repayment on "01 January 2026" with 0.0 transaction amount on Working Capital loan results an error with the following data:
       | httpCode | errorMessage                                              |
       | 400      | The parameter `transactionAmount` must be greater than 0. |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C76620
   Scenario: Verify working capital loan repayment - UC4: simple repayment with negative amount results an error (Negative)
@@ -478,6 +481,7 @@ Feature: Working Capital Loan Repayment
     Then Initiating a repayment on "01 January 2026" with -100.0 transaction amount on Working Capital loan results an error with the following data:
       | httpCode | errorMessage                                              |
       | 400      | The parameter `transactionAmount` must be greater than 0. |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C76621
   Scenario: Verify working capital loan repayment - UC5: simple repayment with future date results an error (Negative)
@@ -502,6 +506,7 @@ Feature: Working Capital Loan Repayment
     Then Initiating a repayment on "15 January 2026" with 270.0 transaction amount on Working Capital loan results an error with the following data:
       | httpCode | errorMessage                                            |
       | 400      | Failed data validation due to: cannot.be.a.future.date. |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C76622
   Scenario: Verify working capital loan repayment - UC6: full expectedAmount repaid on disbursement day
@@ -711,6 +716,7 @@ Feature: Working Capital Loan Repayment
       | 178       | 27 June 2026     | 50.00                 |                     | 100.00          |               | 0.00                       |                          | 0.00                       |
       | 179       | 28 June 2026     | 50.00                 |                     | 50.00           |               | 0.00                       |                          | 0.00                       |
       | 180       | 29 June 2026     | 50.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
 
   @TestRailId:C85164
   Scenario: Verify working capital loan repayment - less then expectedAmount repaid on disbursement day - UC6.1
@@ -935,6 +941,7 @@ Feature: Working Capital Loan Repayment
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment    | 30.0              | 30.0             | 0.0               | 0.0                   | false    |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
 
   @TestRailId:C85165
   Scenario: Verify working capital loan repayment - more then expectedAmount repaid on disbursement day - UC6.2
@@ -1154,6 +1161,7 @@ Feature: Working Capital Loan Repayment
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment    | 280.0             | 280.0            | 0.0               | 0.0                   | false    |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
 
   @TestRailId:C85166
   Scenario: Verify working capital loan repayment - amount matches to expectedAmount repaid on disbursement day - UC6.3
@@ -1373,6 +1381,8 @@ Feature: Working Capital Loan Repayment
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment    | 270.0             | 270.0            | 0.0               | 0.0                   | false    |
+
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
 
   @TestRailId:C85167
   Scenario: Verify working capital loan repayment - amount that closes the loan is repaid on disbursement day - UC6.4
@@ -1734,6 +1744,8 @@ Feature: Working Capital Loan Repayment
       | 01 January 2026 | Repayment    | 20.0              | 20.0             | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment    | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment    | 30.0              | 30.0             | 0.0               | 0.0                   | false    |
+
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "02 January 2026"
 
   @TestRailId:C85171
   Scenario: Verify working capital loan repayment - discount after repayment on disbursement day - UC6.8
@@ -2196,6 +2208,8 @@ Feature: Working Capital Loan Repayment
       | INCOME    | 404000       | Interest Income           |       | 17.26  |
       | LIABILITY | 240005       | Deferred Interest Revenue | 17.26 |        |
 
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "03 January 2026"
+
   @TestRailId:C76623
   Scenario: Verify working capital loan repayment - UC7: full minimum payment after disbursement day
     When Admin sets the business date to "01 January 2026"
@@ -2444,6 +2458,8 @@ Feature: Working Capital Loan Repayment
       | 203       | 23 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
       | 204       | 24 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
 
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "31 January 2026"
+
   @TestRailId:C76624
   Scenario: Verify working capital loan repayment - UC8: full expectedAmount repaid on last day of 1st period
     When Admin sets the business date to "01 January 2026"
@@ -2691,6 +2707,8 @@ Feature: Working Capital Loan Repayment
       | 202       | 22 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
       | 203       | 23 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
       | 204       | 24 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "31 January 2026"
 
   @TestRailId:C76625
   Scenario: Verify working capital loan repayment - UC9: full expectedAmount repaid on first day of 2nd period
@@ -2946,6 +2964,8 @@ Feature: Working Capital Loan Repayment
       | 204       | 24 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
       | 205       | 25 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
 
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 February 2026"
+
   @TestRailId:C76626
   Scenario: Verify working capital loan repayment - UC10: full expectedAmount repaid in 1st period with multiple payments on same day
     When Admin sets the business date to "01 January 2026"
@@ -3194,6 +3214,8 @@ Feature: Working Capital Loan Repayment
       | 202       | 22 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
       | 203       | 23 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
       | 204       | 24 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "31 January 2026"
 
   @TestRailId:C76627
   Scenario: Verify working capital loan repayment - UC11: full expectedAmount repaid in 1st period with multiple payments on different days
@@ -3450,6 +3472,8 @@ Feature: Working Capital Loan Repayment
       | 203       | 23 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
       | 204       | 24 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
 
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "31 January 2026"
+
   @TestRailId:C76628
   Scenario: Verify working capital loan repayment - UC12: partial expectedAmount repaid in 1st period
     When Admin sets the business date to "01 January 2026"
@@ -3491,6 +3515,8 @@ Feature: Working Capital Loan Repayment
     And Delinquency Tag History for Working Capital loan has lines:
       | periodNumber | addedOnDate | liftedOnDate | classification | minimumAgeDays | maximumAgeDays |
       | 1            | 2026-01-31  |              | D00            | 1              | 30             |
+
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "31 January 2026"
 
   @TestRailId:C76629
   Scenario: Verify working capital loan repayment - UC13: partial expectedAmount repaid in 2nd period
@@ -3758,6 +3784,8 @@ Feature: Working Capital Loan Repayment
       | 216       | 05 August 2026   | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
       | 217       | 06 August 2026   | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
 
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 February 2026"
+
   @TestRailId:C76630
   Scenario: Verify working capital loan repayment - UC14: expectedAmount overpaid in 1st period
     When Admin sets the business date to "01 January 2026"
@@ -4005,6 +4033,8 @@ Feature: Working Capital Loan Repayment
       | 200       | 20 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
       | 201       | 21 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
       | 202       | 22 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "31 January 2026"
 
   @TestRailId:C76631
   Scenario: Verify working capital loan repayment - UC15: expectedAmount overpaid in 2nd period
@@ -4267,6 +4297,8 @@ Feature: Working Capital Loan Repayment
       | 211       | 31 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
       | 212       | 01 August 2026   | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
       | 213       | 02 August 2026   | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 February 2026"
 
   @TestRailId:C76632
   Scenario: Verify working capital loan repayment - UC16: expectedAmount overpaid in late period
@@ -4620,6 +4652,8 @@ Feature: Working Capital Loan Repayment
       | 278       | 06 October 2026   | 50.00                 |                     | 50.00           |               | 0.00                       |                          | 0.00                       |
       | 279       | 07 October 2026   | 50.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
 
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 May 2026"
+
   @TestRailId:C76633
   Scenario: Verify working capital loan repayment - UC17: simple repayment with payment details
     When Admin sets the business date to "01 January 2026"
@@ -4834,6 +4868,8 @@ Feature: Working Capital Loan Repayment
       | 182       | 02 July 2026     | 50.00                 |                     | 80.00           |               | 0.00                       |                          | 0.00                       |
       | 183       | 03 July 2026     | 50.00                 |                     | 30.00           |               | 0.00                       |                          | 0.00                       |
       | 184       | 04 July 2026     | 30.00                 |                     | 0.00            |               | 0.00                       |                          | 0.00                       |
+
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C76634
   Scenario: Verify amortization schedule after repayment transaction - UC18
@@ -5257,6 +5293,8 @@ Feature: Working Capital Loan Repayment
       | 199       | 19 July 2019     | 50.00                 |                     | 49.95           |               | 0.11                       |                          | 0.06                       |
       | 200       | 20 July 2019     | 50.00                 |                     | 0.00            |               | 0.06                       |                          | 0.00                       |
 
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2019"
+
   @TestRailId:C83023
   Scenario: Verify working capital loan repayment - UC19: actualBalance and actualDiscountFeeBalance progression across multiple on-time repayments
     When Admin sets the business date to "01 January 2019"
@@ -5281,3 +5319,5 @@ Feature: Working Capital Loan Repayment
       | 4         | 05 January 2019 | 50.00                 |                     | 8838.18         |               | 9.48                       |                          | 961.82                     |                          |
       | 5         | 06 January 2019 | 50.00                 |                     | 8797.62         |               | 9.44                       |                          | 952.38                     |                          |
       | 200       | 20 July 2019    | 50.00                 |                     | 0.00            |               | 0.06                       |                          | 0.00                       |                          |
+
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "04 January 2019"

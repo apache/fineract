@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,10 +45,13 @@ import org.apache.fineract.portfolio.client.service.ClientReadPlatformService;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentType;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
+import org.apache.fineract.portfolio.loanproduct.service.LoanEnumerations;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCollectionData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTemplateData;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionTemplateData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodFrequencyType;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
@@ -273,5 +277,16 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
     @Override
     public boolean existsByLoanId(Long loanId) {
         return this.repository.existsById(loanId);
+    }
+
+    @Override
+    public WorkingCapitalLoanTransactionTemplateData retrieveLoanPrePaymentTemplate(Long loanId, LocalDate transactionDate) {
+        WorkingCapitalLoan workingCapitalLoan = repository.getReferenceById(loanId);
+        return WorkingCapitalLoanTransactionTemplateData.builder().wcLoanId(loanId).currency(workingCapitalLoan.getCurrency().toData())
+                .transactionDate(transactionDate).transactionAmount(workingCapitalLoan.getBalance().getTotalOutstanding())
+                .type(LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT))
+                .principalPortion(workingCapitalLoan.getBalance().getPrincipalOutstanding())
+                .feeChargesPortion(workingCapitalLoan.getBalance().getFeeOutstanding())
+                .penaltyChargesPortion(workingCapitalLoan.getBalance().getPenaltyOutstanding()).build();
     }
 }

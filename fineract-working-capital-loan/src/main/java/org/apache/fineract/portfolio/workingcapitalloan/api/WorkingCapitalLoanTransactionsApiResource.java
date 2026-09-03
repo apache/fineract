@@ -41,20 +41,26 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.api.DateParam;
 import org.apache.fineract.infrastructure.core.api.jersey.Pagination;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.DateFormat;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
+import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCommandTemplateData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionData;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionTemplateData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanTransactionNotFoundException;
@@ -285,6 +291,55 @@ public class WorkingCapitalLoanTransactionsApiResource {
             @QueryParam("command") @Parameter(description = "command", required = true) final String command,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         return executeWorkingCapitalLoanTransactionCommand(loanId, null, null, transactionExternalId, command, apiRequestBodyAsJson);
+    }
+
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "getWorkingCapitalLoanTransactionTemplateById", summary = "Get Working Capital Loan transaction template by loan id", description = "Supported command query parameter: prepayLoan.")
+    @Path("{loanId}/transactions/template")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.WorkingCapitalLoanTransactionTemplateResponse.class))) })
+    public WorkingCapitalLoanTransactionTemplateData getWorkingCapitalLoanTransactionTemplateById(
+            @PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam,
+            @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String rawDateFormat,
+            @QueryParam("transactionDate") @Parameter(description = "transactionDate") final DateParam transactionDateParam,
+            @QueryParam("locale") @Parameter(description = "locale") final String locale) {
+
+        return getWorkingCapitalLoanTransactionTemplate(commandParam, loanId, null, locale, rawDateFormat, transactionDateParam);
+    }
+
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "getWorkingCapitalLoanTransactionTemplateByExternalId", summary = "Get Working Capital Loan transaction template by loan external id", description = "Supported command query parameter: prepayLoan.")
+    @Path("external-id/{loanExternalId}/transactions/template")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.WorkingCapitalLoanTransactionTemplateResponse.class))) })
+    public WorkingCapitalLoanTransactionTemplateData getWorkingCapitalLoanTransactionTemplateByExternalId(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId", required = true) final String loanExternalId,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam,
+            @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String rawDateFormat,
+            @QueryParam("transactionDate") @Parameter(description = "transactionDate") final DateParam transactionDateParam,
+            @QueryParam("locale") @Parameter(description = "locale") final String locale) {
+        return getWorkingCapitalLoanTransactionTemplate(commandParam, null, loanExternalId, locale, rawDateFormat, transactionDateParam);
+    }
+
+    private WorkingCapitalLoanTransactionTemplateData getWorkingCapitalLoanTransactionTemplate(String commandParam, Long loanId,
+            String externalId, String locale, String rawDateFormat, DateParam transactionDateParam) {
+        final Long resolvedLoanId = resolveLoanId(loanId, externalId);
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+        final DateFormat dateFormat = StringUtils.isBlank(rawDateFormat) ? null : new DateFormat(rawDateFormat);
+        if (CommandParameterUtil.is(commandParam, "prepayLoan")) {
+            LocalDate transactionDate;
+            if (transactionDateParam == null) {
+                transactionDate = DateUtils.getBusinessLocalDate();
+            } else {
+                transactionDate = transactionDateParam.getDate("transactionDate", dateFormat, locale);
+            }
+            return this.loanReadPlatformService.retrieveLoanPrePaymentTemplate(resolvedLoanId, transactionDate);
+        } else {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
     }
 
     @POST

@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.accountdetails.data.WorkingCapitalLoanAccountSummaryData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTemplateData;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionTemplateData;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -58,4 +60,6 @@ public interface WorkingCapitalLoanApplicationReadPlatformService {
      * Checks if a Working Capital Loan exists with the given Id
      */
     boolean existsByLoanId(Long loanId);
+
+    WorkingCapitalLoanTransactionTemplateData retrieveLoanPrePaymentTemplate(Long loanId, LocalDate transactionDate);
 }
