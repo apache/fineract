@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import org.apache.fineract.organisation.monetary.data.CurrencyData;
 
 /**
  * Swagger documentation classes for Working Capital Loan Transactions API (GET list / GET one).
@@ -263,5 +264,49 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public Long resourceId;
         @Schema(example = "repayment-ext-001")
         public String resourceExternalId;
+    }
+
+    @Schema(description = "Prepayment template: the exact payoff amount that closes the loan, broken down by bucket.")
+    public static final class WorkingCapitalLoanTransactionTemplateResponse {
+
+        private WorkingCapitalLoanTransactionTemplateResponse() {}
+
+        @Schema(example = "1")
+        public Long wcLoanId;
+        @Schema(description = "Loan currency")
+        public CurrencyData currency;
+        @Schema(description = "Transaction type")
+        public LoanTransactionEnumData type;
+        @Schema(example = "[2024, 2, 1]")
+        public LocalDate transactionDate;
+        @Schema(example = "10000.00", description = "prepayLoan only: total payoff amount, principal + fee + penalty outstanding")
+        public BigDecimal transactionAmount;
+        @Schema(example = "9000.00", description = "Suggested amount to pre-fill, which the user may change")
+        public BigDecimal expectedAmount;
+        @Schema(example = "[2024, 2, 1]", description = "disburse only: expected disbursement date")
+        public LocalDate expectedDisbursementDate;
+        @Schema(example = "0.00", description = "disburse only: approved discount amount")
+        public BigDecimal discountAmount;
+        @Schema(example = "false", description = "disburse only: whether the product forbids overriding the default discount")
+        public Boolean overrideDiscountDisabled;
+
+        @Schema(example = "10000.00", description = "prepayLoan only: outstanding principal portion of the payoff amount")
+        public BigDecimal principalPortion;
+        @Schema(example = "0.00", description = "prepayLoan only: outstanding fee portion of the payoff amount")
+        public BigDecimal feeChargesPortion;
+        @Schema(example = "0.00", description = "prepayLoan only: outstanding penalty portion of the payoff amount")
+        public BigDecimal penaltyChargesPortion;
+
+        @Schema(example = "10000.00", description = "chargeOff only: auto-calculated outstanding balance, read-only")
+        public BigDecimal chargeOffAmount;
+        @Schema(example = "[2024, 2, 1]", description = "chargeOff only: defaults to the business date")
+        public LocalDate chargeOffDate;
+
+        @Schema(description = "Payment type options, where the command records a payment")
+        public List<PaymentTypeData> paymentTypeOptions;
+        @Schema(description = "Classification options for the command's classification code")
+        public List<CodeValueData> classificationOptions;
+        @Schema(description = "chargeOff only: charge-off reason options")
+        public List<CodeValueData> chargeOffReasonOptions;
     }
 }

@@ -35,6 +35,7 @@ import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.CurrencyData;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanCommandTemplateData;
+import org.apache.fineract.client.models.WorkingCapitalLoanTransactionTemplateResponse;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 import org.assertj.core.api.SoftAssertions;
@@ -55,19 +56,29 @@ public class WorkingCapitalLoanActionTemplateStepDef extends AbstractStepDef {
         log.info("Retrieved WC loan action template for loan ID: {} with templateType: {}", loanId, templateType);
     }
 
+    @When("Admin retrieves the working capital loan transaction template with command {string}")
+    public void retrieveWcLoanTransactionTemplate(final String command) {
+        final Long loanId = getCreatedLoanId();
+
+        final WorkingCapitalLoanTransactionTemplateResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .getWorkingCapitalLoanTransactionTemplateById(loanId, command, null, null, null));
+        testContext().set(TestContextKey.WC_LOAN_TRANSACTION_TEMPLATE_RESPONSE, response);
+        log.info("Retrieved WC loan transaction template for loan ID: {} with command: {}", loanId, command);
+    }
+
     @Then("The working capital loan approve template has the following data:")
     public void verifyApproveTemplateData(final DataTable table) {
-        verifyTemplateData(table);
+        verifyActionTemplateData(table);
     }
 
     @Then("The working capital loan disburse template has the following data:")
     public void verifyDisburseTemplateData(final DataTable table) {
-        verifyTemplateData(table);
+        verifyTransactionTemplateData(table);
     }
 
     @Then("The working capital loan charge-off template has the following data:")
     public void verifyChargeOffTemplateData(final DataTable table) {
-        verifyTemplateData(table);
+        verifyTransactionTemplateData(table);
     }
 
     @Then("Retrieving WC loan action template with invalid templateType {string} results in an error")
@@ -104,7 +115,7 @@ public class WorkingCapitalLoanActionTemplateStepDef extends AbstractStepDef {
         log.info("Verified WC loan action template retrieval failed for non-existent loan ID: {}", loanId);
     }
 
-    private void verifyTemplateData(final DataTable table) {
+    private void verifyActionTemplateData(final DataTable table) {
         final WorkingCapitalLoanCommandTemplateData response = testContext().get(TestContextKey.WC_LOAN_ACTION_TEMPLATE_RESPONSE);
         assertThat(response).as("Template response should not be null").isNotNull();
 
@@ -118,6 +129,24 @@ public class WorkingCapitalLoanActionTemplateStepDef extends AbstractStepDef {
                     softly.assertThat(response.getApprovalDate()).as(field).isNotNull().isEqualTo(LocalDate.parse(value));
                 case "expectedDisbursementDate" ->
                     softly.assertThat(response.getExpectedDisbursementDate()).as(field).isNotNull().isEqualTo(LocalDate.parse(value));
+                case "currency" ->
+                    softly.assertThat(response.getCurrency()).as(field).isNotNull().extracting(CurrencyData::getCode).isEqualTo(value);
+                default -> softly.fail("Unknown action template field in DataTable: " + field);
+            }
+        }));
+
+        log.info("Verified WC loan action template data");
+    }
+
+    private void verifyTransactionTemplateData(final DataTable table) {
+        final WorkingCapitalLoanTransactionTemplateResponse response = testContext()
+                .get(TestContextKey.WC_LOAN_TRANSACTION_TEMPLATE_RESPONSE);
+        assertThat(response).as("Template response should not be null").isNotNull();
+
+        final Map<String, String> expected = table.asMaps().get(0);
+
+        SoftAssertions.assertSoftly(softly -> expected.forEach((field, value) -> {
+            switch (field) {
                 case "expectedAmount" -> {
                     if ("null".equals(value)) {
                         softly.assertThat(response.getExpectedAmount()).as(field).isNull();
@@ -125,6 +154,14 @@ public class WorkingCapitalLoanActionTemplateStepDef extends AbstractStepDef {
                         softly.assertThat(response.getExpectedAmount()).as(field).isNotNull().isEqualByComparingTo(new BigDecimal(value));
                     }
                 }
+                case "expectedDisbursementDate" ->
+                    softly.assertThat(response.getExpectedDisbursementDate()).as(field).isNotNull().isEqualTo(LocalDate.parse(value));
+                case "chargeOffAmount" ->
+                    softly.assertThat(response.getChargeOffAmount()).as(field).isNotNull().isEqualByComparingTo(new BigDecimal(value));
+                case "chargeOffDate" ->
+                    softly.assertThat(response.getChargeOffDate()).as(field).isNotNull().isEqualTo(LocalDate.parse(value));
+                case "currency" ->
+                    softly.assertThat(response.getCurrency()).as(field).isNotNull().extracting(CurrencyData::getCode).isEqualTo(value);
                 case "paymentTypeOptionsPresent" -> {
                     if (Boolean.parseBoolean(value)) {
                         softly.assertThat(response.getPaymentTypeOptions()).as(field).isNotNull().isNotEmpty();
@@ -132,12 +169,6 @@ public class WorkingCapitalLoanActionTemplateStepDef extends AbstractStepDef {
                         softly.assertThat(response.getPaymentTypeOptions()).as(field).isNullOrEmpty();
                     }
                 }
-                case "chargeOffAmount" ->
-                    softly.assertThat(response.getChargeOffAmount()).as(field).isNotNull().isEqualByComparingTo(new BigDecimal(value));
-                case "chargeOffDate" ->
-                    softly.assertThat(response.getChargeOffDate()).as(field).isNotNull().isEqualTo(LocalDate.parse(value));
-                case "currency" ->
-                    softly.assertThat(response.getCurrency()).as(field).isNotNull().extracting(CurrencyData::getCode).isEqualTo(value);
                 case "chargeOffReasonOptionsPresent" -> {
                     if (Boolean.parseBoolean(value)) {
                         softly.assertThat(response.getChargeOffReasonOptions()).as(field).isNotNull().isNotEmpty();
@@ -145,11 +176,11 @@ public class WorkingCapitalLoanActionTemplateStepDef extends AbstractStepDef {
                         softly.assertThat(response.getChargeOffReasonOptions()).as(field).isNullOrEmpty();
                     }
                 }
-                default -> softly.fail("Unknown template field in DataTable: " + field);
+                default -> softly.fail("Unknown transaction template field in DataTable: " + field);
             }
         }));
 
-        log.info("Verified WC loan action template data");
+        log.info("Verified WC loan transaction template data");
     }
 
     private Long getCreatedLoanId() {

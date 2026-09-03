@@ -274,4 +274,5 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
     public boolean existsByLoanId(Long loanId) {
         return this.repository.existsById(loanId);
     }
+
 }

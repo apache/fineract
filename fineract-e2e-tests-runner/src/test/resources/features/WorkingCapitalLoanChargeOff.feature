@@ -352,7 +352,7 @@ Feature: Working Capital Loan Charge-off
     Then Working Capital loan status will be "ACTIVE"
     Given A code value "Fraud" exists for code name "ChargeOffReasons"
     And Admin sets the business date to "10 January 2026"
-    When Admin retrieves the working capital loan action template with templateType "chargeOff"
+    When Admin retrieves the working capital loan transaction template with command "chargeOff"
     # chargeOffAmount is the current outstanding balance; chargeOffDate defaults to the business date.
     Then The working capital loan charge-off template has the following data:
       | chargeOffAmount | chargeOffDate | currency | chargeOffReasonOptionsPresent |
