@@ -215,7 +215,8 @@ public class LoanDisbursementService {
         return disburseAmount;
     }
 
-    public void handleDisbursementTransaction(final Loan loan, final LocalDate disbursedOn, final PaymentDetail paymentDetail) {
+    public void handleDisbursementTransaction(final Loan loan, final LocalDate disbursedOn, final PaymentDetail paymentDetail,
+            final boolean isAccountTransfer) {
         // add repayment transaction to track incoming money from client to mfi
         // for (charges due at time of disbursement)
 
@@ -274,7 +275,7 @@ public class LoanDisbursementService {
             chargesPayment.updateLoan(loan);
             loan.addLoanTransaction(chargesPayment);
             loanTransactionRepository.saveAndFlush(chargesPayment);
-            loanJournalEntryPoster.postJournalEntriesForLoanTransaction(chargesPayment, false, false);
+            loanJournalEntryPoster.postJournalEntriesForLoanTransaction(chargesPayment, isAccountTransfer, false);
             loanBalanceService.updateLoanOutstandingBalances(loan);
         }
 
