@@ -1988,3 +1988,55 @@ Feature: Working Capital Period Payment Rate
       | 10 January 2026 | 1.0           | 12.5     | false    | 10 January 2026   |
       | 20 January 2026 | 12.5          | 15.0     | false    | 20 January 2026   |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  @TestRailId:C102417
+  Scenario: Verify a near-payoff after a period payment rate change bills the exact residual and earns the whole discount fee
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                | 1000     |
+    When Admin sets the business date to "05 January 2026"
+    And Admin update Working Capital period payment rate with "40" value effective from "05 January 2026"
+    And Admin retrieves the projected amortization schedule
+    #--- From the effective date the loan bills the new segment's instalment of 111.11 instead of 47.22.
+    Then The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | expectedPaymentAmount | expectedBalance |
+      | 4         | 111.11                | 8910.13         |
+    When Admin sets the business date to "06 January 2026"
+    And Customer makes repayment on "06 January 2026" with 9999 transaction amount on Working Capital loan
+    Then Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 1.0   |
+    When Admin retrieves the projected amortization schedule
+    #--- The payment clears everything but 1.00, so the whole fee is earned and the closing day bills exactly that 1.00 -
+    #--- not the remainder of the segment instalment the plan would otherwise have asked for.
+    Then The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | actualPaymentAmount | actualAmortizationAmount | actualBalance | actualDiscountFeeBalance |
+      | 5         | 9999.00             | 1000.00                  | 1.00          | 0.00                     |
+    And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | expectedPaymentAmount | expectedBalance | expectedDiscountFeeBalance |
+      | 6         | 1.00                  | 0.00            | 0.00                       |
+    And The retrieved amortization schedule actual amortization total is "1000.00"
+    And The retrieved amortization schedule actual payments plus future expected payments total "10000.00"
+    And The retrieved amortization schedule has no negative monetary amounts
+
+  @TestRailId:C102418
+  Scenario: Verify a period payment rate change survives a later repayment
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                | 1000     |
+    When Admin sets the business date to "05 January 2026"
+    And Admin update Working Capital period payment rate with "40" value effective from "05 January 2026"
+    When Admin sets the business date to "06 January 2026"
+    And Customer makes repayment on "06 January 2026" with 50 transaction amount on Working Capital loan
+    Then Working Capital Loan period payment rate in effect is "40"
+    When Admin retrieves the projected amortization schedule
+    #--- Still billing the changed rate after the repayment was written back, not the 47.22 the loan was disbursed at.
+    Then The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | expectedPaymentAmount | actualPaymentAmount | actualBalance | actualDiscountFeeBalance |
+      | 5         | 111.11                | 50.00               | 8959.56       | 990.44                   |
+    And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | expectedPaymentAmount | expectedBalance |
+      | 6         | 111.11                | 8869.59         |
+    And The retrieved amortization schedule has no negative monetary amounts
