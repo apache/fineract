@@ -233,7 +233,7 @@ At disbursement, the origination fee becomes the initial *deferred balance* (unr
 * `unrealizedIncomeFromDiscountFee` = `totalDiscountFee - realizedIncomeFromDiscountFee`
 * `realizedIncomeFromDiscountFee` = 0 (nothing recognized yet)
 
-As repayments are received, the cursor-based amortization mechanism determines how much discount fee income is eligible to move from `unrealizedIncomeFromDiscountFee` to `realizedIncomeFromDiscountFee`.
+As repayments are received, the fee earned on the money collected determines how much discount fee income is eligible to move from `unrealizedIncomeFromDiscountFee` to `realizedIncomeFromDiscountFee`.
 
 == Lifecycle
 
@@ -244,7 +244,7 @@ As repayments are received, the cursor-based amortization mechanism determines h
 | *Approve* | Generates a projected schedule from approved loan parameters and expected disbursement date.
 | *Disburse* | Regenerates the schedule using the actual disbursement amount and actual disbursement date.
 | *Repayment* | `applyPayment()` records the repayment against the calculated schedule date and rebuilds the schedule. Calculates actual amortization and income modification for applied payment rows.
-| *Period Payment Rate Change* | Adds a rate segment from the change's effective date and rebuilds the schedule using the new period payment rate for the remaining term. The effective date may be in the future, in which case the schedule carries the new segment immediately while the rate stored on the loan is switched over by the `WC_PERIOD_PAYMENT_RATE_EFFECTIVE_DATE` COB step once that date arrives.
+| *Period Payment Rate Change* | Records the change's effective date and rate, and rebuilds; the walk switches to the new rate on the day it reaches that date, re-solving from the balance and unearned fee it is carrying. The effective date may be in the future, in which case the schedule carries the change immediately while the rate stored on the loan is switched over by the `WC_PERIOD_PAYMENT_RATE_EFFECTIVE_DATE` COB step once that date arrives. A date past the end of the schedule takes effect on its last day; a date at or before the first instalment takes effect on the first day, so two changes a day apart either side of it can land on the same day — the one booked later governs it.
 |===
 
 === State Transitions
@@ -313,14 +313,21 @@ The amortization schedule model is calculated from these loan-level parameters:
 == Formulas
 
 ----
-expectedPaymentAmount = (TPV × periodPaymentRate / 100) / npvDayCount
-originalPaymentNumber = roundUp((netDisbursement + discountFee) / expectedPayment)
-EIR                   = RATE(originalPaymentNumber, -expectedPayment, netDisbursement)
-paymentsLeft          = max(0, segmentRelativePaymentNo - appliedPaymentCount)
+expectedPaymentAmount = round((TPV × periodPaymentRate / 100) / npvDayCount)   // floored at one minor unit when positive
+grossPayable          = netDisbursement + discountFee
+originalPaymentNumber = roundUp(grossPayable / expectedPaymentAmount)
+finalPaymentAmount    = grossPayable - expectedPaymentAmount × (originalPaymentNumber - 1)
+EIR                   = IRR([-netDisbursement, expectedPaymentAmount × (n-1), finalPaymentAmount])
+paymentsLeft          = max(0, dayWithinCurrentRate - appliedPaymentCount)
 discountFactor        = 1 / (1 + EIR) ^ paymentsLeft
-npvSource            = actualPayment (if applied) or forecastPayment (if not)
-npvValue             = max(0, npvSource × discountFactor)   // row 0: -netDisbursementAmount (unclamped)
+npvSource             = actualPayment (if paid) or 0 (if the day elapsed unpaid) or billedInstalment
+npvValue              = max(0, npvSource × discountFactor)   // row 0: -netDisbursementAmount (unclamped)
 ----
+
+The rate is solved against the cash flow the borrower actually pays, closing remainder
+included, rather than against a uniform annuity. That is what makes the recursion below
+close on exactly zero on the last day, with its daily accruals summing to exactly the
+discount fee — the property the whole schedule rests on.
 
 === Stored Values at Loan Account Level
 
@@ -347,15 +354,15 @@ For each actual repayment transaction:
 
 | `paymentNo` | 1-based. Row 0 = disbursement.
 | `paymentDate` | `expectedDisbursementDate + paymentNo` days.
-| `expectedPaymentAmount` | Constant daily expected payment. Row 0: `-netDisbursementAmount`. Tail rows: null.
-| `discountFactor` | `1/(1+EIR)^paymentsLeft`. Row 0 and paid periods: 1.0.
-| `npvValue` | `max(0, npvSource × DF)`. Row 0: `-netDisbursementAmount`.
-| `balance` | `balance[i-1]×(1+EIR) - expectedPayment`. Row 0: `+netDisbursementAmount`. Tail: null.
-| `expectedAmortizationAmount` | `min(balance[i] + expectedPayment - balance[i-1], discountFee)`. Row 0 and tail rows: null.
+| `expectedPaymentAmount` | The daily instalment in force, capped at the balance the day has to close. Row 0: `-netDisbursementAmount`.
+| `discountFactor` | `1/(1+EIR)^paymentsLeft`. Row 0 and paid periods: 1.0. Model only — not returned by the API.
+| `npvValue` | `max(0, npvSource × DF)`. Row 0: `-netDisbursementAmount`. Model only — not returned by the API.
+| `balance` | `balance[i-1]×(1+EIR) - billedInstalment[i]`. Row 0: `+netDisbursementAmount`. Serialized as `expectedBalance`.
+| `expectedAmortizationAmount` | `round(aggregateAccrual[i]) - round(aggregateAccrual[i-1])`, where the accrual is `balance[i-1] × EIR`. Row 0: null.
 | `actualPaymentAmount` | Actual cash paid. Null if no payment.
-| `actualAmortizationAmount` | Cursor-based: `actualPayment/expectedPayment` periods of expected amortization consumed. Null if no payment.
-| `incomeModification` | Applied positive-payment rows: `actualAmort - expectedAmort`. Zero-amount or unpaid rows: null. Row 0 and tail rows: null.
-| `deferredBalance` | `discountFee - cumulativeActualAmort`. Row 0: `discountFeeAmount`. Tail rows: null.
+| `actualAmortizationAmount` | `round(feeEarned[i]) - round(feeEarned[i-1])`, where `feeEarned` is the plan curve read at the money collected. Null for a day with no record; zero for a day that elapsed unpaid.
+| `incomeModification` | Positive-payment rows: `actualAmort - expectedAmort`. Otherwise null. Model only — not returned by the API.
+| `deferredBalance` | `discountFee - round(aggregateAccrual[i])`, closing on exactly 0. Row 0: `discountFeeAmount`. Serialized as `expectedDiscountFeeBalance`; the actual-driven counterpart is `actualDiscountFeeBalance`.
 |===
 
 === Disbursement Row (paymentNo = 0)
@@ -370,27 +377,31 @@ For each actual repayment transaction:
 | all other nullable fields | null
 |===
 
-=== Tail Periods
+=== Days Past the Term
 
-Appended when shortfall remains after the effective term. Each tail row internally forecasts `min(remainingShortfall, expectedPayment)`. In the public schedule response, tail rows expose `paymentNo`, `paymentDate`, `discountFactor`, and `npvValue`; amount, balance, amortization, and deferred-balance fields are null. Trailing rows with zero forecast are trimmed.
+There are none, in the sense of a separate kind of row. The walk runs until the loan is
+square, so a borrower who has fallen behind simply gets more days — same instalment,
+balance still declining, fee still being earned — and one who has paid ahead gets fewer.
+A day past the original term is an ordinary day of the schedule and fills in the same
+columns as any other.
 
 == EIR-Based Income Recognition
 
-=== Cursor-Based Actual Amortization
+=== Fee Earned Is a Function of Money Collected
 
-When a repayment is received, the system calculates how much origination fee income to recognize using a *cursor-based* approach:
-
-. The cursor tracks how many "periods worth" of expected amortization have been consumed
-. For each payment: `periodsConsumed = actualPaymentAmount / expectedPaymentAmount`
-. The cursor advances by this amount, consuming the corresponding expected amortization amounts
-. Partial periods are interpolated
+The discount fee is accrued at disbursement as deferred revenue and amortized as the money
+comes in, so what governs recognition is how much has been collected, never how much time
+has passed. The fee recognized is read off the plan's own declining-balance recursion at
+the point the money collected has reached — the plan cursor described in the Calculation
+Algorithm above.
 
 This mechanism means:
 
-* A payment equal to the expected amount recognizes exactly one period's expected amortization
-* A payment larger than expected (excess) recognizes proportionally more income
-* A payment smaller than expected recognizes proportionally less income
-* No payment on a given day means no income is recognized for that day
+* A payment equal to the instalment recognizes exactly one day's worth of fee
+* A payment larger than the instalment recognizes proportionally more, and takes a day off the end of the schedule — that day was already covered
+* A payment smaller than the instalment recognizes proportionally less
+* No payment on a given day means no income is recognized for that day, and the schedule runs a day longer
+* Repaying the whole payable recognizes the whole fee, however few days it took; paying more than the payable recognizes nothing further, because there is nothing left to earn
 
 === Income Modification
 
@@ -411,18 +422,25 @@ The deferred balance represents the remaining unrecognized origination fee:
 
 == Calculation Algorithm
 
-. *Balances & expected amortizations*: `balance[i] = balance[i-1]×(1+EIR) - expectedPayment`. Expected amort capped at `discountFee`.
-. *Aggregate payments by date* (same-date payments summed). Repayments are normalized to a valid schedule date.
-. *Shortfall/excess analysis*: compare each applied payment to expected.
-. *Cursor-based actual amortization*: cursor advances by `actualPayment/expectedPayment` periods; interpolates partial periods.
-. *Excess distribution*: reduces forecast payments backward from last period.
-. *Tail periods*: appended for remaining shortfall.
-. *Total net amortization*: `-netDisbursement + Σ(npvSource[i] × DF[i]) + tailNpv`.
-. *Assemble rows*, trim trailing zero-forecast.
+One forward walk over the days, carrying two cursors. The *calendar cursor* takes one step
+per day; the *plan cursor* takes one step per instalment of the plan as written, and runs
+ahead of the calendar exactly as far as the borrower has paid ahead.
+
+Per day:
+
+. *Aggregate payments by date* (same-date payments summed, repayments normalized to a valid schedule date). Every elapsed date with nothing against it is seeded with a nil payment, so a missed instalment is recorded rather than absent.
+. *Accrue and bill*: `grown = balance[n-1] × (1 + EIR)`, `billedInstalment[n] = min(expectedPaymentAmount, grown)`, `balance[n] = grown - billedInstalment[n]`. No day can bill more than the balance it has to close, and that cap is also what closes the loan: on the day the balance falls below an instalment the day bills the balance, and nothing is left. There is no separate closing amount — `finalPaymentAmount` sizes the cash flow the rate is solved from and is reported as the contractual final instalment, but the schedule bills what is owed, which is the same figure on a loan paid to plan and the right one on a loan a repayment has restated.
+. *Advance the plan cursor* until it has billed at least as much as has been collected, then read back to the amount collected within the step it landed in. That reading is the fee the money received has earned — recognition follows money in, not time passed, so paying the whole payable on day one earns the whole fee on day one.
+. *Normalize both tracks*: `aggNorm[n] = round(aggHp[n])`, and the day reports `aggNorm[n] - aggNorm[n-1]`. The running total is rounded, never the day, which is what stops the fee drifting from itself over a few hundred days.
+. *Restate from reality* on a settled day — one that was paid, or that elapsed unpaid: the balance carried forward becomes what the borrower really owes, and the expected fee total is re-seeded from the actual one. Days that have not come round yet keep the plan they were written with.
+. *Stop* once the balance has closed and the schedule has caught up with the date it is being calculated to — and never before today, or before any day a principal adjustment falls on, since a payment or a rate change dated there needs a row to land on. Stop early only if the instalment cannot cover the day's accrual, because then no number of further days would close the balance.
 
 === Rebuild Flow
 
-Every schedule-changing operation triggers a full rebuild: aggregate payments -> build payment list (1 to effective term, actual or null) -> balances -> payment analysis -> cursor amortizations -> excess distribution -> tail -> net amortization -> assemble rows -> trim.
+Every schedule-changing operation triggers a full rebuild, and the rebuild is the walk:
+aggregate payments -> walk the days -> map each day to a row -> overlay principal
+adjustments. Nothing is settled onto a final period afterwards, and nothing is trimmed off
+the end: the schedule ends where the loan closes.
 
 == Loan Balance
 
@@ -448,7 +466,7 @@ The `m_wc_loan_balance` table maintains a running balance snapshot for each loan
 | Penalty amount, cumulative penalty paid, and derived outstanding penalty amount.
 
 | `realizedIncomeFromDiscountFee`
-| Discount fee income that has been recognized (amortized). Increases as repayments trigger cursor-based amortization and COB posts discount fee amortization.
+| Discount fee income that has been recognized (amortized). Increases as repayments earn fee off the plan curve and COB posts discount fee amortization.
 
 | `unrealizedIncomeFromDiscountFee`
 | Derived as `totalDiscountFee - realizedIncomeFromDiscountFee`.
@@ -573,8 +591,7 @@ When actual payment exceeds expected payment for a period:
 When actual payment is less than expected:
 
 * Less income is recognized for the period
-* Tail periods are appended to the schedule for the remaining shortfall
-* Each tail period forecasts `min(remainingShortfall, expectedPayment)`
+* The schedule runs longer: the balance the day left standing still has to be closed, so the walk keeps producing days until it is
 
 === No Payment
 
@@ -764,7 +781,7 @@ In the example above:
 * The discount fee of 1000.00 starts as the full `deferredBalance`
 * `expectedAmortizationAmount` starts at 9.61 on day 1 and *decreases daily* (9.57 on day 2), demonstrating the EIR front-loading effect
 * With no actual payments, `actualAmortizationAmount` and `incomeModification` are null
-* The `balance` decreases daily from 9000.00 toward 0.00 over the 200-day term
+* The `balance` decreases daily from 9000.00 to exactly 0.00 over the 200-day term, and `deferredBalance` reaches exactly 0.00 with it
 ====
 
 == Business Events
@@ -828,7 +845,7 @@ Working Capital loans support the following transaction types:
 | Initial funding of the loan. Triggers amortization schedule generation and deferred income initialization.
 
 | *Repayment*
-| Merchant payment applied to the loan. Triggers cursor-based amortization and schedule rebuild. Payment allocation follows the product's `paymentAllocation` rules.
+| Merchant payment applied to the loan. Earns fee off the plan curve and triggers a schedule rebuild. Payment allocation follows the product's `paymentAllocation` rules.
 
 | *Discount Fee*
 | Sets the discount fee as a transaction related to the disbursement.

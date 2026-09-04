@@ -295,7 +295,6 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
                 .orElseThrow(() -> new IllegalStateException("Projected amortization schedule is not found for loan " + loan.getId()));
 
         model.applyPayment(transactionDate, repaymentAmount);
-        model.recalculateNetAmortizationAndDeferredBalanceFrom(transactionDate);
 
         scheduleRepositoryWrapper.writeModel(loan, model);
     }
@@ -323,9 +322,11 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
                 .orElseThrow(() -> new IllegalStateException("Projected amortization schedule is not found for loan " + loan.getId()));
 
         // Rebuilt from scratch rather than split in place: rate changes are effective-dated, so a backdated one has to
-        // land ahead of the changes that follow it, and applyRateChange drops every segment at or after its own split.
-        // Reconstruction replays them all in effective-date order instead. The source transactions are not retained by
-        // the model, so payments and adjustments are carried over from the model being replaced.
+        // land ahead of the changes that follow it, and applyRateChange can only append - it rejects a date that
+        // precedes a change already recorded, because each change is sized against the balance and unearned fee reached
+        // on its own day. Reconstruction replays them all in effective-date order instead, which is the only order that
+        // method accepts. The source transactions are not retained by the model, so payments and adjustments are
+        // carried over from the model being replaced.
         final List<PrincipalPayment> preservedPayments = currentModel.snapshotActualPayments().stream()
                 .map(payment -> new PrincipalPayment(payment.date(), payment.amount().getAmount(), null, null)).toList();
         final List<PrincipalAdjustment> preservedAdjustments = currentModel.snapshotPrincipalAdjustments().stream()
@@ -387,7 +388,6 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
                 .orElseThrow(() -> new IllegalStateException("Projected amortization schedule is not found for loan " + loan.getId()));
 
         model.undoPayment(transactionDate, repaymentAmount);
-        model.recalculateNetAmortizationAndDeferredBalanceFrom(transactionDate);
 
         scheduleRepositoryWrapper.writeModel(loan, model);
     }

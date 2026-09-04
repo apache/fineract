@@ -64,6 +64,33 @@ class ProjectedAmortizationScheduleModelParserServiceGsonImplTest {
                 "the adjusted expected payment must survive the round trip");
     }
 
+    /**
+     * Rate changes moved from a list of precomputed segments to the date and rate they were booked with, so a model
+     * persisted at the old version carries a field this one does not read.
+     *
+     * <p>
+     * It must load rather than fail: the rate changes themselves live in {@code m_wc_loan_period_payment_rate_change},
+     * not here, so the schedule is restated from that table the next time anything writes the loan. What must not
+     * happen is the old field being read into the new one - the two have no fields in common, so every entry would come
+     * back empty and the walk would be handed a rate change with no date and no rate.
+     */
+    @Test
+    void readsAModelPersistedWithTheOldRateSegmentShape() {
+        final ProjectedAmortizationScheduleModel model = model();
+        final String legacyJson = parser.toJson(model).replace("\"rateChanges\":[]",
+                "\"rateSegments\":[{\"startDayIndex\":9,\"segmentTerm\":180,\"effectiveInterestRate\":0.001,"
+                        + "\"expectedPaymentAmount\":40.00,\"netDisbursementAtSplit\":8000.00,\"discountAtSplit\":400.00,"
+                        + "\"finalPaymentAmount\":20.00}]");
+        assertTrue(legacyJson.contains("rateSegments"), "the legacy fixture must carry the old field");
+        assertTrue(!legacyJson.contains("rateChanges"), "and must not carry the new one");
+
+        final ProjectedAmortizationScheduleModel restored = parser.fromJson(legacyJson, MC, CURRENCY);
+
+        assertNotNull(restored, "an old model must still load");
+        assertTrue(restored.rateChanges().isEmpty(), "the old shape must be ignored, not misread");
+        assertEquals(190, restored.projectedPayments().size() - 1, "the schedule rebuilds at the rate the loan was written with");
+    }
+
     /** Models persisted before principal adjustments existed carry no such field and must still deserialize. */
     @Test
     void readsAModelPersistedWithoutPrincipalAdjustments() {
