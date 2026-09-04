@@ -36,7 +36,7 @@ configurations {
 dependencies {
     driver 'com.mysql:mysql-connector-j'
     driver 'org.mariadb.jdbc:mariadb-java-client'
-    testImplementation 'org.seleniumhq.selenium:selenium-java:4.43.0'
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.48.0'
     testImplementation 'io.github.bonigarcia:webdrivermanager:6.3.4'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
 }

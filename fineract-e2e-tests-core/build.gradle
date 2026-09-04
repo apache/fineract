@@ -67,8 +67,8 @@ dependencies {
     testImplementation 'com.github.spotbugs:spotbugs-annotations'
 
     testImplementation 'com.squareup.retrofit2:retrofit'
-    testImplementation 'io.github.openfeign:feign-core:13.12'
-    testImplementation 'io.github.openfeign:feign-jackson:13.12'
+    testImplementation 'io.github.openfeign:feign-core:13.14'
+    testImplementation 'io.github.openfeign:feign-jackson:13.14'
     testImplementation 'org.apache.httpcomponents:httpclient'
     testImplementation 'org.apache.commons:commons-lang3'
     testImplementation 'com.google.guava:guava'
