@@ -1225,6 +1225,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     Then a Working Capital Loan Discount Fee Amortization Adjustment transaction business event is raised on "08 January 2026"
     Then Admin closes the Working Capital loan with a full repayment on "09 January 2026"
 
+  @TestRailId:C102430
   Scenario: Verify backdated near-payoff after rate change and discount fee adjustment earns the exact remaining fee
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -1259,6 +1260,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     And The retrieved amortization schedule has no negative monetary amounts
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
+  @TestRailId:C102431
   Scenario: Verify backdated near-payoff after discount fee adjustment earns the exact remaining fee
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -1291,6 +1293,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     And The retrieved amortization schedule has no negative monetary amounts
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
 
+  @TestRailId:C102432
   Scenario: Verify discount fee adjustment after backdated near-payoff restates the fee without a cent of drift
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -1321,6 +1324,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9500.0    | 9500.0             | 500.0          | 0.0              | 499.0             |
 
+  @TestRailId:C102433
   Scenario: Verify same-day rate change, discount fee adjustment and near-payoff earn the exact remaining fee
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
