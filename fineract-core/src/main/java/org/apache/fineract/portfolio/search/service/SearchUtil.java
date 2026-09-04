@@ -271,7 +271,15 @@ public class SearchUtil {
                 }
                 return columnValue;
             } else if (columnHeader.isCodeLookupDisplayType()) {
-                final Integer codeLookup = Integer.valueOf(columnValue);
+                // Extract ID from display value format: "Label (ID)" if present
+                String extractedId = extractIdFromDisplayValue(columnValue);
+                Integer codeLookup;
+                try {
+                    codeLookup = Integer.valueOf(extractedId);
+                } catch (NumberFormatException e) {
+                    // If extraction didn't change the value or parsing failed, try original value
+                    codeLookup = Integer.valueOf(columnValue);
+                }
                 if (!columnHeader.isColumnCodeAllowed(codeLookup)) {
                     ApiParameterError error = ApiParameterError.parameterError("error.msg.invalid.columnValue",
                             "Value not found in Allowed Value list", columnHeader.getColumnName(), columnValue);
@@ -293,6 +301,17 @@ public class SearchUtil {
             return JsonParserHelper.convertDateTimeFrom(columnValue, columnHeader.getColumnName(), format, locale);
         }
         if (colType.isAnyIntegerType()) {
+            // Extract ID from display value format: "Label (ID)" if present
+            // This handles FK/INTEGER columns that show human-readable values in Excel
+            String extractedId = extractIdFromDisplayValue(columnValue);
+            if (!extractedId.equals(columnValue)) {
+                // ID was extracted, try to parse it
+                try {
+                    return Integer.parseInt(extractedId);
+                } catch (NumberFormatException e) {
+                    // If parsing fails, fall back to original conversion
+                }
+            }
             return helper.convertToInteger(columnValue, columnHeader.getColumnName(), locale);
         }
         if (colType.isDecimalType()) {
@@ -322,5 +341,29 @@ public class SearchUtil {
     public String camelToSnake(final String camelStr) {
         return camelStr == null ? null
                 : camelStr.replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2").replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();
+    }
+
+    /**
+     * Extracts numeric ID from strings ending with "(id)" format. Example: "Permanent (32)" -> "32" If the string
+     * doesn't match the pattern, returns the original value.
+     *
+     * @param value
+     *            The string value that may contain an ID in parentheses
+     * @return The extracted ID as a string, or the original value if no ID pattern is found
+     */
+    public static String extractIdFromDisplayValue(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return value;
+        }
+        // Match pattern: ".*(\d+)$" where the number is in parentheses at the end
+        String trimmed = value.trim();
+        int lastParenIndex = trimmed.lastIndexOf('(');
+        if (lastParenIndex > 0 && trimmed.endsWith(")")) {
+            String idPart = trimmed.substring(lastParenIndex + 1, trimmed.length() - 1);
+            if (idPart.matches("\\d+")) {
+                return idPart;
+            }
+        }
+        return value;
     }
 }

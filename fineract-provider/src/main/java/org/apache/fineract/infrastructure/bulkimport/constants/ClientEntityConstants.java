@@ -51,15 +51,55 @@ public final class ClientEntityConstants {
     public static final int COUNTRY_COL = 24;// Y
     public static final int POSTAL_CODE_COL = 25;// Z
     public static final int IS_ACTIVE_ADDRESS_COL = 26;// AA
-    public static final int WARNING_COL = 26;// AA
     public static final int STATUS_COL = 27;// AB
+    /**
+     * @deprecated Lookup columns have been moved to a hidden sheet. Use dynamic column resolution instead.
+     */
+    @Deprecated
+    public static final int WARNING_COL = 26;// AA
+    /**
+     * @deprecated Lookup columns have been moved to a hidden sheet. Use dynamic column resolution instead.
+     */
+    @Deprecated
     public static final int RELATIONAL_OFFICE_NAME_COL = 35;// AJ
+    /**
+     * @deprecated Lookup columns have been moved to a hidden sheet. Use dynamic column resolution instead.
+     */
+    @Deprecated
     public static final int RELATIONAL_OFFICE_OPENING_DATE_COL = 36;// AK
+    /**
+     * @deprecated Lookup columns have been moved to a hidden sheet. Use dynamic column resolution instead.
+     */
+    @Deprecated
     public static final int LOOKUP_CONSTITUTION_COL = 37;// AL
+    /**
+     * @deprecated Lookup columns have been moved to a hidden sheet. Use dynamic column resolution instead.
+     */
+    @Deprecated
     public static final int LOOKUP_CLIENT_CLASSIFICATION = 38;// AM
+    /**
+     * @deprecated Lookup columns have been moved to a hidden sheet. Use dynamic column resolution instead.
+     */
+    @Deprecated
     public static final int LOOKUP_CLIENT_TYPES = 39;// AN
+    /**
+     * @deprecated Lookup columns have been moved to a hidden sheet. Use dynamic column resolution instead.
+     */
+    @Deprecated
     public static final int LOOKUP_ADDRESS_TYPE = 40;// AO
+    /**
+     * @deprecated Lookup columns have been moved to a hidden sheet. Use dynamic column resolution instead.
+     */
+    @Deprecated
     public static final int LOOKUP_STATE_PROVINCE = 41;// AP
+    /**
+     * @deprecated Lookup columns have been moved to a hidden sheet. Use dynamic column resolution instead.
+     */
+    @Deprecated
     public static final int LOOKUP_COUNTRY = 42;// AQ
+    /**
+     * @deprecated Lookup columns have been moved to a hidden sheet. Use dynamic column resolution instead.
+     */
+    @Deprecated
     public static final int LOOKUP_MAIN_BUSINESS_LINE = 43;// AR
 }
