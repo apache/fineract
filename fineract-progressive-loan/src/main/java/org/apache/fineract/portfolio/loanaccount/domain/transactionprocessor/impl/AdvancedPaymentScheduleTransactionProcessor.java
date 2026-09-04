@@ -2894,9 +2894,13 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         ProgressiveLoanInterestScheduleModel model = ctx.getModel();
         LocalDate payDate = loanTransaction.getTransactionDate();
 
-        if (installment.isDownPayment() || installment.getDueDate().isAfter(ctx.getModel().getMaturityDate())) {
-            // Skip interest and principal payment processing for down payment period or periods after loan maturity
-            // date
+        if (installment.isDownPayment() || installment.isAdditional()
+                || installment.getDueDate().isAfter(ctx.getModel().getMaturityDate())) {
+            // Skip interest and principal payment processing for down payment periods, additional periods and periods
+            // after the loan maturity date. None of them is represented in the interest schedule model, since the model
+            // is generated without down payment and additional installments, so they cannot be paid through the EMI
+            // calculator. Additional installments need an explicit check because their due date stops being after the
+            // maturity date as soon as a re-age or a reschedule extends the schedule beyond them.
             ctx.getSkipRepaymentScheduleInstallments().add(installment);
             return processPaymentAllocation(paymentAllocationType, installment, loanTransaction, transactionAmountUnprocessed,
                     loanTransactionToRepaymentScheduleMapping, charges, balances, LoanRepaymentScheduleInstallment.PaymentAction.PAY);

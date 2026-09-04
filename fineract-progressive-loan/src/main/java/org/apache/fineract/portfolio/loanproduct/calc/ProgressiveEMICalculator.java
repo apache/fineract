@@ -51,6 +51,7 @@ import org.apache.fineract.portfolio.common.domain.DaysInYearCustomStrategyType;
 import org.apache.fineract.portfolio.common.domain.DaysInYearType;
 import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeInterestHandlingType;
+import org.apache.fineract.portfolio.loanaccount.exception.LoanTransactionProcessingException;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
@@ -573,8 +574,15 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         ProgressiveLoanInterestScheduleModel recalculatedScheduleModelTillDate = recalculateScheduleModelTillDate(scheduleModel,
                 targetDate);
 
+        // Installments which are not represented in the interest schedule model - down payment and additional
+        // installments - must never reach the EMI calculator. Fail with a domain error carrying the offending period
+        // instead of letting a bare NoSuchElementException escape as an unmapped internal server error.
         RepaymentPeriod repaymentPeriod = recalculatedScheduleModelTillDate
-                .findRepaymentPeriodByFromAndDueDate(periodFromDate, periodDueDate).orElseThrow();
+                .findRepaymentPeriodByFromAndDueDate(periodFromDate, periodDueDate)
+                .orElseThrow(() -> new LoanTransactionProcessingException(
+                        String.format("No repayment period found in the interest schedule model for the period from %s to %s",
+                                periodFromDate, periodDueDate),
+                        periodFromDate, periodDueDate));
 
         long notFullyRepaidRepaymentPeriodCount = recalculatedScheduleModelTillDate.repaymentPeriods().stream()
                 .filter(rp -> !rp.isFullyPaid()).count();
