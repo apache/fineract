@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.calc;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Time Value of Money (TVM) utility functions for working capital loan calculations.
@@ -29,6 +30,7 @@ import java.util.List;
  * <li>{@link #irr} — internal rate of return via Newton-Raphson (Excel IRR equivalent), for an arbitrary cash-flow
  * series (e.g. a schedule whose final payment is a smaller remainder)</li>
  * <li>{@link #discountFactor} — present value discount factor: {@code 1 / (1 + r)^days}</li>
+ * <li>{@link #dailyRateFromAnnualEir} — compound daily rate from an annual EIR percentage</li>
  * </ul>
  */
 public final class TvmFunctions {
@@ -183,5 +185,30 @@ public final class TvmFunctions {
             throw new IllegalArgumentException("days must be in [0, " + Integer.MAX_VALUE + "], got: " + days);
         }
         return BigDecimal.ONE.divide(BigDecimal.ONE.add(rate, mc).pow((int) days, mc), mc);
+    }
+
+    /**
+     * Converts an annual EIR percentage to the equivalent compound daily rate for the given day-count convention:
+     * {@code (1 + annualEirPercent/100)^(1/npvDayCount) - 1}.
+     *
+     * <p>
+     * {@link BigDecimal#pow(int, MathContext)} only accepts integer exponents, so the fractional power uses
+     * {@link Math#pow} — the same approach as existing Fineract schedule math ({@code FinanicalFunctions},
+     * {@code EndOfDayBalance}). Double precision is sufficient here: the rate only seeds a cent-rounded payment search.
+     */
+    public static BigDecimal dailyRateFromAnnualEir(final BigDecimal annualEirPercent, final int npvDayCount, final MathContext mc) {
+        Objects.requireNonNull(annualEirPercent, "annualEirPercent");
+        Objects.requireNonNull(mc, "mc");
+        if (npvDayCount <= 0) {
+            throw new IllegalArgumentException("npvDayCount must be positive");
+        }
+        if (annualEirPercent.signum() < 0) {
+            throw new IllegalArgumentException("annualEirPercent must be non-negative");
+        }
+        if (annualEirPercent.signum() == 0) {
+            return BigDecimal.ZERO;
+        }
+        final double onePlusAnnual = BigDecimal.ONE.add(annualEirPercent.divide(BigDecimal.valueOf(100), mc), mc).doubleValue();
+        return BigDecimal.valueOf(Math.pow(onePlusAnnual, 1.0 / npvDayCount) - 1.0);
     }
 }

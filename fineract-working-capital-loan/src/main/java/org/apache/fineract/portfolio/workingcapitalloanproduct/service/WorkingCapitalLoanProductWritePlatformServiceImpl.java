@@ -60,6 +60,7 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCap
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductMinMaxConstraints;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductPaymentAllocationRule;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductCannotBeDeletedException;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductDuplicateExternalIdException;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductDuplicateNameException;
@@ -384,10 +385,20 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
         final String amortizationTypeValue = command
                 .stringValueOfParameterNamed(WorkingCapitalLoanProductConstants.amortizationTypeParamName);
         final WorkingCapitalAmortizationType amortizationType = WorkingCapitalAmortizationType.fromString(amortizationTypeValue);
+        final String paymentAmountCalculationStrategyValue = command
+                .parameterExists(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName)
+                        ? command.stringValueOfParameterNamed(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName)
+                        : WorkingCapitalPaymentAmountCalculationStrategy.TPV.name();
+        final WorkingCapitalPaymentAmountCalculationStrategy paymentAmountCalculationStrategy = WorkingCapitalPaymentAmountCalculationStrategy
+                .fromString(paymentAmountCalculationStrategyValue);
+        final BigDecimal annualEir = command.parameterExists(WorkingCapitalLoanProductConstants.annualEirParamName)
+                ? command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.annualEirParamName)
+                : null;
         final Integer npvDayCount = command.integerValueOfParameterNamed(WorkingCapitalLoanProductConstants.npvDayCountParamName);
         final BigDecimal principal = command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.principalParamName);
-        final BigDecimal periodPaymentRate = command
-                .bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.periodPaymentRateParamName);
+        final BigDecimal periodPaymentRate = command.parameterExists(WorkingCapitalLoanProductConstants.periodPaymentRateParamName)
+                ? command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.periodPaymentRateParamName)
+                : null;
         final Integer repaymentEvery = command.integerValueOfParameterNamed(WorkingCapitalLoanProductConstants.repaymentEveryParamName);
         final String repaymentFrequencyTypeValue = command
                 .stringValueOfParameterNamed(WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName);
@@ -412,8 +423,8 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
                 : WorkingCapitalLoanBreachStartType.DISBURSEMENT;
 
         final WorkingCapitalLoanProductRelatedDetail relatedDetail = new WorkingCapitalLoanProductRelatedDetail(amortizationType,
-                npvDayCount, principal, periodPaymentRate, repaymentEvery, repaymentFrequencyType, discount, delinquencyGraceDays,
-                delinquencyStartType, breachGraceDays, breachStartType);
+                paymentAmountCalculationStrategy, annualEir, npvDayCount, principal, periodPaymentRate, repaymentEvery,
+                repaymentFrequencyType, discount, delinquencyGraceDays, delinquencyStartType, breachGraceDays, breachStartType);
 
         // Min/max constraints
         final BigDecimal minPrincipal = command.parameterExists(WorkingCapitalLoanProductConstants.minPrincipalParamName)

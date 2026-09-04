@@ -147,7 +147,7 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
         loan.setProposedPrincipal(principal);
         loan.setApprovedPrincipal(BigDecimal.ZERO);
         final WorkingCapitalLoanBalance balance = WorkingCapitalLoanBalance.createFor(loan);
-        loan.setTotalPaymentVolume(totalPaymentVolume != null ? totalPaymentVolume : BigDecimal.ZERO);
+        loan.setTotalPaymentVolume(totalPaymentVolume);
         loan.setBalance(balance);
         loan.setLoanProductRelatedDetails(loanProductRelatedDetails);
 
@@ -166,11 +166,20 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
         detail.setPrincipal(fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.principalAmountParamName, element)
                 ? fromApiJsonHelper.extractBigDecimalWithLocaleNamed(WorkingCapitalLoanConstants.principalAmountParamName, element)
                 : productDetail.getPrincipal());
-        detail.setPeriodPaymentRate(
-                fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, element)
-                        ? fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, element,
-                                new HashSet<>())
-                        : productDetail.getPeriodPaymentRate());
+        detail.setPaymentAmountCalculationStrategy(productDetail.getPaymentAmountCalculationStrategy());
+        if (productDetail.getPaymentAmountCalculationStrategy() != null
+                && productDetail.getPaymentAmountCalculationStrategy().isAnnualEir()) {
+            detail.setAnnualEir(fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.annualEirParamName, element)
+                    ? fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.annualEirParamName, element, new HashSet<>())
+                    : productDetail.getAnnualEir());
+            detail.setPeriodPaymentRate(null);
+        } else {
+            detail.setPeriodPaymentRate(fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.periodPaymentRateParamName, element)
+                    ? fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.periodPaymentRateParamName, element,
+                            new HashSet<>())
+                    : productDetail.getPeriodPaymentRate());
+            detail.setAnnualEir(null);
+        }
         detail.setRepaymentEvery(fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.repaymentEveryParamName, element)
                 ? fromApiJsonHelper.extractIntegerWithLocaleNamed(WorkingCapitalLoanProductConstants.repaymentEveryParamName, element)
                 : productDetail.getRepaymentEvery());
@@ -376,6 +385,13 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                         .extractBigDecimalNamed(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, element, new HashSet<>());
                 detail.setPeriodPaymentRate(periodPaymentRate);
                 changes.put(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, periodPaymentRate);
+            }
+            if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.annualEirParamName, element)
+                    && command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanConstants.annualEirParamName, detail.getAnnualEir())) {
+                final BigDecimal annualEir = fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.annualEirParamName,
+                        element, new HashSet<>());
+                detail.setAnnualEir(annualEir);
+                changes.put(WorkingCapitalLoanConstants.annualEirParamName, annualEir);
             }
             if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.repaymentEveryParamName, element)
                     && command.isChangeInIntegerParameterNamed(WorkingCapitalLoanProductConstants.repaymentEveryParamName,

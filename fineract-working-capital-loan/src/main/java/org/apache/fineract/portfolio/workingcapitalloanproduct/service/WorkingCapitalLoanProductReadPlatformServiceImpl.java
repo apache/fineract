@@ -54,6 +54,7 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCap
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.mapper.WorkingCapitalLoanProductMapper;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.repository.WorkingCapitalLoanProductRepository;
@@ -116,6 +117,8 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
         final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
         final List<StringEnumOptionData> amortizationTypeOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(WorkingCapitalAmortizationType.class);
+        final List<StringEnumOptionData> paymentAmountCalculationStrategyOptions = ApiFacingEnum
+                .getValuesAsStringEnumOptionDataList(WorkingCapitalPaymentAmountCalculationStrategy.class);
         final List<StringEnumOptionData> periodFrequencyTypeOptions = ApiFacingEnum
                 .getValuesAsStringEnumOptionDataList(WorkingCapitalLoanPeriodFrequencyType.class);
         final List<WorkingCapitalBreachData> breachOptions = breachReadPlatformService.retrieveAll();
@@ -146,6 +149,7 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
                 .fundOptions(fundOptions) //
                 .currencyOptions(currencyOptions) //
                 .amortizationTypeOptions(amortizationTypeOptions) //
+                .paymentAmountCalculationStrategyOptions(paymentAmountCalculationStrategyOptions) //
                 .periodFrequencyTypeOptions(periodFrequencyTypeOptions) //
                 .breachOptions(breachOptions) //
                 .advancedPaymentAllocationTypes(advancedPaymentAllocationTypes) //

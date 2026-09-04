@@ -59,6 +59,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapita
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -970,6 +971,14 @@ public class WorkingCapitalLoanDataValidator {
                     .failWithCode("rate.change.not.allowed.for.non.active.loan");
         }
 
+        // Period-payment-rate change is a TPV-strategy feature. Annual EIR loans derive the daily payment from annual
+        // EIR instead; supporting an equivalent mid-lifecycle change is a follow-up, so reject clearly for now rather
+        // than letting the TPV rate-change path run against a schedule that has no TPV.
+        if (resolvePaymentAmountCalculationStrategy(loan).isAnnualEir()) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.periodPaymentRateParamName)
+                    .failWithCode("rate.change.not.allowed.for.annual.eir.strategy");
+        }
+
         final LocalDate effectiveDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.effectiveDateParamName,
                 element);
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.effectiveDateParamName).value(effectiveDate).notNull();
@@ -1025,6 +1034,18 @@ public class WorkingCapitalLoanDataValidator {
                 .notExceedingLengthOf(NOTE_MAX_LENGTH);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private WorkingCapitalPaymentAmountCalculationStrategy resolvePaymentAmountCalculationStrategy(final WorkingCapitalLoan loan) {
+        if (loan.getLoanProductRelatedDetails() != null
+                && loan.getLoanProductRelatedDetails().getPaymentAmountCalculationStrategy() != null) {
+            return loan.getLoanProductRelatedDetails().getPaymentAmountCalculationStrategy();
+        }
+        if (loan.getLoanProduct() != null && loan.getLoanProduct().getRelatedDetail() != null
+                && loan.getLoanProduct().getRelatedDetail().getPaymentAmountCalculationStrategy() != null) {
+            return loan.getLoanProduct().getRelatedDetail().getPaymentAmountCalculationStrategy();
+        }
+        return WorkingCapitalPaymentAmountCalculationStrategy.TPV;
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {

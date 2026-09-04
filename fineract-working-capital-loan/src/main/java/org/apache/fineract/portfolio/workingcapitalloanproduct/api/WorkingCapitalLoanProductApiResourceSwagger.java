@@ -92,6 +92,11 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         // Core product parameters (related detail: amortization, repayment defaults)
         @Schema(example = "EIR", allowableValues = { "EIR", "FLAT" })
         public String amortizationType;
+        @Schema(example = "TPV", allowableValues = { "TPV",
+                "ANNUAL_EIR" }, description = "Payment amount calculation strategy: TPV (default) or ANNUAL_EIR")
+        public String paymentAmountCalculationStrategy;
+        @Schema(example = "43.7562", description = "Annual EIR percentage (6 decimal places max). Required when strategy is ANNUAL_EIR.")
+        public BigDecimal annualEir;
         @Schema(example = "1")
         public Long delinquencyBucketId;
         @Schema(example = "365")

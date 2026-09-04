@@ -47,6 +47,7 @@ public final class WorkingCapitalLoanConstants {
     public static final String expectedDisbursementDateParameterName = "expectedDisbursementDate";
     public static final String submittedOnNoteParameterName = "submittedOnNote";
     public static final String totalPaymentVolumeParamName = "totalPaymentVolume";
+    public static final String annualEirParamName = "annualEir";
     public static final String principalAmountParamName = "principalAmount";
 
     // Loan commands

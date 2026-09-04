@@ -70,7 +70,7 @@ import org.apache.fineract.organisation.monetary.domain.Money;
 @Slf4j
 public final class ProjectedAmortizationScheduleModel {
 
-    private static final String MODEL_VERSION = "6";
+    private static final String MODEL_VERSION = "7";
 
     /**
      * Cap on Total Days: beyond this the schedule materialises an unreasonable number of rows and the EIR is
@@ -83,6 +83,7 @@ public final class ProjectedAmortizationScheduleModel {
     private final Money netDisbursementAmount;
     private final Money totalPaymentVolume;
     private final BigDecimal periodPaymentRate;
+    private final BigDecimal annualEir;
     private final int npvDayCount;
     private final LocalDate expectedDisbursementDate;
 
@@ -149,7 +150,7 @@ public final class ProjectedAmortizationScheduleModel {
     private LocalDate calculatedTillDate;
 
     private ProjectedAmortizationScheduleModel(final Money discountFeeAmount, final Money netDisbursementAmount,
-            final Money totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount,
+            final Money totalPaymentVolume, final BigDecimal periodPaymentRate, final BigDecimal annualEir, final int npvDayCount,
             final LocalDate expectedDisbursementDate, final Money expectedPaymentAmount, final Money finalPaymentAmount,
             final int originalPaymentNumber, final BigDecimal effectiveInterestRate, final MathContext mc, final CurrencyData currency,
             final LocalDate currentBusinessDate) {
@@ -157,6 +158,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.netDisbursementAmount = netDisbursementAmount;
         this.totalPaymentVolume = totalPaymentVolume;
         this.periodPaymentRate = periodPaymentRate;
+        this.annualEir = annualEir;
         this.npvDayCount = npvDayCount;
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.expectedPaymentAmount = expectedPaymentAmount;
@@ -198,6 +200,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.netDisbursementAmount = null;
         this.totalPaymentVolume = null;
         this.periodPaymentRate = null;
+        this.annualEir = null;
         this.npvDayCount = 0;
         this.expectedDisbursementDate = null;
         this.expectedPaymentAmount = null;
@@ -432,9 +435,65 @@ public final class ProjectedAmortizationScheduleModel {
                 npvDayCount, currency, mc);
 
         return new ProjectedAmortizationScheduleModel(Money.of(currency, discountFeeAmount, mc),
-                Money.of(currency, netDisbursementAmount, mc), Money.of(currency, totalPaymentVolume, mc), periodPaymentRate, npvDayCount,
-                expectedDisbursementDate, Money.of(currency, params.dailyPayment(), mc), Money.of(currency, params.finalPayment(), mc),
-                params.paymentNumber(), params.eir(), mc, currency, currentDate);
+                Money.of(currency, netDisbursementAmount, mc), Money.of(currency, totalPaymentVolume, mc), periodPaymentRate, null,
+                npvDayCount, expectedDisbursementDate, Money.of(currency, params.dailyPayment(), mc),
+                Money.of(currency, params.finalPayment(), mc), params.paymentNumber(), params.eir(), mc, currency, currentDate);
+    }
+
+    /**
+     * Creates a schedule from net disbursement, discount fee, annual EIR (percentage) and NPV day count. The daily
+     * payment is found by binary search so that the discounted cash-flow NPV equals the net disbursement.
+     */
+    public static ProjectedAmortizationScheduleModel generateFromAnnualEir(final BigDecimal discountFeeAmount,
+            final BigDecimal netDisbursementAmount, final BigDecimal annualEirPercent, final int npvDayCount,
+            final LocalDate expectedDisbursementDate, final MathContext mc, final CurrencyData currency, final LocalDate currentDate) {
+
+        Objects.requireNonNull(discountFeeAmount, "discountFeeAmount");
+        Objects.requireNonNull(netDisbursementAmount, "netDisbursementAmount");
+        Objects.requireNonNull(annualEirPercent, "annualEir");
+        Objects.requireNonNull(expectedDisbursementDate, "expectedDisbursementDate");
+        Objects.requireNonNull(currency, "currency");
+        if (discountFeeAmount.signum() <= 0) {
+            throw new IllegalArgumentException("discountFeeAmount must be positive for annual EIR strategy");
+        }
+        if (netDisbursementAmount.signum() <= 0) {
+            throw new IllegalArgumentException("netDisbursementAmount must be positive");
+        }
+        if (npvDayCount <= 0) {
+            throw new IllegalArgumentException("npvDayCount must be positive");
+        }
+
+        final ScheduleParams params = computeScheduleParamsFromAnnualEir(netDisbursementAmount, discountFeeAmount, annualEirPercent,
+                npvDayCount, currency, mc);
+
+        return new ProjectedAmortizationScheduleModel(Money.of(currency, discountFeeAmount, mc),
+                Money.of(currency, netDisbursementAmount, mc), null, null, annualEirPercent, npvDayCount, expectedDisbursementDate,
+                Money.of(currency, params.dailyPayment(), mc), Money.of(currency, params.finalPayment(), mc), params.paymentNumber(),
+                params.eir(), mc, currency, currentDate);
+    }
+
+    /**
+     * Feasibility pre-check reusing {@link #generateFromAnnualEir}'s formulas, without building the schedule. Callers
+     * must supply non-null inputs; missing mandatory fields are validated elsewhere before this is invoked.
+     */
+    public static boolean isAnnualEirCalculable(final BigDecimal discountFeeAmount, final BigDecimal netDisbursementAmount,
+            final BigDecimal annualEirPercent, final int npvDayCount, final MonetaryCurrency currency, final MathContext mc) {
+        Objects.requireNonNull(discountFeeAmount, "discountFeeAmount");
+        Objects.requireNonNull(netDisbursementAmount, "netDisbursementAmount");
+        Objects.requireNonNull(annualEirPercent, "annualEir");
+        Objects.requireNonNull(currency, "currency");
+        Objects.requireNonNull(mc, "mc");
+        if (discountFeeAmount.signum() <= 0 || netDisbursementAmount.signum() <= 0 || npvDayCount <= 0 || annualEirPercent.signum() <= 0) {
+            return false;
+        }
+        try {
+            computeScheduleParamsFromAnnualEir(netDisbursementAmount, discountFeeAmount, annualEirPercent, npvDayCount,
+                    new CurrencyData(currency.getCode(), null, currency.getDigitsAfterDecimal(), currency.getInMultiplesOf(), null, null),
+                    mc);
+        } catch (final ArithmeticException | IllegalArgumentException | IllegalStateException e) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -485,6 +544,93 @@ public final class ProjectedAmortizationScheduleModel {
         }
         cashFlows.add(finalPayment);
         return cashFlows;
+    }
+
+    private static ScheduleParams computeScheduleParamsFromAnnualEir(final BigDecimal netDisbursement, final BigDecimal discountFee,
+            final BigDecimal annualEirPercent, final int npvDayCount, final CurrencyData currency, final MathContext mc) {
+        final BigDecimal dailyRate = TvmFunctions.dailyRateFromAnnualEir(annualEirPercent, npvDayCount, mc);
+        final BigDecimal dailyPayment = computeDailyPaymentFromAnnualEir(netDisbursement, discountFee, dailyRate,
+                currency.getDecimalPlaces(), mc);
+        if (dailyPayment.signum() <= 0) {
+            throw new IllegalArgumentException("daily payment must be positive (check annualEir and discount fee)");
+        }
+
+        final BigDecimal grossPayable = netDisbursement.add(discountFee, mc);
+        final int paymentNumber = grossPayable.divide(dailyPayment, mc).setScale(0, RoundingMode.UP).intValueExact();
+        if (paymentNumber <= 0 || paymentNumber > MAX_CALCULABLE_TOTAL_DAYS) {
+            throw new IllegalArgumentException("computed paymentNumber out of range: " + paymentNumber);
+        }
+
+        final BigDecimal finalPayment = grossPayable.subtract(dailyPayment.multiply(BigDecimal.valueOf(paymentNumber - 1L), mc), mc);
+        return new ScheduleParams(dailyPayment, paymentNumber, finalPayment, dailyRate);
+    }
+
+    /**
+     * Solves for the currency-rounded daily payment whose discounted repayment stream has NPV equal to
+     * {@code netDisbursement}, using binary search over whole-cent candidates and a final three-cent tie-break.
+     */
+    static BigDecimal computeDailyPaymentFromAnnualEir(final BigDecimal netDisbursement, final BigDecimal discountFee,
+            final BigDecimal dailyRate, final int currencyScale, final MathContext mc) {
+        final BigDecimal totalRepayment = netDisbursement.add(discountFee, mc);
+
+        BigDecimal lower = BigDecimal.ONE.movePointLeft(currencyScale);
+        BigDecimal upper = totalRepayment;
+        BigDecimal candidate;
+
+        while (lower.compareTo(upper) < 0) {
+            candidate = roundDownToCent(lower.add(upper, mc).divide(BigDecimal.valueOf(2), mc), currencyScale);
+            final BigDecimal candidateNpv = npvForDailyPayment(candidate, totalRepayment, dailyRate, mc);
+            if (candidateNpv.compareTo(netDisbursement) < 0) {
+                lower = candidate.add(BigDecimal.ONE.movePointLeft(currencyScale), mc);
+            } else {
+                upper = candidate;
+            }
+        }
+
+        candidate = roundDownToCent(lower.add(upper, mc).divide(BigDecimal.valueOf(2), mc), currencyScale);
+        final BigDecimal cent = BigDecimal.ONE.movePointLeft(currencyScale);
+        BigDecimal bestPayment = candidate;
+        BigDecimal bestError = npvError(candidate, totalRepayment, netDisbursement, dailyRate, mc);
+        for (final BigDecimal neighbour : List.of(candidate.subtract(cent, mc), candidate.add(cent, mc))) {
+            if (neighbour.compareTo(cent) >= 0 && neighbour.compareTo(totalRepayment) <= 0) {
+                final BigDecimal error = npvError(neighbour, totalRepayment, netDisbursement, dailyRate, mc);
+                if (error.compareTo(bestError) < 0) {
+                    bestError = error;
+                    bestPayment = neighbour;
+                }
+            }
+        }
+        return bestPayment.setScale(currencyScale, mc.getRoundingMode());
+    }
+
+    private static BigDecimal npvError(final BigDecimal payment, final BigDecimal totalRepayment, final BigDecimal netDisbursement,
+            final BigDecimal dailyRate, final MathContext mc) {
+        return npvForDailyPayment(payment, totalRepayment, dailyRate, mc).subtract(netDisbursement, mc).abs();
+    }
+
+    private static BigDecimal npvForDailyPayment(final BigDecimal payment, final BigDecimal totalRepayment, final BigDecimal dailyRate,
+            final MathContext mc) {
+        final int fullPaymentCount = totalRepayment.divide(payment, mc).setScale(0, RoundingMode.FLOOR).intValueExact();
+        final BigDecimal totalRegularPayments = payment.multiply(BigDecimal.valueOf(fullPaymentCount), mc);
+        final BigDecimal remainder = totalRepayment.subtract(totalRegularPayments, mc);
+
+        if (dailyRate.signum() == 0) {
+            return totalRegularPayments.add(remainder, mc);
+        }
+
+        final BigDecimal onePlusRate = BigDecimal.ONE.add(dailyRate, mc);
+        final BigDecimal discountBase = BigDecimal.ONE.divide(onePlusRate.pow(fullPaymentCount, mc), mc);
+        final BigDecimal pvRegular = payment.multiply(BigDecimal.ONE.subtract(discountBase, mc), mc).divide(dailyRate, mc);
+
+        if (remainder.signum() == 0) {
+            return pvRegular;
+        }
+        final BigDecimal pvRemainder = remainder.divide(onePlusRate.pow(fullPaymentCount + 1, mc), mc);
+        return pvRegular.add(pvRemainder, mc);
+    }
+
+    private static BigDecimal roundDownToCent(final BigDecimal value, final int currencyScale) {
+        return value.setScale(currencyScale, RoundingMode.DOWN);
     }
 
     /** First-period offset: 0 when a disbursement-date repayment shifts the grid onto the disbursement date, else 1. */
@@ -587,8 +733,10 @@ public final class ProjectedAmortizationScheduleModel {
     /** Creates a new model with updated parameters, preserving applied payments. */
     public ProjectedAmortizationScheduleModel regenerate(final BigDecimal newDiscountAmount, final BigDecimal newNetAmount,
             final LocalDate newStartDate, final LocalDate currentDate) {
-        final ProjectedAmortizationScheduleModel newModel = generate(newDiscountAmount, newNetAmount, totalPaymentVolume.getAmount(),
-                periodPaymentRate, npvDayCount, newStartDate, mc, currency, currentDate);
+        final ProjectedAmortizationScheduleModel newModel = annualEir != null
+                ? generateFromAnnualEir(newDiscountAmount, newNetAmount, annualEir, npvDayCount, newStartDate, mc, currency, currentDate)
+                : generate(newDiscountAmount, newNetAmount, totalPaymentVolume.getAmount(), periodPaymentRate, npvDayCount, newStartDate,
+                        mc, currency, currentDate);
         newModel.actualPayments.addAll(actualPayments);
         newModel.copyPrincipalAdjustmentsFrom(this);
         newModel.rebuildPayments();
