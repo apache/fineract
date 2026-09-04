@@ -21,9 +21,11 @@ package org.apache.fineract.portfolio.savings.data;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import lombok.Getter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.fineract.commands.data.PendingMakerCheckerData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.staff.data.StaffData;
@@ -63,6 +65,8 @@ public class DepositAccountData {
     protected final BigDecimal minBalanceForInterestCalculation;
     protected final boolean withHoldTax;
     protected final TaxGroupData taxGroup;
+
+    protected List<PendingMakerCheckerData> pendingMakerCheckerApprovals;
 
     // associations
     protected final SavingsAccountSummaryData summary;
@@ -334,5 +338,13 @@ public class DepositAccountData {
 
     public Collection<SavingsAccountChargeData> charges() {
         return (this.charges == null) ? new HashSet<SavingsAccountChargeData>() : this.charges;
+    }
+
+    public List<PendingMakerCheckerData> getPendingMakerCheckerApprovals() {
+        return pendingMakerCheckerApprovals;
+    }
+
+    public void setPendingMakerCheckerApprovals(final List<PendingMakerCheckerData> pendingMakerCheckerApprovals) {
+        this.pendingMakerCheckerApprovals = pendingMakerCheckerApprovals;
     }
 }

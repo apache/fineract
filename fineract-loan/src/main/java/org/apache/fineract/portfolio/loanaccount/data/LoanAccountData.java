@@ -31,6 +31,7 @@ import java.util.Map;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.apache.fineract.commands.data.PendingMakerCheckerData;
 import org.apache.fineract.infrastructure.codes.data.CodeValueData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
@@ -294,6 +295,8 @@ public class LoanAccountData {
     private StringEnumOptionData buyDownFeeStrategy;
     private StringEnumOptionData buyDownFeeIncomeType;
     private Boolean merchantBuyDownFee;
+
+    private List<PendingMakerCheckerData> pendingMakerCheckerApprovals;
 
     public static LoanAccountData importInstanceIndividual(EnumOptionData loanTypeEnumOption, Long clientId, Long productId,
             Long loanOfficerId, LocalDate submittedOnDate, Long fundId, BigDecimal principal, Integer numberOfRepayments,
