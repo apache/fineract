@@ -34,21 +34,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 
 public enum EntityTables {
 
-    CLIENT("m_client", "client_id", "id", CREATE, ACTIVATE, CLOSE), //
-    GROUP("m_group", "group_id", "id", CREATE, ACTIVATE, CLOSE), //
-    CENTER("m_center", "m_group", "center_id", "id"), //
-    OFFICE("m_office", "office_id", "id"), //
-    LOAN_PRODUCT("m_product_loan", "product_loan_id", "id"), //
-    LOAN("m_loan", "loan_id", "id", CREATE, APPROVE, DISBURSE, WITHDRAWN, REJECTED, WRITE_OFF), //
-    SAVINGS_PRODUCT("m_savings_product", "savings_product_id", "id"), //
-    SAVINGS("m_savings_account", "savings_account_id", "id", CREATE, APPROVE, ACTIVATE, WITHDRAWN, REJECTED, CLOSE), //
-    SAVINGS_TRANSACTION("m_savings_account_transaction", "savings_transaction_id", "id"), //
-    SHARE_PRODUCT("m_share_product", "share_product_id", "id"), //
-    WC_LOAN_PRODUCT("m_wc_loan_product", "wc_product_loan_id", "id"), //
-    WC_LOAN("m_wc_loan", "wc_loan_id", "id"), //
+    CLIENT("m_client", "Client", "client_id", "id", CREATE, ACTIVATE, CLOSE), //
+    GROUP("m_group", "Group", "group_id", "id", CREATE, ACTIVATE, CLOSE), //
+    CENTER("m_center", "Center", "m_group", "center_id", "id"), //
+    OFFICE("m_office", "Office", "office_id", "id"), //
+    LOAN_PRODUCT("m_product_loan", "Loan Product", "product_loan_id", "id"), //
+    LOAN("m_loan", "Loan", "loan_id", "id", CREATE, APPROVE, DISBURSE, WITHDRAWN, REJECTED, WRITE_OFF), //
+    SAVINGS_PRODUCT("m_savings_product", "Savings Product", "savings_product_id", "id"), //
+    SAVINGS("m_savings_account", "Savings Account", "savings_account_id", "id", CREATE, APPROVE, ACTIVATE, WITHDRAWN, REJECTED, CLOSE), //
+    SAVINGS_TRANSACTION("m_savings_account_transaction", "Savings Account Transaction", "savings_transaction_id", "id"), //
+    SHARE_PRODUCT("m_share_product", "Share Product", "share_product_id", "id"), //
+    WC_LOAN_PRODUCT("m_wc_loan_product", "Working Capital Loan Product", "wc_product_loan_id", "id"), //
+    WC_LOAN("m_wc_loan", "Working Capital Loan", "wc_loan_id", "id"), //
     ;
 
     static final EntityTables[] ENTITY_VALUES = values();
@@ -61,6 +62,8 @@ public enum EntityTables {
     @NotNull
     private final String name;
     @NotNull
+    private final String humanReadableName;
+    @NotNull
     private final String apptableName;
 
     @NotNull
@@ -70,22 +73,29 @@ public enum EntityTables {
 
     private final ImmutableList<StatusEnum> checkStatuses;
 
-    EntityTables(@NotNull String name, @NotNull String apptableName, @NotNull String foreignKeyColumnNameOnDatatable,
-            @NotNull String refColumn, StatusEnum... statuses) {
+    EntityTables(@NotNull String name, @NotNull String humanReadableName, @NotNull String apptableName,
+            @NotNull String foreignKeyColumnNameOnDatatable, @NotNull String refColumn, StatusEnum... statuses) {
         this.name = name;
+        this.humanReadableName = humanReadableName;
         this.apptableName = apptableName;
         this.foreignKeyColumnNameOnDatatable = foreignKeyColumnNameOnDatatable;
         this.refColumn = refColumn;
         this.checkStatuses = statuses == null ? ImmutableList.of() : ImmutableList.copyOf(statuses);
     }
 
-    EntityTables(@NotNull String name, @NotNull String foreignKeyColumnNameOnDatatable, @NotNull String refColumn, StatusEnum... statuses) {
-        this(name, name, foreignKeyColumnNameOnDatatable, refColumn, statuses);
+    EntityTables(@NotNull String name, @NotNull String humanReadableName, @NotNull String foreignKeyColumnNameOnDatatable,
+            @NotNull String refColumn, StatusEnum... statuses) {
+        this(name, humanReadableName, name, foreignKeyColumnNameOnDatatable, refColumn, statuses);
     }
 
     @NotNull
     public String getName() {
         return name;
+    }
+
+    @NotNull
+    public String getHumanReadableName() {
+        return humanReadableName;
     }
 
     @NotNull
@@ -138,5 +148,9 @@ public enum EntityTables {
     @NotNull
     public static List<EntityTables> getFiltered(Predicate<EntityTables> filter) {
         return Arrays.stream(ENTITY_VALUES).filter(filter).toList();
+    }
+
+    public StringEnumOptionData toEnumOptionData() {
+        return new StringEnumOptionData(name(), getName(), getHumanReadableName());
     }
 }

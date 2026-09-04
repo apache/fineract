@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.dataqueries.data;
 
 import java.io.Serializable;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 
 /**
  * Immutable data object for role data.
@@ -28,6 +29,7 @@ public class EntityDataTableChecksData implements Serializable {
 
     private final long id;
     private final String entity;
+    private final StringEnumOptionData entityData;
     private final EnumOptionData status;
     private final String datatableName;
     private final boolean systemDefined;
@@ -35,10 +37,11 @@ public class EntityDataTableChecksData implements Serializable {
     private final Long productId;
     private final String productName;
 
-    public EntityDataTableChecksData(final long id, final String entity, final EnumOptionData status, final String datatableName,
-            final boolean systemDefined, final Long loanProductId, final String productName) {
+    public EntityDataTableChecksData(final long id, final String entity, final StringEnumOptionData entityData, final EnumOptionData status,
+            final String datatableName, final boolean systemDefined, final Long loanProductId, final String productName) {
         this.id = id;
         this.entity = entity;
+        this.entityData = entityData;
         this.status = status;
         this.datatableName = datatableName;
         this.systemDefined = systemDefined;
