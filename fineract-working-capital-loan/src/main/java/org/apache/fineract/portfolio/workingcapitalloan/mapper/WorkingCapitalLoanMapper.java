@@ -193,6 +193,7 @@ public interface WorkingCapitalLoanMapper {
             timelineData.setChargedOffByLastname(loan.getChargedOffBy().getLastname());
             timelineData.setChargedOffOnDate(loan.getChargedOffOnDate());
         }
+        timelineData.setOverpaidOnDate(loan.getOverpaidOnDate());
         return timelineData;
     }
 }
