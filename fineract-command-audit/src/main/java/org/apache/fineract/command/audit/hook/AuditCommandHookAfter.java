@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.command.audit.hook;
 
-import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_HOOK_AUDIT_AFTER;
-import static org.apache.fineract.command.core.CommandState.PROCESSED;
+import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_HOOK_AFTER;
+import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_PROPERTY_HOOK_POST_ENABLED;
 
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandHookAfter;
 import org.apache.fineract.command.core.CommandStore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,20 +34,22 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-@Order(COMMAND_HOOK_AUDIT_AFTER)
-@ConditionalOnProperty(value = "fineract.command.hooks.audit-post", havingValue = "true")
+@Order(COMMAND_AUDIT_HOOK_AFTER)
+@ConditionalOnProperty(value = COMMAND_AUDIT_PROPERTY_HOOK_POST_ENABLED, havingValue = "true", matchIfMissing = false)
 final class AuditCommandHookAfter implements CommandHookAfter<Object, Object> {
 
     private final CommandStore store;
 
     @Override
-    public void onAfter(Command<Object> command, Object response) {
+    public void onAfter(CommandContext<Object, Object> ctx) {
         final var now = Instant.now();
+
+        var command = ctx.getCommand();
 
         command.setExecutedByUsername(command.getInitiatedByUsername());
         command.setUpdatedAt(now);
         command.setExecutedAt(now);
 
-        store.store(command, response, PROCESSED);
+        store.store(ctx);
     }
 }

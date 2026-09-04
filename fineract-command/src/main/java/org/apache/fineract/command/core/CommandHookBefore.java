@@ -19,7 +19,7 @@
 package org.apache.fineract.command.core;
 
 @FunctionalInterface
-public interface CommandHookBefore<REQ> {
+public interface CommandHookBefore<REQ, RES> {
 
-    void onBefore(Command<REQ> command);
+    void onBefore(CommandContext<REQ, RES> ctx);
 }
