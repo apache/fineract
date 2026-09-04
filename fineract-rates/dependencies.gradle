@@ -46,7 +46,6 @@ dependencies {
             'com.squareup.retrofit2:converter-gson',
 
             'org.springdoc:springdoc-openapi-starter-webmvc-ui',
-            'org.mapstruct:mapstruct',
 
             'io.github.resilience4j:resilience4j-spring-boot3',
             'org.apache.httpcomponents:httpcore',
@@ -54,7 +53,6 @@ dependencies {
     compileOnly 'com.github.spotbugs:spotbugs-annotations'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    annotationProcessor 'org.mapstruct:mapstruct-processor'
     implementation ('org.springframework.boot:spring-boot-starter-data-jpa') {
         exclude group: 'org.hibernate'
     }
