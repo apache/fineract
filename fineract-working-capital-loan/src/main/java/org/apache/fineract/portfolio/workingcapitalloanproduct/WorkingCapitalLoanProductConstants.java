@@ -40,6 +40,8 @@ public final class WorkingCapitalLoanProductConstants {
 
     // Settings
     public static final String amortizationTypeParamName = "amortizationType";
+    public static final String paymentAmountCalculationStrategyParamName = "paymentAmountCalculationStrategy";
+    public static final String annualEirParamName = "annualEir";
     public static final String delinquencyBucketIdParamName = "delinquencyBucketId";
     public static final String npvDayCountParamName = "npvDayCount";
     public static final String paymentAllocationParamName = "paymentAllocation";

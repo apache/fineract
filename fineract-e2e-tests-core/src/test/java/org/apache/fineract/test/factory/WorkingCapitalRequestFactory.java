@@ -168,6 +168,19 @@ public class WorkingCapitalRequestFactory {
                 .allowAttributeOverrides(allowAttributeOverrides);
     }
 
+    /**
+     * Annual EIR strategy product: no period payment rate, required discount, and discount override enabled so loan
+     * applications may pass a discount (as in the reference EIR calculation scenarios).
+     */
+    public PostWorkingCapitalLoanProductsRequest defaultAnnualEirWorkingCapitalLoanProductRequest(final BigDecimal annualEir,
+            final BigDecimal discount) {
+        return defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest() //
+                .paymentAmountCalculationStrategy(PostWorkingCapitalLoanProductsRequest.PaymentAmountCalculationStrategyEnum.ANNUAL_EIR) //
+                .annualEir(annualEir) //
+                .discount(discount) //
+                .periodPaymentRate(null);
+    }
+
     public PostWorkingCapitalLoanProductsRequest defaultWorkingCapitalLoanProductBreachRequest() {
         String name = Utils.randomStringGenerator(WCLP_NAME_PREFIX, 10);
         String shortName = loanProductsRequestFactory.generateShortNameSafely();

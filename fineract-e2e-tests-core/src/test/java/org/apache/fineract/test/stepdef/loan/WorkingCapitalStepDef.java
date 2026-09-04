@@ -33,6 +33,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -145,6 +146,59 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, responseDefaultWorkingCapitalLoanProductCreate);
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, defaultWorkingCapitalLoanProductCreateRequest);
         checkWorkingCapitalLoanProductCreate();
+    }
+
+    @When("Admin creates a new Working Capital Loan Product with Annual EIR strategy, annualEir {string} and discount {string}")
+    public void createWorkingCapitalLoanProductWithAnnualEirStrategy(final String annualEir, final String discount) {
+        final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
+        final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory
+                .defaultAnnualEirWorkingCapitalLoanProductRequest(new BigDecimal(annualEir), new BigDecimal(discount))//
+                .name(name);
+        final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+        checkWorkingCapitalLoanProductCreate();
+    }
+
+    @Then("Admin creates a Working Capital Loan Product with the following payment strategy data expecting error:")
+    public void createWorkingCapitalLoanProductWithPaymentStrategyDataExpectingError(final DataTable table) {
+        final Map<String, String> rawData = table.asMaps().getFirst();
+        final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
+        final String strategy = blankToNull(rawData.get("paymentAmountCalculationStrategy"));
+
+        final PostWorkingCapitalLoanProductsRequest request;
+        if ("TPV".equalsIgnoreCase(strategy)) {
+            request = workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest().name(name);
+            applyOptionalBigDecimal(rawData, "annualEir", request::setAnnualEir);
+            applyOptionalBigDecimal(rawData, "discount", request::setDiscount);
+        } else {
+            request = workingCapitalRequestFactory.defaultAnnualEirWorkingCapitalLoanProductRequest(
+                    parseOptionalBigDecimal(rawData.get("annualEir")), parseOptionalBigDecimal(rawData.get("discount"))).name(name);
+        }
+        applyOptionalBigDecimal(rawData, "periodPaymentRate", request::setPeriodPaymentRate);
+        applyOptionalBigDecimal(rawData, "minPeriodPaymentRate", request::setMinPeriodPaymentRate);
+        applyOptionalBigDecimal(rawData, "maxPeriodPaymentRate", request::setMaxPeriodPaymentRate);
+
+        final int expectedHttpCode = Integer.parseInt(rawData.get("httpCode"));
+        final String expectedErrorMessage = rawData.get("errorMessage").trim();
+        checkCreateWorkingCapitalLoanProductWithInvalidDataFailure(request, expectedHttpCode, expectedErrorMessage);
+        log.info("Verified Working Capital Loan Product create failed with status {} and message: {}", expectedHttpCode,
+                expectedErrorMessage);
+    }
+
+    private static String blankToNull(final String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private static BigDecimal parseOptionalBigDecimal(final String value) {
+        final String trimmed = blankToNull(value);
+        return trimmed == null ? null : new BigDecimal(trimmed);
+    }
+
+    private static void applyOptionalBigDecimal(final Map<String, String> rawData, final String key, final Consumer<BigDecimal> setter) {
+        if (rawData.containsKey(key) && blankToNull(rawData.get(key)) != null) {
+            setter.accept(new BigDecimal(rawData.get(key).trim()));
+        }
     }
 
     @When("Admin creates a new Working Capital Loan Product with breach and near breach")
@@ -1286,9 +1340,12 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         assertions.assertThat(getWorkingCapitalProductResponse.getRepaymentFrequencyType()).isNotNull();
         assertions.assertThat(workingCapitalLoanProductCreateRequest.getRepaymentFrequencyType().getValue())
                 .isEqualTo(getWorkingCapitalProductResponse.getRepaymentFrequencyType().getCode());
-        assertions.assertThat(workingCapitalLoanProductCreateRequest.getPeriodPaymentRate()).isNotNull();
-        assertions.assertThat(workingCapitalLoanProductCreateRequest.getPeriodPaymentRate()
-                .compareTo(getWorkingCapitalProductResponse.getPeriodPaymentRate())).isEqualTo(0);
+        if (workingCapitalLoanProductCreateRequest.getPeriodPaymentRate() != null) {
+            assertions.assertThat(workingCapitalLoanProductCreateRequest.getPeriodPaymentRate()
+                    .compareTo(getWorkingCapitalProductResponse.getPeriodPaymentRate())).isEqualTo(0);
+        } else {
+            assertions.assertThat(getWorkingCapitalProductResponse.getPeriodPaymentRate()).isNull();
+        }
         assertions.assertThat(workingCapitalLoanProductCreateRequest.getMinPeriodPaymentRate())
                 .isEqualTo(getWorkingCapitalProductResponse.getMinPeriodPaymentRate());
         assertions.assertThat(workingCapitalLoanProductCreateRequest.getMaxPeriodPaymentRate())

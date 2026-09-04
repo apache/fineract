@@ -225,6 +225,74 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         submitLoanUsingCreatedProduct(table, null, null);
     }
 
+    @When("Admin creates a working capital loan with annual EIR using created product with the following data:")
+    public void createWorkingCapitalLoanWithAnnualEirUsingCreatedProduct(final DataTable table) {
+        final Map<String, String> rawData = table.asMaps().getFirst();
+        final Long clientId = extractClientId();
+        final PostWorkingCapitalLoanProductsResponse productResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
+        final Long loanProductId = productResponse.getResourceId();
+
+        final PostWorkingCapitalLoansRequest loansRequest = workingCapitalLoanRequestFactory
+                .defaultAnnualEirWorkingCapitalLoansRequest(clientId).productId(loanProductId)
+                .submittedOnDate(rawData.get("submittedOnDate")).expectedDisbursementDate(rawData.get("expectedDisbursementDate"))
+                .principalAmount(new BigDecimal(rawData.get("principalAmount")))
+                .discount(blankToNull(rawData.get("discount")) != null ? new BigDecimal(rawData.get("discount").trim()) : null);
+        if (blankToNull(rawData.get("annualEir")) != null) {
+            loansRequest.annualEir(new BigDecimal(rawData.get("annualEir").trim()));
+        }
+        testContext().set(TestContextKey.LOAN_CREATE_REQUEST, loansRequest);
+
+        final PostWorkingCapitalLoansResponse response = ok(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_CREATE_RESPONSE, response);
+        trackLoanIdIfEnabled(response.getLoanId());
+        log.info("Working Capital Loan with annual EIR created, Loan ID: {}", response.getLoanId());
+    }
+
+    @Then("Admin creates a working capital loan with annual EIR using created product with the following data expecting error:")
+    public void createWorkingCapitalLoanWithAnnualEirUsingCreatedProductExpectingError(final DataTable table) {
+        final Map<String, String> rawData = table.asMaps().getFirst();
+        final Long clientId = extractClientId();
+        final PostWorkingCapitalLoanProductsResponse productResponse = testContext()
+                .get(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE);
+        final Long loanProductId = productResponse.getResourceId();
+
+        // Start from the Annual EIR application shell (no TPV fields). Callers that need TPV fields for a
+        // mixed-strategy
+        // negative case pass them explicitly in the table.
+        final PostWorkingCapitalLoansRequest loansRequest = workingCapitalLoanRequestFactory
+                .defaultAnnualEirWorkingCapitalLoansRequest(clientId).productId(loanProductId)
+                .submittedOnDate(rawData.get("submittedOnDate")).expectedDisbursementDate(rawData.get("expectedDisbursementDate"))
+                .principalAmount(new BigDecimal(rawData.get("principalAmount")))
+                .discount(blankToNull(rawData.get("discount")) != null ? new BigDecimal(rawData.get("discount").trim()) : null);
+        if (blankToNull(rawData.get("annualEir")) != null) {
+            loansRequest.annualEir(new BigDecimal(rawData.get("annualEir").trim()));
+        }
+        if (blankToNull(rawData.get("totalPaymentVolume")) != null) {
+            loansRequest.totalPaymentVolume(new BigDecimal(rawData.get("totalPaymentVolume").trim()));
+        }
+        if (blankToNull(rawData.get("periodPaymentRate")) != null) {
+            loansRequest.periodPaymentRate(new BigDecimal(rawData.get("periodPaymentRate").trim()));
+        }
+
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(loansRequest));
+        testContext().set(TestContextKey.LOAN_CREATE_RESPONSE, exception);
+
+        final int expectedHttpCode = Integer.parseInt(rawData.get("httpCode"));
+        final String expectedErrorMessage = rawData.get("errorMessage").trim();
+        assertHttpStatus(exception, expectedHttpCode);
+        assertValidationError(exception, expectedErrorMessage);
+        log.info("Verified Working Capital Loan create with annual EIR failed with status {} and message: {}", expectedHttpCode,
+                expectedErrorMessage);
+    }
+
+    private static String blankToNull(final String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
     @When("Admin creates a working capital loan using created product with breachGraceDays {int} and the following data:")
     public void createWorkingCapitalLoanUsingCreatedProductWithBreachGraceDays(final int breachGraceDays, final DataTable table) {
         submitLoanUsingCreatedProduct(table, breachGraceDays, null);
@@ -2466,6 +2534,25 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @When("Admin update Working Capital period payment rate failed with {string} value with {} error message")
     public void adminAddWorkingCapitalPeriodPaymentRateInvalidDataFailure(final String periodPaymentRate, final String errorMessage) {
         updatePeriodPaymentRateFailed(periodPaymentRate, errorMessage);
+    }
+
+    @Then("Admin update Working Capital period payment rate with {string} value expecting error:")
+    public void adminUpdateWorkingCapitalPeriodPaymentRateExpectingError(final String periodPaymentRate, final DataTable table) {
+        final PostWorkingCapitalLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        final long loanId = loanResponse.getLoanId();
+        final Map<String, String> expectedData = table.asMaps().getFirst();
+        final int expectedHttpCode = Integer.parseInt(expectedData.get("httpCode"));
+        final String expectedErrorMessage = expectedData.get("errorMessage").trim();
+
+        final PutWorkingCapitalLoansLoanIdRateRequest rateChangeRequest = workingCapitalLoanRequestFactory
+                .defaultWorkingCapitalLoanUpdateRateRequest().periodPaymentRate(new BigDecimal(periodPaymentRate));
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoans().updateWorkingCapitalLoanRateById(loanId, rateChangeRequest));
+
+        assertHttpStatus(exception, expectedHttpCode);
+        assertValidationError(exception, expectedErrorMessage);
+        log.info("Verified period payment rate update on loan {} failed with status {} and message: {}", loanId, expectedHttpCode,
+                expectedErrorMessage);
     }
 
     @When("Admin update Working Capital period payment rate failed with {string} value cause unable to calculate EIR")

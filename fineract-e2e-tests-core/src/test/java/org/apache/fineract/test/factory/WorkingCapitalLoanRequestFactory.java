@@ -68,6 +68,21 @@ public class WorkingCapitalLoanRequestFactory {
                 .dateFormat(DATE_FORMAT);//
     }
 
+    /**
+     * Loan application shell for ANNUAL_EIR products: no TPV / period payment rate (those fields are not allowed for
+     * that strategy). Caller sets productId, dates, principal, annualEir and optional discount.
+     */
+    public PostWorkingCapitalLoansRequest defaultAnnualEirWorkingCapitalLoansRequest(final Long clientId) {
+        return new PostWorkingCapitalLoansRequest()//
+                .clientId(clientId)//
+                .productId(workingCapitalLoanProductResolver.resolve(DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT))//
+                .submittedOnDate(DATE_SUBMIT_STRING)//
+                .expectedDisbursementDate(DATE_SUBMIT_STRING)//
+                .principalAmount(DEFAULT_PRINCIPAL)//
+                .locale(DEFAULT_LOCALE)//
+                .dateFormat(DATE_FORMAT);//
+    }
+
     public PutWorkingCapitalLoansLoanIdRequest defaultModifyWorkingCapitalLoansRequest() {
         return new PutWorkingCapitalLoansLoanIdRequest()//
                 .locale(DEFAULT_LOCALE)//

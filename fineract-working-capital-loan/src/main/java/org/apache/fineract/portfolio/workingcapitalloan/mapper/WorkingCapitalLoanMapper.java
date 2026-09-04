@@ -88,6 +88,8 @@ public interface WorkingCapitalLoanMapper {
     @Mapping(target = "calculatedAnnualEir", ignore = true)
     @Mapping(target = "summary", source = ".", qualifiedByName = "toSummaryData")
     @Mapping(target = "totalPaymentVolume", source = "totalPaymentVolume")
+    @Mapping(target = "annualEir", source = "loanProductRelatedDetails.annualEir")
+    @Mapping(target = "paymentAmountCalculationStrategy", source = "loanProductRelatedDetails", qualifiedByName = "paymentAmountCalculationStrategyData")
     @Mapping(target = "principal", source = "loanProductRelatedDetails.principal")
     @Mapping(target = "amortizationType", source = "loanProductRelatedDetails", qualifiedByName = "amortizationTypeData")
     @Mapping(target = "npvDayCount", source = "loanProductRelatedDetails.npvDayCount")
@@ -143,6 +145,13 @@ public interface WorkingCapitalLoanMapper {
     @Named("amortizationTypeData")
     default StringEnumOptionData amortizationTypeData(final WorkingCapitalLoanProductRelatedDetails detail) {
         return (detail != null && detail.getAmortizationType() != null) ? detail.getAmortizationType().getValueAsStringEnumOptionData()
+                : null;
+    }
+
+    @Named("paymentAmountCalculationStrategyData")
+    default StringEnumOptionData paymentAmountCalculationStrategyData(final WorkingCapitalLoanProductRelatedDetails detail) {
+        return (detail != null && detail.getPaymentAmountCalculationStrategy() != null)
+                ? detail.getPaymentAmountCalculationStrategy().getValueAsStringEnumOptionData()
                 : null;
     }
 

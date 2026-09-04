@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet author="fineract" id="wclp-0077-1-add-payment-amount-calculation-strategy-to-wc-loan-product">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="m_wc_loan_product"/>
+                <not>
+                    <columnExists tableName="m_wc_loan_product" columnName="payment_amount_calculation_strategy"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_product">
+            <column name="payment_amount_calculation_strategy" type="VARCHAR(20)" defaultValue="TPV">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="wclp-0077-2-add-annual-eir-to-wc-loan-product">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="m_wc_loan_product"/>
+                <not>
+                    <columnExists tableName="m_wc_loan_product" columnName="annual_eir"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_product">
+            <column name="annual_eir" type="DECIMAL(19, 6)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="wclp-0077-3-make-period-payment-rate-nullable-on-wc-loan-product">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="m_wc_loan_product"/>
+                <columnExists tableName="m_wc_loan_product" columnName="period_payment_rate"/>
+            </and>
+        </preConditions>
+        <dropNotNullConstraint tableName="m_wc_loan_product" columnName="period_payment_rate" columnDataType="DECIMAL(19, 6)"/>
+    </changeSet>
+
+    <changeSet author="fineract" id="wclp-0077-4-add-payment-amount-calculation-strategy-to-wc-loan">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="m_wc_loan"/>
+                <not>
+                    <columnExists tableName="m_wc_loan" columnName="payment_amount_calculation_strategy"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="m_wc_loan">
+            <column name="payment_amount_calculation_strategy" type="VARCHAR(20)" defaultValue="TPV">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="wclp-0077-5-add-annual-eir-to-wc-loan">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="m_wc_loan"/>
+                <not>
+                    <columnExists tableName="m_wc_loan" columnName="annual_eir"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="m_wc_loan">
+            <column name="annual_eir" type="DECIMAL(19, 6)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="fineract" id="wclp-0077-6-make-total-payment-volume-nullable-on-wc-loan">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="m_wc_loan"/>
+                <columnExists tableName="m_wc_loan" columnName="total_payment_volume"/>
+            </and>
+        </preConditions>
+        <dropNotNullConstraint tableName="m_wc_loan" columnName="total_payment_volume" columnDataType="DECIMAL(19, 6)"/>
+    </changeSet>
+
+    <changeSet author="fineract" id="wclp-0077-7-make-period-payment-rate-nullable-on-wc-loan">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="m_wc_loan"/>
+                <columnExists tableName="m_wc_loan" columnName="period_payment_rate"/>
+            </and>
+        </preConditions>
+        <dropNotNullConstraint tableName="m_wc_loan" columnName="period_payment_rate" columnDataType="DECIMAL(19, 6)"/>
+    </changeSet>
+
+</databaseChangeLog>
