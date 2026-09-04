@@ -40,6 +40,8 @@ public final class WorkingCapitalLoanProductConstants {
 
     // Settings
     public static final String amortizationTypeParamName = "amortizationType";
+    public static final String paymentAmountCalculationStrategyParamName = "paymentAmountCalculationStrategy";
+    public static final String annualEirParamName = "annualEir";
     public static final String delinquencyBucketIdParamName = "delinquencyBucketId";
     public static final String npvDayCountParamName = "npvDayCount";
     public static final String paymentAllocationParamName = "paymentAllocation";
@@ -51,6 +53,8 @@ public final class WorkingCapitalLoanProductConstants {
     public static final String minPeriodPaymentRateParamName = "minPeriodPaymentRate";
     public static final String periodPaymentRateParamName = "periodPaymentRate";
     public static final String maxPeriodPaymentRateParamName = "maxPeriodPaymentRate";
+    public static final String minAnnualEirParamName = "minAnnualEir";
+    public static final String maxAnnualEirParamName = "maxAnnualEir";
     public static final String discountParamName = "discount";
     public static final String repaymentEveryParamName = "repaymentEvery";
     public static final String repaymentFrequencyTypeParamName = "repaymentFrequencyType";

@@ -145,12 +145,38 @@ class WorkingCapitalLoanProductDataValidatorTest {
     }
 
     @Test
+    void testValidateForCreate_WithMinGreaterThanMaxAnnualEir_ShouldThrowException() {
+        final JsonObject jsonObject = createBaseJsonObject();
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName, "ANNUAL_EIR");
+        jsonObject.remove(WorkingCapitalLoanProductConstants.periodPaymentRateParamName);
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.annualEirParamName, BigDecimal.valueOf(43.7562));
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.discountParamName, BigDecimal.valueOf(1000));
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.minAnnualEirParamName, BigDecimal.valueOf(50));
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.maxAnnualEirParamName, BigDecimal.valueOf(40));
+
+        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForCreate(toJsonAndSetupMocks(jsonObject)));
+    }
+
+    @Test
+    void testValidateForCreate_WithAnnualEirOutsideMinMax_ShouldThrowException() {
+        final JsonObject jsonObject = createBaseJsonObject();
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName, "ANNUAL_EIR");
+        jsonObject.remove(WorkingCapitalLoanProductConstants.periodPaymentRateParamName);
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.annualEirParamName, BigDecimal.valueOf(10));
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.discountParamName, BigDecimal.valueOf(1000));
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.minAnnualEirParamName, BigDecimal.valueOf(20));
+        jsonObject.addProperty(WorkingCapitalLoanProductConstants.maxAnnualEirParamName, BigDecimal.valueOf(50));
+
+        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForCreate(toJsonAndSetupMocks(jsonObject)));
+    }
+
+    @Test
     void testValidateForUpdate_WithValidData_ShouldNotThrowException() {
         // Given
         final String json = createValidJson();
 
         // When & Then
-        assertDoesNotThrow(() -> validator.validateForUpdate(json));
+        assertDoesNotThrow(() -> validator.validateForUpdate(json, null));
     }
 
     @Test
@@ -159,7 +185,7 @@ class WorkingCapitalLoanProductDataValidatorTest {
         final String json = "";
 
         // When & Then
-        assertThrows(InvalidJsonException.class, () -> validator.validateForUpdate(json));
+        assertThrows(InvalidJsonException.class, () -> validator.validateForUpdate(json, null));
     }
 
     @Test
@@ -170,7 +196,7 @@ class WorkingCapitalLoanProductDataValidatorTest {
         final String json = createJsonWithDates(startDate, closeDate);
 
         // When & Then
-        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForUpdate(json));
+        assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForUpdate(json, null));
     }
 
     @Test
