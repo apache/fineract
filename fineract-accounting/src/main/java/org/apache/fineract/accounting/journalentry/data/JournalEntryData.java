@@ -80,6 +80,13 @@ public class JournalEntryData {
     private TransactionDetailData transactionDetails;
     @SuppressWarnings("unused")
     private LocalDate submittedOnDate;
+    /**
+     * Fineract-style date-time JSON array: [year, month, day, hour, minute, second].
+     *
+     * Note: Keep {@code submittedOnDate} unchanged.
+     */
+    @SuppressWarnings("unused")
+    private List<Integer> submittedOnDateTime;
 
     // import fields
     private transient Integer rowIndex;
@@ -176,6 +183,7 @@ public class JournalEntryData {
         this.entityId = null;
         this.createdByUserId = null;
         this.submittedOnDate = null;
+        this.submittedOnDateTime = null;
         this.createdDate = null;
         this.createdByUserName = null;
         this.reversed = null;
@@ -190,9 +198,10 @@ public class JournalEntryData {
             final String glAccountCode, final EnumOptionData glAccountClassification, final LocalDate transactionDate,
             final EnumOptionData entryType, final BigDecimal amount, final String transactionId, final Boolean manualEntry,
             final EnumOptionData entityType, final Long entityId, final Long createdByUserId, final LocalDate submittedOnDate,
-            final String createdByUserName, final String comments, final Boolean reversed, final String referenceNumber,
-            final BigDecimal officeRunningBalance, final BigDecimal organizationRunningBalance, final Boolean runningBalanceComputed,
-            final TransactionDetailData transactionDetailData, final CurrencyData currency, final String externalAssetOwner) {
+            final List<Integer> submittedOnDateTime, final String createdByUserName, final String comments, final Boolean reversed,
+            final String referenceNumber, final BigDecimal officeRunningBalance, final BigDecimal organizationRunningBalance,
+            final Boolean runningBalanceComputed, final TransactionDetailData transactionDetailData, final CurrencyData currency,
+            final String externalAssetOwner) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -210,6 +219,7 @@ public class JournalEntryData {
         this.createdByUserId = createdByUserId;
         this.createdDate = submittedOnDate;
         this.submittedOnDate = submittedOnDate;
+        this.submittedOnDateTime = submittedOnDateTime;
         this.createdByUserName = createdByUserName;
         this.comments = comments;
         this.reversed = reversed;
@@ -252,6 +262,7 @@ public class JournalEntryData {
         final Long entityId = null;
         final Long createdByUserId = null;
         final LocalDate submittedOnDate = null;
+        final List<Integer> submittedOnDateTime = null;
         final String createdByUserName = null;
         final String comments = null;
         final Boolean reversed = null;
@@ -264,8 +275,8 @@ public class JournalEntryData {
         final String externalAssetOwner = null;
         return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glAccountCode, glAccountClassification,
                 transactionDate, entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, submittedOnDate,
-                createdByUserName, comments, reversed, referenceNumber, officeRunningBalance, organizationRunningBalance,
-                runningBalanceComputed, transactionDetailData, currency, externalAssetOwner);
+                submittedOnDateTime, createdByUserName, comments, reversed, referenceNumber, officeRunningBalance,
+                organizationRunningBalance, runningBalanceComputed, transactionDetailData, currency, externalAssetOwner);
     }
 
     public Integer getRowIndex() {
