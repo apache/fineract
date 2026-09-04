@@ -44,6 +44,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.AddressData;
 import org.apache.fineract.client.models.ClientAddressRequest;
+import org.apache.fineract.client.models.ClientIdentifierCreateRequest;
+import org.apache.fineract.client.models.ClientIdentifierCreateResponse;
 import org.apache.fineract.client.models.ClientTextSearch;
 import org.apache.fineract.client.models.DeleteClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientTransferProposalDateResponse;
@@ -56,8 +58,6 @@ import org.apache.fineract.client.models.LoanAccountLockResponseDTO;
 import org.apache.fineract.client.models.PageClientSearchData;
 import org.apache.fineract.client.models.PagedRequestClientTextSearch;
 import org.apache.fineract.client.models.PostClientClientIdAddressesResponse;
-import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
-import org.apache.fineract.client.models.PostClientsClientIdIdentifiersResponse;
 import org.apache.fineract.client.models.PostClientsClientIdRequest;
 import org.apache.fineract.client.models.PostClientsClientIdResponse;
 import org.apache.fineract.client.models.PostClientsClientIdTransactionsTransactionIdResponse;
@@ -181,8 +181,7 @@ public class ClientHelper {
                 ACTIVATE_CLIENT_COMMAND));
     }
 
-    public PostClientsClientIdIdentifiersResponse createClientIdentifer(final Long clientId,
-            final PostClientsClientIdIdentifiersRequest request) {
+    public ClientIdentifierCreateResponse createClientIdentifer(final Long clientId, final ClientIdentifierCreateRequest request) {
         return Calls.ok(FineractClientHelper.getFineractClient().clientIdentifiers.createClientIdentifier(clientId, request));
     }
 
@@ -1213,8 +1212,8 @@ public class ClientHelper {
         return Calls.ok(FineractClientHelper.getFineractClient().loanAccountLockApi.retrieveLockedAccounts(page, limit));
     }
 
-    public static PostClientsClientIdIdentifiersRequest createClientIdentifer(final Long documentType) {
-        return new PostClientsClientIdIdentifiersRequest().documentTypeId(documentType).documentKey(Utils.randomStringGenerator("ID_", 10))
+    public static ClientIdentifierCreateRequest createClientIdentifer(final Long documentType) {
+        return new ClientIdentifierCreateRequest().documentTypeId(documentType).documentKey(Utils.randomStringGenerator("ID_", 10))
                 .description(Utils.randomStringGenerator("Desc_", 50)).status("Active");
     }
 

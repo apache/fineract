@@ -400,6 +400,14 @@ public class SecurityConfig {
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/floatingrates/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_FLOATINGRATE")
 
+                    // client identifier
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/clients/*/identifiers"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "CREATE_CLIENTIDENTIFIER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/clients/*/identifiers/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_CLIENTIDENTIFIER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/clients/*/identifiers/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_CLIENTIDENTIFIER")
+
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/twofactor/validate")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/*/twofactor")).fullyAuthenticated()
                     .requestMatchers(API_MATCHER.matcher("/api/**")).access(allOfRequestManagers(authorizationManagers));

@@ -24,12 +24,13 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Locale;
+import org.apache.fineract.client.models.ClientIdentifierCreateRequest;
+import org.apache.fineract.client.models.ClientIdentifierCreateResponse;
 import org.apache.fineract.client.models.GetClientsClientIdResponse;
 import org.apache.fineract.client.models.GetClientsResponse;
 import org.apache.fineract.client.models.PageClientSearchData;
-import org.apache.fineract.client.models.PostClientsClientIdIdentifiersRequest;
-import org.apache.fineract.client.models.PostClientsClientIdIdentifiersResponse;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostOfficesRequest;
@@ -305,9 +306,9 @@ public class ClientSearchTest extends IntegrationTest {
         request1.setMobileNo(Utils.randomStringGenerator("", 8, Utils.SOURCE_SET_NUMBERS));
         PostClientsResponse clientResponse = clientHelper.createClient(request1);
         final Long documentType = 1L;
-        PostClientsClientIdIdentifiersRequest identifierRequest = ClientHelper.createClientIdentifer(documentType);
+        ClientIdentifierCreateRequest identifierRequest = ClientHelper.createClientIdentifer(documentType);
         final String documentKey = identifierRequest.getDocumentKey();
-        PostClientsClientIdIdentifiersResponse clientIdentifierResponse = clientHelper.createClientIdentifer(clientResponse.getClientId(),
+        ClientIdentifierCreateResponse clientIdentifierResponse = clientHelper.createClientIdentifer(clientResponse.getClientId(),
                 identifierRequest);
 
         PostClientsRequest request2 = ClientHelper.defaultClientCreationRequest();
@@ -329,7 +330,7 @@ public class ClientSearchTest extends IntegrationTest {
         request1.setMobileNo(Utils.randomStringGenerator("", 8, Utils.SOURCE_SET_NUMBERS));
         PostClientsResponse clientResponse = clientHelper.createClient(request1);
         final Long documentType = 1L;
-        PostClientsClientIdIdentifiersRequest identifierRequest = ClientHelper.createClientIdentifer(documentType);
+        ClientIdentifierCreateRequest identifierRequest = ClientHelper.createClientIdentifer(documentType);
         final String documentKey = identifierRequest.getDocumentKey();
         clientHelper.createClientIdentifer(clientResponse.getClientId(), identifierRequest);
 
@@ -351,18 +352,18 @@ public class ClientSearchTest extends IntegrationTest {
         PostClientsRequest request = ClientHelper.defaultClientCreationRequest();
         PostClientsResponse clientResponse = clientHelper.createClient(request);
 
-        Integer codeId = (Integer) CodeHelper.createCode(requestSpec, responseSpec, Utils.randomStringGenerator("ClientIdentifierTest_", 6),
-                CodeHelper.RESPONSE_ID_ATTRIBUTE_NAME);
+        HashMap<String, Object> customerIdentifierCode = CodeHelper.getCodeByName(requestSpec, responseSpec, "Customer Identifier");
+        Integer codeId = (Integer) customerIdentifierCode.get(CodeHelper.CODE_ID_ATTRIBUTE_NAME);
         Integer documentTypeIdOne = CodeHelper.createCodeValue(requestSpec, responseSpec, codeId,
                 Utils.randomStringGenerator("DocType_", 6), 1);
         Integer documentTypeIdTwo = CodeHelper.createCodeValue(requestSpec, responseSpec, codeId,
                 Utils.randomStringGenerator("DocType_", 6), 2);
 
         String documentKeyToken = Utils.randomStringGenerator("DUP_ID_", 6);
-        PostClientsClientIdIdentifiersRequest identifierOne = new PostClientsClientIdIdentifiersRequest()
-                .documentTypeId(documentTypeIdOne.longValue()).documentKey(documentKeyToken + "_A").description("Test").status("Active");
-        PostClientsClientIdIdentifiersRequest identifierTwo = new PostClientsClientIdIdentifiersRequest()
-                .documentTypeId(documentTypeIdTwo.longValue()).documentKey(documentKeyToken + "_B").description("Test").status("Active");
+        ClientIdentifierCreateRequest identifierOne = new ClientIdentifierCreateRequest().documentTypeId(documentTypeIdOne.longValue())
+                .documentKey(documentKeyToken + "_A").description("Test").status("Active");
+        ClientIdentifierCreateRequest identifierTwo = new ClientIdentifierCreateRequest().documentTypeId(documentTypeIdTwo.longValue())
+                .documentKey(documentKeyToken + "_B").description("Test").status("Active");
         clientHelper.createClientIdentifer(clientResponse.getClientId(), identifierOne);
         clientHelper.createClientIdentifer(clientResponse.getClientId(), identifierTwo);
 

@@ -35,3 +35,6 @@ gradleExp/
 .java-version
 
 .windsurf/
+docs/
+scheduler-test.log
+*.log
