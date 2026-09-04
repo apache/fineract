@@ -711,6 +711,7 @@ Feature: WorkingCapitalAmortizationSchedule
     When Admin rejects the working capital loan on "01 January 2019"
     Then Working capital loan rejection was successful
 
+  @TestRailId:C102407
   Scenario: Verify the projected amortization schedule of a loan disbursed with a discount matches the reference calculation
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
