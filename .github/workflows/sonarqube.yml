@@ -73,4 +73,7 @@ jobs:
         with:
           validate-wrappers: true
       - name: Sonar
-        run: ./gradlew --no-daemon --console=plain -Dsonar.verbose=true -Dsonar.token=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.organization=$SONAR_ORGANIZATION -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.java.binaries=$JAVA_BINARIES --info --stacktrace sonar -x buildJavaSdk
+        # --no-parallel is required: the sonar task resolves every subproject's
+        # compileClasspath, and Gradle 9 rejects that cross-project resolution
+        # unless the task holds the lock of all projects (parallel execution off).
+        run: ./gradlew --no-daemon --no-parallel --console=plain -Dsonar.verbose=true -Dsonar.token=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.organization=$SONAR_ORGANIZATION -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.java.binaries=$JAVA_BINARIES --info --stacktrace sonar -x buildJavaSdk
