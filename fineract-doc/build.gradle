@@ -96,29 +96,29 @@ task copyDiagrams(type: Copy) {
 asciidoctor {
     languages 'en'
 
-    baseDir 'src/docs'
+    baseDir = 'src/docs'
     sourceDir 'src/docs'
     sources {
         include('index.adoc')
     }
-    outputDir 'build/docs/html'
+    outputDir = 'build/docs/html'
 
     logging.captureStandardError LogLevel.INFO
 
     dependsOn copyImages, copyDiagrams
 
-    dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
+    dependsOn(':fineract-client:buildAsciidoc')
 }
 
 asciidoctorPdf {
     languages 'en'
 
-    baseDir 'src/docs'
+    baseDir = 'src/docs'
     sourceDir 'src/docs'
     sources {
         include('index.adoc')
     }
-    outputDir 'build/docs/pdf'
+    outputDir = 'build/docs/pdf'
 
     logging.captureStandardError LogLevel.INFO
 
@@ -132,7 +132,7 @@ asciidoctorPdf {
     //     }
     // }
     // fontsDir "$projectDir/src/resources/fonts"
-    dependsOn(':fineract-client:clean', ':fineract-client:buildAsciidoc')
+    dependsOn(':fineract-client:buildAsciidoc')
 }
 
 task doc(type: Zip) {

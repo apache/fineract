@@ -93,8 +93,7 @@ Feature: Working Capital Breach Start Date Type
       | 3            | 2026-01-10 | 2026-01-12 | 3            | 100              | 100               | null       | null   |
       | 4            | 2026-01-13 | 2026-01-15 | 3            | 100              | 100               | null       | null   |
 
-  @TestRailId:C89775 @Skipped
-  ### test verification is obsolete. Update scenario accordingly or remove.
+  @TestRailId:C89775
   Scenario: Verify breach start date type - UC3: breachGraceDays shift the LOAN_CREATION anchor, not the disbursement date
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data

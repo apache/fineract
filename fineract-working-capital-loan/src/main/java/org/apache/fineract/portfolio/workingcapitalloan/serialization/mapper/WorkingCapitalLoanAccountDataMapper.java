@@ -105,10 +105,6 @@ public interface WorkingCapitalLoanAccountDataMapper {
     WorkingCapitalLoanSummaryDataV1 map(WorkingCapitalLoanSummaryData source);
 
     @Mapping(source = "delinquentPrincipal", target = "totalDelinquentAmount")
-    @Mapping(target = "lastPaymentDate", ignore = true)
-    @Mapping(target = "lastPaymentAmount", ignore = true)
-    @Mapping(target = "lastRepaymentDate", ignore = true)
-    @Mapping(target = "lastRepaymentAmount", ignore = true)
     @Mapping(target = "delinquencySchedule", ignore = true)
     WorkingCapitalLoanCollectionDataV1 map(WorkingCapitalLoanCollectionData source);
 

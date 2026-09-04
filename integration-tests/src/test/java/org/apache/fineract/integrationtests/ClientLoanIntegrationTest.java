@@ -136,6 +136,8 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
     /** The loan/product JSON builders this test replaced used {@code en_GB}; keep it so number parsing is unchanged. */
     private static final String LOCALE = "en_GB";
     private static final String OVERRIDE_MESSAGE = "Loan overrode the product's %s";
+    /** The disburse-to-savings JSON builder this test replaced always sent this note; keep the payload unchanged. */
+    private static final String DISBURSE_NOTE = "DISBURSE NOTE";
     /** The interoperation repayment body was built with plain {@code en}, unlike the {@code en_GB} used elsewhere. */
     private static final String INTEROP_LOCALE = "en";
 
@@ -7298,8 +7300,9 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
                 .expectedDisbursementDate(disbursementDate)//
                 .submittedOnDate(disbursementDate)//
                 .transactionProcessingStrategyCode(repaymentStrategy)//
-                .collateral(createClientCollateral(clientId));
-        return applyForLoan(LoanRequestBuilders.applyLoanWithLegacyDates(request, null, firstRepaymentDate));
+                .collateral(createClientCollateral(clientId))//
+                .repaymentsStartingFromDate(firstRepaymentDate);
+        return applyForLoan(request);
     }
 
     private PostLoansResponse applyForLoanApplicationForOnePeriod30DaysLongNoInterestPeriodicAccrual(Long clientId, Long loanProductId,
@@ -7824,7 +7827,8 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
                 .actualDisbursementDate(date)//
                 .dateFormat(DATETIME_PATTERN)//
                 .locale(LOCALE)//
-                .netDisbursalAmount(netDisbursalAmount));
+                .netDisbursalAmount(netDisbursalAmount)//
+                .note(DISBURSE_NOTE));
         return getLoanDetails(loanId);
     }
 

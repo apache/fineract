@@ -38,8 +38,8 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanBalanceChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanStatusChangedBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanUndoWrittenOffBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanWrittenOffBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanWriteOffTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
@@ -140,7 +140,7 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
             this.accountingProcessor.postJournalEntries(loan, writeOffTransaction, allocation, loan.isChargedOff());
         }
         this.businessEventNotifierService
-                .notifyPostBusinessEvent(new WorkingCapitalLoanWrittenOffBusinessEvent(writeOffTransaction, loan.getId()));
+                .notifyPostBusinessEvent(new WorkingCapitalLoanWriteOffTransactionBusinessEvent(writeOffTransaction, loan.getId()));
         notifyBalanceChanged(loan);
         notifyStatusChanged(loan, oldStatus);
 
@@ -203,7 +203,7 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
             this.accountingProcessor.postReversalJournalEntries(loan, writeOffTransaction);
         }
         this.businessEventNotifierService
-                .notifyPostBusinessEvent(new WorkingCapitalLoanUndoWrittenOffBusinessEvent(writeOffTransaction, loan.getId()));
+                .notifyPostBusinessEvent(new WorkingCapitalLoanUndoWriteOffTransactionBusinessEvent(writeOffTransaction, loan.getId()));
         notifyBalanceChanged(loan);
         notifyStatusChanged(loan, oldStatus);
 

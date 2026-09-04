@@ -40,6 +40,14 @@ public interface WorkingCapitalLoanAccountingProcessor {
 
     void postJournalEntriesForDiscountFeeAmortization(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn, boolean isChargedOff);
 
+    /**
+     * {@link #restateJournalEntries}'s counterpart for a discount-fee-amortization transaction: replaces its stale
+     * journal entries with a fresh set posted from its recomputed {@code transactionAmount} (a no-op if the ledger
+     * already reflects that amount). Used to replay the charge-off's final lump-sum amortization in place when a
+     * backdated discount-fee adjustment reprocess changes what it should have been.
+     */
+    void restateJournalEntriesForDiscountFeeAmortization(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn, boolean isChargedOff);
+
     void postJournalEntriesForDiscountFeeAmortizationAdjustment(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn,
             boolean isChargedOff);
 

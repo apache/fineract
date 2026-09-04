@@ -90,25 +90,34 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     @Override
     public void notifyPostBusinessEvent(BusinessEvent<?> businessEvent) {
         throwExceptionIfBulkEvent(businessEvent);
-        boolean isExternalEvent = !(businessEvent instanceof NoExternalEvent);
         List<BusinessEventListener> businessEventListeners = findSuitableListeners(postListeners, businessEvent.getClass());
         for (BusinessEventListener eventListener : businessEventListeners) {
             eventListener.onBusinessEvent(businessEvent);
         }
-        if (isExternalEvent && isExternalEventPostingEnabled()) {
-            // we only want to create external events for operations that were successful, hence the post listener
-            if (externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(businessEvent)) {
-                if (isExternalEventRecordingEnabled()) {
-                    recordedEvents.get().add(businessEvent);
+        // we only want to create external events for operations that were successful, hence the post listener
+        if (isExternalEventPostingEnabled(businessEvent)) {
+            if (isExternalEventRecordingEnabled()) {
+                recordedEvents.get().add(businessEvent);
+            } else {
+                if (transactionHelper.hasTransaction()) {
+                    storeTransactionalBusinessEvent(businessEvent);
                 } else {
-                    if (transactionHelper.hasTransaction()) {
-                        storeTransactionalBusinessEvent(businessEvent);
-                    } else {
-                        externalEventService.postEvent(businessEvent);
-                    }
+                    externalEventService.postEvent(businessEvent);
                 }
             }
         }
+    }
+
+    @Override
+    public boolean isExternalEventPostingEnabled(final BusinessEvent<?> businessEvent) {
+        return !(businessEvent instanceof NoExternalEvent) && isExternalEventPostingEnabled()
+                && externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(businessEvent);
+    }
+
+    @Override
+    public boolean isExternalEventPostingEnabled(final String eventType) {
+        return isExternalEventPostingEnabled()
+                && externalBusinessEventConfigurationService.isExternalEventTypeConfiguredForPosting(eventType);
     }
 
     private List<BusinessEventListener> findSuitableListeners(Map<Class, List<BusinessEventListener>> listeners, Class<?> eventClazz) {

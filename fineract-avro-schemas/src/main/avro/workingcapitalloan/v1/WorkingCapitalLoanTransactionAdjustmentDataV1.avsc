@@ -1,0 +1,23 @@
+{
+    "name": "WorkingCapitalLoanTransactionAdjustmentDataV1",
+    "namespace": "org.apache.fineract.avro.workingcapitalloan.v1",
+    "type": "record",
+    "fields": [
+        {
+            "default": null,
+            "name": "transactionToAdjust",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanTransactionDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "newTransactionDetail",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanTransactionDataV1"
+            ]
+        }
+    ]
+}

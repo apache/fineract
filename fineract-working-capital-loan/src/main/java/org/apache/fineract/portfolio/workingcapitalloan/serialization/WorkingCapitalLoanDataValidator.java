@@ -176,14 +176,12 @@ public class WorkingCapitalLoanDataValidator {
             validateDiscountAmountWithProductDiscount(discountAmount, loan.getLoanProduct().getRelatedDetail(), baseDataValidator);
         }
 
-        final LocalDate actualDisbursementDate = loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()
-                ? loan.getDisbursementDetails().getFirst().getActualDisbursementDate()
-                : null;
-        if (actualDisbursementDate == null) {
+        if (loan.isNotDisbursed()) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.actualDisbursementDateParamName)
                     .failWithCode("loan.not.disbursed");
         }
 
+        final LocalDate actualDisbursementDate = loan.getFirstActualDisbursementDate();
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
         if (actualDisbursementDate != null && !actualDisbursementDate.equals(businessDate)) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.actualDisbursementDateParamName).value(businessDate)
@@ -274,7 +272,7 @@ public class WorkingCapitalLoanDataValidator {
             }
         }
         validatePaymentDetails(baseDataValidator, element);
-        if (loan.getLoanStatus() == null || !loan.getLoanStatus().isActive()) {
+        if (!loan.isOpen()) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
                     .failWithCode("adjustment.only.allowed.for.active.loan");
         }
@@ -685,10 +683,7 @@ public class WorkingCapitalLoanDataValidator {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
                         .failWithCode("cannot.be.a.future.date");
             }
-            final LocalDate disbursalDate = loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()
-                    ? loan.getDisbursementDetails().getFirst().getActualDisbursementDate()
-                    : null;
-            if (DateUtils.isBefore(transactionDate, disbursalDate)) {
+            if (DateUtils.isBefore(transactionDate, loan.getFirstActualDisbursementDate())) {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
                         .failWithCode("cannot.be.before.disbursal.date");
             }
@@ -755,7 +750,7 @@ public class WorkingCapitalLoanDataValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
 
-        if (loan.getLoanStatus() == null || !loan.getLoanStatus().isActive()) {
+        if (!loan.isOpen()) {
             baseDataValidator.reset().parameter("loanStatus").failWithCode("error.msg.wc.loan.is.not.active");
         }
 
@@ -803,7 +798,7 @@ public class WorkingCapitalLoanDataValidator {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
 
-        if (loan.getLoanStatus() == null || !loan.getLoanStatus().isClosedWrittenOff()) {
+        if (!loan.isClosedWrittenOff()) {
             baseDataValidator.reset().parameter("loanStatus").failWithCode("error.msg.wc.loan.is.not.written.off");
         }
 
@@ -848,10 +843,7 @@ public class WorkingCapitalLoanDataValidator {
                         .failWithCode("cannot.be.a.future.date");
             }
             final LocalDate businessDate = DateUtils.getBusinessLocalDate();
-            final LocalDate disbursalDate = loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()
-                    ? loan.getDisbursementDetails().getFirst().getActualDisbursementDate()
-                    : null;
-            if (DateUtils.isBefore(transactionDate, disbursalDate)) {
+            if (DateUtils.isBefore(transactionDate, loan.getFirstActualDisbursementDate())) {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.transactionDateParamName)
                         .failWithCode("cannot.be.before.disbursal.date");
             } else if (DateUtils.isBefore(transactionDate, businessDate)) {
@@ -902,7 +894,7 @@ public class WorkingCapitalLoanDataValidator {
                 .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (loan.getLoanStatus() != LoanStatus.ACTIVE) {
+        if (!loan.isOpen()) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
                     .failWithCode("near.breach.action.not.allowed.for.non.active.loan");
         }
@@ -973,7 +965,7 @@ public class WorkingCapitalLoanDataValidator {
                 .resource(WorkingCapitalLoanConstants.RESOURCE_NAME);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        if (loan.getLoanStatus() != LoanStatus.ACTIVE) {
+        if (!loan.isOpen()) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanStatusParamName)
                     .failWithCode("rate.change.not.allowed.for.non.active.loan");
         }
@@ -981,10 +973,7 @@ public class WorkingCapitalLoanDataValidator {
         final LocalDate effectiveDate = this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanConstants.effectiveDateParamName,
                 element);
         baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.effectiveDateParamName).value(effectiveDate).notNull();
-        final LocalDate disbursalDate = loan.getDisbursementDetails() != null && !loan.getDisbursementDetails().isEmpty()
-                ? loan.getDisbursementDetails().getFirst().getActualDisbursementDate()
-                : null;
-        if (DateUtils.isBefore(effectiveDate, disbursalDate)) {
+        if (DateUtils.isBefore(effectiveDate, loan.getFirstActualDisbursementDate())) {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.effectiveDateParamName)
                     .failWithCode("cannot.be.before.disbursal.date");
         }

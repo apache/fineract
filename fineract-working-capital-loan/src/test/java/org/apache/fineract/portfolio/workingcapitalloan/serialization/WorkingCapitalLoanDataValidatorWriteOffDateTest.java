@@ -38,7 +38,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
@@ -85,7 +84,7 @@ class WorkingCapitalLoanDataValidatorWriteOffDateTest {
         ThreadLocalContextUtil.setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, BUSINESS_DATE)));
 
         validator = new WorkingCapitalLoanDataValidator(new FromJsonHelper(), null, null, transactionFinder, null, null, null);
-        lenient().when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
+        lenient().when(loan.isOpen()).thenReturn(true);
         lenient().when(transactionFinder.getLastUserTransactionDate(loan)).thenReturn(Optional.of(LAST_REPAYMENT_DATE));
     }
 
@@ -147,7 +146,7 @@ class WorkingCapitalLoanDataValidatorWriteOffDateTest {
 
     @Test
     void shouldRejectWriteOffOnANonActiveLoan() {
-        when(loan.getLoanStatus()).thenReturn(LoanStatus.CLOSED_WRITTEN_OFF);
+        when(loan.isOpen()).thenReturn(false);
         final PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
                 () -> validator.validateWriteOff(writeOffCommand(BUSINESS_DATE), loan));
         assertThat(ex.getErrors())

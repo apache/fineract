@@ -309,6 +309,8 @@ final class SavingsAccountsApiResourceSwagger {
         public Long productId;
         @Schema(example = "01 March 2011")
         public String submittedOnDate;
+        @Schema(example = "true")
+        public Boolean withdrawalFeeForTransfers;
     }
 
     @Schema(description = "PutSavingsAccountsAccountIdResponse")

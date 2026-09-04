@@ -31,6 +31,7 @@ import java.util.List;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdStatus;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignGlimHelper;
@@ -80,7 +81,7 @@ public class GroupLoanIntegrationTest extends FeignLoanTestBase {
         final Long groupId = groupHelper.createActiveGroup().getResourceId();
         groupHelper.associateClient(groupId, clientId);
 
-        final Long loanProductId = createLoanProductFromJson(loanProductJson());
+        final Long loanProductId = createLoanProduct(loanProductRequest());
         final Long loanId = applyGroupLoan(groupId, loanProductId);
 
         final List<GetLoansLoanIdRepaymentPeriod> periods = getLoanDetails(loanId).getRepaymentSchedule().getPeriods();
@@ -131,7 +132,7 @@ public class GroupLoanIntegrationTest extends FeignLoanTestBase {
         final Long clientId = createClient();
         currentGroupId = groupHelper.createActiveGroup().getResourceId();
         groupHelper.associateClient(currentGroupId, clientId);
-        final Long loanProductId = createLoanProductFromJson(loanProductJson());
+        final Long loanProductId = createLoanProduct(loanProductRequest());
 
         return glimHelper.applyGlim(loanApplication(loanProductId)//
                 .groupId(currentGroupId)//
@@ -163,14 +164,14 @@ public class GroupLoanIntegrationTest extends FeignLoanTestBase {
                 .dateFormat(LoanTestData.DATETIME_PATTERN);
     }
 
-    private String loanProductJson() {
+    private PostLoanProductsRequest loanProductRequest() {
         return new LoanProductTestBuilder()//
                 .withPrincipal(PRODUCT_PRINCIPAL)//
                 .withNumberOfRepayments(PRODUCT_NUMBER_OF_REPAYMENTS)//
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth()//
                 .withinterestRatePerPeriod(PRODUCT_INTEREST_RATE).withInterestRateFrequencyTypeAsMonths()//
                 .withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()//
-                .build(null);
+                .buildRequest(null);
     }
 
     private GetLoansLoanIdStatus loanStatus(Long loanId) {

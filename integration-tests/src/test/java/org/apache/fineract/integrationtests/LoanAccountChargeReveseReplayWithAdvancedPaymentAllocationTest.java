@@ -37,13 +37,14 @@ import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -218,15 +219,14 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest exte
     private Long createLoanAccount(final Long clientId, final Long loanProductId, final String externalId,
             final boolean advancedPaymentStrategy, String approveDate, String disbursementDate) {
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("30")
-                .withLoanTermFrequencyAsDays().withNumberOfRepayments("1").withRepaymentEveryAfter("30").withRepaymentFrequencyTypeAsDays()
-                .withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualPrincipalPayments()
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("03 September 2022")
-                .withSubmittedOnDate("01 September 2022").withLoanType("individual").withExternalId(externalId)
-                .withRepaymentStrategy(advancedPaymentStrategy ? "advanced-payment-allocation-strategy" : "mifos-standard-strategy")
-                .build(clientId.toString(), loanProductId.toString(), null);
+        PostLoansRequest loanApplication = LoanRequestBuilders
+                .legacyDaysBasedApplication(clientId, loanProductId, "1000", 30, 1, 30, "03 September 2022", "01 September 2022")
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .externalId(externalId)//
+                .transactionProcessingStrategyCode(
+                        advancedPaymentStrategy ? "advanced-payment-allocation-strategy" : "mifos-standard-strategy");
 
-        Long loanId = applyForLoanFromJson(loanApplicationJSON);
+        Long loanId = applyForLoan(loanApplication);
         approveLoan(loanId, approveLoanRequest(1000.0, approveDate));
         disburseLoanWithAmount(loanId, disbursementDate, 1000.0);
         return loanId;

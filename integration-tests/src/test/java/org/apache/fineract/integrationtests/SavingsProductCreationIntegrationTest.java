@@ -18,174 +18,145 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.math.BigDecimal;
+import org.apache.fineract.client.models.GetSavingsProductsAccountingMappings;
 import org.apache.fineract.client.models.GetSavingsProductsProductIdResponse;
+import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.PutSavingsProductsProductIdRequest;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-@ExtendWith({ SavingsTestLifecycleExtension.class })
-public class SavingsProductCreationIntegrationTest {
+public class SavingsProductCreationIntegrationTest extends FeignSavingsTestBase {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsProductCreationIntegrationTest.class);
-    private static ResponseSpecification responseSpec;
-    private static RequestSpecification requestSpec;
-    private AccountHelper accountHelper;
-    private SavingsAccountHelper savingsAccountHelper;
-    public static final String MINIMUM_OPENING_BALANCE = "1000.0";
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-    }
+    private static final BigDecimal MINIMUM_OPENING_BALANCE = new BigDecimal("1000.0");
+    private static final BigDecimal OVERDRAFT_LIMIT = new BigDecimal("100000");
+    private static final String INTEREST_RECEIVABLE_ACCOUNT = "interestReceivableAccount";
 
     @Test
     public void testStandardSavingsProductCreation_DoesNotAllowOverdraft() {
-        // --- ARRANGE ---
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount("assetAccount");
+        final Account incomeAccount = accountHelper.createIncomeAccount("incomeAccount");
+        final Account expenseAccount = accountHelper.createExpenseAccount("expenseAccount");
+        final Account liabilityAccount = accountHelper.createLiabilityAccount("liabilityAccount");
 
-        final Integer savingsProductID = createSavingsProductWithAccrualAccountingWithOutOverdraftAllowed(MINIMUM_OPENING_BALANCE,
-                assetAccount, incomeAccount, expenseAccount, liabilityAccount);
-        final GetSavingsProductsProductIdResponse savingsProductsResponse = SavingsProductHelper.getSavingsProductById(requestSpec,
-                responseSpec, savingsProductID);
-        Assertions.assertNotNull(savingsProductsResponse);
-        Assertions.assertNotNull(savingsProductsResponse.getAccountingMappings());
-        Assertions.assertNull(savingsProductsResponse.getAccountingMappings().getInterestReceivableAccount());
+        final Long productId = savingsProductHelper.createSavingsProduct(SavingsRequestBuilders
+                .withAccrualAccountingMappings(accrualProduct(), assetAccount, liabilityAccount, incomeAccount, expenseAccount))
+                .getResourceId();
+        assertNotNull(productId);
+
+        assertNull(getAccountingMappings(productId).getInterestReceivableAccount(),
+                "A product without an overdraft should not carry an interest receivable account");
     }
 
     @Test
     public void testSavingsProductWithOverdraftCreation_AllowsOverdraft() {
-        // --- ARRANGE ---
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account interestReceivableAccount = accountHelper.createAssetAccount("interestReceivableAccount");
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount("assetAccount");
+        final Account interestReceivableAccount = accountHelper.createAssetAccount(INTEREST_RECEIVABLE_ACCOUNT);
+        final Account incomeAccount = accountHelper.createIncomeAccount("incomeAccount");
+        final Account expenseAccount = accountHelper.createExpenseAccount("expenseAccount");
+        final Account liabilityAccount = accountHelper.createLiabilityAccount("liabilityAccount");
 
-        final Integer savingsProductID = createSavingsProductWithAccrualAccountingWithOverdraftAllowed(
-                interestReceivableAccount.getAccountID().toString(), MINIMUM_OPENING_BALANCE, assetAccount, incomeAccount, expenseAccount,
-                liabilityAccount);
-        final GetSavingsProductsProductIdResponse savingsProductsResponse = SavingsProductHelper.getSavingsProductById(requestSpec,
-                responseSpec, savingsProductID);
-        Assertions.assertNotNull(savingsProductsResponse);
-        Assertions.assertNotNull(savingsProductsResponse.getAccountingMappings());
-        Assertions.assertNotNull(savingsProductsResponse.getAccountingMappings().getInterestReceivableAccount());
+        final Long productId = savingsProductHelper
+                .createSavingsProduct(SavingsRequestBuilders.withAccrualAccountingMappings(overdraftAccrualProduct(), assetAccount,
+                        liabilityAccount, incomeAccount, expenseAccount, interestReceivableAccount))
+                .getResourceId();
+        assertNotNull(productId);
 
-        Assertions.assertEquals(interestReceivableAccount.getAccountID(),
-                savingsProductsResponse.getAccountingMappings().getInterestReceivableAccount().getId().intValue());
-
+        verifyInterestReceivableAccount(productId, interestReceivableAccount);
     }
 
     @Test
     public void testSavingsProductWithOverdraftUpdate_AllowsOverdraft() {
-        // --- ARRANGE ---
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account interestReceivableAccount = accountHelper.createAssetAccount("interestReceivableAccount");
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount("assetAccount");
+        final Account interestReceivableAccount = accountHelper.createAssetAccount(INTEREST_RECEIVABLE_ACCOUNT);
+        final Account incomeAccount = accountHelper.createIncomeAccount("incomeAccount");
+        final Account expenseAccount = accountHelper.createExpenseAccount("expenseAccount");
+        final Account liabilityAccount = accountHelper.createLiabilityAccount("liabilityAccount");
 
-        final Integer savingsProductID = createSavingsProductWithAccrualAccountingWithOverdraftAllowed(
-                interestReceivableAccount.getAccountID().toString(), MINIMUM_OPENING_BALANCE, assetAccount, incomeAccount, expenseAccount,
-                liabilityAccount);
-        final GetSavingsProductsProductIdResponse savingsProductsResponse = SavingsProductHelper.getSavingsProductById(requestSpec,
-                responseSpec, savingsProductID);
+        final PostSavingsProductsRequest createdProduct = SavingsRequestBuilders.withAccrualAccountingMappings(overdraftAccrualProduct(),
+                assetAccount, liabilityAccount, incomeAccount, expenseAccount, interestReceivableAccount);
+        final Long productId = savingsProductHelper.createSavingsProduct(createdProduct).getResourceId();
+        assertNotNull(productId);
+        verifyInterestReceivableAccount(productId, interestReceivableAccount);
 
-        Assertions.assertNotNull(savingsProductsResponse);
-        Assertions.assertNotNull(savingsProductsResponse.getAccountingMappings());
-        Assertions.assertNotNull(savingsProductsResponse.getAccountingMappings().getInterestReceivableAccount());
+        final Account newInterestReceivableAccount = accountHelper.createAssetAccount(INTEREST_RECEIVABLE_ACCOUNT);
+        final Long updatedProductId = savingsProductHelper
+                .updateSavingsProduct(productId, SavingsRequestBuilders.withAccrualAccountingMappings(updateOf(createdProduct),
+                        assetAccount, liabilityAccount, incomeAccount, expenseAccount, newInterestReceivableAccount))
+                .getResourceId();
+        assertEquals(productId, updatedProductId, "The update should have been applied to the same product");
 
-        Assertions.assertEquals(interestReceivableAccount.getAccountID(),
-                savingsProductsResponse.getAccountingMappings().getInterestReceivableAccount().getId().intValue());
-
-        final Account newInterestReceivableAccount = accountHelper.createAssetAccount("interestReceivableAccount");
-
-        final Integer savingsProductIDupdate = updateSavingsProductWithAccrualAccountingWithOverdraftAllowed(savingsProductID,
-                newInterestReceivableAccount.getAccountID().toString(), MINIMUM_OPENING_BALANCE, assetAccount, incomeAccount,
-                expenseAccount, liabilityAccount);
-
-        final GetSavingsProductsProductIdResponse savingsProductsResponseUpdate = SavingsProductHelper.getSavingsProductById(requestSpec,
-                responseSpec, savingsProductIDupdate);
-
-        Assertions.assertNotNull(savingsProductsResponseUpdate);
-        Assertions.assertNotNull(savingsProductsResponseUpdate.getAccountingMappings());
-        Assertions.assertNotNull(savingsProductsResponseUpdate.getAccountingMappings().getInterestReceivableAccount());
-
-        Assertions.assertEquals(newInterestReceivableAccount.getAccountID(),
-                savingsProductsResponseUpdate.getAccountingMappings().getInterestReceivableAccount().getId().intValue());
-        Assertions.assertNotEquals(interestReceivableAccount.getAccountID(),
-                savingsProductsResponseUpdate.getAccountingMappings().getInterestReceivableAccount().getId().intValue());
-
+        verifyInterestReceivableAccount(updatedProductId, newInterestReceivableAccount);
+        assertNotEquals(interestReceivableAccount.getAccountID(),
+                getAccountingMappings(updatedProductId).getInterestReceivableAccount().getId().intValue(),
+                "The interest receivable account should no longer be the one the product was created with");
     }
 
     @Test
     public void testRetrieveSavingsProductsWithOfficeSpecificRestrictionEnabledAndNoEntityAccessMapping() {
-        final GlobalConfigurationHelper globalConfigurationHelper = new GlobalConfigurationHelper();
         try {
             globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED, true);
             globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.RESTRICT_PRODUCTS_TO_USER_OFFICE, true);
 
-            final String savingsProducts = SavingsProductHelper.retrieveAllSavingsProducts(requestSpec, responseSpec);
-            Assertions.assertNotNull(savingsProducts);
+            assertNotNull(savingsProductHelper.getAllSavingsProducts());
         } finally {
             globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.RESTRICT_PRODUCTS_TO_USER_OFFICE, false);
             globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.OFFICE_SPECIFIC_PRODUCTS_ENABLED, false);
         }
     }
 
-    public static Integer createSavingsProductWithAccrualAccountingWithOverdraftAllowed(final String interestReceivableAccount,
-            final String minOpenningBalance, final Account... accounts) {
-        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT WITH OVERDRAFT ---------------------------------------");
-        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
-                .withInterestPostingPeriodTypeAsQuarterly() //
-                .withInterestCalculationPeriodTypeAsDailyBalance() //
-                .withOverDraft("100000").withAccountInterestReceivables(interestReceivableAccount)
-                .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsAccrualBased(accounts).build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    private void verifyInterestReceivableAccount(final Long productId, final Account expectedAccount) {
+        final GetSavingsProductsAccountingMappings mappings = getAccountingMappings(productId);
+        assertNotNull(mappings.getInterestReceivableAccount(), "Interest receivable account is missing");
+        assertEquals(expectedAccount.getAccountID(), mappings.getInterestReceivableAccount().getId().intValue());
     }
 
-    public static Integer createSavingsProductWithAccrualAccountingWithOutOverdraftAllowed(final String minOpenningBalance,
-            final Account... accounts) {
-        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT WITHOUT OVERDRAFT ---------------------------------------");
-        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
-                .withInterestPostingPeriodTypeAsQuarterly() //
-                .withInterestCalculationPeriodTypeAsDailyBalance() //
-                .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsAccrualBased(accounts).build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    private GetSavingsProductsAccountingMappings getAccountingMappings(final Long productId) {
+        final GetSavingsProductsProductIdResponse product = getSavingsProduct(productId);
+        assertNotNull(product);
+        assertNotNull(product.getAccountingMappings(), "Accounting mappings are missing");
+        return product.getAccountingMappings();
     }
 
-    public static Integer updateSavingsProductWithAccrualAccountingWithOverdraftAllowed(final Integer productId,
-            final String interestReceivableAccount, final String minOpenningBalance, final Account... accounts) {
-        LOG.info("------------------------------UPDATE SAVINGS PRODUCT ACCOUNT ---------------------------------------");
-        final String savingsProductJSON = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily() //
-                .withInterestPostingPeriodTypeAsQuarterly() //
-                .withInterestCalculationPeriodTypeAsDailyBalance() //
-                .withOverDraft("100000").withAccountInterestReceivables(interestReceivableAccount)
-                .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsAccrualBased(accounts).build();
-        return SavingsProductHelper.updateSavingsProduct(savingsProductJSON, requestSpec, responseSpec, productId);
+    private PostSavingsProductsRequest overdraftAccrualProduct() {
+        return accrualProduct().allowOverdraft(true).overdraftLimit(OVERDRAFT_LIMIT);
     }
 
+    private PostSavingsProductsRequest accrualProduct() {
+        return SavingsRequestBuilders
+                .savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY, SavingsTestData.InterestPostingPeriodType.QUARTERLY,
+                        SavingsTestData.InterestCalculationType.DAILY_BALANCE)
+                .minRequiredOpeningBalance(MINIMUM_OPENING_BALANCE)//
+                .accountingRule(SavingsTestData.AccountingRule.ACCRUAL_PERIODIC);
+    }
+
+    /** Carries the created product's own values, so the update changes only the accounting mappings under test. */
+    private PutSavingsProductsProductIdRequest updateOf(final PostSavingsProductsRequest product) {
+        return new PutSavingsProductsProductIdRequest()//
+                .name(product.getName())//
+                .shortName(product.getShortName())//
+                .description(product.getDescription())//
+                .currencyCode(product.getCurrencyCode())//
+                .digitsAfterDecimal(product.getDigitsAfterDecimal())//
+                .inMultiplesOf(product.getInMultiplesOf())//
+                .nominalAnnualInterestRate(product.getNominalAnnualInterestRate())//
+                .minRequiredOpeningBalance(product.getMinRequiredOpeningBalance())//
+                .interestCompoundingPeriodType(product.getInterestCompoundingPeriodType())//
+                .interestPostingPeriodType(product.getInterestPostingPeriodType())//
+                .interestCalculationType(product.getInterestCalculationType())//
+                .interestCalculationDaysInYearType(product.getInterestCalculationDaysInYearType())//
+                .accountingRule(product.getAccountingRule())//
+                .allowOverdraft(product.getAllowOverdraft())//
+                .overdraftLimit(product.getOverdraftLimit())//
+                .locale(SavingsTestData.LOCALE);
+    }
 }

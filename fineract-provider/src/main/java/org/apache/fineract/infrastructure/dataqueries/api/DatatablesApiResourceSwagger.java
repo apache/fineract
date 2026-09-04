@@ -45,6 +45,8 @@ final class DatatablesApiResourceSwagger {
         public String applicationTableName;
         @Schema(example = "extra_client_details")
         public String registeredTableName;
+        @Schema(example = "Person", description = "The entity sub type the datatable is registered against, when the application table supports one (for example Person or Entity on m_client). Null when the registration is not scoped to a sub type.")
+        public String entitySubType;
         public List<ResultsetColumnHeaderData> columnHeaderData;
     }
 
@@ -266,6 +268,12 @@ final class DatatablesApiResourceSwagger {
         public Long loanId;
         @Schema(example = "1")
         public Long resourceId;
+        /**
+         * Carried by the {@code CommandProcessingResult} whenever the datatable hangs off a transaction - a savings
+         * transaction datatable, for instance - but it was missing here, so generated clients could not read it.
+         */
+        @Schema(example = "1")
+        public String transactionId;
         public Map<String, Object> changes;
     }
 
@@ -278,6 +286,11 @@ final class DatatablesApiResourceSwagger {
 
         @Schema(example = "1")
         public Long resourceId;
+        /**
+         * See {@link PutDataTablesAppTableIdDatatableIdResponse#transactionId}.
+         */
+        @Schema(example = "1")
+        public String transactionId;
     }
 
     @Schema(description = "DeleteDataTablesDatatableAppTableIdDatatableIdResponse ")

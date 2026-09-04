@@ -189,12 +189,13 @@ Feature: Working Capital Loan Repayment - Overpayment
     Then Working Capital loan status will be "OVERPAID"
     And Working capital loan account has the correct data:
       | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
-      | 9012.0    | 9000.0            | 100000.0           | 18.0              | 12.0     | 9012.0             | 0.0            | 12.0             | 8.0               |
+      | 9012.0    | 9000.0            | 100000.0           | 18.0              | 12.0     | 9012.0             | 12.0           | 0.0              | 8.0               |
     And Working Capital Loan has transactions:
-      | transactionDate | type            | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement    | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee    | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
-      | 15 January 2026 | Repayment       | 9020.0            | 9012.0           | 0.0               | 0.0                  | false    |
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Repayment                 | 9020.0            | 9012.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Discount Fee Amortization | 12.0              |                  |                   |                       | false    |
 #--- make backdated discount fee adjustment to make loan closed as per finalize test scenario ---#
     And Customer makes credit balance refund on "15 January 2026" with 8.0 transaction amount on Working Capital loan
     Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"

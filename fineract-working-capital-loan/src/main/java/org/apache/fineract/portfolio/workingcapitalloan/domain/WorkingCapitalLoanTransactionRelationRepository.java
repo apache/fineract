@@ -39,6 +39,13 @@ public interface WorkingCapitalLoanTransactionRelationRepository
     List<WorkingCapitalLoanTransactionRelation> findAllByToTransactionAndFromTransactionReversedAndFromTransactionTransactionType(
             WorkingCapitalLoanTransaction relatedDisbursementTransaction, boolean reversed, LoanTransactionType transactionType);
 
+    /**
+     * Unfiltered by reversed state, unlike the sibling lookup above: used where a previously-reversed link must still
+     * be found again (e.g. reviving a final discount-fee amortization the discount pool no longer zeroes out).
+     */
+    List<WorkingCapitalLoanTransactionRelation> findAllByToTransactionAndFromTransactionTransactionType(
+            WorkingCapitalLoanTransaction toTransaction, LoanTransactionType transactionType);
+
     List<WorkingCapitalLoanTransactionRelation> findAllByToChargeAndFromTransactionReversedAndFromTransactionTransactionType(
             WorkingCapitalLoanCharge toCharge, boolean reversed, LoanTransactionType transactionType);
 

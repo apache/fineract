@@ -795,7 +795,7 @@ Feature: WorkingCapitalDiscountFeeAmortization
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | actualBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualDiscountFeeBalance |
       | 0         | 2026-01-01 | -900.00               | 900.00          | 900.00        |                            |                     |                          | 100.00                     | 100.00                   |
       | 1         | 2026-01-01 | 50.00                 | 859.23          | 859.23        | 9.23                       | 50.00               | 9.23                     | 90.77                      | 90.77                    |
-      | 2         | 2026-01-02 | 50.00                 | 818.03          | 818.04        | 8.81                       | 50.00               | 8.81                     | 81.96                      | 81.96                    |
+      | 2         | 2026-01-02 | 50.00                 | 818.03          | 818.03        | 8.81                       | 50.00               | 8.80                     | 81.96                      | 81.97                    |
       | 3         | 2026-01-03 | 50.00                 | 776.42          |               | 8.39                       |                     |                          | 73.57                      |                          |
       | 4         | 2026-01-04 | 50.00                 | 734.38          |               | 7.96                       |                     |                          | 65.61                      |                          |
       | 5         | 2026-01-05 | 50.00                 | 691.91          |               | 7.53                       |                     |                          | 58.08                      |                          |
@@ -818,18 +818,18 @@ Feature: WorkingCapitalDiscountFeeAmortization
     When Admin runs inline COB job for Working Capital Loan
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | totalPaymentVolume | realizedIncome | unrealizedIncome | overpaymentAmount |
-      | 1000.0    | 100.0              | 100000.0           | 18.04          | 81.96            | 0.0               |
+      | 1000.0    | 100.0              | 100000.0           | 18.03          | 81.97            | 0.0               |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement              | 900.0             | 900.0            | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Discount Fee              | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
       | 02 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Discount Fee Amortization | 18.04             |                  |                   |                       | false    |
+      | 02 January 2026 | Discount Fee Amortization | 18.03             |                  |                   |                       | false    |
     Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "02 January 2026" which has the following Journal entries:
       | Type      | Account code | Account name              | Debit | Credit |
-      | INCOME    | 404000       | Interest Income           |       | 18.04  |
-      | LIABILITY | 240005       | Deferred Interest Revenue | 18.04 |        |
+      | INCOME    | 404000       | Interest Income           |       | 18.03  |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 18.03 |        |
 
   @TestRailId:C85163
   Scenario: Verify Discount Fee Adjustment with following discount fee amortization when repayment is made on the disbursement date
@@ -1091,3 +1091,262 @@ Feature: WorkingCapitalDiscountFeeAmortization
     And Admin runs inline COB job for Working Capital Loan
     Then a Working Capital Loan Discount Fee Amortization transaction business event is raised on "05 January 2026"
     Then Admin closes the Working Capital loan with a full repayment on "06 January 2026"
+
+  @TestRailId:C98177
+  Scenario: Verify that discount fee amortization after a repayment above the daily amount stays consistent with the schedule over the following on-time repayments
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                |          |
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Working Capital loan status will be "ACTIVE"
+    Then Admin successfully add discount with "1000" amount on Working Capital loan account
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 50 transaction amount on Working Capital loan
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has the following summary fields:
+      | discountFeeAmount | netDisbursementAmount | totalPaymentVolume | periodPaymentRate | npvDayCount | expectedPaymentAmount | originalPaymentNumber |
+      | 1000.00           | 9000.00               | 100000.00          | 17                | 360         | 47.22                 | 212                   |
+    And The retrieved amortization schedule has payments with the following details in first "5" lines:
+      | paymentNo | date       | expectedPaymentAmount | expectedBalance | actualBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualDiscountFeeBalance |
+      | 0         | 2026-01-01 | -9000.00              | 9000.00         | 9000.00       |                            |                     |                          | 1000.00                    | 1000.00                  |
+      | 1         | 2026-01-02 | 47.22                 | 8961.86         | 8959.61       | 9.08                       | 50.00               | 9.61                     | 990.92                     | 990.39                   |
+      | 2         | 2026-01-03 | 47.22                 | 8921.43         |               | 9.04                       |                     |                          | 981.35                     |                          |
+      | 3         | 2026-01-04 | 47.22                 | 8883.21         |               | 9.00                       |                     |                          | 972.35                     |                          |
+      | 4         | 2026-01-05 | 47.22                 | 8844.95         |               | 8.96                       |                     |                          | 963.39                     |                          |
+    And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | expectedDiscountFeeBalance |
+      | 210       | 2026-07-30 | 47.22                 | 80.90           | 0.13                       | 0.12                       |
+      | 211       | 2026-07-31 | 47.22                 | 33.77           | 0.08                       | 0.04                       |
+      | 212       | 2026-08-01 | 33.80                 | 0.00            | 0.04                       | 0.00                       |
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 50.0               | 9.61           | 990.39           | 0.0               |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "02 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | INCOME    | 404000       | Interest Income           |       | 9.61   |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 9.61  |        |
+    And Customer makes repayment on "03 January 2026" with 47.22 transaction amount on Working Capital loan
+    When Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 97.22              | 18.65          | 981.35           | 0.0               |
+    And Customer makes repayment on "04 January 2026" with 47.22 transaction amount on Working Capital loan
+    When Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "05 January 2026" with 47.22 transaction amount on Working Capital loan
+    When Admin sets the business date to "06 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 191.66             | 36.61          | 963.39           | 0.0               |
+    And Customer makes repayment on "06 January 2026" with 47.22 transaction amount on Working Capital loan
+    When Admin sets the business date to "07 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "07 January 2026" with 47.22 transaction amount on Working Capital loan
+    When Admin sets the business date to "08 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 286.1              | 54.41          | 945.59           | 0.0               |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 9.61              |                  |                   |                       | false    |
+      | 03 January 2026 | Repayment                 | 47.22             | 47.22            | 0.0               | 0.0                   | false    |
+      | 03 January 2026 | Discount Fee Amortization | 9.04              |                  |                   |                       | false    |
+      | 04 January 2026 | Repayment                 | 47.22             | 47.22            | 0.0               | 0.0                   | false    |
+      | 04 January 2026 | Discount Fee Amortization | 9.0               |                  |                   |                       | false    |
+      | 05 January 2026 | Repayment                 | 47.22             | 47.22            | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Discount Fee Amortization | 8.96              |                  |                   |                       | false    |
+      | 06 January 2026 | Repayment                 | 47.22             | 47.22            | 0.0               | 0.0                   | false    |
+      | 06 January 2026 | Discount Fee Amortization | 8.92              |                  |                   |                       | false    |
+      | 07 January 2026 | Repayment                 | 47.22             | 47.22            | 0.0               | 0.0                   | false    |
+      | 07 January 2026 | Discount Fee Amortization | 8.88              |                  |                   |                       | false    |
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | expectedPaymentAmount | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualDiscountFeeBalance |
+      | 1         | 2026-01-02 | 47.22                 | 9.08                       | 50.00               | 9.61                     | 990.92                     | 990.39                   |
+      | 2         | 2026-01-03 | 47.22                 | 9.04                       | 47.22               | 9.04                     | 981.35                     | 981.35                   |
+      | 3         | 2026-01-04 | 47.22                 | 9.00                       | 47.22               | 9.00                     | 972.35                     | 972.35                   |
+      | 4         | 2026-01-05 | 47.22                 | 8.96                       | 47.22               | 8.96                     | 963.39                     | 963.39                   |
+      | 5         | 2026-01-06 | 47.22                 | 8.92                       | 47.22               | 8.92                     | 954.47                     | 954.47                   |
+      | 6         | 2026-01-07 | 47.22                 | 8.88                       | 47.22               | 8.88                     | 945.59                     | 945.59                   |
+    And The retrieved amortization schedule has no negative amounts
+    And The retrieved amortization schedule actual amortization is consistent with the loan realized and unrealized income after close of business
+
+  @TestRailId:C98178
+  Scenario: Verify that discount fee amortization after a repayment below the daily amount stays consistent with the schedule over the following on-time repayments
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                |          |
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Working Capital loan status will be "ACTIVE"
+    Then Admin successfully add discount with "1000" amount on Working Capital loan account
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 40 transaction amount on Working Capital loan
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 40.0               | 7.69           | 992.31           | 0.0               |
+    And Customer makes repayment on "03 January 2026" with 47.22 transaction amount on Working Capital loan
+    When Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "04 January 2026" with 47.22 transaction amount on Working Capital loan
+    When Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "05 January 2026" with 47.22 transaction amount on Working Capital loan
+    When Admin sets the business date to "06 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 181.66             | 34.71          | 965.29           | 0.0               |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                 | 40.0              | 40.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 7.69              |                  |                   |                       | false    |
+      | 03 January 2026 | Repayment                 | 47.22             | 47.22            | 0.0               | 0.0                   | false    |
+      | 03 January 2026 | Discount Fee Amortization | 9.05              |                  |                   |                       | false    |
+      | 04 January 2026 | Repayment                 | 47.22             | 47.22            | 0.0               | 0.0                   | false    |
+      | 04 January 2026 | Discount Fee Amortization | 9.0               |                  |                   |                       | false    |
+      | 05 January 2026 | Repayment                 | 47.22             | 47.22            | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Discount Fee Amortization | 8.97              |                  |                   |                       | false    |
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | expectedPaymentAmount | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | actualBalance | actualDiscountFeeBalance |
+      | 1         | 2026-01-02 | 47.22                 | 9.08                       | 40.00               | 7.69                     | 8967.69       | 992.31                   |
+      | 2         | 2026-01-03 | 47.22                 | 9.05                       | 47.22               | 9.05                     | 8929.52       | 983.26                   |
+      | 3         | 2026-01-04 | 47.22                 | 9.01                       | 47.22               | 9.00                     | 8891.30       | 974.26                   |
+      | 4         | 2026-01-05 | 47.22                 | 8.97                       | 47.22               | 8.97                     | 8853.05       | 965.29                   |
+    And The retrieved amortization schedule has no negative amounts
+    And The retrieved amortization schedule actual amortization is consistent with the loan realized and unrealized income after close of business
+
+  @TestRailId:C98179
+  Scenario: Verify that discount fee amortization after a fractional repayment closes to the discount fee without an amortization adjustment
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 450             | 100000             | 18                |          |
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "450" amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "450" EUR transaction amount
+    Then Working Capital loan status will be "ACTIVE"
+    Then Admin successfully add discount with "50" amount on Working Capital loan account
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has the following summary fields:
+      | discountFeeAmount | netDisbursementAmount | totalPaymentVolume | periodPaymentRate | npvDayCount | expectedPaymentAmount | originalPaymentNumber |
+      | 50.00             | 450.00                | 100000.00          | 18                | 360         | 50.00                 | 10                    |
+    And The retrieved amortization schedule expected amortization sums to the discount fee and both expected balances close to zero
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 50.25 transaction amount on Working Capital loan
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "03 January 2026" with 50 transaction amount on Working Capital loan
+    When Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 500.0     | 100.25             | 16.89          | 33.11            | 0.0               |
+    And Admin retrieves the projected amortization schedule
+    And The retrieved amortization schedule actual amortization is consistent with the loan realized and unrealized income after close of business
+    And Customer makes repayment on "04 January 2026" with 50 transaction amount on Working Capital loan
+    When Admin sets the business date to "05 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "05 January 2026" with 50 transaction amount on Working Capital loan
+    When Admin sets the business date to "06 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "06 January 2026" with 50 transaction amount on Working Capital loan
+    When Admin sets the business date to "07 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "07 January 2026" with 50 transaction amount on Working Capital loan
+    When Admin sets the business date to "08 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "08 January 2026" with 50 transaction amount on Working Capital loan
+    When Admin sets the business date to "09 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "09 January 2026" with 50 transaction amount on Working Capital loan
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Customer makes repayment on "10 January 2026" with 50 transaction amount on Working Capital loan
+    When Admin sets the business date to "11 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 500.0     | 450.25             | 49.04          | 0.96             | 0.0               |
+    And Admin retrieves the projected amortization schedule
+    And The retrieved amortization schedule actual amortization is consistent with the loan realized and unrealized income after close of business
+    And Customer makes repayment on "11 January 2026" with 50 transaction amount on Working Capital loan
+    When Admin sets the business date to "12 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan status will be "OVERPAID"
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 500.0     | 500.0              | 50.0           | 0.0              | 0.25              |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 450.0             | 450.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                 | 50.25             | 50.25            | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 8.87              |                  |                   |                       | false    |
+      | 03 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 03 January 2026 | Discount Fee Amortization | 8.02              |                  |                   |                       | false    |
+      | 04 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 04 January 2026 | Discount Fee Amortization | 7.20              |                  |                   |                       | false    |
+      | 05 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 05 January 2026 | Discount Fee Amortization | 6.36              |                  |                   |                       | false    |
+      | 06 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 06 January 2026 | Discount Fee Amortization | 5.50              |                  |                   |                       | false    |
+      | 07 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 07 January 2026 | Discount Fee Amortization | 4.63              |                  |                   |                       | false    |
+      | 08 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 08 January 2026 | Discount Fee Amortization | 3.73              |                  |                   |                       | false    |
+      | 09 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 09 January 2026 | Discount Fee Amortization | 2.83              |                  |                   |                       | false    |
+      | 10 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Discount Fee Amortization | 1.90              |                  |                   |                       | false    |
+      | 11 January 2026 | Repayment                 | 50.0              | 49.75            | 0.0               | 0.0                   | false    |
+      | 11 January 2026 | Discount Fee Amortization | 0.96              |                  |                   |                       | false    |
+    And Admin retrieves the projected amortization schedule
+    And The retrieved amortization schedule has no negative amounts
+    And The retrieved amortization schedule actual amortization is consistent with the loan realized and unrealized income after close of business
+
+  @TestRailId:C98213
+  Scenario: Verify that a lump-sum payoff of a working capital loan with a remainder final payment amortizes the whole discount fee on the schedule
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                |          |
+    Then Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and expected disbursement date on "01 January 2026"
+    Then Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
+    Then Working Capital loan status will be "ACTIVE"
+    Then Admin successfully add discount with "1000" amount on Working Capital loan account
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 10000 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "CLOSED_OBLIGATIONS_MET"
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 10000.0            | 1000.0         | 0.0              | 0.0               |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                 | 10000.0           | 10000.0          | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 1000.0            |                  |                   |                       | false    |
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | expectedPaymentAmount | actualPaymentAmount | actualAmortizationAmount | actualBalance | actualDiscountFeeBalance |
+      | 1         | 2026-01-02 | 47.22                 | 10000.00            | 1000.00                  | 0.00          | 0.00                     |

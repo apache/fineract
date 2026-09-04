@@ -318,7 +318,8 @@ Feature: WorkingCapitalLoanChargeAdjustmentFeature
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "10 January 2026" due date and 100.0 transaction amount
     When Admin makes a charge adjustment for the last added charge with 100.0 amount on working capital loan
-    Then Working Capital Loan has transactions:
+    Then a Working Capital Loan Charge Adjustment transaction business event is raised with "100.0" EUR amount
+    And Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Charge Adjustment | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
@@ -328,7 +329,8 @@ Feature: WorkingCapitalLoanChargeAdjustmentFeature
     When Admin sets the business date to "15 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin reverts the last charge adjustment on working capital loan
-    Then Working Capital Loan has transactions:
+    Then a Working Capital Loan Adjust Transaction business event is raised for the reversed "chargeAdjustment" transaction
+    And Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Charge Adjustment | 100.0             | 0.0              | 100.0             | 0.0                   | true     |

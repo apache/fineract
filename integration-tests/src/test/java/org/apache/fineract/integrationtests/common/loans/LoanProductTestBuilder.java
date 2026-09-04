@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.common.loans;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,7 +29,12 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.Builder;
 import org.apache.fineract.client.models.AdvancedPaymentData;
+import org.apache.fineract.client.models.AllowAttributeOverrides;
 import org.apache.fineract.client.models.CreditAllocationData;
+import org.apache.fineract.client.models.LoanProductChargeData;
+import org.apache.fineract.client.models.LoanProductChargeToGLAccountMapper;
+import org.apache.fineract.client.models.PostChargeOffReasonToExpenseAccountMappings;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeOffBehaviour;
@@ -359,6 +365,281 @@ public class LoanProductTestBuilder {
         }
 
         return map;
+    }
+
+    public PostLoanProductsRequest buildRequest() {
+        return buildRequest(null, null);
+    }
+
+    public PostLoanProductsRequest buildRequest(final String chargeId) {
+        return buildRequest(chargeId, null);
+    }
+
+    /**
+     * Typed counterpart of {@link #build(String, Long)}, for callers on the Feign client.
+     *
+     * Six keys the map carries have no counterpart on {@link PostLoanProductsRequest}:
+     * {@code syncExpectedWithDisbursementDate}, {@code mandatoryGuarantee}, {@code minimumGuaranteeFromGuarantor},
+     * {@code minimumGuaranteeFromOwnFunds}, {@code minimumGap} and {@code maximumGap}. Deserialising the map's JSON
+     * into the request model dropped them as unknown properties, so leaving them unset here sends the same body.
+     */
+    public PostLoanProductsRequest buildRequest(final String chargeId, final Long delinquencyBucketId) {
+        final PostLoanProductsRequest request = new PostLoanProductsRequest();
+
+        if (chargeId != null) {
+            request.charges(new ArrayList<>(List.of(new LoanProductChargeData().id(toLong(chargeId)))));
+        }
+        request.name(this.nameOfLoanProduct);
+        request.shortName(this.shortName);
+        request.externalId(this.externalId);
+        request.currencyCode(this.currencyCode);
+        request.locale(LOCALE);
+        request.dateFormat("dd MMMM yyyy");
+        request.digitsAfterDecimal(toInteger(this.digitsAfterDecimal));
+        request.inMultiplesOf(toInteger(this.inMultiplesOf));
+        request.principal(toDouble(this.principal));
+        request.numberOfRepayments(toInteger(this.numberOfRepayments));
+        request.repaymentEvery(toInteger(this.repaymentPeriod));
+        request.repaymentFrequencyType(toLong(this.repaymentFrequency));
+        request.interestRatePerPeriod(toDouble(this.interestRatePerPeriod));
+        request.interestRateFrequencyType(toInteger(this.interestRateFrequencyType));
+        request.amortizationType(toInteger(this.amortizationType));
+        request.fixedPrincipalPercentagePerInstallment(toBigDecimal(this.fixedPrincipalPercentagePerInstallment));
+        request.interestType(toInteger(this.interestType));
+        request.interestCalculationPeriodType(toInteger(this.interestCalculationPeriodType));
+        request.inArrearsTolerance(toInteger(this.inArrearsTolerance));
+        request.transactionProcessingStrategyCode(this.transactionProcessingStrategyCode);
+        request.paymentAllocation(this.advancedPaymentAllocations);
+        request.creditAllocation(this.creditAllocations);
+        request.accountingRule(toInteger(this.accountingRule));
+        request.minPrincipal(toDouble(this.minPrincipal));
+        request.maxPrincipal(toDouble(this.maxPrincipal));
+        request.isEqualAmortization(this.isEqualAmortization);
+        request.overdueDaysForNPA(toInteger(this.overdueDaysForNPA));
+        request.loanScheduleType(this.loanScheduleType);
+        request.loanScheduleProcessingType(this.loanScheduleProcessingType);
+
+        if (this.minimumDaysBetweenDisbursalAndFirstRepayment != null) {
+            request.minimumDaysBetweenDisbursalAndFirstRepayment(toInteger(this.minimumDaysBetweenDisbursalAndFirstRepayment));
+        }
+        if (this.multiDisburseLoan) {
+            request.multiDisburseLoan(this.multiDisburseLoan);
+            request.allowFullTermForTranche(this.allowFullTermForTranche);
+            request.maxTrancheCount(toInteger(this.maxTrancheCount));
+            request.outstandingLoanBalance(toDouble(this.outstandingLoanBalance));
+            request.disallowExpectedDisbursements(this.disallowExpectedDisbursements);
+            if (this.disallowExpectedDisbursements) {
+                request.allowApprovedDisbursedAmountsOverApplied(this.allowApprovedDisbursedAmountsOverApplied);
+                request.overAppliedCalculationType(this.overAppliedCalculationType);
+                request.overAppliedNumber(this.overAppliedNumber);
+            }
+        }
+        if (this.canDefineInstallmentAmount) {
+            request.canDefineInstallmentAmount(this.canDefineInstallmentAmount);
+        }
+        // Always send allowFullTermForTranche when it's true (for validation testing of single-disburse scenarios)
+        if (this.allowFullTermForTranche && !this.multiDisburseLoan) {
+            request.allowFullTermForTranche(this.allowFullTermForTranche);
+        }
+
+        if (this.fullAccountingConfig != null) {
+            this.fullAccountingConfig.applyTo(request);
+        } else if (this.accountingRule.equals(ACCRUAL_UPFRONT) || this.accountingRule.equals(ACCRUAL_PERIODIC)) {
+            applyAccountMappingForAccrualBased(request, this.feeAndPenaltyAssetAccount);
+        } else if (this.accountingRule.equals(CASH_BASED)) {
+            applyAccountMappingForCashBased(request);
+        }
+        request.daysInMonthType(toInteger(this.daysInMonthType));
+        request.daysInYearType(toInteger(this.daysInYearType));
+        request.isInterestRecalculationEnabled(this.isInterestRecalculationEnabled);
+        if (this.isInterestRecalculationEnabled) {
+            request.interestRecalculationCompoundingMethod(toInteger(this.interestRecalculationCompoundingMethod));
+            request.rescheduleStrategyMethod(toInteger(this.rescheduleStrategyMethod));
+            request.recalculationRestFrequencyType(toInteger(this.recalculationRestFrequencyType));
+            request.recalculationRestFrequencyInterval(toInteger(this.recalculationRestFrequencyInterval));
+            if (!RECALCULATION_COMPOUNDING_METHOD_NONE.equals(this.interestRecalculationCompoundingMethod)) {
+                request.recalculationCompoundingFrequencyType(toInteger(this.recalculationCompoundingFrequencyType));
+                request.recalculationCompoundingFrequencyInterval(toInteger(this.recalculationCompoundingFrequencyInterval));
+            }
+            request.preClosureInterestCalculationStrategy(toInteger(this.preCloseInterestCalculationStrategy));
+            if (this.isArrearsBasedOnOriginalSchedule != null) {
+                request.isArrearsBasedOnOriginalSchedule(Boolean.valueOf(this.isArrearsBasedOnOriginalSchedule));
+            }
+            request.recalculationCompoundingFrequencyOnDayType(this.recalculationCompoundingFrequencyOnDayType);
+            request.recalculationCompoundingFrequencyDayOfWeekType(this.recalculationCompoundingFrequencyDayOfWeekType);
+            request.recalculationRestFrequencyOnDayType(this.recalculationRestFrequencyOnDayType);
+            request.recalculationRestFrequencyDayOfWeekType(this.recalculationRestFrequencyDayOfWeekType);
+        }
+        if (this.holdGuaranteeFunds != null) {
+            request.holdGuaranteeFunds(this.holdGuaranteeFunds);
+        }
+        request.graceOnPrincipalPayment(toInteger(this.graceOnPrincipalPayment));
+        request.graceOnInterestPayment(toInteger(this.graceOnInterestPayment));
+        if (this.allowAttributeOverrides != null) {
+            request.allowAttributeOverrides(toAllowAttributeOverrides(this.allowAttributeOverrides));
+        }
+        request.allowPartialPeriodInterestCalculation(this.allowPartialPeriodInterestCalculation);
+        request.allowVariableInstallments(this.allowVariableInstallments);
+        if (this.installmentAmountInMultiplesOf != null) {
+            request.installmentAmountInMultiplesOf(toInteger(this.installmentAmountInMultiplesOf));
+        }
+
+        // Delinquency Bucket
+        if (delinquencyBucketId != null) {
+            request.delinquencyBucketId(delinquencyBucketId);
+        }
+        if (this.delinquencyBucketId != null) {
+            request.delinquencyBucketId(this.delinquencyBucketId);
+        }
+
+        if (this.feeToIncomeAccountMappings != null) {
+            request.feeToIncomeAccountMappings(toChargeToGLAccountMappers(this.feeToIncomeAccountMappings));
+        }
+        if (this.penaltyToIncomeAccountMappings != null) {
+            request.penaltyToIncomeAccountMappings(toChargeToGLAccountMappers(this.penaltyToIncomeAccountMappings));
+        }
+        if (this.chargeOffReasonToExpenseAccountMappings != null) {
+            request.chargeOffReasonToExpenseAccountMappings(toChargeOffReasonMappings(this.chargeOffReasonToExpenseAccountMappings));
+        }
+        if (this.dueDaysForRepaymentEvent != null) {
+            request.dueDaysForRepaymentEvent(this.dueDaysForRepaymentEvent);
+        }
+        if (this.overDueDaysForRepaymentEvent != null) {
+            request.overDueDaysForRepaymentEvent(this.overDueDaysForRepaymentEvent);
+        }
+        request.enableDownPayment(this.enableDownPayment);
+        if (this.disbursedAmountPercentageForDownPayment != null) {
+            request.disbursedAmountPercentageForDownPayment(toBigDecimal(this.disbursedAmountPercentageForDownPayment));
+        }
+        if (this.enableAutoRepaymentForDownPayment) {
+            request.enableAutoRepaymentForDownPayment(this.enableAutoRepaymentForDownPayment);
+        }
+        if (this.interestRecognitionOnDisbursementDate) {
+            request.interestRecognitionOnDisbursementDate(this.interestRecognitionOnDisbursementDate);
+        }
+        if (this.repaymentStartDateType != null) {
+            request.repaymentStartDateType(this.repaymentStartDateType);
+        }
+        if (this.supportedInterestRefundTypes != null) {
+            request.supportedInterestRefundTypes(this.supportedInterestRefundTypes);
+        }
+        if (this.chargeOffBehaviour != null) {
+            request.chargeOffBehaviour(this.chargeOffBehaviour);
+        }
+        if (this.enableBuyDownFee != null) {
+            request.enableBuyDownFee(this.enableBuyDownFee);
+        }
+        if (this.merchantBuyDownFee != null) {
+            request.merchantBuyDownFee(this.merchantBuyDownFee);
+        }
+        return request;
+    }
+
+    /**
+     * The map form carries every amount as a string, sometimes with thousands separators ("15,000.00"). Strip them the
+     * way the JSON path used to before parsing.
+     */
+    private static String stripThousandsSeparators(final String value) {
+        return value.replaceAll("(?<=\\d),(?=\\d{3}(?!\\d))", "");
+    }
+
+    private static boolean isBlank(final String value) {
+        return value == null || value.isEmpty();
+    }
+
+    private static Integer toInteger(final String value) {
+        return isBlank(value) ? null : Integer.valueOf(stripThousandsSeparators(value));
+    }
+
+    private static Long toLong(final String value) {
+        return isBlank(value) ? null : Long.valueOf(stripThousandsSeparators(value));
+    }
+
+    private static Double toDouble(final String value) {
+        return isBlank(value) ? null : Double.valueOf(stripThousandsSeparators(value));
+    }
+
+    private static BigDecimal toBigDecimal(final String value) {
+        return isBlank(value) ? null : new BigDecimal(stripThousandsSeparators(value));
+    }
+
+    private static AllowAttributeOverrides toAllowAttributeOverrides(final JsonObject overrides) {
+        final AllowAttributeOverrides result = new AllowAttributeOverrides();
+        result.amortizationType(readBoolean(overrides, "amortizationType"));
+        result.graceOnArrearsAgeing(readBoolean(overrides, "graceOnArrearsAgeing"));
+        result.graceOnPrincipalAndInterestPayment(readBoolean(overrides, "graceOnPrincipalAndInterestPayment"));
+        result.inArrearsTolerance(readBoolean(overrides, "inArrearsTolerance"));
+        result.interestCalculationPeriodType(readBoolean(overrides, "interestCalculationPeriodType"));
+        result.interestType(readBoolean(overrides, "interestType"));
+        result.repaymentEvery(readBoolean(overrides, "repaymentEvery"));
+        result.transactionProcessingStrategyCode(readBoolean(overrides, "transactionProcessingStrategyCode"));
+        return result;
+    }
+
+    private static Boolean readBoolean(final JsonObject source, final String member) {
+        return (source.has(member) && !source.get(member).isJsonNull()) ? source.get(member).getAsBoolean() : null;
+    }
+
+    private static List<LoanProductChargeToGLAccountMapper> toChargeToGLAccountMappers(final List<Map<String, Long>> mappings) {
+        final List<LoanProductChargeToGLAccountMapper> mappers = new ArrayList<>();
+        for (Map<String, Long> mapping : mappings) {
+            mappers.add(new LoanProductChargeToGLAccountMapper().chargeId(mapping.get("chargeId"))
+                    .incomeAccountId(mapping.get("incomeAccountId")));
+        }
+        return mappers;
+    }
+
+    private static List<PostChargeOffReasonToExpenseAccountMappings> toChargeOffReasonMappings(final List<Map<String, Long>> mappings) {
+        final List<PostChargeOffReasonToExpenseAccountMappings> result = new ArrayList<>();
+        for (Map<String, Long> mapping : mappings) {
+            result.add(
+                    new PostChargeOffReasonToExpenseAccountMappings().chargeOffReasonCodeValueId(mapping.get("chargeOffReasonCodeValueId"))
+                            .expenseAccountId(mapping.get("expenseAccountId")));
+        }
+        return result;
+    }
+
+    private void applyAccountMappingForCashBased(final PostLoanProductsRequest request) {
+        for (Account account : this.accountList) {
+            final Long id = account.getAccountID().longValue();
+            switch (account.getAccountType()) {
+                case ASSET -> request.fundSourceAccountId(id).loanPortfolioAccountId(id).transfersInSuspenseAccountId(id);
+                case INCOME -> applyIncomeAccounts(request, id);
+                case EXPENSE -> applyExpenseAccounts(request, id);
+                case LIABILITY -> request.overpaymentLiabilityAccountId(id);
+                default -> {
+                }
+            }
+        }
+    }
+
+    private void applyAccountMappingForAccrualBased(final PostLoanProductsRequest request, final Account feeAndPenaltyAssetAccount) {
+        for (Account account : this.accountList) {
+            final Long id = account.getAccountID().longValue();
+            switch (account.getAccountType()) {
+                case ASSET -> {
+                    request.fundSourceAccountId(id).loanPortfolioAccountId(id).transfersInSuspenseAccountId(id);
+                    final Long receivableId = feeAndPenaltyAssetAccount != null ? feeAndPenaltyAssetAccount.getAccountID().longValue() : id;
+                    request.receivableFeeAccountId(receivableId).receivablePenaltyAccountId(receivableId).receivableInterestAccountId(id);
+                }
+                case INCOME -> applyIncomeAccounts(request, id);
+                case EXPENSE -> applyExpenseAccounts(request, id);
+                case LIABILITY -> request.overpaymentLiabilityAccountId(id);
+                default -> {
+                }
+            }
+        }
+    }
+
+    private static void applyIncomeAccounts(final PostLoanProductsRequest request, final Long id) {
+        request.interestOnLoanAccountId(id).incomeFromFeeAccountId(id).incomeFromPenaltyAccountId(id).incomeFromRecoveryAccountId(id)
+                .incomeFromChargeOffInterestAccountId(id).incomeFromChargeOffFeesAccountId(id).incomeFromChargeOffPenaltyAccountId(id)
+                .incomeFromGoodwillCreditInterestAccountId(id).incomeFromGoodwillCreditFeesAccountId(id)
+                .incomeFromGoodwillCreditPenaltyAccountId(id);
+    }
+
+    private static void applyExpenseAccounts(final PostLoanProductsRequest request, final Long id) {
+        request.writeOffAccountId(id).goodwillCreditAccountId(id).chargeOffExpenseAccountId(id).chargeOffFraudExpenseAccountId(id);
     }
 
     public LoanProductTestBuilder withExternalId(String externalId) {
@@ -925,6 +1206,30 @@ public class LoanProductTestBuilder {
             Optional.ofNullable(incomeFromChargeOffPenaltyAccountId).ifPresent(incomeFromChargeOffPenaltyAccountId -> map
                     .put("incomeFromChargeOffPenaltyAccountId", Long.toString(incomeFromChargeOffPenaltyAccountId)));
             return map;
+        }
+
+        public void applyTo(final PostLoanProductsRequest request) {
+            request.fundSourceAccountId(fundSourceAccountId);
+            request.loanPortfolioAccountId(loanPortfolioAccountId);
+            request.transfersInSuspenseAccountId(transfersInSuspenseAccountId);
+            request.interestOnLoanAccountId(interestOnLoanAccountId);
+            request.incomeFromFeeAccountId(incomeFromFeeAccountId);
+            request.incomeFromPenaltyAccountId(incomeFromPenaltyAccountId);
+            request.incomeFromRecoveryAccountId(incomeFromRecoveryAccountId);
+            request.writeOffAccountId(writeOffAccountId);
+            request.overpaymentLiabilityAccountId(overpaymentLiabilityAccountId);
+            request.receivableInterestAccountId(receivableInterestAccountId);
+            request.receivableFeeAccountId(receivableFeeAccountId);
+            request.receivablePenaltyAccountId(receivablePenaltyAccountId);
+            request.goodwillCreditAccountId(goodwillCreditAccountId);
+            request.incomeFromGoodwillCreditInterestAccountId(incomeFromGoodwillCreditInterestAccountId);
+            request.incomeFromGoodwillCreditFeesAccountId(incomeFromGoodwillCreditFeesAccountId);
+            request.incomeFromGoodwillCreditPenaltyAccountId(incomeFromGoodwillCreditPenaltyAccountId);
+            request.incomeFromChargeOffInterestAccountId(incomeFromChargeOffInterestAccountId);
+            request.incomeFromChargeOffFeesAccountId(incomeFromChargeOffFeesAccountId);
+            request.chargeOffExpenseAccountId(chargeOffExpenseAccountId);
+            request.chargeOffFraudExpenseAccountId(chargeOffFraudExpenseAccountId);
+            request.incomeFromChargeOffPenaltyAccountId(incomeFromChargeOffPenaltyAccountId);
         }
     }
 

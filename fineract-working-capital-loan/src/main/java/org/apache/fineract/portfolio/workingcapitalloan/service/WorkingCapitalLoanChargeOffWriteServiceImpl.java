@@ -37,7 +37,6 @@ import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanChargeOffBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanUndoChargeOffBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanChargeOffTransactionBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanTransactionReversedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
@@ -76,6 +75,8 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
     private final ExternalIdFactory externalIdFactory;
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
+    private final WorkingCapitalLoanAdjustTransactionEventPublisher adjustTransactionEventPublisher;
 
     @Transactional
     @Override
@@ -130,6 +131,8 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
             this.accountingProcessor.postJournalEntries(loan, chargeOffTransaction, allocation, loan.isChargedOff());
         }
 
+        this.discountFeeAmortizationService.processFinalDiscountFeeAmortizationOnChargeOff(loan, chargeOffTransaction);
+
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(WorkingCapitalLoanConstants.transactionDateParamName, transactionDate);
         if (chargeOffReasonId != null) {
@@ -161,6 +164,8 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
                 .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.wc.loan.charge.off.transaction.not.found",
                         "No active charge-off transaction found for loan " + loanId, loanId));
 
+        this.discountFeeAmortizationService.undoDiscountFeeAmortizationOnChargeOff(loan, chargeOffTransaction);
+
         final ExternalId reversalExternalId = this.externalIdFactory
                 .create(command.stringValueOfParameterNamedAllowingNull(WorkingCapitalLoanConstants.reversalExternalIdParamName));
         chargeOffTransaction.setReversed(true);
@@ -172,8 +177,7 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
         this.loanRepository.saveAndFlush(loan);
 
         this.businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanUndoChargeOffBusinessEvent(loan));
-        this.businessEventNotifierService
-                .notifyPostBusinessEvent(new WorkingCapitalLoanTransactionReversedBusinessEvent(chargeOffTransaction, loan.getId()));
+        this.adjustTransactionEventPublisher.publishReversal(loan.getId(), chargeOffTransaction);
 
         // Reverse the charge-off journal entries. No schedule reprocessing -- pure tag.
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {

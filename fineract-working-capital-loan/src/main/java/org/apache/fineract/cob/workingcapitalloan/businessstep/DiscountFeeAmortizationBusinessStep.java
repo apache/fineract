@@ -36,27 +36,35 @@ public class DiscountFeeAmortizationBusinessStep extends WorkingCapitalLoanCOBBu
     private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
 
     @Override
-    public WorkingCapitalLoan execute(final WorkingCapitalLoan input) {
-        if (input.getLoanProductRelatedDetails() == null) {
-            log.debug("Skipping discount fee amortization for WC loan {} - no loan product details", input.getId());
-            return input;
+    public WorkingCapitalLoan execute(final WorkingCapitalLoan loan) {
+        if (loan.isClosed()) {
+            log.debug("Skipping discount fee amortization for WC loan {} - loan is closed", loan.getId());
+            return loan;
+        }
+        if (loan.getLoanProductRelatedDetails() == null) {
+            log.debug("Skipping discount fee amortization for WC loan {} - no loan product details", loan.getId());
+            return loan;
+        }
+        if (loan.isChargedOff()) {
+            log.debug("Skipping discount fee amortization for WC loan {} - loan is charged off", loan.getId());
+            return loan;
         }
         // Run when there is still a discount to amortize, OR when income was previously recognized and now needs to be
         // reconciled down (e.g. a full discount adjustment reduced the discount to zero). Otherwise there is nothing to
         // do.
-        final BigDecimal discount = input.getLoanProductRelatedDetails().getDiscount();
-        final BigDecimal recognizedIncome = input.getBalance() == null ? null : input.getBalance().getRealizedIncomeFromDiscountFee();
+        final BigDecimal discount = loan.getLoanProductRelatedDetails().getDiscount();
+        final BigDecimal recognizedIncome = loan.getBalance() == null ? null : loan.getBalance().getRealizedIncomeFromDiscountFee();
         if (!MathUtil.isGreaterThanZero(discount) && !MathUtil.isGreaterThanZero(recognizedIncome)) {
             log.debug("Skipping discount fee amortization for WC loan {} - no discount fee and no recognized income to reconcile",
-                    input.getId());
-            return input;
+                    loan.getId());
+            return loan;
         }
 
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
 
-        discountFeeAmortizationService.processDiscountFeeAmortization(input, businessDate);
+        discountFeeAmortizationService.processDiscountFeeAmortization(loan, businessDate);
 
-        return input;
+        return loan;
     }
 
     @Override

@@ -145,7 +145,7 @@ public class LoanRescheduleWithAdvancePaymentTest extends FeignLoanTestBase {
             req.dateFormat(LoanTestData.ISO_DATE_PATTERN);
             req.submittedOnDate(submittedDate);
             req.expectedDisbursementDate(submittedDate);
-            req.repaymentsStartingFromDate(LocalDate.of(2021, 6, 14));
+            req.repaymentsStartingFromDate("2021-06-14");
         });
 
         this.loanId = applyForLoan(applyRequest);
@@ -243,7 +243,7 @@ public class LoanRescheduleWithAdvancePaymentTest extends FeignLoanTestBase {
             req.dateFormat(LoanTestData.ISO_DATE_PATTERN);
             req.submittedOnDate(submittedDate);
             req.expectedDisbursementDate(submittedDate);
-            req.repaymentsStartingFromDate(LocalDate.of(2022, 1, 3));
+            req.repaymentsStartingFromDate("2022-01-03");
         });
 
         this.loanId = applyForLoan(applyRequest);

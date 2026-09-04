@@ -1339,7 +1339,7 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
 
         if (withJournalEntries) {
             LoanTestAccounts accounts = getAccounts();
-            return createLoanProductFromJson(Utils.convertToJson(builder
+            return createLoanProduct(builder
                     .withFullAccountingConfig(ACCRUAL_PERIODIC,
                             LoanProductTestBuilder.FullAccountingConfig.builder()
                                     .fundSourceAccountId(accounts.getFundSource().getAccountID().longValue())
@@ -1354,9 +1354,9 @@ public class LoanTransactionChargebackTest extends FeignLoanTestBase {
                                     .receivableInterestAccountId(accounts.getInterestReceivableAccount().getAccountID().longValue())
                                     .receivableFeeAccountId(accounts.getInterestReceivableAccount().getAccountID().longValue())
                                     .receivablePenaltyAccountId(accounts.getInterestReceivableAccount().getAccountID().longValue()).build())
-                    .build(null, delinquencyBucketId)));
+                    .buildRequest(null, delinquencyBucketId));
         }
-        return createLoanProductFromJson(Utils.convertToJson(builder.build(null, delinquencyBucketId)));
+        return createLoanProduct(builder.buildRequest(null, delinquencyBucketId));
     }
 
     private Long createLoanAccount(final Long clientId, final Long loanProductId, final String operationDate, final String principalAmount,

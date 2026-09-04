@@ -55,8 +55,6 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
 
     void applyRepayment(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
 
-    BigDecimal getWorkingCapitalLoanDiscountAmount(WorkingCapitalLoan loan);
-
     void applyRepaymentUndo(WorkingCapitalLoan loan, LocalDate transactionDate, BigDecimal repaymentAmount);
 
     /**

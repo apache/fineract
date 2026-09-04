@@ -26,6 +26,8 @@ import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,7 @@ import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdNearBreachActionsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanNearBreachActionData;
+import org.apache.fineract.test.helper.WorkingCapitalTenantDateHelper;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.support.TestContextKey;
 
@@ -42,7 +45,10 @@ import org.apache.fineract.test.support.TestContextKey;
 @RequiredArgsConstructor
 public class WorkingCapitalNearBreachActionStepDef extends AbstractStepDef {
 
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+
     private final FineractFeignClient fineractClient;
+    private final WorkingCapitalTenantDateHelper workingCapitalTenantDateHelper;
 
     @When("Admin creates a near breach reschedule action with threshold {string} frequency {int} frequencyType {string}")
     public void createNearBreachRescheduleAction(final String threshold, final int frequency, final String frequencyType) {
@@ -114,8 +120,23 @@ public class WorkingCapitalNearBreachActionStepDef extends AbstractStepDef {
                 assertThat(actual.getFrequency()).as("Frequency for row %d", rowNumber).isEqualTo(Integer.parseInt(expectedValue));
             case "frequencyType" ->
                 assertThat(actual.getFrequencyType()).as("FrequencyType for row %d", rowNumber).isEqualTo(expectedValue);
+            case "submittedOnDate" -> {
+                assertThat(actual.getSubmittedOnDate()).as("SubmittedOnDate for row %d", rowNumber).isNotNull();
+                assertThat(FORMATTER.format(actual.getSubmittedOnDate())).as("SubmittedOnDate for row %d", rowNumber)
+                        .isEqualTo(expectedValue);
+            }
             default -> throw new IllegalArgumentException("Unknown near breach action field: " + fieldName);
         }
+    }
+
+    @Then("Latest near breach action was submitted on the current tenant date")
+    public void latestNearBreachActionSubmittedOnTenantDate() {
+        final Long loanId = extractLoanId();
+        final WorkingCapitalLoanNearBreachActionData latest = retrieveNearBreachActionHistory(loanId).stream()//
+                .max(Comparator.comparing(WorkingCapitalLoanNearBreachActionData::getId))//
+                .orElseThrow(() -> new IllegalStateException(String.format("No near breach action found on loan [%s]", loanId)));
+        workingCapitalTenantDateHelper.assertStampedOnCurrentTenantDate(latest.getSubmittedOnDate(), loanId,
+                String.format("submittedOnDate of latest near breach action on loan %d", loanId));
     }
 
     private PostWorkingCapitalLoansLoanIdNearBreachActionsRequest buildRequest(final String threshold, final int frequency,

@@ -39,6 +39,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactions;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
@@ -49,7 +50,6 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuil
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Assertions;
@@ -104,28 +104,15 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
             loanProductTestBuilder = loanProductTestBuilder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
             loanProductTestBuilder = loanProductTestBuilder.withMaxTrancheCount("30");
         }
-        final String loanProductJSON = loanProductTestBuilder.build(null);
-        return createLoanProductFromJson(loanProductJSON);
+        final PostLoanProductsRequest loanProductRequest = loanProductTestBuilder.buildRequest(null);
+        return createLoanProduct(loanProductRequest);
     }
 
     private Long applyForLoanApplication(final Long clientID, final Long loanProductID, String principal, String submitDate,
             String repaymentStrategy) {
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal(principal) //
-                .withLoanTermFrequency("4") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("4") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate(submitDate) //
-                .withSubmittedOnDate(submitDate) //
-                .withRepaymentStrategy(repaymentStrategy) //
-                .build(clientID.toString(), loanProductID.toString(), null);
-        return applyForLoanFromJson(loanApplicationJSON);
+        return applyForLoan(
+                LoanRequestBuilders.legacyIndividualApplication(clientID, loanProductID, principal, 4, new BigDecimal("2"), submitDate)
+                        .transactionProcessingStrategyCode(repaymentStrategy));
     }
 
     private Long fromStartToDisburseLoan(LoanProductTestBuilder loanProductTestBuilder, String submitApproveDisburseDate, String principal,

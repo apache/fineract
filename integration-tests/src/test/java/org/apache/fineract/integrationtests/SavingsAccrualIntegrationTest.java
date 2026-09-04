@@ -18,247 +18,161 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.integrationtests.common.BusinessDateHelper.runAt;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.client.models.SavingsAccountTransactionData;
+import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
-import org.apache.fineract.integrationtests.common.savings.SavingsTestLifecycleExtension;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Order(2)
-@ExtendWith({ SavingsTestLifecycleExtension.class })
-public class SavingsAccrualIntegrationTest {
+public class SavingsAccrualIntegrationTest extends FeignSavingsTestBase {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SavingsAccrualIntegrationTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private SavingsAccountHelper savingsAccountHelper;
-    private JournalEntryHelper journalEntryHelper;
-    private AccountHelper accountHelper;
+    private static final String ACCRUAL_JOB = "Add Accrual Transactions For Savings";
 
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-    }
+    private static final String BUSINESS_DATE = "2021-08-12";
+    private static final LocalDate TODAY = LocalDate.of(2021, 8, 12);
+    private static final String CLIENT_ACTIVATION_DATE = "01 January 2020";
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US);
+
+    private static final Double INTEREST_RATE = 10.0;
+    private static final String DEPOSIT_AMOUNT = "10000";
+    private static final int DAYS_TO_TEST = 10;
+    private static final int DAYS_UNTIL_TRANSACTION = 5;
+    private static final BigDecimal DAYS_IN_YEAR = new BigDecimal("365");
+    private static final BigDecimal PERCENT = new BigDecimal("100");
 
     @Test
     public void testAccrualsAreGeneratedForTenDayPeriod() {
-        runAt("12 August 2021", () -> {
-            // --- ARRANGE ---
+        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+            final LocalDate startDate = TODAY.minusDays(DAYS_TO_TEST);
+            final Long savingsAccountId = createFundedSavingsAccount(startDate);
 
-            final Account assetAccount = this.accountHelper.createAssetAccount();
-            final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
-            final Account incomeAccount = this.accountHelper.createIncomeAccount();
-            final Account expenseAccount = this.accountHelper.createExpenseAccount();
-            final String interestRate = "10.0";
-            final int daysToTest = 10;
+            schedulerHelper.executeAndAwaitJob(ACCRUAL_JOB);
 
-            final SavingsProductHelper productHelper = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily()
-                    .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance()
-                    .withNominalAnnualInterestRate(new BigDecimal(interestRate))
-                    .withAccountingRuleAsAccrualBased(new Account[] { assetAccount, liabilityAccount, incomeAccount, expenseAccount });
+            final List<SavingsAccountTransactionData> accrualTransactions = savingsTransactionHelper
+                    .getAccrualTransactions(savingsAccountId);
+            assertFalse(accrualTransactions.isEmpty(), "No accrual transactions were found.");
 
-            final Integer savingsProductId = SavingsProductHelper.createSavingsProduct(productHelper.build(), this.requestSpec,
-                    this.responseSpec);
-            Assertions.assertNotNull(savingsProductId, "Error creating savings product.");
+            final long daysBetween = ChronoUnit.DAYS.between(startDate, TODAY);
+            final long actualNumberOfTransactions = accrualTransactions.size();
+            assertTrue(actualNumberOfTransactions >= daysBetween && actualNumberOfTransactions <= daysBetween + 1, "For a period of "
+                    + daysBetween + " days, a close number of transactions was expected, but found " + actualNumberOfTransactions);
 
-            final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2020");
-            Assertions.assertNotNull(clientId, "Error creating client.");
+            final BigDecimal expectedTotalAccrual = dailyInterest(new BigDecimal(DEPOSIT_AMOUNT), 8)
+                    .multiply(BigDecimal.valueOf(actualNumberOfTransactions)).setScale(2, RoundingMode.HALF_EVEN);
 
-            final LocalDate startDate = LocalDate.of(2021, 8, 12).minusDays(daysToTest);
-            final String startDateString = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(startDate);
-
-            final Integer savingsAccountId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientId, savingsProductId,
-                    SavingsAccountHelper.ACCOUNT_TYPE_INDIVIDUAL, startDateString);
-            Assertions.assertNotNull(savingsAccountId, "Error applying for savings account.");
-
-            this.savingsAccountHelper.approveSavingsOnDate(savingsAccountId, startDateString);
-            this.savingsAccountHelper.activateSavings(savingsAccountId, startDateString);
-
-            final HashMap<String, Object> savingsStatus = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec,
-                    savingsAccountId);
-            SavingsStatusChecker.verifySavingsIsActive(savingsStatus);
-
-            this.savingsAccountHelper.depositToSavingsAccount(savingsAccountId, "10000", startDateString,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
-
-            // --- ACT ---
-            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions For Savings");
-
-            // --- ASSERT ---
-            List<HashMap> allTransactions = savingsAccountHelper.getSavingsTransactions(savingsAccountId);
-            List<HashMap> accrualTransactions = new ArrayList<>();
-            for (HashMap transaction : allTransactions) {
-                Map<String, Object> type = (Map<String, Object>) transaction.get("transactionType");
-                if (type != null && Boolean.TRUE.equals(type.get("accrual"))) {
-                    accrualTransactions.add(transaction);
-                }
-            }
-            Assertions.assertFalse(accrualTransactions.isEmpty(), "No accrual transactions were found.");
-
-            long daysBetween = ChronoUnit.DAYS.between(startDate, LocalDate.of(2021, 8, 12));
-            long actualNumberOfTransactions = accrualTransactions.size();
-
-            Assertions.assertTrue(actualNumberOfTransactions >= daysBetween && actualNumberOfTransactions <= daysBetween + 1,
-                    "For a period of " + daysBetween + " days, a close number of transactions was expected, but found "
-                            + actualNumberOfTransactions);
-
-            BigDecimal principal = new BigDecimal("10000");
-            BigDecimal rate = new BigDecimal(interestRate).divide(new BigDecimal(100));
-            BigDecimal daysInYear = new BigDecimal("365");
-
-            BigDecimal expectedTotalAccrual = principal.multiply(rate).divide(daysInYear, 8, RoundingMode.HALF_EVEN)
-                    .multiply(new BigDecimal(actualNumberOfTransactions)).setScale(2, RoundingMode.HALF_EVEN);
-
-            BigDecimal actualTotalAccrual = savingsAccountHelper.getTotalAccrualAmount(savingsAccountId);
-
-            Assertions.assertEquals(0, expectedTotalAccrual.compareTo(actualTotalAccrual),
-                    "The total accrual (" + actualTotalAccrual + ") does not match the expected (" + expectedTotalAccrual + ")");
+            SavingsTestValidators.verifyAmount(expectedTotalAccrual, savingsTransactionHelper.getTotalAccrualAmount(savingsAccountId),
+                    "Verifying the total accrual");
         });
     }
 
     @Test
     public void testAccrualsAreReversedAndRecalculatedAfterBackdatedTransaction() {
-        runAt("12 August 2021", () -> {
-            // --- ARRANGE ---
-            final Account assetAccount = this.accountHelper.createAssetAccount();
-            final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
-            final Account incomeAccount = this.accountHelper.createIncomeAccount();
-            final Account expenseAccount = this.accountHelper.createExpenseAccount();
-            final String interestRate = "10.0";
-            final int daysToTest = 10;
-            final int daysUntilTransaction = 5;
+        businessDateHelper.runAt(BUSINESS_DATE, () -> {
+            final LocalDate startDate = TODAY.minusDays(DAYS_TO_TEST);
+            final Long savingsAccountId = createFundedSavingsAccount(startDate);
 
-            final SavingsProductHelper productHelper = new SavingsProductHelper().withInterestCompoundingPeriodTypeAsDaily()
-                    .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance()
-                    .withNominalAnnualInterestRate(new BigDecimal(interestRate))
-                    .withAccountingRuleAsAccrualBased(new Account[] { assetAccount, liabilityAccount, incomeAccount, expenseAccount });
+            schedulerHelper.executeAndAwaitJob(ACCRUAL_JOB);
 
-            final Integer savingsProductId = SavingsProductHelper.createSavingsProduct(productHelper.build(), this.requestSpec,
-                    this.responseSpec);
-            Assertions.assertNotNull(savingsProductId);
+            final LocalDate backdatedTransactionDate = startDate.plusDays(DAYS_UNTIL_TRANSACTION);
+            final BigDecimal withdrawalAmount = new BigDecimal("1000");
+            withdraw(savingsAccountId, withdrawalAmount.toPlainString(), DATE_FORMATTER.format(backdatedTransactionDate));
 
-            final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2020");
-            Assertions.assertNotNull(clientId);
+            schedulerHelper.executeAndAwaitJob(ACCRUAL_JOB);
 
-            final LocalDate today = LocalDate.of(2021, 8, 12);
-            final LocalDate startDate = today.minusDays(daysToTest);
-            final String startDateString = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US).format(startDate);
+            final List<SavingsAccountTransactionData> accrualTransactions = savingsTransactionHelper
+                    .getAccrualTransactions(savingsAccountId);
+            verifyAccrualsWereReversedFrom(backdatedTransactionDate, accrualTransactions);
 
-            final Integer savingsAccountId = this.savingsAccountHelper.applyForSavingsApplicationOnDate(clientId, savingsProductId,
-                    SavingsAccountHelper.ACCOUNT_TYPE_INDIVIDUAL, startDateString);
-            Assertions.assertNotNull(savingsAccountId);
-
-            this.savingsAccountHelper.approveSavingsOnDate(savingsAccountId, startDateString);
-            this.savingsAccountHelper.activateSavings(savingsAccountId, startDateString);
-            this.savingsAccountHelper.depositToSavingsAccount(savingsAccountId, "10000", startDateString,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
-
-            // --- ACT ---
-            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions For Savings");
-
-            final LocalDate backdatedTransactionDate = startDate.plusDays(daysUntilTransaction);
-            final String backdatedTransactionDateString = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.US)
-                    .format(backdatedTransactionDate);
-            this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsAccountId, "1000", backdatedTransactionDateString,
-                    CommonConstants.RESPONSE_RESOURCE_ID);
-
-            SchedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions For Savings");
-
-            // --- ASSERT ---
-            List<HashMap> allTransactions = savingsAccountHelper.getSavingsTransactions(savingsAccountId);
-
-            Map<LocalDate, Map<String, Integer>> accrualsByDate = new HashMap<>();
-
-            for (HashMap transaction : allTransactions) {
-                Map<String, Object> type = (Map<String, Object>) transaction.get("transactionType");
-
-                if (type != null && Boolean.TRUE.equals(type.get("accrual"))) {
-                    List<Number> dateArray = (List<Number>) transaction.get("date");
-                    LocalDate transactionDate = LocalDate.of(dateArray.get(0).intValue(), dateArray.get(1).intValue(),
-                            dateArray.get(2).intValue());
-                    boolean isReversed = Boolean.TRUE.equals(transaction.get("reversed"));
-
-                    accrualsByDate.putIfAbsent(transactionDate, new HashMap<>(Map.of("TOTAL", 0, "REVERSED", 0)));
-
-                    Map<String, Integer> counts = accrualsByDate.get(transactionDate);
-                    counts.put("TOTAL", counts.get("TOTAL") + 1);
-                    if (isReversed) {
-                        counts.put("REVERSED", counts.get("REVERSED") + 1);
-                    }
-                }
-            }
-
-            for (Map.Entry<LocalDate, Map<String, Integer>> entry : accrualsByDate.entrySet()) {
-                LocalDate date = entry.getKey();
-                Map<String, Integer> counts = entry.getValue();
-                Integer total = counts.get("TOTAL");
-                Integer reversed = counts.get("REVERSED");
-
-                if (date.isBefore(backdatedTransactionDate)) {
-                    Assertions.assertEquals(1, total, "There should be 1 accrual for the date " + date);
-                    Assertions.assertEquals(0, reversed, "The accrual for the date " + date + " should not be reversed.");
-                } else {
-                    Assertions.assertEquals(2, total, "There should be 2 accruals (original and new) for the date " + date);
-                    Assertions.assertEquals(1, reversed, "There should be 1 reversed accrual for the date " + date);
-                }
-            }
-            Assertions.assertFalse(accrualsByDate.isEmpty(), "No accrual transactions were found to verify.");
-            BigDecimal expectedDailyInterestOn9k = new BigDecimal("9000").multiply(new BigDecimal("0.10")).divide(new BigDecimal("365"), 4,
-                    RoundingMode.HALF_EVEN);
+            final BigDecimal remainingBalance = new BigDecimal(DEPOSIT_AMOUNT).subtract(withdrawalAmount);
+            final BigDecimal expectedDailyInterest = dailyInterest(remainingBalance, 4);
 
             boolean newAccrualVerified = false;
-            for (HashMap transaction : allTransactions) {
-                Map<String, Object> type = (Map<String, Object>) transaction.get("transactionType");
-                if (type != null && Boolean.TRUE.equals(type.get("accrual")) && !Boolean.TRUE.equals(transaction.get("reversed"))) {
-                    List<Number> dateArray = (List<Number>) transaction.get("date");
-                    LocalDate transactionDate = LocalDate.of(dateArray.get(0).intValue(), dateArray.get(1).intValue(),
-                            dateArray.get(2).intValue());
-
-                    if (!transactionDate.isBefore(backdatedTransactionDate)) {
-                        BigDecimal actualAmount = new BigDecimal(transaction.get("amount").toString()).setScale(4, RoundingMode.HALF_EVEN);
-                        Assertions.assertEquals(0, expectedDailyInterestOn9k.compareTo(actualAmount), "The new accrual amount ("
-                                + actualAmount + ") does not match the expected (" + expectedDailyInterestOn9k + ")");
-                        newAccrualVerified = true;
-                    }
+            for (SavingsAccountTransactionData accrual : accrualTransactions) {
+                if (!Boolean.TRUE.equals(accrual.getReversed()) && !accrual.getDate().isBefore(backdatedTransactionDate)) {
+                    SavingsTestValidators.verifyAmount(expectedDailyInterest, accrual.getAmount().setScale(4, RoundingMode.HALF_EVEN),
+                            "Verifying the recalculated accrual of " + accrual.getDate());
+                    newAccrualVerified = true;
                 }
             }
-            Assertions.assertTrue(newAccrualVerified, "Could not verify the mathematical calculation of a new accrual.");
+            assertTrue(newAccrualVerified, "Could not verify the mathematical calculation of a new accrual.");
         });
+    }
+
+    /** Dates before the backdated transaction keep one accrual; dates from it carry the reversed one plus a new one. */
+    private void verifyAccrualsWereReversedFrom(final LocalDate backdatedTransactionDate,
+            final List<SavingsAccountTransactionData> accrualTransactions) {
+        final Map<LocalDate, Long> accrualsByDate = new HashMap<>();
+        final Map<LocalDate, Long> reversedAccrualsByDate = new HashMap<>();
+        for (SavingsAccountTransactionData accrual : accrualTransactions) {
+            accrualsByDate.merge(accrual.getDate(), 1L, Long::sum);
+            if (Boolean.TRUE.equals(accrual.getReversed())) {
+                reversedAccrualsByDate.merge(accrual.getDate(), 1L, Long::sum);
+            }
+        }
+        assertFalse(accrualsByDate.isEmpty(), "No accrual transactions were found to verify.");
+
+        for (Map.Entry<LocalDate, Long> entry : accrualsByDate.entrySet()) {
+            final LocalDate date = entry.getKey();
+            final long reversed = reversedAccrualsByDate.getOrDefault(date, 0L);
+            if (date.isBefore(backdatedTransactionDate)) {
+                assertEquals(1L, entry.getValue(), "There should be 1 accrual for the date " + date);
+                assertEquals(0L, reversed, "The accrual for the date " + date + " should not be reversed.");
+            } else {
+                assertEquals(2L, entry.getValue(), "There should be 2 accruals (original and new) for the date " + date);
+                assertEquals(1L, reversed, "There should be 1 reversed accrual for the date " + date);
+            }
+        }
+    }
+
+    private BigDecimal dailyInterest(final BigDecimal balance, final int scale) {
+        return balance.multiply(BigDecimal.valueOf(INTEREST_RATE)).divide(PERCENT.multiply(DAYS_IN_YEAR), scale, RoundingMode.HALF_EVEN);
+    }
+
+    private Long createFundedSavingsAccount(final LocalDate startDate) {
+        final Account assetAccount = accountHelper.createAssetAccount("assetAccount");
+        final Account liabilityAccount = accountHelper.createLiabilityAccount("liabilityAccount");
+        final Account incomeAccount = accountHelper.createIncomeAccount("incomeAccount");
+        final Account expenseAccount = accountHelper.createExpenseAccount("expenseAccount");
+
+        final Long savingsProductId = savingsProductHelper.createSavingsProduct(SavingsRequestBuilders.withAccrualAccountingMappings(
+                SavingsRequestBuilders
+                        .savingsProduct(SavingsTestData.InterestCompoundingPeriodType.DAILY,
+                                SavingsTestData.InterestPostingPeriodType.MONTHLY, SavingsTestData.InterestCalculationType.DAILY_BALANCE)
+                        .nominalAnnualInterestRate(INTEREST_RATE)//
+                        .accountingRule(SavingsTestData.AccountingRule.ACCRUAL_PERIODIC),
+                assetAccount, liabilityAccount, incomeAccount, expenseAccount)).getResourceId();
+        assertNotNull(savingsProductId, "Error creating savings product.");
+
+        final Long clientId = createClient(CLIENT_ACTIVATION_DATE);
+        assertNotNull(clientId, "Error creating client.");
+
+        final String startDateString = DATE_FORMATTER.format(startDate);
+        final Long savingsAccountId = submitSavingsApplication(clientId, savingsProductId, startDateString).getSavingsId();
+        assertNotNull(savingsAccountId, "Error applying for savings account.");
+
+        approveSavings(savingsAccountId, startDateString);
+        activateSavings(savingsAccountId, startDateString);
+        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsAccountId));
+
+        deposit(savingsAccountId, DEPOSIT_AMOUNT, startDateString);
+        return savingsAccountId;
     }
 }

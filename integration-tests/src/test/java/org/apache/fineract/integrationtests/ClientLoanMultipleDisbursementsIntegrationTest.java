@@ -27,13 +27,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostLoansDisbursementData;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignRawHttpHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Assertions;
@@ -74,36 +75,20 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
             builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
             builder = builder.withMaxTrancheCount("30");
         }
-        final String loanProductJSON = builder.build(null);
-        return createLoanProductFromJson(loanProductJSON);
+        final PostLoanProductsRequest loanProductRequest = builder.buildRequest(null);
+        return createLoanProduct(loanProductRequest);
     }
 
     private Long applyForLoanApplicationWithTranches(final Long clientId, final Long loanProductID, String principal,
-            List<HashMap> tranches, String submitDate) {
+            List<PostLoansDisbursementData> tranches, String submitDate) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal(principal) //
-                .withLoanTermFrequency("4") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("4") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("0") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate(submitDate) //
-                .withTranches(tranches) //
-                .withSubmittedOnDate(submitDate) //
-                .build(clientId.toString(), loanProductID.toString(), null);
-        return applyForLoanFromJson(loanApplicationJSON);
+        return applyForLoan(LoanRequestBuilders
+                .legacyIndividualApplication(clientId, loanProductID, principal, 4, BigDecimal.ZERO, submitDate).disbursementData(tranches)//
+                .fixedEmiAmount(new BigDecimal("10000")));
     }
 
-    private HashMap createTrancheDetail(final String date, final String amount) {
-        HashMap detail = new HashMap();
-        detail.put("expectedDisbursementDate", date);
-        detail.put("principal", amount);
-        return detail;
+    private PostLoansDisbursementData createTrancheDetail(final String date, final String amount) {
+        return new PostLoansDisbursementData().expectedDisbursementDate(date).principal(new BigDecimal(amount));
     }
 
     /**
@@ -144,7 +129,7 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
         final String principal = "12,000.00";
 
         LOG.info("-----------------------------------10 Tranches--------------------------------------");
-        List<HashMap> tranches = new ArrayList<>();
+        List<PostLoansDisbursementData> tranches = new ArrayList<>();
         tranches.add(createTrancheDetail("01 January 2021", "1"));
         tranches.add(createTrancheDetail("02 January 2021", "2"));
         tranches.add(createTrancheDetail("03 January 2021", "4"));
@@ -223,7 +208,7 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
         final String principal = "12,000.00";
 
         LOG.info("-----------------------------------2 Tranches--------------------------------------");
-        List<HashMap> tranches = new ArrayList<>();
+        List<PostLoansDisbursementData> tranches = new ArrayList<>();
         tranches.add(createTrancheDetail("01 January 2021", "1"));
         tranches.add(createTrancheDetail("02 January 2021", "2"));
         String submitDate = "01 January 2021";
@@ -296,7 +281,7 @@ public class ClientLoanMultipleDisbursementsIntegrationTest extends FeignLoanTes
         final String principal = "12,000.00";
 
         LOG.info("-----------------------------------2 Tranches--------------------------------------");
-        List<HashMap> tranches = new ArrayList<>();
+        List<PostLoansDisbursementData> tranches = new ArrayList<>();
         tranches.add(createTrancheDetail("01 January 2021", "1"));
         tranches.add(createTrancheDetail("02 January 2021", "2"));
         String submitDate = "01 January 2021";

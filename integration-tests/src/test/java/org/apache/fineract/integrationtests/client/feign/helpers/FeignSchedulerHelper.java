@@ -19,6 +19,8 @@
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.Duration;
 import java.util.List;
@@ -72,12 +74,19 @@ public class FeignSchedulerHelper {
         Long previousRunHistoryId = getRunHistoryId(getLatestJobRunHistory(jobId));
         FeignCalls.executeVoid(() -> fineractClient.schedulerJob().executeJob(jobId, "executeJob", new ExecuteJobRequest()));
 
-        Awaitility.await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1)).pollDelay(Duration.ofSeconds(1))
-                .until(() -> isNewCompletedRunHistory(jobId, previousRunHistoryId));
+        JobDetailHistoryDataSwagger finalRunHistory = Awaitility.await().atMost(Duration.ofMinutes(2)).pollInterval(Duration.ofSeconds(1))
+                .pollDelay(Duration.ofSeconds(1))
+                .until(() -> getLatestJobRunHistory(jobId), runHistory -> isNewCompletedRunHistory(runHistory, previousRunHistoryId));
+
+        assertEquals("application", finalRunHistory.getTriggerType(),
+                "Job was not triggered by the test for jobId=" + jobId + ": " + finalRunHistory);
+        String status = finalRunHistory.getStatus();
+        if (!"success".equals(status)) {
+            fail("Job status is not success for jobId=" + jobId + ": " + finalRunHistory);
+        }
     }
 
-    private boolean isNewCompletedRunHistory(Long jobId, Long previousRunHistoryId) {
-        JobDetailHistoryDataSwagger latestRunHistory = getLatestJobRunHistory(jobId);
+    private boolean isNewCompletedRunHistory(JobDetailHistoryDataSwagger latestRunHistory, Long previousRunHistoryId) {
         if (latestRunHistory == null || latestRunHistory.getJobRunEndTime() == null) {
             return false;
         }

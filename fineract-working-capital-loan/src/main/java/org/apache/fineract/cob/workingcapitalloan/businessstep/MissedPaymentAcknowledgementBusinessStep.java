@@ -19,13 +19,11 @@
 package org.apache.fineract.cob.workingcapitalloan.businessstep;
 
 import java.time.LocalDate;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.service.WorkingCapitalLoanAmortizationScheduleWriteService;
 import org.springframework.stereotype.Component;
 
@@ -54,9 +52,7 @@ public class MissedPaymentAcknowledgementBusinessStep extends WorkingCapitalLoan
 
     @Override
     public WorkingCapitalLoan execute(final WorkingCapitalLoan input) {
-        final boolean isDisbursed = input.getDisbursementDetails().stream()
-                .map(WorkingCapitalLoanDisbursementDetails::getActualDisbursementDate).anyMatch(Objects::nonNull);
-        if (!isDisbursed) {
+        if (input.isNotDisbursed()) {
             log.debug("Skipping missed payment acknowledgement for WC loan {} - not yet disbursed", input.getId());
             return input;
         }

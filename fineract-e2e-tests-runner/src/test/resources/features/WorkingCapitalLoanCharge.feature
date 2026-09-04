@@ -65,6 +65,7 @@ Feature: WorkingCapitalLoanChargesFeature
     Then Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
       | Working Capital Loan Fee | 10 January 2026 | 35.0   | EUR      | false     | Specified due date | Flat                    | Regular             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C83049
   Scenario: Verify Working Capital Charge on loan account level - UC2: specified due date penalty added with business date as due date
@@ -78,6 +79,7 @@ Feature: WorkingCapitalLoanChargesFeature
     Then Working Capital Loan has charges with the following data:
       | Charge Name                  | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
       | Working Capital Loan Penalty | 10 January 2026 | 35.0   | EUR      | true      | Specified due date | Flat                    | Regular             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C83050
   Scenario: Verify Working Capital Charge on loan account level - UC3: specified due date charge added with future due date
@@ -91,6 +93,7 @@ Feature: WorkingCapitalLoanChargesFeature
     Then Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
       | Working Capital Loan Fee | 12 January 2026 | 35.0   | EUR      | false     | Specified due date | Flat                    | Regular             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C83051
   Scenario: Verify Working Capital Charge on loan account level - UC4: specified due date charge added on disbursement date
@@ -103,6 +106,7 @@ Feature: WorkingCapitalLoanChargesFeature
       | Charge Name              | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
       | Working Capital Loan Fee | 01 January 2026 | 35.0   | EUR      | false     | Specified due date | Flat                    | Regular             |
     And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
 
   @TestRailId:C83052
   Scenario: Verify Working Capital Charge on loan account level - UC5: specified due date charge added on disbursement date with future due date
@@ -115,6 +119,7 @@ Feature: WorkingCapitalLoanChargesFeature
       | Charge Name              | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
       | Working Capital Loan Fee | 12 January 2026 | 35.0   | EUR      | false     | Specified due date | Flat                    | Regular             |
     And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
 
   @TestRailId:C83053
   Scenario: Verify Working Capital Charge on loan account level - UC6: multiple charges can be added to the same loan
@@ -125,11 +130,14 @@ Feature: WorkingCapitalLoanChargesFeature
     When Admin sets the business date to "10 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "12 January 2026" due date and 35.0 transaction amount
+    Then a Working Capital Loan Add Charge business event is raised for "fee" charge "Working Capital Loan Fee" with "35.0" EUR amount
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY" specified due date charge to working capital loan with "15 January 2026" due date and 50.0 transaction amount
+    Then a Working Capital Loan Add Charge business event is raised for "penalty" charge "Working Capital Loan Penalty" with "50.0" EUR amount
     Then Working Capital Loan has charges with the following data:
       | Charge Name                  | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
       | Working Capital Loan Fee     | 12 January 2026 | 35.0   | EUR      | false     | Specified due date | Flat                    | Regular             |
       | Working Capital Loan Penalty | 15 January 2026 | 50.0   | EUR      | true      | Specified due date | Flat                    | Regular             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C83054
   Scenario: Verify Working Capital Charge on loan account level - UC7: fee and penalty with different amounts can be added
@@ -145,6 +153,7 @@ Feature: WorkingCapitalLoanChargesFeature
       | Charge Name                  | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
       | Working Capital Loan Fee     | 12 January 2026 | 15.0   | EUR      | false     | Specified due date | Flat                    | Regular             |
       | Working Capital Loan Penalty | 12 January 2026 | 25.0   | EUR      | true      | Specified due date | Flat                    | Regular             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C83055
   Scenario: Verify Working Capital Charge on loan account level - UC8: charge can be added with minimum amount
@@ -158,6 +167,7 @@ Feature: WorkingCapitalLoanChargesFeature
     Then Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
       | Working Capital Loan Fee | 12 January 2026 | 1.0    | EUR      | false     | Specified due date | Flat                    | Regular             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C83056
   Scenario: Verify Working Capital Charge on loan account level - UC9: charge can be added with large amount
@@ -171,6 +181,7 @@ Feature: WorkingCapitalLoanChargesFeature
     Then Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
       | Working Capital Loan Fee | 12 January 2026 | 5000.0 | EUR      | false     | Specified due date | Flat                    | Regular             |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C83057
   Scenario: Verify Working Capital Charge on loan account level - UC10: charge balances are correctly calculated (Outstanding only, no repayment)
@@ -197,6 +208,7 @@ Feature: WorkingCapitalLoanChargesFeature
     Then Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 100.0           | 0.0      | 50.0           | 50.0                | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "12 January 2026"
 
   @TestRailId:C83058
   Scenario: Verify Working Capital Charge on loan account level - UC11: charge in use cannot be deleted, template retrieved
@@ -215,7 +227,6 @@ Feature: WorkingCapitalLoanChargesFeature
     When Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount
     Then Working Capital loan status will be "ACTIVE"
     And Verify Working Capital loan disbursement was successful
-
     And Working capital loan account has the correct data:
       | product.name | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
       | WCLP         | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
@@ -225,6 +236,7 @@ Feature: WorkingCapitalLoanChargesFeature
     Then Admin add working capital loan charge by loan id and charge id with amount 45.0 and due date "21-01-2026"
     When Admin fails to delete working capital loan charge with status 403 message "This charge cannot be deleted, it is already used in"
     Then Working Capital Loan has the created charges
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C83059
   Scenario: Verify Working Capital Charge on loan account level - UC12: charge cannot be added in state "Submitted and pending approval"
@@ -239,6 +251,8 @@ Feature: WorkingCapitalLoanChargesFeature
     And Trying to add working capital loan charge by loan id and charge id with amount 45.0 and due date "21-01-2026" results an error with the following data:
       | httpCode | errorMessage                    |
       | 400      | Loan should be in active status |
+    When Admin rejects the working capital loan on "01 January 2026"
+    Then Working capital loan rejection was successful
 
   @TestRailId:C83060
   Scenario: Verify Working Capital Charge on loan account level - UC13: charge cannot be added in state "Approved"
@@ -258,3 +272,7 @@ Feature: WorkingCapitalLoanChargesFeature
     And Trying to add working capital loan charge by loan id and charge id with amount 45.0 and due date "21-01-2026" results an error with the following data:
       | httpCode | errorMessage                    |
       | 400      | Loan should be in active status |
+    When Admin makes undo approval on the working capital loan
+    Then Working capital loan undo approval was successful
+    When Admin rejects the working capital loan on "01 January 2026"
+    Then Working capital loan rejection was successful

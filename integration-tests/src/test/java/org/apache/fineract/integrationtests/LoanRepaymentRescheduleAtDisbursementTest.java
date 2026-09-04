@@ -20,18 +20,20 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansDisbursementData;
+import org.apache.fineract.client.models.PostLoansLoanIdDisbursementData;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestValidators;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Test;
@@ -48,19 +50,19 @@ public class LoanRepaymentRescheduleAtDisbursementTest extends FeignLoanTestBase
 
         Long clientId = createClient("01 January 2014");
 
-        Long loanProductId = createLoanProductFromJson(buildLoanProductJson());
+        Long loanProductId = createLoanProduct(buildLoanProductRequest());
 
         List<PostLoansDisbursementData> createTranches = List.of(LoanRequestBuilders.applyTrancheDetail("01 March 2015", 5000.0),
                 LoanRequestBuilders.applyTrancheDetail("01 May 2015", 5000.0));
 
-        List<PostLoansDisbursementData> approveTranches = List.of(LoanRequestBuilders.applyTrancheDetail("01 March 2015", 5000.0),
-                LoanRequestBuilders.applyTrancheDetail("01 May 2015", 5000.0));
+        List<PostLoansLoanIdDisbursementData> approveTranches = List.of(LoanRequestBuilders.approveTrancheDetail("01 March 2015", 5000.0),
+                LoanRequestBuilders.approveTrancheDetail("01 May 2015", 5000.0));
 
-        Long loanId = applyForLoanFromJson(buildLoanApplicationJson(clientId, loanProductId, disbursementDate, createTranches));
+        Long loanId = applyForLoan(buildLoanApplication(clientId, loanProductId, disbursementDate, createTranches));
 
         verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        approveLoanFromJson(loanId, LoanRequestBuilders.approveLoanWithTranchesJson(Double.valueOf(approvalAmount), approveDate,
+        approveLoan(loanId, LoanRequestBuilders.approveLoanWithTranches(Double.valueOf(approvalAmount), approveDate,
                 expectedDisbursementDate, approveTranches));
 
         GetLoansLoanIdResponse approvedLoan = getLoanDetails(loanId);
@@ -78,7 +80,7 @@ public class LoanRepaymentRescheduleAtDisbursementTest extends FeignLoanTestBase
         assertEquals(884.03, Utils.getDoubleValue(firstInstallment.getTotalDueForPeriod()));
     }
 
-    private String buildLoanProductJson() {
+    private PostLoanProductsRequest buildLoanProductRequest() {
         return new LoanProductTestBuilder().withPrincipal("10000.00").withNumberOfRepayments("12").withRepaymentAfterEvery("2")
                 .withRepaymentTypeAsWeek().withinterestRatePerPeriod("2").withInterestRateFrequencyTypeAsMonths().withTranches(true)
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withRepaymentStrategy(LoanProductTestBuilder.RBI_INDIA_STRATEGY)
@@ -87,25 +89,33 @@ public class LoanRepaymentRescheduleAtDisbursementTest extends FeignLoanTestBase
                         LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
                         LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE)
                 .withInterestRecalculationRestFrequencyDetails(LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", null, null)
-                .withInterestRecalculationCompoundingFrequencyDetails(null, null, null, null).build(null);
+                .withInterestRecalculationCompoundingFrequencyDetails(null, null, null, null).buildRequest(null);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private String buildLoanApplicationJson(Long clientId, Long loanProductId, String disbursementDate,
+    private PostLoansRequest buildLoanApplication(Long clientId, Long loanProductId, String disbursementDate,
             List<PostLoansDisbursementData> tranches) {
-        List<HashMap> trancheMaps = tranches.stream().map(tranche -> {
-            HashMap map = new HashMap();
-            map.put("expectedDisbursementDate", tranche.getExpectedDisbursementDate());
-            map.put("principal", tranche.getPrincipal().toPlainString());
-            return map;
-        }).toList();
-
-        return new LoanApplicationTestBuilder().withPrincipal("10000.00").withLoanTermFrequency("24").withLoanTermFrequencyAsWeeks()
-                .withNumberOfRepayments("12").withRepaymentEveryAfter("2").withRepaymentFrequencyTypeAsWeeks()
-                .withInterestRatePerPeriod("2").withAmortizationTypeAsEqualInstallments().withTranches(trancheMaps).withFixedEmiAmount("")
-                .withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeAsDays()
-                .withExpectedDisbursementDate(disbursementDate).withSubmittedOnDate(disbursementDate)
-                .withRepaymentStrategy(LoanApplicationTestBuilder.RBI_INDIA_STRATEGY).withCharges(new ArrayList<>())
-                .build(clientId.toString(), loanProductId.toString(), null);
+        return new PostLoansRequest()//
+                .clientId(clientId)//
+                .productId(loanProductId)//
+                .principal(new BigDecimal("10000.00"))//
+                .loanTermFrequency(24)//
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.WEEKS)//
+                .numberOfRepayments(12)//
+                .repaymentEvery(2)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.WEEKS)//
+                .interestRatePerPeriod(new BigDecimal("2"))//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS)//
+                .disbursementData(tranches)//
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.DAILY)//
+                .expectedDisbursementDate(disbursementDate)//
+                .submittedOnDate(disbursementDate)//
+                .transactionProcessingStrategyCode(LoanProductTestBuilder.RBI_INDIA_STRATEGY)//
+                .charges(List.of())//
+                .loanType("individual")//
+                .maxOutstandingLoanBalance(new BigDecimal("36000"))//
+                .collateral(List.of())//
+                .locale("en_GB")//
+                .dateFormat(LoanTestData.DATETIME_PATTERN);
     }
 }

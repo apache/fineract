@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.workingcapitalloan.mapper;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
@@ -30,9 +29,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ProjectedAmortizationScheduleMapper {
-
-    private static final int DISPLAY_SCALE = 2;
-    private static final RoundingMode DISPLAY_ROUNDING = RoundingMode.HALF_UP;
 
     public ProjectedAmortizationScheduleData toData(final ProjectedAmortizationScheduleModel model) {
         final List<ProjectedAmortizationSchedulePaymentData> paymentDataList = model.projectedPayments().stream().map(this::toPaymentData)
@@ -68,6 +64,6 @@ public class ProjectedAmortizationScheduleMapper {
     }
 
     private static BigDecimal roundMoney(final Money value) {
-        return value != null ? value.getAmount().setScale(DISPLAY_SCALE, DISPLAY_ROUNDING) : null;
+        return value != null ? value.getAmount() : null;
     }
 }

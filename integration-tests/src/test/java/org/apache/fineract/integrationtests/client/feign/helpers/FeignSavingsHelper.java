@@ -32,7 +32,10 @@ import org.apache.fineract.client.models.PostSavingsAccountsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesResponse;
+import org.apache.fineract.client.models.PutSavingsAccountsAccountIdRequest;
+import org.apache.fineract.client.models.PutSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
+import org.apache.fineract.client.models.SavingsAccountStatusEnumData;
 import org.apache.fineract.client.models.SavingsAccountSummaryData;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 
@@ -91,6 +94,30 @@ public class FeignSavingsHelper {
 
     public DeleteSavingsAccountsAccountIdResponse deleteSavingsApplication(Long savingsId) {
         return ok(() -> fineractClient.savingsAccount().deleteSavingsAccount(savingsId));
+    }
+
+    public PostSavingsAccountsAccountIdResponse withdrawnByApplicant(Long savingsId, String withdrawnOnDate) {
+        PostSavingsAccountsAccountIdRequest request = SavingsRequestBuilders.withdrawnByApplicant(withdrawnOnDate);
+        return ok(() -> fineractClient.savingsAccount().handleCommandsSavingsAccount(savingsId, request, "withdrawnByApplicant"));
+    }
+
+    public PostSavingsAccountsAccountIdResponse postInterest(Long savingsId) {
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
+        return ok(() -> fineractClient.savingsAccount().handleCommandsSavingsAccount(savingsId, request, "postInterest"));
+    }
+
+    public PostSavingsAccountsAccountIdResponse calculateInterest(Long savingsId) {
+        PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
+        return ok(() -> fineractClient.savingsAccount().handleCommandsSavingsAccount(savingsId, request, "calculateInterest"));
+    }
+
+    public PutSavingsAccountsAccountIdResponse updateSavingsAccount(Long savingsId, PutSavingsAccountsAccountIdRequest request) {
+        return ok(() -> fineractClient.savingsAccount().updateSavingsAccount(savingsId, request, (String) null));
+    }
+
+    /** The status is on the account itself, so no associations are requested. */
+    public SavingsAccountStatusEnumData getSavingsStatus(Long savingsId) {
+        return ok(() -> fineractClient.savingsAccount().retrieveSavingsAccount(savingsId, Map.of())).getStatus();
     }
 
     public Long createApproveActivateSavings(Long clientId, Long productId, String date) {

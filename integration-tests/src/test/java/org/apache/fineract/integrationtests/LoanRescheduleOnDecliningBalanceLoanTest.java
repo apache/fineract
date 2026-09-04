@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.PostCreateRescheduleLoansRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -36,7 +36,6 @@ import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.AfterEach;
@@ -110,17 +109,17 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
         LOG.info(
                 "---------------------------------CREATING LOAN PRODUCT WITH RECALULATION ENABLED ------------------------------------------");
 
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(String.valueOf((int) loanPrincipalAmount))
-                .withNumberOfRepayments(String.valueOf(numberOfRepayments))
+        final PostLoanProductsRequest loanProductRequest = new LoanProductTestBuilder()
+                .withPrincipal(String.valueOf((int) loanPrincipalAmount)).withNumberOfRepayments(String.valueOf(numberOfRepayments))
                 .withinterestRatePerPeriod(String.valueOf((int) interestRatePerPeriod)).withInterestRateFrequencyTypeAsYear()
                 .withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeAsDays()
                 .withInterestRecalculationDetails(LoanProductTestBuilder.RECALCULATION_COMPOUNDING_METHOD_NONE,
                         LoanProductTestBuilder.RECALCULATION_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS,
                         LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE)
                 .withInterestRecalculationRestFrequencyDetails(LoanProductTestBuilder.RECALCULATION_FREQUENCY_TYPE_DAILY, "0", null, null)
-                .withInterestRecalculationCompoundingFrequencyDetails(null, null, null, null).build(null);
+                .withInterestRecalculationCompoundingFrequencyDetails(null, null, null, null).buildRequest(null);
 
-        this.loanProductId = createLoanProductFromJson(loanProductJSON);
+        this.loanProductId = createLoanProduct(loanProductRequest);
         assertTrue(Boolean.TRUE.equals(retrieveLoanProduct(this.loanProductId).getIsInterestRecalculationEnabled()));
         LOG.info("Successfully created loan product  (ID:{}) ", this.loanProductId);
     }
@@ -225,9 +224,9 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
 
         chargeOffLoan(this.loanId, "04 January 2015");
 
-        Map<?, ?> response = loanHelper.createRescheduleRequestWithFullResponse(rescheduleRequest, 403);
-        assertEquals("error.msg.loan.is.charged.off",
-                ((Map<?, ?>) ((List<?>) response.get("errors")).get(0)).get("userMessageGlobalisationCode"));
+        CallFailedRuntimeException exception = loanHelper.createRescheduleRequestExpectingError(rescheduleRequest);
+        assertEquals(403, exception.getStatus());
+        assertEquals("error.msg.loan.is.charged.off", extractErrorGlobalisationCode(exception));
 
         undoChargeOffLoan(this.loanId);
         closeRescheduledLoan(this.loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN)
@@ -384,14 +383,29 @@ public class LoanRescheduleOnDecliningBalanceLoanTest extends FeignLoanTestBase 
     private void createLoanEntityWithScheduleGapWithInterestGreaterThanEMIAndPrincipalCompoundingOff() {
         LOG.info("---------------------------------NEW LOAN APPLICATION------------------------------------------");
 
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("15000").withLoanTermFrequency("24")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("24").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestCalculationPeriodTypeAsDays()
-                .withInterestRatePerPeriod("25").withInterestTypeAsDecliningBalance().withSubmittedOnDate(this.dateString)
-                .withExpectedDisbursementDate(this.dateString).withFirstRepaymentDate("01 January 2015")
-                .withinterestChargedFromDate(this.dateString).build(this.clientId.toString(), this.loanProductId.toString(), null);
-
-        this.loanId = applyForLoanFromJson(loanApplicationJSON);
+        this.loanId = applyForLoan(new PostLoansRequest()//
+                .clientId(this.clientId)//
+                .productId(this.loanProductId)//
+                .principal(new BigDecimal("15000"))//
+                .loanTermFrequency(24)//
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .numberOfRepayments(24)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.DAILY)//
+                .interestRatePerPeriod(new BigDecimal("25"))//
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .transactionProcessingStrategyCode(LoanTestData.TransactionProcessingStrategyCode.MIFOS_STANDARD_STRATEGY)//
+                .loanType("individual")//
+                .submittedOnDate(this.dateString)//
+                .expectedDisbursementDate(this.dateString)//
+                .repaymentsStartingFromDate("01 January 2015")//
+                .interestChargedFromDate(this.dateString)//
+                .maxOutstandingLoanBalance(new BigDecimal("36000"))//
+                .collateral(List.of())//
+                .locale("en_GB")//
+                .dateFormat(LoanTestData.DATETIME_PATTERN));
 
         LOG.info("Sucessfully created loan (ID: {} )", this.loanId);
 

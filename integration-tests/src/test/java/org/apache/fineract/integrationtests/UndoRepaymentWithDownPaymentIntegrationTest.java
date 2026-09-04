@@ -37,11 +37,13 @@ import org.apache.fineract.client.models.PaymentTypeCreateRequest;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.funds.FundsResourceHandler;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -244,15 +246,16 @@ public class UndoRepaymentWithDownPaymentIntegrationTest extends FeignLoanTestBa
     private Long createApproveAndDisburseLoanAccount(final Long clientId, final Long loanProductId, final String externalId,
             final String numberOfRepayments, final String interestRate) {
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency(numberOfRepayments)
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments(numberOfRepayments).withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod(interestRate).withInterestTypeAsFlatBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
-                .withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY).withExternalId(externalId)
-                .build(clientId.toString(), loanProductId.toString(), null);
+        PostLoansRequest loanApplication = LoanRequestBuilders
+                .legacyIndividualApplication(clientId, loanProductId, "1000", Integer.parseInt(numberOfRepayments),
+                        new BigDecimal(interestRate), "03 September 2022")
+                .submittedOnDate("01 September 2022")//
+                .interestType(LoanTestData.InterestType.FLAT)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .transactionProcessingStrategyCode(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)//
+                .externalId(externalId);
 
-        final Long loanId = applyForLoanFromJson(loanApplicationJSON);
+        final Long loanId = applyForLoan(loanApplication);
         approveLoan(loanId, approveLoanRequest(1000.0, "02 September 2022"));
         disburseLoanWithAmount(loanId, "03 September 2022", 1000.0);
         return loanId;

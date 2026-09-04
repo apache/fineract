@@ -40,6 +40,7 @@ import org.apache.fineract.client.models.PostFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.SavingsAccountData;
 import org.apache.fineract.client.models.SavingsAccountTransactionData;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
@@ -49,6 +50,7 @@ import org.apache.fineract.integrationtests.client.feign.helpers.FeignRawHttpHel
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignSavingsProductHelper;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
@@ -90,21 +92,35 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Fei
 
             mapLiabilityTransferFinancialActivity(loanProductId);
 
-            String loanApplicationJSON = new org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder()
-                    .withPrincipal("1000").withLoanTermFrequency("45").withLoanTermFrequencyAsDays().withNumberOfRepayments("3")
-                    .withRepaymentEveryAfter("15").withRepaymentFrequencyTypeAsDays().withInterestRatePerPeriod("0")
-                    .withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualPrincipalPayments()
-                    .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("01 March 2023")
-                    .withSubmittedOnDate("01 March 2023").withLoanType("individual").withExternalId(loanExternalIdStr)
-                    .withCreateStandingInstructionAtDisbursement()
-                    .build(clientId.toString(), loanProductId.toString(), savingsAccountId.toString());
-
-            Long loanId = applyForLoanFromJson(loanApplicationJSON);
+            Long loanId = applyForLoan(new PostLoansRequest()//
+                    .clientId(clientId)//
+                    .productId(loanProductId)//
+                    .principal(new BigDecimal("1000"))//
+                    .loanTermFrequency(45)//
+                    .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS)//
+                    .numberOfRepayments(3)//
+                    .repaymentEvery(15)//
+                    .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.DAYS)//
+                    .interestRatePerPeriod(BigDecimal.ZERO)//
+                    .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                    .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                    .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                    .transactionProcessingStrategyCode(LoanTestData.TransactionProcessingStrategyCode.MIFOS_STANDARD_STRATEGY)//
+                    .expectedDisbursementDate("01 March 2023")//
+                    .submittedOnDate("01 March 2023")//
+                    .loanType("individual")//
+                    .externalId(loanExternalIdStr)//
+                    .createStandingInstructionAtDisbursement(true)//
+                    .linkAccountId(savingsAccountId)//
+                    .maxOutstandingLoanBalance(new BigDecimal("36000"))//
+                    .collateral(List.of())//
+                    .locale("en_GB")//
+                    .dateFormat("dd MMMM yyyy"));
             approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 March 2023"));
 
             PostLoansLoanIdResponse responseLoanDisburseToSavings = disburseToSavings(loanId,
                     new PostLoansLoanIdRequest().actualDisbursementDate("01 March 2023").transactionAmount(new BigDecimal("1000"))
-                            .locale("en").dateFormat("dd MMMM yyyy"));
+                            .netDisbursalAmount(new BigDecimal("1000")).note("DISBURSE NOTE").locale("en").dateFormat("dd MMMM yyyy"));
 
             assertEquals(loanExternalIdStr, responseLoanDisburseToSavings.getResourceExternalId());
 

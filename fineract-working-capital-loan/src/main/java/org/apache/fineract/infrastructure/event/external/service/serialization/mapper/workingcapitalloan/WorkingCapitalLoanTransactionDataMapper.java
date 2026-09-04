@@ -19,12 +19,13 @@
 package org.apache.fineract.infrastructure.event.external.service.serialization.mapper.workingcapitalloan;
 
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanTransactionDataV1;
+import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.generic.CurrencyDataMapper;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionData;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(config = AvroMapperConfig.class)
+@Mapper(config = AvroMapperConfig.class, uses = CurrencyDataMapper.class)
 public interface WorkingCapitalLoanTransactionDataMapper {
 
     @Mapping(target = "reversed", expression = "java(isReversed(source))")

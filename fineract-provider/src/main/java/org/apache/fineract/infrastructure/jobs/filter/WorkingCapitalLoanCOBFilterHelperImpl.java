@@ -74,25 +74,26 @@ public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
 
     public static final Pattern IGNORE_LOAN_PATH_PATTERN = Pattern.compile("/v[1-9][0-9]*/working-capital-loans/catch-up");
-    public static final Pattern LOAN_PATH_PATTERN = Pattern
-            .compile("/v[1-9][0-9]*/(?:reschedule)?working-capital-loans/(?:external-id/)?([^/?]+).*");
+    public static final Pattern LOAN_PATH_PATTERN = Pattern.compile("/v[1-9][0-9]*/working-capital-loans/([^/?]+).*");
+
+    public static final Pattern EXTERNAL_ID_LOAN_PATH_PATTERN = Pattern
+            .compile("/v[1-9][0-9]*/working-capital-loans/external-id/([^/?]+).*");
     private static final Predicate<String> URL_FUNCTION = s -> LOAN_PATH_PATTERN.matcher(s).find();
 
     private Long getLoanId(String pathInfo) {
-        String id = LOAN_PATH_PATTERN.matcher(pathInfo).replaceAll("$1");
         if (isExternal(pathInfo)) {
-            String externalId = id;
+            String externalId = EXTERNAL_ID_LOAN_PATH_PATTERN.matcher(pathInfo).replaceAll("$1");
             return loanRepository.findIdByExternalId(new ExternalId(externalId));
-        } else if (StringUtils.isNumeric(id)) {
-            return Long.valueOf(id);
-        } else {
-            return null;
         }
-
+        String id = LOAN_PATH_PATTERN.matcher(pathInfo).replaceAll("$1");
+        if (StringUtils.isNumeric(id)) {
+            return Long.valueOf(id);
+        }
+        return null;
     }
 
     private boolean isExternal(String pathInfo) {
-        return LOAN_PATH_PATTERN.matcher(pathInfo).matches() && pathInfo.contains("external-id");
+        return EXTERNAL_ID_LOAN_PATH_PATTERN.matcher(pathInfo).matches();
     }
 
     @Override
@@ -158,17 +159,18 @@ public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher
                 loanIds.addAll(getLoanIdsFromApi(relativeUrl));
             }
 
-            // check the body for Loan ID
-            Long loanId = getTopLevelLoanIdFromBatchRequest(batchRequest);
-            if (loanId != null) {
-                if (isLoanHardLocked(loanId) && !isLockOverrulable(loanId)) {
-                    throw new LoanIdsHardLockedException(loanId);
-                } else {
-                    loanIds.add(loanId);
+            if (isApiMatching(batchRequest.getMethod(), relativeUrl)) {
+                Long loanId = getTopLevelLoanIdFromBatchRequest(batchRequest);
+                if (loanId != null) {
+                    if (isLoanHardLocked(loanId) && !isLockOverrulable(loanId)) {
+                        throw new LoanIdsHardLockedException(loanId);
+                    } else {
+                        loanIds.add(loanId);
+                    }
                 }
             }
         }
-        return loanIds;
+        return loanIds.stream().distinct().toList();
     }
 
     private Long getTopLevelLoanIdFromBatchRequest(BatchRequest batchRequest) throws JsonProcessingException {
@@ -184,6 +186,9 @@ public class WorkingCapitalLoanCOBFilterHelperImpl extends COBFilterApiMatcher
 
     private List<Long> getLoanIdsFromApi(String pathInfo) {
         List<Long> loanIds = getLoanIdList(pathInfo);
+        if (loanIds.isEmpty()) {
+            return loanIds;
+        }
         if (isLoanHardLocked(loanIds) && !isLockOverrulable(loanIds)) {
             throw new LoanIdsHardLockedException(loanIds.getFirst());
         } else {
