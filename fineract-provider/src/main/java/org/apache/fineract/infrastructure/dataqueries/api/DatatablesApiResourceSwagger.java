@@ -45,6 +45,8 @@ final class DatatablesApiResourceSwagger {
         public String applicationTableName;
         @Schema(example = "extra_client_details")
         public String registeredTableName;
+        @Schema(example = "Person", description = "The entity sub type the datatable is registered against, when the application table supports one (for example Person or Entity on m_client). Null when the registration is not scoped to a sub type.")
+        public String entitySubType;
         public List<ResultsetColumnHeaderData> columnHeaderData;
     }
 
