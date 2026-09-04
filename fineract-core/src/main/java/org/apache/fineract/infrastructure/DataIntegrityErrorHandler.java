@@ -35,7 +35,7 @@ public class DataIntegrityErrorHandler {
             throw new PlatformDataIntegrityException("error.msg." + msgType + ".duplicate.externalId",
                     msgDescription + ": externalId `" + externalId + "` already exists", "externalId", externalId);
         }
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg." + msgType + ".unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + msgDescription);
     }

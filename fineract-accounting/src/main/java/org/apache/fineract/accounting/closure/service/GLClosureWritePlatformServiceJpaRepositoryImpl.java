@@ -151,7 +151,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
                     command.localDateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue()));
         }
 
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.glClosure.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource GL Closure: " + realCause.getMessage());
     }
