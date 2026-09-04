@@ -16,18 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.calendar.exception;
+package org.apache.fineract.portfolio.calendar.data;
 
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import java.io.Serial;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public class CalendarEntityTypeNotSupportedException extends AbstractPlatformResourceNotFoundException {
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CalendarDeleteResponse implements Serializable {
 
-    public CalendarEntityTypeNotSupportedException(final String resource) {
-        super("calendar.entitytype.not.supported", "Calendar does not support resource " + resource);
-    }
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    public CalendarEntityTypeNotSupportedException(final String resource, final Throwable cause) {
-        super("calendar.entitytype.not.supported", "Calendar does not support resource " + resource);
-        initCause(cause);
-    }
+    private Long resourceId;
 }
