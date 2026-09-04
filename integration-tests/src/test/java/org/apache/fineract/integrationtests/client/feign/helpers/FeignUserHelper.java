@@ -58,6 +58,19 @@ public final class FeignUserHelper {
         return simpleUserWithoutBypassPermissionClient;
     }
 
+    /**
+     * Creates a user in the head office with the given role, staff and password. Mirrors
+     * {@code UserHelper.createUser(roleId, staffId, username, password)}; returns the full response so callers can read
+     * the generated user id.
+     */
+    public static PostUsersResponse createUser(Long roleId, Long staffId, String username, String password) {
+        FineractFeignClient adminClient = FineractFeignClientHelper.getFineractFeignClient();
+        return ok(() -> adminClient.users()
+                .createUser(new PostUsersRequest().username(username).firstname("Test").lastname("User").email("whatever@mifos.org")
+                        .officeId(OfficeHelper.getHeadOffice().getId()).staffId(staffId).roles(List.of(roleId)).password(password)
+                        .repeatPassword(password).sendPasswordToEmail(false)));
+    }
+
     private static void createSimpleUser(String username) {
         FineractFeignClient adminClient = FineractFeignClientHelper.getFineractFeignClient();
         GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();

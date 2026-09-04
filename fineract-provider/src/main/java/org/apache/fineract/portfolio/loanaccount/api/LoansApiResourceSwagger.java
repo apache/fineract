@@ -1256,8 +1256,8 @@ final class LoansApiResourceSwagger {
         public GetLoansLoanIdRepaymentSchedule repaymentSchedule;
         @Schema(description = "Set of GetLoansLoanIdTransactions")
         public List<GetLoansLoanIdTransactions> transactions;
-        @Schema(description = "Set of GetLoansLoanIdDisbursementDetails")
-        public Set<GetLoansLoanIdDisbursementDetails> disbursementDetails;
+        @Schema(description = "List of GetLoansLoanIdDisbursementDetails")
+        public List<GetLoansLoanIdDisbursementDetails> disbursementDetails;
         @Schema(example = "false", description = "Allow full term length for each tranche disbursement")
         public Boolean allowFullTermForTranche;
         @Schema(description = "Delinquent data")
@@ -1823,6 +1823,23 @@ final class LoansApiResourceSwagger {
             public BigDecimal principal;
         }
 
+        @Schema(description = "Post dated check backing one repayment installment")
+        static final class PostLoansLoanIdPostDatedCheckData {
+
+            private PostLoansLoanIdPostDatedCheckData() {}
+
+            @Schema(example = "1")
+            public Integer installmentId;
+            @Schema(example = "AMANA BANK")
+            public String name;
+            @Schema(example = "1600.00")
+            public BigDecimal amount;
+            @Schema(example = "900400500621")
+            public Long accountNo;
+            @Schema(example = "123456789")
+            public Long checkNo;
+        }
+
         @Schema(description = "Originator data for loan disbursement request")
         public static final class PostLoansLoanIdOriginatorData {
 
@@ -1895,6 +1912,8 @@ final class LoansApiResourceSwagger {
         public String withdrawnOnDate;
         @Schema(description = "List of PostLoansLoanIdDisbursementData")
         public List<PostLoansLoanIdDisbursementData> disbursementData;
+        @Schema(description = "Disburse only: the post dated checks backing the repayment schedule")
+        public List<PostLoansLoanIdPostDatedCheckData> postDatedChecks;
         @Schema(example = "500.00")
         public BigDecimal fixedEmiAmount;
         @Schema(example = "28 July 2022")
@@ -1959,6 +1978,8 @@ final class LoansApiResourceSwagger {
             public String note;
             @Schema(description = "PostLoansLoanIdStatus")
             public PostLoansLoanIdStatus status;
+            @Schema(example = "1000.00", description = "Undo last disbursal only: the tranche amount that was rolled back")
+            public BigDecimal disbursedAmount;
         }
 
         @Schema(example = "2")

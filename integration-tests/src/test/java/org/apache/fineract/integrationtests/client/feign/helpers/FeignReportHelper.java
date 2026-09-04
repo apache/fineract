@@ -20,6 +20,8 @@ package org.apache.fineract.integrationtests.client.feign.helpers;
 
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.RunReportsResponse;
@@ -40,5 +42,19 @@ public class FeignReportHelper {
      */
     public RunReportsResponse runReport(String reportName, Map<String, String> reportParameters) {
         return ok(() -> fineractClient.runReports().runReportGetData(reportName, reportParameters));
+    }
+
+    /**
+     * Runs a table report with {@code genericResultSet=false}, which answers a plain array of rows rather than the
+     * {@code columnHeaders}/{@code data} shape {@link #runReport} decodes. The keys of each row are whatever columns
+     * the report's stored SQL selects, so there is no generated model to bind them to.
+     *
+     * @param reportParameters
+     *            the report's {@code R_}-prefixed parameters, as expected by the report definition
+     */
+    public List<Map<String, Object>> runReportRows(String reportName, Map<String, String> reportParameters) {
+        Map<String, String> parameters = new HashMap<>(reportParameters);
+        parameters.put("genericResultSet", "false");
+        return ok(() -> fineractClient.runReports().runReportGetRows(reportName, parameters));
     }
 }

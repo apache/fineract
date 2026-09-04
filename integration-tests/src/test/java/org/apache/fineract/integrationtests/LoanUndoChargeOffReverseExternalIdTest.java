@@ -23,26 +23,19 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.system.CodeHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,73 +43,59 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanUndoChargeOffReverseExternalIdTest extends FeignLoanTestBase {
 
-    protected ResponseSpecification responseSpec;
-    protected RequestSpecification requestSpec;
-
-    @BeforeEach
-    public void setupREST() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.restAccountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.assetAccount = this.restAccountHelper.createAssetAccount();
-        this.incomeAccount = this.restAccountHelper.createIncomeAccount();
-        this.expenseAccount = this.restAccountHelper.createExpenseAccount();
-        this.overpaymentAccount = this.restAccountHelper.createLiabilityAccount();
-    }
-
-    private LoanTransactionHelper loanTransactionHelper;
-
-    private AccountHelper restAccountHelper;
     private Account assetAccount;
     private Account incomeAccount;
     private Account expenseAccount;
     private Account overpaymentAccount;
+
+    @BeforeEach
+    public void setupAccounts() {
+        this.assetAccount = accountHelper.createAssetAccount();
+        this.incomeAccount = accountHelper.createIncomeAccount();
+        this.expenseAccount = accountHelper.createExpenseAccount();
+        this.overpaymentAccount = accountHelper.createLiabilityAccount();
+    }
 
     @Test
     public void loanUndoChargeOffReverseExternalIdTest() {
         // Loan ExternalId
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting(assetAccount, incomeAccount, expenseAccount,
+        final Long loanProductID = createLoanProductWithPeriodicAccrualAccounting(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-        final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
+        final Long clientId = createClient();
+        final Long loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
 
         // make Repayment
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("6 September 2022").locale("en")
-                        .transactionAmount(100.0));
+        makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN)
+                .transactionDate("6 September 2022").locale(LoanTestData.LOCALE).transactionAmount(100.0));
 
-        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
         assertTrue(loanDetails.getStatus().getActive());
 
         // set loan as chargeoff
         String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6) + Utils.randomStringGenerator("is", 5);
-        Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
+        Long chargeOffReasonId = codeHelper.createChargeOffCodeValue(randomText, 1);
         String transactionExternalId = UUID.randomUUID().toString();
-        loanTransactionHelper.chargeOffLoan((long) loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("7 September 2022")
-                .locale("en").dateFormat("dd MMMM yyyy").externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+        chargeOffLoan(loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("7 September 2022").locale(LoanTestData.LOCALE)
+                .dateFormat(LoanTestData.DATETIME_PATTERN).externalId(transactionExternalId).chargeOffReasonId(chargeOffReasonId));
 
-        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = getLoanDetails(loanId);
         assertTrue(loanDetails.getStatus().getActive());
         assertTrue(loanDetails.getChargedOff());
 
         // undo charge-off
         String reverseTransactionExternalId = UUID.randomUUID().toString();
-        PostLoansLoanIdTransactionsResponse undoChargeOffTxResponse = loanTransactionHelper.undoChargeOffLoan((long) loanId,
+        PostLoansLoanIdTransactionsResponse undoChargeOffTxResponse = transactionHelper.undoChargeOff(loanId,
                 new PostLoansLoanIdTransactionsRequest().reversalExternalId(reverseTransactionExternalId));
         assertNotNull(undoChargeOffTxResponse);
 
-        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = getLoanDetails(loanId);
         assertTrue(loanDetails.getStatus().getActive());
         assertFalse(loanDetails.getChargedOff());
 
-        GetLoansLoanIdTransactionsTransactionIdResponse chargeOffTransactionDetails = loanTransactionHelper
-                .getLoanTransactionDetails((long) loanId, transactionExternalId);
+        GetLoansLoanIdTransactionsTransactionIdResponse chargeOffTransactionDetails = getLoanTransactionDetails(loanId,
+                transactionExternalId);
         assertNotNull(chargeOffTransactionDetails);
         assertTrue(chargeOffTransactionDetails.getManuallyReversed());
         assertEquals(reverseTransactionExternalId, chargeOffTransactionDetails.getReversalExternalId());
@@ -132,82 +111,75 @@ public class LoanUndoChargeOffReverseExternalIdTest extends FeignLoanTestBase {
         // Loan ExternalId
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting(assetAccount, incomeAccount, expenseAccount,
+        final Long loanProductID = createLoanProductWithPeriodicAccrualAccounting(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-        final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
+        final Long clientId = createClient();
+        final Long loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
 
         // make Repayment
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("28 March 2025").locale("en")
-                        .transactionAmount(100.0));
+        makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN)
+                .transactionDate("28 March 2025").locale(LoanTestData.LOCALE).transactionAmount(100.0));
 
-        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
         assertTrue(loanDetails.getStatus().getActive());
 
         // Perform first charge-off with date "29 March 2025"
         String randomText1 = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6) + Utils.randomStringGenerator("is", 5);
-        Integer chargeOffReasonId1 = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText1, 1);
+        Long chargeOffReasonId1 = codeHelper.createChargeOffCodeValue(randomText1, 1);
         String transactionExternalId1 = UUID.randomUUID().toString();
-        loanTransactionHelper.chargeOffLoan((long) loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("29 March 2025")
-                .locale("en").dateFormat("dd MMMM yyyy").externalId(transactionExternalId1).chargeOffReasonId((long) chargeOffReasonId1));
+        chargeOffLoan(loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("29 March 2025").locale(LoanTestData.LOCALE)
+                .dateFormat(LoanTestData.DATETIME_PATTERN).externalId(transactionExternalId1).chargeOffReasonId(chargeOffReasonId1));
 
-        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = getLoanDetails(loanId);
         assertTrue(loanDetails.getStatus().getActive());
         assertTrue(loanDetails.getChargedOff());
 
         // Undo the charge-off
         String reverseTransactionExternalId = UUID.randomUUID().toString();
-        PostLoansLoanIdTransactionsResponse undoChargeOffTxResponse = loanTransactionHelper.undoChargeOffLoan((long) loanId,
+        PostLoansLoanIdTransactionsResponse undoChargeOffTxResponse = transactionHelper.undoChargeOff(loanId,
                 new PostLoansLoanIdTransactionsRequest().reversalExternalId(reverseTransactionExternalId));
         assertNotNull(undoChargeOffTxResponse);
 
-        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = getLoanDetails(loanId);
         assertTrue(loanDetails.getStatus().getActive());
         assertFalse(loanDetails.getChargedOff());
 
         // Perform a new charge-off with an earlier date ("28 March 2025") than the first charge-off
         String randomText2 = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6) + Utils.randomStringGenerator("is", 5);
-        Integer chargeOffReasonId2 = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText2, 1);
+        Long chargeOffReasonId2 = codeHelper.createChargeOffCodeValue(randomText2, 1);
         String transactionExternalId2 = UUID.randomUUID().toString();
-        loanTransactionHelper.chargeOffLoan((long) loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("28 March 2025")
-                .locale("en").dateFormat("dd MMMM yyyy").externalId(transactionExternalId2).chargeOffReasonId((long) chargeOffReasonId2));
+        chargeOffLoan(loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("28 March 2025").locale(LoanTestData.LOCALE)
+                .dateFormat(LoanTestData.DATETIME_PATTERN).externalId(transactionExternalId2).chargeOffReasonId(chargeOffReasonId2));
 
-        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = getLoanDetails(loanId);
         // After the new charge-off, the loan should be charged off
         assertTrue(loanDetails.getStatus().getActive());
         assertTrue(loanDetails.getChargedOff());
 
         // Verify the new charge-off transaction details
-        GetLoansLoanIdTransactionsTransactionIdResponse newChargeOffTransactionDetails = loanTransactionHelper
-                .getLoanTransactionDetails((long) loanId, transactionExternalId2);
+        GetLoansLoanIdTransactionsTransactionIdResponse newChargeOffTransactionDetails = getLoanTransactionDetails(loanId,
+                transactionExternalId2);
         assertNotNull(newChargeOffTransactionDetails);
     }
 
-    private Integer createLoanAccount(final Integer clientID, final Integer loanProductID, final String externalId) {
+    private Long createLoanAccount(final Long clientId, final Long loanProductId, final String externalId) {
+        final PostLoansRequest application = LoanRequestBuilders.applyLoan(clientId, loanProductId, "01 September 2022", 1000.0, 1)//
+                .expectedDisbursementDate("03 September 2022")//
+                .interestType(LoanTestData.InterestType.FLAT)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .externalId(externalId);
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
-                .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
-
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan("02 September 2022", "1000", loanId, null);
-        loanTransactionHelper.disburseLoanWithNetDisbursalAmount("03 September 2022", loanId, "1000");
+        final Long loanId = loanHelper.applyForLoan(application).getLoanId();
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "02 September 2022"));
+        disburseLoan(loanId, "03 September 2022", 1000.0);
         return loanId;
     }
 
-    private Integer createLoanProductWithPeriodicAccrualAccounting(final Account... accounts) {
-
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentAfterEvery("1")
-                .withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
-                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
-                .withAccountingRulePeriodicAccrual(accounts).withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
-                .build(null);
-
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+    private Long createLoanProductWithPeriodicAccrualAccounting(final Account... accounts) {
+        return createLoanProduct(new LoanProductTestBuilder().withPrincipal("1000").withRepaymentAfterEvery("1").withNumberOfRepayments("1")
+                .withRepaymentTypeAsMonth().withinterestRatePerPeriod("0").withInterestRateFrequencyTypeAsMonths()
+                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRulePeriodicAccrual(accounts)
+                .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0").buildRequest(null));
     }
 
 }

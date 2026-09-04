@@ -43,6 +43,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdChargesTemplateResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetLoansResponse;
+import org.apache.fineract.client.models.GetPostDatedChecks;
 import org.apache.fineract.client.models.InterestPauseRequestDto;
 import org.apache.fineract.client.models.InterestPauseResponseDto;
 import org.apache.fineract.client.models.LoanApprovedAmountHistoryData;
@@ -74,6 +75,7 @@ import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountRequ
 import org.apache.fineract.client.models.PutLoansAvailableDisbursementAmountResponse;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdChargesChargeIdResponse;
+import org.apache.fineract.client.models.PutLoansLoanIdDisbursementsDisbursementIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -473,8 +475,21 @@ public class FeignLoanHelper {
         return ok(() -> fineractClient.loanDisbursementDetails().retriveDetail(loanId, disbursementId));
     }
 
-    public CommandProcessingResult updateDisbursementDate(Long loanId, Long disbursementId, String body) {
-        return ok(() -> fineractClient.loanDisbursementDetails().updateDisbursementDate(loanId, disbursementId, body));
+    public CommandProcessingResult updateDisbursementDate(Long loanId, Long disbursementId,
+            PutLoansLoanIdDisbursementsDisbursementIdRequest request) {
+        return ok(() -> fineractClient.loanDisbursementDetails().updateDisbursementDate(loanId, disbursementId, request));
+    }
+
+    /** Restates the expected date and principal of one tranche of a multi-disbursement loan. */
+    public CommandProcessingResult updateDisbursementDate(Long loanId, Long disbursementId, String approvedLoanAmount,
+            String expectedDisbursementDate, String updatedExpectedDisbursementDate, String updatedPrincipal) {
+        return updateDisbursementDate(loanId, disbursementId, new PutLoansLoanIdDisbursementsDisbursementIdRequest()//
+                .locale("en")//
+                .dateFormat("dd MMMM yyyy")//
+                .approvedLoanAmount(new BigDecimal(approvedLoanAmount))//
+                .expectedDisbursementDate(expectedDisbursementDate)//
+                .updatedExpectedDisbursementDate(updatedExpectedDisbursementDate)//
+                .updatedPrincipal(new BigDecimal(updatedPrincipal)));
     }
 
     public PutLoansAvailableDisbursementAmountResponse modifyAvailableDisbursementAmount(Long loanId,
@@ -574,6 +589,12 @@ public class FeignLoanHelper {
 
     public PostLoansLoanIdResponse unassignLoanOfficerByExternalId(String loanExternalId, PostLoansLoanIdRequest request) {
         return ok(() -> fineractClient.loans().handleCommandsLoanByExternalId(loanExternalId, request, "unassignLoanOfficer"));
+    }
+
+    /** Recovers the outstanding balance of a written-off or overdue loan from its guarantors' on-hold funds. */
+    public PostLoansLoanIdResponse recoverGuarantees(Long loanId) {
+        return ok(() -> fineractClient.loans().handleCommandsLoan(loanId, new PostLoansLoanIdRequest(),
+                Map.of("command", "recoverGuarantees")));
     }
 
     public PostLoansLoanIdResponse recoverGuaranteesLoan(String loanExternalId, PostLoansLoanIdRequest request) {
@@ -720,4 +741,12 @@ public class FeignLoanHelper {
                 .locale("en")//
                 .dateFormat("dd MMMM yyyy");
     }
+
+    /**
+     * Returns the post dated check backing the given repayment installment of the loan.
+     */
+    public GetPostDatedChecks getPostDatedCheck(Long loanId, Integer installmentId) {
+        return ok(() -> fineractClient.repaymentWithPostDatedChecks().getPostDatedCheck(installmentId, loanId));
+    }
+
 }

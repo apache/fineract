@@ -19,157 +19,138 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.google.gson.Gson;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetLoansLoanIdLoanChargePaidByData;
+import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
-import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.jupiter.api.Assertions;
+import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class ClientLoanChargeRefundIntegrationTest extends FeignLoanTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientLoanChargeRefundIntegrationTest.class);
 
-    private Integer disbursedLoanID;
-    private Account assetAccount;
-    private Account feeIncomeAccount;
-    private Account penaltyIncomeAccount;
-    private Account expenseAccount;
-    private Account overpaymentAccount;
     private static final String ZERO_INTEREST_RATE = "0";
     private static final String FOUR_INSTALLMENTS = "4";
     private static final String NONE = "1";
     private static final String CASH_BASED = "2";
     private static final String ACCRUAL_PERIODIC = "3";
     private static final String MAKE_REPAYMENT_COMMAND = "repayment";
-    private static final String OVERPAID = "overpaid";
-    private static final String CLOSED_OBLIGATION_MET = "closedObligationsMet";
-    private static final String ACTIVE = "active";
 
     /*
      * loan disbursed: 4 installments of 3000; zero % interest; a specified due date charge of 120 is added and the
      * amount is allocated to installment 2; allocation strategy is penalty, fees, interest, principal
      */
-    private static final Float oneInstallment = 3000.00f;
-    private static final Float fullLoan = 3000.00f * 4;
-    private static final Float fullChargeRefundAmount = 120.00f;
-    private static final Float oneThirdChargeRefundAmount = 40.00f;
+    private static final Double oneInstallment = 3000.00d;
+    private static final Double fullLoan = 3000.00d * 4;
+    private static final Double fullChargeRefundAmount = 120.00d;
+    private static final Double oneThirdChargeRefundAmount = 40.00d;
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private LoanTransactionHelper loanTransactionHelperValidationError;
-    private AccountHelper accountHelper;
-    private JournalEntryHelper journalEntryHelper;
-    private Integer createdRepaymentTypeResourceId;
+    private Long disbursedLoanID;
+    private Account assetAccount;
+    private Account feeIncomeAccount;
+    private Account penaltyIncomeAccount;
+    private Account expenseAccount;
+    private Account overpaymentAccount;
+    private Long createdRepaymentTypeResourceId;
 
     @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.loanTransactionHelperValidationError = new LoanTransactionHelper(this.requestSpec, new ResponseSpecBuilder().build());
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.assetAccount = this.accountHelper.createAssetAccount();
-        this.feeIncomeAccount = this.accountHelper.createIncomeAccount();
-        this.penaltyIncomeAccount = this.accountHelper.createIncomeAccount();
-        this.expenseAccount = this.accountHelper.createExpenseAccount();
-        this.overpaymentAccount = this.accountHelper.createLiabilityAccount();
-        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
+    public void setupAccounts() {
+        this.assetAccount = accountHelper.createAssetAccount();
+        this.feeIncomeAccount = accountHelper.createIncomeAccount();
+        this.penaltyIncomeAccount = accountHelper.createIncomeAccount();
+        this.expenseAccount = accountHelper.createExpenseAccount();
+        this.overpaymentAccount = accountHelper.createLiabilityAccount();
     }
 
     @Test
     public void fullRefundAndReverseOfPaidChargeSucceedsTest_Active_Active() {
-        testRefundAndReverseOfPaidChargeSucceeds(oneInstallment + fullChargeRefundAmount, fullChargeRefundAmount, ACTIVE, ACTIVE);
+        testRefundAndReverseOfPaidChargeSucceeds(oneInstallment + fullChargeRefundAmount, fullChargeRefundAmount, LoanStatus.ACTIVE,
+                LoanStatus.ACTIVE);
     }
 
     @Test
     public void fullRefundAndReverseOfPaidChargeSucceedsTest_Active_Com() {
-        testRefundAndReverseOfPaidChargeSucceeds(fullLoan, fullChargeRefundAmount, ACTIVE, CLOSED_OBLIGATION_MET);
+        testRefundAndReverseOfPaidChargeSucceeds(fullLoan, fullChargeRefundAmount, LoanStatus.ACTIVE, LoanStatus.CLOSED_OBLIGATIONS_MET);
     }
 
     @Test
     public void fullRefundAndReverseOfPaidChargeSucceedsTest_Active_Overpaid() {
-        testRefundAndReverseOfPaidChargeSucceeds(fullLoan + 50.00f, fullChargeRefundAmount, ACTIVE, OVERPAID);
+        testRefundAndReverseOfPaidChargeSucceeds(fullLoan + 50.00d, fullChargeRefundAmount, LoanStatus.ACTIVE, LoanStatus.OVERPAID);
     }
 
     @Test
     public void fullRefundAndReverseOfPaidChargeSucceedsTest_Com_Overpaid() {
-        testRefundAndReverseOfPaidChargeSucceeds(fullLoan + fullChargeRefundAmount, fullChargeRefundAmount, CLOSED_OBLIGATION_MET,
-                OVERPAID);
+        testRefundAndReverseOfPaidChargeSucceeds(fullLoan + fullChargeRefundAmount, fullChargeRefundAmount,
+                LoanStatus.CLOSED_OBLIGATIONS_MET, LoanStatus.OVERPAID);
     }
 
     @Test
     public void fullRefundAndReverseOfPaidChargeSucceedsTest_Overpaid_Overpaid() {
-        testRefundAndReverseOfPaidChargeSucceeds(fullLoan + fullChargeRefundAmount + 50.00f, fullChargeRefundAmount, OVERPAID, OVERPAID);
+        testRefundAndReverseOfPaidChargeSucceeds(fullLoan + fullChargeRefundAmount + 50.00d, fullChargeRefundAmount, LoanStatus.OVERPAID,
+                LoanStatus.OVERPAID);
     }
 
     @Test
     public void partialRefundAndReverseOfPaidChargeSucceedsTest_Active_Active() {
-        testRefundAndReverseOfPaidChargeSucceeds(fullLoan, oneThirdChargeRefundAmount, ACTIVE, ACTIVE);
+        testRefundAndReverseOfPaidChargeSucceeds(fullLoan, oneThirdChargeRefundAmount, LoanStatus.ACTIVE, LoanStatus.ACTIVE);
     }
 
     @Test
     public void partialRefundAndReverseOfPaidChargeSucceedsTest_Active_Com() {
-        testRefundAndReverseOfPaidChargeSucceeds(fullLoan + (oneThirdChargeRefundAmount * 2), oneThirdChargeRefundAmount, ACTIVE,
-                CLOSED_OBLIGATION_MET);
+        testRefundAndReverseOfPaidChargeSucceeds(fullLoan + (oneThirdChargeRefundAmount * 2), oneThirdChargeRefundAmount, LoanStatus.ACTIVE,
+                LoanStatus.CLOSED_OBLIGATIONS_MET);
     }
 
     @Test
     public void partialRefundAndReverseOfPaidChargeSucceedsTest_Active_Overpaid() {
-        testRefundAndReverseOfPaidChargeSucceeds(fullLoan + (oneThirdChargeRefundAmount * 2) + 1.0f, oneThirdChargeRefundAmount, ACTIVE,
-                OVERPAID);
+        testRefundAndReverseOfPaidChargeSucceeds(fullLoan + (oneThirdChargeRefundAmount * 2) + 1.0d, oneThirdChargeRefundAmount,
+                LoanStatus.ACTIVE, LoanStatus.OVERPAID);
     }
 
-    private void testRefundAndReverseOfPaidChargeSucceeds(final Float repaymentAmount, final Float refundAmount,
-            final String expectedPostRepaymentStatus, final String expectedPostRefundStatus) {
+    private void testRefundAndReverseOfPaidChargeSucceeds(final Double repaymentAmount, final Double refundAmount,
+            final LoanStatus expectedPostRepaymentStatus, final LoanStatus expectedPostRefundStatus) {
         // disburse, repay, add charge, charge refund and reverse charge refund
-        Integer loanChargeId = disburseAddChargeAndRepay(repaymentAmount, expectedPostRepaymentStatus, NONE, true);
+        Long loanChargeId = disburseAddChargeAndRepay(repaymentAmount, expectedPostRepaymentStatus, NONE, true);
 
-        Float totalOutstandingPreRefund = getLoanDetailsSummaryTotalOutstanding(disbursedLoanID);
-        Float overpaidPreRefund = getLoanDetailsTotalOverpaidAmount(disbursedLoanID);
+        Double totalOutstandingPreRefund = getLoanDetailsSummaryTotalOutstanding(disbursedLoanID);
+        Double overpaidPreRefund = getLoanDetailsTotalOverpaidAmount(disbursedLoanID);
 
-        Float expectedTotalOutstandingPostRefund = null;
-        Float expectedOverpaidPostRefund = null;
+        Double expectedTotalOutstandingPostRefund = null;
+        Double expectedOverpaidPostRefund = null;
         if (totalOutstandingPreRefund.compareTo(refundAmount) >= 0) {
             expectedTotalOutstandingPostRefund = totalOutstandingPreRefund - refundAmount;
-            expectedOverpaidPostRefund = 0.0f;
+            expectedOverpaidPostRefund = 0.0d;
         } else {
-            expectedTotalOutstandingPostRefund = 0.0f;
-            if (totalOutstandingPreRefund == 0.0f) {
+            expectedTotalOutstandingPostRefund = 0.0d;
+            if (totalOutstandingPreRefund == 0.0d) {
                 expectedOverpaidPostRefund = overpaidPreRefund + refundAmount;
             } else {
                 expectedOverpaidPostRefund = refundAmount - totalOutstandingPreRefund;
@@ -177,141 +158,99 @@ public class ClientLoanChargeRefundIntegrationTest extends FeignLoanTestBase {
         }
 
         LOG.info("-------------Loancharge Refund -----------");
-        final Integer installmentNumber = null;
-        final String externalId = null;
-        Integer chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber, refundAmount,
-                externalId, this.disbursedLoanID, "resourceId");
-        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
-                "status");
-        assertTrue((Boolean) loanStatusHashMap.get(expectedPostRefundStatus), "Invalid Post Refund Status");
+        Long chargeRefundTxnId = loanChargeRefund(loanChargeId, refundAmount);
+        verifyLoanStatus(disbursedLoanID, expectedPostRefundStatus);
 
-        Float totalOutstandingPostRefund = getLoanDetailsSummaryTotalOutstanding(disbursedLoanID);
-        Float overpaidPostRefund = getLoanDetailsTotalOverpaidAmount(disbursedLoanID);
+        Double totalOutstandingPostRefund = getLoanDetailsSummaryTotalOutstanding(disbursedLoanID);
+        Double overpaidPostRefund = getLoanDetailsTotalOverpaidAmount(disbursedLoanID);
 
-        Assertions.assertEquals(expectedTotalOutstandingPostRefund, totalOutstandingPostRefund, "Incorrect totalOutstanding Post Refund");
-        Assertions.assertEquals(expectedOverpaidPostRefund, overpaidPostRefund, "Incorrect overpaid Post Refund");
+        assertEquals(expectedTotalOutstandingPostRefund, totalOutstandingPostRefund, "Incorrect totalOutstanding Post Refund");
+        assertEquals(expectedOverpaidPostRefund, overpaidPostRefund, "Incorrect overpaid Post Refund");
 
         verifyPaidByEntry(disbursedLoanID, chargeRefundTxnId, refundAmount);
 
         LOG.info("-------------Reverse Loancharge Refund -----------");
-        final String reverseDate = getTodaysDate();
-        final Float adjustmentAmount = 0.0f;
-        HashMap reverseHashMap = (HashMap) this.loanTransactionHelper.adjustLoanTransaction(disbursedLoanID, chargeRefundTxnId, reverseDate,
-                adjustmentAmount.toString(), "");
-        loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
-                "status");
-        assertTrue((Boolean) loanStatusHashMap.get(expectedPostRepaymentStatus), "Invalid Post Reversed Status");
+        adjustLoanTransaction(disbursedLoanID, chargeRefundTxnId, getTodaysDate());
+        verifyLoanStatus(disbursedLoanID, expectedPostRepaymentStatus);
 
-        Float totalOutstandingPostReverse = getLoanDetailsSummaryTotalOutstanding(disbursedLoanID);
-        Float overpaidPostReverse = getLoanDetailsTotalOverpaidAmount(disbursedLoanID);
+        Double totalOutstandingPostReverse = getLoanDetailsSummaryTotalOutstanding(disbursedLoanID);
+        Double overpaidPostReverse = getLoanDetailsTotalOverpaidAmount(disbursedLoanID);
 
-        Assertions.assertEquals(totalOutstandingPreRefund, totalOutstandingPostReverse, "Incorrect totalOutstanding Post Reverse");
-        Assertions.assertEquals(overpaidPreRefund, overpaidPostReverse, "Incorrect overpaid Post Reverse");
-
+        assertEquals(totalOutstandingPreRefund, totalOutstandingPostReverse, "Incorrect totalOutstanding Post Reverse");
+        assertEquals(overpaidPreRefund, overpaidPostReverse, "Incorrect overpaid Post Reverse");
     }
 
     @Test
     public void refundOfUnpaidChargeFailsTest() {
 
-        final Float repaymentAmount = 3000.00f; // pays installment one but none of added charge
-        Integer loanChargeId = disburseAddChargeAndRepay(repaymentAmount, ACTIVE, NONE, false);
+        final Double repaymentAmount = 3000.00d; // pays installment one but none of added charge
+        Long loanChargeId = disburseAddChargeAndRepay(repaymentAmount, LoanStatus.ACTIVE, NONE, false);
 
         LOG.info("-------------Loancharge Refund -----------");
-        final Float refundAmount = 60.00f;
-        final Integer installmentNumber = null;
-        final String externalId = null;
-        ArrayList<HashMap> errors = (ArrayList<HashMap>) this.loanTransactionHelperValidationError.loanChargeRefund(loanChargeId,
-                installmentNumber, refundAmount, externalId, this.disbursedLoanID, CommonConstants.RESPONSE_ERROR);
-        assertEquals("error.msg.loan.charge.transaction.amount.is.more.than.is.refundable",
-                errors.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        final Double refundAmount = 60.00d;
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> loanChargeRefund(loanChargeId, refundAmount));
+        assertErrorGlobalisationCode(exception, "error.msg.loan.charge.transaction.amount.is.more.than.is.refundable");
     }
 
     @Test
     public void refundingMoreThanPaidFailsTest() {
 
-        final Float repaymentAmount = 3090.00f; // pays installment one and 90 (not all) of added charge
-        Integer loanChargeId = disburseAddChargeAndRepay(repaymentAmount, ACTIVE, NONE, false);
+        final Double repaymentAmount = 3090.00d; // pays installment one and 90 (not all) of added charge
+        Long loanChargeId = disburseAddChargeAndRepay(repaymentAmount, LoanStatus.ACTIVE, NONE, false);
 
         LOG.info("-------------Loancharge Refund -----------");
-        final Float refundAmount = 90.01f; // 0.01 more than paid.
-        final Integer installmentNumber = null;
-        final String externalId = null;
-        ArrayList<HashMap> errors = (ArrayList<HashMap>) this.loanTransactionHelperValidationError.loanChargeRefund(loanChargeId,
-                installmentNumber, refundAmount, externalId, this.disbursedLoanID, CommonConstants.RESPONSE_ERROR);
-
-        assertEquals("error.msg.loan.charge.transaction.amount.is.more.than.is.refundable",
-                errors.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-
+        final Double refundAmount = 90.01d; // 0.01 more than paid.
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> loanChargeRefund(loanChargeId, refundAmount));
+        assertErrorGlobalisationCode(exception, "error.msg.loan.charge.transaction.amount.is.more.than.is.refundable");
     }
 
     @Test
     public void onyRefundElementNotRepaymentElementUsedToCalculateRefundableAmountTest() {
-        final Float chargeAmountPaid = 60.00f;
-        final Float repaymentAmount = 3000.00f + chargeAmountPaid;
+        final Double chargeAmountPaid = 60.00d;
+        final Double repaymentAmount = 3000.00d + chargeAmountPaid;
         // covers Installment 1 plus half of 120 charge added to installment 2
-        Integer loanChargeId = disburseAddChargeAndRepay(repaymentAmount, ACTIVE, NONE, false);
+        Long loanChargeId = disburseAddChargeAndRepay(repaymentAmount, LoanStatus.ACTIVE, NONE, false);
 
         LOG.info("-------------Loancharge Refund 1 -----------");
-        final Float refundAmount = chargeAmountPaid; // refund charge paid
-        final Integer installmentNumber = null;
-        final String externalId = null;
-        Integer chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber, refundAmount,
-                externalId, this.disbursedLoanID, "resourceId");
-        HashMap loanDetailsHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec,
-                disbursedLoanID, "");
         // refund 60 pays off remainder of charge leaving an amount 60 that could be refunded
+        loanChargeRefund(loanChargeId, chargeAmountPaid);
 
         LOG.info("-------------Loancharge Refund 2 -----------");
-        final Float smallRefund = 0.01f;
-        chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber, smallRefund, externalId,
-                this.disbursedLoanID, "resourceId");
-        loanDetailsHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID, "");
-
+        final Double smallRefund = 0.01d;
+        loanChargeRefund(loanChargeId, smallRefund);
     }
 
     @Test
     public void refundOfPartiallyPaidChargeCanRepayMoreOfSameChargeTest() {
-        final Float chargeAmountPaid = 80.00f;
-        final Float chargeAmountFull = 120.00f;
-        final Float chargeAmountOutstanding = chargeAmountFull - chargeAmountPaid;
-        final Float repaymentAmount = 3000.00f + chargeAmountPaid;
+        final Double chargeAmountPaid = 80.00d;
+        final Double chargeAmountFull = 120.00d;
+        final Double chargeAmountOutstanding = chargeAmountFull - chargeAmountPaid;
+        final Double repaymentAmount = 3000.00d + chargeAmountPaid;
         // covers Installment 1 plus two thirds of 120 charge added to installment 2
-        Integer loanChargeId = disburseAddChargeAndRepay(repaymentAmount, ACTIVE, NONE, false);
-        Float feeChargesPaid = getLoanDetailsSummaryfeeChargesPaid(disbursedLoanID);
-        Assertions.assertEquals(feeChargesPaid, chargeAmountPaid, "Incorrect Partial feeChargesPaid");
+        Long loanChargeId = disburseAddChargeAndRepay(repaymentAmount, LoanStatus.ACTIVE, NONE, false);
+        Double feeChargesPaid = getLoanDetailsSummaryfeeChargesPaid(disbursedLoanID);
+        assertEquals(chargeAmountPaid, feeChargesPaid, "Incorrect Partial feeChargesPaid");
 
         LOG.info("-------------Loancharge Refund -----------");
-        final Float refundAmount = chargeAmountPaid; // refund charge paid
-        final Integer installmentNumber = null;
-        final String externalId = null;
-        Integer chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber, refundAmount,
-                externalId, this.disbursedLoanID, "resourceId");
+        Long chargeRefundTxnId = loanChargeRefund(loanChargeId, chargeAmountPaid);
         feeChargesPaid = getLoanDetailsSummaryfeeChargesPaid(disbursedLoanID);
-        Assertions.assertEquals(feeChargesPaid, chargeAmountFull, "Incorrect Full feeChargesPaid");
+        assertEquals(chargeAmountFull, feeChargesPaid, "Incorrect Full feeChargesPaid");
 
-        ArrayList<HashMap> loanChargePaidByList = (ArrayList<HashMap>) this.loanTransactionHelper.getLoanTransactionDetails(disbursedLoanID,
-                chargeRefundTxnId, "loanChargePaidByList");
-        Assertions.assertNotNull(loanChargePaidByList);
-        Assertions.assertEquals(loanChargePaidByList.size(), 2);
-        // expecting 2 entries 1)-80 refund 2) 40 repayment
-        Float paidByAmount1 = (Float) loanChargePaidByList.get(0).get("amount");
-        Assertions.assertNotNull(paidByAmount1);
-        Assertions.assertNotEquals(paidByAmount1, 0.0f);
-        Float paidByAmount2 = (Float) loanChargePaidByList.get(1).get("amount");
-        Assertions.assertNotNull(paidByAmount2);
-        Assertions.assertNotEquals(paidByAmount2, 0.0f);
+        // expecting 2 entries: the -80 refund and the 40 repayment. loanChargePaidByList is a Set, so the server
+        // promises no order; match on sign rather than position.
+        List<Double> paidByAmounts = getLoanTransactionDetails(disbursedLoanID, chargeRefundTxnId).getLoanChargePaidByList().stream()
+                .map(GetLoansLoanIdLoanChargePaidByData::getAmount).map(Utils::getDoubleValue).toList();
+        assertEquals(2, paidByAmounts.size());
+        paidByAmounts.forEach(amount -> assertNotEquals(0.0d, amount));
 
-        if (paidByAmount1 < 0.0f) {
-            Assertions.assertEquals(paidByAmount1, chargeAmountPaid * -1, "Refund Element Incorrect");
-        } else {
-            Assertions.assertEquals(paidByAmount1, chargeAmountOutstanding, "Repayment Element Incorrect");
-        }
-        if (paidByAmount2 < 0.0f) {
-            Assertions.assertEquals(paidByAmount2, chargeAmountPaid * -1, "Refund Element Incorrect");
-        } else {
-            Assertions.assertEquals(paidByAmount2, chargeAmountOutstanding, "Repayment Element Incorrect");
-        }
-
+        Double refundElement = paidByAmounts.stream().filter(amount -> amount < 0.0d).findFirst().orElse(null);
+        Double repaymentElement = paidByAmounts.stream().filter(amount -> amount > 0.0d).findFirst().orElse(null);
+        assertNotNull(refundElement, "Refund Element missing");
+        assertNotNull(repaymentElement, "Repayment Element missing");
+        assertEquals(chargeAmountPaid * -1, refundElement, "Refund Element Incorrect");
+        assertEquals(chargeAmountOutstanding, repaymentElement, "Repayment Element Incorrect");
     }
 
     @Test
@@ -336,170 +275,124 @@ public class ClientLoanChargeRefundIntegrationTest extends FeignLoanTestBase {
 
     private void chargeRefundCreatesCorrectJournalEntries(final String accountingType, final boolean penalty) {
 
-        final Float repaymentAmount = fullLoan + fullChargeRefundAmount;
-        Integer loanChargeId = disburseAddChargeAndRepay(repaymentAmount, CLOSED_OBLIGATION_MET, accountingType, penalty);
+        final Double repaymentAmount = fullLoan + fullChargeRefundAmount;
+        Long loanChargeId = disburseAddChargeAndRepay(repaymentAmount, LoanStatus.CLOSED_OBLIGATIONS_MET, accountingType, penalty);
 
         LOG.info("-------------Loancharge Refund -----------");
-        final Integer installmentNumber = null;
-        final String externalId = null;
-        Integer chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber,
-                oneThirdChargeRefundAmount, externalId, this.disbursedLoanID, "resourceId");
+        Long chargeRefundTxnId = loanChargeRefund(loanChargeId, oneThirdChargeRefundAmount);
         final String txnDate = getTodaysDate();
 
-        Account incomeAccount = feeIncomeAccount;
-        if (penalty) {
-            incomeAccount = penaltyIncomeAccount;
-        }
+        Account incomeAccount = penalty ? penaltyIncomeAccount : feeIncomeAccount;
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, txnDate,
-                new JournalEntry(oneThirdChargeRefundAmount, JournalEntry.TransactionType.CREDIT));
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, txnDate,
-                new JournalEntry(oneThirdChargeRefundAmount, JournalEntry.TransactionType.CREDIT));
-        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, txnDate,
-                new JournalEntry(oneThirdChargeRefundAmount, JournalEntry.TransactionType.DEBIT));
+        checkJournalEntryForAssetAccount(assetAccount, txnDate,
+                journalEntry(oneThirdChargeRefundAmount, assetAccount, JournalEntry.TransactionType.CREDIT.name()));
+        checkJournalEntryForLiabilityAccount(overpaymentAccount, txnDate,
+                journalEntry(oneThirdChargeRefundAmount, overpaymentAccount, JournalEntry.TransactionType.CREDIT.name()));
+        checkJournalEntryForIncomeAccount(incomeAccount, txnDate,
+                journalEntry(oneThirdChargeRefundAmount, incomeAccount, JournalEntry.TransactionType.DEBIT.name()));
 
         LOG.info("-------------Reverse Loancharge Refund -----------");
-        final String reverseDate = getTodaysDate();
-        final Float adjustmentAmount = 0.0f;
-        HashMap reverseHashMap = (HashMap) this.loanTransactionHelper.adjustLoanTransaction(disbursedLoanID, chargeRefundTxnId, reverseDate,
-                adjustmentAmount.toString(), "");
+        adjustLoanTransaction(disbursedLoanID, chargeRefundTxnId, getTodaysDate());
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, txnDate,
-                new JournalEntry(oneThirdChargeRefundAmount, JournalEntry.TransactionType.DEBIT));
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, txnDate,
-                new JournalEntry(oneThirdChargeRefundAmount, JournalEntry.TransactionType.DEBIT));
-        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, txnDate,
-                new JournalEntry(oneThirdChargeRefundAmount, JournalEntry.TransactionType.CREDIT));
-
+        checkJournalEntryForAssetAccount(assetAccount, txnDate,
+                journalEntry(oneThirdChargeRefundAmount, assetAccount, JournalEntry.TransactionType.DEBIT.name()));
+        checkJournalEntryForLiabilityAccount(overpaymentAccount, txnDate,
+                journalEntry(oneThirdChargeRefundAmount, overpaymentAccount, JournalEntry.TransactionType.DEBIT.name()));
+        checkJournalEntryForIncomeAccount(incomeAccount, txnDate,
+                journalEntry(oneThirdChargeRefundAmount, incomeAccount, JournalEntry.TransactionType.CREDIT.name()));
     }
 
     @Test
     public void repaymentReversalDisallowedIfLaterChargeRefundTest() {
 
         // repayment covers 2 installments plus charge
-        final Float repaymentAmount = oneInstallment + oneInstallment + fullChargeRefundAmount;
-        final Integer loanChargeId = disburseAddChargeAndRepay(repaymentAmount, ACTIVE, ACCRUAL_PERIODIC, false);
-        final Integer repayment1Id = createdRepaymentTypeResourceId;
+        final Double repaymentAmount = oneInstallment + oneInstallment + fullChargeRefundAmount;
+        final Long loanChargeId = disburseAddChargeAndRepay(repaymentAmount, LoanStatus.ACTIVE, ACCRUAL_PERIODIC, false);
 
         final String repayment2Date = "20 January 2022";
-        final Float repayment2Amount = oneInstallment; // installment 3
-        makeRepaymentType(MAKE_REPAYMENT_COMMAND, repayment2Date, repayment2Amount);
-        Integer repayment2Id = createdRepaymentTypeResourceId;
+        makeRepaymentType(MAKE_REPAYMENT_COMMAND, repayment2Date, oneInstallment); // installment 3
+        Long repayment2Id = createdRepaymentTypeResourceId;
 
         LOG.info("-------------Loancharge Refund -----------");
-        final Integer installmentNumber = null;
-        final String externalId = null;
-        final Integer chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber,
-                oneThirdChargeRefundAmount, externalId, this.disbursedLoanID, "resourceId");
+        loanChargeRefund(loanChargeId, oneThirdChargeRefundAmount);
 
-        final String reverseDate = getTodaysDate();
-        final Float adjustmentAmount = 0.0f;
         LOG.info("-------------Reverse Repayment 2  -----------");
-        ArrayList<HashMap> errors = (ArrayList<HashMap>) this.loanTransactionHelperValidationError.adjustLoanTransaction(disbursedLoanID,
-                repayment2Id, reverseDate, adjustmentAmount.toString(), CommonConstants.RESPONSE_ERROR);
-
-        assertEquals("error.msg.loan.transaction.cant.be.reversed.because.later.charge.refund.exists",
-                errors.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> adjustLoanTransaction(disbursedLoanID, repayment2Id, getTodaysDate()));
+        assertErrorGlobalisationCode(exception, "error.msg.loan.transaction.cant.be.reversed.because.later.charge.refund.exists");
     }
 
     @Test
     public void repaymentNotAllowedIfLaterChargeRefundTest() {
 
         // repayment covers 2 installments plus charge
-        final Float repaymentAmount = oneInstallment + oneInstallment + fullChargeRefundAmount;
-        final Integer loanChargeId = disburseAddChargeAndRepay(repaymentAmount, ACTIVE, ACCRUAL_PERIODIC, false);
+        final Double repaymentAmount = oneInstallment + oneInstallment + fullChargeRefundAmount;
+        final Long loanChargeId = disburseAddChargeAndRepay(repaymentAmount, LoanStatus.ACTIVE, ACCRUAL_PERIODIC, false);
 
         LOG.info("-------------Loancharge Refund -----------");
-        final Integer installmentNumber = null;
-        final String externalId = null;
-        final Integer chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber,
-                oneThirdChargeRefundAmount, externalId, this.disbursedLoanID, "resourceId");
+        loanChargeRefund(loanChargeId, oneThirdChargeRefundAmount);
 
         final String repayment2Date = "20 January 2022";
-        final Float repayment2Amount = oneInstallment; // installment 3
-        ArrayList<HashMap> errors = (ArrayList<HashMap>) this.loanTransactionHelperValidationError.makeRepaymentTypePayment(
-                MAKE_REPAYMENT_COMMAND, repayment2Date, repayment2Amount, this.disbursedLoanID, CommonConstants.RESPONSE_ERROR);
-
-        assertEquals("error.msg.loan.transaction.cant.be.created.because.later.charge.refund.exists",
-                errors.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> makeRepaymentType(MAKE_REPAYMENT_COMMAND, repayment2Date, oneInstallment)); // installment 3
+        assertErrorGlobalisationCode(exception, "error.msg.loan.transaction.cant.be.created.because.later.charge.refund.exists");
     }
 
-    private void disburseLoanOfAccountingRule(final String accountingType, final String loanAmount, final String loanDate,
+    private Long loanChargeRefund(final Long loanChargeId, final Double refundAmount) {
+        return transactionHelper
+                .makeChargeRefund(disbursedLoanID,
+                        new PostLoansLoanIdTransactionsRequest().locale(LoanTestData.LOCALE).dateFormat(LoanTestData.DATETIME_PATTERN)
+                                .loanChargeId(loanChargeId).transactionAmount(refundAmount).note("Loancharge Refund Made!!!"))
+                .getResourceId();
+    }
+
+    private void disburseLoanOfAccountingRule(final String accountingType, final Double loanAmount, final String loanDate,
             final boolean penalty) {
         this.disbursedLoanID = fromStartToDisburseLoan(loanDate, loanAmount, penalty, accountingType, assetAccount, feeIncomeAccount,
                 expenseAccount, overpaymentAccount);
     }
 
-    private Integer fromStartToDisburseLoan(String submitApproveDisburseDate, String principal, final boolean penalty,
+    private Long fromStartToDisburseLoan(String submitApproveDisburseDate, Double principal, final boolean penalty,
             final String accountingRule, final Account... accounts) {
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Long clientId = createClient();
 
         boolean allowMultipleDisbursals = false;
-        final Integer loanProductID = createLoanProduct(principal, allowMultipleDisbursals, accountingRule, accounts);
-        Assertions.assertNotNull(loanProductID);
-        // if (penalty) {
+        final Long loanProductId = createLoanProduct(principal, allowMultipleDisbursals, accountingRule, accounts);
+        assertNotNull(loanProductId);
+
         LOG.info("-----------------------------------Setting Specific Penalty Income Account-----------------------------------------");
-        final String accountId = penaltyIncomeAccount.getAccountID().toString();
-        final String putURL = "/fineract-provider/api/v1/loanproducts/" + loanProductID + "?" + Utils.TENANT_IDENTIFIER;
+        updateLoanProduct(loanProductId,
+                new PutLoanProductsProductIdRequest().incomeFromPenaltyAccountId(penaltyIncomeAccount.getAccountID().longValue()));
 
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("incomeFromPenaltyAccountId", accountId);
-        final String jsonBodyToSend = new Gson().toJson(map);
-        Utils.performServerPut(requestSpec, responseSpec, putURL, jsonBodyToSend);
-        // }
-
-        final List<HashMap> charges = null;
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, charges, principal, submitApproveDisburseDate);
-        Assertions.assertNotNull(loanID);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        final Long loanId = applyForLoanApplication(clientId, loanProductId, principal, submitApproveDisburseDate);
+        assertNotNull(loanId);
+        verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(submitApproveDisburseDate, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(principal, submitApproveDisburseDate));
+        verifyLoanStatus(loanId, LoanStatus.APPROVED);
 
-        LOG.info("-------------------------------DISBURSE LOAN -------------------------------------------"); //
-        // String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(submitApproveDisburseDate, loanID, principal);
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-        return loanID;
+        LOG.info("-------------------------------DISBURSE LOAN -------------------------------------------");
+        disburseLoan(loanId, submitApproveDisburseDate, principal);
+        verifyLoanStatus(loanId, LoanStatus.ACTIVE);
+        return loanId;
     }
 
-    private HashMap makeRepaymentType(final String repaymentTypeCommand, final String repaymentDate, final Float repayment) {
+    private void makeRepaymentType(final String repaymentTypeCommand, final String repaymentDate, final Double repayment) {
         LOG.info("-------------Make repayment Type -----------");
-        createdRepaymentTypeResourceId = (Integer) this.loanTransactionHelper.makeRepaymentTypePayment(repaymentTypeCommand, repaymentDate,
-                repayment, this.disbursedLoanID, "resourceId");
-        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
-                "status");
-        return loanStatusHashMap;
+        createdRepaymentTypeResourceId = makeLoanRepayment(disbursedLoanID, repaymentTypeCommand, repaymentDate, repayment).getResourceId();
     }
 
-    private static String getLoanChargeAsJSON(final String chargeId, final String dueDate, final String amount, final String externalId) {
-        final HashMap<String, String> map = new HashMap<>();
-        map.put("locale", "en_GB");
-        map.put("dateFormat", "dd MMMM yyyy");
-        map.put("amount", amount);
-        map.put("dueDate", dueDate);
-        map.put("chargeId", chargeId);
-        map.put("externalId", externalId);
-        String json = new Gson().toJson(map);
-        LOG.info("{}", json);
-        return json;
-    }
-
-    private Integer createLoanProduct(final String principal, final boolean multiDisburseLoan, final String accountingRule,
+    private Long createLoanProduct(final Double principal, final boolean multiDisburseLoan, final String accountingRule,
             final Account... accounts) {
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         LoanProductTestBuilder builder = new LoanProductTestBuilder() //
-                .withPrincipal(principal) //
-                .withNumberOfRepayments("4") //
+                .withPrincipal(principal.toString()) //
+                .withNumberOfRepayments(FOUR_INSTALLMENTS) //
                 .withRepaymentAfterEvery("1") //
                 .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("0") //
+                .withinterestRatePerPeriod(ZERO_INTEREST_RATE) //
                 .withInterestRateFrequencyTypeAsMonths() //
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //
@@ -508,99 +401,66 @@ public class ClientLoanChargeRefundIntegrationTest extends FeignLoanTestBase {
         if (multiDisburseLoan) {
             builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
         }
-        final String loanProductJSON = builder.build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return createLoanProduct(builder.buildRequest(null));
     }
 
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges, String principal,
-            String loanDate) {
+    private Long applyForLoanApplication(final Long clientId, final Long loanProductId, Double principal, String loanDate) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        final String savingsId = null;
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal(principal) //
-                .withLoanTermFrequency("4") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments(FOUR_INSTALLMENTS) //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod(ZERO_INTEREST_RATE) //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate(loanDate) //
-                .withSubmittedOnDate(loanDate) //
-                .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        final PostLoansRequest application = LoanRequestBuilders.applyLoan(clientId, loanProductId, loanDate, principal,
+                Integer.valueOf(FOUR_INSTALLMENTS));
+        return applyForLoan(application);
     }
 
-    private Integer disburseAddChargeAndRepay(final Float repaymentAmount, final String expectedPostRepaymentStatus,
+    private Long disburseAddChargeAndRepay(final Double repaymentAmount, final LoanStatus expectedPostRepaymentStatus,
             final String accountingType, final boolean penalty) {
         final String loanDate = "01 January 2022";
-        final String loanAmount = "12,000.00";
-        disburseLoanOfAccountingRule(accountingType, loanAmount, loanDate, penalty);
+        disburseLoanOfAccountingRule(accountingType, fullLoan, loanDate, penalty);
 
-        final Integer charge = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
-                .getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_PERCENTAGE_AMOUNT_AND_INTEREST, "1", penalty));
+        final Long charge = chargesHelper
+                .createLoanSpecifiedDueDateCharge(ChargeCalculationType.PERCENT_OF_AMOUNT_AND_INTEREST, 1.0d, penalty).getResourceId();
 
-        final String externalId = null;
-        final float amount = 1.0f;
         final String chargeDueDate = "15 February 2022"; // will be added to the 2nd installment (March)
-        final Integer loanChargeId = this.loanTransactionHelper.addChargesForLoan(this.disbursedLoanID,
-                getLoanChargeAsJSON(String.valueOf(charge), chargeDueDate, String.valueOf(amount), externalId));
-        Assertions.assertNotNull(loanChargeId);
+        final Long loanChargeId = addChargesForLoan(disbursedLoanID, new PostLoansLoanIdChargesRequest().locale(LoanTestData.LOCALE)
+                .dateFormat(LoanTestData.DATETIME_PATTERN).chargeId(charge).amount(1.0d).dueDate(chargeDueDate)).getResourceId();
+        assertNotNull(loanChargeId);
 
         final String repaymentDate = "10 January 2022";
-        HashMap loanStatusHashMap = makeRepaymentType(MAKE_REPAYMENT_COMMAND, repaymentDate, repaymentAmount);
-        assertTrue((Boolean) loanStatusHashMap.get(expectedPostRepaymentStatus));
+        makeRepaymentType(MAKE_REPAYMENT_COMMAND, repaymentDate, repaymentAmount);
+        verifyLoanStatus(disbursedLoanID, expectedPostRepaymentStatus);
         return loanChargeId;
     }
 
-    private Float getLoanDetailsSummaryTotalOutstanding(final Integer loanId) {
-
-        HashMap loanDetailsHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanId,
-                "summary");
-        Float amount = (Float) loanDetailsHashMap.get("totalOutstanding");
-        if (amount == null) {
-            amount = 0.0f;
-        }
-        return amount;
+    private Double getLoanDetailsSummaryTotalOutstanding(final Long loanId) {
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+        Double amount = Utils.getDoubleValue(loanDetails.getSummary().getTotalOutstanding());
+        return amount == null ? 0.0d : amount;
     }
 
-    private Float getLoanDetailsSummaryfeeChargesPaid(final Integer loanId) {
-
-        HashMap loanDetailsHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanId,
-                "summary");
-        Float amount = (Float) loanDetailsHashMap.get("feeChargesPaid");
-        if (amount == null) {
-            amount = 0.0f;
-        }
-        return amount;
+    private Double getLoanDetailsSummaryfeeChargesPaid(final Long loanId) {
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
+        Double amount = Utils.getDoubleValue(loanDetails.getSummary().getFeeChargesPaid());
+        return amount == null ? 0.0d : amount;
     }
 
-    private Float getLoanDetailsTotalOverpaidAmount(final Integer loanId) {
-
-        Float amount = (Float) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanId, "totalOverpaid");
-        if (amount == null) {
-            amount = 0.0f;
-        }
-        return amount;
+    private Double getLoanDetailsTotalOverpaidAmount(final Long loanId) {
+        Double amount = Utils.getDoubleValue(getLoanDetails(loanId).getTotalOverpaid());
+        return amount == null ? 0.0d : amount;
     }
 
-    private void verifyPaidByEntry(final Integer loanId, final Integer chargeRefundTxnId, final Float refundAmount) {
-        ArrayList<HashMap> loanChargePaidByList = (ArrayList<HashMap>) this.loanTransactionHelper.getLoanTransactionDetails(loanId,
-                chargeRefundTxnId, "loanChargePaidByList");
-        Assertions.assertNotNull(loanChargePaidByList);
-        Assertions.assertEquals(loanChargePaidByList.size(), 1);
+    private void verifyPaidByEntry(final Long loanId, final Long chargeRefundTxnId, final Double refundAmount) {
+        Set<GetLoansLoanIdLoanChargePaidByData> loanChargePaidByList = getLoanTransactionDetails(loanId, chargeRefundTxnId)
+                .getLoanChargePaidByList();
+        assertNotNull(loanChargePaidByList);
+        assertEquals(1, loanChargePaidByList.size());
 
-        Float paidByAmount = (Float) loanChargePaidByList.get(0).get("amount") * -1;
-        Assertions.assertEquals(refundAmount, paidByAmount, "Incorrect Paid By Amount");
+        Double paidByAmount = Utils.getDoubleValue(loanChargePaidByList.iterator().next().getAmount()) * -1;
+        assertEquals(refundAmount, paidByAmount, "Incorrect Paid By Amount");
     }
 
     private String getTodaysDate() {
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(LoanTestData.DATETIME_PATTERN, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         return dateFormat.format(todaysDate.getTime());
     }
-
 }
