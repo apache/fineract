@@ -426,15 +426,7 @@ public class Charge extends AbstractPersistableCustom<Long> {
                 }
             } else if (ChargeAppliesTo.WORKING_CAPITAL_LOAN.getValue().equals(this.chargeAppliesTo)) {
                 baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(chargeTimeType).notNull()
-                        .isOneOfTheseValues(ChargeTimeType.validWorkingCapitalLoanValues());
-
-                Object[] validCalculationTypeValues = new Object[] {};
-                if (ChargeTimeType.SPECIFIED_DUE_DATE.getValue().equals(chargeTimeType)) {
-                    validCalculationTypeValues = ChargeCalculationType.validValuesForWorkingCapitalLoanSpecifiedDueDate();
-                }
-                baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(chargeCalculation).notNull()
-                        .isOneOfTheseValues(validCalculationTypeValues);
-
+                        .isOneOfTheseValues(ChargeTimeType.validWorkingCapitalLoanProductValues());
             } else if (isClientCharge() && !isAllowedLoanChargeTime()) {
                 baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.client");
@@ -523,9 +515,20 @@ public class Charge extends AbstractPersistableCustom<Long> {
             }
         }
 
+        final String paymentModeParamName = "chargePaymentMode";
+        if (ChargeAppliesTo.WORKING_CAPITAL_LOAN.getValue().equals(this.chargeAppliesTo)) {
+            if (actualChanges.containsKey(CHARGE_TIME_PARAM_NAME) || actualChanges.containsKey(CHARGE_CALCULATION_TYPE_PARAM_NAME)) {
+                baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(this.chargeCalculation).notNull()
+                        .isOneOfTheseValues(ChargeCalculationType.validValuesForWorkingCapitalLoan(this.chargeTimeType));
+            }
+            if (command.hasParameter(paymentModeParamName)) {
+                baseDataValidator.reset().parameter(paymentModeParamName).value(command.integerValueOfParameterNamed(paymentModeParamName))
+                        .isOneOfTheseValues(ChargePaymentMode.validValuesForWorkingCapitalLoan());
+            }
+        }
+
         // validate only for loan charge
         if (isLoanCharge()) {
-            final String paymentModeParamName = "chargePaymentMode";
             if (command.isChangeInIntegerParameterNamed(paymentModeParamName, this.chargePaymentMode)) {
                 final Integer newValue = command.integerValueOfParameterNamed(paymentModeParamName);
                 actualChanges.put(paymentModeParamName, newValue);
@@ -602,10 +605,10 @@ public class Charge extends AbstractPersistableCustom<Long> {
 
         }
 
-        if (this.penalty && ChargeTimeType.fromInt(this.chargeTimeType).isTimeOfDisbursement()) {
+        if (isLoanCharge() && this.penalty && ChargeTimeType.fromInt(this.chargeTimeType).isTimeOfDisbursement()) {
             throw new ChargeDueAtDisbursementCannotBePenaltyException(this.name);
         }
-        if (!penalty && ChargeTimeType.fromInt(this.chargeTimeType).isOverdueInstallment()) {
+        if (isLoanCharge() && !penalty && ChargeTimeType.fromInt(this.chargeTimeType).isOverdueInstallment()) {
             throw new ChargeMustBePenaltyException(name);
         }
 

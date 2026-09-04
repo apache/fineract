@@ -41,6 +41,7 @@ public final class WorkingCapitalLoanRequestBuilders {
     private static final String DATE_FORMAT = "dd MMMM yyyy";
 
     private static final Integer CHARGE_APPLIES_TO_WORKING_CAPITAL_LOAN = 5;
+    private static final Integer CHARGE_TIME_TYPE_DISBURSEMENT = 1;
     private static final Integer CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE = 2;
     private static final Integer CHARGE_CALCULATION_TYPE_FLAT = 1;
     private static final String CHARGE_CURRENCY_CODE = "USD";
@@ -145,10 +146,54 @@ public final class WorkingCapitalLoanRequestBuilders {
     }
 
     public static ChargeRequest specifiedDueDateCharge(boolean penalty, double amount) {
-        return new ChargeRequest().chargeAppliesTo(CHARGE_APPLIES_TO_WORKING_CAPITAL_LOAN)
-                .chargeTimeType(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE).chargeCalculationType(CHARGE_CALCULATION_TYPE_FLAT)
-                .name(Utils.uniqueRandomStringGenerator("WCL_CHARGE_", 8)).amount(amount).active(true).currencyCode(CHARGE_CURRENCY_CODE)
-                .locale(LOCALE).penalty(penalty);
+        return workingCapitalCharge(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE, CHARGE_CALCULATION_TYPE_FLAT, penalty, amount);
+    }
+
+    public static ChargeRequest specifiedDueDateCharge(Integer chargeCalculationType, boolean penalty, double amount) {
+        return workingCapitalCharge(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE, chargeCalculationType, penalty, amount);
+    }
+
+    public static ChargeRequest disbursementCharge(boolean penalty, double amount) {
+        return workingCapitalCharge(CHARGE_TIME_TYPE_DISBURSEMENT, CHARGE_CALCULATION_TYPE_FLAT, penalty, amount);
+    }
+
+    public static ChargeRequest disbursementCharge(Integer chargeCalculationType, boolean penalty, double amount) {
+        return workingCapitalCharge(CHARGE_TIME_TYPE_DISBURSEMENT, chargeCalculationType, penalty, amount);
+    }
+
+    public static ChargeRequest disbursementChargeWithPaymentMode(Integer chargePaymentMode, boolean penalty, double amount) {
+        return disbursementCharge(penalty, amount).chargePaymentMode(chargePaymentMode);
+    }
+
+    public static ChargeRequest workingCapitalCharge(Integer chargeTimeType, Integer chargeCalculationType, boolean penalty,
+            double amount) {
+        return new ChargeRequest().chargeAppliesTo(CHARGE_APPLIES_TO_WORKING_CAPITAL_LOAN).chargeTimeType(chargeTimeType)
+                .chargeCalculationType(chargeCalculationType).name(Utils.uniqueRandomStringGenerator("WCL_CHARGE_", 8)).amount(amount)
+                .active(true).currencyCode(CHARGE_CURRENCY_CODE).penalty(penalty).locale(LOCALE);
+    }
+
+    public static ChargeRequest updateChargeAmount(double amount) {
+        return new ChargeRequest().amount(amount).locale(LOCALE);
+    }
+
+    public static ChargeRequest updateChargeTimeType(Integer chargeTimeType) {
+        return new ChargeRequest().chargeTimeType(chargeTimeType).locale(LOCALE);
+    }
+
+    public static ChargeRequest updateChargePaymentMode(Integer chargePaymentMode) {
+        return new ChargeRequest().chargePaymentMode(chargePaymentMode).locale(LOCALE);
+    }
+
+    public static ChargeRequest updateChargeCalculationType(Integer chargeCalculationType) {
+        return new ChargeRequest().chargeCalculationType(chargeCalculationType).locale(LOCALE);
+    }
+
+    public static ChargeRequest updateChargeTimeAndCalculationType(Integer chargeTimeType, Integer chargeCalculationType) {
+        return new ChargeRequest().chargeTimeType(chargeTimeType).chargeCalculationType(chargeCalculationType).locale(LOCALE);
+    }
+
+    public static PostLoansLoanIdChargesRequest addChargeWithoutDueDate(Long chargeId, double amount) {
+        return new PostLoansLoanIdChargesRequest().chargeId(chargeId).amount(amount).locale(LOCALE).dateFormat(DATE_FORMAT);
     }
 
     public static PostLoansLoanIdChargesRequest addCharge(Long chargeId, double amount, String dueDate) {

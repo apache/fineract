@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
@@ -110,15 +111,12 @@ public class WorkingCapitalLoanChargeDataValidator {
 
     }
 
-    /**
-     * Validates a specified-due-date charge against the target loan: the due date is mandatory, cannot fall in the past
-     * and the loan must be active, closed (obligations met) or overpaid so a charge can be raised after the loan
-     * matured. Non specified-due-date charges carry no due date and are unaffected.
-     */
     public void validateCreateLoanChargeAgainstLoan(final LoanStatus loanStatus, final ChargeTimeType chargeTimeType,
             final LocalDate dueDate, final LocalDate businessDate) {
-        if (chargeTimeType != ChargeTimeType.SPECIFIED_DUE_DATE) {
-            return;
+        if (chargeTimeType == null || !ChargeTimeType.validWorkingCapitalLoanAccount().contains(chargeTimeType)) {
+            final String chargeTimeCode = chargeTimeType == null ? null : chargeTimeType.getCode();
+            throw new GeneralPlatformDomainRuleException("error.msg.wc.loan.charge.time.type.not.supported",
+                    "Charge time type " + chargeTimeType + " is not supported on a Working Capital Loan.", chargeTimeCode);
         }
         if (dueDate == null) {
             throw new PlatformApiDataValidationException("field.is.mandatory", "Field is mandatory",
