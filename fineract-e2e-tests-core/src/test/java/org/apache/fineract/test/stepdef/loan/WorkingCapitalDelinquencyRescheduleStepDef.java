@@ -39,6 +39,8 @@ import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.DelinquencyBucketRequest;
+import org.apache.fineract.client.models.DelinquencyBucketResponse;
+import org.apache.fineract.client.models.DelinquencyRangeResponse;
 import org.apache.fineract.client.models.MinimumPaymentPeriodAndRule;
 import org.apache.fineract.client.models.PostAllowAttributeOverrides;
 import org.apache.fineract.client.models.PostDelinquencyBucketResponse;
@@ -50,6 +52,8 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.WorkingCapitalBreachRequest;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
+import org.apache.fineract.test.data.DelinquencyBucket;
+import org.apache.fineract.test.data.delinquency.DelinquencyBucketResolver;
 import org.apache.fineract.test.factory.WorkingCapitalRequestFactory;
 import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
@@ -65,6 +69,7 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
     private final FineractFeignClient fineractFeignClient;
 
     private final WorkingCapitalRequestFactory workingCapitalRequestFactory;
+    private final DelinquencyBucketResolver delinquencyBucketResolver;
 
     @When("Admin creates a new Working Capital Loan Product with delinquency bucket")
     public void createProductWithDelinquencyBucket() {
@@ -113,7 +118,7 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
     public void createWcDelinquencyBucket(final int frequency, final String frequencyType, final int minimumPayment,
             final String minimumPaymentType) {
         final DelinquencyBucketRequest request = new DelinquencyBucketRequest().name("DB-WCL-" + Utils.randomStringGenerator(12))
-                .bucketType("WORKING_CAPITAL").ranges(List.of(1L))
+                .bucketType("WORKING_CAPITAL").ranges(resolveSeededWcDelinquencyRangeIds())
                 .minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule().frequency(frequency).frequencyType(frequencyType)
                         .minimumPayment(new BigDecimal(minimumPayment)).minimumPaymentType(minimumPaymentType));
 
@@ -124,6 +129,19 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
         TestContext.GLOBAL.set(TestContextKey.DELINQUENCY_BUCKET_ID, result.getResourceId());
         log.info("Created WC delinquency bucket id={} with frequency={} {} minimumPayment={} {}", result.getResourceId(), frequency,
                 frequencyType, minimumPayment, minimumPaymentType);
+    }
+
+    /**
+     * Range ids are environment specific (ranges are created by the global initializer, partly in parallel), so the
+     * custom bucket reuses the ranges of the seeded {@link DelinquencyBucket#WC_DELINQUENCY_BUCKET} (D00..D270) instead
+     * of a hardcoded id. This keeps delinquency tag classifications (e.g. D00 for 1-30 days) deterministic.
+     */
+    private List<Long> resolveSeededWcDelinquencyRangeIds() {
+        final long seededBucketId = delinquencyBucketResolver.resolve(DelinquencyBucket.WC_DELINQUENCY_BUCKET);
+        final DelinquencyBucketResponse seededBucket = ok(
+                () -> fineractFeignClient.delinquencyRangeAndBucketsManagement().getBucket(seededBucketId));
+        assertThat(seededBucket.getRanges()).as("ranges of seeded WC delinquency bucket").isNotEmpty();
+        return seededBucket.getRanges().stream().map(DelinquencyRangeResponse::getId).toList();
     }
 
     @When("Admin creates a Working Capital delinquency reset")
