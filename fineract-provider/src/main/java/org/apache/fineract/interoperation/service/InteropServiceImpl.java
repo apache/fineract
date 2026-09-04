@@ -654,7 +654,7 @@ public class InteropServiceImpl implements InteropService {
                     "idType", idType.name(), accountId);
         }
 
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.interop.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
