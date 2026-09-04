@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests;
 
+import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -40,6 +41,8 @@ import org.apache.fineract.client.models.PostTaxesGroupTaxComponents;
 import org.apache.fineract.integrationtests.common.TaxComponentHelper;
 import org.apache.fineract.integrationtests.common.TaxGroupHelper;
 import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.common.accounting.Account;
+import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
@@ -394,6 +397,37 @@ public class ChargesTest {
         Assertions.assertNotNull(chargeResponseData);
         Assertions.assertNotNull(chargeResponseData.getTaxGroup());
         Assertions.assertEquals(chargeResponseData.getTaxGroup().getId(), taxGroupResponse.getResourceId());
+    }
+
+    // Regression test for FINERACT-2752 (CBS-129): a charge's GL income account used to look reverted or
+    // missing when re-read right after unrelated fields were edited, because the update path didn't flush
+    // before the response was built. The income account must remain visible across an edit that doesn't
+    // touch it.
+    @Test
+    public void testChargeIncomeAccountPersistsAfterUnrelatedFieldIsEdited() {
+        final AccountHelper accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+
+        final HashMap<String, Object> createRequestMap = ChargesHelper.populateDefaultsClientCharge();
+        createRequestMap.put("incomeAccountId", incomeAccount.getAccountID());
+        final Integer chargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec, new Gson().toJson(createRequestMap));
+        Assertions.assertNotNull(chargeId);
+
+        HashMap chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, chargeId);
+        assertIncomeAccountIs(chargeData, incomeAccount.getAccountID());
+
+        // Editing amount only -- the income account mapping isn't part of this change.
+        ChargesHelper.updateCharges(this.requestSpec, this.responseSpec, chargeId, ChargesHelper.getModifyChargeJSON());
+
+        chargeData = ChargesHelper.getChargeById(this.requestSpec, this.responseSpec, chargeId);
+        assertIncomeAccountIs(chargeData, incomeAccount.getAccountID());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void assertIncomeAccountIs(final HashMap chargeData, final Integer expectedAccountId) {
+        final HashMap<String, Object> incomeOrLiabilityAccount = (HashMap<String, Object>) chargeData.get("incomeOrLiabilityAccount");
+        Assertions.assertNotNull(incomeOrLiabilityAccount, "Income account should still be set on the charge");
+        Assertions.assertEquals(expectedAccountId, ((Number) incomeOrLiabilityAccount.get("id")).intValue());
     }
 
 }
