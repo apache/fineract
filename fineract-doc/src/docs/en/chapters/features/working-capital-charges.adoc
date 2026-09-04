@@ -14,10 +14,11 @@ Creates or updates a charge product applicable to Working Capital Loans.
 ** Must be set to `5`, as the `WorkingCapitalLoan` enum identifier is `5`.
 
 * `chargeTimeType`
-** Must be `2` (`SPECIFIED_DUE_DATE`).
+** Must be `1` (`DISBURSEMENT`) or `2` (`SPECIFIED_DUE_DATE`).
 
 * `chargeCalculationType`
-** Must be `1` (`FLAT`).
+** Must be `1` (`FLAT`) when `chargeTimeType` is `2` (`SPECIFIED_DUE_DATE`).
+** Must be `1` (`FLAT`) or `2` (`PERCENT_OF_AMOUNT`) when `chargeTimeType` is `1` (`DISBURSEMENT`).
 
 * `name`
 ** Must be unique across all charge products.
@@ -35,11 +36,18 @@ Creates or updates a charge product applicable to Working Capital Loans.
 
 * `penalty`
 ** Boolean value.
+** A Working Capital `disbursement` charge product may be flagged as a penalty. The term-loan rule that rejects a penalty due at disbursement does not apply to `chargeAppliesTo` `5`.
 
 ==== Optional Fields
 
 * `chargePaymentMode`
+** Only `regular` (`0`) is accepted, on both create and update. Any other value is rejected with HTTP 400.
 ** Defaults to `regular` when not provided.
+
+=== Validation Rules
+
+* The `chargeTimeType` / `chargeCalculationType` pair is validated on create and on update. An update is validated against the state the charge would have after the update, so a single `PUT /charges/{chargeId}` may change both fields together (for example from `disbursement` + `% amount` to `specified due date` + `flat`), while changing only `chargeCalculationType` to `% amount` on a `specified due date` charge is rejected.
+* `chargePaymentMode` is validated on both paths: an explicit value other than `regular` is rejected on `POST /charges` and on `PUT /charges/{chargeId}`.
 
 === Supported Values
 
@@ -54,8 +62,38 @@ Creates or updates a charge product applicable to Working Capital Loans.
 
 ==== chargeTimeType
 
+* `disbursement` (`1`)
 * `specified due date` (`2`)
 
 ==== chargeCalculationType
 
-* `flat` (`1`)
+* `flat` (`1`) -- for both `disbursement` and `specified due date`
+* `% amount` (`2`) -- for `disbursement` only
+
+== Loan Account Level Charges
+
+A charge product being valid for `chargeAppliesTo` `5` does not mean it can be attached to a Working Capital Loan account by hand. The account-level endpoints accept only `specified due date` charge products.
+
+=== Add Charge to Loan Account
+
+[source,http]
+----
+POST /working-capital-loans/{loanId}/charges
+----
+
+* Accepts charge products with `chargeTimeType` `2` (`specified due date`) only. `dueDate` is mandatory, cannot be in the past, and the loan must be active, closed (obligations met) or overpaid.
+* A `disbursement` charge product is rejected with HTTP 403 and the error code `error.msg.wc.loan.charge.time.type.not.supported`. Nothing is persisted on the account.
+
+=== Loan Account Charge Template
+
+[source,http]
+----
+GET /working-capital-loans/{loanId}/charges/template
+----
+
+* `chargeOptions` lists only active `specified due date` charge products in the loan currency. `disbursement` charge products are omitted because the endpoint above would reject them.
+
+[NOTE]
+====
+Disbursement charge products for Working Capital Loans are currently a product-definition capability only: they can be created, updated and offered through the charge template API, but they are not assessed during a Working Capital Loan disbursement and are not inherited from the loan product. Applying them in the loan lifecycle is outside the scope of this feature.
+====
