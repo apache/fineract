@@ -25,9 +25,9 @@ dependencies {
     implementation(
             'org.springframework.boot:spring-boot-starter',
             'org.springframework.boot:spring-boot-starter-data-jdbc',
-            'org.springframework.boot:spring-boot-starter-web',
+            'org.springframework.boot:spring-boot-starter-webmvc',
             'org.springframework.boot:spring-boot-starter-validation',
-            'io.github.resilience4j:resilience4j-spring-boot3',
+            'io.github.resilience4j:resilience4j-spring-boot4',
 
             'com.fasterxml.jackson.core:jackson-databind',
 
@@ -50,7 +50,6 @@ dependencies {
         exclude group: 'org.skyscreamer'
     }
     implementation (
-            'org.mockito:mockito-inline',
             'org.testcontainers:junit-jupiter',
             'org.testcontainers:postgresql',
             'org.testcontainers:mariadb',

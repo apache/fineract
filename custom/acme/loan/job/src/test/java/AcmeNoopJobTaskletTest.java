@@ -18,7 +18,7 @@
  * under the License.
  */
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.batch.repeat.RepeatStatus.FINISHED;
+import static org.springframework.batch.infrastructure.repeat.RepeatStatus.FINISHED;
 
 import com.acme.fineract.loan.job.AcmeNoopJobTasklet;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,9 +26,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.core.step.StepContribution;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 
 @ExtendWith(MockitoExtension.class)
 public class AcmeNoopJobTaskletTest {

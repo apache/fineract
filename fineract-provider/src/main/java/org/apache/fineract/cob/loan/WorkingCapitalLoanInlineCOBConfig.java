@@ -35,13 +35,13 @@ import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobScope;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
+import org.springframework.batch.core.step.builder.ChunkOrientedStepBuilder;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -90,11 +90,13 @@ public class WorkingCapitalLoanInlineCOBConfig {
             WorkingCapitalLoanInlineCOBWorkerItemProcessor inlineWorkingCapitalLoanCobWorkerItemProcessor,
             InlineWorkingCapitalLoanCOBWorkerItemWriter inlineWorkingCapitalLoanCobWorkerItemWriter,
             InlineWorkingCapitalLoanCOBWorkerItemListener inlineWorkingCapitalLoanCobLoanItemListener) {
-        return new StepBuilder("Inline Working Capital Loan COB Step", jobRepository)
-                .<WorkingCapitalLoan, WorkingCapitalLoan>chunk(propertyService.getChunkSize(JobName.WORKING_CAPITAL_LOAN_COB_JOB.name()),
-                        transactionManager)
-                .reader(inlineWorkingCapitalLoanCobWorkerItemReader).processor(inlineWorkingCapitalLoanCobWorkerItemProcessor)
-                .writer(inlineWorkingCapitalLoanCobWorkerItemWriter).listener(inlineWorkingCapitalLoanCobLoanItemListener).build();
+        ChunkOrientedStepBuilder<WorkingCapitalLoan, WorkingCapitalLoan> stepBuilder = new StepBuilder(
+                "Inline Working Capital Loan COB Step", jobRepository)
+                .<WorkingCapitalLoan, WorkingCapitalLoan>chunk(propertyService.getChunkSize(JobName.WORKING_CAPITAL_LOAN_COB_JOB.name()))
+                .transactionManager(transactionManager).reader(inlineWorkingCapitalLoanCobWorkerItemReader)
+                .processor(inlineWorkingCapitalLoanCobWorkerItemProcessor).writer(inlineWorkingCapitalLoanCobWorkerItemWriter)
+                .listener(inlineWorkingCapitalLoanCobLoanItemListener);
+        return stepBuilder.build();
     }
 
     @Bean(name = "inlineWorkingCapitalLoanCOBJob")
@@ -103,7 +105,6 @@ public class WorkingCapitalLoanInlineCOBConfig {
         return new JobBuilder(WorkingCapitalLoanCOBConstant.INLINE_WORKING_CAPITAL_LOAN_COB_JOB_NAME, jobRepository) //
                 .start(inlineWorkingCapitalLoanCOBBuildExecutionContextStep).next(inlineWorkingCapitalLoanCOBStep)
                 .next(inlineWorkingCapitalLoanCOBResetContextStep) //
-                .incrementer(new RunIdIncrementer()) //
                 .build();
     }
 

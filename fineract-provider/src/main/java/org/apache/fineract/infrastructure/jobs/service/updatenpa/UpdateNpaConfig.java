@@ -23,11 +23,10 @@ import org.apache.fineract.infrastructure.core.service.database.DatabaseTypeReso
 import org.apache.fineract.infrastructure.core.service.database.RoutingDataSourceServiceFactory;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -58,7 +57,7 @@ public class UpdateNpaConfig {
 
     @Bean
     public Job updateNpaJob() {
-        return new JobBuilder(JobName.UPDATE_NPA.name(), jobRepository).start(updateNpaStep()).incrementer(new RunIdIncrementer()).build();
+        return new JobBuilder(JobName.UPDATE_NPA.name(), jobRepository).start(updateNpaStep()).build();
     }
 
     @Bean

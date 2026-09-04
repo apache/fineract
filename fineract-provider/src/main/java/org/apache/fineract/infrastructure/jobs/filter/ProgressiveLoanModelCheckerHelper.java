@@ -18,10 +18,6 @@
  */
 package org.apache.fineract.infrastructure.jobs.filter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -38,21 +34,19 @@ import org.apache.fineract.infrastructure.core.http.BodyCachingHttpServletReques
 import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
 
 @RequiredArgsConstructor
 @Component
-public class ProgressiveLoanModelCheckerHelper extends COBFilterApiMatcher implements InitializingBean {
+public class ProgressiveLoanModelCheckerHelper extends COBFilterApiMatcher {
 
     private final GLIMAccountInfoRepository glimAccountInfoRepository;
     private final LoanRepository loanRepository;
 
     private final LoanRescheduleRequestRepository loanRescheduleRequestRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     private static final List<HttpMethod> HTTP_METHODS = List.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE);
 
     public static final Pattern IGNORE_LOAN_PATH_PATTERN = Pattern.compile("/v[1-9][0-9]*/loans/catch-up");
@@ -133,12 +127,14 @@ public class ProgressiveLoanModelCheckerHelper extends COBFilterApiMatcher imple
         return loanIds;
     }
 
-    private Long getTopLevelLoanIdFromBatchRequest(BatchRequest batchRequest) throws JsonProcessingException {
+    private Long getTopLevelLoanIdFromBatchRequest(BatchRequest batchRequest) {
         String body = batchRequest.getBody();
         if (StringUtils.isNotBlank(body)) {
             JsonNode jsonNode = objectMapper.readTree(body);
             if (jsonNode.has("loanId")) {
-                return jsonNode.get("loanId").asLong();
+                // the body may hold an unresolved batch reference like "$.loanId"; Jackson 3 asLong() throws on
+                // non-numeric values while Jackson 2 returned 0, so keep the lenient behavior explicitly
+                return jsonNode.get("loanId").asLong(0);
             }
         }
         return null;
@@ -159,11 +155,6 @@ public class ProgressiveLoanModelCheckerHelper extends COBFilterApiMatcher imple
         } else {
             return Collections.singletonList(loanIdFromRequest);
         }
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        objectMapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
     }
 
     @Override

@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.core.auditing;
 
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.auditing.AuditableBeanWrapper;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.auditing.DateTimeProvider;
@@ -27,7 +28,6 @@ import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mapping.context.PersistentEntities;
-import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
 public class CustomAuditingHandler extends AuditingHandler {

@@ -30,7 +30,7 @@ dependencies {
             )
 
     implementation(
-            'org.springframework.boot:spring-boot-starter-web',
+            'org.springframework.boot:spring-boot-starter-webmvc',
             'org.springframework.boot:spring-boot-starter-validation',
             'org.springframework.boot:spring-boot-starter-security',
             'org.springframework.boot:spring-boot-starter-data-jdbc',
@@ -44,7 +44,7 @@ dependencies {
 
             'org.mapstruct:mapstruct',
 
-            'io.github.resilience4j:resilience4j-spring-boot3',
+            'io.github.resilience4j:resilience4j-spring-boot4',
             'org.apache.httpcomponents:httpcore',
 
             'org.apache.tika:tika-core',
@@ -74,6 +74,5 @@ dependencies {
         exclude group: 'javax.activation'
         exclude group: 'org.skyscreamer'
     }
-    testImplementation ('org.mockito:mockito-inline')
     testImplementation 'com.github.romankh3:image-comparison'
 }

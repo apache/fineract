@@ -46,10 +46,10 @@ import org.apache.fineract.infrastructure.event.external.repository.domain.Exter
 import org.apache.fineract.infrastructure.event.external.repository.domain.ExternalEventView;
 import org.apache.fineract.infrastructure.event.external.service.message.MessageFactory;
 import org.apache.fineract.infrastructure.event.external.service.support.ByteBufferConverter;
-import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.StepContribution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

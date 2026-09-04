@@ -25,18 +25,18 @@ dependencyManagement {
         mavenBom 'com.squareup.okhttp3:okhttp-bom:4.12.0'
         mavenBom 'org.slf4j:slf4j-bom:2.0.17'
         mavenBom 'io.micrometer:micrometer-bom:1.16.5'
-        mavenBom 'org.springframework.boot:spring-boot-dependencies:3.5.15'
+        mavenBom 'org.springframework.boot:spring-boot-dependencies:4.1.0'
         mavenBom 'io.awspring.cloud:spring-cloud-aws-dependencies:4.0.2'
         mavenBom 'io.opentelemetry:opentelemetry-bom:1.62.0'
         mavenBom 'org.jetbrains.kotlin:kotlin-bom:2.3.21'
-        mavenBom 'org.junit:junit-bom:5.14.4'
+        mavenBom 'org.junit:junit-bom:6.0.3'
         mavenBom 'com.fasterxml.jackson:jackson-bom:2.22.1'
         mavenBom 'io.cucumber:cucumber-bom:7.34.3'
         mavenBom 'org.mockito:mockito-bom:5.23.0'
         mavenBom 'software.amazon.awssdk:bom:2.44.4'
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.4.0'
         mavenBom 'org.testcontainers:testcontainers-bom:1.21.4'
-        mavenBom 'org.glassfish.jersey:jersey-bom:3.1.11'
+        mavenBom 'org.glassfish.jersey:jersey-bom:4.0.2'
     }
 
     dependencies {
@@ -50,7 +50,7 @@ dependencyManagement {
         dependency 'ch.qos.logback.contrib:logback-jackson:0.1.5'
         dependency 'org.codehaus.janino:janino:3.1.12'
 
-        dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:4.0.9'
+        dependency 'org.eclipse.persistence:org.eclipse.persistence.jpa:5.0.1'
         dependency 'com.google.guava:guava:33.6.0-jre'
         dependency 'com.google.code.gson:gson:2.14.0'
         dependency 'com.google.googlejavaformat:google-java-format:1.35.0'
@@ -180,7 +180,7 @@ dependencyManagement {
         dependency 'com.vdurmont:semver4j:3.1.0'
         dependency 'org.beryx:text-io:3.4.1'
 
-        dependency ('org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.17') {
+        dependency ('org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3') {
             exclude 'io.swagger.core.v3:swagger-core'
         }
 
@@ -228,7 +228,7 @@ dependencyManagement {
             entry 'poi-ooxml'
         }
 
-        dependencySet(group: 'io.rest-assured', version: '5.5.7') {
+        dependencySet(group: 'io.rest-assured', version: '6.0.1') {
             entry 'rest-assured'
             entry 'json-path'
             entry 'xml-path'
@@ -252,8 +252,6 @@ dependencyManagement {
         dependency 'org.apache.commons:commons-math3:3.6.1'
         dependency 'commons-beanutils:commons-beanutils:1.11.0'
 
-        dependency 'org.mockito:mockito-inline:5.2.0'
-
         dependency 'org.wiremock:wiremock-standalone:3.13.2'
         dependency 'org.apache.sshd:sshd-common:2.17.1'
         dependency 'org.apache.sshd:sshd-core:2.17.1'
@@ -268,10 +266,7 @@ dependencyManagement {
         dependency 'org.openjdk.jmh:jmh-core:1.37'
         dependency 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 
-        dependency 'org.springframework.restdocs:spring-restdocs-asciidoctor:3.0.5'
-        dependency 'org.springframework.restdocs:spring-restdocs-mockmvc:3.0.5'
-        dependency 'org.springframework.restdocs:spring-restdocs-webtestclient:3.0.5'
-        dependency 'org.springframework.restdocs:spring-restdocs-restassured:3.0.5'
+        // spring-restdocs (4.0.x) now managed by the Spring Boot 4 BOM
 
         dependency 'com.lmax:disruptor:4.0.0'
 
@@ -285,8 +280,9 @@ dependencyManagement {
         dependency 'org.yakworks:spring-icu4j:0.5.2'
         dependency 'org.apache.commons:commons-lang3:3.20.0'
         dependency 'com.nimbusds:nimbus-jose-jwt:10.9'
-        dependency 'org.springframework:spring-core:6.2.18'
-        dependency 'org.springframework.security:spring-security-core:6.5.10'
+        // spring-core & spring-security-core now come from the Spring Boot 4 BOM (Spring Framework 7 / Security 7)
+        // resilience4j-bom does not manage the spring-boot4 starter variant — pin it explicitly:
+        dependency 'io.github.resilience4j:resilience4j-spring-boot4:2.4.0'
         // Keep Netty on the 4.1 line for MockServer compatibility.
         dependency 'io.netty:netty-buffer:4.1.135.Final'
         dependency 'io.netty:netty-common:4.1.135.Final'
@@ -305,10 +301,6 @@ dependencyManagement {
         dependency 'io.netty:netty-transport-classes-epoll:4.1.135.Final'
         dependency 'io.netty:netty-transport-native-unix-common:4.1.135.Final'
         dependency 'at.yawk.lz4:lz4-java:1.11.0'
-        dependency 'org.thymeleaf:thymeleaf:3.1.5.RELEASE'
-        dependency 'org.thymeleaf:thymeleaf-spring6:3.1.5.RELEASE'
-        dependency 'org.apache.tomcat.embed:tomcat-embed-core:10.1.55'
-        dependency 'org.apache.tomcat.embed:tomcat-embed-el:10.1.55'
-        dependency 'org.apache.tomcat.embed:tomcat-embed-websocket:10.1.55'
+        // thymeleaf + thymeleaf-spring7 and Tomcat 11 embed now come from the Spring Boot 4 BOM
     }
 }
