@@ -339,17 +339,8 @@
         },
         {
             "default": null,
-            "name": "dailyEir",
-            "doc": "Daily effective interest rate derived from discount-fee pricing, not a lending interest rate.",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "default": null,
             "name": "calculatedAnnualEir",
-            "doc": "Annualised dailyEir.",
+            "doc": "Annual effective rate the loan was priced at: compounded over the product's NPV day count, not a calendar year, and rounded to six decimals. The base schedule's daily discounting derives from it. A rate change does not restate it - each rate segment solves its own. Comes from discount-fee pricing, not a lending interest rate.",
             "type": [
                 "null",
                 "bigdecimal"

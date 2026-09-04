@@ -328,8 +328,7 @@ After EIR calculation, the following values are persisted:
 
 * *Period Payment Amount* — constant daily expected payment
 * *Total Days* — loan term in days
-* *Daily EIR* — the effective interest rate per period
-* *Calculated Annual EIR* — annualized effective rate
+* *Calculated Annual EIR* — effective interest rate compounded over `npvDayCount` periods and rounded to six decimals, stored on the amortization schedule. The base schedule's daily rate is back-calculated from it; a payment rate change does not restate it, and each rate segment solves its own rate
 
 === Stored Values per Repayment
 

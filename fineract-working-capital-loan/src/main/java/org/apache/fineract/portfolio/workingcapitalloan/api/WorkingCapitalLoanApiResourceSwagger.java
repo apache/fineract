@@ -243,9 +243,10 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public Integer numberOfRepayments;
         @Schema(example = "116.67", description = "Daily expected payment amount from the amortization schedule; null if schedule not yet generated")
         public BigDecimal periodPaymentAmount;
-        @Schema(example = "0.000435", description = "Periodic (daily) effective interest rate computed via RATE(); null if schedule not yet generated")
-        public BigDecimal dailyEir;
-        @Schema(example = "0.1691", description = "Annualized EIR: (1 + dailyEir)^365 − 1; null if schedule not yet generated")
+        @Schema(example = "0.468451", description = "Annual effective rate the loan was priced at: compounded over the product's NPV "
+                + "day count, not a calendar year, and rounded to six decimals. The base schedule's daily discounting derives from "
+                + "it. A rate change does not restate it - each rate segment solves its own. Comes from discount-fee pricing, not a "
+                + "lending interest rate. Null if schedule not yet generated")
         public BigDecimal calculatedAnnualEir;
         @Schema(description = "Working capital breach)")
         public WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanProductsResponse.GetWorkingCapitalLoanBreach breach;

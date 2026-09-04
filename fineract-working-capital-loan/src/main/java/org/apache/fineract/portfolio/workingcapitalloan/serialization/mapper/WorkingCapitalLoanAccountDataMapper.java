@@ -51,7 +51,6 @@ public interface WorkingCapitalLoanAccountDataMapper {
 
     @Mapping(source = "delinquencyGraceDays", target = "graceOnArrearsAgeing")
     @Mapping(source = "summary.overpayment", target = "totalOverpaid")
-    @Mapping(source = "dailyEir", target = "dailyEir", qualifiedByName = "toAvroDecimalScale")
     @Mapping(source = "calculatedAnnualEir", target = "calculatedAnnualEir", qualifiedByName = "toAvroDecimalScale")
     @Mapping(source = "numberOfRepayments", target = "actualNoTerm")
     @Mapping(source = "delinquencyStartType", target = "delinquency.delinquencyStartType")

@@ -23,9 +23,9 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 05 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Discount Fee Amortization | 9.61              |                  |                   |                       | false    |
     Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "05 January 2026" which has the following Journal entries:
-      | Type      | Account code | Account name                 | Debit  | Credit |
-      | INCOME    | 404000       | Interest Income              |        | 9.61   |
-      | LIABILITY | 240005       | Deferred Interest Revenue    | 9.61   |        |
+      | Type      | Account code | Account name              | Debit | Credit |
+      | INCOME    | 404000       | Interest Income           |       | 9.61   |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 9.61  |        |
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 10000.0   | 50.0               | 9.61           | 990.39           | 0.0               |
@@ -97,7 +97,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 50        | 20 February 2026 | 50.00                 |                     | 7001.85         |               | 4.03                       |                          | 298.15                     |
       | 51        | 21 February 2026 | 50.00                 |                     | 6955.85         |               | 4.00                       |                          | 294.15                     |
       | 52        | 22 February 2026 | 50.00                 |                     | 6909.83         |               | 3.97                       |                          | 290.18                     |
-      | 53        | 23 February 2026 | 50.00                 |                     | 6863.78         |               | 3.95                       |                          | 286.23                     |
+      | 53        | 23 February 2026 | 50.00                 |                     | 6863.77         |               | 3.95                       |                          | 286.23                     |
       | 54        | 24 February 2026 | 50.00                 |                     | 6817.70         |               | 3.92                       |                          | 282.31                     |
       | 55        | 25 February 2026 | 50.00                 |                     | 6771.59         |               | 3.90                       |                          | 278.41                     |
       | 56        | 26 February 2026 | 50.00                 |                     | 6725.46         |               | 3.87                       |                          | 274.54                     |
@@ -128,7 +128,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 81        | 23 March 2026    | 50.00                 |                     | 5563.60         |               | 3.21                       |                          | 186.40                     |
       | 82        | 24 March 2026    | 50.00                 |                     | 5516.78         |               | 3.18                       |                          | 183.22                     |
       | 83        | 25 March 2026    | 50.00                 |                     | 5469.93         |               | 3.15                       |                          | 180.07                     |
-      | 84        | 26 March 2026    | 50.00                 |                     | 5423.06         |               | 3.13                       |                          | 176.94                     |
+      | 84        | 26 March 2026    | 50.00                 |                     | 5423.05         |               | 3.13                       |                          | 176.94                     |
       | 85        | 27 March 2026    | 50.00                 |                     | 5376.15         |               | 3.10                       |                          | 173.84                     |
       | 86        | 28 March 2026    | 50.00                 |                     | 5329.23         |               | 3.07                       |                          | 170.77                     |
       | 87        | 29 March 2026    | 50.00                 |                     | 5282.27         |               | 3.05                       |                          | 167.72                     |
@@ -205,14 +205,14 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 158       | 08 June 2026     | 50.00                 |                     | 1878.99         |               | 1.10                       |                          | 21.01                      |
       | 159       | 09 June 2026     | 50.00                 |                     | 1830.06         |               | 1.07                       |                          | 19.94                      |
       | 160       | 10 June 2026     | 50.00                 |                     | 1781.11         |               | 1.05                       |                          | 18.89                      |
-      | 161       | 11 June 2026     | 50.00                 |                     | 1732.13         |               | 1.02                       |                          | 17.87                      |
-      | 162       | 12 June 2026     | 50.00                 |                     | 1683.12         |               | 0.99                       |                          | 16.88                      |
+      | 161       | 11 June 2026     | 50.00                 |                     | 1732.12         |               | 1.02                       |                          | 17.87                      |
+      | 162       | 12 June 2026     | 50.00                 |                     | 1683.11         |               | 0.99                       |                          | 16.88                      |
       | 163       | 13 June 2026     | 50.00                 |                     | 1634.08         |               | 0.96                       |                          | 15.92                      |
       | 164       | 14 June 2026     | 50.00                 |                     | 1585.01         |               | 0.93                       |                          | 14.99                      |
       | 165       | 15 June 2026     | 50.00                 |                     | 1535.92         |               | 0.91                       |                          | 14.08                      |
       | 166       | 16 June 2026     | 50.00                 |                     | 1486.79         |               | 0.88                       |                          | 13.20                      |
       | 167       | 17 June 2026     | 50.00                 |                     | 1437.64         |               | 0.85                       |                          | 12.35                      |
-      | 168       | 18 June 2026     | 50.00                 |                     | 1388.47         |               | 0.82                       |                          | 11.53                      |
+      | 168       | 18 June 2026     | 50.00                 |                     | 1388.46         |               | 0.82                       |                          | 11.53                      |
       | 169       | 19 June 2026     | 50.00                 |                     | 1339.26         |               | 0.79                       |                          | 10.74                      |
       | 170       | 20 June 2026     | 50.00                 |                     | 1290.02         |               | 0.77                       |                          | 9.97                       |
       | 171       | 21 June 2026     | 50.00                 |                     | 1240.76         |               | 0.74                       |                          | 9.23                       |
@@ -250,9 +250,9 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 08 January 2026 | Discount Fee Adjustment              | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
       | 08 January 2026 | Discount Fee Amortization Adjustment | 4.47              |                  |                   |                       | false    |
     Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT" transaction with date "08 January 2026" which has the following Journal entries:
-      | Type      | Account code | Account name                 | Debit  | Credit |
-      | INCOME    | 404000       | Interest Income              | 4.47   |        |
-      | LIABILITY | 240005       | Deferred Interest Revenue    |        | 4.47   |
+      | Type      | Account code | Account name              | Debit | Credit |
+      | INCOME    | 404000       | Interest Income           | 4.47  |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |       | 4.47   |
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9500.0    | 50.0               | 5.14           | 494.86           | 0.0               |
@@ -279,9 +279,9 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 05 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Discount Fee Amortization | 9.61              |                  |                   |                       | false    |
     Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "05 January 2026" which has the following Journal entries:
-      | Type      | Account code | Account name                 | Debit  | Credit |
-      | INCOME    | 404000       | Interest Income              |        | 9.61   |
-      | LIABILITY | 240005       | Deferred Interest Revenue    | 9.61   |        |
+      | Type      | Account code | Account name              | Debit | Credit |
+      | INCOME    | 404000       | Interest Income           |       | 9.61   |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 9.61  |        |
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 10000.0   | 50.0               | 9.61           | 990.39           | 0.0               |
@@ -353,7 +353,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 50        | 20 February 2026 | 50.00                 |                     | 7001.85         |               | 4.03                       |                          | 298.15                     |
       | 51        | 21 February 2026 | 50.00                 |                     | 6955.85         |               | 4.00                       |                          | 294.15                     |
       | 52        | 22 February 2026 | 50.00                 |                     | 6909.83         |               | 3.97                       |                          | 290.18                     |
-      | 53        | 23 February 2026 | 50.00                 |                     | 6863.78         |               | 3.95                       |                          | 286.23                     |
+      | 53        | 23 February 2026 | 50.00                 |                     | 6863.77         |               | 3.95                       |                          | 286.23                     |
       | 54        | 24 February 2026 | 50.00                 |                     | 6817.70         |               | 3.92                       |                          | 282.31                     |
       | 55        | 25 February 2026 | 50.00                 |                     | 6771.59         |               | 3.90                       |                          | 278.41                     |
       | 56        | 26 February 2026 | 50.00                 |                     | 6725.46         |               | 3.87                       |                          | 274.54                     |
@@ -384,7 +384,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 81        | 23 March 2026    | 50.00                 |                     | 5563.60         |               | 3.21                       |                          | 186.40                     |
       | 82        | 24 March 2026    | 50.00                 |                     | 5516.78         |               | 3.18                       |                          | 183.22                     |
       | 83        | 25 March 2026    | 50.00                 |                     | 5469.93         |               | 3.15                       |                          | 180.07                     |
-      | 84        | 26 March 2026    | 50.00                 |                     | 5423.06         |               | 3.13                       |                          | 176.94                     |
+      | 84        | 26 March 2026    | 50.00                 |                     | 5423.05         |               | 3.13                       |                          | 176.94                     |
       | 85        | 27 March 2026    | 50.00                 |                     | 5376.15         |               | 3.10                       |                          | 173.84                     |
       | 86        | 28 March 2026    | 50.00                 |                     | 5329.23         |               | 3.07                       |                          | 170.77                     |
       | 87        | 29 March 2026    | 50.00                 |                     | 5282.27         |               | 3.05                       |                          | 167.72                     |
@@ -461,14 +461,14 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 158       | 08 June 2026     | 50.00                 |                     | 1878.99         |               | 1.10                       |                          | 21.01                      |
       | 159       | 09 June 2026     | 50.00                 |                     | 1830.06         |               | 1.07                       |                          | 19.94                      |
       | 160       | 10 June 2026     | 50.00                 |                     | 1781.11         |               | 1.05                       |                          | 18.89                      |
-      | 161       | 11 June 2026     | 50.00                 |                     | 1732.13         |               | 1.02                       |                          | 17.87                      |
-      | 162       | 12 June 2026     | 50.00                 |                     | 1683.12         |               | 0.99                       |                          | 16.88                      |
+      | 161       | 11 June 2026     | 50.00                 |                     | 1732.12         |               | 1.02                       |                          | 17.87                      |
+      | 162       | 12 June 2026     | 50.00                 |                     | 1683.11         |               | 0.99                       |                          | 16.88                      |
       | 163       | 13 June 2026     | 50.00                 |                     | 1634.08         |               | 0.96                       |                          | 15.92                      |
       | 164       | 14 June 2026     | 50.00                 |                     | 1585.01         |               | 0.93                       |                          | 14.99                      |
       | 165       | 15 June 2026     | 50.00                 |                     | 1535.92         |               | 0.91                       |                          | 14.08                      |
       | 166       | 16 June 2026     | 50.00                 |                     | 1486.79         |               | 0.88                       |                          | 13.20                      |
       | 167       | 17 June 2026     | 50.00                 |                     | 1437.64         |               | 0.85                       |                          | 12.35                      |
-      | 168       | 18 June 2026     | 50.00                 |                     | 1388.47         |               | 0.82                       |                          | 11.53                      |
+      | 168       | 18 June 2026     | 50.00                 |                     | 1388.46         |               | 0.82                       |                          | 11.53                      |
       | 169       | 19 June 2026     | 50.00                 |                     | 1339.26         |               | 0.79                       |                          | 10.74                      |
       | 170       | 20 June 2026     | 50.00                 |                     | 1290.02         |               | 0.77                       |                          | 9.97                       |
       | 171       | 21 June 2026     | 50.00                 |                     | 1240.76         |               | 0.74                       |                          | 9.23                       |
@@ -506,9 +506,9 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 08 January 2026 | Discount Fee Adjustment              | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
       | 08 January 2026 | Discount Fee Amortization Adjustment | 4.47              |                  |                   |                       | false    |
     Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT" transaction with date "08 January 2026" which has the following Journal entries:
-      | Type      | Account code | Account name                 | Debit  | Credit |
-      | INCOME    | 404000       | Interest Income              | 4.47   |        |
-      | LIABILITY | 240005       | Deferred Interest Revenue    |        | 4.47   |
+      | Type      | Account code | Account name              | Debit | Credit |
+      | INCOME    | 404000       | Interest Income           | 4.47  |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |       | 4.47   |
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9500.0    | 50.0               | 5.14           | 494.86           | 0.0               |
@@ -541,23 +541,23 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     When Admin sets the business date to "03 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "02 January 2026" which has the following Journal entries:
-      | Type      | Account code | Account name                 | Debit  | Credit |
-      | INCOME    | 404000       | Interest Income              |        | 9.61   |
-      | LIABILITY | 240005       | Deferred Interest Revenue    | 9.61   |        |
+      | Type      | Account code | Account name              | Debit | Credit |
+      | INCOME    | 404000       | Interest Income           |       | 9.61   |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 9.61  |        |
     And Customer makes repayment on "03 January 2026" with 50 transaction amount on Working Capital loan
     When Admin sets the business date to "04 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "03 January 2026" which has the following Journal entries:
-      | Type      | Account code | Account name                 | Debit  | Credit |
-      | INCOME    | 404000       | Interest Income              |        | 9.57   |
-      | LIABILITY | 240005       | Deferred Interest Revenue    | 9.57   |        |
+      | Type      | Account code | Account name              | Debit | Credit |
+      | INCOME    | 404000       | Interest Income           |       | 9.57   |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 9.57  |        |
     And Customer makes repayment on "04 January 2026" with 50 transaction amount on Working Capital loan
     When Admin sets the business date to "05 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "04 January 2026" which has the following Journal entries:
-      | Type      | Account code | Account name                 | Debit  | Credit |
-      | INCOME    | 404000       | Interest Income              |        | 9.52   |
-      | LIABILITY | 240005       | Deferred Interest Revenue    | 9.52   |        |
+      | Type      | Account code | Account name              | Debit | Credit |
+      | INCOME    | 404000       | Interest Income           |       | 9.52   |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 9.52  |        |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -641,7 +641,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 48        | 18 February 2026 | 50.00                 |                     | 7001.85         | 4.03                       |                          | 298.15                     |
       | 49        | 19 February 2026 | 50.00                 |                     | 6955.85         | 4.00                       |                          | 294.15                     |
       | 50        | 20 February 2026 | 50.00                 |                     | 6909.83         | 3.97                       |                          | 290.18                     |
-      | 51        | 21 February 2026 | 50.00                 |                     | 6863.78         | 3.95                       |                          | 286.23                     |
+      | 51        | 21 February 2026 | 50.00                 |                     | 6863.77         | 3.95                       |                          | 286.23                     |
       | 52        | 22 February 2026 | 50.00                 |                     | 6817.70         | 3.92                       |                          | 282.31                     |
       | 53        | 23 February 2026 | 50.00                 |                     | 6771.59         | 3.90                       |                          | 278.41                     |
       | 54        | 24 February 2026 | 50.00                 |                     | 6725.46         | 3.87                       |                          | 274.54                     |
@@ -672,7 +672,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 79        | 21 March 2026    | 50.00                 |                     | 5563.60         | 3.21                       |                          | 186.40                     |
       | 80        | 22 March 2026    | 50.00                 |                     | 5516.78         | 3.18                       |                          | 183.22                     |
       | 81        | 23 March 2026    | 50.00                 |                     | 5469.93         | 3.15                       |                          | 180.07                     |
-      | 82        | 24 March 2026    | 50.00                 |                     | 5423.06         | 3.13                       |                          | 176.94                     |
+      | 82        | 24 March 2026    | 50.00                 |                     | 5423.05         | 3.13                       |                          | 176.94                     |
       | 83        | 25 March 2026    | 50.00                 |                     | 5376.15         | 3.10                       |                          | 173.84                     |
       | 84        | 26 March 2026    | 50.00                 |                     | 5329.23         | 3.07                       |                          | 170.77                     |
       | 85        | 27 March 2026    | 50.00                 |                     | 5282.27         | 3.05                       |                          | 167.72                     |
@@ -749,14 +749,14 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 156       | 06 June 2026     | 50.00                 |                     | 1878.99         | 1.10                       |                          | 21.01                      |
       | 157       | 07 June 2026     | 50.00                 |                     | 1830.06         | 1.07                       |                          | 19.94                      |
       | 158       | 08 June 2026     | 50.00                 |                     | 1781.11         | 1.05                       |                          | 18.89                      |
-      | 159       | 09 June 2026     | 50.00                 |                     | 1732.13         | 1.02                       |                          | 17.87                      |
-      | 160       | 10 June 2026     | 50.00                 |                     | 1683.12         | 0.99                       |                          | 16.88                      |
+      | 159       | 09 June 2026     | 50.00                 |                     | 1732.12         | 1.02                       |                          | 17.87                      |
+      | 160       | 10 June 2026     | 50.00                 |                     | 1683.11         | 0.99                       |                          | 16.88                      |
       | 161       | 11 June 2026     | 50.00                 |                     | 1634.08         | 0.96                       |                          | 15.92                      |
       | 162       | 12 June 2026     | 50.00                 |                     | 1585.01         | 0.93                       |                          | 14.99                      |
       | 163       | 13 June 2026     | 50.00                 |                     | 1535.92         | 0.91                       |                          | 14.08                      |
       | 164       | 14 June 2026     | 50.00                 |                     | 1486.79         | 0.88                       |                          | 13.20                      |
       | 165       | 15 June 2026     | 50.00                 |                     | 1437.64         | 0.85                       |                          | 12.35                      |
-      | 166       | 16 June 2026     | 50.00                 |                     | 1388.47         | 0.82                       |                          | 11.53                      |
+      | 166       | 16 June 2026     | 50.00                 |                     | 1388.46         | 0.82                       |                          | 11.53                      |
       | 167       | 17 June 2026     | 50.00                 |                     | 1339.26         | 0.79                       |                          | 10.74                      |
       | 168       | 18 June 2026     | 50.00                 |                     | 1290.02         | 0.77                       |                          | 9.97                       |
       | 169       | 19 June 2026     | 50.00                 |                     | 1240.76         | 0.74                       |                          | 9.23                       |
@@ -798,9 +798,9 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | 05 January 2026 | Discount Fee Adjustment              | 500.0             | 500.0            | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Discount Fee Amortization Adjustment | 13.35             |                  |                   |                       | false    |
     Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT" transaction with date "05 January 2026" which has the following Journal entries:
-      | Type      | Account code | Account name                 | Debit  | Credit |
-      | INCOME    | 404000       | Interest Income              | 13.35  |        |
-      | LIABILITY | 240005       | Deferred Interest Revenue    |        | 13.35  |
+      | Type      | Account code | Account name              | Debit | Credit |
+      | INCOME    | 404000       | Interest Income           | 13.35 |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |       | 13.35  |
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9500.0    | 150.0              | 15.35          | 484.65           | 0.0               |
@@ -832,11 +832,11 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9700.0    | 150.0              | 0.0            | 700.0            | 0.0               |
     And Working Capital Loan has transactions:
-      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment                 | 150.0             | 150.0            | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Discount Fee Adjustment   | 300.0             | 300.0            | 0.0               | 0.0                   | false    |
+      | transactionDate | type                    | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement            | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee            | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment               | 150.0             | 150.0            | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Adjustment | 300.0             | 300.0            | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "03 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     And Working Capital Loan has transactions:
@@ -873,15 +873,15 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 10000.0   | 150.0              | 0.0            | 1000.0           | 0.0               |
     And Working Capital Loan has transactions:
-      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment                 | 150.0             | 150.0            | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 150.0             | 150.0            | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "03 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
-      | 10000.0   | 150.0              | 28.7           | 971.3           | 0.0               |
+      | 10000.0   | 150.0              | 28.7           | 971.3            | 0.0               |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -891,7 +891,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     And Admin adds Discount fee adjustment with "400" amount on transaction date "03 January 2026" on Working Capital loan account for last discount
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
-      | 9600.0    | 150.0              | 28.7           | 571.3          | 0.0               |
+      | 9600.0    | 150.0              | 28.7           | 571.3            | 0.0               |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -928,23 +928,23 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
     And Working capital loan account has the correct data:
       | product.name             | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Active | 10000.0   | 9000.0            | 100000.0           | 18.0              | 1000.0     |
+      | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Active | 10000.0   | 9000.0            | 100000.0           | 18.0              | 1000.0   |
     When Admin sets the business date to "02 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Customer makes repayment on "02 January 2026" with 30.0 transaction amount on Working Capital loan
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
-      | 10000.0   | 30.0               | 0.0            | 1000.0         | 0.0               |
+      | 10000.0   | 30.0               | 0.0            | 1000.0           | 0.0               |
     And Working Capital Loan has transactions:
-      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment                 | 30.0              | 30.0             | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 30.0              | 30.0             | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "03 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
-      | 10000.0   | 30.0               | 5.77           | 994.23          | 0.0               |
+      | 10000.0   | 30.0               | 5.77           | 994.23           | 0.0               |
     And Working Capital Loan has transactions:
       | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
@@ -993,18 +993,18 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
     And Working capital loan account has the correct data:
       | product.name             | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Active | 10000.0   | 9000.0            | 100000.0           | 18.0              | 1000.0     |
+      | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Active | 10000.0   | 9000.0            | 100000.0           | 18.0              | 1000.0   |
     When Admin sets the business date to "02 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Customer makes repayment on "02 January 2026" with 50.0 transaction amount on Working Capital loan
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
-      | 10000.0   | 50.0               | 0.0            | 1000.0         | 0.0               |
+      | 10000.0   | 50.0               | 0.0            | 1000.0           | 0.0               |
     And Working Capital Loan has transactions:
-      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "03 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     And Working capital loan account has the correct data:
@@ -1045,15 +1045,15 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     When Admin sets the business date to "05 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     And Working Capital Loan has transactions:
-      | transactionDate | type                                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement                          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee                          | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment                             | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Discount Fee Amortization             | 9.61              |                  |                   |                       | false    |
-      | 03 January 2026 | Discount Fee Adjustment               | 200.0             | 200.0            | 0.0               | 0.0                   | false    |
-      | 03 January 2026 | Discount Fee Amortization Adjustment  | 1.71              |                  |                   |                       | false    |
-      | 04 January 2026 | Discount Fee Adjustment               | 300.0             | 300.0            | 0.0               | 0.0                   | false    |
-      | 04 January 2026 | Discount Fee Amortization Adjustment  | 2.76              |                  |                   |                       | false    |
+      | transactionDate | type                                 | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement                         | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee                         | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                            | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization            | 9.61              |                  |                   |                       | false    |
+      | 03 January 2026 | Discount Fee Adjustment              | 200.0             | 200.0            | 0.0               | 0.0                   | false    |
+      | 03 January 2026 | Discount Fee Amortization Adjustment | 1.71              |                  |                   |                       | false    |
+      | 04 January 2026 | Discount Fee Adjustment              | 300.0             | 300.0            | 0.0               | 0.0                   | false    |
+      | 04 January 2026 | Discount Fee Amortization Adjustment | 2.76              |                  |                   |                       | false    |
 
   @TestRailId:C83083
   Scenario: Verify Discount fee adjustment with amount that equals to discount fee creates discount fee amortization adjustment equals to discount fee amortization - UC8
@@ -1073,7 +1073,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
     And Working capital loan account has the correct data:
       | product.name             | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Active | 10000.0   | 9000.0            | 100000.0           | 18.0              | 1000.0     |
+      | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Active | 10000.0   | 9000.0            | 100000.0           | 18.0              | 1000.0   |
     When Admin sets the business date to "02 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Customer makes repayment on "02 January 2026" with 50.0 transaction amount on Working Capital loan
@@ -1081,10 +1081,10 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 10000.0   | 50.0               | 0.0            | 1000.0           | 0.0               |
     And Working Capital Loan has transactions:
-      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "03 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     And Working capital loan account has the correct data:
@@ -1110,13 +1110,13 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     When Admin sets the business date to "04 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Working Capital Loan has transactions:
-      | transactionDate | type                                  | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement                          | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee                          | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment                             | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Discount Fee Amortization             | 9.61              |                  |                   |                       | false    |
-      | 03 January 2026 | Discount Fee Adjustment               | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 03 January 2026 | Discount Fee Amortization Adjustment  | 9.61              |                  |                   |                       | false    |
+      | transactionDate | type                                 | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement                         | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee                         | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                            | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization            | 9.61              |                  |                   |                       | false    |
+      | 03 January 2026 | Discount Fee Adjustment              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 03 January 2026 | Discount Fee Amortization Adjustment | 9.61              |                  |                   |                       | false    |
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9000.0    | 50.0               | 0.0            | 0.0              | 0.0               |
@@ -1139,7 +1139,7 @@ Feature: Working Capital Discount Fee Amortization Adjustment
     And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
     And Working capital loan account has the correct data:
       | product.name             | submittedOnDate | expectedDisbursementDate | status | principal | approvedPrincipal | totalPaymentVolume | periodPaymentRate | discount |
-      | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Active | 10000.0   | 9000.0            | 100000.0           | 18.0              | 1000.0     |
+      | WCLP_ADVANCED_ACCOUNTING | 2026-01-01      | 2026-01-01               | Active | 10000.0   | 9000.0            | 100000.0           | 18.0              | 1000.0   |
     When Admin sets the business date to "02 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Customer makes repayment on "02 January 2026" with 9900.0 transaction amount on Working Capital loan
@@ -1147,10 +1147,10 @@ Feature: Working Capital Discount Fee Amortization Adjustment
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 10000.0   | 9900.0             | 0.0            | 1000.0           | 0.0               |
     And Working Capital Loan has transactions:
-      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 02 January 2026 | Repayment                 | 9900.0            | 9900.0           | 0.0               | 0.0                   | false    |
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment    | 9900.0            | 9900.0           | 0.0               | 0.0                   | false    |
     When Admin sets the business date to "03 January 2026"
     When Admin runs inline COB job for Working Capital Loan
     And Working capital loan account has the correct data:

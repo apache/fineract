@@ -116,6 +116,7 @@ import org.apache.fineract.test.messaging.event.EventCheckHelper;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
 import org.apache.fineract.test.stepdef.common.JournalEntriesStepDef;
 import org.apache.fineract.test.support.TestContextKey;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
 
 @Slf4j
@@ -354,6 +355,18 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
             } else {
                 assertThat(actual).as("WC loan details field %s", field).isEqualTo(expected);
             }
+        });
+    }
+
+    @Then("Working capital loan details has the following exact decimal field values:")
+    public void verifyWorkingCapitalLoanDetailExactDecimalFieldValues(final DataTable table) {
+        final GetWorkingCapitalLoansLoanIdResponse response = retrieveLoanDetails(getCreatedLoanId());
+
+        table.asMap().forEach((field, expected) -> {
+            final Object actual = invokeGetter(response, field);
+            assertThat(actual).as("WC loan details field %s is not a decimal", field).isInstanceOf(BigDecimal.class);
+            assertThat(WorkingCapitalScheduleMatcher.matchesDecimal((BigDecimal) actual, expected))
+                    .as("WC loan details field %s: expected=%s actual=%s", field, expected, actual).isTrue();
         });
     }
 
@@ -1610,6 +1623,11 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @Then("a Working Capital Loan Balance Changed business event is raised with charges:")
     public void aWorkingCapitalLoanBalanceChangedBusinessEventIsRaisedWithCharges(final DataTable table) {
         eventCheckHelper.workingCapitalLoanBalanceChangedEventChargesCheck(getCreatedLoanId(), table.asMaps());
+    }
+
+    @Then("a Working Capital Loan Balance Changed business event is raised with annual effective interest rate {string}")
+    public void aWorkingCapitalLoanBalanceChangedBusinessEventIsRaisedWithAnnualEir(final String expectedAnnualEir) {
+        eventCheckHelper.workingCapitalLoanBalanceChangedEventAnnualEirCheck(getCreatedLoanId(), expectedAnnualEir);
     }
 
     @Then("a Working Capital Loan Balance Changed business event is raised on approval")
@@ -3549,11 +3567,13 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final int linesActual = (int) periods.stream().filter(p -> p.getPaymentNo() != null).count();
 
         final List<List<String>> data = table.asLists();
+        final List<String> headers = data.getFirst();
+        final int dateColumn = headers.indexOf("paymentDate");
+        assertThat(dateColumn).as("Table must contain 'paymentDate' column").isGreaterThanOrEqualTo(0);
+
+        final SoftAssertions assertions = new SoftAssertions();
         for (int i = 1; i < data.size(); i++) {
             final List<String> expectedValues = data.get(i);
-            final List<String> headers = data.getFirst();
-            final int dateColumn = headers.indexOf("paymentDate");
-            assertThat(dateColumn).as("Table must contain 'paymentDate' column").isGreaterThanOrEqualTo(0);
             final String paymentDateExpected = expectedValues.get(dateColumn);
 
             final List<ProjectedAmortizationSchedulePaymentData> matchingPeriods = periods.stream()
@@ -3561,15 +3581,17 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
 
             final boolean containsExpectedValues = matchingPeriods.stream()
                     .anyMatch(period -> matchesExpectedWcAmortizationRow(headers, expectedValues, period));
-            assertThat(containsExpectedValues).as(
-                    "Wrong value in line %s of amortization schedule: \n actual=%s,\n expected=%s", i, matchingPeriods.stream()
+            assertions.assertThat(containsExpectedValues)
+                    .as("Wrong value in line %s of amortization schedule: \n actual=%s,\n expected=%s", i, matchingPeriods.stream()
                             .map(period -> fetchValuesOfWcAmortizationSchedule(headers, period)).collect(Collectors.toList()),
-                    expectedValues).isTrue();
+                            expectedValues)
+                    .isTrue();
         }
 
-        assertThat(linesActual)
+        assertions.assertThat(linesActual)
                 .as("Wrong number of lines in WC amortization schedule: \n actual=%s,\n expected=%s", linesActual, linesExpected)
                 .isEqualTo(linesExpected);
+        assertions.assertAll();
     }
 
     private String asText(final BigDecimal value) {

@@ -117,9 +117,7 @@ class WorkingCapitalLoanAccountDataMapperTest {
         // totalOverpaid is pulled from the nested summary.overpayment
         assertEquals(new BigDecimal("9.99"), result.getTotalOverpaid());
 
-        // EIR values are re-scaled to the fixed avro decimal scale (8, HALF_UP)
-        assertEquals(new BigDecimal("0.05000000"), result.getDailyEir());
-        assertEquals(8, result.getDailyEir().scale());
+        // The EIR value is re-scaled to the fixed avro decimal scale (8, HALF_UP)
         assertEquals(new BigDecimal("18.25000000"), result.getCalculatedAnnualEir());
         assertEquals(8, result.getCalculatedAnnualEir().scale());
         assertEquals("2024-02-01", result.getLastClosedBusinessDate());
@@ -527,7 +525,7 @@ class WorkingCapitalLoanAccountDataMapperTest {
                 .loanProductCounter(7).paymentRate(new BigDecimal("2.50")).repaymentEvery(30)
                 .repaymentFrequencyType(stringEnum("0", "repaymentFrequency.days", "Days")).discountFee(new BigDecimal("12.00"))
                 .proposedDiscountFee(new BigDecimal("13.00")).approvedDiscountFee(new BigDecimal("14.00")).numberOfRepayments(90)
-                .periodPaymentAmount(new BigDecimal("120.00")).dailyEir(new BigDecimal("0.05")).calculatedAnnualEir(new BigDecimal("18.25"))
+                .periodPaymentAmount(new BigDecimal("120.00")).calculatedAnnualEir(new BigDecimal("18.25"))
                 .totalPaymentVolume(new BigDecimal("5000.00")).breachGraceDays(3).delinquencyGraceDays(7)
                 .delinquencyStartType(stringEnum("1", "delinquencyStart.disbursement", "Disbursement"))
                 .delinquencyStartDate(LocalDate.of(2024, 1, 5)).breachStartDate(LocalDate.of(2024, 1, 6))

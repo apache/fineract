@@ -55,7 +55,7 @@ Feature: Working Capital Discount Adjustment
       | transactionDate | type                    | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement            | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Discount Fee            | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee Adjustment | 11.0              | 11.0              | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee Adjustment | 11.0              | 11.0             | 0.0               | 0.0                   | false    |
     Then Add Discount fee adjustment with "3" amount on Working Capital loan account failed due to exceeding discount amount
     And Working Capital Loan has transactions:
       | transactionDate | type                    | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
@@ -326,7 +326,7 @@ Feature: Working Capital Discount Adjustment
       | transactionDate | type                    | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement            | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Discount Fee            | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee Adjustment | 100.0              | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee Adjustment | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
     And Working Capital Loan has a "DISCOUNT_FEE_ADJUSTMENT" transaction with date "01 January 2026" which has classification code value "working_capital_loan_discount_fee_classification_value"
 
   @TestRailId:C83037
@@ -599,7 +599,7 @@ Feature: Working Capital Discount Adjustment
       | 44        | 14 February 2019 | 50.00                 |                     | 7001.85         | 4.03                       |                          | 298.15                     |
       | 45        | 15 February 2019 | 50.00                 |                     | 6955.85         | 4.00                       |                          | 294.15                     |
       | 46        | 16 February 2019 | 50.00                 |                     | 6909.83         | 3.97                       |                          | 290.18                     |
-      | 47        | 17 February 2019 | 50.00                 |                     | 6863.78         | 3.95                       |                          | 286.23                     |
+      | 47        | 17 February 2019 | 50.00                 |                     | 6863.77         | 3.95                       |                          | 286.23                     |
       | 48        | 18 February 2019 | 50.00                 |                     | 6817.70         | 3.92                       |                          | 282.31                     |
       | 49        | 19 February 2019 | 50.00                 |                     | 6771.59         | 3.90                       |                          | 278.41                     |
       | 50        | 20 February 2019 | 50.00                 |                     | 6725.46         | 3.87                       |                          | 274.54                     |
@@ -630,7 +630,7 @@ Feature: Working Capital Discount Adjustment
       | 75        | 17 March 2019    | 50.00                 |                     | 5563.60         | 3.21                       |                          | 186.40                     |
       | 76        | 18 March 2019    | 50.00                 |                     | 5516.78         | 3.18                       |                          | 183.22                     |
       | 77        | 19 March 2019    | 50.00                 |                     | 5469.93         | 3.15                       |                          | 180.07                     |
-      | 78        | 20 March 2019    | 50.00                 |                     | 5423.06         | 3.13                       |                          | 176.94                     |
+      | 78        | 20 March 2019    | 50.00                 |                     | 5423.05         | 3.13                       |                          | 176.94                     |
       | 79        | 21 March 2019    | 50.00                 |                     | 5376.15         | 3.10                       |                          | 173.84                     |
       | 80        | 22 March 2019    | 50.00                 |                     | 5329.23         | 3.07                       |                          | 170.77                     |
       | 81        | 23 March 2019    | 50.00                 |                     | 5282.27         | 3.05                       |                          | 167.72                     |
@@ -707,14 +707,14 @@ Feature: Working Capital Discount Adjustment
       | 152       | 02 June 2019     | 50.00                 |                     | 1878.99         | 1.10                       |                          | 21.01                      |
       | 153       | 03 June 2019     | 50.00                 |                     | 1830.06         | 1.07                       |                          | 19.94                      |
       | 154       | 04 June 2019     | 50.00                 |                     | 1781.11         | 1.05                       |                          | 18.89                      |
-      | 155       | 05 June 2019     | 50.00                 |                     | 1732.13         | 1.02                       |                          | 17.87                      |
-      | 156       | 06 June 2019     | 50.00                 |                     | 1683.12         | 0.99                       |                          | 16.88                      |
+      | 155       | 05 June 2019     | 50.00                 |                     | 1732.12         | 1.02                       |                          | 17.87                      |
+      | 156       | 06 June 2019     | 50.00                 |                     | 1683.11         | 0.99                       |                          | 16.88                      |
       | 157       | 07 June 2019     | 50.00                 |                     | 1634.08         | 0.96                       |                          | 15.92                      |
       | 158       | 08 June 2019     | 50.00                 |                     | 1585.01         | 0.93                       |                          | 14.99                      |
       | 159       | 09 June 2019     | 50.00                 |                     | 1535.92         | 0.91                       |                          | 14.08                      |
       | 160       | 10 June 2019     | 50.00                 |                     | 1486.79         | 0.88                       |                          | 13.20                      |
       | 161       | 11 June 2019     | 50.00                 |                     | 1437.64         | 0.85                       |                          | 12.35                      |
-      | 162       | 12 June 2019     | 50.00                 |                     | 1388.47         | 0.82                       |                          | 11.53                      |
+      | 162       | 12 June 2019     | 50.00                 |                     | 1388.46         | 0.82                       |                          | 11.53                      |
       | 163       | 13 June 2019     | 50.00                 |                     | 1339.26         | 0.79                       |                          | 10.74                      |
       | 164       | 14 June 2019     | 50.00                 |                     | 1290.02         | 0.77                       |                          | 9.97                       |
       | 165       | 15 June 2019     | 50.00                 |                     | 1240.76         | 0.74                       |                          | 9.23                       |
@@ -1013,7 +1013,7 @@ Feature: Working Capital Discount Adjustment
       | 47        | 17 February 2019 | 50.00                 |                     | 7001.85         |               | 4.03                       |                          | 298.15                     |
       | 48        | 18 February 2019 | 50.00                 |                     | 6955.85         |               | 4.00                       |                          | 294.15                     |
       | 49        | 19 February 2019 | 50.00                 |                     | 6909.83         |               | 3.97                       |                          | 290.18                     |
-      | 50        | 20 February 2019 | 50.00                 |                     | 6863.78         |               | 3.95                       |                          | 286.23                     |
+      | 50        | 20 February 2019 | 50.00                 |                     | 6863.77         |               | 3.95                       |                          | 286.23                     |
       | 51        | 21 February 2019 | 50.00                 |                     | 6817.70         |               | 3.92                       |                          | 282.31                     |
       | 52        | 22 February 2019 | 50.00                 |                     | 6771.59         |               | 3.90                       |                          | 278.41                     |
       | 53        | 23 February 2019 | 50.00                 |                     | 6725.46         |               | 3.87                       |                          | 274.54                     |
@@ -1044,7 +1044,7 @@ Feature: Working Capital Discount Adjustment
       | 78        | 20 March 2019    | 50.00                 |                     | 5563.60         |               | 3.21                       |                          | 186.40                     |
       | 79        | 21 March 2019    | 50.00                 |                     | 5516.78         |               | 3.18                       |                          | 183.22                     |
       | 80        | 22 March 2019    | 50.00                 |                     | 5469.93         |               | 3.15                       |                          | 180.07                     |
-      | 81        | 23 March 2019    | 50.00                 |                     | 5423.06         |               | 3.13                       |                          | 176.94                     |
+      | 81        | 23 March 2019    | 50.00                 |                     | 5423.05         |               | 3.13                       |                          | 176.94                     |
       | 82        | 24 March 2019    | 50.00                 |                     | 5376.15         |               | 3.10                       |                          | 173.84                     |
       | 83        | 25 March 2019    | 50.00                 |                     | 5329.23         |               | 3.07                       |                          | 170.77                     |
       | 84        | 26 March 2019    | 50.00                 |                     | 5282.27         |               | 3.05                       |                          | 167.72                     |
@@ -1121,14 +1121,14 @@ Feature: Working Capital Discount Adjustment
       | 155       | 05 June 2019     | 50.00                 |                     | 1878.99         |               | 1.10                       |                          | 21.01                      |
       | 156       | 06 June 2019     | 50.00                 |                     | 1830.06         |               | 1.07                       |                          | 19.94                      |
       | 157       | 07 June 2019     | 50.00                 |                     | 1781.11         |               | 1.05                       |                          | 18.89                      |
-      | 158       | 08 June 2019     | 50.00                 |                     | 1732.13         |               | 1.02                       |                          | 17.87                      |
-      | 159       | 09 June 2019     | 50.00                 |                     | 1683.12         |               | 0.99                       |                          | 16.88                      |
+      | 158       | 08 June 2019     | 50.00                 |                     | 1732.12         |               | 1.02                       |                          | 17.87                      |
+      | 159       | 09 June 2019     | 50.00                 |                     | 1683.11         |               | 0.99                       |                          | 16.88                      |
       | 160       | 10 June 2019     | 50.00                 |                     | 1634.08         |               | 0.96                       |                          | 15.92                      |
       | 161       | 11 June 2019     | 50.00                 |                     | 1585.01         |               | 0.93                       |                          | 14.99                      |
       | 162       | 12 June 2019     | 50.00                 |                     | 1535.92         |               | 0.91                       |                          | 14.08                      |
       | 163       | 13 June 2019     | 50.00                 |                     | 1486.79         |               | 0.88                       |                          | 13.20                      |
       | 164       | 14 June 2019     | 50.00                 |                     | 1437.64         |               | 0.85                       |                          | 12.35                      |
-      | 165       | 15 June 2019     | 50.00                 |                     | 1388.47         |               | 0.82                       |                          | 11.53                      |
+      | 165       | 15 June 2019     | 50.00                 |                     | 1388.46         |               | 0.82                       |                          | 11.53                      |
       | 166       | 16 June 2019     | 50.00                 |                     | 1339.26         |               | 0.79                       |                          | 10.74                      |
       | 167       | 17 June 2019     | 50.00                 |                     | 1290.02         |               | 0.77                       |                          | 9.97                       |
       | 168       | 18 June 2019     | 50.00                 |                     | 1240.76         |               | 0.74                       |                          | 9.23                       |

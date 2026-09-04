@@ -78,6 +78,14 @@ public final class ProjectedAmortizationScheduleModel {
      */
     public static final int MAX_CALCULABLE_TOTAL_DAYS = 100_000;
 
+    private static final int ANNUAL_EIR_SCALE = 6;
+
+    /**
+     * Fixed rather than the tenant's money rounding mode: a rate is not money, and this one is spread back into the
+     * rate the whole schedule discounts on, so configuration would amortize the same loan differently per tenant.
+     */
+    private static final RoundingMode ANNUAL_EIR_ROUNDING = RoundingMode.HALF_EVEN;
+
     @SerializedName(value = "discountFeeAmount", alternate = "originationFeeAmount")
     private final Money discountFeeAmount;
     private final Money netDisbursementAmount;
@@ -100,11 +108,24 @@ public final class ProjectedAmortizationScheduleModel {
     private final int originalPaymentNumber;
 
     /**
-     * Periodic effective rate, solved as {@code IRR([−netDisbursement, expectedPayment × (n−1), finalPayment])} and
-     * seeded with a linear rate estimate. Because the cash flow carries the smaller final remainder payment rather than
-     * assuming a uniform payment throughout, this is zero exactly when the loan carries no discount fee.
+     * Periodic rate every balance and amortization is discounted by: {@link #annualEffectiveInterestRate} spread back
+     * over {@link #npvDayCount}. Models persisted before that field hold the solved IRR instead, left as it is.
+     * <p>
+     * Zero when the loan carries no discount fee, and when the annual rate rounds to zero.
      */
     private final BigDecimal effectiveInterestRate;
+
+    /**
+     * The rate the loan was priced at and the source {@link #effectiveInterestRate} is derived from, compounded over
+     * {@link #npvDayCount} rather than a calendar year.
+     * <p>
+     * Not restated by a payment rate change: each {@link RateSegment} solves its own rate, and the rate in force on a
+     * date comes from the rate-change history. Matches the period payment rate beside it, likewise as created.
+     * <p>
+     * Null on models written before it existed — read through {@link #annualEffectiveInterestRate()}.
+     */
+    @Getter(AccessLevel.NONE)
+    private final BigDecimal annualEffectiveInterestRate;
 
     @JsonExclude
     private final MathContext mc;
@@ -151,8 +172,8 @@ public final class ProjectedAmortizationScheduleModel {
     private ProjectedAmortizationScheduleModel(final Money discountFeeAmount, final Money netDisbursementAmount,
             final Money totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount,
             final LocalDate expectedDisbursementDate, final Money expectedPaymentAmount, final Money finalPaymentAmount,
-            final int originalPaymentNumber, final BigDecimal effectiveInterestRate, final MathContext mc, final CurrencyData currency,
-            final LocalDate currentBusinessDate) {
+            final int originalPaymentNumber, final BigDecimal effectiveInterestRate, final BigDecimal annualEffectiveInterestRate,
+            final MathContext mc, final CurrencyData currency, final LocalDate currentBusinessDate) {
         this.discountFeeAmount = discountFeeAmount;
         this.netDisbursementAmount = netDisbursementAmount;
         this.totalPaymentVolume = totalPaymentVolume;
@@ -163,6 +184,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.finalPaymentAmount = finalPaymentAmount;
         this.originalPaymentNumber = originalPaymentNumber;
         this.effectiveInterestRate = effectiveInterestRate;
+        this.annualEffectiveInterestRate = annualEffectiveInterestRate;
         this.mc = mc;
         this.currency = currency;
         this.actualPayments = new ArrayList<>();
@@ -204,6 +226,7 @@ public final class ProjectedAmortizationScheduleModel {
         this.finalPaymentAmount = null;
         this.originalPaymentNumber = 0;
         this.effectiveInterestRate = null;
+        this.annualEffectiveInterestRate = null;
         this.mc = mc;
         this.currency = currency;
         this.actualPayments = new ArrayList<>();
@@ -338,6 +361,22 @@ public final class ProjectedAmortizationScheduleModel {
         return (int) Math.clamp(elapsed, 0L, MAX_CALCULABLE_TOTAL_DAYS);
     }
 
+    /**
+     * The base schedule's annual rate; see {@link #annualEffectiveInterestRate}. Models predating the field compound
+     * their stored periodic rate rather than re-solving, so they keep reporting the rate they were built on.
+     */
+    public BigDecimal annualEffectiveInterestRate() {
+        return Optional.ofNullable(annualEffectiveInterestRate)
+                .or(() -> Optional.ofNullable(effectiveInterestRate).map(rate -> normalizedAnnualRate(rate, npvDayCount, mc))).orElse(null);
+    }
+
+    /**
+     * Single definition of the reported rate — the stored value and the derive-on-read fallback must round identically.
+     */
+    private static BigDecimal normalizedAnnualRate(final BigDecimal periodicRate, final int npvDayCount, final MathContext mc) {
+        return TvmFunctions.annualize(periodicRate, npvDayCount, mc).setScale(ANNUAL_EIR_SCALE, ANNUAL_EIR_ROUNDING);
+    }
+
     public int effectiveTotalTerm() {
         if (rateSegments == null || rateSegments.isEmpty()) {
             return originalPaymentNumber;
@@ -404,7 +443,11 @@ public final class ProjectedAmortizationScheduleModel {
         // schedule divides evenly this equals the daily payment.
         final BigDecimal finalPayment = grossPayable.subtract(dailyPayment.multiply(BigDecimal.valueOf(paymentNumber - 1L), mc), mc);
         try {
-            TvmFunctions.irr(buildEirCashFlows(netDisbursementAmount, dailyPayment, finalPayment, paymentNumber), mc);
+            // Mirrors computeScheduleParams: the answer only holds while validation runs the arithmetic generate()
+            // will run. Results are dropped — what is probed is whether the schedule survives these inputs.
+            final BigDecimal solvedEir = TvmFunctions
+                    .irr(buildEirCashFlows(netDisbursementAmount, dailyPayment, finalPayment, paymentNumber), mc);
+            TvmFunctions.deannualize(normalizedAnnualRate(solvedEir, npvDayCount, mc), npvDayCount, mc);
         } catch (final ArithmeticException | IllegalArgumentException | IllegalStateException e) {
             return false;
         }
@@ -434,14 +477,12 @@ public final class ProjectedAmortizationScheduleModel {
         return new ProjectedAmortizationScheduleModel(Money.of(currency, discountFeeAmount, mc),
                 Money.of(currency, netDisbursementAmount, mc), Money.of(currency, totalPaymentVolume, mc), periodPaymentRate, npvDayCount,
                 expectedDisbursementDate, Money.of(currency, params.dailyPayment(), mc), Money.of(currency, params.finalPayment(), mc),
-                params.paymentNumber(), params.eir(), mc, currency, currentDate);
+                params.paymentNumber(), params.eir(), params.annualEir(), mc, currency, currentDate);
     }
 
     /**
-     * Derives the amortization parameters for a schedule (or a rate-change sub-schedule): the currency-rounded daily
-     * payment, the round-up payment count, the smaller remainder final payment, and the EIR as the IRR of the resulting
-     * non-uniform cash-flow series. Shared by {@link #generate} and {@link #applyRateChange} so the base schedule and
-     * every rate segment are computed identically.
+     * Derives the amortization parameters for a schedule or a rate-change sub-schedule. Shared by {@link #generate} and
+     * {@link #applyRateChange} so the base schedule and every rate segment are computed identically.
      */
     private static ScheduleParams computeScheduleParams(final BigDecimal netDisbursement, final BigDecimal discountFee,
             final BigDecimal totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount, final CurrencyData currency,
@@ -464,11 +505,12 @@ public final class ProjectedAmortizationScheduleModel {
         // schedule divides evenly this equals the daily payment.
         final BigDecimal finalPayment = grossPayable.subtract(dailyPayment.multiply(BigDecimal.valueOf(paymentNumber - 1L), mc), mc);
 
-        // EIR is the IRR of the actual (non-uniform) cash-flow series. The IRR seeds its Newton-Raphson search from a
-        // linear estimate of the series, so no separate uniform-annuity RATE solve is needed.
-        final BigDecimal eir = TvmFunctions.irr(buildEirCashFlows(netDisbursement, dailyPayment, finalPayment, paymentNumber), mc);
+        // The IRR is rounded to the reported annual scale and spread back, so the schedule runs on the published rate.
+        final BigDecimal solvedEir = TvmFunctions.irr(buildEirCashFlows(netDisbursement, dailyPayment, finalPayment, paymentNumber), mc);
+        final BigDecimal annualEir = normalizedAnnualRate(solvedEir, npvDayCount, mc);
+        final BigDecimal eir = TvmFunctions.deannualize(annualEir, npvDayCount, mc);
 
-        return new ScheduleParams(dailyPayment, paymentNumber, finalPayment, eir);
+        return new ScheduleParams(dailyPayment, paymentNumber, finalPayment, eir, annualEir);
     }
 
     /**
@@ -729,8 +771,8 @@ public final class ProjectedAmortizationScheduleModel {
             throw new IllegalArgumentException("balance at split must be positive for rate change");
         }
 
-        // The segment is a fresh sub-schedule of the remaining balance + discount at the new rate: round-up term,
-        // remainder final payment and IRR EIR, computed identically to the base schedule.
+        // A rate change restarts the schedule from the remaining balance, so the segment is solved from scratch by the
+        // same rule as the base schedule.
         final ScheduleParams segment = computeScheduleParams(newNetDisb, newDiscount, tpv, newPeriodPaymentRate, npvDayCount, currency, mc);
 
         rateSegments.add(new RateSegment(splitDayIndex, money(segment.dailyPayment()), segment.paymentNumber(), segment.eir(),
@@ -1087,10 +1129,11 @@ public final class ProjectedAmortizationScheduleModel {
      * along, which is all the re-processing that case needs.
      *
      * <p>
-     * The returned amortization list is <em>not</em> settled — the caller that needs the full schedule applies
+     * The expected amortization list comes back <em>not</em> settled — the caller that needs the full schedule applies
      * {@link #settleAmortizationOntoFinalPeriods}; a bounded prefix used to read the balance at a rate-change split
-     * does not. Pass {@code null} for {@code settledPaymentsByDate} to walk the pure projection throughout, which is
-     * what the unchanging original schedule is built from.
+     * does not. The plan does come back settled, by {@link #settlePlanOntoTerm}, unless the walk stops short of the
+     * term. Pass {@code null} for {@code settledPaymentsByDate} to walk the pure projection throughout, which is what
+     * the unchanging original schedule is built from.
      */
     private BalancesAndAmortizations computeBalancesAndAmortizations(final int upToDayIndex,
             final Map<LocalDate, BigDecimal> settledPaymentsByDate) {
@@ -1159,6 +1202,9 @@ public final class ProjectedAmortizationScheduleModel {
             // should not depend on that to stay coherent.
             prevBalance = MathUtil.negativeToZero(actualBalance);
         }
+        if (settledPaymentsByDate == null) {
+            settlePlanOntoTerm(exactAmortizations, upToDayIndex);
+        }
         return new BalancesAndAmortizations(balances, expectedAmortizations, prevBalance, billedPayments, planAmortizations);
     }
 
@@ -1187,6 +1233,30 @@ public final class ProjectedAmortizationScheduleModel {
             final BigDecimal current = amortizations.get(i).getAmount();
             final BigDecimal settled = current.add(drift, mc).max(BigDecimal.ZERO);
             amortizations.set(i, money(settled));
+            drift = drift.subtract(settled.subtract(current, mc), mc);
+        }
+    }
+
+    /**
+     * The schedule runs on the rounded published rate, not the exact one solved for it, so its periods no longer add up
+     * to the discount fee. The difference goes on the last periods of the term instead of being shared across all of
+     * them: payments take their share of the fee from these same numbers, so touching a period a payment has already
+     * passed would let an on-time payment shift the schedule. Periods past the term are left out - they earn their fee
+     * separately - and a partial walk is left alone, since it only covers part of the fee. Rate segments still add up
+     * to the whole fee, because a rate change hands what is unearned to the next one.
+     */
+    private void settlePlanOntoTerm(final List<BigDecimal> planAmortizations, final int upToDayIndex) {
+        final int term = effectiveTotalTerm();
+        if (upToDayIndex < term || planAmortizations.isEmpty()) {
+            return;
+        }
+        final List<BigDecimal> termPeriods = planAmortizations.subList(0, term);
+        final BigDecimal planned = termPeriods.stream().reduce(BigDecimal.ZERO, (running, next) -> running.add(next, mc));
+        BigDecimal drift = discountFeeAmount.getAmount().subtract(planned, mc);
+        for (int i = termPeriods.size() - 1; i >= 0 && drift.signum() != 0; i--) {
+            final BigDecimal current = termPeriods.get(i);
+            final BigDecimal settled = current.add(drift, mc).max(BigDecimal.ZERO);
+            termPeriods.set(i, settled);
             drift = drift.subtract(settled.subtract(current, mc), mc);
         }
     }
@@ -1452,7 +1522,8 @@ public final class ProjectedAmortizationScheduleModel {
     }
 
     /** Amortization parameters shared by the base schedule and each rate-change segment. */
-    private record ScheduleParams(BigDecimal dailyPayment, int paymentNumber, BigDecimal finalPayment, BigDecimal eir) {
+    private record ScheduleParams(BigDecimal dailyPayment, int paymentNumber, BigDecimal finalPayment, BigDecimal eir,
+            BigDecimal annualEir) {
     }
 
     public record ActualPayment(LocalDate date, Money amount) {
