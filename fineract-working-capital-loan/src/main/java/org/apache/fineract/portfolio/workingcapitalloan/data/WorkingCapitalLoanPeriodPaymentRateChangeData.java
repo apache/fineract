@@ -26,6 +26,7 @@ import java.time.OffsetDateTime;
 public record WorkingCapitalLoanPeriodPaymentRateChangeData(Long id, Long loanId, LocalDate effectiveDate, BigDecimal previousRate,
         BigDecimal newRate, boolean reversed, LocalDate reversedOnDate,
         @Schema(deprecated = true, description = "Audit/system timestamp. Prefer submittedOnDate for the booking business/tenant date.") //
-        OffsetDateTime createdDate, LocalDate submittedOnDate) {
+        OffsetDateTime createdDate, LocalDate submittedOnDate, BigDecimal calculatedAnnualEir, BigDecimal dailyPaymentAmount,
+        Integer segmentTerm) {
 
 }

@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.data.ProjectedAmortizationScheduleGenerateRequest;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 
@@ -70,7 +71,7 @@ public interface WorkingCapitalLoanAmortizationScheduleWriteService {
      * reconstructed by replaying every non-reversed rate change in effective-date order, so it is read back from the
      * loan's rate-change history along with the ones already there.
      */
-    void regenerateAmortizationScheduleOnRateChange(WorkingCapitalLoan loan);
+    ProjectedAmortizationScheduleModel regenerateAmortizationScheduleOnRateChange(WorkingCapitalLoan loan);
 
     /**
      * After a discount fee adjustment: regenerates the projected schedule with the new loan-level discount (as on

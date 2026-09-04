@@ -406,6 +406,18 @@
                     "type": "map"
                 }
             ]
+        },
+        {
+            "default": null,
+            "name": "periodPaymentRateHistory",
+            "doc": "Period payment rate changes with the annual EIR, daily payment amount and segment term snapshotted when each change was booked, most recently booked first - which for a backdated change is not the same as effective-date order. Appended at the end of the record so consumers decoding positionally keep working.",
+            "type": [
+                "null",
+                {
+                    "type": "array",
+                    "items": "org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanPeriodPaymentRateChangeDataV1"
+                }
+            ]
         }
     ]
 }

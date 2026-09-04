@@ -29,6 +29,7 @@ import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyRangeData;
 import org.apache.fineract.portfolio.fund.data.FundData;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanPeriodPaymentRateChangeData;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.api.WorkingCapitalLoanProductApiResourceSwagger;
 
 /**
@@ -245,8 +246,12 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal periodPaymentAmount;
         @Schema(example = "0.000435", description = "Periodic (daily) effective interest rate computed via RATE(); null if schedule not yet generated")
         public BigDecimal dailyEir;
-        @Schema(example = "0.1691", description = "Annualized EIR: (1 + dailyEir)^365 − 1; null if schedule not yet generated")
+        @Schema(example = "0.1691", description = "Annualized EIR: (1 + dailyEir)^npvDayCount − 1; null if schedule not yet generated")
         public BigDecimal calculatedAnnualEir;
+        @Schema(description = "Period payment rate change history, most recently booked first - which for a backdated change is not "
+                + "the same as effective-date order. Each entry carries the annual EIR, daily payment amount and segment term the "
+                + "amortization schedule computed when that change was booked; those are null for changes booked before the snapshot was introduced")
+        public List<WorkingCapitalLoanPeriodPaymentRateChangeData> periodPaymentRateHistory;
         @Schema(description = "Working capital breach)")
         public WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanProductsResponse.GetWorkingCapitalLoanBreach breach;
         public WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanNearBreach nearBreach;
