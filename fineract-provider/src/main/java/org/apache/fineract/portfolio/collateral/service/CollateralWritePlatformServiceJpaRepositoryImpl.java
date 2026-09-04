@@ -168,7 +168,7 @@ public class CollateralWritePlatformServiceJpaRepositoryImpl implements Collater
     }
 
     private void handleCollateralDataIntegrityViolation(final NonTransientDataAccessException dve) {
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.collateral.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }

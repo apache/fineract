@@ -571,7 +571,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     .build();
         } catch (final JpaSystemException | DataIntegrityViolationException dve) {
             Throwable throwable = ExceptionUtils.getRootCause(dve.getCause());
-            log.error("Error occured.", throwable);
+            log.error("Error occurred.", throwable);
             throw ErrorHandler.getMappable(dve, "error.msg.group.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
         }
@@ -760,7 +760,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                     name);
         }
 
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.group.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
 
