@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.integrationtests;
+package org.apache.fineract.integrationtests.client;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -28,10 +28,16 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.models.NoteCreateRequest;
+import org.apache.fineract.client.models.NoteCreateResponse;
+import org.apache.fineract.client.models.NoteData;
+import org.apache.fineract.client.models.NoteDeleteResponse;
+import org.apache.fineract.client.models.NoteUpdateRequest;
+import org.apache.fineract.client.models.NoteUpdateResponse;
+import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
-import org.apache.fineract.integrationtests.common.NotesHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -39,16 +45,15 @@ import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtens
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.portfolio.note.data.NoteCreateResponse;
-import org.apache.fineract.portfolio.note.data.NoteData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import retrofit2.Response;
 
 @SuppressWarnings({ "rawtypes" })
 @ExtendWith(LoanTestLifecycleExtension.class)
-public class NotesTest {
+public class NotesTest extends IntegrationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -76,12 +81,14 @@ public class NotesTest {
         Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
-        String request = "{\"note\": \"" + noteText + "\"}";
-        Integer noteId = NotesHelper.createClientNote(requestSpec, responseSpec, clientId, request);
+        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
+        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("clients", Long.valueOf(clientId), request));
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        String receivedNoteText = NotesHelper.getClientNote(requestSpec, responseSpec, clientId, noteId);
-        Assertions.assertEquals(noteText, receivedNoteText);
+        NoteData noteData = ok(fineractClient().notes.retrieveNote("clients", Long.valueOf(clientId), noteId));
+        Assertions.assertEquals(noteText, noteData.getNote());
     }
 
     @Test
@@ -91,20 +98,24 @@ public class NotesTest {
         Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
-        String request = "{\"note\": \"" + noteText + "\"}";
-        Integer noteId = NotesHelper.createClientNote(requestSpec, responseSpec, clientId, request);
+        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
+        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("clients", Long.valueOf(clientId), request));
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        String receivedNoteText = NotesHelper.getClientNote(requestSpec, responseSpec, clientId, noteId);
-        Assertions.assertEquals(noteText, receivedNoteText);
+        NoteData noteData = ok(fineractClient().notes.retrieveNote("clients", Long.valueOf(clientId), noteId));
+        Assertions.assertEquals(noteText, noteData.getNote());
 
         String updatedNoteText = "this is an updated test note";
 
-        String updateRequest = "{\"note\": \"" + updatedNoteText + "\"}";
-        NotesHelper.updateClientNote(requestSpec, responseSpec, clientId, noteId, updateRequest);
+        NoteUpdateRequest updateRequest = new NoteUpdateRequest().note(updatedNoteText);
+        NoteUpdateResponse noteUpdateResponse = ok(
+                fineractClient().notes.updateNote("clients", Long.valueOf(clientId), noteId, updateRequest));
+        Assertions.assertNotNull(noteUpdateResponse);
 
-        receivedNoteText = NotesHelper.getClientNote(requestSpec, responseSpec, clientId, noteId);
-        Assertions.assertEquals(updatedNoteText, receivedNoteText);
+        noteData = ok(fineractClient().notes.retrieveNote("clients", Long.valueOf(clientId), noteId));
+        Assertions.assertEquals(updatedNoteText, noteData.getNote());
     }
 
     @Test
@@ -114,16 +125,20 @@ public class NotesTest {
         Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
-        String request = "{\"note\": \"" + noteText + "\"}";
-        Integer noteId = NotesHelper.createClientNote(requestSpec, responseSpec, clientId, request);
+        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
+        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("clients", Long.valueOf(clientId), request));
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        String receivedNoteText = NotesHelper.getClientNote(requestSpec, responseSpec, clientId, noteId);
-        Assertions.assertEquals(noteText, receivedNoteText);
+        NoteData noteData = ok(fineractClient().notes.retrieveNote("clients", Long.valueOf(clientId), noteId));
+        Assertions.assertEquals(noteText, noteData.getNote());
 
-        NotesHelper.deleteClientNote(requestSpec, responseSpec, clientId, noteId);
+        NoteDeleteResponse noteDeleteResponse = ok(fineractClient().notes.deleteNote("clients", Long.valueOf(clientId), noteId));
+        Assertions.assertNotNull(noteDeleteResponse);
 
-        NotesHelper.getClientNote(requestSpec, responseSpec404, clientId, noteId);
+        Response<NoteData> response = Calls.executeU(fineractClient().notes.retrieveNote("clients", Long.valueOf(clientId), noteId));
+        Assertions.assertEquals(404, response.code());
     }
 
     @Test
@@ -133,12 +148,14 @@ public class NotesTest {
         Integer groupId = GroupHelper.createGroup(requestSpec, responseSpec);
         Assertions.assertNotNull(groupId);
 
-        String request = "{\"note\": \"" + noteText + "\"}";
-        Integer noteId = NotesHelper.createGroupNote(requestSpec, responseSpec, groupId, request);
+        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
+        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("groups", Long.valueOf(groupId), request));
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        String receivedNoteText = NotesHelper.getGroupNote(requestSpec, responseSpec, groupId, noteId);
-        Assertions.assertEquals(noteText, receivedNoteText);
+        NoteData noteData = ok(fineractClient().notes.retrieveNote("groups", Long.valueOf(groupId), noteId));
+        Assertions.assertEquals(noteText, noteData.getNote());
     }
 
     @Test
@@ -148,20 +165,24 @@ public class NotesTest {
         Integer groupId = GroupHelper.createGroup(requestSpec, responseSpec);
         Assertions.assertNotNull(groupId);
 
-        String request = "{\"note\": \"" + noteText + "\"}";
-        Integer noteId = NotesHelper.createGroupNote(requestSpec, responseSpec, groupId, request);
+        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
+        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("groups", Long.valueOf(groupId), request));
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        String receivedNoteText = NotesHelper.getGroupNote(requestSpec, responseSpec, groupId, noteId);
-        Assertions.assertEquals(noteText, receivedNoteText);
+        NoteData noteData = ok(fineractClient().notes.retrieveNote("groups", Long.valueOf(groupId), noteId));
+        Assertions.assertEquals(noteText, noteData.getNote());
 
         String updatedNoteText = "this is an updated test group note";
 
-        String updateRequest = "{\"note\": \"" + updatedNoteText + "\"}";
-        NotesHelper.updateGroupNote(requestSpec, responseSpec, groupId, noteId, updateRequest);
+        NoteUpdateRequest updateRequest = new NoteUpdateRequest().note(updatedNoteText);
+        NoteUpdateResponse noteUpdateResponse = ok(
+                fineractClient().notes.updateNote("groups", Long.valueOf(groupId), noteId, updateRequest));
+        Assertions.assertNotNull(noteUpdateResponse);
 
-        receivedNoteText = NotesHelper.getGroupNote(requestSpec, responseSpec, groupId, noteId);
-        Assertions.assertEquals(updatedNoteText, receivedNoteText);
+        noteData = ok(fineractClient().notes.retrieveNote("groups", Long.valueOf(groupId), noteId));
+        Assertions.assertEquals(updatedNoteText, noteData.getNote());
     }
 
     @Test
@@ -171,16 +192,20 @@ public class NotesTest {
         Integer groupId = GroupHelper.createGroup(requestSpec, responseSpec);
         Assertions.assertNotNull(groupId);
 
-        String request = "{\"note\": \"" + noteText + "\"}";
-        Integer noteId = NotesHelper.createGroupNote(requestSpec, responseSpec, groupId, request);
+        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
+        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("groups", Long.valueOf(groupId), request));
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        String receivedNoteText = NotesHelper.getGroupNote(requestSpec, responseSpec, groupId, noteId);
-        Assertions.assertEquals(noteText, receivedNoteText);
+        NoteData noteData = ok(fineractClient().notes.retrieveNote("groups", Long.valueOf(groupId), noteId));
+        Assertions.assertEquals(noteText, noteData.getNote());
 
-        NotesHelper.deleteGroupNote(requestSpec, responseSpec, groupId, noteId);
+        NoteDeleteResponse noteDeleteResponse = ok(fineractClient().notes.deleteNote("groups", Long.valueOf(groupId), noteId));
+        Assertions.assertNotNull(noteDeleteResponse);
 
-        NotesHelper.getGroupNote(requestSpec, responseSpec404, groupId, noteId);
+        Response<NoteData> response = Calls.executeU(fineractClient().notes.retrieveNote("groups", Long.valueOf(groupId), noteId));
+        Assertions.assertEquals(404, response.code());
     }
 
     @Test
@@ -192,13 +217,14 @@ public class NotesTest {
         final Integer loanId = applyForLoanApplication(clientID, loanProductID);
         Assertions.assertNotNull(loanId);
 
-        String request = "{\"note\": \"" + noteText + "\"}";
-        Integer noteId = NotesHelper.createLoanNote(requestSpec, responseSpec, loanId, request);
+        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
+        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("loans", Long.valueOf(loanId), request));
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        String receivedNoteText = NotesHelper.getLoanNote(requestSpec, responseSpec, loanId, noteId);
-        Assertions.assertEquals(noteText, receivedNoteText);
-
+        NoteData noteData = ok(fineractClient().notes.retrieveNote("loans", Long.valueOf(loanId), noteId));
+        Assertions.assertEquals(noteText, noteData.getNote());
     }
 
     @Test
@@ -216,15 +242,14 @@ public class NotesTest {
         Assertions.assertNotNull(savingsId);
 
         // Notes
-        final String payload = "{\"note\": \"" + noteText + "\"}";
-        final NoteCreateResponse postNoteResponse = NotesHelper.createSavingsNote(requestSpec, responseSpec, savingsId, payload);
-        Assertions.assertNotNull(postNoteResponse);
-        Assertions.assertNotNull(postNoteResponse.getResourceId());
+        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
+        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("savings", Long.valueOf(savingsId), request));
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
+        Assertions.assertNotNull(noteId);
 
-        NoteData getNoteResponse = NotesHelper.retrieveSavingsNote(requestSpec, responseSpec, savingsId,
-                Math.toIntExact(postNoteResponse.getResourceId()));
-        Assertions.assertNotNull(getNoteResponse);
-        Assertions.assertEquals(noteText, getNoteResponse.getNote());
+        NoteData noteData = ok(fineractClient().notes.retrieveNote("savings", Long.valueOf(savingsId), noteId));
+        Assertions.assertEquals(noteText, noteData.getNote());
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
@@ -264,20 +289,23 @@ public class NotesTest {
         final Integer loanId = applyForLoanApplication(clientID, loanProductID);
         Assertions.assertNotNull(loanId);
 
-        String request = "{\"note\": \"" + noteText + "\"}";
-        Integer noteId = NotesHelper.createLoanNote(requestSpec, responseSpec, loanId, request);
+        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
+        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("loans", Long.valueOf(loanId), request));
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        String receivedNoteText = NotesHelper.getLoanNote(requestSpec, responseSpec, loanId, noteId);
-        Assertions.assertEquals(noteText, receivedNoteText);
+        NoteData noteData = ok(fineractClient().notes.retrieveNote("loans", Long.valueOf(loanId), noteId));
+        Assertions.assertEquals(noteText, noteData.getNote());
 
         String updatedNoteText = "this is an updated test loan note";
 
-        String updateRequest = "{\"note\": \"" + updatedNoteText + "\"}";
-        NotesHelper.updateLoanNote(requestSpec, responseSpec, loanId, noteId, updateRequest);
+        NoteUpdateRequest updateRequest = new NoteUpdateRequest().note(updatedNoteText);
+        NoteUpdateResponse noteUpdateResponse = ok(fineractClient().notes.updateNote("loans", Long.valueOf(loanId), noteId, updateRequest));
+        Assertions.assertNotNull(noteUpdateResponse);
 
-        receivedNoteText = NotesHelper.getLoanNote(requestSpec, responseSpec, loanId, noteId);
-        Assertions.assertEquals(updatedNoteText, receivedNoteText);
+        noteData = ok(fineractClient().notes.retrieveNote("loans", Long.valueOf(loanId), noteId));
+        Assertions.assertEquals(updatedNoteText, noteData.getNote());
     }
 
     @Test
@@ -289,16 +317,20 @@ public class NotesTest {
         final Integer loanId = applyForLoanApplication(clientID, loanProductID);
         Assertions.assertNotNull(loanId);
 
-        String request = "{\"note\": \"" + noteText + "\"}";
-        Integer noteId = NotesHelper.createLoanNote(requestSpec, responseSpec, loanId, request);
+        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
+        NoteCreateResponse noteCreateResponse = ok(fineractClient().notes.addNewNote("loans", Long.valueOf(loanId), request));
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        String receivedNoteText = NotesHelper.getLoanNote(requestSpec, responseSpec, loanId, noteId);
-        Assertions.assertEquals(noteText, receivedNoteText);
+        NoteData noteData = ok(fineractClient().notes.retrieveNote("loans", Long.valueOf(loanId), noteId));
+        Assertions.assertEquals(noteText, noteData.getNote());
 
-        NotesHelper.deleteLoanNote(requestSpec, responseSpec, loanId, noteId);
+        NoteDeleteResponse noteDeleteResponse = ok(fineractClient().notes.deleteNote("loans", Long.valueOf(loanId), noteId));
+        Assertions.assertNotNull(noteDeleteResponse);
 
-        NotesHelper.getLoanNote(requestSpec, responseSpec404, loanId, noteId);
+        Response<NoteData> response = Calls.executeU(fineractClient().notes.retrieveNote("loans", Long.valueOf(loanId), noteId));
+        Assertions.assertEquals(404, response.code());
     }
 
     @Test
@@ -318,12 +350,15 @@ public class NotesTest {
         Integer loanTransactionId = (Integer) repayment.get("resourceId");
         Assertions.assertNotNull(loanTransactionId);
 
-        String request = "{\"note\": \"" + noteText + "\"}";
-        Integer noteId = NotesHelper.createLoanTransactionNote(requestSpec, responseSpec, loanTransactionId, request);
+        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
+        NoteCreateResponse noteCreateResponse = ok(
+                fineractClient().notes.addNewNote("loanTransactions", Long.valueOf(loanTransactionId), request));
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        String receivedNoteText = NotesHelper.getLoanTransactionNote(requestSpec, responseSpec, loanTransactionId, noteId);
-        Assertions.assertEquals(noteText, receivedNoteText);
+        NoteData noteData = ok(fineractClient().notes.retrieveNote("loanTransactions", Long.valueOf(loanTransactionId), noteId));
+        Assertions.assertEquals(noteText, noteData.getNote());
     }
 
     @Test
@@ -343,21 +378,25 @@ public class NotesTest {
         Integer loanTransactionId = (Integer) repayment.get("resourceId");
         Assertions.assertNotNull(loanTransactionId);
 
-        String request = "{\"note\": \"" + noteText + "\"}";
-        Integer noteId = NotesHelper.createLoanTransactionNote(requestSpec, responseSpec, loanTransactionId, request);
+        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
+        NoteCreateResponse noteCreateResponse = ok(
+                fineractClient().notes.addNewNote("loanTransactions", Long.valueOf(loanTransactionId), request));
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        String receivedNoteText = NotesHelper.getLoanTransactionNote(requestSpec, responseSpec, loanTransactionId, noteId);
-        Assertions.assertEquals(noteText, receivedNoteText);
+        NoteData noteData = ok(fineractClient().notes.retrieveNote("loanTransactions", Long.valueOf(loanTransactionId), noteId));
+        Assertions.assertEquals(noteText, noteData.getNote());
 
         String updatedNoteText = "this is an updated test loan transaction note";
 
-        String updateRequest = "{\"note\": \"" + updatedNoteText + "\"}";
-        NotesHelper.updateLoanTransactionNote(requestSpec, responseSpec, loanTransactionId, noteId, updateRequest);
+        NoteUpdateRequest updateRequest = new NoteUpdateRequest().note(updatedNoteText);
+        NoteUpdateResponse noteUpdateResponse = ok(
+                fineractClient().notes.updateNote("loanTransactions", Long.valueOf(loanTransactionId), noteId, updateRequest));
+        Assertions.assertNotNull(noteUpdateResponse);
 
-        receivedNoteText = NotesHelper.getLoanTransactionNote(requestSpec, responseSpec, loanTransactionId, noteId);
-        Assertions.assertEquals(updatedNoteText, receivedNoteText);
-
+        noteData = ok(fineractClient().notes.retrieveNote("loanTransactions", Long.valueOf(loanTransactionId), noteId));
+        Assertions.assertEquals(updatedNoteText, noteData.getNote());
     }
 
     @Test
@@ -377,16 +416,23 @@ public class NotesTest {
         Integer loanTransactionId = (Integer) repayment.get("resourceId");
         Assertions.assertNotNull(loanTransactionId);
 
-        String request = "{\"note\": \"" + noteText + "\"}";
-        Integer noteId = NotesHelper.createLoanTransactionNote(requestSpec, responseSpec, loanTransactionId, request);
+        NoteCreateRequest request = new NoteCreateRequest().note(noteText);
+        NoteCreateResponse noteCreateResponse = ok(
+                fineractClient().notes.addNewNote("loanTransactions", Long.valueOf(loanTransactionId), request));
+        Assertions.assertNotNull(noteCreateResponse);
+        Long noteId = noteCreateResponse.getResourceId();
         Assertions.assertNotNull(noteId);
 
-        String receivedNoteText = NotesHelper.getLoanTransactionNote(requestSpec, responseSpec, loanTransactionId, noteId);
-        Assertions.assertEquals(noteText, receivedNoteText);
+        NoteData noteData = ok(fineractClient().notes.retrieveNote("loanTransactions", Long.valueOf(loanTransactionId), noteId));
+        Assertions.assertEquals(noteText, noteData.getNote());
 
-        NotesHelper.deleteLoanTransactionNote(requestSpec, responseSpec, loanTransactionId, noteId);
+        NoteDeleteResponse noteDeleteResponse = ok(
+                fineractClient().notes.deleteNote("loanTransactions", Long.valueOf(loanTransactionId), noteId));
+        Assertions.assertNotNull(noteDeleteResponse);
 
-        NotesHelper.getLoanTransactionNote(requestSpec, responseSpec404, loanTransactionId, noteId);
+        Response<NoteData> response = Calls
+                .executeU(fineractClient().notes.retrieveNote("loanTransactions", Long.valueOf(loanTransactionId), noteId));
+        Assertions.assertEquals(404, response.code());
     }
 
 }
