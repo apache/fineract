@@ -54,40 +54,33 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
 
     private final ReloaderService reloaderService;
 
-    @SuppressWarnings({ "unchecked" })
     @Override
     public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom<Long>> S run(TreeMap<Long, String> executionMap, S item) {
         if (executionMap == null || executionMap.isEmpty()) {
             throw new BusinessStepException("Execution map is empty! COB Business step execution skipped!");
         }
-        boolean bulkEventEnabled = configurationDomainService.isCOBBulkEventEnabled();
-        // Extra safety net to avoid event leaking
-        try {
-            if (bulkEventEnabled) {
-                businessEventNotifierService.startExternalEventRecording();
-            }
+        if (!configurationDomainService.isCOBBulkEventEnabled()) {
+            return executeBusinessSteps(executionMap, item);
+        }
+        // Everything the chain raises - including any recording window a business step opens of its own - reaches the
+        // consumer as a single bulk event.
+        return businessEventNotifierService.withExternalEventRecording(() -> executeBusinessSteps(executionMap, item));
+    }
 
-            for (String businessStep : executionMap.values()) {
-                try {
-                    ThreadLocalContextUtil.setActionContext(ActionContext.COB);
-                    COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
-                    item = reloaderService.reload(item);
-                    item = businessStepBean.execute(item);
-                } catch (Exception e) {
-                    throw new BusinessStepException("Error happened during business step execution", e);
-                } finally {
-                    // Fallback to COB action context after each business step
-                    ThreadLocalContextUtil.setActionContext(ActionContext.COB);
-                }
+    @SuppressWarnings({ "unchecked" })
+    private <S extends AbstractPersistableCustom<Long>> S executeBusinessSteps(TreeMap<Long, String> executionMap, S item) {
+        for (String businessStep : executionMap.values()) {
+            try {
+                ThreadLocalContextUtil.setActionContext(ActionContext.COB);
+                COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
+                item = reloaderService.reload(item);
+                item = businessStepBean.execute(item);
+            } catch (Exception e) {
+                throw new BusinessStepException("Error happened during business step execution", e);
+            } finally {
+                // Fallback to COB action context after each business step
+                ThreadLocalContextUtil.setActionContext(ActionContext.COB);
             }
-            if (bulkEventEnabled) {
-                businessEventNotifierService.stopExternalEventRecording();
-            }
-        } catch (Exception e) {
-            if (bulkEventEnabled) {
-                businessEventNotifierService.resetEventRecording();
-            }
-            throw e;
         }
         return item;
     }
