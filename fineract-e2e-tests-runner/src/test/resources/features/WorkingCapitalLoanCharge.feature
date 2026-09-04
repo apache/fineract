@@ -11,8 +11,8 @@ Feature: WorkingCapitalLoanChargesFeature
   @TestRailId:C80955
   Scenario: Verify Working Capital Charge product - UC2: template API returns filtered options
     Then Admin retrieves the charge template for Working Capital Loan
-    Then The charge template chargeTimeTypeOptions contains only Specified due date
-    Then The charge template chargeCalculationTypeOptions contains only Flat
+    Then The charge template chargeTimeTypeOptions contains only Disbursement and Specified due date
+    Then The charge template chargeCalculationTypeOptions contains only Flat and % Amount
     Then The charge template chargePaymentModeOptions contains only Regular
 
   @TestRailId:C80956
@@ -33,10 +33,9 @@ Feature: WorkingCapitalLoanChargesFeature
     When Admin deletes working capital loan charge
 
   @TestRailId:C80959
-  Scenario: Verify Working Capital Charge product - UC6: invalid chargeTimeType Disbursement fails (Negative)
-    Then Creating working capital loan charge with "DISBURSEMENT" chargeTimeType and "FLAT" chargeCalculationType results an error with the following data:
-      | httpCode | errorMessage                                          |
-      | 400      | The parameter `chargeTimeType` must be one of [ 2 ] . |
+  Scenario: Verify Working Capital Charge product - UC6: charge can be created with chargeTimeType Disbursement
+    When Admin creates working capital loan charge with "DISBURSEMENT" charge time type and "FLAT" calculation type
+    When Admin deletes working capital loan charge
 
   @TestRailId:C80960
   Scenario: Verify Working Capital Charge product - UC7: invalid chargeCalculationType Percentage Amount fails (Negative)
@@ -47,8 +46,8 @@ Feature: WorkingCapitalLoanChargesFeature
   @TestRailId:C80961
   Scenario: Verify Working Capital Charge product - UC8: invalid chargeTimeType Instalment Fee fails (Negative)
     Then Creating working capital loan charge with "INSTALLMENT_FEE" chargeTimeType and "FLAT" chargeCalculationType results an error with the following data:
-      | httpCode | errorMessage                                          |
-      | 400      | The parameter `chargeTimeType` must be one of [ 2 ] . |
+      | httpCode | errorMessage                                             |
+      | 400      | The parameter `chargeTimeType` must be one of [ 1, 2 ] . |
 
 #    #############################################
 #    --- Loan Account level ---
