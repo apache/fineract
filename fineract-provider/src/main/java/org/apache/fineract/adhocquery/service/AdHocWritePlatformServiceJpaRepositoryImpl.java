@@ -85,7 +85,7 @@ public class AdHocWritePlatformServiceJpaRepositoryImpl implements AdHocWritePla
             throw new PlatformDataIntegrityException("error.msg.adhocquery.duplicate.name",
                     "AdHocQuery with name `" + name + "` already exists", "name", name);
         }
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.adhocquery.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
