@@ -1335,7 +1335,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             newScheduleModel.repaymentPeriods().forEach(period -> {
                 if (!period.getFromDate().isBefore(relatedPeriodsFirstFromDate) && !period.getDueDate().isBefore(relatedPeriodsFirstDueDate)
                         && !adjustedEqualMonthlyInstallmentValue.isLessThan(period.getTotalPaidAmount())
-                        && !period.isReAgedEarlyRepaymentHolder()) {
+                        && !period.isReAgedEarlyRepaymentHolder() && !period.isPrincipalPaymentGrace()) {
                     period.setEmi(adjustedEqualMonthlyInstallmentValue);
                     period.setOriginalEmi(adjustedEqualMonthlyInstallmentValue);
                 }
@@ -1348,10 +1348,14 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
             final Iterator<RepaymentPeriod> relatedPeriodFromNewModelIterator = newScheduleModel.repaymentPeriods().stream()//
                     .filter(period -> !period.getFromDate().isBefore(relatedPeriodsFirstFromDate)
-                            && !period.getDueDate().isBefore(relatedPeriodsFirstDueDate) && !period.isReAgedEarlyRepaymentHolder())//
+                            && !period.getDueDate().isBefore(relatedPeriodsFirstDueDate) && !period.isReAgedEarlyRepaymentHolder()
+                            && !period.isPrincipalPaymentGrace())//
                     .toList().iterator();//
 
             relatedRepaymentPeriods.forEach(relatedRepaymentPeriod -> {
+                if (relatedRepaymentPeriod.isPrincipalPaymentGrace()) {
+                    return;
+                }
                 if (!relatedPeriodFromNewModelIterator.hasNext()) {
                     return;
                 }
@@ -1743,6 +1747,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         if (repaymentPeriods.isEmpty()) {
             return;
         }
+        repaymentPeriods.forEach(rp -> rp.setPrincipalPaymentGrace(false));
         Integer graceOnPrincipalPayment = scheduleModel.loanProductRelatedDetail().getGraceOnPrincipalPayment();
         if (graceOnPrincipalPayment == null || graceOnPrincipalPayment <= 0) {
             return;
@@ -1753,6 +1758,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             Money interestOnlyEmi = period.getDueInterest();
             period.setEmi(interestOnlyEmi);
             period.setOriginalEmi(interestOnlyEmi);
+            period.setPrincipalPaymentGrace(true);
         });
         if (gracePeriods == repaymentPeriods.size()) {
             return;
@@ -1835,6 +1841,9 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         for (int idx = repaymentPeriods.size() - 1; idx > 0; --idx) {
             RepaymentPeriod lastPeriod = repaymentPeriods.get(idx);
             RepaymentPeriod penultimatePeriod = repaymentPeriods.get(idx - 1);
+            if (lastPeriod.isPrincipalPaymentGrace() || penultimatePeriod.isPrincipalPaymentGrace()) {
+                continue;
+            }
             if (!lastPeriod.isFullyPaid() && !penultimatePeriod.isFullyPaid()) {
                 Money emiDifference = lastPeriod.getEmi().minus(penultimatePeriod.getEmi());
                 return new EmiAdjustment(penultimatePeriod.getEmi(), emiDifference, repaymentPeriods,

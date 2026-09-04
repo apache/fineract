@@ -81,6 +81,9 @@ public class RepaymentPeriod {
     @Getter
     @Setter
     private boolean interestPaymentGrace = false;
+    @Getter
+    @Setter
+    private boolean principalPaymentGrace = false;
 
     @Setter
     private Money totalDisbursedAmount;
@@ -162,6 +165,7 @@ public class RepaymentPeriod {
         newRepaymentPeriod.setTotalCapitalizedIncomeAmount(repaymentPeriod.getTotalCapitalizedIncomeAmount());
         newRepaymentPeriod.setInterestMovedUpward(repaymentPeriod.isInterestMovedUpward());
         newRepaymentPeriod.setInterestPaymentGrace(repaymentPeriod.isInterestPaymentGrace());
+        newRepaymentPeriod.setPrincipalPaymentGrace(repaymentPeriod.isPrincipalPaymentGrace());
         newRepaymentPeriod.setCurrency(repaymentPeriod.getCurrency());
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.getInterestPeriods()) {
@@ -185,6 +189,7 @@ public class RepaymentPeriod {
         newRepaymentPeriod.setTotalCapitalizedIncomeAmount(repaymentPeriod.getTotalCapitalizedIncomeAmount());
         newRepaymentPeriod.setInterestMovedUpward(repaymentPeriod.isInterestMovedUpward());
         newRepaymentPeriod.setInterestPaymentGrace(repaymentPeriod.isInterestPaymentGrace());
+        newRepaymentPeriod.setPrincipalPaymentGrace(repaymentPeriod.isPrincipalPaymentGrace());
         newRepaymentPeriod.setCurrency(repaymentPeriod.getCurrency());
         // There is always at least 1 interest period, by default with same from-due date as repayment period
         for (InterestPeriod interestPeriod : repaymentPeriod.getInterestPeriods()) {
