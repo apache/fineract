@@ -225,6 +225,118 @@ public class ClientLoanIntegrationTest extends FeignLoanTestBase {
         verifyLoanRepaymentSchedule(loanSchedule);
     }
 
+    // FINERACT-2721: submitting a loan application used to decrement the linked client collateral quantity twice
+    // (once during submission validation, once during the actual assembly of the loan), because both call sites
+    // shared the same LoanCollateralAssembler#fromParsedJson overload. Verify the client collateral quantity is now
+    // only reduced by the requested amount, exactly once.
+    @Test
+    public void checkClientCollateralQuantityIsDecrementedExactlyOnceOnLoanSubmission() {
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(REQUEST_SPEC, RESPONSE_SPEC);
+        final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
+        ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientID);
+
+        // CollateralManagementHelper always seeds a client collateral with quantity 100
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(REQUEST_SPEC, RESPONSE_SPEC,
+                String.valueOf(clientID), collateralId);
+        final BigDecimal initialClientCollateralQuantity = getClientCollateralQuantity(clientID, clientCollateralId);
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(initialClientCollateralQuantity));
+
+        List<HashMap> collaterals = new ArrayList<>();
+        final BigDecimal loanCollateralQuantity = BigDecimal.valueOf(10);
+        addCollaterals(collaterals, clientCollateralId, loanCollateralQuantity);
+
+        final Integer loanProductID = createLoanProduct(false, NONE);
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
+        assertNotNull(loanID);
+
+        final BigDecimal remainingClientCollateralQuantity = getClientCollateralQuantity(clientID, clientCollateralId);
+        assertEquals(0, initialClientCollateralQuantity.subtract(loanCollateralQuantity).compareTo(remainingClientCollateralQuantity),
+                "Client collateral quantity should be reduced by the requested amount exactly once, not twice: expected "
+                        + initialClientCollateralQuantity.subtract(loanCollateralQuantity) + " but was "
+                        + remainingClientCollateralQuantity);
+    }
+
+    // FINERACT-2721: modifying a pending loan's collateral used to check
+    // `possiblyModifedLoanCollateralItems.equals(loan.getLoanCollateralManagements())` (inverted) to decide whether
+    // to persist the change, so a genuine collateral quantity change on modify-loan was silently dropped. Verify the
+    // change is now both reported in the "changes" response and actually persisted against the loan.
+    @Test
+    public void checkModifyLoanApplicationPersistsGenuineCollateralQuantityChange() {
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(REQUEST_SPEC, RESPONSE_SPEC);
+        final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
+        ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientID);
+
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(REQUEST_SPEC, RESPONSE_SPEC,
+                String.valueOf(clientID), collateralId);
+
+        List<HashMap> collaterals = new ArrayList<>();
+        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(10));
+        final Integer loanProductID = createLoanProduct(false, NONE);
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
+
+        final String loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(REQUEST_SPEC, RESPONSE_SPEC, loanID);
+        final Object loanCollateralManagementId = JsonPath.from(loanDetails).get("collateral[0].id");
+
+        List<HashMap> updatedCollaterals = new ArrayList<>();
+        HashMap<String, String> updatedCollateral = collaterals(clientCollateralId, BigDecimal.valueOf(20));
+        updatedCollateral.put("id", loanCollateralManagementId.toString());
+        updatedCollaterals.add(updatedCollateral);
+
+        final String updateJson = updateLoanJson(clientID, loanProductID, null, null, updatedCollaterals);
+        final String changesJson = Utils.performServerPut(REQUEST_SPEC, RESPONSE_SPEC,
+                "/fineract-provider/api/v1/loans/" + loanID + "?" + Utils.TENANT_IDENTIFIER, updateJson, null);
+        final Object collateralChange = JsonPath.from(changesJson).get("changes.collateral");
+        assertNotNull(collateralChange, "A genuine collateral quantity change must be reported in the update response");
+
+        final String updatedLoanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(REQUEST_SPEC, RESPONSE_SPEC, loanID);
+        final Object persistedQuantity = JsonPath.from(updatedLoanDetails).get("collateral[0].quantity");
+        assertEquals(0, BigDecimal.valueOf(20).compareTo(new BigDecimal(String.valueOf(persistedQuantity))),
+                "The new collateral quantity must actually be persisted against the loan");
+    }
+
+    // FINERACT-2721: resubmitting the same collateral quantity on modify-loan takes the "unchanged" branch in
+    // LoanCollateralAssembler#fromParsedJson. Verify this is idempotent: the loan's persisted collateral quantity
+    // must still read back as the original value, not be corrupted by the restore-quantity bookkeeping.
+    @Test
+    public void checkModifyLoanApplicationWithUnchangedCollateralQuantityStaysConsistent() {
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(REQUEST_SPEC, RESPONSE_SPEC);
+        final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
+        ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientID);
+
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(REQUEST_SPEC, RESPONSE_SPEC,
+                String.valueOf(clientID), collateralId);
+
+        List<HashMap> collaterals = new ArrayList<>();
+        final BigDecimal loanCollateralQuantity = BigDecimal.valueOf(10);
+        addCollaterals(collaterals, clientCollateralId, loanCollateralQuantity);
+        final Integer loanProductID = createLoanProduct(false, NONE);
+        final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
+
+        final String loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(REQUEST_SPEC, RESPONSE_SPEC, loanID);
+        final Object loanCollateralManagementId = JsonPath.from(loanDetails).get("collateral[0].id");
+
+        List<HashMap> unchangedCollaterals = new ArrayList<>();
+        HashMap<String, String> unchangedCollateral = collaterals(clientCollateralId, loanCollateralQuantity);
+        unchangedCollateral.put("id", loanCollateralManagementId.toString());
+        unchangedCollaterals.add(unchangedCollateral);
+
+        final String updateJson = updateLoanJson(clientID, loanProductID, null, null, unchangedCollaterals);
+        Utils.performServerPut(REQUEST_SPEC, RESPONSE_SPEC, "/fineract-provider/api/v1/loans/" + loanID + "?" + Utils.TENANT_IDENTIFIER,
+                updateJson, null);
+
+        final String updatedLoanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(REQUEST_SPEC, RESPONSE_SPEC, loanID);
+        final Object persistedQuantity = JsonPath.from(updatedLoanDetails).get("collateral[0].quantity");
+        assertEquals(0, loanCollateralQuantity.compareTo(new BigDecimal(String.valueOf(persistedQuantity))),
+                "Resubmitting an unchanged collateral quantity must not alter the loan's persisted collateral quantity");
+    }
+
+    private BigDecimal getClientCollateralQuantity(final Integer clientId, final Integer clientCollateralId) {
+        final String url = "/fineract-provider/api/v1/clients/" + clientId + "/collaterals/" + clientCollateralId + "?"
+                + Utils.TENANT_IDENTIFIER;
+        final Object quantity = Utils.performServerGet(REQUEST_SPEC, RESPONSE_SPEC, url, "quantity");
+        return new BigDecimal(String.valueOf(quantity));
+    }
+
     @Test
     public void validateClientLoanWithUniqueExternalId() {
         // Given

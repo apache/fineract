@@ -43,7 +43,7 @@ public class LoanCollateralAssembler {
     private final LoanCollateralManagementRepository loanCollateralRepository;
     private final ClientCollateralManagementRepositoryWrapper clientCollateralManagementRepositoryWrapper;
 
-    public Set<LoanCollateralManagement> fromParsedJson(final JsonElement element) {
+    public Set<LoanCollateralManagement> fromParsedJson(final JsonElement element, final boolean adjustClientCollateralQuantity) {
 
         final Set<LoanCollateralManagement> collateralItems = new HashSet<>();
 
@@ -63,27 +63,33 @@ public class LoanCollateralAssembler {
                 BigDecimal updatedClientQuantity = null;
 
                 if (id == null) {
-                    updatedClientQuantity = clientCollateral.getQuantity().subtract(quantity);
-                    if (BigDecimal.ZERO.compareTo(updatedClientQuantity) > 0) {
-                        throw new InvalidAmountOfCollateralQuantity(quantity);
+                    if (adjustClientCollateralQuantity) {
+                        updatedClientQuantity = clientCollateral.getQuantity().subtract(quantity);
+                        if (BigDecimal.ZERO.compareTo(updatedClientQuantity) > 0) {
+                            throw new InvalidAmountOfCollateralQuantity(quantity);
+                        }
+                        clientCollateral.updateQuantity(updatedClientQuantity);
                     }
-                    clientCollateral.updateQuantity(updatedClientQuantity);
                     collateralItems.add(LoanCollateralManagement.from(clientCollateral, quantity));
                 } else {
                     LoanCollateralManagement loanCollateralManagement = this.loanCollateralRepository.findById(id)
                             .orElseThrow(() -> new LoanCollateralManagementNotFoundException(id));
 
-                    if (loanCollateralManagement.getQuantity().compareTo(quantity) != 0) {
-                        updatedClientQuantity = clientCollateral.getQuantity().add(loanCollateralManagement.getQuantity())
-                                .subtract(quantity);
-                        if (BigDecimal.ZERO.compareTo(updatedClientQuantity) > 0) {
-                            throw new InvalidAmountOfCollateralQuantity(quantity);
+                    if (adjustClientCollateralQuantity) {
+                        if (loanCollateralManagement.getQuantity().compareTo(quantity) != 0) {
+                            updatedClientQuantity = clientCollateral.getQuantity().add(loanCollateralManagement.getQuantity())
+                                    .subtract(quantity);
+                            if (BigDecimal.ZERO.compareTo(updatedClientQuantity) > 0) {
+                                throw new InvalidAmountOfCollateralQuantity(quantity);
+                            }
+                        } else {
+                            // when quantity is unchanged, restore the original client collateral quantity rather than
+                            // setting it to the requested quantity value which may be less than available
+                            updatedClientQuantity = clientCollateral.getQuantity().add(loanCollateralManagement.getQuantity());
                         }
-                    } else {
-                        updatedClientQuantity = quantity;
-                    }
 
-                    clientCollateral.updateQuantity(updatedClientQuantity);
+                        clientCollateral.updateQuantity(updatedClientQuantity);
+                    }
                     collateralItems
                             .add(LoanCollateralManagement.fromExisting(clientCollateral, quantity, loanCollateralManagement.getLoanData(),
                                     loanCollateralManagement.getLoanTransaction(), loanCollateralManagement.getId()));
@@ -91,5 +97,11 @@ public class LoanCollateralAssembler {
             }
         }
         return collateralItems;
+    }
+
+    public Set<LoanCollateralManagement> fromParsedJson(final JsonElement element) {
+        // Default behavior should not adjust client collateral quantities to avoid side effects
+        // during read-only operations such as repayment schedule calculation or validation.
+        return fromParsedJson(element, false);
     }
 }
