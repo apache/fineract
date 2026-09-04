@@ -112,6 +112,14 @@ public class WorkingCapitalLoanTransactionReadPlatformServiceImpl implements Wor
                     .chargeOffReasonOptions(
                             codeValueReadPlatformService.retrieveCodeValuesByCode(WorkingCapitalLoanConstants.CHARGE_OFF_REASONS))
                     .build();
+        } else if (WorkingCapitalLoanConstants.RECOVERY_PAYMENT_LOAN_COMMAND.equals(command)) {
+            // The amount to pre-fill is what is still recoverable, NOT the gross amount written off: a recovery may
+            // not exceed it, so offering the gross figure after a partial recovery would pre-fill a value the API
+            // rejects. Term loan pre-fills the gross figure and has that problem.
+            return WorkingCapitalLoanCommandTemplateData.builder()
+                    .expectedAmount(wcLoan.getBalance() != null ? wcLoan.getBalance().getWrittenOffOutstanding() : BigDecimal.ZERO)
+                    .currency(wcLoan.getLoanProduct().getCurrency().toData())
+                    .paymentTypeOptions(paymentTypeReadPlatformService.retrieveAllPaymentTypes()).build();
         }
         return null;
     }

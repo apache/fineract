@@ -62,6 +62,7 @@ public final class WorkingCapitalLoanConstants {
     public static final String UNDO_CHARGE_OFF_LOAN_COMMAND = "undoChargeOff";
     public static final String WRITE_OFF_LOAN_COMMAND = "writeOff";
     public static final String UNDO_WRITE_OFF_LOAN_COMMAND = "undoWriteOff";
+    public static final String RECOVERY_PAYMENT_LOAN_COMMAND = "recoveryPayment";
 
     // Approval / Rejection / Undo-approval parameters
     public static final String RESOURCE_NAME = WCL_RESOURCE_NAME;

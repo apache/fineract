@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <!-- Running total of what has been collected on the loan after it was written off. It caps how much more can be -->
+    <!-- recovered, so successive recovery payments cannot add up past the amount that was written off. -->
+    <changeSet author="fineract" id="wcl-0075-balance-total-recovered">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="m_wc_loan_balance"/>
+            <not>
+                <columnExists tableName="m_wc_loan_balance" columnName="total_recovered"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="m_wc_loan_balance">
+            <column name="total_recovered" type="DECIMAL(19,6)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- Without this row the maker-checker lookup on RECOVERYPAYMENT_WORKINGCAPITALLOAN fails and no role other than -->
+    <!-- a super user (ALL_FUNCTIONS) can be granted the permission. Mirrors the write-off pair seeded in 0067. -->
+    <changeSet author="fineract" id="wcl-0075-recovery-payment-permission">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM m_permission WHERE code = 'RECOVERYPAYMENT_WORKINGCAPITALLOAN'</sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="transaction_loan"/>
+            <column name="code" value="RECOVERYPAYMENT_WORKINGCAPITALLOAN"/>
+            <column name="entity_name" value="WORKINGCAPITALLOAN"/>
+            <column name="action_name" value="RECOVERYPAYMENT"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0075-recovery-payment-event">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_external_event_configuration WHERE type = 'WorkingCapitalLoanRecoveryPaymentTransactionBusinessEvent'
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_external_event_configuration">
+            <column name="type" value="WorkingCapitalLoanRecoveryPaymentTransactionBusinessEvent"/>
+            <column name="enabled" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

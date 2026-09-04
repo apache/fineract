@@ -1,0 +1,292 @@
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+= Working Capital Loan — Recovery Payment
+
+== Purpose
+
+A Recovery Payment records money collected on a Working Capital Loan *after it was written off*. The loss was already recognized at write-off time, so the money coming back is recognized as *income*, not as a repayment of a receivable that no longer exists.
+
+It ensures:
+
+* Collections on written-off accounts can be *recorded and accounted for*
+* The recovered cash is recognized as *recovery income*, leaving the written-off loss intact
+* Recoveries cannot exceed the loss that was actually booked
+* A recovery captured in error can be *reversed*
+
+== Functionality
+
+* A Recovery Payment is the *only* monetary transaction admitted while the loan sits in `CLOSED_WRITTEN_OFF` (see <<_interaction_with_the_post_write_off_lock>>).
+* It is recorded as a `RECOVERY_REPAYMENT` transaction for the amount collected.
+* It results in:
+** Recognition of the whole amount as recovery income
+** An increase of the loan's running `totalRecovered`, which lowers how much is still recoverable
+** Triggering of accounting entries for accrual with deferred revenue amortization accounting products
+* It deliberately does *not*:
+** Change the loan status — the loan stays `CLOSED_WRITTEN_OFF`
+** Move the outstanding balance, which the write-off left at zero and which stays at zero
+** Allocate across principal, fees or penalty — the transaction carries *no allocation*
+** Touch the amortization, delinquency or breach schedules
+
+[NOTE]
+====
+The status is left untouched on purpose. A Working Capital Loan in `CLOSED_WRITTEN_OFF` has a zero outstanding, so running the balance-driven status evaluation would try to transition it as *repaid in full*, which is not a legal transition out of `CLOSED_WRITTEN_OFF`. The recovery path therefore never invokes the loan lifecycle state machine.
+====
+
+== Recovery Payment Handling
+
+* The collected amount is added to `totalRecovered` on the loan balance. That column is the only balance-side effect of the transaction.
+* `totalWrittenOff` — the gross amount the write-off moved out of the outstanding — is *not* reduced by recoveries. It remains the accounting record of the loss that was booked.
+* What is still collectable is derived: `writtenOffOutstanding = totalWrittenOff - totalRecovered`, floored at zero. This value caps the next recovery payment.
+
+== Undo Recovery Payment
+
+A recovery captured in error can be reversed through the generic transaction-undo command:
+
+* Reverses the `RECOVERY_REPAYMENT` transaction (kept in the ledger, flagged reversed, with an optional `reversalExternalId`).
+* Subtracts the amount from `totalRecovered`, so the money becomes recoverable again.
+* Posts the mirror journal entries (see <<_undo_recovery_payment_2>>).
+* Leaves the loan in `CLOSED_WRITTEN_OFF`.
+
+.Recovery payment and reversal flow
+[plantuml,format=svg]
+....
+@startuml
+actor User
+participant "Transactions API" as API
+participant "Recovery Payment\nWrite Service" as SVC
+participant "Data Validator" as VAL
+database "Loan balance" as BAL
+participant "Accounting\nProcessor" as ACC
+
+User -> API : POST ...?command=recoveryPayment
+API -> SVC : recoveryPayment(loanId, command)
+SVC -> VAL : validateRecoveryPayment
+alt loan not CLOSED_WRITTEN_OFF
+  VAL --> User : 400 error.msg.wc.loan.is.not.written.off
+else amount > writtenOffOutstanding
+  VAL --> User : 400 cannot.be.greater.than.remaining.written.off.amount
+else valid
+  SVC -> SVC : create RECOVERY_REPAYMENT txn (no allocation)
+  SVC -> BAL : totalRecovered += amount
+  SVC -> ACC : Dr Fund Source / Cr Income from Recovery
+  note over SVC : status stays CLOSED_WRITTEN_OFF
+  SVC --> User : 200
+end
+
+User -> API : POST .../transactions/{txnId}?command=undo
+API -> SVC : undoRecoveryPayment
+SVC -> SVC : reverse txn
+SVC -> BAL : totalRecovered -= amount
+SVC -> ACC : mirror entries
+SVC --> User : 200
+@enduml
+....
+
+== Validation Rules
+
+A recovery payment can be applied only if:
+
+* Loan status is *Closed (written-off)*.
+
+A recovery payment can be reversed only if:
+
+* Loan status is still *Closed (written-off)*, and the transaction is not already reversed.
+
+=== Recovery Payment Date
+
+`transactionDate` is *required*. It may be backdated, with the same two bounds Write-Off and Charge-Off apply:
+
+* It must not be in the future.
+* It must not be earlier than the last user transaction date.
+
+Because the write-off is itself a user transaction, the lower bound also prevents a recovery from being dated before the write-off that made it possible — no separate check is needed.
+
+=== Recovery Payment Amount
+
+`transactionAmount` is *required* and must be positive. It is capped by `writtenOffOutstanding` — what is *still* recoverable — and not by the gross amount written off.
+
+[IMPORTANT]
+====
+This is a deliberate divergence from term and progressive loans, which cap each recovery against the gross written-off figure. Because that figure is never reduced by the recoveries collected against it, successive recoveries can each pass validation on their own and together collect more than the loss that was booked. Working Capital compares against the remaining amount instead, so the recoveries can never add up past the loss.
+====
+
+[cols="1,3,2"]
+|===
+|*Operation* |*Rule* |*Error code*
+
+|Recovery payment |The loan must be written off. |`error.msg.wc.loan.is.not.written.off`
+|Recovery payment |The transaction date is required. |`validation.msg.WORKINGCAPITALLOAN.transactionDate.cannot.be.blank`
+|Recovery payment |The transaction date must not be in the future. |`cannot.be.a.future.date`
+|Recovery payment |The transaction date must not be earlier than the last user transaction date. |`cannot.be.before.last.transaction.date`
+|Recovery payment |The amount is required and must be positive. |`validation.msg.WORKINGCAPITALLOAN.transactionAmount.cannot.be.blank`
+|Recovery payment |The amount must not exceed what is still recoverable. |`cannot.be.greater.than.remaining.written.off.amount`
+|Undo recovery payment |The transaction must not be already reversed. |`transaction.already.undone`
+|Undo recovery payment |The loan must still be written off. |`error.msg.wc.loan.is.not.written.off`
+|Undo recovery payment |`totalRecovered` must cover the amount being reversed; a smaller running total means the balance row was repaired or migrated inconsistently, and the undo fails rather than silently clamping the figure at zero. |`error.msg.wc.loan.total.recovered.less.than.reversed.amount`
+|===
+
+A repayment classification (`classificationId`) is *not* accepted: a recovery carries no allocation, so there is nothing to classify, and silently ignoring the parameter would hide the mistake.
+
+=== Interaction with the post-write-off lock
+
+A written-off Working Capital Loan is otherwise locked — no transaction can be posted and none can be undone. The recovery payment is the single exception, and it is a *typed* one: the hole is opened for the `RECOVERY_REPAYMENT` transaction type coming from `CLOSED_WRITTEN_OFF`, not by relaxing the status gates that guard repayment, goodwill credit, payout refund, charge adjustment or the generic transaction undo. Those gates are unchanged and still reject a written-off loan.
+
+=== Undoing the write-off while a recovery stands
+
+Undo Write-Off is *rejected* while any recovery payment is outstanding.
+
+Undoing the write-off restores the full outstanding balance. The recovered cash, however, stays booked as recovery income and would then also be replayed against that restored balance — the same money both recognized as income and reducing the receivable. The recoveries must therefore be reversed first, which is exactly what the undo recovery payment is for.
+
+[cols="1,3,2"]
+|===
+|*Operation* |*Rule* |*Error code*
+
+|Undo write-off |No recovery payment may be outstanding (`totalRecovered` must be zero). |`cannot.undo.write.off.with.recovery.payments`
+|===
+
+== Transaction Template
+
+The transaction template pre-fills the amount with what is *still* recoverable, so the value it offers is always one the API accepts:
+
+[source]
+----
+GET /v1/working-capital-loans/{loanId}/template?templateType=recoveryPayment
+----
+
+`expectedAmount` returns `writtenOffOutstanding`. On a loan written off for 100 with 30 already recovered, the template offers 70 — not the gross 100, which the API would reject.
+
+== API
+
+[source]
+----
+POST /v1/working-capital-loans/{loanId}/transactions?command=recoveryPayment
+POST /v1/working-capital-loans/{loanId}/transactions/{transactionId}?command=undo
+----
+
+.Recovery payment request
+[source,json]
+----
+{
+  "transactionDate": "20 January 2026",
+  "transactionAmount": 40,
+  "externalId": "WC-RP-001",
+  "dateFormat": "dd MMMM yyyy",
+  "locale": "en",
+  "note": "Partial collection after write-off",
+  "paymentDetails": {
+    "paymentTypeId": 1,
+    "accountNumber": "ACC-001"
+  }
+}
+----
+
+.Undo recovery payment request
+[source,json]
+----
+{
+  "reversalExternalId": "WC-RP-REV-001",
+  "note": "Captured in error",
+  "locale": "en"
+}
+----
+
+== Read Model
+
+The Working Capital Loan balance exposes the written-off and recovered figures, so a client can reconcile the zeroed outstanding and explain a rejected amount:
+
+[cols="1,3"]
+|===
+|*Field* |*Description*
+
+|`totalWrittenOff`
+|Gross amount the write-off moved out of the outstanding. Not reduced by recoveries.
+
+|`principalWrittenOff`, `feeWrittenOff`, `penaltyWrittenOff`
+|The same figure split by portion. `principalOutstanding` and its siblings already net these off, so without them the exposed balance cannot be reconciled: a written-off loan reports a gross principal and a zero outstanding with nothing in between to explain the difference.
+
+|`totalRecovered`
+|Running total collected after the write-off and recognized as recovery income.
+
+|`writtenOffOutstanding`
+|Still recoverable (`totalWrittenOff - totalRecovered`). Caps the next recovery payment and is what the transaction template offers.
+|===
+
+== Accounting Treatment
+
+A Recovery Payment triggers Journal Entries (JE) when the Working Capital Loan product uses accrual with deferred revenue amortization accounting. The portfolio and receivable accounts were already relieved by the write-off, so there is nothing to credit back: the whole amount is recognized as income against the fund source, with no split by portion.
+
+=== Recovery Payment
+
+[cols="1,2,1,2"]
+|===
+|*Type* |*WCP mapping name* |*GL type* |*Allocation*
+
+|Dr |Fund Source |Asset/Liability |Excess amount
+|Cr |Income from Recovery |Income |Excess amount
+|===
+
+=== Undo Recovery Payment
+
+Undo posts an offsetting mirror for each entry above (the ledger stays append-only), which nets the recovery to zero:
+
+[cols="1,2,1,2"]
+|===
+|*Type* |*WCP mapping name* |*GL type* |*Allocation*
+
+|Dr |Income from Recovery |Income |Excess amount
+|Cr |Fund Source |Asset/Liability |Excess amount
+|===
+
+[NOTE]
+====
+Do not confuse this with a *repayment posted after a charge-off*. That transaction is a real repayment: it moves the balance and is credited to Income from Recovery *by portion*, because a charge-off is a non-monetary tag that leaves the receivable on the books. A recovery payment on a written-off loan moves no balance and books a single line.
+====
+
+== Business Events
+
+* `WorkingCapitalLoanRecoveryPaymentTransactionBusinessEvent` — emitted after a recovery payment.
+* `WorkingCapitalLoanAdjustTransactionBusinessEvent` — emitted alongside the undo event, mirroring the other transaction reversals, so a consumer reconciling reversals generically does not miss recovery ones.
+
+Neither operation emits a balance-changed or status-changed event: the outstanding balance stays at zero and the loan stays in `CLOSED_WRITTEN_OFF` throughout.
+
+== Permissions
+
+[cols="1,1,1,1"]
+|===
+|*Permission* |*Grouping* |*Entity* |*Action*
+
+|`RECOVERYPAYMENT_WORKINGCAPITALLOAN` |`transaction_loan` |`WORKINGCAPITALLOAN` |`RECOVERYPAYMENT`
+|===
+
+The reversal adds no permission of its own: it goes through the generic transaction-undo command, exactly as
+the reversal of a repayment, goodwill credit, payout refund or charge adjustment does. That command carries
+action `UNDO` on entity `ENTITY_WORKINGCAPITALLOANTRANSACTION`.
+
+[NOTE]
+====
+The permission code checked for a reversal is *not written anywhere in the source*: it is derived at runtime as
+`actionName + "_" + entityName`, which for this command yields `UNDO_ENTITY_WORKINGCAPITALLOANTRANSACTION`.
+Searching the codebase for that string finds nothing — the entity name and the action are declared separately
+and concatenated when the command wrapper is built.
+
+No `m_permission` row is seeded for it, so today it can only be exercised by a super user (`ALL_FUNCTIONS`);
+no other role can be granted it. This is pre-existing behaviour shared by every Working Capital transaction
+reversal, not something the recovery payment introduces.
+====

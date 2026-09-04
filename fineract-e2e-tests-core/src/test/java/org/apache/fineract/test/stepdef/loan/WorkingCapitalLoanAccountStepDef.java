@@ -1296,6 +1296,47 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId, "undoWriteOff", request));
     }
 
+    @When("Admin makes a recovery payment of {string} on the Working Capital loan on {string}")
+    public void recoveryPaymentWorkingCapitalLoan(final String transactionAmount, final String transactionDate) {
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate)
+                .transactionAmount(new BigDecimal(transactionAmount));
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(getCreatedLoanId(),
+                "recoveryPayment", request));
+    }
+
+    @Then("Initiating a recovery payment of {string} on the Working Capital loan on {string} results an error with the following data:")
+    public void recoveryPaymentWorkingCapitalError(final String transactionAmount, final String transactionDate, final DataTable table) {
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate)
+                .transactionAmount(new BigDecimal(transactionAmount));
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(getCreatedLoanId(), "recoveryPayment", request));
+        if (table != null) {
+            verifyErrorResponse(exception, table);
+        }
+    }
+
+    @When("Admin undoes the last recovery payment on the Working Capital loan")
+    public void undoLastRecoveryPaymentWorkingCapitalLoan() {
+        final Long loanId = getCreatedLoanId();
+        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest();
+        ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId,
+                latestActiveRecoveryPaymentTransaction().getId(), "undo", request));
+    }
+
+    private GetWorkingCapitalLoanTransactionIdResponse latestActiveRecoveryPaymentTransaction() {
+        final GetWorkingCapitalLoanTransactionsResponse body = retrieveLoanTransactions(getCreatedLoanId());
+        if (body.getContent() == null || body.getContent().isEmpty()) {
+            throw new IllegalStateException("No Working Capital Loan transactions found");
+        }
+        return body.getContent().stream()
+                .filter(t -> t.getType() != null && "loanTransactionType.recoveryRepayment".equals(t.getType().getCode()))
+                .filter(t -> !Boolean.TRUE.equals(t.getReversed()))
+                .max(Comparator.comparing(GetWorkingCapitalLoanTransactionIdResponse::getId))
+                .orElseThrow(() -> new IllegalStateException("Active recovery payment transaction not found on loan"));
+    }
+
     @Then("Initiating write-off undo of the Working Capital loan results an error with the following data:")
     public void initiateWriteOffUndoWorkingCapitalError(final DataTable table) {
         final Long loanId = getCreatedLoanId();
@@ -1794,6 +1835,16 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @Then("a Working Capital Loan Charge Off transaction business event is raised with {string} EUR amount")
     public void aWorkingCapitalLoanChargeOffTransactionBusinessEventIsRaised(final String amount) {
         eventCheckHelper.workingCapitalLoanChargeOffTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
+    }
+
+    @Then("a Working Capital Loan Undo Write-Off transaction business event is raised")
+    public void aWorkingCapitalLoanUndoWriteOffTransactionBusinessEventIsRaised() {
+        eventCheckHelper.workingCapitalLoanUndoWriteOffTransactionEventCheck(getCreatedLoanId(), null);
+    }
+
+    @Then("a Working Capital Loan Recovery Payment transaction business event is raised with {string} EUR amount")
+    public void aWorkingCapitalLoanRecoveryPaymentTransactionBusinessEventIsRaised(final String amount) {
+        eventCheckHelper.workingCapitalLoanRecoveryPaymentTransactionEventCheck(getCreatedLoanId(), new BigDecimal(amount));
     }
 
     @Then("a Working Capital Loan Discount Fee Amortization transaction business event is raised on {string}")
@@ -3826,6 +3877,9 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
             case "totalPaidPrincipal" -> balance.getPrincipalPaid();
             case "realizedIncome" -> balance.getRealizedIncomeFromDiscountFee();
             case "unrealizedIncome" -> balance.getUnrealizedIncomeFromDiscountFee();
+            case "totalWrittenOff" -> balance.getTotalWrittenOff();
+            case "totalRecovered" -> balance.getTotalRecovered();
+            case "writtenOffOutstanding" -> balance.getWrittenOffOutstanding();
             default -> throw new IllegalArgumentException("Unknown balance field: " + field);
         };
         assertNotNull(actual, "Balance field " + field + " should not be null");
