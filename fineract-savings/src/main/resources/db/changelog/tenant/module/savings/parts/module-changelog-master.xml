@@ -28,4 +28,7 @@
   <include file="parts/2003_add_accrued_till_date_to_savings_account.xml" relativeToChangelogFile="true" />
   <include file="parts/2004_add_savings_account_cob_infrastructure.xml" relativeToChangelogFile="true" />
   <include file="parts/2005_add_external_id_to_savings_transaction.xml" relativeToChangelogFile="true" />
+  <include file="parts/2006_add_last_cob_business_date_to_savings_account.xml" relativeToChangelogFile="true" />
+  <include file="parts/2007_add_savings_cob_job_data.xml" relativeToChangelogFile="true" />
+  <include file="parts/2008_add_savings_cob_business_steps.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

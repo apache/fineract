@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 
 @Entity
@@ -47,7 +48,7 @@ public class SavingsAccountLock {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "lock_owner", nullable = false)
-    private SavingsLockOwner lockOwner;
+    private LockOwner lockOwner;
 
     @Column(name = "lock_placed_on", nullable = false)
     private OffsetDateTime lockPlacedOn;
@@ -61,7 +62,7 @@ public class SavingsAccountLock {
     @Column(name = "lock_placed_on_cob_business_date")
     private LocalDate lockPlacedOnCobBusinessDate;
 
-    public SavingsAccountLock(Long savingsId, SavingsLockOwner lockOwner, LocalDate lockPlacedOnCobBusinessDate) {
+    public SavingsAccountLock(Long savingsId, LockOwner lockOwner, LocalDate lockPlacedOnCobBusinessDate) {
         this.savingsId = savingsId;
         this.lockOwner = lockOwner;
         this.lockPlacedOn = DateUtils.getAuditOffsetDateTime();
@@ -73,7 +74,7 @@ public class SavingsAccountLock {
         this.stacktrace = stacktrace;
     }
 
-    public void setNewLockOwner(SavingsLockOwner newLockOwner) {
+    public void setNewLockOwner(LockOwner newLockOwner) {
         this.lockOwner = newLockOwner;
         this.lockPlacedOn = DateUtils.getAuditOffsetDateTime();
     }
