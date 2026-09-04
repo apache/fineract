@@ -73,8 +73,10 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
     private static final DateTimeFormatter FORMATTER_API = DateTimeFormatter.ofPattern(DATE_FORMAT_API);
     private static final Long REGULAR_PAYMENT_MODE_ID = 0L;
+    private static final Long DISBURSEMENT_ID = 1L;
     private static final Long SPECIFIED_DUE_DATE_ID = 2L;
     private static final Long FLAT_CALCULATION_TYPE_ID = 1L;
+    private static final Long PERCENTAGE_AMOUNT_CALCULATION_TYPE_ID = 2L;
 
     private final FineractFeignClient fineractClient;
     private final WorkingCapitalChargeRequestFactory chargeRequestFactory;
@@ -379,21 +381,28 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         log.info("Retrieved charge template for Working Capital Loan with chargeTimeType={}", chargeTimeTypeName);
     }
 
-    @Then("The charge template chargeTimeTypeOptions contains only Specified due date")
+    @Then("The charge template chargeTimeTypeOptions contains only Disbursement and Specified due date")
     public void verifyTemplateChargeTimeTypeOptions() {
-        assertSingleOption(getChargeTemplate().getChargeTimeTypeOptions(), "chargeTimeTypeOptions", SPECIFIED_DUE_DATE_ID);
-        log.info("Verified charge template chargeTimeTypeOptions contains only Specified due date");
+        assertExactOptions(getChargeTemplate().getChargeTimeTypeOptions(), "chargeTimeTypeOptions", DISBURSEMENT_ID, SPECIFIED_DUE_DATE_ID);
+        log.info("Verified charge template chargeTimeTypeOptions contains only Disbursement and Specified due date");
     }
 
     @Then("The charge template chargeCalculationTypeOptions contains only Flat")
     public void verifyTemplateChargeCalculationTypeOptions() {
-        assertSingleOption(getChargeTemplate().getChargeCalculationTypeOptions(), "chargeCalculationTypeOptions", FLAT_CALCULATION_TYPE_ID);
+        assertExactOptions(getChargeTemplate().getChargeCalculationTypeOptions(), "chargeCalculationTypeOptions", FLAT_CALCULATION_TYPE_ID);
         log.info("Verified charge template chargeCalculationTypeOptions contains only Flat");
+    }
+
+    @Then("The charge template chargeCalculationTypeOptions contains only Flat and % Amount")
+    public void verifyTemplateChargeCalculationTypeOptionsFlatAndPercentageAmount() {
+        assertExactOptions(getChargeTemplate().getChargeCalculationTypeOptions(), "chargeCalculationTypeOptions", FLAT_CALCULATION_TYPE_ID,
+                PERCENTAGE_AMOUNT_CALCULATION_TYPE_ID);
+        log.info("Verified charge template chargeCalculationTypeOptions contains only Flat and % Amount");
     }
 
     @Then("The charge template chargePaymentModeOptions contains only Regular")
     public void verifyTemplateChargePaymentModeOptions() {
-        assertSingleOption(getChargeTemplate().getChargePaymetModeOptions(), "chargePaymentModeOptions", REGULAR_PAYMENT_MODE_ID);
+        assertExactOptions(getChargeTemplate().getChargePaymetModeOptions(), "chargePaymentModeOptions", REGULAR_PAYMENT_MODE_ID);
         log.info("Verified charge template chargePaymentModeOptions contains only Regular");
     }
 
@@ -642,10 +651,9 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         log.info("Verified adding charge {} after charge-off failed for loan {}", chargeType, loanId);
     }
 
-    private void assertSingleOption(final List<EnumOptionData> options, final String optionName, final Long expectedId) {
-        assertThat(options).as(optionName + " should not be null or empty").isNotNull().isNotEmpty();
-        assertThat(options).hasSize(1);
-        assertThat(options.get(0).getId()).as("Only " + optionName + " with ID " + expectedId + " should be available")
-                .isEqualTo(expectedId);
+    private void assertExactOptions(final List<EnumOptionData> options, final String optionName, final Long... expectedIds) {
+        assertThat(options).as(optionName + " should not be null").isNotNull();
+        assertThat(options.stream().map(EnumOptionData::getId).toList()).as(optionName + " should offer exactly the expected options")
+                .containsExactly(expectedIds);
     }
 }
