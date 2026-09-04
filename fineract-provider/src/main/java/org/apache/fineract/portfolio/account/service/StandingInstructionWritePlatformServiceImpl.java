@@ -105,7 +105,7 @@ public class StandingInstructionWritePlatformServiceImpl implements StandingInst
             throw new PlatformDataIntegrityException("error.msg.standinginstruction.duplicate.name",
                     "Standinginstruction with name `" + name + "` already exists", "name", name);
         }
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.client.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
