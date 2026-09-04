@@ -20,19 +20,28 @@ package org.apache.fineract.infrastructure.core.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.gson.JsonParser;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.MonthDay;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
+import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -91,6 +100,90 @@ public class DateUtilsTest {
     @Test
     public void getBusinesLocalDate() {
         assertTrue(DateUtils.isEqualBusinessDate(LocalDate.of(2022, 6, 12)));
+    }
+
+    @Test
+    public void localDateParameterStillAcceptsDateOnlyRequest() {
+        final JsonCommand command = commandFromJson("""
+                {"transactionDate":"27 July 2026","dateFormat":"dd MMMM yyyy","locale":"en"}
+                """);
+
+        assertEquals(LocalDate.of(2026, 7, 27), command.localDateValueOfParameterNamed("transactionDate"));
+    }
+
+    @Test
+    public void offsetTimeParameterAcceptsPositiveOffsetAndNormalizesToUtc() {
+        final JsonCommand command = commandFromJson("""
+                {"transactionTime":"14:30:00+05:30"}
+                """);
+
+        assertEquals(OffsetTime.of(9, 0, 0, 0, ZoneOffset.UTC), command.offsetTimeValueOfParameterNamed("transactionTime"));
+    }
+
+    @Test
+    public void offsetTimeParameterAcceptsNegativeOffsetAndNormalizesToUtc() {
+        final JsonCommand command = commandFromJson("""
+                {"transactionTime":"04:15:30-04:00"}
+                """);
+
+        assertEquals(OffsetTime.of(8, 15, 30, 0, ZoneOffset.UTC), command.offsetTimeValueOfParameterNamed("transactionTime"));
+    }
+
+    @Test
+    public void offsetTimeParameterAcceptsUtcTime() {
+        final JsonCommand command = commandFromJson("""
+                {"transactionTime":"09:00:00Z"}
+                """);
+
+        assertEquals(OffsetTime.of(9, 0, 0, 0, ZoneOffset.UTC), command.offsetTimeValueOfParameterNamed("transactionTime"));
+    }
+
+    @Test
+    public void offsetTimeParameterReturnsNullWhenOmitted() {
+        final JsonCommand command = commandFromJson("""
+                {"transactionDate":"27 July 2026","dateFormat":"dd MMMM yyyy","locale":"en"}
+                """);
+
+        assertNull(command.offsetTimeValueOfParameterNamed("transactionTime"));
+    }
+
+    @Test
+    public void offsetTimeParameterReturnsNullWhenJsonNull() {
+        final JsonCommand command = commandFromJson("""
+                {"transactionTime":null}
+                """);
+
+        assertNull(command.offsetTimeValueOfParameterNamed("transactionTime"));
+    }
+
+    @Test
+    public void offsetTimeParameterRejectsOffsetlessTime() {
+        final JsonCommand command = commandFromJson("""
+                {"transactionTime":"14:30:00"}
+                """);
+
+        assertThrows(PlatformApiDataValidationException.class, () -> command.offsetTimeValueOfParameterNamed("transactionTime"));
+    }
+
+    @Test
+    public void offsetTimeParameterRejectsInvalidTime() {
+        final JsonCommand command = commandFromJson("""
+                {"transactionTime":"invalid"}
+                """);
+
+        assertThrows(PlatformApiDataValidationException.class, () -> command.offsetTimeValueOfParameterNamed("transactionTime"));
+    }
+
+    @Test
+    public void offsetTimeSerializesAsIsoOffsetTimeString() {
+        final String json = GoogleGsonSerializerHelper.createSimpleGson()
+                .toJson(Map.of("transactionTime", OffsetTime.of(9, 0, 0, 0, ZoneOffset.UTC)));
+
+        assertEquals("{\"transactionTime\":\"09:00:00Z\"}", json);
+    }
+
+    private JsonCommand commandFromJson(final String json) {
+        return JsonCommand.fromJsonElement(null, JsonParser.parseString(json), new FromJsonHelper());
     }
 
     // --- safeMonthDay (clamps day to last valid day of month for current business year) ---

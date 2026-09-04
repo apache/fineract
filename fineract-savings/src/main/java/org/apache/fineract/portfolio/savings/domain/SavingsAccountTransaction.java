@@ -32,6 +32,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,6 +82,9 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
 
     @Column(name = "transaction_date", nullable = false)
     private LocalDate dateOf;
+
+    @Column(name = "transaction_time")
+    private OffsetTime transactionTime;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
@@ -147,10 +152,18 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
             final Integer typeOf, final LocalDate transactionLocalDate, final BigDecimal amount, final boolean isReversed,
             final boolean isManualTransaction, final Boolean lienTransaction, final String refNo) {
+        this(savingsAccount, office, paymentDetail, typeOf, transactionLocalDate, null, amount, isReversed, isManualTransaction,
+                lienTransaction, refNo);
+    }
+
+    private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
+            final Integer typeOf, final LocalDate transactionLocalDate, final OffsetTime transactionTime, final BigDecimal amount,
+            final boolean isReversed, final boolean isManualTransaction, final Boolean lienTransaction, final String refNo) {
         this.savingsAccount = savingsAccount;
         this.office = office;
         this.typeOf = typeOf;
         this.dateOf = transactionLocalDate;
+        this.transactionTime = transactionTime == null ? null : transactionTime.withOffsetSameInstant(ZoneOffset.UTC);
         this.amount = amount;
         this.reversed = isReversed;
         this.paymentDetail = paymentDetail;
@@ -174,6 +187,13 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
                 lienTransaction, refNo);
     }
 
+    private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
+            final Integer typeOf, final LocalDate transactionLocalDate, final OffsetTime transactionTime, final Money amount,
+            final boolean isReversed, final boolean isManualTransaction, final Boolean lienTransaction, final String refNo) {
+        this(savingsAccount, office, paymentDetail, typeOf, transactionLocalDate, transactionTime, amount.getAmount(), isReversed,
+                isManualTransaction, lienTransaction, refNo);
+    }
+
     public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
             final PaymentDetail paymentDetail, final LocalDate date, final Money amount, final String refNo) {
         final boolean isReversed = false;
@@ -181,6 +201,16 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
         final Boolean lienTransaction = false;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.DEPOSIT.getValue(), date,
                 amount, isReversed, isManualTransaction, lienTransaction, refNo);
+    }
+
+    public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
+            final PaymentDetail paymentDetail, final LocalDate date, final OffsetTime transactionTime, final Money amount,
+            final String refNo) {
+        final boolean isReversed = false;
+        final boolean isManualTransaction = false;
+        final Boolean lienTransaction = false;
+        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.DEPOSIT.getValue(), date,
+                transactionTime, amount, isReversed, isManualTransaction, lienTransaction, refNo);
     }
 
     public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
@@ -193,6 +223,16 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
                 isReversed, isManualTransaction, lienTransaction, refNo);
     }
 
+    public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final Office office,
+            final PaymentDetail paymentDetail, final LocalDate date, final OffsetTime transactionTime, final Money amount,
+            final SavingsAccountTransactionType savingsAccountTransactionType, final String refNo) {
+        final boolean isReversed = false;
+        final boolean isManualTransaction = false;
+        final Boolean lienTransaction = false;
+        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, savingsAccountTransactionType.getValue(), date,
+                transactionTime, amount, isReversed, isManualTransaction, lienTransaction, refNo);
+    }
+
     public static SavingsAccountTransaction withdrawal(final SavingsAccount savingsAccount, final Office office,
             final PaymentDetail paymentDetail, final LocalDate date, final Money amount, final String refNo) {
         final boolean isReversed = false;
@@ -200,6 +240,16 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
         final Boolean lienTransaction = false;
         return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.WITHDRAWAL.getValue(),
                 date, amount, isReversed, isManualTransaction, lienTransaction, refNo);
+    }
+
+    public static SavingsAccountTransaction withdrawal(final SavingsAccount savingsAccount, final Office office,
+            final PaymentDetail paymentDetail, final LocalDate date, final OffsetTime transactionTime, final Money amount,
+            final String refNo) {
+        final boolean isReversed = false;
+        final boolean isManualTransaction = false;
+        final Boolean lienTransaction = false;
+        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail, SavingsAccountTransactionType.WITHDRAWAL.getValue(),
+                date, transactionTime, amount, isReversed, isManualTransaction, lienTransaction, refNo);
     }
 
     public static SavingsAccountTransaction accrual(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
@@ -329,8 +379,9 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
 
     public static SavingsAccountTransaction copyTransaction(SavingsAccountTransaction accountTransaction) {
         return new SavingsAccountTransaction(accountTransaction.savingsAccount, accountTransaction.office, accountTransaction.paymentDetail,
-                accountTransaction.typeOf, accountTransaction.getTransactionDate(), accountTransaction.amount, accountTransaction.reversed,
-                accountTransaction.isManualTransaction, accountTransaction.lienTransaction, accountTransaction.refNo);
+                accountTransaction.typeOf, accountTransaction.getTransactionDate(), accountTransaction.transactionTime,
+                accountTransaction.amount, accountTransaction.reversed, accountTransaction.isManualTransaction,
+                accountTransaction.lienTransaction, accountTransaction.refNo);
     }
 
     public static SavingsAccountTransaction holdAmount(final SavingsAccount savingsAccount, final Office office,
@@ -373,6 +424,10 @@ public final class SavingsAccountTransaction extends AbstractAuditableWithUTCDat
 
     public LocalDate getTransactionDate() {
         return this.dateOf;
+    }
+
+    public OffsetTime getTransactionTime() {
+        return this.transactionTime;
     }
 
     public ExternalId getExternalId() {
