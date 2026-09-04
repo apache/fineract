@@ -34,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.exception.ErrorHandler;
@@ -225,7 +226,113 @@ public class GenericDataServiceImpl implements GenericDataService {
         // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7046875 - prevent
         // Invalid Column Name bug in sun's CachedRowSetImpl where it doesn't
         // pick up on label names, only column names
-        return "select x.* from (" + sql + ") x";
+
+        // FINERACT-2622: a derived table's ORDER BY is not guaranteed to be honored by the outer query, so lift a
+        // top-level trailing ORDER BY (together with any trailing LIMIT/OFFSET) onto the outer wrapper to preserve
+        // the requested ordering.
+        final int orderByIndex = topLevelTrailingOrderByIndex(sql);
+        if (orderByIndex < 0) {
+            return "select x.* from (" + sql + ") x";
+        }
+        final String inner = sql.substring(0, orderByIndex);
+        final String trailingOrderBy = sql.substring(orderByIndex);
+        return "select x.* from (" + inner + ") x " + trailingOrderBy;
+    }
+
+    private static final Pattern DOT_QUALIFIED_REFERENCE = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*\\s*\\.\\s*[A-Za-z_*]");
+
+    private static int topLevelTrailingOrderByIndex(final String sql) {
+        int depth = 0;
+        int lastTopLevelOrderBy = -1;
+        final int length = sql.length();
+        int i = 0;
+        while (i < length) {
+            final char c = sql.charAt(i);
+            if (c == '\'') {
+                i = skipStringLiteral(sql, i);
+                continue;
+            }
+            if (c == '-' && i + 1 < length && sql.charAt(i + 1) == '-') {
+                i = skipLineComment(sql, i);
+                continue;
+            }
+            if (c == '/' && i + 1 < length && sql.charAt(i + 1) == '*') {
+                i = skipBlockComment(sql, i);
+                continue;
+            }
+            if (c == '(') {
+                depth++;
+            } else if (c == ')') {
+                depth--;
+            } else if (depth == 0 && isOrderByAt(sql, i)) {
+                lastTopLevelOrderBy = i;
+            }
+            i++;
+        }
+        if (lastTopLevelOrderBy < 0 || DOT_QUALIFIED_REFERENCE.matcher(sql.substring(lastTopLevelOrderBy)).find()) {
+            return -1;
+        }
+        return lastTopLevelOrderBy;
+    }
+
+    private static int skipStringLiteral(final String sql, final int start) {
+        final int length = sql.length();
+        int i = start + 1;
+        while (i < length) {
+            if (sql.charAt(i) == '\'') {
+                if (i + 1 < length && sql.charAt(i + 1) == '\'') {
+                    i += 2;
+                    continue;
+                }
+                return i + 1;
+            }
+            i++;
+        }
+        return i;
+    }
+
+    private static int skipLineComment(final String sql, final int start) {
+        final int length = sql.length();
+        int i = start + 2;
+        while (i < length && sql.charAt(i) != '\n') {
+            i++;
+        }
+        return i;
+    }
+
+    private static int skipBlockComment(final String sql, final int start) {
+        final int length = sql.length();
+        int i = start + 2;
+        while (i + 1 < length && !(sql.charAt(i) == '*' && sql.charAt(i + 1) == '/')) {
+            i++;
+        }
+        return Math.min(i + 2, length);
+    }
+
+    private static boolean isOrderByAt(final String sql, final int index) {
+        if (!sql.regionMatches(true, index, "order", 0, 5)) {
+            return false;
+        }
+        if (index > 0 && isWordChar(sql.charAt(index - 1))) {
+            return false;
+        }
+        int j = index + 5;
+        final int afterOrder = j;
+        while (j < sql.length() && Character.isWhitespace(sql.charAt(j))) {
+            j++;
+        }
+        if (j == afterOrder) {
+            return false;
+        }
+        if (!sql.regionMatches(true, j, "by", 0, 2)) {
+            return false;
+        }
+        final int afterBy = j + 2;
+        return afterBy >= sql.length() || !isWordChar(sql.charAt(afterBy));
+    }
+
+    private static boolean isWordChar(final char c) {
+        return Character.isLetterOrDigit(c) || c == '_';
     }
 
     @Override
