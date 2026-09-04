@@ -192,6 +192,10 @@ public class Office extends AbstractPersistableCustom<Long> implements Serializa
         } else {
             this.hierarchy = ".";
         }
+
+        for (final Office child : this.children) {
+            child.generateHierarchy();
+        }
     }
 
     private String hierarchyOf(final Long id) {

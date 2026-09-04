@@ -90,6 +90,7 @@ import org.apache.fineract.portfolio.loanorigination.exception.LoanOriginatorNot
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
+import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.useradministration.domain.AppUser;
 import org.junit.jupiter.api.BeforeEach;
@@ -208,6 +209,45 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
 
         // Initialize MoneyHelper with tenant configuration (HALF_EVEN = 6)
         MoneyHelper.initializeTenantRoundingMode("test", 6);
+    }
+
+    @Test
+    public void makeLoanRepaymentWithChargeRefundChargeType_validatesOfficeHierarchyAccess() {
+        Long loanId = 1L;
+        Loan loan = mock(Loan.class);
+        Office office = mock(Office.class);
+        LoanTransaction loanTransaction = mock(LoanTransaction.class);
+        PaymentDetail paymentDetail = mock(PaymentDetail.class);
+        JsonCommand command = mock(JsonCommand.class);
+
+        when(command.json()).thenReturn("{}");
+        when(command.localDateValueOfParameterNamed("transactionDate")).thenReturn(LocalDate.now());
+        when(command.bigDecimalValueOfParameterNamed("transactionAmount")).thenReturn(BigDecimal.TEN);
+        when(command.stringValueOfParameterNamed("note")).thenReturn(null);
+        when(command.locale()).thenReturn("en");
+        when(command.dateFormat()).thenReturn("dd MMM yyyy");
+        when(command.longValueOfParameterNamed("paymentTypeId")).thenReturn(1L);
+        when(command.commandId()).thenReturn(10L);
+        when(command.stringValueOfParameterNamed("transactionDate")).thenReturn("2025-05-20");
+        when(command.stringValueOfParameterNamed("transactionAmount")).thenReturn("10");
+        when(externalIdFactory.createFromCommand(command, LoanApiConstants.externalIdParameterName)).thenReturn(ExternalId.generate());
+        when(loanAssembler.assembleFrom(loanId)).thenReturn(loan);
+        when(loan.getOffice()).thenReturn(office);
+        when(office.getHierarchy()).thenReturn("1.2");
+        when(paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, any())).thenReturn(paymentDetail);
+        when(loanAccountDomainService.makeRepayment(any(), any(), any(), any(), any(), any(), any(), anyBoolean(), anyString(), anyBoolean(),
+                any(), anyBoolean())).thenReturn(loanTransaction);
+        when(loanTransaction.getLoan()).thenReturn(loan);
+        when(loanTransaction.getId()).thenReturn(2L);
+        when(loanTransaction.getExternalId()).thenReturn(ExternalId.generate());
+        when(loan.getId()).thenReturn(loanId);
+        when(loan.getOfficeId()).thenReturn(1L);
+        when(loan.getClientId()).thenReturn(null);
+        when(loan.getGroupId()).thenReturn(null);
+
+        loanWritePlatformService.makeLoanRepaymentWithChargeRefundChargeType(LoanTransactionType.REPAYMENT, loanId, command, false, null);
+
+        verify(context).validateAccessRights("1.2");
     }
 
     @Test
