@@ -2150,7 +2150,8 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         final LoanRepaymentScheduleInstallment currentInstallment = loan.getRelatedRepaymentScheduleInstallment(transactionDate);
 
         if (!installments.isEmpty() && transactionDate.isBefore(loan.getMaturityDate()) && currentInstallment != null) {
-            if (currentInstallment.isNotFullyPaidOff() || currentInstallment.isReAged()) {
+            // Additional installments are excluded from repaymentPeriods(), so skip them here.
+            if ((currentInstallment.isNotFullyPaidOff() || currentInstallment.isReAged()) && !currentInstallment.isAdditional()) {
                 if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx
                         && loan.isInterestBearingAndInterestRecalculationEnabled()) {
                     final BigDecimal interestOutstanding = currentInstallment.getInterestOutstanding(loan.getCurrency()).getAmount();
@@ -2270,8 +2271,11 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         if (!installments.isEmpty()) {
             if (transactionCtx instanceof ProgressiveTransactionCtx progressiveTransactionCtx
                     && loanTransaction.getLoan().isInterestBearingAndInterestRecalculationEnabled()) {
-                installments.stream().filter(installment -> !installment.getFromDate().isAfter(transactionDate)
-                        && installment.getDueDate().isAfter(transactionDate)).forEach(installment -> {
+                // Additional installments are excluded from repaymentPeriods(), so exclude them here.
+                installments.stream()
+                        .filter(installment -> !installment.getFromDate().isAfter(transactionDate)
+                                && installment.getDueDate().isAfter(transactionDate) && !installment.isAdditional())
+                        .forEach(installment -> {
                             final BigDecimal interestOutstanding = installment.getInterestOutstanding(currency).getAmount();
 
                             final BigDecimal newInterest = emiCalculator.getPeriodInterestTillDate(progressiveTransactionCtx.getModel(),
