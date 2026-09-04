@@ -1431,7 +1431,7 @@ public class DatatableWriteServiceImpl implements DatatableWriteService {
             msgCode += ".unknown.data.integrity.issue";
             msgArgs = new Object[] { dataTableName, e };
         }
-        log.error("Error occured.", e);
+        log.error("Error occurred.", e);
         throw ErrorHandler.getMappable(e, msgCode, msg, param, msgArgs);
     }
 

@@ -99,7 +99,7 @@ public class WriteLikelihoodServiceImpl implements WriteLikelihoodService {
      * Guaranteed to throw an exception no matter what the data integrity issue is.
      */
     private void handleDataIntegrityIssues(final Throwable realCause, final NonTransientDataAccessException dve) {
-        LOG.error("Error occured.", dve);
+        LOG.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.likelihood.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
