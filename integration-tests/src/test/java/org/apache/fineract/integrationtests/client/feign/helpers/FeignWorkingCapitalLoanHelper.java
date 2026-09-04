@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ChargeData;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
@@ -240,6 +241,16 @@ public class FeignWorkingCapitalLoanHelper {
     public Long addCharge(Long loanId, PostLoansLoanIdChargesRequest request) {
         PostLoansLoanIdChargesResponse response = ok(() -> fineractClient.workingCapitalLoanCharges().createLoanCharge(loanId, request));
         return response.getResourceId();
+    }
+
+    public CallFailedRuntimeException addChargeExpectingFailure(Long loanId, PostLoansLoanIdChargesRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoanCharges().createLoanCharge(loanId, request));
+    }
+
+    public List<ChargeData> getChargeTemplateOptions(Long loanId) {
+        WorkingCapitalLoanChargeData template = ok(
+                () -> fineractClient.workingCapitalLoanCharges().retrieveTemplateWorkingCapitalLoanCharge(loanId));
+        return template.getChargeOptions() != null ? template.getChargeOptions() : List.of();
     }
 
     public List<WorkingCapitalLoanChargeData> getCharges(Long loanId) {
