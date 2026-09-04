@@ -134,7 +134,7 @@ public final class ProcessorHelper {
 
             @Override
             public void onFailure(@SuppressWarnings("unused") Call call, Throwable t) {
-                LOG.error("URL: {} - Retrofit failure occured", url, t);
+                LOG.error("URL: {} - Retrofit failure occurred", url, t);
             }
         };
     }
