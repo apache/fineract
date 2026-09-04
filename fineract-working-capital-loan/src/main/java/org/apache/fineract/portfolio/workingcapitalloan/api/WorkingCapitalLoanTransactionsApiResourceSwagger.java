@@ -264,4 +264,23 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         @Schema(example = "repayment-ext-001")
         public String resourceExternalId;
     }
+
+    public static final class WorkingCapitalLoanTransactionTemplateResponse {
+
+        @Schema(example = "1")
+        public Long id;
+        @Schema(description = "Transaction type")
+        public LoanTransactionEnumData type;
+        @Schema(example = "[2024, 2, 1]")
+        public LocalDate transactionDate;
+        @Schema(example = "10000.00")
+        public BigDecimal transactionAmount;
+
+        @Schema(example = "10000.00", description = "Principal portion from allocation")
+        public BigDecimal principalPortion;
+        @Schema(example = "0.00", description = "Fee charges portion from allocation")
+        public BigDecimal feeChargesPortion;
+        @Schema(example = "0.00", description = "Penalty charges portion from allocation")
+        public BigDecimal penaltyChargesPortion;
+    }
 }
