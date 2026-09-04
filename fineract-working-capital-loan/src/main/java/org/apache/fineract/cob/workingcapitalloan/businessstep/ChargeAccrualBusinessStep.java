@@ -32,7 +32,7 @@ public class ChargeAccrualBusinessStep extends WorkingCapitalLoanCOBBusinessStep
 
     @Override
     public WorkingCapitalLoan execute(final WorkingCapitalLoan input) {
-        chargeAccrualService.processDueDateAccruals(input, DateUtils.getBusinessLocalDate());
+        chargeAccrualService.processChargeAccrualsOnCOB(input, DateUtils.getBusinessLocalDate());
         return input;
     }
 

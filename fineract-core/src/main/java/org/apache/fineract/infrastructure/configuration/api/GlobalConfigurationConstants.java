@@ -95,6 +95,7 @@ public final class GlobalConfigurationConstants {
     public static final String RETAINED_EARNING_USED_BY_REPORT_NAME = "retained-earning-used-by-report-name";
     public static final String OFFICE_ID = "office-id";
     public static final String DISALLOW_BACKDATED_TRANSACTIONS = "disallow-backdated-transactions";
+    public static final String WCL_CHARGE_ACCRUAL_TIME = "wcl-charge-accrual-time";
 
     private GlobalConfigurationConstants() {}
 }
