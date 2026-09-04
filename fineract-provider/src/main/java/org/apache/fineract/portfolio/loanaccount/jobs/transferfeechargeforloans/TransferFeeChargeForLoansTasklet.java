@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.loanaccount.jobs.transferfeechargeforloans;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,10 +36,13 @@ import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatfo
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.loanaccount.data.LoanChargeData;
 import org.apache.fineract.portfolio.loanaccount.data.LoanInstallmentChargeData;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanCharge;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.apache.fineract.portfolio.loanproduct.exception.LinkedAccountRequiredException;
+import org.apache.fineract.portfolio.tax.service.TaxUtils;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -51,6 +55,7 @@ public class TransferFeeChargeForLoansTasklet implements Tasklet {
     private final LoanChargeReadPlatformService loanChargeReadPlatformService;
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
+    private final LoanChargeRepository loanChargeRepository;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -60,6 +65,7 @@ public class TransferFeeChargeForLoansTasklet implements Tasklet {
         List<Throwable> errors = new ArrayList<>();
         if (chargeDatas != null) {
             for (final LoanChargeData chargeData : chargeDatas) {
+                final LoanCharge loanCharge = loanChargeRepository.findById(chargeData.getId()).orElse(null);
                 if (chargeData.isInstallmentFee()) {
                     final Collection<LoanInstallmentChargeData> chargePerInstallments = loanChargeReadPlatformService
                             .retrieveInstallmentLoanCharges(chargeData.getId(), true);
@@ -78,9 +84,27 @@ public class TransferFeeChargeForLoansTasklet implements Tasklet {
                                 break;
                             }
                             final boolean isExceptionForBalanceCheck = false;
+                            BigDecimal amountWithTax = installmentChargeData.getAmountOutstanding();
+                            if (loanCharge != null) {
+                                if (loanCharge.getCharge().getTaxGroup() != null && log.isInfoEnabled()) {
+                                    log.info(
+                                            "Scheduled charge payment tax evaluation: loanId={}, loanChargeId={}, installmentNumber={}, txDate={}, baseAmount={}, applicableTaxComponents={}",
+                                            chargeData.getLoanId(), chargeData.getId(), installmentChargeData.getInstallmentNumber(),
+                                            DateUtils.getBusinessLocalDate(), amountWithTax, TaxUtils.getApplicableTaxComponentSummaries(
+                                                    loanCharge.getCharge().getTaxGroup(), DateUtils.getBusinessLocalDate()));
+                                }
+                                amountWithTax = TaxUtils.calculateChargeAmountWithTax(amountWithTax, loanCharge.getCharge().getTaxGroup(),
+                                        DateUtils.getBusinessLocalDate(), loanCharge.getLoan().getCurrency().getDigitsAfterDecimal());
+                                if (loanCharge.getCharge().getTaxGroup() != null && log.isInfoEnabled()) {
+                                    log.info(
+                                            "Scheduled charge payment tax result: loanId={}, loanChargeId={}, installmentNumber={}, txDate={}, amountAfterTax={}",
+                                            chargeData.getLoanId(), chargeData.getId(), installmentChargeData.getInstallmentNumber(),
+                                            DateUtils.getBusinessLocalDate(), amountWithTax);
+                                }
+                            }
                             final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(DateUtils.getBusinessLocalDate(),
-                                    installmentChargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
-                                    portfolioAccountData.getId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
+                                    amountWithTax, PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN, portfolioAccountData.getId(),
+                                    chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
                                     LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(),
                                     installmentChargeData.getInstallmentNumber(), AccountTransferType.CHARGE_PAYMENT.getValue(), null, null,
                                     ExternalId.empty(), null, null, null, isRegularTransaction, isExceptionForBalanceCheck);
@@ -98,12 +122,28 @@ public class TransferFeeChargeForLoansTasklet implements Tasklet {
                         continue;
                     }
                     final boolean isExceptionForBalanceCheck = false;
-                    final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(DateUtils.getBusinessLocalDate(),
-                            chargeData.getAmountOutstanding(), PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN,
-                            portfolioAccountData.getId(), chargeData.getLoanId(), "Loan Charge Payment", null, null, null, null,
-                            LoanTransactionType.CHARGE_PAYMENT.getValue(), chargeData.getId(), null,
-                            AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, ExternalId.empty(), null, null, null,
-                            isRegularTransaction, isExceptionForBalanceCheck);
+                    BigDecimal amountWithTax = chargeData.getAmountOutstanding();
+                    if (loanCharge != null) {
+                        if (loanCharge.getCharge().getTaxGroup() != null && log.isInfoEnabled()) {
+                            log.info(
+                                    "Scheduled charge payment tax evaluation: loanId={}, loanChargeId={}, installmentNumber={}, txDate={}, baseAmount={}, applicableTaxComponents={}",
+                                    chargeData.getLoanId(), chargeData.getId(), null, DateUtils.getBusinessLocalDate(), amountWithTax,
+                                    TaxUtils.getApplicableTaxComponentSummaries(loanCharge.getCharge().getTaxGroup(),
+                                            DateUtils.getBusinessLocalDate()));
+                        }
+                        amountWithTax = TaxUtils.calculateChargeAmountWithTax(amountWithTax, loanCharge.getCharge().getTaxGroup(),
+                                DateUtils.getBusinessLocalDate(), loanCharge.getLoan().getCurrency().getDigitsAfterDecimal());
+                        if (loanCharge.getCharge().getTaxGroup() != null && log.isInfoEnabled()) {
+                            log.info(
+                                    "Scheduled charge payment tax result: loanId={}, loanChargeId={}, installmentNumber={}, txDate={}, amountAfterTax={}",
+                                    chargeData.getLoanId(), chargeData.getId(), null, DateUtils.getBusinessLocalDate(), amountWithTax);
+                        }
+                    }
+                    final AccountTransferDTO accountTransferDTO = new AccountTransferDTO(DateUtils.getBusinessLocalDate(), amountWithTax,
+                            PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN, portfolioAccountData.getId(), chargeData.getLoanId(),
+                            "Loan Charge Payment", null, null, null, null, LoanTransactionType.CHARGE_PAYMENT.getValue(),
+                            chargeData.getId(), null, AccountTransferType.CHARGE_PAYMENT.getValue(), null, null, ExternalId.empty(), null,
+                            null, null, isRegularTransaction, isExceptionForBalanceCheck);
                     transferFeeCharge(accountTransferDTO, errors);
                 }
             }

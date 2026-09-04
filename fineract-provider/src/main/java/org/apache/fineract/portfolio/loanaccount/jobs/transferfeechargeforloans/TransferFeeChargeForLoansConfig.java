@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.loanaccount.jobs.transferfeechargeforloans
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.apache.fineract.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -46,6 +47,8 @@ public class TransferFeeChargeForLoansConfig {
     private AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
     @Autowired
     private AccountTransfersWritePlatformService accountTransfersWritePlatformService;
+    @Autowired
+    private LoanChargeRepository loanChargeRepository;
 
     @Bean
     protected Step transferFeeChargeForLoansStep() {
@@ -62,6 +65,6 @@ public class TransferFeeChargeForLoansConfig {
     @Bean
     public TransferFeeChargeForLoansTasklet transferFeeChargeForLoansTasklet() {
         return new TransferFeeChargeForLoansTasklet(loanChargeReadPlatformService, accountAssociationsReadPlatformService,
-                accountTransfersWritePlatformService);
+                accountTransfersWritePlatformService, loanChargeRepository);
     }
 }
