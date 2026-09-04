@@ -119,6 +119,19 @@ public final class WorkingCapitalLoanRequestBuilders {
                 .locale(LOCALE);
     }
 
+    public static PostWorkingCapitalLoansBreachActionRequest breachResetWithRestartPeriod() {
+        return breachReset().restartPeriodFromResetDate(true);
+    }
+
+    public static PostWorkingCapitalLoansBreachActionRequest breachReschedule(Integer frequency, String frequencyType) {
+        return new PostWorkingCapitalLoansBreachActionRequest().action("reschedule").frequency(frequency).frequencyType(frequencyType)
+                .locale(LOCALE).dateFormat(DATE_FORMAT);
+    }
+
+    public static PostWorkingCapitalLoansBreachActionRequest breachUndoReset() {
+        return new PostWorkingCapitalLoansBreachActionRequest().action("undo_reset").locale(LOCALE).dateFormat(DATE_FORMAT);
+    }
+
     public static PostWorkingCapitalLoanTransactionsRequest repayment(BigDecimal amount, String transactionDate) {
         return new PostWorkingCapitalLoanTransactionsRequest().transactionAmount(amount).transactionDate(transactionDate).locale(LOCALE)
                 .dateFormat(DATE_FORMAT);

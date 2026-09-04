@@ -76,7 +76,7 @@ public class WorkingCapitalLoanBreachActionWriteServiceImpl implements WorkingCa
         } else if (WorkingCapitalLoanBreachActionType.RESET.equals(breachAction.getAction())) {
             breachResetService.resetBreach(workingCapitalLoan, saved);
         } else if (WorkingCapitalLoanBreachActionType.UNDO_RESET.equals(breachAction.getAction())) {
-            breachResetService.undoResetBreach(workingCapitalLoan, saved);
+            breachResetService.undoResetBreach(workingCapitalLoan, saved, existing);
         } else if (WorkingCapitalLoanBreachActionType.ENABLE.equals(breachAction.getAction())) {
             existing.stream().filter(action -> WorkingCapitalLoanBreachActionType.DISABLE == action.getAction())
                     .reduce((first, second) -> second).ifPresent(action -> {

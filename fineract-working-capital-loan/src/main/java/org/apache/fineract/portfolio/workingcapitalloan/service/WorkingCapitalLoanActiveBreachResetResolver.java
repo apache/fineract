@@ -36,20 +36,30 @@ public class WorkingCapitalLoanActiveBreachResetResolver {
 
     private final WorkingCapitalLoanBreachActionRepository breachActionRepository;
 
-    public Optional<WorkingCapitalLoanBreachAction> findLatestActiveReset(final Long workingCapitalLoanId) {
-        List<WorkingCapitalLoanBreachAction> filtereredList = breachActionRepository.findByLoanAndActionType(workingCapitalLoanId,
-                List.of(WorkingCapitalLoanBreachActionType.RESET, WorkingCapitalLoanBreachActionType.UNDO_RESET));
-        Deque<WorkingCapitalLoanBreachAction> queue = new ArrayDeque<>();
-        filtereredList.forEach(action -> {
-            if (action.getAction().equals(WorkingCapitalLoanBreachActionType.RESET)) {
-                queue.push(action);
-            } else if (action.getAction().equals(WorkingCapitalLoanBreachActionType.UNDO_RESET)) {
-                if (!queue.isEmpty()) {
-                    queue.pop();
-                }
+    /**
+     * Active resets, latest on top. Replays in recording order, not date order: action dates are the business date of
+     * their own request and are not monotonic.
+     */
+    public Deque<WorkingCapitalLoanBreachAction> activeResets(final List<WorkingCapitalLoanBreachAction> actions) {
+        final Deque<WorkingCapitalLoanBreachAction> stack = new ArrayDeque<>();
+        if (actions == null) {
+            return stack;
+        }
+        for (final WorkingCapitalLoanBreachAction action : actions) {
+            if (action == null) {
+                continue;
             }
-        });
-        return queue.isEmpty() ? Optional.empty() : Optional.of(queue.peek());
+            if (WorkingCapitalLoanBreachActionType.RESET.equals(action.getAction())) {
+                stack.push(action);
+            } else if (WorkingCapitalLoanBreachActionType.UNDO_RESET.equals(action.getAction()) && !stack.isEmpty()) {
+                stack.pop();
+            }
+        }
+        return stack;
+    }
+
+    public Optional<WorkingCapitalLoanBreachAction> findLatestActiveReset(final Long workingCapitalLoanId) {
+        return Optional.ofNullable(activeResets(breachActionRepository.findByWorkingCapitalLoanIdOrderById(workingCapitalLoanId)).peek());
     }
 
     public boolean hasActiveReset(final Long workingCapitalLoanId) {
@@ -57,7 +67,7 @@ public class WorkingCapitalLoanActiveBreachResetResolver {
     }
 
     public boolean existsActiveResetInPeriod(final Long workingCapitalLoanId, final LocalDate fromDate, final LocalDate toDate) {
-        return findLatestActiveReset(workingCapitalLoanId).filter(a -> DateUtils.isDateInRangeInclusive(a.getStartDate(), fromDate, toDate))
-                .isPresent();
+        return activeResets(breachActionRepository.findByWorkingCapitalLoanIdOrderById(workingCapitalLoanId)).stream()
+                .anyMatch(reset -> DateUtils.isDateInRangeInclusive(reset.getStartDate(), fromDate, toDate));
     }
 }
