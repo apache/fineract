@@ -96,7 +96,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
                     "name", name);
         }
 
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.role.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
 
