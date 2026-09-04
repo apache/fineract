@@ -103,10 +103,6 @@ public class TaxGroupMappings extends AbstractAuditableCustom {
         return this.endDate;
     }
 
-    public TaxGroup getTaxGroup() {
-        return taxGroup;
-    }
-
     public void setTaxGroup(TaxGroup taxGroup) {
         this.taxGroup = taxGroup;
     }
