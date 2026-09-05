@@ -23,7 +23,7 @@ services:
       service: postgresql
 
   localstack:
-    image: localstack/localstack:2.1
+    image: localstack/localstack:2.3
     ports:
       - "4566:4566"
       - "4510-4559:4510-4559"
