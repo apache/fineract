@@ -50,11 +50,23 @@ public final class SavingsTestData {
         private ChargeCalculationType() {}
     }
 
+    /** {@code SavingsPeriodFrequencyType}: a lock-in period, a deposit term, or a recurring deposit's frequency. */
+    public static final class PeriodFrequencyType {
+
+        public static final int DAYS = 0;
+        public static final int WEEKS = 1;
+        public static final int MONTHS = 2;
+        public static final int YEARS = 3;
+
+        private PeriodFrequencyType() {}
+    }
+
     public static final class InterestCompoundingPeriodType {
 
         public static final int DAILY = 1;
         public static final int MONTHLY = 4;
         public static final int QUARTERLY = 5;
+        public static final int BI_ANNUAL = 6;
         public static final int ANNUAL = 7;
 
         private InterestCompoundingPeriodType() {}
@@ -65,6 +77,7 @@ public final class SavingsTestData {
         public static final int DAILY = 1;
         public static final int MONTHLY = 4;
         public static final int QUARTERLY = 5;
+        public static final int BI_ANNUAL = 6;
         public static final int ANNUAL = 7;
 
         private InterestPostingPeriodType() {}
