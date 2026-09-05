@@ -40,8 +40,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SchedulerJobListener implements JobListener {
 
-    private final SchedularWritePlatformService schedularService;
     private final TenantDetailsService tenantDetailsService;
+    private final ScheduledJobReadService scheduledJobReadService;
+    private final SchedulerWritePlatformService schedulerService;
 
     @Override
     public String getName() {
@@ -71,8 +72,8 @@ public class SchedulerJobListener implements JobListener {
 
             final JobKey key = context.getJobDetail().getKey();
             final String jobKey = key.getName() + SchedulerServiceConstants.JOB_KEY_SEPERATOR + key.getGroup();
-            final ScheduledJobDetail scheduledJobDetails = this.schedularService.findByJobKey(jobKey);
-            final Long version = this.schedularService.fetchMaxVersionBy(jobKey) + 1;
+            final ScheduledJobDetail scheduledJobDetails = this.scheduledJobReadService.findByJobKey(jobKey);
+            final Long version = this.scheduledJobReadService.fetchMaxVersionBy(jobKey) + 1;
             String status = SchedulerServiceConstants.STATUS_SUCCESS;
             String errorMessage = null;
             String errorLog = null;
@@ -106,7 +107,7 @@ public class SchedulerJobListener implements JobListener {
                     .setVersion(version).setStartTime(context.getFireTime()).setEndTime(new Date()).setStatus(status)
                     .setErrorMessage(errorMessage).setTriggerType(triggerType).setErrorLog(errorLog);
 
-            this.schedularService.saveOrUpdate(scheduledJobDetails, runHistory);
+            this.schedulerService.saveOrUpdate(scheduledJobDetails, runHistory);
         } finally {
             if (contextInitialized) {
                 ThreadLocalContextUtil.reset();

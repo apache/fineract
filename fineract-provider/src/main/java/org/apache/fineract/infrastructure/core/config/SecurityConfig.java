@@ -375,6 +375,27 @@ public class SecurityConfig {
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_HOOK")
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.DELETE, "/api/*/hooks/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "DELETE_HOOK")
+                    // scheduler job - read
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/short-name/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/*/runhistory"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/jobs/short-name/*/runhistory"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_SCHEDULER")
+                    // scheduler job - execute
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/jobs/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "EXECUTEJOB_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.POST, "/api/*/jobs/short-name/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "EXECUTEJOB_SCHEDULER")
+                    // scheduler job - update
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/jobs/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_SCHEDULER")
+                    .requestMatchers(API_MATCHER.matcher(HttpMethod.PUT, "/api/*/jobs/short-name/*"))
+                    .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_WRITE, "UPDATE_SCHEDULER")
                     // template
                     .requestMatchers(API_MATCHER.matcher(HttpMethod.GET, "/api/*/templates/*"))
                     .hasAnyAuthority(ALL_FUNCTIONS, ALL_FUNCTIONS_READ, "READ_TEMPLATE")
