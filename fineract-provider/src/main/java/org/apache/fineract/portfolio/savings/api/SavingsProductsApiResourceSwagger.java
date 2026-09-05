@@ -93,6 +93,26 @@ final class SavingsProductsApiResourceSwagger {
         public BigDecimal overdraftLimit;
         @Schema(example = "21.0")
         public BigDecimal nominalAnnualInterestRateOverdraft;
+        @Schema(example = "0")
+        public Integer lockinPeriodFrequency;
+        @Schema(example = "2")
+        public Integer lockinPeriodFrequencyType;
+        @Schema(example = "100.0")
+        public BigDecimal minRequiredBalance;
+        @Schema(example = "100.0")
+        public BigDecimal minBalanceForInterestCalculation;
+        @Schema(example = "false")
+        public Boolean lienAllowed;
+        @Schema(example = "2000.0")
+        public BigDecimal maxAllowedLienLimit;
+        @Schema(example = "1")
+        public Long taxGroupId;
+        @Schema(example = "30")
+        public Long daysToInactive;
+        @Schema(example = "60")
+        public Long daysToDormancy;
+        @Schema(example = "90")
+        public Long daysToEscheat;
         @Schema(example = "1")
         public Long savingsReferenceAccountId;
         @Schema(example = "1")

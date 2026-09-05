@@ -235,6 +235,8 @@ final class SavingsAccountsApiResourceSwagger {
         public String submittedOnDate;
         @Schema(example = "123")
         public String externalId;
+        @Schema(example = "true")
+        public Boolean withdrawalFeeForTransfers;
     }
 
     @Schema(description = "PostSavingsAccountsResponse")
@@ -307,10 +309,14 @@ final class SavingsAccountsApiResourceSwagger {
         public Double nominalAnnualInterestRate;
         @Schema(example = "1")
         public Long clientId;
+        @Schema(example = "1", description = "Mandatory for a group savings account, in place of clientId")
+        public Long groupId;
         @Schema(example = "1")
         public Long productId;
         @Schema(example = "01 March 2011")
         public String submittedOnDate;
+        @Schema(example = "123")
+        public String externalId;
         @Schema(example = "true")
         public Boolean withdrawalFeeForTransfers;
     }
@@ -364,6 +370,12 @@ final class SavingsAccountsApiResourceSwagger {
         public String rejectedOnDate;
         @Schema(example = "05 September 2014")
         public String withdrawnOnDate;
+        @Schema(example = "Blocked on a court order", description = "command=block, blockCredit, blockDebit")
+        public String reasonForBlock;
+        @Schema(example = "false", description = "command=close")
+        public Boolean postInterestValidationOnClosure;
+        @Schema(example = "Approved by the branch manager")
+        public String note;
     }
 
     @Schema(description = "PostSavingsAccountsAccountIdResponse")
