@@ -267,7 +267,8 @@ public final class DepositRequestBuilders {
                 .inMultiplesOfDepositTermTypeId(request.getInMultiplesOfDepositTermTypeId())//
                 .linkAccountId(request.getLinkAccountId())//
                 .transferInterestToSavings(request.getTransferInterestToSavings())//
-                .maturityInstructionId(request.getMaturityInstructionId());
+                .maturityInstructionId(request.getMaturityInstructionId())//
+                .isRateChartOverridden(request.getIsRateChartOverridden());
     }
 
     /** An update is validated against the same parameter set as a create, so it carries the whole account body. */
@@ -301,7 +302,8 @@ public final class DepositRequestBuilders {
                 .recurringFrequencyType(request.getRecurringFrequencyType())//
                 .mandatoryRecommendedDepositAmount(request.getMandatoryRecommendedDepositAmount())//
                 .expectedFirstDepositOnDate(request.getExpectedFirstDepositOnDate())//
-                .isCalendarInherited(request.getIsCalendarInherited());
+                .isCalendarInherited(request.getIsCalendarInherited())//
+                .isRateChartOverridden(request.getIsRateChartOverridden());
     }
 
     public static PostFixedDepositAccountsAccountIdRequest approveFixedDeposit(String approvedOnDate) {
