@@ -114,7 +114,7 @@ EOF
 
 # 2. Check licenses on PR head / current branch
 echo "Checking licenses on current branch..."
-./gradlew checkLicense --init-script "$LICENSE_CHECK_INIT_SCRIPT" --continue || true
+./gradlew checkLicense --init-script "$LICENSE_CHECK_INIT_SCRIPT" --continue -x aggregateLicenseReport || true
 
 # Collect head violations
 find . -path '*/build/reports/dependency-license/dependencies-without-allowed-license.json' -exec cat {} \; \
@@ -132,7 +132,7 @@ if [ -n "$BASE_SHA" ]; then
 
     # Run check on base
     echo "Checking licenses on base branch..."
-    (cd "$WORKTREE_PATH" && ./gradlew checkLicense --init-script "$LICENSE_CHECK_INIT_SCRIPT" --continue) || true
+    (cd "$WORKTREE_PATH" && ./gradlew checkLicense --init-script "$LICENSE_CHECK_INIT_SCRIPT" --continue -x aggregateLicenseReport) || true
 
     # Collect base violations
     find "$WORKTREE_PATH" -path '*/build/reports/dependency-license/dependencies-without-allowed-license.json' -exec cat {} \; \
