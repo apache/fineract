@@ -141,6 +141,7 @@ public final class DepositsApiConstants {
     public static final String depositMaxAmountParamName = "maxDepositAmount";
     public static final String depositPeriodParamName = "depositPeriod";
     public static final String depositPeriodFrequencyIdParamName = "depositPeriodFrequencyId";
+    public static final String isRateChartOverriddenParamName = "isRateChartOverridden";
 
     // recurring parameters
     public static final String mandatoryRecommendedDepositAmountParamName = "mandatoryRecommendedDepositAmount";
@@ -338,6 +339,7 @@ public final class DepositsApiConstants {
         fixedDepositRequestData.addAll(DEPOSIT_TERM_REQUEST_DATA_PARAMETERS);
         fixedDepositRequestData.add(linkedAccountParamName);
         fixedDepositRequestData.add(transferInterestToSavingsParamName);
+        fixedDepositRequestData.add(isRateChartOverriddenParamName);
         return fixedDepositRequestData;
     }
 
@@ -348,6 +350,7 @@ public final class DepositsApiConstants {
         fixedDepositResponseData.addAll(DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS);
         fixedDepositResponseData.add(linkedAccountParamName);
         fixedDepositResponseData.add(transferInterestToSavingsParamName);
+        fixedDepositResponseData.add(isRateChartOverriddenParamName);
         return fixedDepositResponseData;
     }
 
@@ -357,6 +360,7 @@ public final class DepositsApiConstants {
         recurringDepositRequestData.addAll(PRECLOSURE_REQUEST_DATA_PARAMETERS);
         recurringDepositRequestData.addAll(DEPOSIT_TERM_REQUEST_DATA_PARAMETERS);
         recurringDepositRequestData.addAll(RECURRING_DETAILS_REQUEST_DATA_PARAMETERS);
+        recurringDepositRequestData.add(isRateChartOverriddenParamName);
         return recurringDepositRequestData;
     }
 
@@ -366,6 +370,7 @@ public final class DepositsApiConstants {
         recurringDepositResponseData.addAll(PRECLOSURE_RESPONSE_DATA_PARAMETERS);
         recurringDepositResponseData.addAll(DEPOSIT_TERM_RESPONSE_DATA_PARAMETERS);
         recurringDepositResponseData.addAll(RECURRING_DETAILS_RESPONSE_DATA_PARAMETERS);
+        recurringDepositResponseData.add(isRateChartOverriddenParamName);
         return recurringDepositResponseData;
     }
 

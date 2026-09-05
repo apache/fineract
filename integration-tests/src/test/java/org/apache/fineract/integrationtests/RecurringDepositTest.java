@@ -1332,4 +1332,58 @@ public class RecurringDepositTest extends FeignDepositTestBase {
     private LoanTestData.Journal credit(final Account account, final BigDecimal amount) {
         return LoanTestData.Journal.credit(account.getAccountID().longValue(), amount.doubleValue());
     }
+
+    @Test
+    public void testRecurringDepositAccountWithRateChartOverriddenEndToEnd() {
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        Calendar todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -3);
+        final String VALID_FROM = dateFormat.format(todaysDate.getTime());
+        todaysDate.add(Calendar.YEAR, 10);
+        final String VALID_TO = dateFormat.format(todaysDate.getTime());
+
+        todaysDate = Calendar.getInstance();
+        todaysDate.add(Calendar.MONTH, -1);
+        final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String APPROVED_ON_DATE = dateFormat.format(todaysDate.getTime());
+        final String ACTIVATION_DATE = dateFormat.format(todaysDate.getTime());
+        final String expectedFirstDepositOnDate = dateFormat.format(todaysDate.getTime());
+
+        Long clientId = clientHelper.createClient();
+        Assertions.assertNotNull(clientId);
+
+        Long recurringDepositProductId = createRecurringDepositProduct(VALID_FROM, VALID_TO, NONE);
+        Assertions.assertNotNull(recurringDepositProductId);
+
+        final BigDecimal customInterestRate = new BigDecimal("10.0");
+        PostRecurringDepositAccountsRequest request = DepositRequestBuilders
+                .recurringDepositAccount(clientId, recurringDepositProductId, SUBMITTED_ON_DATE, expectedFirstDepositOnDate, WHOLE_TERM)
+                .isRateChartOverridden(true).nominalAnnualInterestRate(customInterestRate);
+
+        Long recurringDepositAccountId = recurringDepositHelper.submitApplication(request).getSavingsId();
+        Assertions.assertNotNull(recurringDepositAccountId);
+
+        // GET and verify custom rate and flag
+        GetRecurringDepositAccountsAccountIdResponse account = recurringDepositHelper.getAccount(recurringDepositAccountId);
+        Assertions.assertTrue(Boolean.TRUE.equals(account.getIsRateChartOverridden()), "isRateChartOverridden should be true");
+        Assertions.assertEquals(0, customInterestRate.compareTo(account.getNominalAnnualInterestRate()));
+
+        // Approve and activate
+        recurringDepositHelper.approve(recurringDepositAccountId, APPROVED_ON_DATE);
+        DepositTestValidators.verifyRecurringDepositIsApproved(statusOf(recurringDepositAccountId));
+
+        recurringDepositHelper.activate(recurringDepositAccountId, ACTIVATION_DATE);
+        DepositTestValidators.verifyRecurringDepositIsActive(statusOf(recurringDepositAccountId));
+
+        // Deposit installment
+        BigDecimal depositAmount = recurringDepositHelper.getAccount(recurringDepositAccountId).getMandatoryRecommendedDepositAmount();
+        Assertions.assertNotNull(
+                recurringDepositHelper.deposit(recurringDepositAccountId, expectedFirstDepositOnDate, depositAmount).getResourceId());
+
+        // Calculate interest: must retain custom rate 10.0%
+        Assertions.assertNotNull(recurringDepositHelper.calculateInterest(recurringDepositAccountId));
+        account = recurringDepositHelper.getAccount(recurringDepositAccountId);
+        Assertions.assertTrue(Boolean.TRUE.equals(account.getIsRateChartOverridden()), "isRateChartOverridden should remain true");
+        Assertions.assertEquals(0, customInterestRate.compareTo(account.getNominalAnnualInterestRate()));
+    }
 }
