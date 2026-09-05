@@ -125,7 +125,7 @@ public final class DepositsApiConstants {
     public static final String interestFreePeriodFrequencyType = "interestFreePeriodFrequencyType";
     public static final String preClosurePenalInterestOnType = "preClosurePenalInterestOnType";
 
-    // term paramters
+    // term parameters
     public static final String minDepositTermParamName = "minDepositTerm";
     public static final String maxDepositTermParamName = "maxDepositTerm";
     public static final String minDepositTermTypeIdParamName = "minDepositTermTypeId";
