@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.google.gson.Gson;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
@@ -56,6 +57,7 @@ public class ClientTest {
     private static final SecureRandom rand = new SecureRandom();
 
     private ResponseSpecification responseSpec;
+    private ResponseSpecification responseSpecForValidationError;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
     private GlobalConfigurationHelper globalConfigurationHelper;
@@ -66,6 +68,8 @@ public class ClientTest {
         requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        // TODO: figure out why Jakarta validation throws 403 instead of 400 (same note as StaffTest)
+        responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
         clientHelper = new ClientHelper(requestSpec, responseSpec);
         globalConfigurationHelper = new GlobalConfigurationHelper();
     }
@@ -74,6 +78,34 @@ public class ClientTest {
     public void tearDown() {
         globalConfigurationHelper.resetAllDefaultGlobalConfigurations();
         globalConfigurationHelper.verifyAllDefaultGlobalConfigurations();
+    }
+
+    @Test
+    public void testClientCreateWithInvalidMobileNoValidationError() {
+        // given
+        final HashMap<String, Object> map = ClientHelper.setInitialClientValues("1", ClientHelper.LEGALFORM_ID_PERSON);
+        map.put("active", "true");
+        map.put("activationDate", ClientHelper.DEFAULT_DATE);
+        map.put("mobileNo", "invalid-phone-###");
+
+        // when/then: expects 400 (validation error), not 500 (would indicate the
+        // FineractPhoneProperties NPE regression from FINERACT-405 has resurfaced)
+        Utils.performServerPost(requestSpec, responseSpecForValidationError, "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER,
+                new Gson().toJson(map));
+    }
+
+    @Test
+    public void testClientUpdateWithInvalidMobileNoValidationError() {
+        // given
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("mobileNo", "invalid-phone-###");
+        map.put("locale", "en");
+
+        // when/then: expects 400 (validation error), not 500 (would indicate the
+        // FineractPhoneProperties NPE regression from FINERACT-405 has resurfaced)
+        final String updateClientUrl = "/fineract-provider/api/v1/clients/" + clientId + "?" + Utils.TENANT_IDENTIFIER;
+        Utils.performServerPut(requestSpec, responseSpecForValidationError, updateClientUrl, new Gson().toJson(map));
     }
 
     @Test
