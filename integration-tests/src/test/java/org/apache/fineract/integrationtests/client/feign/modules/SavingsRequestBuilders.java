@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
+import org.apache.fineract.client.models.PostSavingsAccountsGsimClient;
+import org.apache.fineract.client.models.PostSavingsAccountsGsimSavings;
 import org.apache.fineract.client.models.PostSavingsAccountsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
@@ -200,6 +202,50 @@ public final class SavingsRequestBuilders {
                 .clientId(clientId)//
                 .productId(productId)//
                 .submittedOnDate(submittedOnDate)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .locale(SavingsTestData.LOCALE);
+    }
+
+    /** A group application carries a groupId where an individual one carries a clientId. */
+    public static PostSavingsAccountsRequest submitGroupSavingsApplication(Long groupId, Long productId, String submittedOnDate) {
+        return new PostSavingsAccountsRequest()//
+                .groupId(groupId)//
+                .productId(productId)//
+                .submittedOnDate(submittedOnDate)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .locale(SavingsTestData.LOCALE);
+    }
+
+    public static PutSavingsAccountsAccountIdRequest updateGroupSavingsApplication(Long groupId, Long productId, String submittedOnDate) {
+        return new PutSavingsAccountsAccountIdRequest()//
+                .groupId(groupId)//
+                .productId(productId)//
+                .submittedOnDate(submittedOnDate)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .locale(SavingsTestData.LOCALE);
+    }
+
+    /** One member of a GSIM application; exactly one of them is the parent the commands then act through. */
+    public static PostSavingsAccountsGsimClient gsimClient(Long clientId, Long groupId, Long productId, String submittedOnDate,
+            boolean isParentAccount) {
+        return new PostSavingsAccountsGsimClient()//
+                .clientId(clientId)//
+                .groupId(groupId)//
+                .productId(productId)//
+                .submittedOnDate(submittedOnDate)//
+                .isParentAccount(isParentAccount)//
+                .isGSIM("true")//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .locale(SavingsTestData.LOCALE);
+    }
+
+    public static PostSavingsAccountsGsimSavings gsimSavings(Long childAccountId, Long paymentTypeId, String transactionAmount,
+            String transactionDate) {
+        return new PostSavingsAccountsGsimSavings()//
+                .childAccountId(childAccountId)//
+                .paymentTypeId(paymentTypeId)//
+                .transactionAmount(new BigDecimal(transactionAmount))//
+                .transactionDate(transactionDate)//
                 .dateFormat(SavingsTestData.DATETIME_PATTERN)//
                 .locale(SavingsTestData.LOCALE);
     }
