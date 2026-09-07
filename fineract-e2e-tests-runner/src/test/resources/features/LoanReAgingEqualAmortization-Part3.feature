@@ -2109,3 +2109,303 @@ Feature: LoanReAgingEqualAmortization - Part3
       | 21 April 2026    | Down Payment     | 30.0   | 30.0      | 0.0      | 0.0  | 0.0       | 90.0         | true     |
       | 19 May 2026      | Repayment        | 18.0   | 18.0      | 0.0      | 0.0  | 0.0       | 102.0        | false    |
       | 20 May 2026      | Re-age           | 102.0  | 102.0     | 0.0      | 0.0  | 0.0       | 0.0          | false    |
+
+  @TestRailId:C102411 @AdvancedPaymentAllocation
+  Scenario: Re-aging with equal amortization payable interest behaviour considers the down payment installment while having added goodwill credit transaction previously - UC4
+    When Admin sets the business date to "21 May 2026"
+    When Admin creates a client with random data
+    When Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT | 21 May 2026       | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "21 May 2026" with "600" amount and expected disbursement date on "21 May 2026"
+    When Admin successfully disburse the loan on "21 May 2026" with "400" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 May 2026    |               | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 21 May 2026    | 21 May 2026   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2026   |               | 200.83          | 99.17         | 2.5      | 0.0  | 0.0       | 101.67 | 0.0   | 0.0        | 0.0  | 101.67      |
+      | 3  | 30   | 21 July 2026   |               | 100.83          | 100.0         | 1.67     | 0.0  | 0.0       | 101.67 | 0.0   | 0.0        | 0.0  | 101.67      |
+      | 4  | 31   | 21 August 2026 |               | 0.0             | 100.83        | 0.84     | 0.0  | 0.0       | 101.67 | 0.0   | 0.0        | 0.0  | 101.67      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 400.0         | 5.01     | 0.0  | 0.0       | 405.01 | 100.0 | 0.0        | 0.0  | 305.01      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 21 May 2026      | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 21 May 2026      | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        | false    |
+# ---- goodwill credit with last installment payment allocation strategy trn  --- #
+    When Admin sets the business date to "10 June 2026"
+    When Customer makes "GOODWILL_CREDIT" transaction with "AUTOPAY" payment type on "10 June 2026" with 2.8 EUR transaction amount and system-generated Idempotency key
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 May 2026    |               | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 21 May 2026    | 21 May 2026   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2026   |               | 200.82          | 99.18         | 2.49     | 0.0  | 0.0       | 101.67 | 0.0   | 0.0        | 0.0  | 101.67      |
+      | 3  | 30   | 21 July 2026   |               | 100.8           | 100.02        | 1.65     | 0.0  | 0.0       | 101.67 | 0.0   | 0.0        | 0.0  | 101.67      |
+      | 4  | 31   | 21 August 2026 |               | 0.0             | 100.8         | 0.82     | 0.0  | 0.0       | 101.62 | 2.8   | 2.8        | 0.0  | 98.82       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 400.0         | 4.96     | 0.0  | 0.0       | 404.96 | 102.8 | 2.8        | 0.0  | 302.16      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 21 May 2026      | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 21 May 2026      | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        | false    |
+      | 10 June 2026     | Goodwill Credit  | 2.8    | 2.8       | 0.0      | 0.0  | 0.0       | 297.2        | false    |
+    When Admin sets the business date to "25 June 2026"
+    When Admin successfully disburse the loan on "25 June 2026" with "200" EUR transaction amount
+    Then Loan Repayment schedule has 5 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 May 2026    |               | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 21 May 2026    | 21 May 2026   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2026   |               | 200.82          | 99.18         | 2.49     | 0.0  | 0.0       | 101.67 | 50.0  | 0.0        | 50.0 | 51.67       |
+      |    |      | 25 June 2026   |               | 200.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 3  | 0    | 25 June 2026   |               | 350.82          | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 0.0   | 0.0        | 0.0  | 50.0        |
+      | 4  | 30   | 21 July 2026   |               | 176.14          | 174.68        | 2.84     | 0.0  | 0.0       | 177.52 | 0.0   | 0.0        | 0.0  | 177.52      |
+      | 5  | 31   | 21 August 2026 |               | 0.0             | 176.14        | 1.44     | 0.0  | 0.0       | 177.58 | 2.8   | 2.8        | 0.0  | 174.78      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 600.0         | 6.77     | 0.0  | 0.0       | 606.77 | 152.8 | 2.8        | 50.0 | 453.97      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 21 May 2026      | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 21 May 2026      | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        | false    |
+      | 10 June 2026     | Goodwill Credit  | 2.8    | 2.8       | 0.0      | 0.0  | 0.0       | 297.2        | false    |
+      | 25 June 2026     | Disbursement     | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 497.2        | false    |
+      | 25 June 2026     | Down Payment     | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 447.2        | false    |
+#  --- re-age loan --- #
+    When Admin sets the business date to "10 July 2026"
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate    | numberOfInstallments | reAgeInterestHandling               |
+      | 1               | MONTHS        | 10 July 2026 | 10                   | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+    Then Loan Repayment schedule has 14 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 May 2026       |               | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 21 May 2026       | 21 May 2026   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2026      | 10 July 2026  | 250.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 50.0  | 0.0        | 50.0 | 0.0         |
+      |    |      | 25 June 2026      |               | 200.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 3  | 0    | 25 June 2026      |               | 400.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 0.0   | 0.0        | 0.0  | 50.0        |
+      | 4  | 15   | 10 July 2026      | 10 July 2026  | 397.2           | 2.8           | 0.0      | 0.0  | 0.0       | 2.8    | 2.8   | 2.8        | 0.0  | 0.0         |
+      | 5  | 0    | 10 July 2026      |               | 357.48          | 39.72         | 0.45     | 0.0  | 0.0       | 40.17  | 0.0   | 0.0        | 0.0  | 40.17       |
+      | 6  | 31   | 10 August 2026    |               | 317.76          | 39.72         | 0.45     | 0.0  | 0.0       | 40.17  | 0.0   | 0.0        | 0.0  | 40.17       |
+      | 7  | 31   | 10 September 2026 |               | 278.04          | 39.72         | 0.45     | 0.0  | 0.0       | 40.17  | 0.0   | 0.0        | 0.0  | 40.17       |
+      | 8  | 30   | 10 October 2026   |               | 238.32          | 39.72         | 0.45     | 0.0  | 0.0       | 40.17  | 0.0   | 0.0        | 0.0  | 40.17       |
+      | 9  | 31   | 10 November 2026  |               | 198.6           | 39.72         | 0.45     | 0.0  | 0.0       | 40.17  | 0.0   | 0.0        | 0.0  | 40.17       |
+      | 10 | 30   | 10 December 2026  |               | 158.88          | 39.72         | 0.45     | 0.0  | 0.0       | 40.17  | 0.0   | 0.0        | 0.0  | 40.17       |
+      | 11 | 31   | 10 January 2027   |               | 119.16          | 39.72         | 0.45     | 0.0  | 0.0       | 40.17  | 0.0   | 0.0        | 0.0  | 40.17       |
+      | 12 | 31   | 10 February 2027  |               | 79.44           | 39.72         | 0.45     | 0.0  | 0.0       | 40.17  | 0.0   | 0.0        | 0.0  | 40.17       |
+      | 13 | 28   | 10 March 2027     |               | 39.72           | 39.72         | 0.45     | 0.0  | 0.0       | 40.17  | 0.0   | 0.0        | 0.0  | 40.17       |
+      | 14 | 31   | 10 April 2027     |               | 0.0             | 39.72         | 0.42     | 0.0  | 0.0       | 40.14  | 0.0   | 0.0        | 0.0  | 40.14       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 600.0         | 4.47     | 0.0  | 0.0       | 604.47 | 152.8 | 2.8        | 50.0 | 451.67      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 21 May 2026      | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 21 May 2026      | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        | false    |
+      | 10 June 2026     | Goodwill Credit  | 2.8    | 2.8       | 0.0      | 0.0  | 0.0       | 297.2        | false    |
+      | 25 June 2026     | Disbursement     | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 497.2        | false    |
+      | 25 June 2026     | Down Payment     | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 447.2        | false    |
+      | 10 July 2026     | Re-age           | 401.67 | 397.2     | 4.47     | 0.0  | 0.0       | 0.0          | false    |
+    When Loan Pay-off is made on "10 July 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C102412 @AdvancedPaymentAllocation
+  Scenario: Re-aging with equal amortization payable interest behaviour considers the down payment installment while having added repayment transaction previously - UC5
+    When Admin sets the business date to "21 May 2026"
+    When Admin creates a client with random data
+    When Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "DEFAULT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT | 21 May 2026       | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "21 May 2026" with "600" amount and expected disbursement date on "21 May 2026"
+    When Admin successfully disburse the loan on "21 May 2026" with "400" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 May 2026    |               | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 21 May 2026    | 21 May 2026   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2026   |               | 200.83          | 99.17         | 2.5      | 0.0  | 0.0       | 101.67 | 0.0   | 0.0        | 0.0  | 101.67      |
+      | 3  | 30   | 21 July 2026   |               | 100.83          | 100.0         | 1.67     | 0.0  | 0.0       | 101.67 | 0.0   | 0.0        | 0.0  | 101.67      |
+      | 4  | 31   | 21 August 2026 |               | 0.0             | 100.83        | 0.84     | 0.0  | 0.0       | 101.67 | 0.0   | 0.0        | 0.0  | 101.67      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 400.0         | 5.01     | 0.0  | 0.0       | 405.01 | 100.0 | 0.0        | 0.0  | 305.01      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 21 May 2026      | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 21 May 2026      | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        | false    |
+    When Admin sets the business date to "10 June 2026"
+    And Customer makes "AUTOPAY" repayment on "10 June 2026" with 100 EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 May 2026    |               | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 21 May 2026    | 21 May 2026   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2026   |               | 200.53          | 99.47         | 2.2      | 0.0  | 0.0       | 101.67 | 0.0   | 0.0        | 0.0  | 101.67      |
+      | 3  | 30   | 21 July 2026   |               | 100.0           | 100.53        | 0.84     | 0.0  | 0.0       | 101.37 | 0.0   | 0.0        | 0.0  | 101.37      |
+      | 4  | 31   | 21 August 2026 | 10 June 2026  | 0.0             | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 100.0      | 0.0  | 0.0         |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 400.0         | 3.04     | 0.0  | 0.0       | 403.04 | 200.0 | 100.0      | 0.0  | 203.04      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 21 May 2026      | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 21 May 2026      | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        | false    |
+      | 10 June 2026     | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 200.0        | false    |
+    When Admin sets the business date to "25 June 2026"
+    When Admin successfully disburse the loan on "25 June 2026" with "200" EUR transaction amount
+    Then Loan Repayment schedule has 5 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 May 2026    |               | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 21 May 2026    | 21 May 2026   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2026   |               | 200.53          | 99.47         | 2.2      | 0.0  | 0.0       | 101.67 | 50.0  | 0.0        | 50.0 | 51.67       |
+      |    |      | 25 June 2026   |               | 200.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 3  | 0    | 25 June 2026   |               | 350.53          | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 0.0   | 0.0        | 0.0  | 50.0        |
+      | 4  | 30   | 21 July 2026   |               | 175.04          | 175.49        | 2.03     | 0.0  | 0.0       | 177.52 | 0.0   | 0.0        | 0.0  | 177.52      |
+      | 5  | 31   | 21 August 2026 |               | 0.0             | 175.04        | 0.62     | 0.0  | 0.0       | 175.66 | 100.0 | 100.0      | 0.0  | 75.66       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 600.0         | 4.85     | 0.0  | 0.0       | 604.85 | 250.0 | 100.0      | 50.0 | 354.85      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 21 May 2026      | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 21 May 2026      | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        | false    |
+      | 10 June 2026     | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 200.0        | false    |
+      | 25 June 2026     | Disbursement     | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 25 June 2026     | Down Payment     | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 350.0        | false    |
+#  --- re-age loan --- #
+    When Admin sets the business date to "10 July 2026"
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate    | numberOfInstallments | reAgeInterestHandling               |
+      | 1               | MONTHS        | 10 July 2026 | 10                   | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+    Then Loan Repayment schedule has 14 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 May 2026       |               | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 21 May 2026       | 21 May 2026   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2026      | 10 July 2026  | 250.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 50.0  | 0.0        | 50.0 | 0.0         |
+      |    |      | 25 June 2026      |               | 200.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 3  | 0    | 25 June 2026      |               | 400.0           | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 0.0   | 0.0        | 0.0  | 50.0        |
+      | 4  | 15   | 10 July 2026      | 10 July 2026  | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 100.0      | 0.0  | 0.0         |
+      | 5  | 0    | 10 July 2026      |               | 270.0           | 30.0          | 0.37     | 0.0  | 0.0       | 30.37  | 0.0   | 0.0        | 0.0  | 30.37       |
+      | 6  | 31   | 10 August 2026    |               | 240.0           | 30.0          | 0.37     | 0.0  | 0.0       | 30.37  | 0.0   | 0.0        | 0.0  | 30.37       |
+      | 7  | 31   | 10 September 2026 |               | 210.0           | 30.0          | 0.37     | 0.0  | 0.0       | 30.37  | 0.0   | 0.0        | 0.0  | 30.37       |
+      | 8  | 30   | 10 October 2026   |               | 180.0           | 30.0          | 0.37     | 0.0  | 0.0       | 30.37  | 0.0   | 0.0        | 0.0  | 30.37       |
+      | 9  | 31   | 10 November 2026  |               | 150.0           | 30.0          | 0.37     | 0.0  | 0.0       | 30.37  | 0.0   | 0.0        | 0.0  | 30.37       |
+      | 10 | 30   | 10 December 2026  |               | 120.0           | 30.0          | 0.37     | 0.0  | 0.0       | 30.37  | 0.0   | 0.0        | 0.0  | 30.37       |
+      | 11 | 31   | 10 January 2027   |               | 90.0            | 30.0          | 0.37     | 0.0  | 0.0       | 30.37  | 0.0   | 0.0        | 0.0  | 30.37       |
+      | 12 | 31   | 10 February 2027  |               | 60.0            | 30.0          | 0.37     | 0.0  | 0.0       | 30.37  | 0.0   | 0.0        | 0.0  | 30.37       |
+      | 13 | 28   | 10 March 2027     |               | 30.0            | 30.0          | 0.37     | 0.0  | 0.0       | 30.37  | 0.0   | 0.0        | 0.0  | 30.37       |
+      | 14 | 31   | 10 April 2027     |               | 0.0             | 30.0          | 0.34     | 0.0  | 0.0       | 30.34  | 0.0   | 0.0        | 0.0  | 30.34       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 600.0         | 3.67     | 0.0  | 0.0       | 603.67 | 250.0 | 100.0      | 50.0 | 353.67     |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 21 May 2026      | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 21 May 2026      | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        | false    |
+      | 10 June 2026     | Repayment        | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 200.0        | false    |
+      | 25 June 2026     | Disbursement     | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 25 June 2026     | Down Payment     | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 350.0        | false    |
+      | 10 July 2026     | Re-age           | 303.67 | 300.0     | 3.67     | 0.0  | 0.0       | 0.0          | false    |
+    When Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Loan Pay-off is made on "10 July 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C102413 @AdvancedPaymentAllocation
+  Scenario: Re-aging with equal amortization full interest behaviour considers the down payment installment while having added MIR transaction previously - UC6
+    When Admin sets the business date to "21 May 2026"
+    When Admin creates a client with random data
+    When Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT | 21 May 2026       | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "21 May 2026" with "600" amount and expected disbursement date on "21 May 2026"
+    When Admin successfully disburse the loan on "21 May 2026" with "400" EUR transaction amount
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 May 2026    |               | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 21 May 2026    | 21 May 2026   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2026   |               | 200.83          | 99.17         | 2.5      | 0.0  | 0.0       | 101.67 | 0.0   | 0.0        | 0.0  | 101.67      |
+      | 3  | 30   | 21 July 2026   |               | 100.83          | 100.0         | 1.67     | 0.0  | 0.0       | 101.67 | 0.0   | 0.0        | 0.0  | 101.67      |
+      | 4  | 31   | 21 August 2026 |               | 0.0             | 100.83        | 0.84     | 0.0  | 0.0       | 101.67 | 0.0   | 0.0        | 0.0  | 101.67      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 400.0         | 5.01     | 0.0  | 0.0       | 405.01 | 100.0 | 0.0        | 0.0  | 305.01      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 21 May 2026      | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 21 May 2026      | Down Payment     | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        | false    |
+    When Admin sets the business date to "10 June 2026"
+    When Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 June 2026" with 58 EUR transaction amount and system-generated Idempotency key
+    Then Loan Repayment schedule has 4 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 May 2026    |               | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 21 May 2026    | 21 May 2026   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2026   |               | 200.66          | 99.34         | 2.33     | 0.0  | 0.0       | 101.67 | 19.33 | 19.33      | 0.0  | 82.34      |
+      | 3  | 30   | 21 July 2026   |               | 100.34          | 100.32        | 1.35     | 0.0  | 0.0       | 101.67 | 19.33 | 19.33      | 0.0  | 82.34       |
+      | 4  | 31   | 21 August 2026 |               | 0.0             | 100.34        | 0.67     | 0.0  | 0.0       | 101.01 | 19.34 | 19.34      | 0.0  | 81.67       |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 400.0         | 4.35     | 0.0  | 0.0       | 404.35 | 158.0 | 58.0       | 0.0  | 246.35      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 21 May 2026      | Disbursement           | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 21 May 2026      | Down Payment           | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        | false    |
+      | 10 June 2026     | Merchant Issued Refund | 58.0   | 58.0      | 0.0      | 0.0  | 0.0       | 242.0        | false    |
+    When Admin sets the business date to "25 June 2026"
+    When Admin successfully disburse the loan on "25 June 2026" with "200" EUR transaction amount
+    Then Loan Repayment schedule has 5 periods, with the following data for periods:
+      | Nr | Days | Date           | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 May 2026    |               | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 21 May 2026    | 21 May 2026   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2026   |               | 200.66          | 99.34         | 2.33     | 0.0  | 0.0       | 101.67 | 69.33 | 19.33      | 50.0 | 32.34      |
+      |    |      | 25 June 2026   |               | 200.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 3  | 0    | 25 June 2026   |               | 350.66          | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 0.0   | 0.0        | 0.0  | 50.0        |
+      | 4  | 30   | 21 July 2026   |               | 175.66          | 175.0         | 2.52     | 0.0  | 0.0       | 177.52 | 19.33 | 19.33      | 0.0  | 158.19      |
+      | 5  | 31   | 21 August 2026 |               | 0.0             | 175.66        | 1.3      | 0.0  | 0.0       | 176.96 | 19.34 | 19.34      | 0.0  | 157.62      |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 600.0         | 6.15     | 0.0  | 0.0       | 606.15 | 208.0 | 58.0       | 50.0 | 398.15      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 21 May 2026      | Disbursement           | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 21 May 2026      | Down Payment           | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        | false    |
+      | 10 June 2026     | Merchant Issued Refund | 58.0   | 58.0      | 0.0      | 0.0  | 0.0       | 242.0        | false    |
+      | 25 June 2026     | Disbursement           | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 442.0        | false    |
+      | 25 June 2026     | Down Payment           | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 392.0        | false    |
+#  --- re-age loan --- #
+    When Admin sets the business date to "10 July 2026"
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate    | numberOfInstallments | reAgeInterestHandling            |
+      | 1               | MONTHS        | 10 July 2026 | 10                   | EQUAL_AMORTIZATION_FULL_INTEREST |
+    Then Loan Repayment schedule has 14 periods, with the following data for periods:
+      | Nr | Days | Date              | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      |    |      | 21 May 2026       |               | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 1  | 0    | 21 May 2026       | 21 May 2026   | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 0.0  | 0.0         |
+      | 2  | 31   | 21 June 2026      | 10 July 2026  | 230.67          | 69.33         | 0.0      | 0.0  | 0.0       | 69.33  | 69.33 | 19.33      | 50.0 | 0.0         |
+      |    |      | 25 June 2026      |               | 200.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 3  | 0    | 25 June 2026      |               | 380.67          | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 0.0   | 0.0        | 0.0  | 50.0        |
+      | 4  | 15   | 10 July 2026      | 10 July 2026  | 342.0           | 38.67         | 0.0      | 0.0  | 0.0       | 38.67  | 38.67 | 38.67      | 0.0  | 0.0         |
+      | 5  | 0    | 10 July 2026      |               | 307.8           | 34.2          | 0.63     | 0.0  | 0.0       | 34.83  | 0.0   | 0.0        | 0.0  | 34.83       |
+      | 6  | 31   | 10 August 2026    |               | 273.6           | 34.2          | 0.63     | 0.0  | 0.0       | 34.83  | 0.0   | 0.0        | 0.0  | 34.83       |
+      | 7  | 31   | 10 September 2026 |               | 239.4           | 34.2          | 0.63     | 0.0  | 0.0       | 34.83  | 0.0   | 0.0        | 0.0  | 34.83       |
+      | 8  | 30   | 10 October 2026   |               | 205.2           | 34.2          | 0.63     | 0.0  | 0.0       | 34.83  | 0.0   | 0.0        | 0.0  | 34.83       |
+      | 9  | 31   | 10 November 2026  |               | 171.0           | 34.2          | 0.63     | 0.0  | 0.0       | 34.83  | 0.0   | 0.0        | 0.0  | 34.83       |
+      | 10 | 30   | 10 December 2026  |               | 136.8           | 34.2          | 0.63     | 0.0  | 0.0       | 34.83  | 0.0   | 0.0        | 0.0  | 34.83       |
+      | 11 | 31   | 10 January 2027   |               | 102.6           | 34.2          | 0.63     | 0.0  | 0.0       | 34.83  | 0.0   | 0.0        | 0.0  | 34.83       |
+      | 12 | 31   | 10 February 2027  |               | 68.4            | 34.2          | 0.63     | 0.0  | 0.0       | 34.83  | 0.0   | 0.0        | 0.0  | 34.83       |
+      | 13 | 28   | 10 March 2027     |               | 34.2            | 34.2          | 0.63     | 0.0  | 0.0       | 34.83  | 0.0   | 0.0        | 0.0  | 34.83       |
+      | 14 | 31   | 10 April 2027     |               | 0.0             | 34.2          | 0.6      | 0.0  | 0.0       | 34.8   | 0.0   | 0.0        | 0.0  | 34.8        |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 600.0         | 6.27     | 0.0  | 0.0       | 606.27 | 208.0 | 58.0       | 50.0 | 398.27      |
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 21 May 2026      | Disbursement           | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 21 May 2026      | Down Payment           | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        | false    |
+      | 10 June 2026     | Merchant Issued Refund | 58.0   | 58.0      | 0.0      | 0.0  | 0.0       | 242.0        | false    |
+      | 25 June 2026     | Disbursement           | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 442.0        | false    |
+      | 25 June 2026     | Down Payment           | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 392.0        | false    |
+      | 10 July 2026     | Re-age                 | 348.27 | 342.0     | 6.27     | 0.0  | 0.0       | 0.0          | false    |
+    When Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "DEFAULT" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Loan Pay-off is made on "10 July 2026"
+    Then Loan is closed with zero outstanding balance and it's all installments have obligations met
