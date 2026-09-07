@@ -202,6 +202,9 @@ final class SavingsAccountTransactionsApiResourceSwagger {
 
         private PostSavingsAccountTransactionsRequest() {}
 
+        @Schema(description = "command=gsimDeposit: the child accounts of a GSIM parent to deposit into, and how much into each")
+        public List<SavingsAccountsApiResourceSwagger.PostSavingsAccountsGsimRequest.PostSavingsAccountsGsimSavings> savingsArray;
+
         @Schema(example = "27 March 2022")
         public String transactionDate;
         @Schema(example = "1000")
