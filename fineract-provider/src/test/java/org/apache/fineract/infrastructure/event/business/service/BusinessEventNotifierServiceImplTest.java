@@ -19,6 +19,7 @@
 package org.apache.fineract.infrastructure.event.business.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -229,9 +230,10 @@ class BusinessEventNotifierServiceImplTest {
         // given
         configureExternalEventsProperties(true);
         when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
-        underTest.startExternalEventRecording();
         // when
-        underTest.stopExternalEventRecording();
+        underTest.withExternalEventRecording(() -> {
+            // blank on purpose
+        });
         // then
         verify(externalEventService, never()).postEvent(any());
     }
@@ -244,10 +246,8 @@ class BusinessEventNotifierServiceImplTest {
         MockBusinessEvent event = new MockBusinessEvent();
         BusinessEventListener<MockBusinessEvent> postListener = mockListener();
         underTest.addPostBusinessEventListener(MockBusinessEvent.class, postListener);
-        underTest.startExternalEventRecording();
-        underTest.notifyPostBusinessEvent(event);
         // when
-        underTest.stopExternalEventRecording();
+        underTest.withExternalEventRecording(() -> underTest.notifyPostBusinessEvent(event));
         // then
         verify(postListener).onBusinessEvent(event);
         verify(externalEventService).postEvent(event);
@@ -262,11 +262,11 @@ class BusinessEventNotifierServiceImplTest {
         MockBusinessEvent event2 = new MockBusinessEvent();
         BusinessEventListener<MockBusinessEvent> postListener = mockListener();
         underTest.addPostBusinessEventListener(MockBusinessEvent.class, postListener);
-        underTest.startExternalEventRecording();
-        underTest.notifyPostBusinessEvent(event);
-        underTest.notifyPostBusinessEvent(event2);
         // when
-        underTest.stopExternalEventRecording();
+        underTest.withExternalEventRecording(() -> {
+            underTest.notifyPostBusinessEvent(event);
+            underTest.notifyPostBusinessEvent(event2);
+        });
         // then
         verify(postListener).onBusinessEvent(event);
         verify(postListener).onBusinessEvent(event2);
@@ -277,6 +277,118 @@ class BusinessEventNotifierServiceImplTest {
         assertThat(capturedEvent.get()).hasSize(2);
         assertThat(capturedEvent.get().get(0)).isEqualTo(event);
         assertThat(capturedEvent.get().get(1)).isEqualTo(event2);
+    }
+
+    @Test
+    public void testNestedRecordingWindowShouldMergeIntoASingleBulkEventInsteadOfFlushingEarly() {
+        // given
+        configureExternalEventsProperties(true);
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
+        MockBusinessEvent beforeNested = new MockBusinessEvent();
+        MockBusinessEvent nested = new MockBusinessEvent();
+        MockBusinessEvent afterNested = new MockBusinessEvent();
+        // when
+        underTest.withExternalEventRecording(() -> {
+            underTest.notifyPostBusinessEvent(beforeNested);
+            underTest.withExternalEventRecording(() -> underTest.notifyPostBusinessEvent(nested));
+            underTest.notifyPostBusinessEvent(afterNested);
+        });
+        // then the inner window posts nothing of its own and the events raised after it are still recorded
+        ArgumentCaptor<BulkBusinessEvent> argumentCaptor = ArgumentCaptor.forClass(BulkBusinessEvent.class);
+        verify(externalEventService).postEvent(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue().get()).containsExactly(beforeNested, nested, afterNested);
+    }
+
+    @Test
+    public void testNestedRecordingWindowShouldNotPostAnythingOfItsOwn() {
+        // given
+        configureExternalEventsProperties(true);
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
+        MockBusinessEvent nested = new MockBusinessEvent();
+        // when
+        underTest.withExternalEventRecording(() -> underTest.withExternalEventRecording(() -> {
+            underTest.notifyPostBusinessEvent(nested);
+            // nothing may be posted while the enclosing window is still open
+            verify(externalEventService, never()).postEvent(any());
+        }));
+        // then
+        verify(externalEventService).postEvent(nested);
+    }
+
+    @Test
+    public void testFailingRecordingWindowShouldAbandonTheRecordingAndRethrow() {
+        // given
+        configureExternalEventsProperties(true);
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
+        MockBusinessEvent event = new MockBusinessEvent();
+        RuntimeException failure = new RuntimeException("boom");
+        // when
+        assertThatThrownBy(() -> underTest.withExternalEventRecording(() -> {
+            underTest.notifyPostBusinessEvent(event);
+            throw failure;
+        })).isSameAs(failure);
+        // then
+        verify(externalEventService, never()).postEvent(any());
+    }
+
+    @Test
+    public void testFailingNestedRecordingWindowShouldAbandonTheWholeRecording() {
+        // given
+        configureExternalEventsProperties(true);
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
+        MockBusinessEvent outerEvent = new MockBusinessEvent();
+        RuntimeException failure = new RuntimeException("boom");
+        // when
+        assertThatThrownBy(() -> underTest.withExternalEventRecording(() -> {
+            underTest.notifyPostBusinessEvent(outerEvent);
+            underTest.withExternalEventRecording(() -> {
+                throw failure;
+            });
+        })).isSameAs(failure);
+        // then
+        verify(externalEventService, never()).postEvent(any());
+    }
+
+    @Test
+    public void testEnclosingWindowShouldSurviveANestedWindowWhoseFailureIsCaught() {
+        // given
+        configureExternalEventsProperties(true);
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
+        MockBusinessEvent beforeNested = new MockBusinessEvent();
+        MockBusinessEvent abandoned = new MockBusinessEvent();
+        MockBusinessEvent afterNested = new MockBusinessEvent();
+        // when a frame between the two windows swallows the failure and carries on
+        underTest.withExternalEventRecording(() -> {
+            underTest.notifyPostBusinessEvent(beforeNested);
+            try {
+                underTest.withExternalEventRecording(() -> {
+                    underTest.notifyPostBusinessEvent(abandoned);
+                    throw new RuntimeException("boom");
+                });
+            } catch (RuntimeException expected) {
+                // deliberately swallowed: the enclosing window must still be open and still hold its own events
+            }
+            underTest.notifyPostBusinessEvent(afterNested);
+        });
+        // then the enclosing window still posts, without the abandoned window's event
+        ArgumentCaptor<BulkBusinessEvent> argumentCaptor = ArgumentCaptor.forClass(BulkBusinessEvent.class);
+        verify(externalEventService).postEvent(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue().get()).containsExactly(beforeNested, afterNested);
+    }
+
+    @Test
+    public void testARecordingWindowShouldBeUsableAgainAfterAPreviousOneFailed() {
+        // given
+        configureExternalEventsProperties(true);
+        when(externalBusinessEventConfigurationService.isExternalEventConfiguredForPosting(Mockito.any())).thenReturn(true);
+        MockBusinessEvent event = new MockBusinessEvent();
+        assertThatThrownBy(() -> underTest.withExternalEventRecording(() -> {
+            throw new RuntimeException("boom");
+        })).isInstanceOf(RuntimeException.class);
+        // when the depth counter must have been unwound, so this window behaves like a fresh outermost one
+        underTest.withExternalEventRecording(() -> underTest.notifyPostBusinessEvent(event));
+        // then
+        verify(externalEventService).postEvent(event);
     }
 
     @Test

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -50,7 +51,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     private final Map<Class, List<BusinessEventListener>> preListeners = new HashMap<>();
     private final Map<Class, List<BusinessEventListener>> postListeners = new HashMap<>();
 
-    private final ThreadLocal<Boolean> eventRecordingEnabled = ThreadLocal.withInitial(() -> false);
+    private final ThreadLocal<Integer> eventRecordingDepth = ThreadLocal.withInitial(() -> 0);
     private final ThreadLocal<List<BusinessEvent<?>>> recordedEvents = ThreadLocal.withInitial(ArrayList::new);
 
     private final ExternalEventService externalEventService;
@@ -142,7 +143,7 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     }
 
     private boolean isExternalEventRecordingEnabled() {
-        return eventRecordingEnabled.get();
+        return eventRecordingDepth.get() > 0;
     }
 
     private boolean isExternalEventPostingEnabled() {
@@ -156,13 +157,47 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
     }
 
     @Override
-    public void startExternalEventRecording() {
-        eventRecordingEnabled.set(true);
+    public void withExternalEventRecording(final Runnable action) {
+        withExternalEventRecording(() -> {
+            action.run();
+            return null;
+        });
     }
 
     @Override
-    public void stopExternalEventRecording() {
-        eventRecordingEnabled.set(false);
+    public <T> T withExternalEventRecording(final Supplier<T> action) {
+        int recordedBeforeThisWindow = recordedEvents.get().size();
+        startExternalEventRecording();
+        boolean completed = false;
+        try {
+            T result = action.get();
+            completed = true;
+            return result;
+        } finally {
+            if (completed) {
+                stopExternalEventRecording();
+            } else {
+                abandonExternalEventRecording(recordedBeforeThisWindow);
+            }
+        }
+    }
+
+    private void startExternalEventRecording() {
+        eventRecordingDepth.set(eventRecordingDepth.get() + 1);
+    }
+
+    /**
+     * Closes one recording window. Only the outermost one posts: a nested window leaves its events in the buffer for
+     * the window enclosing it, so the whole nest reaches the consumer as one bulk event.
+     */
+    private void stopExternalEventRecording() {
+        int remainingDepth = eventRecordingDepth.get() - 1;
+        eventRecordingDepth.set(remainingDepth);
+        if (remainingDepth > 0) {
+            log.debug("Keeping {} recorded events for the enclosing recording window", recordedEvents.get().size());
+            return;
+        }
+        eventRecordingDepth.remove();
         try {
             List<BusinessEvent<?>> recordedBusinessEvents = recordedEvents.get();
             if (isExternalEventPostingEnabled()) {
@@ -183,9 +218,24 @@ public class BusinessEventNotifierServiceImpl implements BusinessEventNotifierSe
         }
     }
 
-    @Override
-    public void resetEventRecording() {
-        eventRecordingEnabled.set(false);
+    /**
+     * Abandons one recording window whose action did not finish, without posting anything for it. This is the mirror
+     * image of {@link #stopExternalEventRecording()} and unwinds exactly one level, so an enclosing window is left
+     * intact: whether the exception actually propagates past it is the caller's business, not something this class can
+     * know. Only the events this window recorded are discarded - the enclosing window keeps its own.
+     */
+    private void abandonExternalEventRecording(final int recordedBeforeThisWindow) {
+        int remainingDepth = eventRecordingDepth.get() - 1;
+        if (remainingDepth > 0) {
+            eventRecordingDepth.set(remainingDepth);
+            List<BusinessEvent<?>> recordedBusinessEvents = recordedEvents.get();
+            recordedBusinessEvents.subList(recordedBeforeThisWindow, recordedBusinessEvents.size()).clear();
+            log.debug("Abandoned a nested recording window, leaving {} recorded events for the enclosing one",
+                    recordedBusinessEvents.size());
+            return;
+        }
+        // Removed rather than zeroed so nothing is left behind on a pooled thread.
+        eventRecordingDepth.remove();
         recordedEvents.remove();
     }
 

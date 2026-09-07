@@ -32,6 +32,7 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 import org.apache.fineract.cob.COBBusinessStep;
 import org.apache.fineract.cob.COBBusinessStepServiceImpl;
 import org.apache.fineract.cob.domain.BatchBusinessStepRepository;
@@ -49,6 +50,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -80,6 +82,8 @@ public class COBBulkEventConfigurationTest {
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
         when(reloaderService.reload(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        Mockito.lenient().doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(businessEventNotifierService)
+                .withExternalEventRecording(Mockito.<Supplier<Loan>>any());
     }
 
     @AfterEach
@@ -102,8 +106,7 @@ public class COBBulkEventConfigurationTest {
         underTest.run(dummyExecutionMap, loan);
 
         // then
-        verify(businessEventNotifierService, times(1)).startExternalEventRecording();
-        verify(businessEventNotifierService, times(1)).stopExternalEventRecording();
+        verify(businessEventNotifierService, times(1)).withExternalEventRecording(Mockito.<Supplier<Loan>>any());
     }
 
     @Test
@@ -121,12 +124,11 @@ public class COBBulkEventConfigurationTest {
         underTest.run(dummyExecutionMap, loan);
 
         // then
-        verify(businessEventNotifierService, times(0)).startExternalEventRecording();
-        verify(businessEventNotifierService, times(0)).stopExternalEventRecording();
+        verify(businessEventNotifierService, times(0)).withExternalEventRecording(Mockito.<Supplier<Loan>>any());
     }
 
     @Test
-    public void testGivenBulkEventEnabledWhenCOBRunExceptionThenEventRecordingReset() {
+    public void testGivenBulkEventEnabledWhenCOBRunExceptionThenTheChainStillRanInsideARecordingWindow() {
         // given
         Loan loan = mock(Loan.class);
         TreeMap<Long, String> dummyExecutionMap = new TreeMap<>();
@@ -141,11 +143,12 @@ public class COBBulkEventConfigurationTest {
         assertThrows(BusinessStepException.class, () -> underTest.run(dummyExecutionMap, loan));
 
         // then
-        verify(businessEventNotifierService, times(1)).resetEventRecording();
+        // Abandoning the recording on failure is the notifier's job; here the window merely has to have been opened.
+        verify(businessEventNotifierService, times(1)).withExternalEventRecording(Mockito.<Supplier<Loan>>any());
     }
 
     @Test
-    public void testGivenBulkEventDisabledWhenCOBRunExceptionThenEventRecordingResetNotCalled() {
+    public void testGivenBulkEventDisabledWhenCOBRunExceptionThenNoRecordingWindowIsOpened() {
         // given
         Loan loan = mock(Loan.class);
         TreeMap<Long, String> dummyExecutionMap = new TreeMap<>();
@@ -159,7 +162,7 @@ public class COBBulkEventConfigurationTest {
         assertThrows(BusinessStepException.class, () -> underTest.run(dummyExecutionMap, loan));
 
         // then
-        verify(businessEventNotifierService, times(0)).resetEventRecording();
+        verify(businessEventNotifierService, times(0)).withExternalEventRecording(Mockito.<Supplier<Loan>>any());
     }
 
 }
