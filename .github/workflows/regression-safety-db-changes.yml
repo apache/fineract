@@ -166,12 +166,30 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
+      # This job holds two Gradle build JVMs plus a backend and a test JVM at the same time.
+      # The build JVMs only configure the project and launch forked processes, so 2g is
+      # ample; every gradlew call here also uses --no-daemon so idle build JVMs cannot
+      # accumulate across the three instances (org.gradle.daemon.idletimeout is 3h).
+      - name: Apply Gradle memory budget
+        uses: ./.github/actions/gradle-memory-budget
+        with:
+          max-heap: '2g'
+          workers-max: '2'
+
       - name: Wait for PostgreSQL
         run: |
           until pg_isready -h localhost -U $DB_USER; do
             echo "Waiting for postgres..."
             sleep 2
           done
+
+      - name: Compile baseline backend
+        working-directory: baseline
+        env:
+          # The baseline checkout predates the compiler-daemon heap cap in build.gradle,
+          # so bound its forked javac processes here.
+          JAVA_TOOL_OPTIONS: -Xmx2g
+        run: ./gradlew --no-daemon :fineract-provider:classes
 
       - name: Print checked out revisions
         run: |
@@ -194,8 +212,10 @@ jobs:
 
       - name: "Instance #1: Start baseline backend"
         working-directory: baseline
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx3g
         run: |
-          ./gradlew :fineract-provider:devRun --args="${DEVRUN_ARGS}" &
+          ./gradlew --no-daemon :fineract-provider:devRun --args="${DEVRUN_ARGS}" &
           BACKEND_PID=$!
           echo $BACKEND_PID > backend.pid
 
@@ -225,11 +245,14 @@ jobs:
       - name: "Instance #1: Run regression safety E2E test"
         id: instance1
         continue-on-error: true
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx2g
         run: |
           ./gradlew --no-daemon --console=plain \
             :fineract-e2e-tests-runner:cucumber \
             -Pcucumber.tags="@RegressionSafety" \
-            -x spotlessCheck
+            -x spotlessCheck \
+            -x buildJavaSdk
 
       - name: "Instance #1: Stop backend"
         if: always()
@@ -257,6 +280,8 @@ jobs:
             -c "CREATE DATABASE $DB_NAME;"
 
       - name: "Instance #2: Apply PR Liquibase migrations (schema only)"
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx3g
         run: |
           echo "Applying all Liquibase changesets (base + PR) using PR code..."
           # The liquibase-only profile sets web-application-type=none, so Spring Boot
@@ -285,9 +310,11 @@ jobs:
 
       - name: "Instance #2: Start baseline backend (old code, new schema)"
         working-directory: baseline
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx3g
         run: |
           echo "Starting baseline code against DB with PR schema (Liquibase disabled)..."
-          ./gradlew :fineract-provider:devRun --args="\
+          ./gradlew --no-daemon :fineract-provider:devRun --args="\
           ${DEVRUN_ARGS} \
           --spring.liquibase.enabled=false" &
           BACKEND_PID=$!
@@ -320,11 +347,14 @@ jobs:
       - name: "Instance #2: Run regression safety E2E test"
         id: instance2
         continue-on-error: true
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx2g
         run: |
           ./gradlew --no-daemon --console=plain \
             :fineract-e2e-tests-runner:cucumber \
             -Pcucumber.tags="@RegressionSafety" \
-            -x spotlessCheck
+            -x spotlessCheck \
+            -x buildJavaSdk
 
       - name: "Instance #2: Stop backend"
         if: always()
@@ -351,8 +381,10 @@ jobs:
             -c "CREATE DATABASE $DB_NAME;"
 
       - name: "Instance #3: Start PR backend"
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx3g
         run: |
-          ./gradlew :fineract-provider:devRun --args="${DEVRUN_ARGS}" &
+          ./gradlew --no-daemon :fineract-provider:devRun --args="${DEVRUN_ARGS}" &
           BACKEND_PID=$!
           echo $BACKEND_PID > backend.pid
 
@@ -382,11 +414,14 @@ jobs:
       - name: "Instance #3: Run regression safety E2E test"
         id: instance3
         continue-on-error: true
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx2g
         run: |
           ./gradlew --no-daemon --console=plain \
             :fineract-e2e-tests-runner:cucumber \
             -Pcucumber.tags="@RegressionSafety" \
-            -x spotlessCheck
+            -x spotlessCheck \
+            -x buildJavaSdk
 
       - name: "Instance #3: Stop backend"
         if: always()

@@ -66,6 +66,12 @@ jobs:
         with:
           validate-wrappers: true
 
+      - name: Apply Gradle memory budget
+        uses: ./.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
       - name: Verify PostgreSQL connection
         run: |
           while ! pg_isready -d postgres -U root -h 127.0.0.1 -p 5432 ; do

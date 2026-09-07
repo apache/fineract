@@ -8,6 +8,16 @@ inputs:
   working-directory:
     description: Directory containing the Fineract checkout to build.
     default: '.'
+  max-heap:
+    description: >-
+      Heap for the Gradle build JVM during this build. Must stay at or above 8g: the OpenAPI
+      generator runs through the worker API with classloader isolation, i.e. inside this JVM,
+      and ':fineract-client:buildJavaSdk' alone needs 7g (measured: 6g fails with Java heap
+      space, 7g passes). This build is sequential, so nothing else competes for the runner.
+    default: '8g'
+  workers-max:
+    description: Maximum concurrent Gradle workers during this build.
+    default: '2'
 
 runs:
   using: composite
@@ -23,6 +33,14 @@ runs:
       with:
         validate-wrappers: true
         cache-read-only: ${{ inputs.cache-read-only }}
+
+    - name: Apply Gradle memory budget
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        MAX_HEAP: ${{ inputs.max-heap }}
+        WORKERS_MAX: ${{ inputs.workers-max }}
+      run: "$GITHUB_ACTION_PATH/../../scripts/gradle-memory-budget.sh"
 
     - name: Build Avro Java SDK
       shell: bash
@@ -58,3 +76,12 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       run: ./gradlew build -x test -x cucumber -x doc -x javadoc -x javadocJar -x checkstyleMain -x checkstyleTest -x checkstyleJmh -x spotbugsMain -x spotbugsTest -x spotlessCheck -x spotlessApply -x rat
+
+    # The seven builds above share one daemon, which is why they do not use --no-daemon.
+    # Stop it here so an idle build JVM is never left alive alongside whatever the calling
+    # job runs next (org.gradle.daemon.idletimeout is 3h, so it would not expire on its own).
+    - name: Stop Gradle daemon
+      shell: bash
+      if: always()
+      working-directory: ${{ inputs.working-directory }}
+      run: ./gradlew --stop || true

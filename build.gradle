@@ -425,6 +425,10 @@ configure(project.fineractJavaProjects) {
     tasks.withType(JavaCompile).configureEach {
         options.incremental = true
         options.fork = true
+        // Forked compiler daemons get no explicit -Xmx, so each one defaults to 25% of the
+        // container's RAM. With parallel builds that tail is unbounded and can outgrow the
+        // build JVM itself, so give the compiler processes an explicit budget.
+        options.forkOptions.memoryMaximumSize = '2g'
         outputs.cacheIf { true }
         options.compilerArgs << '-parameters'
         options.encoding = 'UTF-8'
@@ -737,6 +741,12 @@ configure(project.fineractJavaProjects) {
     test {
         useJUnitPlatform()
 
+        // Forked test JVMs get no explicit -Xmx otherwise, so each one would default to 25%
+        // of the container's RAM -- 4g on a 16 GB CI runner, but 16g on a 64 GB workstation.
+        // Pin it so the figure is the same everywhere. ':fineract-provider' holds its own
+        // suite to 2g and adds a metaspace cap.
+        maxHeapSize = '4g'
+
         // Gradle 9 fails a Test task that has test sources but discovers no tests. Several modules
         // carry test *support* code only -- Spring @TestConfiguration classes, Cucumber step
         // definitions that the 'cucumber' task or ':fineract-e2e-tests-runner' consumes, a JMH
@@ -763,6 +773,8 @@ configure(project.fineractJavaProjects) {
         // reportLevel = com.github.spotbugs.snom.Confidence.DEFAULT
         showProgress = false
         excludeFilter = file("$rootDir/config/spotbugs/exclude.xml")
+        // Without this the SpotBugs worker inherits the JVM default (25% of container RAM).
+        maxHeapSize = '2g'
     }
     // https://github.com/spotbugs/spotbugs-gradle-plugin/issues/242
     spotbugsMain {
