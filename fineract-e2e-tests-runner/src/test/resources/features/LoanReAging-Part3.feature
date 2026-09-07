@@ -3476,3 +3476,35 @@ Feature: LoanReAging - Part3
       | 10 July 2026     | Re-age                 | 346.02 | 342.0     | 4.02     | 0.0  | 0.0       | 0.0          | false    |
     When Loan Pay-off is made on "10 July 2026"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
+
+  @TestRailId:C_01 @AdvancedPaymentAllocation
+  Scenario: Re-aging considers the down payment installment while add additional disbursement before MIR - UC01
+    When Admin sets the business date to "21 April 2026"
+    When Admin creates a client with random data
+    When Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "MERCHANT_ISSUED_REFUND" transaction type to "LAST_INSTALLMENT" future installment allocation rule
+    When Admin creates a fully customized loan with the following data:
+      | LoanProduct                                                                          | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
+      | LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT | 21 April 2026     | 600            | 9.99                   | DECLINING_BALANCE | DAILY                       | EQUAL_INSTALLMENTS | 3                 | MONTHS                | 1              | MONTHS                 | 3                  | 0                       | 0                      | 0                    | ADVANCED_PAYMENT_ALLOCATION |
+    And Admin successfully approves the loan on "21 April 2026" with "600" amount and expected disbursement date on "21 April 2026"
+    When Admin successfully disburse the loan on "21 April 2026" with "400" EUR transaction amount
+    When Admin sets the business date to "10 June 2026"
+#  --- re-age loan --- #
+    When Admin creates a Loan re-aging transaction with the following data:
+      | frequencyNumber | frequencyType | startDate    | numberOfInstallments | reAgeInterestHandling               |
+      | 1               | MONTHS        | 10 July 2026 | 10                   | EQUAL_AMORTIZATION_PAYABLE_INTEREST |
+    When Admin successfully disburse the loan on "10 June 2026" with "200" EUR transaction amount
+#  The MERCHANT_ISSUED_REFUND with LAST_INSTALLMENT allocation used to abort with an infinite allocation loop
+#  ("Loop exceeded N iterations"): the last re-aged period carries a remainder-cent EMI adjustment which the
+#  recalculated-till-date model view re-derived away, leaving the allocation one cent short forever
+    When Customer makes "MERCHANT_ISSUED_REFUND" transaction with "AUTOPAY" payment type on "10 June 2026" with 150 EUR transaction amount and system-generated Idempotency key
+    Then Loan Transactions tab has the following data:
+      | Transaction date | Transaction Type       | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
+      | 21 April 2026    | Disbursement           | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
+      | 21 April 2026    | Down Payment           | 100.0  | 100.0     | 0.0      | 0.0  | 0.0       | 300.0        | false    |
+      | 10 June 2026     | Re-age                 | 304.11 | 300.0     | 4.11     | 0.0  | 0.0       | 0.0          | false    |
+      | 10 June 2026     | Disbursement           | 200.0  | 0.0       | 0.0      | 0.0  | 0.0       | 500.0        | false    |
+      | 10 June 2026     | Down Payment           | 50.0   | 50.0      | 0.0      | 0.0  | 0.0       | 450.0        | false    |
+      | 10 June 2026     | Merchant Issued Refund | 150.0  | 148.76    | 1.24     | 0.0  | 0.0       | 301.24       | false    |
+    Then Loan Repayment schedule has the following data in Total row:
+      | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
+      | 600.0         | 4.11     | 0.0  | 0.0       | 604.11 | 300.0 | 150.0      | 0.0  | 304.11      |

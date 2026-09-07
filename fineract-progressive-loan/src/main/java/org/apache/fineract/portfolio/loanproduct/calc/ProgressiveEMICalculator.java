@@ -590,7 +590,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         boolean isVertical = scheduleModel.loanProductRelatedDetail()
                 .getLoanScheduleProcessingType() == LoanScheduleProcessingType.VERTICAL;
 
-        adjustEmiIfRequired(repaymentPeriod, recalculatedScheduleModelTillDate, targetDate, notFullyRepaidRepaymentPeriodCount);
+        adjustEmiIfRequired(repaymentPeriod, recalculatedScheduleModelTillDate, targetDate, notFullyRepaidRepaymentPeriodCount,
+                scheduleModel);
 
         Money duePrincipal = isVertical && notFullyRepaidRepaymentPeriodCount > 1
                 ? repaymentPeriod.getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest()
@@ -613,9 +614,21 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     private void adjustEmiIfRequired(RepaymentPeriod repaymentPeriod,
             ProgressiveLoanInterestScheduleModel recalculatedScheduleModelTillDate, LocalDate targetDate,
-            long notFullyRepaidRepaymentPeriodCount) {
+            long notFullyRepaidRepaymentPeriodCount, ProgressiveLoanInterestScheduleModel sourceScheduleModel) {
 
         if (targetDate.isAfter(repaymentPeriod.getFromDate())) {
+            return;
+        }
+
+        if (repaymentPeriod.isReAged()) {
+            // A re-aged period carries a contractual EMI: its amortization and payable interest were frozen at
+            // re-age time, and the last re-aged period may hold a remainder-cent adjustment on top of the original
+            // EMI. Re-deriving it from originalEmi drops that cent and leaves the due amounts one cent below what
+            // the repayment schedule installment expects, which starves the horizontal allocation loop (it pays the
+            // recalculated amount, the model sync restores the outstanding cent, and the installment is re-selected
+            // forever with nothing left to allocate). Restore the EMI from the source model instead.
+            sourceScheduleModel.findRepaymentPeriodByFromAndDueDate(repaymentPeriod.getFromDate(), repaymentPeriod.getDueDate())
+                    .ifPresent(sourcePeriod -> repaymentPeriod.setEmi(sourcePeriod.getEmi()));
             return;
         }
 
