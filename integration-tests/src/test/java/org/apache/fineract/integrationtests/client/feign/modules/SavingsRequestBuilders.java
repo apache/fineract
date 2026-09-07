@@ -114,6 +114,22 @@ public final class SavingsRequestBuilders {
                 .interestReceivableAccountId(accountId(interestReceivableAccount));
     }
 
+    /** The cash-based mapping the RestAssured {@code SavingsProductHelper} built from one account per type. */
+    public static PostSavingsProductsRequest withCashBasedAccounting(PostSavingsProductsRequest request, Account assetAccount,
+            Account liabilityAccount, Account incomeAccount, Account expenseAccount) {
+        return request//
+                .accountingRule(SavingsTestData.AccountingRule.CASH_BASED)//
+                .savingsReferenceAccountId(accountId(assetAccount))//
+                .overdraftPortfolioControlId(accountId(assetAccount))//
+                .savingsControlAccountId(accountId(liabilityAccount))//
+                .transfersInSuspenseAccountId(accountId(liabilityAccount))//
+                .interestOnSavingsAccountId(accountId(expenseAccount))//
+                .writeOffAccountId(accountId(expenseAccount))//
+                .incomeFromFeeAccountId(accountId(incomeAccount))//
+                .incomeFromPenaltyAccountId(accountId(incomeAccount))//
+                .incomeFromInterestId(accountId(incomeAccount));
+    }
+
     public static Long accountId(Account account) {
         return account.getAccountID().longValue();
     }
