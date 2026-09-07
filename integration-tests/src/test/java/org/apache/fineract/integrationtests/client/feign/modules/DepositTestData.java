@@ -21,6 +21,7 @@ package org.apache.fineract.integrationtests.client.feign.modules;
 import java.math.BigDecimal;
 import java.util.List;
 import org.apache.fineract.client.models.PostFixedDepositProductsChartSlabs;
+import org.apache.fineract.client.models.PostRecurringDepositProductsChartSlabs;
 
 /**
  * Constants for fixed and recurring deposit products and accounts. The types shared with plain savings -- interest
@@ -122,5 +123,25 @@ public final class DepositTestData {
                 .amountRangeTo(amountTo == null ? null : new BigDecimal(amountTo))//
                 .annualInterestRate(Double.valueOf(rate))//
                 .locale(SavingsTestData.LOCALE);
+    }
+
+    /**
+     * The recurring deposit charts, whose slab values are identical to the fixed deposit ones -- only the generated
+     * type differs, so the rates are kept in one place and mapped across.
+     */
+    public static List<PostRecurringDepositProductsChartSlabs> recurringChartSlabsFor(String chartToBePicked) {
+        return chartSlabsFor(chartToBePicked).stream().map(DepositTestData::asRecurringSlab).toList();
+    }
+
+    private static PostRecurringDepositProductsChartSlabs asRecurringSlab(PostFixedDepositProductsChartSlabs slab) {
+        return new PostRecurringDepositProductsChartSlabs()//
+                .description(slab.getDescription())//
+                .periodType(slab.getPeriodType())//
+                .fromPeriod(slab.getFromPeriod())//
+                .toPeriod(slab.getToPeriod())//
+                .amountRangeFrom(slab.getAmountRangeFrom())//
+                .amountRangeTo(slab.getAmountRangeTo())//
+                .annualInterestRate(slab.getAnnualInterestRate())//
+                .locale(slab.getLocale());
     }
 }

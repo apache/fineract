@@ -46,6 +46,36 @@ public final class DepositInterestCalculator {
     }
 
     /**
+     * The principal of a recurring deposit after {@code depositPeriod} months, where {@code depositAmount} is paid in
+     * at the start of each month before that month's interest accrues.
+     */
+    public static float principalAfterCompoundingInterest(Calendar startDate, float principal, float depositAmount, int depositPeriod,
+            double interestPerDay, int compoundingInterval, int postingInterval) {
+        Calendar currentDate = (Calendar) startDate.clone();
+        float totalInterest = 0.0f;
+
+        for (int month = 1; month <= depositPeriod; month++) {
+            int daysInMonth = currentDate.getActualMaximum(Calendar.DATE);
+            principal += depositAmount;
+            for (int day = 0; day < daysInMonth; day++) {
+                float interestEarned = (float) (principal * interestPerDay);
+                totalInterest += interestEarned;
+                if (compoundingInterval == 0) {
+                    principal += interestEarned;
+                }
+            }
+            if (month % postingInterval == 0 || month == depositPeriod) {
+                if (compoundingInterval != 0) {
+                    principal += totalInterest;
+                }
+                totalInterest = 0.0f;
+            }
+            currentDate.add(Calendar.MONTH, 1);
+        }
+        return principal;
+    }
+
+    /**
      * The principal after {@code depositPeriod} months of daily interest, compounded every {@code compoundingInterval}
      * months (0 meaning daily) and posted every {@code postingInterval} months.
      */

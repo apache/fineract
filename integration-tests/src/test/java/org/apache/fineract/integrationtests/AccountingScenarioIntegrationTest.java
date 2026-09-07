@@ -595,7 +595,7 @@ public class AccountingScenarioIntegrationTest {
         Assertions.assertNull(recurringDepositProductsProduct.getAccountingMappings().getInterestPayableAccount());
 
         Integer recurringDepositAccountId = applyForRecurringDepositApplication(clientId.toString(), recurringDepositProductId.toString(),
-                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, RecurringDepositTest.WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
+                VALID_FROM, VALID_TO, SUBMITTED_ON_DATE, PRE_CLOSURE_PENAL_INTEREST_ON_WHOLE_TERM, EXPECTED_FIRST_DEPOSIT_ON_DATE);
         Assertions.assertNotNull(recurringDepositAccountId);
 
         HashMap recurringDepositAccountStatusHashMap = RecurringDepositAccountStatusChecker.getStatusOfRecurringDepositAccount(requestSpec,
