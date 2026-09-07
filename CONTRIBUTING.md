@@ -31,6 +31,10 @@ Here's how to run the set of relatively fast and independent Fineract tests:
 This runs nearly 1,000 tests and completes in a few minutes on decent hardware.
 They shouldn't need any special servers/services running.
 
+On CI, individual test failures are automatically retried up to twice (see [Flaky tests](#flaky-tests) below).
+Retry is disabled locally by default; add `-PtestRetry=true` to opt in, or `-PtestRetry=false` to force it off (e.g. on a self-hosted CI-like environment).
+You can also exclude specific tests with `-PexcludeTests=<pattern>` (matched against the fully-qualified test name).
+
 #### Cucumber E2E tests
 
 The Cucumber E2E tests run against a live Fineract instance instead of starting one for you.
@@ -301,7 +305,18 @@ Our `ClasspathHellDuplicatesCheckRuleTest` detects classes that appear in more t
 Your PR title must include a JIRA issue and a one-liner that describes the changes.
 Start your one-liner after the JIRA issue id. Use an upper case present-tense imperative verb and a short but concise clear description. (E.g. "FINERACT-821: Add enforced HideUtilityClassConstructor checkstyle").
 
-If your PR is failing to pass our CI build due to a test failure, then:
+#### Flaky tests
+
+Our CI automatically retries an individual test up to twice if it fails, via the [Gradle Test Retry plugin](https://github.com/gradle/test-retry-gradle-plugin) (`build.gradle`, `retry { ... }` in the shared `test { }` block). If a test passes on retry, the build stays green - this is meant to absorb one-off environmental flakiness (timing, network, CI resource contention), not to replace fixing the underlying instability. Retry does not apply to the `cucumber` task (Cucumber E2E tests aren't `Test`-typed tasks).
+
+If 20 or more tests fail within the same round of execution, no retries are attempted for that round - that many simultaneous failures indicates a real regression, not flakiness, so it's treated as a hard failure straight away.
+
+To see whether (and which) tests were retried in a given CI run:
+
+- Open the run's **Develocity build scan** (linked from the GitHub Actions job output, or via `https://develocity.apache.org`) - its Tests tab explicitly tags retried/flaky tests.
+- Or download the job's `test-results-*` artifact and open `build/reports/tests/test/index.html` for the affected module - the retry plugin's report shows every attempt.
+
+If your PR is still failing to pass our CI build due to a test failure after the automatic retries, then:
 
 1. Understand if the failure is due to your PR or an unrelated unstable test.
 1. If you suspect it is because of a "flaky" test, and not due to a change in your PR, then please do not simply wait for an active maintainer to come and help you, but instead be a proactive contributor to the project - see next steps.  Do understand that we may not review PRs that are not green - it is the contributor's (that's you!) responsibility to get a proposed PR to pass the build, not primarily the maintainers.

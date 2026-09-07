@@ -133,6 +133,7 @@ plugins {
     id 'org.cyclonedx.bom' version '3.4.1' apply false
     id 'com.docktape.swagger-brake' version '2.7.0' apply false
     id 'io.github.usekylis.java-architecture-metrics' version '0.1.1' apply false
+    id 'org.gradle.test-retry' version '1.6.5' apply false
 }
 
 apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.release.gradle"
@@ -448,6 +449,7 @@ configure(project.fineractJavaProjects) {
     apply plugin: 'com.github.spotbugs'
     apply plugin: 'com.github.andygoossens.modernizer'
     apply plugin: 'io.github.usekylis.java-architecture-metrics'
+    apply plugin: 'org.gradle.test-retry'
     apply from: "${rootDir}/buildSrc/src/main/groovy/org.apache.fineract.dependencies.gradle"
 
     group = 'org.apache.fineract'
@@ -742,6 +744,17 @@ configure(project.fineractJavaProjects) {
         // definitions that the 'cucumber' task or ':fineract-e2e-tests-runner' consumes, a JMH
         // benchmark -- so their own test task legitimately has nothing to run.
         failOnNoDiscoveredTests = false
+
+        // Retry flaky tests. Enabled only on CI (env var CI) to avoid masking flakiness
+        // during local development. Override locally with -PtestRetry=true / -PtestRetry=false.
+        def retryEnabled = project.hasProperty('testRetry')
+                ? Boolean.parseBoolean(project.property('testRetry').toString())
+                : (System.getenv('CI') != null)
+        retry {
+            failOnPassedAfterRetry = false // keep the build green if a test passes on retry
+            maxRetries = retryEnabled ? 2 : 0
+            maxFailures = 20 // safety cap: too many failures => real breakage, stop retrying
+        }
 
         if (project.hasProperty('excludeTests')) {
             filter {
