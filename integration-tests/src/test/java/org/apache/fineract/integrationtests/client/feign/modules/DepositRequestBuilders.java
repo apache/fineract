@@ -144,12 +144,17 @@ public final class DepositRequestBuilders {
 
     public static PostFixedDepositProductsRequest withChart(PostFixedDepositProductsRequest request, String validFrom, String validTo,
             List<PostFixedDepositProductsChartSlabs> slabs) {
+        return withChart(request, validFrom, validTo, slabs, false);
+    }
+
+    public static PostFixedDepositProductsRequest withChart(PostFixedDepositProductsRequest request, String validFrom, String validTo,
+            List<PostFixedDepositProductsChartSlabs> slabs, boolean isPrimaryGroupingByAmount) {
         return request.charts(Set.of(new PostFixedDepositProductsCharts()//
                 .fromDate(validFrom)//
                 .endDate(validTo)//
                 .dateFormat(SavingsTestData.DATETIME_PATTERN)//
                 .locale(SavingsTestData.LOCALE)//
-                .isPrimaryGroupingByAmount(false)//
+                .isPrimaryGroupingByAmount(isPrimaryGroupingByAmount)//
                 .chartSlabs(Set.copyOf(slabs))));
     }
 
