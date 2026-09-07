@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.DeleteGroupsGroupIdResponse;
+import org.apache.fineract.client.models.GetGroupsGroupIdAccountsResponse;
 import org.apache.fineract.client.models.GetGroupsGroupIdClientMembers;
 import org.apache.fineract.client.models.GetGroupsGroupIdResponse;
 import org.apache.fineract.client.models.GetGroupsPageItems;
@@ -107,6 +108,11 @@ public class FeignGroupHelper {
     public GetGroupsGroupIdResponse retrieveGroupWithAssociations(Long groupId, String associations) {
         Map<String, Object> params = Map.of("associations", associations);
         return ok(() -> fineractClient.groups().retrieveOneGroup(groupId, params));
+    }
+
+    /** The group's own accounts plus its members'; the savings entries carry the balances and the amounts on hold. */
+    public GetGroupsGroupIdAccountsResponse retrieveGroupAccounts(Long groupId) {
+        return ok(() -> fineractClient.groups().retrieveAccountsGroup(groupId));
     }
 
     public PutGroupsGroupIdResponse updateGroup(Long groupId, String name) {

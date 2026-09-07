@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.DeleteSavingsAccountsAccountIdResponse;
+import org.apache.fineract.client.models.DepositAccountOnHoldTransactionData;
 import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesResponse;
 import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
@@ -59,6 +60,15 @@ public class FeignSavingsHelper {
 
     public PostSavingsAccountsResponse submitApplication(Long clientId, Long productId, String submittedOnDate) {
         return submitApplication(SavingsRequestBuilders.submitSavingsApplication(clientId, productId, submittedOnDate));
+    }
+
+    public PostSavingsAccountsResponse submitGroupApplication(Long groupId, Long productId, String submittedOnDate) {
+        return submitApplication(SavingsRequestBuilders.submitGroupSavingsApplication(groupId, productId, submittedOnDate));
+    }
+
+    public PutSavingsAccountsAccountIdResponse updateGroupSavingsApplication(Long savingsId, Long groupId, Long productId,
+            String submittedOnDate) {
+        return updateSavingsAccount(savingsId, SavingsRequestBuilders.updateGroupSavingsApplication(groupId, productId, submittedOnDate));
     }
 
     public PostSavingsAccountsAccountIdResponse approveSavings(Long savingsId, String approvedOnDate) {
@@ -238,6 +248,12 @@ public class FeignSavingsHelper {
     /** The status is on the account itself, so no associations are requested. */
     public SavingsAccountStatusEnumData getSavingsStatus(Long savingsId) {
         return ok(() -> fineractClient.savingsAccount().retrieveSavingsAccount(savingsId, Map.of())).getStatus();
+    }
+
+    /** The guarantor holds standing against the account, which is what an account pledged as collateral carries. */
+    public List<DepositAccountOnHoldTransactionData> getOnHoldTransactions(Long savingsId) {
+        return ok(() -> fineractClient.depositAccountOnHoldFundTransactions().retrieveAllDepositAccountOnHoldFundTransactions(savingsId,
+                Map.of())).getPageItems();
     }
 
     public SavingsAccountSubStatusEnumData getSavingsSubStatus(Long savingsId) {
