@@ -74,8 +74,9 @@ public class FeignRecurringDepositHelper {
         return command(accountId, DepositRequestBuilders.approveRecurringDeposit(approvedOnDate), APPROVE);
     }
 
+    /** The undo-approval command accepts a note only; sending locale or dateFormat is rejected as unsupported. */
     public PostRecurringDepositAccountsAccountIdResponse undoApproval(Long accountId) {
-        return command(accountId, DepositRequestBuilders.recurringDepositCommand(), UNDO_APPROVAL);
+        return command(accountId, new PostRecurringDepositAccountsAccountIdRequest().note("UNDO APPROVAL"), UNDO_APPROVAL);
     }
 
     public PostRecurringDepositAccountsAccountIdResponse reject(Long accountId, String rejectedOnDate) {
@@ -90,12 +91,16 @@ public class FeignRecurringDepositHelper {
         return command(accountId, DepositRequestBuilders.activateRecurringDeposit(activatedOnDate), ACTIVATE);
     }
 
+    /**
+     * Both interest commands take an empty body; the legacy helper sends {@code {}} and the validator allows nothing
+     * else.
+     */
     public PostRecurringDepositAccountsAccountIdResponse calculateInterest(Long accountId) {
-        return command(accountId, DepositRequestBuilders.recurringDepositCommand(), CALCULATE_INTEREST);
+        return command(accountId, new PostRecurringDepositAccountsAccountIdRequest(), CALCULATE_INTEREST);
     }
 
     public PostRecurringDepositAccountsAccountIdResponse postInterest(Long accountId) {
-        return command(accountId, DepositRequestBuilders.recurringDepositCommand(), POST_INTEREST);
+        return command(accountId, new PostRecurringDepositAccountsAccountIdRequest(), POST_INTEREST);
     }
 
     public PostRecurringDepositAccountsAccountIdResponse calculatePrematureAmount(Long accountId, String closedOnDate) {
@@ -130,8 +135,10 @@ public class FeignRecurringDepositHelper {
                 request, DEPOSIT));
     }
 
-    public Long undoTransaction(Long accountId, Long transactionId) {
-        PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest request = new PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest();
+    /** The undo command carries the transaction date and amount, the same body the modify command takes. */
+    public Long undoTransaction(Long accountId, Long transactionId, String transactionDate, BigDecimal transactionAmount) {
+        PostRecurringDepositAccountsRecurringDepositAccountIdTransactionsRequest request = DepositRequestBuilders
+                .depositTransaction(transactionDate, transactionAmount);
         return ok(() -> fineractClient.recurringDepositAccountTransactions().handleCommandsRecurringDepositAccountTransaction(accountId,
                 transactionId, request, UNDO_TRANSACTION)).getResourceId();
     }
