@@ -18,11 +18,13 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.DeleteSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesResponse;
 import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse;
@@ -82,6 +84,35 @@ public class FeignSavingsHelper {
 
     public SavingsAccountData getSavingsDetails(Long savingsId) {
         return ok(() -> fineractClient.savingsAccount().retrieveSavingsAccount(savingsId, Map.of("associations", "all")));
+    }
+
+    public PostSavingsAccountsAccountIdResponse commandByExternalId(String externalId, PostSavingsAccountsAccountIdRequest request,
+            String command) {
+        return ok(() -> fineractClient.savingsAccount().handleCommandsSavingsAccountByExternalId(externalId, request, command));
+    }
+
+    public PostSavingsAccountsAccountIdResponse approveSavingsByExternalId(String externalId, String approvedOnDate) {
+        return commandByExternalId(externalId, SavingsRequestBuilders.approveSavings(approvedOnDate), "approve");
+    }
+
+    public PostSavingsAccountsAccountIdResponse undoApprovalByExternalId(String externalId) {
+        return commandByExternalId(externalId, new PostSavingsAccountsAccountIdRequest(), "undoapproval");
+    }
+
+    public PutSavingsAccountsAccountIdResponse updateSavingsByExternalId(String externalId, PutSavingsAccountsAccountIdRequest request) {
+        return ok(() -> fineractClient.savingsAccount().updateSavingsAccountByExternalId(externalId, request, ""));
+    }
+
+    public SavingsAccountData getSavingsDetailsByExternalId(String externalId, String associations) {
+        return ok(() -> fineractClient.savingsAccount().retrieveSavingsAccountByExternalId(externalId, null, null, associations));
+    }
+
+    public CallFailedRuntimeException getSavingsDetailsByExternalIdExpectingError(String externalId) {
+        return fail(() -> fineractClient.savingsAccount().retrieveSavingsAccountByExternalId(externalId, null, null, "all"));
+    }
+
+    public DeleteSavingsAccountsAccountIdResponse deleteSavingsByExternalId(String externalId) {
+        return ok(() -> fineractClient.savingsAccount().deleteSavingsAccountByExternalId(externalId));
     }
 
     public SavingsAccountData getSavingsDetails(Long savingsId, String associations) {
