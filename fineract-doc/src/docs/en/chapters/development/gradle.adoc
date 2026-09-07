@@ -1,3 +1,24 @@
 = Gradle
 
 The https://docs.gradle.org/current/userguide/gradle_wrapper.html[Gradle Wrapper] included with Fineract will automatically run the correct version of Gradle.
+
+== Build properties
+
+A few `-P` properties (Gradle project properties) control test execution across all modules; they are configured in the shared `test { }` block in the root `build.gradle`:
+
+[cols="1,3", options="header"]
+|===
+| Property | Effect
+| `-PexcludeTests=<pattern>` | Exclude tests matching the given pattern (matched against the fully-qualified test name) from the run.
+|===
+
+== Flaky test retry
+
+The `:integration-tests`, `:twofactor-tests` and `:oauth2-tests` suites drive a live Fineract instance over HTTP, which makes them the suites exposed to one-off environmental flakiness (timing, network, CI resource contention). Their failed tests are automatically retried up to twice via the https://docs.gradle.com/develocity/gradle-plugin/current/#test_retry[Develocity plugin's built-in test retry] (`develocity.testRetry { ... }`), already applied via `settings.gradle`. If a retry passes, the build is still considered successful (`failOnPassedAfterRetry = false`). Unit tests in every other module are not retried: a unit test that only passes on a later attempt usually points to a real ordering/concurrency bug.
+
+As a safety cap, if 20 or more tests fail within the same round of execution, no retries are attempted for that round: that many simultaneous failures is treated as a real regression rather than flakiness, so retrying would just waste CI time.
+
+=== Viewing retried tests
+
+- The **Develocity build scan** for a build (published to `https://develocity.apache.org` on CI, or generated locally with `--scan`) tags retried/flaky tests on its Tests tab.
+- The standard HTML test report, `<module>/build/reports/tests/test/index.html`, lists every attempt of a retried test.

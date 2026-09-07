@@ -786,6 +786,17 @@ configure(project.fineractJavaProjects) {
         // benchmark -- so their own test task legitimately has nothing to run.
         failOnNoDiscoveredTests = false
 
+        // Flaky-test retry, provided by the Develocity plugin applied in settings.gradle.
+        // Scoped to the API-dependent suites: they drive a live Fineract instance over HTTP and
+        // are the only ones exposed to one-off environmental flakiness. Unit tests stay strict.
+        if (project.name in ['integration-tests', 'twofactor-tests', 'oauth2-tests']) {
+            develocity.testRetry {
+                failOnPassedAfterRetry = false // keep the build green if a test passes on retry
+                maxRetries = 2
+                maxFailures = 20 // safety cap: too many failures => real breakage, stop retrying
+            }
+        }
+
         if (project.hasProperty('excludeTests')) {
             filter {
                 excludeTestsMatching project.property('excludeTests')
