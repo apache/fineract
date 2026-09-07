@@ -22,8 +22,10 @@ public final class SavingsTestData {
 
     public static final String DATETIME_PATTERN = FeignTestConstants.DATETIME_PATTERN;
     public static final String LOCALE = FeignTestConstants.LOCALE;
+    public static final String MONTH_DAY_FORMAT = FeignTestConstants.MONTH_DAY_FORMAT;
     public static final String CURRENCY_CODE = "USD";
     public static final Double DEFAULT_CHARGE_AMOUNT = 100.0;
+    public static final String FEE_ON_MONTH_DAY = "04 March";
 
     private SavingsTestData() {}
 
@@ -34,11 +36,16 @@ public final class SavingsTestData {
         private ChargeAppliesTo() {}
     }
 
+    /** Mirrors {@code org.apache.fineract.portfolio.charge.domain.ChargeTimeType}. */
     public static final class ChargeTimeType {
 
+        public static final int SPECIFIED_DUE_DATE = 2;
+        public static final int SAVINGS_ACTIVATION = 3;
         public static final int WITHDRAWAL_FEE = 5;
-        public static final int SAVINGS_ACTIVATION = 6;
-        public static final int ANNUAL_FEE = 7;
+        public static final int ANNUAL_FEE = 6;
+        public static final int MONTHLY_FEE = 7;
+        public static final int WEEKLY_FEE = 11;
+        public static final int SAVINGS_NO_ACTIVITY_FEE = 16;
 
         private ChargeTimeType() {}
     }

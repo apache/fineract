@@ -25,6 +25,7 @@ import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesRequest;
 import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.client.models.PutSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PutSavingsProductsProductIdRequest;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -118,14 +119,56 @@ public final class SavingsRequestBuilders {
     }
 
     public static ChargeRequest savingsWithdrawalFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.WITHDRAWAL_FEE);
+    }
+
+    /** A withdrawal fee that only applies to withdrawals made with the given payment type. */
+    public static ChargeRequest savingsWithdrawalFeeCharge(Double amount, Long paymentTypeId) {
+        return savingsCharge(SavingsTestData.ChargeTimeType.WITHDRAWAL_FEE)//
+                .amount(amount)//
+                .enablePaymentType(true)//
+                .paymentTypeId(paymentTypeId);
+    }
+
+    public static ChargeRequest savingsActivationFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.SAVINGS_ACTIVATION);
+    }
+
+    public static ChargeRequest savingsNoActivityFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.SAVINGS_NO_ACTIVITY_FEE);
+    }
+
+    public static ChargeRequest savingsSpecifiedDueDateCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.SPECIFIED_DUE_DATE).feeInterval("2");
+    }
+
+    public static ChargeRequest savingsSpecifiedDueDateCharge(Double amount, String currencyCode) {
+        return savingsCharge(SavingsTestData.ChargeTimeType.SPECIFIED_DUE_DATE).amount(amount).currencyCode(currencyCode);
+    }
+
+    /** The recurring fees carry the day they fall due; the annual one recurs yearly, so it needs no interval. */
+    public static ChargeRequest savingsAnnualFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.ANNUAL_FEE).feeOnMonthDay(SavingsTestData.FEE_ON_MONTH_DAY);
+    }
+
+    public static ChargeRequest savingsMonthlyFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.MONTHLY_FEE).feeOnMonthDay(SavingsTestData.FEE_ON_MONTH_DAY).feeInterval("2");
+    }
+
+    public static ChargeRequest savingsWeeklyFeeCharge() {
+        return savingsCharge(SavingsTestData.ChargeTimeType.WEEKLY_FEE).feeInterval("1");
+    }
+
+    public static ChargeRequest savingsCharge(int chargeTimeType) {
         return new ChargeRequest()//
                 .active(true)//
                 .name(Utils.uniqueRandomStringGenerator("Charge_Savings_", 6))//
                 .currencyCode(SavingsTestData.CURRENCY_CODE)//
                 .amount(SavingsTestData.DEFAULT_CHARGE_AMOUNT)//
                 .chargeAppliesTo(SavingsTestData.ChargeAppliesTo.SAVINGS)//
-                .chargeTimeType(SavingsTestData.ChargeTimeType.WITHDRAWAL_FEE)//
+                .chargeTimeType(chargeTimeType)//
                 .chargeCalculationType(SavingsTestData.ChargeCalculationType.FLAT)//
+                .monthDayFormat(SavingsTestData.MONTH_DAY_FORMAT)//
                 .locale(SavingsTestData.LOCALE);
     }
 
@@ -199,6 +242,20 @@ public final class SavingsRequestBuilders {
                 .paymentTypeId(1);
     }
 
+    /** A savings application update is validated as a fresh application, so it re-sends client, product and date. */
+    public static PutSavingsAccountsAccountIdRequest updateSavingsApplication(Long clientId, Long productId, String submittedOnDate) {
+        return new PutSavingsAccountsAccountIdRequest()//
+                .clientId(clientId)//
+                .productId(productId)//
+                .submittedOnDate(submittedOnDate)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .locale(SavingsTestData.LOCALE);
+    }
+
+    public static PostSavingsAccountTransactionsRequest withdrawal(String amount, String transactionDate, Long paymentTypeId) {
+        return withdrawal(amount, transactionDate).paymentTypeId(paymentTypeId.intValue());
+    }
+
     public static PostSavingsAccountTransactionsRequest postInterestAsOn(String transactionDate) {
         return new PostSavingsAccountTransactionsRequest()//
                 .transactionDate(transactionDate)//
@@ -215,5 +272,13 @@ public final class SavingsRequestBuilders {
                 .reasonForBlock(reasonForBlock)//
                 .dateFormat(SavingsTestData.DATETIME_PATTERN)//
                 .locale(SavingsTestData.LOCALE);
+    }
+
+    /**
+     * A lien hold may take the balance below zero; without the flag the same hold is rejected for insufficient funds.
+     */
+    public static PostSavingsAccountTransactionsRequest holdAmount(String amount, String transactionDate, String reasonForBlock,
+            boolean lienAllowed) {
+        return holdAmount(amount, transactionDate, reasonForBlock).lienAllowed(String.valueOf(lienAllowed));
     }
 }
