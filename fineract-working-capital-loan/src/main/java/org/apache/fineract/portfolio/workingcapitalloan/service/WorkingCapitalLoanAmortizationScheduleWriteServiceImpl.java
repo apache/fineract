@@ -22,24 +22,30 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.Validate;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.data.ProjectedAmortizationScheduleGenerateRequest;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPeriodPaymentRateChange;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanEirNotCalculableException;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,6 +62,7 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
     private final WorkingCapitalLoanRepository loanRepository;
     private final ProjectedAmortizationScheduleRepositoryWrapper scheduleRepositoryWrapper;
     private final WorkingCapitalLoanPeriodPaymentRateChangeRepository rateChangeRepository;
+    private final WorkingCapitalLoanTransactionRepository transactionRepository;
 
     // Deliberately a different tie-break from the allocation replay's (which leads with the submitted-on date, matching
     // the core loan module). This stream mixes payments with rate changes, and creation time is the only key both carry
@@ -295,7 +302,6 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
                 .orElseThrow(() -> new IllegalStateException("Projected amortization schedule is not found for loan " + loan.getId()));
 
         model.applyPayment(transactionDate, repaymentAmount);
-        model.recalculateNetAmortizationAndDeferredBalanceFrom(transactionDate);
 
         scheduleRepositoryWrapper.writeModel(loan, model);
     }
@@ -323,19 +329,76 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
                 .orElseThrow(() -> new IllegalStateException("Projected amortization schedule is not found for loan " + loan.getId()));
 
         // Rebuilt from scratch rather than split in place: rate changes are effective-dated, so a backdated one has to
-        // land ahead of the changes that follow it, and applyRateChange drops every segment at or after its own split.
-        // Reconstruction replays them all in effective-date order instead. The source transactions are not retained by
-        // the model, so payments and adjustments are carried over from the model being replaced.
+        // land ahead of the changes that follow it, and applyRateChange can only append - it rejects a date that
+        // precedes a change already recorded, because each change is sized against the balance and unearned fee reached
+        // on its own day. Reconstruction replays them all in effective-date order instead, which is the only order that
+        // method accepts. The source transactions are not retained by the model, so payments and adjustments are
+        // carried over from the model being replaced.
         final List<PrincipalPayment> preservedPayments = currentModel.snapshotActualPayments().stream()
                 .map(payment -> new PrincipalPayment(payment.date(), payment.amount().getAmount(), null, null)).toList();
         final List<PrincipalAdjustment> preservedAdjustments = currentModel.snapshotPrincipalAdjustments().stream()
                 .map(adjustment -> new PrincipalAdjustment(adjustment.date(), adjustment.amount().getAmount())).toList();
 
+        writeReconstructed(loan, preservedPayments, preservedAdjustments);
+    }
+
+    @Override
+    public void rebuildScheduleModelFromRecordedHistory(final WorkingCapitalLoan loan) {
+        Validate.notNull(loan, "loan must not be null");
+
+        final List<PrincipalPayment> payments = new ArrayList<>();
+        final List<PrincipalAdjustment> adjustments = new ArrayList<>();
+        collectPrincipalHistory(loan, payments, adjustments);
+
+        writeReconstructed(loan, payments, adjustments);
+    }
+
+    /**
+     * The principal the loan has really taken in, read from its transactions and their stored allocations.
+     *
+     * <p>
+     * Deliberately not read back out of the model, unlike every other rebuild here. The model is the thing being
+     * replaced, and it is being replaced because an older version of the calculation wrote it - so whatever it says
+     * about itself is exactly what cannot be trusted. The transactions and the allocation rows against them are the
+     * record of what actually happened, and they are what a rebuild has to start from if a future version is to be free
+     * to change the model's shape however it likes. This is what the progressive term-loan rebuild does, for the same
+     * reason.
+     *
+     * <p>
+     * Which transactions contribute, and as what, follows the transaction replay in
+     * {@code WorkingCapitalLoanTransactionReprocessingServiceImpl}: a charge-off moves no principal and contributes
+     * nothing; a credit balance refund contributes the part of itself no overpayment was backing, as a principal
+     * adjustment on its own date; every other repayment-like transaction contributes the principal its allocation
+     * records. A transaction never allocated has nothing to say about principal and is skipped.
+     */
+    private void collectPrincipalHistory(final WorkingCapitalLoan loan, final List<PrincipalPayment> payments,
+            final List<PrincipalAdjustment> adjustments) {
+        for (final WorkingCapitalLoanTransaction transaction : transactionRepository
+                .findByWcLoan_IdOrderByTransactionDateAscIdAsc(loan.getId())) {
+            if (transaction.isReversed() || transaction.getTypeOf() == LoanTransactionType.CHARGE_OFF) {
+                continue;
+            }
+            final WorkingCapitalLoanTransactionAllocation allocation = transaction.getAllocation();
+            if (allocation == null) {
+                continue;
+            }
+            final BigDecimal principalPortion = MathUtil.nullToZero(allocation.getPrincipalPortion());
+            if (transaction.getTypeOf() == LoanTransactionType.CREDIT_BALANCE_REFUND) {
+                adjustments.add(new PrincipalAdjustment(transaction.getTransactionDate(), principalPortion));
+            } else if (transaction.getTransactionType().isRepaymentType()) {
+                payments.add(new PrincipalPayment(transaction.getTransactionDate(), principalPortion,
+                        transaction.getCreatedDate().orElse(null), transaction.getId()));
+            }
+        }
+    }
+
+    private void writeReconstructed(final WorkingCapitalLoan loan, final List<PrincipalPayment> payments,
+            final List<PrincipalAdjustment> adjustments) {
         // A pathological rate can make a re-solved segment non-computable (zero daily payment, over-cap term,
         // non-convergent EIR); surface those as a domain-rule error.
         final ProjectedAmortizationScheduleModel model;
         try {
-            model = reconstructScheduleModel(loan, preservedPayments, preservedAdjustments);
+            model = reconstructScheduleModel(loan, payments, adjustments);
         } catch (final IllegalStateException | IllegalArgumentException | ArithmeticException e) {
             throw new WorkingCapitalLoanEirNotCalculableException(e);
         }
@@ -387,7 +450,6 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
                 .orElseThrow(() -> new IllegalStateException("Projected amortization schedule is not found for loan " + loan.getId()));
 
         model.undoPayment(transactionDate, repaymentAmount);
-        model.recalculateNetAmortizationAndDeferredBalanceFrom(transactionDate);
 
         scheduleRepositoryWrapper.writeModel(loan, model);
     }
