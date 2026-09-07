@@ -49,6 +49,7 @@ public class FeignFixedDepositHelper {
     private static final String POST_INTEREST = "postInterest";
     private static final String CALCULATE_PREMATURE_AMOUNT = "calculatePrematureAmount";
     private static final String PREMATURE_CLOSE = "prematureClose";
+    private static final String CLOSE = "close";
     private static final String MODIFY_TRANSACTION = "modify";
     private static final String UNDO_TRANSACTION = "undo";
 
@@ -74,8 +75,9 @@ public class FeignFixedDepositHelper {
         return command(accountId, DepositRequestBuilders.approveFixedDeposit(approvedOnDate), APPROVE);
     }
 
+    /** The undo-approval command accepts a note only; sending locale or dateFormat is rejected as unsupported. */
     public PostFixedDepositAccountsAccountIdResponse undoApproval(Long accountId) {
-        return command(accountId, DepositRequestBuilders.fixedDepositCommand(), UNDO_APPROVAL);
+        return command(accountId, new PostFixedDepositAccountsAccountIdRequest().note("UNDO APPROVAL"), UNDO_APPROVAL);
     }
 
     public PostFixedDepositAccountsAccountIdResponse reject(Long accountId, String rejectedOnDate) {
@@ -106,6 +108,13 @@ public class FeignFixedDepositHelper {
             Long toSavingsAccountId) {
         return command(accountId, DepositRequestBuilders.prematureCloseFixedDeposit(closedOnDate, onAccountClosureId, toSavingsAccountId),
                 PREMATURE_CLOSE);
+    }
+
+    /** Closes a matured account; {@code onAccountClosureId} selects withdraw, transfer to savings or re-invest. */
+    public PostFixedDepositAccountsAccountIdResponse close(Long accountId, String closedOnDate, int onAccountClosureId,
+            Long toSavingsAccountId) {
+        return command(accountId, DepositRequestBuilders.prematureCloseFixedDeposit(closedOnDate, onAccountClosureId, toSavingsAccountId),
+                CLOSE);
     }
 
     public PostFixedDepositAccountsAccountIdResponse command(Long accountId, PostFixedDepositAccountsAccountIdRequest request,
