@@ -29,7 +29,7 @@ import org.apache.fineract.client.models.PostRecurringDepositProductsChartSlabs;
  */
 public final class DepositTestData {
 
-    public static final String MONTH_DAY_FORMAT = "dd MMM";
+    public static final String MONTH_DAY_FORMAT = FeignTestConstants.MONTH_DAY_FORMAT;
     public static final BigDecimal DEPOSIT_AMOUNT = new BigDecimal("100000");
     public static final BigDecimal RECURRING_DEPOSIT_AMOUNT = new BigDecimal("2000");
 
