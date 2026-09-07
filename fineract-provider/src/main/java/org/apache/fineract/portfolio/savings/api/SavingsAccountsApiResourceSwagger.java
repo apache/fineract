@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.savings.api;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -319,6 +320,8 @@ final class SavingsAccountsApiResourceSwagger {
         public String externalId;
         @Schema(example = "true")
         public Boolean withdrawalFeeForTransfers;
+        @Schema(example = "false", description = "command=updateWithHoldTax")
+        public Boolean withHoldTax;
     }
 
     @Schema(description = "PutSavingsAccountsAccountIdResponse")
@@ -336,6 +339,8 @@ final class SavingsAccountsApiResourceSwagger {
             public String locale;
             @Schema(example = "01 March 2011")
             public String submittedOnDate;
+            @Schema(example = "false")
+            public Boolean withHoldTax;
         }
 
         @Schema(example = "2")
@@ -408,5 +413,84 @@ final class SavingsAccountsApiResourceSwagger {
         public Long clientId;
         @Schema(example = "1")
         public Long resourceId;
+    }
+
+    @Schema(description = "PostSavingsAccountsGsimRequest")
+    public static final class PostSavingsAccountsGsimRequest {
+
+        private PostSavingsAccountsGsimRequest() {}
+
+        static final class PostSavingsAccountsGsimClient {
+
+            private PostSavingsAccountsGsimClient() {}
+
+            @Schema(example = "1")
+            public Long clientId;
+            @Schema(example = "1")
+            public Long groupId;
+            @Schema(example = "1")
+            public Long productId;
+            @Schema(example = "08 January 2013")
+            public String submittedOnDate;
+            @Schema(example = "dd MMMM yyyy")
+            public String dateFormat;
+            @Schema(example = "en")
+            public String locale;
+            @Schema(example = "true", description = "Exactly one member of the array is the parent account")
+            public Boolean isParentAccount;
+            @Schema(example = "true")
+            public String isGSIM;
+        }
+
+        static final class PostSavingsAccountsGsimSavings {
+
+            private PostSavingsAccountsGsimSavings() {}
+
+            @Schema(example = "10 March 2013")
+            public String transactionDate;
+            @Schema(example = "dd MMMM yyyy")
+            public String dateFormat;
+            @Schema(example = "en")
+            public String locale;
+            @Schema(example = "1000")
+            public BigDecimal transactionAmount;
+            @Schema(example = "1")
+            public Long paymentTypeId;
+            @Schema(example = "1")
+            public Long childAccountId;
+        }
+
+        public List<PostSavingsAccountsGsimClient> clientArray;
+        public List<PostSavingsAccountsGsimSavings> savingsArray;
+    }
+
+    @Schema(description = "PostSavingsAccountsGsimResponse")
+    public static final class PostSavingsAccountsGsimResponse {
+
+        private PostSavingsAccountsGsimResponse() {}
+
+        @Schema(example = "1")
+        public Long officeId;
+        @Schema(example = "1")
+        public Long clientId;
+        @Schema(example = "1")
+        public Long savingsId;
+        @Schema(example = "1")
+        public Long resourceId;
+        @Schema(example = "1")
+        public Long gsimId;
+    }
+
+    @Schema(description = "PutSavingsAccountsGsimRequest")
+    public static final class PutSavingsAccountsGsimRequest {
+
+        private PutSavingsAccountsGsimRequest() {}
+
+        @Schema(example = "1")
+        public Long clientId;
+        @Schema(example = "1")
+        public Long groupId;
+        @Schema(example = "1")
+        public Long productId;
     }
 }

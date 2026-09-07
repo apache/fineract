@@ -250,5 +250,15 @@ final class SavingsAccountTransactionsApiResourceSwagger {
         public String externalId;
         @Schema(example = "true")
         public String isBulk;
+        @Schema(example = "en")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "01 March 2013")
+        public String transactionDate;
+        @Schema(example = "500")
+        public BigDecimal transactionAmount;
+        @Schema(example = "1")
+        public Long paymentTypeId;
     }
 }
