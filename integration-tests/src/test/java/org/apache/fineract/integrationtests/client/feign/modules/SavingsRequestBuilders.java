@@ -47,6 +47,9 @@ public final class SavingsRequestBuilders {
                 .interestCalculationType(SavingsTestData.InterestCalculationType.DAILY_BALANCE)//
                 .interestCalculationDaysInYearType(SavingsTestData.InterestCalculationDaysInYearType.DAYS_365)//
                 .accountingRule(SavingsTestData.AccountingRule.NONE)//
+                .lockinPeriodFrequency(0)//
+                .lockinPeriodFrequencyType(SavingsTestData.PeriodFrequencyType.DAYS)//
+                .lienAllowed(false)//
                 .locale(SavingsTestData.LOCALE);
     }
 
