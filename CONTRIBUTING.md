@@ -75,6 +75,26 @@ See [Cucumber E2E Tests](https://fineract.apache.org/docs/current/#testing-cucum
 
 #### Integration tests
 
+Like the Cucumber tests, the integration tests run against a live Fineract instance instead of starting one for you.
+Bring one up first — the Docker stack is what CI uses, so it is the configuration these suites are verified against:
+
+```bash
+# Build the image once
+./gradlew :fineract-provider:jibDockerBuild -Djib.to.image=fineract -x test -x cucumber
+
+# Start Fineract plus its database, LocalStack and the mock OAuth2 server
+docker compose -f docker-compose-postgresql-test.yml up -d
+./gradlew :integration-tests:waitForFineract
+
+./gradlew :integration-tests:test --tests ClientLoanIntegrationTest
+```
+
+`./gradlew :fineract-provider:bootRun` works too, provided you created the databases as shown above for the
+Cucumber tests. `:twofactor-tests` and `:oauth2-tests` need the server started in a different authentication mode,
+and `docker-compose-war-test.yml` runs the WAR in a stock Tomcat instead of the Spring Boot jar; see
+[Integration Testing](https://fineract.apache.org/docs/current/#testing-integration) for those and for the
+`BACKEND_*` variables that point the suites at a non-default address.
+
 Running tests with external dependencies is a multi-step process with many moving parts.
 Sometimes there are arbitrary failures and the prerequisite setup can be daunting.
 A full local integration test run (on a developer workstation) covering every possible test using every external service and every supported relational database engine could take an entire day - and that's assuming everything is properly configured and runs as expected.
@@ -112,19 +132,19 @@ git clean --force -dx
 
 # Destroy various caches and configs.
 # ⚠️ This may delete gibibytes of cached data, making the next build very slow.
-rm -rf ~/.gradle ~/.m2 /tmp/cargo*
+rm -rf ~/.gradle ~/.m2
 
-# Destroy any Java containers left running.
-# 💚 This is generally very safe to run between builds.
-ps auxwww | grep [c]argo | awk '{ print $2 }' | xargs -r kill
+# Tear down the test stack, including its database volume.
+# ⚠️ This discards the data of the instance the integration tests were running against.
+docker compose -f docker-compose-postgresql-test.yml down -v
 ```
 
 Integration test runs such as
 ```bash
 ./gradlew --no-daemon --console=plain test -x :twofactor-tests:test \
-  -x :oauth2-tests:test :fineract-e2e-tests-runner:test -PdbType=postgresql
+  -x :oauth2-tests:test -x :fineract-e2e-tests-runner:test
 ```
-in `.github/workflows/build-postgresql.yml` often take an hour or longer to complete.
+in `.github/workflows/run-integration-test-sequentially-postgresql.yml` often take an hour or longer to complete.
 If you notice the `:integration-tests:test` task taking significantly less time, say, one minute, gradle may be skipping it.
 Look for something like this in the test output:
 
@@ -132,8 +152,6 @@ Look for something like this in the test output:
 Custom actions are attached to task ':integration-tests:test'.
 Build cache key for task ':integration-tests:test' is 6aeeec3f58bf9703d4c100fbaa657f5c
 Skipping task ':integration-tests:test' as it is up-to-date.
-Resolve mutations for :integration-tests:cargoStopLocal (Thread[Execution worker Thread 11,5,main]) started.
-:integration-tests:cargoStopLocal (Thread[Execution worker Thread 11,5,main]) started.
 
 
 (This is with the `--info` gradle argument with eyeballs added for emphasis.)

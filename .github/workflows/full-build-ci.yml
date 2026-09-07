@@ -127,6 +127,14 @@ jobs:
     secrets:
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
+  run-war-smoke-test:
+    needs: build-core
+    uses: ./.github/workflows/build-war-smoke.yml
+    with:
+      upload_artifacts: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_artifacts }}
+    secrets:
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
   run-liquibase-only-on-postgresql:
     needs: build-core
     uses: ./.github/workflows/liquibase-only-postgresql.yml
