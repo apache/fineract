@@ -115,6 +115,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     private final WorkingCapitalLoanTransactionAllocationRepository allocationRepository;
     private final PaymentDetailWritePlatformService paymentDetailService;
     private final WorkingCapitalLoanBalanceRepository balanceRepository;
+    private final WorkingCapitalLoanRecoveryPaymentWriteService recoveryPaymentWriteService;
     private final WorkingCapitalLoanAmortizationScheduleWriteService amortizationScheduleWriteService;
     private final CodeValueRepository codeValueRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
@@ -705,6 +706,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                         "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
         return switch (transaction.getTypeOf()) {
             case DISCOUNT_FEE_ADJUSTMENT -> undoDiscountFeeAdjustment(loan, transaction, command);
+            // A recovery payment never entered the balance, so the generic undo (which rewinds an allocation and
+            // replays the schedule) does not apply: it has its own reversal, allowed while the loan is written off.
+            case RECOVERY_REPAYMENT -> recoveryPaymentWriteService.undoRecoveryPayment(loan, transaction, command);
             case REPAYMENT, GOODWILL_CREDIT, CHARGE_ADJUSTMENT, PAYOUT_REFUND -> undoTransaction(loan, transaction, command);
             default -> throw new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.undo.not.supported",
                     "Undo is not supported for transaction type " + transaction.getTypeOf(),

@@ -1331,6 +1331,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder recoveryPaymentWorkingCapitalLoanTransaction(final Long loanId) {
+        this.actionName = ACTION_RECOVERYPAYMENT;
+        this.entityName = ENTITY_WORKINGCAPITALLOAN;
+        this.entityId = loanId;
+        this.loanId = loanId;
+        this.href = "/working-capital-loans/" + loanId + "/transactions?command=recoveryPayment";
+        return this;
+    }
+
     public CommandWrapperBuilder loanInterestPaymentWaiverTransaction(final Long loanId) {
         this.actionName = ACTION_INTERESTPAYMENTWAIVER;
         this.entityName = ENTITY_LOAN;

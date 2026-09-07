@@ -196,6 +196,19 @@ public final class WorkingCapitalLoanDisbursementTestBuilder {
         return new PostWorkingCapitalLoanTransactionsRequest().locale(DEFAULT_LOCALE);
     }
 
+    public static PostWorkingCapitalLoanTransactionsRequest buildRecoveryPaymentRequest(final LocalDate transactionDate,
+            final BigDecimal transactionAmount) {
+        final PostWorkingCapitalLoanTransactionsRequest request = new PostWorkingCapitalLoanTransactionsRequest().locale(DEFAULT_LOCALE)
+                .dateFormat(DEFAULT_DATE_FORMAT);
+        if (transactionDate != null) {
+            request.transactionDate(format(transactionDate));
+        }
+        if (transactionAmount != null) {
+            request.transactionAmount(transactionAmount);
+        }
+        return request;
+    }
+
     private static PostWorkingCapitalLoansLoanIdRequest baseLoanIdRequest() {
         return new PostWorkingCapitalLoansLoanIdRequest().locale(DEFAULT_LOCALE).dateFormat(DEFAULT_DATE_FORMAT);
     }

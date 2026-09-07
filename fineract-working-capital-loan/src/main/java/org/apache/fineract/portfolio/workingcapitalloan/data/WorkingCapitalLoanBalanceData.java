@@ -47,6 +47,19 @@ public class WorkingCapitalLoanBalanceData implements Serializable {
     private BigDecimal penalty;
     private BigDecimal penaltyPaid;
     private BigDecimal penaltyOutstanding;
+    /**
+     * Portions moved out of the outstanding balance by a write-off. Without them the exposed figures cannot be
+     * reconciled: {@code principalOutstanding} already nets these off, so a written-off loan reports a gross principal
+     * and a zero outstanding with nothing in between to explain the difference.
+     */
+    private BigDecimal principalWrittenOff;
+    private BigDecimal feeWrittenOff;
+    private BigDecimal penaltyWrittenOff;
+    private BigDecimal totalWrittenOff;
+    /** Collected on the loan after it was written off. Recovery income; it does not reduce {@code totalWrittenOff}. */
+    private BigDecimal totalRecovered;
+    /** What is still recoverable: {@code totalWrittenOff - totalRecovered}. Caps the next recovery payment. */
+    private BigDecimal writtenOffOutstanding;
     private BigDecimal realizedIncomeFromDiscountFee;
     private BigDecimal unrealizedIncomeFromDiscountFee;
     private BigDecimal overpaymentAmount;

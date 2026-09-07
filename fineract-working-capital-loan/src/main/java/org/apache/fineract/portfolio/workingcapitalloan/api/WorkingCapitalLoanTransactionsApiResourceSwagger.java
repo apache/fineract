@@ -202,7 +202,7 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String transactionDate;
         @Schema(example = "42", description = "Disbursement transaction id for discountFee; discount fee transaction id for discountFeeAdjustment")
         public Long relatedResourceId;
-        @Schema(example = "100.0", description = "Transaction amount")
+        @Schema(example = "100.0", description = "Transaction amount. For command=recoveryPayment it may not exceed the loan's writtenOffOutstanding")
         public BigDecimal transactionAmount;
         @Schema(example = "12", description = "Optional code value id for transaction classification")
         public Long classificationId;

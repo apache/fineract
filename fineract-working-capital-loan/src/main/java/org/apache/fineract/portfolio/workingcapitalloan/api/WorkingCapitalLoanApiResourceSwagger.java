@@ -417,6 +417,18 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal penaltyPaid;
         @Schema(example = "10000.00")
         public BigDecimal penaltyOutstanding;
+        @Schema(example = "10000.00", description = "Principal moved out of the outstanding balance by a write-off")
+        public BigDecimal principalWrittenOff;
+        @Schema(example = "0.00", description = "Fees moved out of the outstanding balance by a write-off")
+        public BigDecimal feeWrittenOff;
+        @Schema(example = "0.00", description = "Penalties moved out of the outstanding balance by a write-off")
+        public BigDecimal penaltyWrittenOff;
+        @Schema(example = "10000.00", description = "Gross amount written off; not reduced by recoveries")
+        public BigDecimal totalWrittenOff;
+        @Schema(example = "2000.00", description = "Collected after the write-off and recognized as recovery income")
+        public BigDecimal totalRecovered;
+        @Schema(example = "8000.00", description = "Still recoverable (totalWrittenOff - totalRecovered); caps the next recovery payment")
+        public BigDecimal writtenOffOutstanding;
         @Schema(example = "10000.00")
         public BigDecimal realizedIncomeFromDiscountFee;
         @Schema(example = "10000.00")

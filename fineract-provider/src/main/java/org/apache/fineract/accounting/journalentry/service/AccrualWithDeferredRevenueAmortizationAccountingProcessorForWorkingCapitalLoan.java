@@ -130,6 +130,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             case LoanTransactionType.ACCRUAL -> chargeAccrualPostings(feesPortion, penaltiesPortion);
             case LoanTransactionType.CHARGE_OFF -> chargeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion);
             case LoanTransactionType.WRITEOFF -> writeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion, isChargedOff);
+            case LoanTransactionType.RECOVERY_REPAYMENT -> recoveryPaymentPostings(txn);
             default -> throw new NotImplementedException(
                     "Post Journal Entries is not implemented yet for " + txn.getTypeOf().getCode() + " for Working Capital Loan");
         };
@@ -199,6 +200,16 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                 LedgerPosting.credit(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion),
                 LedgerPosting.credit(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion),
                 LedgerPosting.credit(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion));
+    }
+
+    /**
+     * Money collected after the loan was written off. The portfolio and receivables were already relieved by the
+     * write-off, so there is nothing to credit back: the whole amount is recognized as recovery income against the fund
+     * source. No split by principal, fee or penalty - the transaction carries no allocation.
+     */
+    private List<LedgerPosting> recoveryPaymentPostings(final WorkingCapitalLoanTransaction txn) {
+        return List.of(LedgerPosting.debit(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount()),
+                LedgerPosting.creditWithoutPaymentDetail(CashAccountsForLoan.INCOME_FROM_RECOVERY, txn.getTransactionAmount()));
     }
 
     /**
