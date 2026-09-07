@@ -79,7 +79,7 @@ public class WorkingCapitalDelinquencyConfigStepDef extends AbstractStepDef {
         DelinquencyBucketRequest delinquencyBucketRequest = new DelinquencyBucketRequest() //
                 .name("DB-WCL-" + Utils.randomStringGenerator(12)) //
                 .bucketType(DelinquencyBucketType.WORKING_CAPITAL.toString())//
-                .ranges(List.of(1L)) //
+                .ranges(workingCapitalRequestFactory.seededWorkingCapitalDelinquencyRangeIds()) //
                 .minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule() //
                         .frequency(1) //
                         .minimumPaymentType(DelinquencyMinimumPayment.PERCENTAGE.name()) //
@@ -99,7 +99,7 @@ public class WorkingCapitalDelinquencyConfigStepDef extends AbstractStepDef {
         DelinquencyBucketRequest delinquencyBucketRequest = new DelinquencyBucketRequest() //
                 .name("DB-WCL-" + Utils.randomStringGenerator(12)) //
                 .bucketType(DelinquencyBucketType.WORKING_CAPITAL.toString())//
-                .ranges(List.of(1L)) //
+                .ranges(workingCapitalRequestFactory.seededWorkingCapitalDelinquencyRangeIds()) //
                 .minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule() //
                         .frequency(Integer.parseInt(data.get("frequency"))) //
                         .minimumPaymentType(data.get("minimumPaymentType")) //
