@@ -1,0 +1,58 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements. See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership. The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License. You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# FOR TESTING PURPOSES ONLY! NOT SUITABLE FOR PRODUCTION USAGE!
+#
+# Deploys fineract-provider.war into a stock Tomcat, which is the deployment path described under
+# "How to build the WAR file" in the README. Everything else in CI exercises the Spring Boot jar via
+# the jib image, so this file exists to keep the WAR from rotting unnoticed; see
+# .github/workflows/build-war-smoke.yml.
+#
+# Run ./gradlew :fineract-war:war first — the WAR is bind-mounted, not built into an image.
+#
+# Tomcat serves plain HTTP on 8080 rather than HTTPS on 8443. Configuring the TLS connector would
+# mean shipping a server.xml purely for this job, and the suites take the protocol and port from
+# BASE_URL / BACKEND_* anyway.
+services:
+  db:
+    extends:
+      file: ./config/docker/compose/postgresql.yml
+      service: postgresql
+
+  fineract-war:
+    # Same Tomcat major as the servlet API the WAR is built against, on the JDK the project targets.
+    image: tomcat:10.1-jdk25-temurin
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ${PWD}/fineract-war/build/libs/fineract-provider.war:/usr/local/tomcat/webapps/fineract-provider.war:ro
+    tmpfs:
+      - /tmp:rw,nosuid,size=256m
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./config/docker/env/fineract.env
+      - ./config/docker/env/fineract-common.env
+      - ./config/docker/env/fineract-postgresql.env
+    environment:
+      # Spring Boot's embedded-container settings do not apply to a WAR in an external Tomcat; the
+      # connector in Tomcat's own server.xml decides, and that is plain HTTP on 8080.
+      FINERACT_SERVER_SSL_ENABLED: "false"
+# FOR TESTING PURPOSES ONLY! NOT SUITABLE FOR PRODUCTION USAGE!

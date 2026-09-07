@@ -1,0 +1,163 @@
+name: Fineract WAR Deployment Smoke Test
+
+# Everything else in CI exercises the Spring Boot jar through the jib image. This job is the only
+# thing covering the WAR that fineract-war ships in the binary distribution: it deploys
+# fineract-provider.war into a stock Tomcat and drives one E2E scenario against it, so a change that
+# breaks the traditional servlet-container deployment fails here instead of after a release.
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      upload_artifacts:
+        description: Upload reports and logs even when the job succeeds
+        required: false
+        default: false
+        type: boolean
+    secrets:
+      DEVELOCITY_ACCESS_KEY:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  war-smoke:
+    name: WAR in Tomcat
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    env:
+      TZ: Asia/Kolkata
+      DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      COMPOSE_FILE: docker-compose-war-test.yml
+      DOCKER_LOG_DIR: ci-logs/war-smoke
+      # Tomcat serves the WAR over plain HTTP on 8080; see docker-compose-war-test.yml.
+      BASE_URL: http://localhost:8080
+      TEST_USERNAME: mifos
+      TEST_PASSWORD: password
+      TEST_STRONG_PASSWORD: A1b2c3d4e5f$
+      TEST_TENANT_ID: default
+      INITIALIZATION_ENABLED: true
+      # The @Smoke tag is the repo's own marker for this; scoped to Client.feature it is one scenario.
+      SMOKE_FEATURE: src/test/resources/features/Client.feature
+      SMOKE_TAGS: "@Smoke"
+
+    steps:
+      - name: Set up JDK 25
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          java-version: '25'
+          distribution: 'zulu'
+
+      - name: Download workspace
+        id: download-workspace
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        continue-on-error: true
+        with:
+          name: fineract-workspace-${{ github.run_id }}
+          path: .
+
+      - name: Extract workspace
+        if: steps.download-workspace.outcome == 'success'
+        run: tar -xf fineract-workspace.tar
+
+      - name: Checkout
+        if: steps.download-workspace.outcome != 'success'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Build workspace fallback
+        if: steps.download-workspace.outcome != 'success'
+        uses: ./.github/actions/setup-and-build-fineract
+        with:
+          cache-read-only: false
+
+      - name: Setup Gradle and Validate Wrapper
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        with:
+          validate-wrappers: true
+
+      - name: Build the WAR
+        run: ./gradlew --no-daemon --console=plain :fineract-war:war -x test -x cucumber -x buildJavaSdk
+
+      - name: Deploy the WAR into Tomcat
+        run: docker compose -f "$COMPOSE_FILE" up -d
+
+      - name: Check the stack
+        run: docker ps
+
+      - name: Wait for the deployed WAR to be ready
+        run: curl -f --retry 60 --retry-all-errors --connect-timeout 30 --retry-delay 10 "$BASE_URL/fineract-provider/actuator/health"
+
+      - name: Run one E2E scenario against the WAR
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon --console=plain \
+            :fineract-e2e-tests-runner:cucumber \
+            -Pcucumber.features="$SMOKE_FEATURE" \
+            -Pcucumber.tags="$SMOKE_TAGS" \
+            -x :fineract-e2e-tests-runner:allureReport \
+            -x buildJavaSdk \
+            -x :fineract-client:buildJavaSdk \
+            -x :fineract-client-feign:buildJavaSdk \
+            -x :fineract-avro-schemas:buildJavaSdk \
+            2>&1 | tee cucumber-war-smoke.log
+
+          # A failing scenario already fails the build through cucumber's exit code, but cucumber
+          # exits 0 when its filters match nothing. Without this check a moved feature file or a
+          # dropped tag would leave the job green having deployed the WAR and tested nothing.
+          summary="$(sed -E 's/\x1B\[[0-9;]*[mK]//g' cucumber-war-smoke.log | grep -E '^[0-9]+ scenarios' | tail -1)"
+          if [ -z "$summary" ]; then
+            echo "::error::No cucumber summary line in the output; cannot tell whether anything ran."
+            exit 1
+          fi
+          if [ "${summary%% *}" = "0" ]; then
+            echo "::error::Cucumber ran no scenarios. Check that SMOKE_FEATURE ($SMOKE_FEATURE) exists and still carries SMOKE_TAGS ($SMOKE_TAGS)."
+            exit 1
+          fi
+          echo "Ran against the WAR: $summary"
+
+      - name: Archive test results
+        if: ${{ failure() || inputs.upload_artifacts }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: test-results-war-smoke-attempt-${{ github.run_attempt }}
+          retention-days: 5
+          compression-level: 9
+          if-no-files-found: ignore
+          path: |
+            cucumber-war-smoke.log
+            fineract-e2e-tests-runner/build/reports/
+
+      - name: Collect Docker logs
+        if: always()
+        run: |
+          mkdir -p "$DOCKER_LOG_DIR"
+          docker ps -a > "$DOCKER_LOG_DIR/docker-ps.txt" 2>&1 || true
+          docker compose -f "$COMPOSE_FILE" ps --all > "$DOCKER_LOG_DIR/docker-compose-ps.txt" 2>&1 || true
+          docker compose -f "$COMPOSE_FILE" logs --no-color --timestamps > "$DOCKER_LOG_DIR/docker-compose.log" 2>&1 || true
+
+          docker compose -f "$COMPOSE_FILE" ps -q | while read -r container_id; do
+            [ -n "$container_id" ] || continue
+            container_name="$(docker inspect --format '{{.Name}}' "$container_id" 2>/dev/null | sed 's#^/##; s#[^A-Za-z0-9_.-]#_#g')"
+            [ -n "$container_name" ] || container_name="$container_id"
+            docker logs --timestamps "$container_id" > "$DOCKER_LOG_DIR/${container_name}.log" 2>&1 || true
+          done
+
+      - name: Archive server logs
+        if: ${{ failure() || inputs.upload_artifacts }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: server-logs-war-smoke-attempt-${{ github.run_attempt }}
+          retention-days: 5
+          compression-level: 9
+          if-no-files-found: ignore
+          path: ci-logs/
+
+      - name: Clean up
+        if: always()
+        run: docker compose -f "$COMPOSE_FILE" down -v

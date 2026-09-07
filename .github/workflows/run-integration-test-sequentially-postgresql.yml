@@ -1,4 +1,4 @@
-name: Fineract Cargo & Unit- & Integration tests - Sequential Execution - PostgreSQL
+name: Fineract Sequential Unit- & Integration tests - PostgreSQL
 
 on:
   workflow_dispatch:
@@ -28,25 +28,20 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 180
 
-    services:
-      postgresql:
-        image: postgres:18.3
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: root
-          POSTGRES_PASSWORD: postgres
-        options: --health-cmd="pg_isready -q -d postgres -U root" --health-interval=5s --health-timeout=2s --health-retries=12
-      mock-oauth2-server:
-        image: ghcr.io/navikt/mock-oauth2-server:3.0.3
-        ports:
-          - 9000:9000
-        env:
-          SERVER_PORT: 9000
-          JSON_CONFIG: '{ "interactiveLogin": true, "httpServer": "NettyWrapper", "tokenCallbacks": [ { "issuerId": "auth/realms/fineract", "tokenExpiry": 120, "requestMappings": [{ "requestParam": "scope", "match": "fineract", "claims": { "sub": "mifos", "scope": [ "test" ] } } ] } ] }'
     env:
       TZ: Asia/Kolkata
       DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+      IMAGE_NAME: fineract
+      COMPOSE_FILE: docker-compose-postgresql-test.yml
+      DOCKER_LOG_DIR: ci-logs/postgresql-sequential
+      AWS_ENDPOINT_URL: http://localhost:4566
+      AWS_ACCESS_KEY_ID: localstack
+      AWS_SECRET_ACCESS_KEY: localstack
+      AWS_REGION: us-east-1
+      FINERACT_REPORT_EXPORT_S3_ENABLED: true
+      FINERACT_REPORT_EXPORT_S3_BUCKET_NAME: fineract-reports
+      FINERACT_TEST_EXTERNAL_HOST: host.docker.internal
+
     steps:
       - name: Set up JDK 25
         uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
@@ -82,40 +77,86 @@ jobs:
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
         with:
           validate-wrappers: true
-      - name: Verify PostgreSQL connection
-        run: |
-          while ! pg_isready -d postgres -U root -h 127.0.0.1 -p 5432 ; do
-              sleep 1
-          done
-      - name: Initialise databases
-        run: |
-          ./gradlew --no-daemon -q createPGDB -PdbName=fineract_tenants -x buildJavaSdk
-          ./gradlew --no-daemon -q createPGDB -PdbName=fineract_default -x buildJavaSdk
 
-      - name: Start LocalStack
-        env:
-          AWS_ENDPOINT_URL: http://localhost:4566
-          AWS_ACCESS_KEY_ID: localstack
-          AWS_SECRET_ACCESS_KEY: localstack
-          AWS_REGION: us-east-1
+      - name: Build the image
+        run: ./gradlew --no-daemon --console=plain :fineract-provider:jibDockerBuild -Djib.to.image=$IMAGE_NAME -x test -x cucumber -x buildJavaSdk
+
+      - name: Start dependencies
+        run: docker compose -f "$COMPOSE_FILE" up -d db localstack mock-oauth2-server
+
+      - name: Initialise LocalStack
         run: |
-          docker run -d --name localstack -p 4566:4566 -p 4510-4559:4510-4559 localstack/localstack:2.1
-          sleep 10
-          docker exec localstack awslocal s3api create-bucket --bucket fineract-reports
-          echo "LocalStack initialization complete"
-      - name: Build & Test
-        env:
-          AWS_ENDPOINT_URL: http://localhost:4566
-          AWS_ACCESS_KEY_ID: localstack
-          AWS_SECRET_ACCESS_KEY: localstack
-          AWS_REGION: us-east-1
-          FINERACT_REPORT_EXPORT_S3_ENABLED: true
-          FINERACT_REPORT_EXPORT_S3_BUCKET_NAME: fineract-reports
+          timeout 120 bash -c 'until docker compose -f "$COMPOSE_FILE" exec -T localstack awslocal s3api head-bucket --bucket fineract-reports >/dev/null 2>&1 || docker compose -f "$COMPOSE_FILE" exec -T localstack awslocal s3api create-bucket --bucket fineract-reports; do
+            sleep 5
+          done'
+
+      - name: Start Fineract
+        run: docker compose -f "$COMPOSE_FILE" up -d fineract
+
+      - name: Check the stack
+        run: docker ps
+
+      - name: Wait for Fineract to be ready
+        run: curl -f -k --retry 60 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
+
+      - name: Run Cucumber
+        run: ./gradlew --no-daemon --console=plain cucumber -x :fineract-e2e-tests-runner:cucumber -x buildJavaSdk
+
+      - name: Run tests sequentially
         run: |
-          ./gradlew --no-daemon --console=plain cucumber -x :fineract-e2e-tests-runner:cucumber -x buildJavaSdk
-          ./gradlew --no-daemon --console=plain test -x :twofactor-tests:test -x :oauth2-test:test -x :fineract-e2e-tests-runner:test -PdbType=postgresql -x buildJavaSdk
-          ./gradlew --no-daemon --console=plain :twofactor-tests:test -PdbType=postgresql -x buildJavaSdk
-          ./gradlew --no-daemon --console=plain :oauth2-tests:test -PdbType=postgresql -x buildJavaSdk
+          set -e  # Fail the script if any command fails
+          FAILED=0
+
+          wait_for_fineract() {
+            curl -f -k --retry 60 --retry-all-errors --connect-timeout 30 --retry-delay 30 https://localhost:8443/fineract-provider/actuator/health
+          }
+
+          configure_sms_gateway_host() {
+            docker compose -f "$COMPOSE_FILE" exec -T db sh -lc 'PGPASSWORD="$POSTGRES_PASSWORD" psql -U "$POSTGRES_USER" -d fineract_default -c "UPDATE c_external_service_properties SET value = '\''host.docker.internal'\'' WHERE name = '\''host_name'\'' AND external_service_id = (SELECT id FROM c_external_service WHERE name = '\''MESSAGE_GATEWAY'\'')"'
+          }
+
+          configure_twofactor_smtp_host() {
+            docker compose -f "$COMPOSE_FILE" exec -T db sh -lc 'PGPASSWORD="$POSTGRES_PASSWORD" psql -U "$POSTGRES_USER" -d fineract_default -c "UPDATE c_external_service_properties SET value = '\''host.docker.internal'\'' WHERE name = '\''host'\'' AND external_service_id = (SELECT id FROM c_external_service WHERE name = '\''SMTP_Email_Account'\'')"'
+          }
+
+          # The twofactor and oauth2 suites need the server started with a different authentication
+          # mode, so Fineract is recreated with the matching compose override before each of them.
+          recreate_fineract_with_auth_mode() {
+            local override="$1"
+            docker compose -f "$COMPOSE_FILE" -f "$override" up -d --force-recreate fineract
+            wait_for_fineract
+          }
+
+          run_gradle() {
+            if ! ./gradlew --no-daemon --console=plain "$@" -x buildJavaSdk ; then
+              echo "::error::Tests failed: $*"
+              FAILED=1
+            fi
+          }
+
+          configure_sms_gateway_host
+
+          echo "::group::Running tests against basic authentication"
+          run_gradle test -x :twofactor-tests:test -x :oauth2-tests:test -x :fineract-e2e-tests-runner:test
+          echo "::endgroup::"
+
+          echo "::group::Running :twofactor-tests:test"
+          recreate_fineract_with_auth_mode docker-compose-twofactor-test.yml
+          configure_twofactor_smtp_host
+          run_gradle :twofactor-tests:test
+          echo "::endgroup::"
+
+          echo "::group::Running :oauth2-tests:test"
+          recreate_fineract_with_auth_mode docker-compose-oauth2-test.yml
+          run_gradle :oauth2-tests:test
+          echo "::endgroup::"
+
+          # Exit with failure status if any test failed
+          if [ "$FAILED" -eq 1 ]; then
+            echo "::error::Some tests failed in this job"
+            exit 1
+          fi
+
       - name: Archive test results
         if: ${{ failure() || inputs.upload_artifacts }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -128,6 +169,24 @@ jobs:
             integration-tests/build/reports/
             twofactor-tests/build/reports/
             oauth2-tests/build/reports/
+
+      - name: Collect Docker logs
+        if: always()
+        run: |
+          mkdir -p "$DOCKER_LOG_DIR"
+          docker ps -a > "$DOCKER_LOG_DIR/docker-ps.txt" 2>&1 || true
+          docker compose -f "$COMPOSE_FILE" ps --all > "$DOCKER_LOG_DIR/docker-compose-ps.txt" 2>&1 || true
+          docker compose -f "$COMPOSE_FILE" logs --no-color --timestamps > "$DOCKER_LOG_DIR/docker-compose.log" 2>&1 || true
+          docker stats --no-stream > "$DOCKER_LOG_DIR/docker-stats.txt" 2>&1 || true
+
+          docker compose -f "$COMPOSE_FILE" ps -q | while read -r container_id; do
+            [ -n "$container_id" ] || continue
+            container_name="$(docker inspect --format '{{.Name}}' "$container_id" 2>/dev/null | sed 's#^/##; s#[^A-Za-z0-9_.-]#_#g')"
+            [ -n "$container_name" ] || container_name="$container_id"
+            docker logs --timestamps "$container_id" > "$DOCKER_LOG_DIR/${container_name}.log" 2>&1 || true
+            docker inspect "$container_id" > "$DOCKER_LOG_DIR/${container_name}.inspect.json" 2>&1 || true
+          done
+
       - name: Archive server logs
         if: ${{ failure() || inputs.upload_artifacts }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -136,6 +195,9 @@ jobs:
           retention-days: 5
           compression-level: 9
           path: |
-            integration-tests/build/cargo/
-            twofactor-tests/build/cargo/
-            oauth2-tests/build/cargo/
+            ci-logs/
+            build/fineract/logs/
+
+      - name: Clean up
+        if: always()
+        run: docker compose -f "$COMPOSE_FILE" down -v

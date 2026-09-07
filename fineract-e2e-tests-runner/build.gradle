@@ -106,9 +106,12 @@ cucumber {
         featurePath = "src/test/resources/features";
     }
 
+    // CucumberExtension.tags is a String that is passed straight to cucumber's --tags. Wrapping the
+    // value in a list made Groovy coerce it with toString(), so -Pcucumber.tags=@Smoke reached
+    // cucumber as the tag expression "[@Smoke]", which matches nothing and still exits 0.
     tags = 'not @Skip'
     if (project.hasProperty("cucumber.tags")) {
-        tags = [project.getProperty("cucumber.tags")]
+        tags = project.getProperty("cucumber.tags")
     }
 
     if (project.hasProperty("cucumber.name")) {

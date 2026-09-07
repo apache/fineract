@@ -104,7 +104,7 @@ jobs:
           jq -e '.git | type == "object"' actuator-info-worker1.json
 
       - name: Run Smoke Test with Remote COB
-        run: ./gradlew --no-daemon --console=plain :integration-tests:cleanTest :integration-tests:test --tests "org.apache.fineract.integrationtests.investor.externalassetowner.InitiateExternalAssetOwnerTransferTest.saleActiveLoanToExternalAssetOwnerAndBuybackADayLater" -PcargoDisabled -x buildJavaSdk
+        run: ./gradlew --no-daemon --console=plain :integration-tests:cleanTest :integration-tests:test --tests "org.apache.fineract.integrationtests.investor.externalassetowner.InitiateExternalAssetOwnerTransferTest.saleActiveLoanToExternalAssetOwnerAndBuybackADayLater" -x buildJavaSdk
 
       - name: Collect Docker logs
         if: ${{ failure() || inputs.upload_artifacts }}
