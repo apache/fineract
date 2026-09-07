@@ -1449,3 +1449,235 @@ Feature: WorkingCapitalAmortizationSchedule
       | 2         | 47.22                 | 8961.86         | 9.08                       | 46.00               | 8.84                     | 990.92                     | 8962.84       | 991.16                   |
       | 3         | 47.22                 | 8924.66         | 9.04                       | 46.00               | 8.81                     | 982.12                     | 8925.65       | 982.35                   |
     And The retrieved amortization schedule has no negative monetary amounts
+
+  Scenario: Verify rate change after backdated near-payoff leaves prior days and earned fee untouched
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                | 1000     |
+    When Admin sets the business date to "03 January 2026"
+    And Customer makes repayment on "03 January 2026" with 46 transaction amount on Working Capital loan
+    When Admin sets the business date to "04 January 2026"
+    And Customer makes repayment on "04 January 2026" with 46 transaction amount on Working Capital loan
+    And Customer makes repayment on "02 January 2026" with 9904 transaction amount on Working Capital loan
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule actual amortization total is "1000.00"
+    And The retrieved amortization schedule actual payments plus future expected payments total "10000.00"
+    And The retrieved amortization schedule has no negative monetary amounts
+    And Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 4.0   |
+    And Admin remembers the retrieved amortization schedule payments before "2026-01-04"
+    When Admin update Working Capital period payment rate with "13" value effective from "04 January 2026"
+    Then Working Capital Loan period payment rate in effect is "13"
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule payments before "2026-01-04" match the previously remembered ones
+    And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | actualPaymentAmount | actualAmortizationAmount | actualBalance | actualDiscountFeeBalance |
+      | 1         | 2026-01-02 | 9904.00             | 999.84                   | 95.84         | 0.16                     |
+      | 2         | 2026-01-03 | 46.00               | 0.10                     | 49.94         | 0.06                     |
+    And The retrieved amortization schedule actual amortization total is "1000.00"
+    And The retrieved amortization schedule actual payments plus future expected payments total "10000.00"
+    And The retrieved amortization schedule has no negative monetary amounts
+    And Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 4.0   |
+    Then Admin closes the Working Capital loan with a full repayment on "04 January 2026"
+
+  Scenario: Verify a schedule closed after a rate change does not grow as days elapse
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                | 1000     |
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "21 January 2026" due date and 45.0 transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Admin update Working Capital period payment rate with "13" value effective from "02 January 2026"
+    Then Working Capital Loan period payment rate in effect is "13"
+    And Customer makes repayment on "02 January 2026" with 10000 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "ACTIVE"
+    And Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 0.0   |
+    Then Working Capital loan amortization schedule has 2 periods, with the following data for periods:
+      | paymentNo | paymentDate     | actualPaymentAmount | actualBalance | actualAmortizationAmount | expectedDiscountFeeBalance |
+      | 1         | 02 January 2026 | 10000.00            | 0.00          | 1000.00                  | 0.00                       |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan amortization schedule has 2 periods, with the following data for periods:
+      | paymentNo | paymentDate     | actualPaymentAmount | actualBalance | actualAmortizationAmount | expectedDiscountFeeBalance |
+      | 1         | 02 January 2026 | 10000.00            | 0.00          | 1000.00                  | 0.00                       |
+
+  Scenario: Verify near-payoff after twenty missed days and COB catch-up earns the whole fee exactly
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                | 1000     |
+    When Admin sets the business date to "21 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+    And Customer makes repayment on "21 January 2026" with 9999 transaction amount on Working Capital loan
+    Then Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 1.0   |
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | actualPaymentAmount | actualAmortizationAmount | actualBalance | actualDiscountFeeBalance |
+      | 20        | 2026-01-21 | 9999.00             | 1000.00                  | 1.00          | 0.00                     |
+    And The retrieved amortization schedule actual amortization total is "1000.00"
+    And The retrieved amortization schedule actual payments plus future expected payments total "10000.00"
+    And The retrieved amortization schedule has no negative monetary amounts
+
+  Scenario: Verify undo of repayment after COB then near-payoff still earns the whole fee exactly
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                | 1000     |
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 150 transaction amount on Working Capital loan
+    When Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule actual amortization is consistent with the loan realized and unrealized income after close of business
+    When Customer undo "1"th "REPAYMENT" transaction made on "02 January 2026" on Working Capital loan
+    When Admin sets the business date to "04 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has no negative monetary amounts
+    And The retrieved amortization schedule actual amortization is consistent with the loan realized and unrealized income after close of business
+    And Customer makes repayment on "04 January 2026" with 9999 transaction amount on Working Capital loan
+    Then Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 1.0   |
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule actual amortization total is "1000.00"
+    And The retrieved amortization schedule actual payments plus future expected payments total "10000.00"
+    And The retrieved amortization schedule has no negative monetary amounts
+
+  Scenario: Verify backdated rate change after COB then near-payoff earns the whole fee exactly
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                | 1000     |
+    When Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+    And Admin retrieves the projected amortization schedule
+    And Admin remembers the retrieved amortization schedule payments before "2026-01-05"
+    When Admin update Working Capital period payment rate with "13" value effective from "05 January 2026"
+    Then Working Capital Loan period payment rate in effect is "13"
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule payments before "2026-01-05" match the previously remembered ones
+    And Customer makes repayment on "10 January 2026" with 9999 transaction amount on Working Capital loan
+    Then Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 1.0   |
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule actual amortization total is "1000.00"
+    And The retrieved amortization schedule actual payments plus future expected payments total "10000.00"
+    And The retrieved amortization schedule has no negative monetary amounts
+
+  Scenario: Verify mid-term charge does not disturb near-payoff of the working capital payable
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                | 1000     |
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "25 January 2026" due date and 45.0 transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes repayment on "10 January 2026" with 9999 transaction amount on Working Capital loan
+    Then Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 1.0   |
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | actualPaymentAmount | actualAmortizationAmount | actualBalance | actualDiscountFeeBalance |
+      | 9         | 2026-01-10 | 9999.00             | 1000.00                  | 1.00          | 0.00                     |
+    And The retrieved amortization schedule actual amortization total is "1000.00"
+    And The retrieved amortization schedule actual payments plus future expected payments total "10000.00"
+    And The retrieved amortization schedule has no negative monetary amounts
+
+  Scenario: Verify paying the residual before the charge is due clears principal and the schedule does not grow
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                | 1000     |
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "25 January 2026" due date and 45.0 transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes repayment on "10 January 2026" with 9999 transaction amount on Working Capital loan
+    Then Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 1.0   |
+    And Customer makes repayment on "10 January 2026" with 1 transaction amount on Working Capital loan
+    Then Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 0.0   |
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | actualPaymentAmount | actualBalance | actualAmortizationAmount | actualDiscountFeeBalance |
+      | 9         | 2026-01-10 | 10000.00            | 0.00          | 1000.00                  | 0.00                     |
+    And The retrieved amortization schedule actual amortization total is "1000.00"
+    And The retrieved amortization schedule actual payments plus future expected payments total "10000.00"
+    And The retrieved amortization schedule has no negative monetary amounts
+    And Admin remembers the retrieved amortization schedule as "residual cleared before charge due"
+    When Admin sets the business date to "15 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule exactly matches the remembered schedule "residual cleared before charge due"
+
+  Scenario: Verify a one unit repayment after the charge is due pays the charge first and leaves principal outstanding
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                | 1000     |
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "15 January 2026" due date and 45.0 transaction amount
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes repayment on "10 January 2026" with 9999 transaction amount on Working Capital loan
+    Then Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 1.0   |
+    When Admin sets the business date to "16 January 2026"
+    And Admin runs inline COB job for Working Capital Loan
+    And Customer makes repayment on "16 January 2026" with 1 transaction amount on Working Capital loan
+    Then Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 1.0   |
+    And Working Capital Loan "REPAYMENT" transaction on "16 January 2026" has the following charge paid-by data:
+      | Charge Name              | Amount |
+      | Working Capital Loan Fee | 1.0    |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 45.0       | 44.0            | 1.0      | 0.0            | 0.0                 | 0.0          |
+    And Customer makes repayment on "16 January 2026" with 45 transaction amount on Working Capital loan
+    Then Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 0.0   |
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 45.0       | 0.0             | 45.0     | 0.0            | 0.0                 | 0.0          |
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule actual amortization total is "1000.00"
+    And The retrieved amortization schedule has no negative monetary amounts
+    And Admin remembers the retrieved amortization schedule as "residual cleared after due charge"
+    When Admin sets the business date to "15 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule exactly matches the remembered schedule "residual cleared after due charge"
+
+  Scenario: Verify a schedule closed with two future charges does not grow as days elapse
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                | 1000     |
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "21 January 2026" due date and 45.0 transaction amount
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "28 January 2026" due date and 30.0 transaction amount
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 10000 transaction amount on Working Capital loan
+    Then Working Capital loan status will be "ACTIVE"
+    And Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 0.0   |
+    Then Working Capital loan amortization schedule has 2 periods, with the following data for periods:
+      | paymentNo | paymentDate     | actualPaymentAmount | actualBalance | actualAmortizationAmount | expectedDiscountFeeBalance |
+      | 1         | 02 January 2026 | 10000.00            | 0.00          | 1000.00                  | 0.00                       |
+    When Admin sets the business date to "15 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan amortization schedule has 2 periods, with the following data for periods:
+      | paymentNo | paymentDate     | actualPaymentAmount | actualBalance | actualAmortizationAmount | expectedDiscountFeeBalance |
+      | 1         | 02 January 2026 | 10000.00            | 0.00          | 1000.00                  | 0.00                       |

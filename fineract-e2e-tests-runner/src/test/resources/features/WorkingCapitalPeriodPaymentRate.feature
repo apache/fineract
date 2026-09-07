@@ -1988,3 +1988,27 @@ Feature: Working Capital Period Payment Rate
       | 10 January 2026 | 1.0           | 12.5     | false    | 10 January 2026   |
       | 20 January 2026 | 12.5          | 15.0     | false    | 20 January 2026   |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"
+
+  Scenario: Verify near-payoff after two period payment rate changes bills the exact residual and earns the whole fee
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 17                | 1000     |
+    When Admin sets the business date to "05 January 2026"
+    And Admin update Working Capital period payment rate with "40" value effective from "05 January 2026"
+    Then Working Capital Loan period payment rate in effect is "40"
+    When Admin sets the business date to "08 January 2026"
+    And Admin update Working Capital period payment rate with "13" value effective from "08 January 2026"
+    Then Working Capital Loan period payment rate in effect is "13"
+    When Admin sets the business date to "10 January 2026"
+    And Customer makes repayment on "08 January 2026" with 9999 transaction amount on Working Capital loan
+    Then Working Capital loan balance payload contains the following fields:
+      | field                | value |
+      | principalOutstanding | 1.0   |
+    When Admin retrieves the projected amortization schedule
+    Then The retrieved amortization schedule has payments with the following details for the listed payment numbers:
+      | paymentNo | date       | actualPaymentAmount | actualAmortizationAmount | actualBalance | actualDiscountFeeBalance |
+      | 7         | 2026-01-08 | 9999.00             | 1000.00                  | 1.00          | 0.00                     |
+    And The retrieved amortization schedule actual amortization total is "1000.00"
+    And The retrieved amortization schedule actual payments plus future expected payments total "10000.00"
+    And The retrieved amortization schedule has no negative monetary amounts
