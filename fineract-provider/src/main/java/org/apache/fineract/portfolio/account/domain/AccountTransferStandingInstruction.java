@@ -20,6 +20,7 @@ package org.apache.fineract.portfolio.account.domain;
 
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.transferTypeParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.STANDING_INSTRUCTION_RESOURCE_NAME;
+import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.allowPartialTransferParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.amountParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.instructionTypeParamName;
 import static org.apache.fineract.portfolio.account.api.StandingInstructionApiConstants.priorityParamName;
@@ -99,6 +100,9 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
     @Column(name = "last_run_date")
     private LocalDate latsRunDate;
 
+    @Column(name = "allow_partial_transfer", nullable = false)
+    private boolean allowPartialTransfer;
+
     protected AccountTransferStandingInstruction() {
 
     }
@@ -106,7 +110,7 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
     public static AccountTransferStandingInstruction create(final AccountTransferDetails accountTransferDetails, final String name,
             final Integer priority, final Integer instructionType, final Integer status, final BigDecimal amount, final LocalDate validFrom,
             final LocalDate validTill, final Integer recurrenceType, final Integer recurrenceFrequency, final Integer recurrenceInterval,
-            final MonthDay recurrenceOnMonthDay) {
+            final MonthDay recurrenceOnMonthDay, final boolean allowPartialTransfer) {
         Integer recurrenceOnDay = null;
         Integer recurrenceOnMonth = null;
         if (recurrenceOnMonthDay != null) {
@@ -114,13 +118,14 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
             recurrenceOnMonth = recurrenceOnMonthDay.getMonthValue();
         }
         return new AccountTransferStandingInstruction(accountTransferDetails, name, priority, instructionType, status, amount, validFrom,
-                validTill, recurrenceType, recurrenceFrequency, recurrenceInterval, recurrenceOnDay, recurrenceOnMonth);
+                validTill, recurrenceType, recurrenceFrequency, recurrenceInterval, recurrenceOnDay, recurrenceOnMonth,
+                allowPartialTransfer);
     }
 
     private AccountTransferStandingInstruction(final AccountTransferDetails accountTransferDetails, final String name,
             final Integer priority, final Integer instructionType, final Integer status, final BigDecimal amount, final LocalDate validFrom,
             final LocalDate validTill, final Integer recurrenceType, final Integer recurrenceFrequency, final Integer recurrenceInterval,
-            final Integer recurrenceOnDay, final Integer recurrenceOnMonth) {
+            final Integer recurrenceOnDay, final Integer recurrenceOnMonth, final boolean allowPartialTransfer) {
         this.accountTransferDetails = accountTransferDetails;
         this.name = name;
         this.priority = priority;
@@ -134,6 +139,7 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
         this.recurrenceInterval = recurrenceInterval;
         this.recurrenceOnDay = recurrenceOnDay;
         this.recurrenceOnMonth = recurrenceOnMonth;
+        this.allowPartialTransfer = allowPartialTransfer;
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(STANDING_INSTRUCTION_RESOURCE_NAME);
@@ -221,6 +227,12 @@ public class AccountTransferStandingInstruction extends AbstractPersistableCusto
             final Integer newValue = command.integerValueOfParameterNamed(recurrenceIntervalParamName);
             actualChanges.put(recurrenceIntervalParamName, newValue);
             this.recurrenceInterval = newValue;
+        }
+
+        if (command.isChangeInBooleanParameterNamed(allowPartialTransferParamName, this.allowPartialTransfer)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(allowPartialTransferParamName);
+            actualChanges.put(allowPartialTransferParamName, newValue);
+            this.allowPartialTransfer = newValue;
         }
         validateDependencies(baseDataValidator);
         if (!dataValidationErrors.isEmpty()) {
