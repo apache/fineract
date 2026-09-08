@@ -982,6 +982,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     private void checkClientOrGroupActive(final SavingsAccount account) {
+        validateSavingsAccountAccess(account);
         final Client client = account.getClient();
         if (client != null) {
             if (client.isNotActive()) {
@@ -994,6 +995,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 throw new GroupNotActiveException(group.getId());
             }
         }
+    }
+
+    private void validateSavingsAccountAccess(final SavingsAccount account) {
+        this.context.validateAccessRights(account.office().getHierarchy());
     }
 
     @Override

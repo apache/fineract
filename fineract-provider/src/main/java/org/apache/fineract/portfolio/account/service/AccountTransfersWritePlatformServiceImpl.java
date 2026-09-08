@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuild
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.account.data.AccountTransferDTO;
 import org.apache.fineract.portfolio.account.data.AccountTransfersDataValidator;
@@ -96,6 +97,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final FineractProperties fineractProperties;
     private final LoanAdjustmentService loanAdjustmentService;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
+    private final PlatformSecurityContext context;
 
     @Transactional
     @Override
@@ -117,7 +119,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         final PortfolioAccountType toAccountType = PortfolioAccountType.fromInt(toAccountTypeId);
 
         final Map<String, Object> changes = new HashMap<>();
-        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+        PaymentDetail paymentDetail;
         Long fromSavingsAccountId = null;
         Long transferDetailId = null;
         boolean isInterestTransfer = false;
@@ -131,14 +133,15 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             fromSavingsAccountId = command.longValueOfParameterNamed(fromAccountIdParamName);
             final SavingsAccount fromSavingsAccount = this.savingsAccountAssembler.assembleFrom(fromSavingsAccountId,
                     backdatedTxnsAllowedTill);
+            final Long toSavingsId = command.longValueOfParameterNamed(toAccountIdParamName);
+            final SavingsAccount toSavingsAccount = this.savingsAccountAssembler.assembleFrom(toSavingsId, backdatedTxnsAllowedTill);
+            validateTransferAccess(null, null, fromSavingsAccount, toSavingsAccount);
+            paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
             final SavingsTransactionBooleanValues transactionBooleanValues = new SavingsTransactionBooleanValues(isAccountTransfer,
                     isRegularTransaction, fromSavingsAccount.isWithdrawalFeeApplicableForTransfer(), isInterestTransfer, isWithdrawBalance);
             final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(fromSavingsAccount, fmt,
                     transactionDate, transactionAmount, paymentDetail, transactionBooleanValues, backdatedTxnsAllowedTill);
-
-            final Long toSavingsId = command.longValueOfParameterNamed(toAccountIdParamName);
-            final SavingsAccount toSavingsAccount = this.savingsAccountAssembler.assembleFrom(toSavingsId, backdatedTxnsAllowedTill);
 
             final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount, fmt, transactionDate,
                     transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction, backdatedTxnsAllowedTill);
@@ -158,14 +161,15 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             fromSavingsAccountId = command.longValueOfParameterNamed(fromAccountIdParamName);
             final SavingsAccount fromSavingsAccount = this.savingsAccountAssembler.assembleFrom(fromSavingsAccountId,
                     backdatedTxnsAllowedTill);
+            final Long toLoanAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
+            Loan toLoanAccount = this.loanAccountAssembler.assembleFrom(toLoanAccountId);
+            validateTransferAccess(toLoanAccount, null, fromSavingsAccount, null);
+            paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
             final SavingsTransactionBooleanValues transactionBooleanValues = new SavingsTransactionBooleanValues(isAccountTransfer,
                     isRegularTransaction, fromSavingsAccount.isWithdrawalFeeApplicableForTransfer(), isInterestTransfer, isWithdrawBalance);
             final SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(fromSavingsAccount, fmt,
                     transactionDate, transactionAmount, paymentDetail, transactionBooleanValues, backdatedTxnsAllowedTill);
-
-            final Long toLoanAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
-            Loan toLoanAccount = this.loanAccountAssembler.assembleFrom(toLoanAccountId);
 
             final Boolean isHolidayValidationDone = false;
             final HolidayDetailDTO holidayDetailDto = null;
@@ -188,12 +192,13 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
             fromLoanAccountId = command.longValueOfParameterNamed(fromAccountIdParamName);
             final Loan fromLoanAccount = this.loanAccountAssembler.assembleFrom(fromLoanAccountId);
+            final Long toSavingsAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
+            final SavingsAccount toSavingsAccount = this.savingsAccountAssembler.assembleFrom(toSavingsAccountId, backdatedTxnsAllowedTill);
+            validateTransferAccess(fromLoanAccount, null, null, toSavingsAccount);
+            paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
             ExternalId externalId = externalIdFactory.create();
             final LoanTransaction loanRefundTransaction = this.loanAccountDomainService.makeRefund(fromLoanAccountId,
                     new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, externalId);
-
-            final Long toSavingsAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
-            final SavingsAccount toSavingsAccount = this.savingsAccountAssembler.assembleFrom(toSavingsAccountId, backdatedTxnsAllowedTill);
 
             final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount, fmt, transactionDate,
                     transactionAmount, paymentDetail, isAccountTransfer, isRegularTransaction, backdatedTxnsAllowedTill);
@@ -311,6 +316,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                 this.savingsAccountAssembler.setHelpers(fromSavingsAccount);
                 toLoanAccount = accountTransferDetails.toLoanAccount();
             }
+            validateTransferAccess(toLoanAccount, null, fromSavingsAccount, null);
 
             final SavingsTransactionBooleanValues transactionBooleanValues = new SavingsTransactionBooleanValues(isAccountTransfer,
                     isRegularTransaction, fromSavingsAccount.isWithdrawalFeeApplicableForTransfer(),
@@ -383,6 +389,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                 toSavingsAccount = accountTransferDetails.toSavingsAccount();
                 this.savingsAccountAssembler.setHelpers(toSavingsAccount);
             }
+            validateTransferAccess(null, null, fromSavingsAccount, toSavingsAccount);
 
             final SavingsTransactionBooleanValues transactionBooleanValues = new SavingsTransactionBooleanValues(isAccountTransfer,
                     isRegularTransaction, fromSavingsAccount.isWithdrawalFeeApplicableForTransfer(),
@@ -425,6 +432,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
                 toSavingsAccount = accountTransferDetails.toSavingsAccount();
                 this.savingsAccountAssembler.setHelpers(toSavingsAccount);
             }
+            validateTransferAccess(fromLoanAccount, null, null, toSavingsAccount);
             LoanTransaction loanTransaction = null;
 
             ExternalId txnExternalId = accountTransferDTO.getTxnExternalId();
@@ -481,6 +489,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         } else {
             toLoanAccount = accountTransferDTO.getToLoan();
         }
+        validateTransferAccess(fromLoanAccount, toLoanAccount, null, null);
 
         ExternalId externalIdForDisbursement = accountTransferDTO.getTxnExternalId();
 
@@ -520,6 +529,9 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         PortfolioAccountType toAccountType = accountTransferDetails.toLoanAccount() != null ? PortfolioAccountType.LOAN
                 : accountTransferDetails.toSavingsAccount() != null ? PortfolioAccountType.SAVINGS : throwUnsupported();
 
+        validateTransferAccess(accountTransferDetails.fromLoanAccount(), accountTransferDetails.toLoanAccount(),
+                accountTransferDetails.fromSavingsAccount(), accountTransferDetails.toSavingsAccount());
+
         if (isSavingsToSavingsAccountTransfer(fromAccountType, toAccountType)) {
             accountTransferDetails.getAccountTransferTransactions().forEach(transaction -> {
                 this.savingsAccountWritePlatformService.undoTransaction(transaction.getFromSavingsTransaction().getSavingsAccount().getId(),
@@ -551,6 +563,30 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         return builder.build();
     }
 
+    private void validateTransferAccess(final Loan fromLoanAccount, final Loan toLoanAccount, final SavingsAccount fromSavingsAccount,
+            final SavingsAccount toSavingsAccount) {
+        if (fromLoanAccount != null) {
+            validateLoanAccess(fromLoanAccount);
+        }
+        if (toLoanAccount != null) {
+            validateLoanAccess(toLoanAccount);
+        }
+        if (fromSavingsAccount != null) {
+            validateSavingsAccountAccess(fromSavingsAccount);
+        }
+        if (toSavingsAccount != null) {
+            validateSavingsAccountAccess(toSavingsAccount);
+        }
+    }
+
+    private void validateLoanAccess(final Loan loan) {
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
+    }
+
+    private void validateSavingsAccountAccess(final SavingsAccount savingsAccount) {
+        this.context.validateAccessRights(savingsAccount.office().getHierarchy());
+    }
+
     private static PortfolioAccountType throwUnsupported() {
         throw new UnsupportedOperationException("Undo account transfer only be supported between Loan and Saving accounts");
     }
@@ -580,11 +616,14 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         final DateTimeFormatter fmt = DateTimeFormatter.ofPattern(command.dateFormat()).withLocale(locale);
 
         final Map<String, Object> changes = new HashMap<>();
-        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
         Long transferTransactionId = null;
 
         final Long fromLoanAccountId = command.longValueOfParameterNamed(fromAccountIdParamName);
         final Loan fromLoanAccount = this.loanAccountAssembler.assembleFrom(fromLoanAccountId);
+        final Long toSavingsAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
+        final SavingsAccount toSavingsAccount = this.savingsAccountAssembler.assembleFrom(toSavingsAccountId, false);
+        validateTransferAccess(fromLoanAccount, null, null, toSavingsAccount);
+        final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
         BigDecimal overpaid = this.loanReadPlatformService.retrieveTotalPaidInAdvance(fromLoanAccountId).getPaidInAdvance();
         final boolean backdatedTxnsAllowedTill = false;
@@ -600,9 +639,6 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
 
         final LoanTransaction loanRefundTransaction = this.loanAccountDomainService.makeRefundForActiveLoan(fromLoanAccountId,
                 new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, externalId);
-
-        final Long toSavingsAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
-        final SavingsAccount toSavingsAccount = this.savingsAccountAssembler.assembleFrom(toSavingsAccountId, backdatedTxnsAllowedTill);
 
         final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount, fmt, transactionDate,
                 transactionAmount, paymentDetail, true, true, backdatedTxnsAllowedTill);
