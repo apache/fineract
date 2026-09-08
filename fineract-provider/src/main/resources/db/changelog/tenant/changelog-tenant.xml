@@ -291,4 +291,5 @@
     <include file="parts/0270_month_end_due_date_strategy.xml" relativeToChangelogFile="true" />
     <include file="parts/0271_fix_npa_job_cron_order.xml" relativeToChangelogFile="true" />
     <include file="parts/0272_put_arrears_ageing_in_npa_scheduler_group.xml" relativeToChangelogFile="true" />
+    <include file="parts/0273_add_allow_partial_transfer_to_standing_instruction.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

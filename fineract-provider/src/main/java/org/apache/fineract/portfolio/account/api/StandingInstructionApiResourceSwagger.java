@@ -433,6 +433,8 @@ final class StandingInstructionApiResourceSwagger {
             public Integer recurrenceInterval;
             @Schema(example = "[4, 3]")
             public LocalDate recurrenceOnMonthDay;
+            @Schema(example = "false")
+            public Boolean allowPartialTransfer;
         }
 
         @Schema(example = "2")

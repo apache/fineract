@@ -38,5 +38,6 @@ public final class StandingInstructionApiConstants {
     public static final String recurrenceIntervalParamName = "recurrenceInterval";
     public static final String recurrenceOnMonthDayParamName = "recurrenceOnMonthDay";
     public static final String monthDayFormatParamName = "monthDayFormat";
+    public static final String allowPartialTransferParamName = "allowPartialTransfer";
 
 }
