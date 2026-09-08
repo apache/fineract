@@ -26,6 +26,7 @@ import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.AccountTransferRequest;
+import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.GetAccountTransfersPageItems;
 import org.apache.fineract.client.models.PostAccountTransfersRefundByTransferResponse;
 import org.apache.fineract.client.models.PostAccountTransfersResponse;
@@ -67,5 +68,10 @@ public class FeignAccountTransferHelper {
 
     public PostAccountTransfersRefundByTransferResponse refundLoanByTransfer(AccountTransferRequest request) {
         return ok(() -> fineractClient.accountTransfers().refundByTransfer(request));
+    }
+
+    /** Undoing a transfer reverses both of its legs, returning each account to the balance it had before. */
+    public CommandProcessingResult undoTransfer(Long accountTransferId) {
+        return ok(() -> fineractClient.accountTransfers().accountTransferOperation(accountTransferId, "undo"));
     }
 }
