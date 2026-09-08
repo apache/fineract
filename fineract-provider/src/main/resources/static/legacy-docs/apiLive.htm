@@ -35754,7 +35754,8 @@ No Request Body:
 	"locale":"en",
 	"dateFormat":"dd MMMM yyyy",
 	"recurrenceOnMonthDay":"02 April",
-	"monthDayFormat":"dd MMMM"
+	"monthDayFormat":"dd MMMM",
+	"allowPartialTransfer":false
 }
 	        </code>
 	        <code class="method-response">
@@ -35779,14 +35780,16 @@ No Request Body:
 Content-Type: application/json
 No Request Body:
 {
-	"recurrenceInterval":"2"
+	"recurrenceInterval":"2",
+	"allowPartialTransfer":true
 }
 	        </code>
 	        <code class="method-response">
 {
 	"resourceId":20,
 	"changes":{
-		"recurrenceInterval":2
+		"recurrenceInterval":2,
+		"allowPartialTransfer":true
 	}
 }
 	        </code>
