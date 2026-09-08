@@ -5315,12 +5315,11 @@ class ProgressiveEMICalculatorTest {
     }
 
     /**
-     * Control case for the bullet-loan boundary defect.
+     * Progressive declining-balance loan with N = 8 repayments and graceOnPrincipalPayment = N-2 = 6.
      *
-     * With N=8 repayments and graceOnPrincipalPayment = N-2 = 6, the schedule behaves correctly: installments 1..6 are
-     * interest-only and the principal is amortized across the final two installments (7 and 8). This test passes on the
-     * current engine and is here to demonstrate that the defect exercised by
-     * {@link #test_principalGrace_nMinus1_shouldProduceBulletLoan()} is specific to the grace = N-1 boundary.
+     * <p>
+     * Installments 1..6 are interest-only and the principal is amortized across the final two installments (7 and 8).
+     * EMI equalization counts the grace periods as uncountable so the last two EMIs stay aligned.
      */
     @Test
     public void test_principalGrace_nMinus2_deferralWorks() {
@@ -5373,21 +5372,12 @@ class ProgressiveEMICalculatorTest {
     }
 
     /**
-     * Reproduces the bullet-loan defect at the grace = N-1 boundary (Fineract 1.15.0).
+     * Progressive declining-balance loan with N = 8 repayments and graceOnPrincipalPayment = N-1 = 7 produces a bullet /
+     * balloon schedule.
      *
      * <p>
-     * Setup: progressive schedule, advanced payment allocation, declining balance / equal installments, single
-     * disbursement, N = 8 repayments, graceOnPrincipalPayment = 7 (= N-1), interest recalculation disabled.
-     *
-     * <p>
-     * Expected (a true bullet loan): installments 1..7 are interest-only (principal 0, balance stays at 100) and
-     * installment 8 carries 100% of the principal.
-     *
-     * <p>
-     * Actual on the current engine: principal is fully amortized across installments 1..7 and the final installment (8)
-     * is left completely empty (0 principal / 0 interest). This assertion therefore FAILS on 1.15.0 and documents the
-     * defect. The neighbouring grace = N-2 case ({@link #test_principalGrace_nMinus2_deferralWorks()}) works correctly,
-     * showing the problem is confined to the single-remaining-period boundary.
+     * Installments 1..7 are interest-only (principal 0, balance stays at 100) and installment 8 carries the full
+     * principal.
      */
     @Test
     public void test_principalGrace_nMinus1_shouldProduceBulletLoan() {
