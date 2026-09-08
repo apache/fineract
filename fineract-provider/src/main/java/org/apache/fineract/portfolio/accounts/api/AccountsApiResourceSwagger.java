@@ -474,6 +474,12 @@ final class AccountsApiResourceSwagger {
         }
 
         public Set<PostAccountsRequestedShares> requestedShares;
+        @Schema(example = "en")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "01 January 2026", description = "command=activate")
+        public String activatedDate;
     }
 
     @Schema(description = "PostAccountsTypeAccountIdResponse")
