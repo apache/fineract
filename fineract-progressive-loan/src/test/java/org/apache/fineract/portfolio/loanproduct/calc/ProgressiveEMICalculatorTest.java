@@ -42,6 +42,7 @@ import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultSche
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelRepaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.service.ProgressiveLoanInterestScheduleModelParserServiceGsonImpl;
+import org.apache.fineract.portfolio.loanproduct.calc.data.EmiAdjustment;
 import org.apache.fineract.portfolio.loanproduct.calc.data.EqualAmortizationValues;
 import org.apache.fineract.portfolio.loanproduct.calc.data.InterestPeriod;
 import org.apache.fineract.portfolio.loanproduct.calc.data.LoanReAgeParameterData;
@@ -5361,6 +5362,14 @@ class ProgressiveEMICalculatorTest {
                 "Installment 8 should carry principal when grace = N-2");
         final double totalPrincipal = repaymentPeriods.stream().mapToDouble(rp -> toDouble(rp.getDuePrincipal())).sum();
         Assertions.assertEquals(100.0, totalPrincipal, 0.01, "All principal must be scheduled");
+
+        // Grace periods are skipped when EMI is rewritten, so they must also be uncountable in the
+        // adjustment divisor (N - uncountable = 2 amortizing periods, not 8).
+        final EmiAdjustment emiAdjustment = emiCalculator.getEmiAdjustment(repaymentPeriods);
+        Assertions.assertEquals(6, emiAdjustment.uncountablePeriods(),
+                "Principal-grace periods must be uncountable so adjustment() matches the update loop");
+        Assertions.assertEquals(toDouble(repaymentPeriods.get(6).getEmi()), toDouble(repaymentPeriods.get(7).getEmi()), 0.05,
+                "Last two EMIs should equalize when grace periods are excluded from the divisor");
     }
 
     /**

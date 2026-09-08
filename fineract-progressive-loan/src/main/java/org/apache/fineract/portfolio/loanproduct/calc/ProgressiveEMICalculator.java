@@ -2035,7 +2035,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     private long getUncountablePeriods(final List<RepaymentPeriod> relatedRepaymentPeriods, final Money originalEmi) {
         return relatedRepaymentPeriods.stream() //
-                .filter(repaymentPeriod -> originalEmi.isLessThan(repaymentPeriod.getTotalPaidAmount())) //
+                .filter(repaymentPeriod -> repaymentPeriod.isPrincipalPaymentGrace()
+                        || originalEmi.isLessThan(repaymentPeriod.getTotalPaidAmount())) //
                 .count(); //
     }
 
