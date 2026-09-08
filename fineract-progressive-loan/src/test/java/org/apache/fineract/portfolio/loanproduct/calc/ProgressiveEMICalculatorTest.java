@@ -5459,6 +5459,53 @@ class ProgressiveEMICalculatorTest {
         checkPeriod(interestSchedule, 11, 102.5, 2.5, 100.0, 0.0, false);
     }
 
+    /**
+     * Mid-loan recalculation resets principalPaymentGrace on the full schedule model, not only the related suffix, so
+     * flags set on earlier periods during initial generation do not stay stuck.
+     */
+    @Test
+    public void test_principalGrace_midLoanRecalc_clearsFlagsOutsideRelatedSuffix() {
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 8, 1), LocalDate.of(2024, 9, 1)));
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(BigDecimal.valueOf(30.0));
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getNumberOfRepayments()).thenReturn(8);
+        Mockito.when(loanProductRelatedDetail.getGraceOnPrincipalPayment()).thenReturn(3);
+        Mockito.when(loanProductRelatedDetail.getGraceOnInterestPayment()).thenReturn(0);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator
+                .generatePeriodInterestScheduleModel(expectedRepaymentPeriods, loanProductRelatedDetail, null, mc);
+
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), toMoney(100.0));
+
+        final List<RepaymentPeriod> afterFirst = interestSchedule.repaymentPeriods();
+        Assertions.assertTrue(afterFirst.get(0).isPrincipalPaymentGrace());
+        Assertions.assertTrue(afterFirst.get(1).isPrincipalPaymentGrace());
+        Assertions.assertTrue(afterFirst.get(2).isPrincipalPaymentGrace());
+        Assertions.assertFalse(afterFirst.get(3).isPrincipalPaymentGrace());
+
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 4, 15), toMoney(50.0));
+
+        final List<RepaymentPeriod> afterSecond = interestSchedule.repaymentPeriods();
+        Assertions.assertFalse(afterSecond.get(0).isPrincipalPaymentGrace(),
+                "Period 0 is outside the mid-loan suffix and must not keep a stale grace flag");
+        Assertions.assertFalse(afterSecond.get(1).isPrincipalPaymentGrace(),
+                "Period 1 is outside the mid-loan suffix and must not keep a stale grace flag");
+        Assertions.assertFalse(afterSecond.get(2).isPrincipalPaymentGrace(),
+                "Period 2 is outside the mid-loan suffix and must not keep a stale grace flag");
+    }
+
     @Test
     public void test_interestGraceForProgressiveSchedule() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
