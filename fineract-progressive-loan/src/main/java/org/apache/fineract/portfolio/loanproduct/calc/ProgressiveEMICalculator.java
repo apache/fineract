@@ -1796,7 +1796,7 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         if (repaymentPeriods.isEmpty()) {
             return;
         }
-        repaymentPeriods.forEach(rp -> rp.setPrincipalPaymentGrace(false));
+        scheduleModel.repaymentPeriods().forEach(rp -> rp.setPrincipalPaymentGrace(false));
         Integer graceOnPrincipalPayment = scheduleModel.loanProductRelatedDetail().getGraceOnPrincipalPayment();
         if (graceOnPrincipalPayment == null || graceOnPrincipalPayment <= 0) {
             return;
