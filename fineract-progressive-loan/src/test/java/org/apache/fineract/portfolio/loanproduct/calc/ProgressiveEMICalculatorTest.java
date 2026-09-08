@@ -5506,6 +5506,78 @@ class ProgressiveEMICalculatorTest {
                 "Period 2 is outside the mid-loan suffix and must not keep a stale grace flag");
     }
 
+    /**
+     * Re-amortization overrides principal grace: flags are lifted and the remaining periods are equalized again.
+     */
+    @Test
+    public void test_principalGrace_reAmortization_liftsFlagAndEqualizesEmi() {
+        final ProgressiveLoanInterestScheduleModel interestSchedule = generatePrincipalGraceScheduleForReAmortProbe();
+        final List<RepaymentPeriod> before = interestSchedule.repaymentPeriods();
+        Assertions.assertTrue(before.get(0).isPrincipalPaymentGrace());
+        Assertions.assertTrue(before.get(1).isPrincipalPaymentGrace());
+        Assertions.assertTrue(before.get(2).isPrincipalPaymentGrace());
+
+        emiCalculator.updateModelRepaymentPeriodsDuringReAmortization(interestSchedule, LocalDate.of(2024, 2, 15));
+
+        assertPrincipalGraceLiftedAndFutureEmisEqualized(interestSchedule);
+    }
+
+    /**
+     * Equal-interest-split re-amortization also lifts principal grace so equalization is not skipped.
+     */
+    @Test
+    public void test_principalGrace_reAmortizationEqualInterestSplit_liftsFlagAndEqualizesEmi() {
+        final ProgressiveLoanInterestScheduleModel interestSchedule = generatePrincipalGraceScheduleForReAmortProbe();
+
+        emiCalculator.updateModelRepaymentPeriodsDuringReAmortizationWithEqualInterestSplit(interestSchedule, LocalDate.of(2024, 2, 15));
+
+        assertPrincipalGraceLiftedAndFutureEmisEqualized(interestSchedule);
+    }
+
+    private ProgressiveLoanInterestScheduleModel generatePrincipalGraceScheduleForReAmortProbe() {
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 8, 1), LocalDate.of(2024, 9, 1)));
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(BigDecimal.valueOf(30.0));
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getNumberOfRepayments()).thenReturn(8);
+        Mockito.when(loanProductRelatedDetail.getGraceOnPrincipalPayment()).thenReturn(3);
+        Mockito.when(loanProductRelatedDetail.getGraceOnInterestPayment()).thenReturn(0);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator
+                .generatePeriodInterestScheduleModel(expectedRepaymentPeriods, loanProductRelatedDetail, null, mc);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), toMoney(100.0));
+        return interestSchedule;
+    }
+
+    private static void assertPrincipalGraceLiftedAndFutureEmisEqualized(final ProgressiveLoanInterestScheduleModel interestSchedule) {
+        final LocalDate transactionDate = LocalDate.of(2024, 2, 15);
+        final List<RepaymentPeriod> repaymentPeriods = interestSchedule.repaymentPeriods();
+        Assertions.assertTrue(repaymentPeriods.stream().noneMatch(RepaymentPeriod::isPrincipalPaymentGrace),
+                "Re-amortization must lift principalPaymentGrace so equalization is not skipped");
+
+        final List<RepaymentPeriod> futurePeriods = repaymentPeriods.stream().filter(rp -> rp.getDueDate().isAfter(transactionDate))
+                .toList();
+        Assertions.assertFalse(futurePeriods.isEmpty());
+        final double firstFutureEmi = toDouble(futurePeriods.getFirst().getEmi());
+        for (final RepaymentPeriod futurePeriod : futurePeriods) {
+            Assertions.assertEquals(firstFutureEmi, toDouble(futurePeriod.getEmi()), 0.05,
+                    "Re-amortized remaining periods should be equal-installment after grace flags are lifted");
+        }
+        final double totalPrincipal = repaymentPeriods.stream().mapToDouble(rp -> toDouble(rp.getDuePrincipal())).sum();
+        Assertions.assertEquals(100.0, totalPrincipal, 0.01, "All principal must still be scheduled");
+    }
+
     @Test
     public void test_interestGraceForProgressiveSchedule() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
