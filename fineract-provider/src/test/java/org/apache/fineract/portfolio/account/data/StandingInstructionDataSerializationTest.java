@@ -84,7 +84,8 @@ public class StandingInstructionDataSerializationTest {
                 null, // recurrenceType
                 null, // recurrenceFrequency
                 null, // recurrenceInterval
-                null // recurrenceOnMonthDay
+                null, // recurrenceOnMonthDay
+                false // allowPartialTransfer
         );
 
         // Serialize to JSON
@@ -190,7 +191,7 @@ public class StandingInstructionDataSerializationTest {
     public void testOfficeFieldsSerialization() throws Exception {
         StandingInstructionData standingInstruction = StandingInstructionData.instance(1L, 100L, "Test Standing Instruction",
                 OfficeData.testInstance(1L, "Head Office"), OfficeData.testInstance(2L, "Branch Office"), null, null, null, null, null,
-                null, null, null, null, null, BigDecimal.valueOf(1000), LocalDate.of(2026, 1, 1), null, null, null, null, null);
+                null, null, null, null, null, BigDecimal.valueOf(1000), LocalDate.of(2026, 1, 1), null, null, null, null, null, false);
 
         JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(standingInstruction));
 
@@ -225,7 +226,8 @@ public class StandingInstructionDataSerializationTest {
                 null, // recurrenceType
                 null, // recurrenceFrequency
                 null, // recurrenceInterval
-                null // recurrenceOnMonthDay
+                null, // recurrenceOnMonthDay
+                false // allowPartialTransfer
         );
     }
 }

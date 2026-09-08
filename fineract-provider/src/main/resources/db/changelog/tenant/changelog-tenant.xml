@@ -280,4 +280,5 @@
     <include file="parts/0259_put_cob_jobs_in_one_scheduler_group.xml" relativeToChangelogFile="true" />
     <include file="parts/0260_merge_force_withdrawal_configurations.xml" relativeToChangelogFile="true" />
     <include file="parts/0261_transaction_summary_reports_for_working_capital_loans.xml" relativeToChangelogFile="true" />
+    <include file="parts/0262_add_allow_partial_transfer_to_standing_instruction.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>
