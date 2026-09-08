@@ -49,6 +49,36 @@ Feature: WorkingCapitalLoanChargesFeature
       | httpCode | errorMessage                                             |
       | 400      | The parameter `chargeTimeType` must be one of [ 1, 2 ] . |
 
+  @TestRailId:C102435
+  Scenario: Verify Working Capital Charge product - UC9: template API with Disbursement returns Flat and % Amount calculation types
+    When Admin retrieves the charge template for Working Capital Loan with charge time type "DISBURSEMENT"
+    Then The charge template chargeCalculationTypeOptions contains only Flat and % Amount
+
+  @TestRailId:C102436
+  Scenario: Verify Working Capital Charge product - UC10: charge can be created with chargeTimeType Disbursement and calculationType Percentage of amount
+    When Admin creates working capital loan charge with "DISBURSEMENT" charge time type and "PERCENTAGE_AMOUNT" calculation type
+    And Admin deletes working capital loan charge
+
+  @TestRailId:C102437
+  Scenario: Verify Working Capital Charge product - UC11: Disbursement charge can be created as penalty
+    When Admin creates working capital loan charge with "DISBURSEMENT" charge time type as penalty
+    Then Admin retrieves working capital loan charge and verifies it is a penalty
+    When Admin deletes working capital loan charge
+
+  @TestRailId:C102438
+  Scenario: Verify Working Capital Charge product - UC12: invalid chargePaymentMode Account transfer fails (Negative)
+    When Creating working capital loan charge with "ACCOUNT_TRANSFER" chargePaymentMode results an error with the following data:
+      | httpCode | errorMessage                                                |
+      | 400      | The parameter `chargePaymentMode` must be one of [ 0 ] .   |
+
+  @TestRailId:C102439
+  Scenario: Verify Working Capital Charge product - UC13: updating a Disbursement % Amount charge to Specified due date fails (Negative)
+    When Admin creates working capital loan charge with "DISBURSEMENT" charge time type and "PERCENTAGE_AMOUNT" calculation type
+    Then Updating working capital loan charge chargeTimeType to "SPECIFIED_DUE_DATE" results an error with the following data:
+      | httpCode | errorMessage                                                 |
+      | 400      | The parameter `chargeCalculationType` must be one of [ 1 ] . |
+    When Admin deletes working capital loan charge
+
 #    #############################################
 #    --- Loan Account level ---
 #  ###############################################
@@ -275,3 +305,17 @@ Feature: WorkingCapitalLoanChargesFeature
     Then Working capital loan undo approval was successful
     When Admin rejects the working capital loan on "01 January 2026"
     Then Working capital loan rejection was successful
+
+  @TestRailId:C102440
+  Scenario: Verify Working Capital Charge on loan account level - UC14: Disbursement charge cannot be added directly to an active loan (Negative)
+    When Admin creates working capital loan charge with "DISBURSEMENT" charge time type and "FLAT" calculation type
+    And Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin sets the business date to "10 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Trying to add working capital loan charge by loan id and charge id with amount 45.0 and due date "10-01-2026" results an error with the following data:
+      | httpCode | errorMessage                                                             |
+      | 403      | Charge time type DISBURSEMENT is not supported on a Working Capital Loan. |
+    When Admin deletes working capital loan charge

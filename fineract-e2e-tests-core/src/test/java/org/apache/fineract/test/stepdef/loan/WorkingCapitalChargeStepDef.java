@@ -53,6 +53,7 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesCha
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanChargeData;
 import org.apache.fineract.test.data.ChargeCalculationType;
+import org.apache.fineract.test.data.ChargePaymentMode;
 import org.apache.fineract.test.data.ChargeProductAppliesTo;
 import org.apache.fineract.test.data.ChargeProductResolver;
 import org.apache.fineract.test.data.ChargeProductType;
@@ -90,6 +91,14 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     @When("Admin creates working capital loan charge as penalty")
     public void createWorkingCapitalLoanChargeAsPenalty() {
         createChargeAndStore(chargeRequestFactory.defaultWorkingCapitalChargeRequest().penalty(true).amount(15.0D));
+    }
+
+    @When("Admin creates working capital loan charge with {string} charge time type as penalty")
+    public void createWorkingCapitalLoanChargeWithTimeTypeAsPenalty(String chargeTimeTypeName) {
+        final ChargeTimeType timeType = ChargeTimeType.valueOf(chargeTimeTypeName);
+        createChargeAndStore(chargeRequestFactory.defaultWorkingCapitalChargeRequest() //
+                .chargeTimeType(timeType.value) //
+                .penalty(true).amount(15.0D));
     }
 
     @When("Admin creates working capital loan charge without payment mode")
@@ -423,6 +432,41 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         assertErrorMessage(exception, expectedErrorMessage);
         log.info("Verified creating WCL charge with chargeTimeType={} and calcType={} failed with status {} and message: {}",
                 chargeTimeTypeName, chargeCalcTypeName, exception.getStatus(), expectedErrorMessage);
+    }
+
+    @Then("Creating working capital loan charge with {string} chargePaymentMode results an error with the following data:")
+    public void createWclChargeWithInvalidPaymentModeFails(String chargePaymentModeName, DataTable table) {
+        final ChargePaymentMode paymentMode = ChargePaymentMode.valueOf(chargePaymentModeName);
+        final ChargeRequest request = chargeRequestFactory.defaultWorkingCapitalChargeRequest() //
+                .chargePaymentMode(paymentMode.value);
+
+        final Map<String, String> expectedData = table.asMaps().get(0);
+        final int expectedHttpCode = Integer.parseInt(expectedData.get("httpCode"));
+        final String expectedErrorMessage = expectedData.get("errorMessage").trim();
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.charges().createCharge(request));
+        assertHttpStatus(exception, expectedHttpCode);
+        assertErrorMessage(exception, expectedErrorMessage);
+        log.info("Verified creating WCL charge with chargePaymentMode={} failed with status {} and message: {}", chargePaymentModeName,
+                exception.getStatus(), expectedErrorMessage);
+    }
+
+    @Then("Updating working capital loan charge chargeTimeType to {string} results an error with the following data:")
+    public void updateWclChargeTimeTypeFails(String chargeTimeTypeName, DataTable table) {
+        final Long id = getChargeId();
+        final ChargeTimeType timeType = ChargeTimeType.valueOf(chargeTimeTypeName);
+        final ChargeRequest request = new ChargeRequest().chargeTimeType(timeType.value)
+                .locale(WorkingCapitalChargeRequestFactory.DEFAULT_LOCALE);
+
+        final Map<String, String> expectedData = table.asMaps().get(0);
+        final int expectedHttpCode = Integer.parseInt(expectedData.get("httpCode"));
+        final String expectedErrorMessage = expectedData.get("errorMessage").trim();
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.charges().updateCharge(id, request));
+        assertHttpStatus(exception, expectedHttpCode);
+        assertErrorMessage(exception, expectedErrorMessage);
+        log.info("Verified updating WCL charge chargeTimeType to {} failed with status {} and message: {}", chargeTimeTypeName,
+                exception.getStatus(), expectedErrorMessage);
     }
 
     @When("Admin makes a charge adjustment for the last added charge with {double} amount on working capital loan")
