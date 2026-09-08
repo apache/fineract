@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.loanproduct.calc.data;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -137,5 +138,72 @@ class RepaymentPeriodTest {
         assertDoesNotThrow(period::getFutureUnrecognizedInterest);
         assertDoesNotThrow(period::getTotalDisbursedAmount);
         assertDoesNotThrow(period::getTotalCapitalizedIncomeAmount);
+    }
+
+    private static RepaymentPeriod periodWithFixedInterest(LocalDate fromDate, LocalDate dueDate, double fixedInterest) {
+        RepaymentPeriod period = RepaymentPeriod.create(null, fromDate, dueDate, ZERO, MC, loanProductRelatedDetail);
+        period.setFixedInterest(Money.of(USD, BigDecimal.valueOf(fixedInterest), MC));
+        return period;
+    }
+
+    @Test
+    void fixedInterestTillDateIsZeroBeforeThePeriodStarted() {
+        LocalDate from = LocalDate.of(2026, 3, 15);
+        RepaymentPeriod period = periodWithFixedInterest(from, from.plusDays(30), 30.0);
+
+        assertEquals(BigDecimal.ZERO.compareTo(period.calculateFixedInterestTillDate(from).getAmount()), 0);
+        assertEquals(BigDecimal.ZERO.compareTo(period.calculateFixedInterestTillDate(from.minusDays(5)).getAmount()), 0);
+    }
+
+    @Test
+    void fixedInterestTillDateIsProratedInsideThePeriod() {
+        LocalDate from = LocalDate.of(2026, 3, 15);
+        RepaymentPeriod period = periodWithFixedInterest(from, from.plusDays(30), 30.0);
+
+        // one day elapsed of thirty
+        assertEquals(0, BigDecimal.ONE.compareTo(period.calculateFixedInterestTillDate(from.plusDays(1)).getAmount()));
+        // half the period elapsed
+        assertEquals(0, BigDecimal.valueOf(15).compareTo(period.calculateFixedInterestTillDate(from.plusDays(15)).getAmount()));
+    }
+
+    @Test
+    void fixedInterestTillDateIsFullOnAndAfterTheDueDate() {
+        LocalDate from = LocalDate.of(2026, 3, 15);
+        LocalDate due = from.plusDays(30);
+        RepaymentPeriod period = periodWithFixedInterest(from, due, 30.0);
+
+        assertEquals(0, BigDecimal.valueOf(30).compareTo(period.calculateFixedInterestTillDate(due).getAmount()));
+        assertEquals(0, BigDecimal.valueOf(30).compareTo(period.calculateFixedInterestTillDate(due.plusDays(10)).getAmount()));
+    }
+
+    @Test
+    void fixedInterestTillDateIsFullForAZeroLengthPeriod() {
+        LocalDate sameDay = LocalDate.of(2026, 3, 15);
+        RepaymentPeriod period = periodWithFixedInterest(sameDay, sameDay, 30.0);
+
+        // A zero length period cannot be prorated, so the whole fixed interest is due. Both variants agree on this.
+        assertEquals(0, BigDecimal.valueOf(30).compareTo(period.calculateFixedInterestTillDate(sameDay).getAmount()));
+        assertEquals(0, BigDecimal.valueOf(30).compareTo(period.calculateFixedInterestTillDate().getAmount()));
+    }
+
+    @Test
+    void fixedInterestTillDateIsZeroWithoutFixedInterest() {
+        LocalDate from = LocalDate.of(2026, 3, 15);
+        RepaymentPeriod period = RepaymentPeriod.create(null, from, from.plusDays(30), ZERO, MC, loanProductRelatedDetail);
+
+        assertEquals(0, BigDecimal.ZERO.compareTo(period.calculateFixedInterestTillDate(from.plusDays(10)).getAmount()));
+    }
+
+    @Test
+    void bothFixedInterestTillDateVariantsAgreeOnATruncatedModel() {
+        LocalDate from = LocalDate.of(2026, 3, 15);
+        LocalDate target = from.plusDays(10);
+        RepaymentPeriod period = periodWithFixedInterest(from, from.plusDays(30), 30.0);
+        // the no-arg variant reads the elapsed part off the interest periods, so truncate the only one to the target
+        period.getInterestPeriods().getLast().setDueDate(target);
+
+        assertEquals(
+                period.calculateFixedInterestTillDate().getAmount().compareTo(period.calculateFixedInterestTillDate(target).getAmount()),
+                0);
     }
 }
