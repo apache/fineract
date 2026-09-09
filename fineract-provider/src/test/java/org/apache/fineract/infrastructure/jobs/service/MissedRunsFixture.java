@@ -53,7 +53,6 @@ import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameData;
 import org.apache.fineract.infrastructure.jobs.service.jobname.JobNameService;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.job.Job;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * Wires the real {@link JobRegisterServiceImpl}, {@link JobSchedulerServiceImpl}, {@link SchedulerVetoer},
@@ -70,7 +69,7 @@ final class MissedRunsFixture implements AutoCloseable {
     final FineractProperties properties = new FineractProperties();
     final SchedulerDetail schedulerDetail = new SchedulerDetail();
     final List<ScheduledJobDetail> jobs = new CopyOnWriteArrayList<>();
-    final JobRegisterServiceImpl jobRegisterService = new JobRegisterServiceImpl();
+    final JobRegisterServiceImpl jobRegisterService;
     final JobSchedulerServiceImpl jobSchedulerService;
     final Map<String, List<Instant>> executions = new ConcurrentHashMap<>();
     final AtomicInteger concurrentExecutions = new AtomicInteger();
@@ -99,14 +98,44 @@ final class MissedRunsFixture implements AutoCloseable {
 
         final ScheduledJobDetailRepository jobRepository = mock(ScheduledJobDetailRepository.class);
         when(jobRepository.findAllJobs(anyInt())).thenAnswer(inv -> List.copyOf(jobs));
+        when(jobRepository.findByJobId(any())).thenAnswer(inv -> byJobId(inv.getArgument(0)));
         when(jobRepository.findByJobKey(anyString())).thenAnswer(inv -> byJobKey(inv.getArgument(0)));
         when(jobRepository.findByJobKeyWithLock(anyString())).thenAnswer(inv -> byJobKey(inv.getArgument(0)));
         when(jobRepository.save(any(ScheduledJobDetail.class))).thenAnswer(inv -> inv.getArgument(0));
         final ScheduledJobRunHistoryRepository historyRepository = mock(ScheduledJobRunHistoryRepository.class);
         final SchedulerDetailRepository schedulerDetailRepository = mock(SchedulerDetailRepository.class);
         when(schedulerDetailRepository.findAllSchedulerDetails()).thenAnswer(inv -> List.of(schedulerDetail));
-        final SchedularWritePlatformService writeService = new SchedularWritePlatformServiceJpaRepositoryImpl(jobRepository,
-                historyRepository, null, schedulerDetailRepository);
+        final ScheduledJobReadService readService = new ScheduledJobReadService() {
+
+            @Override
+            public ScheduledJobDetail findByJobId(Long jobId) {
+                return jobRepository.findByJobId(jobId);
+            }
+
+            @Override
+            public List<ScheduledJobDetail> retrieveAllJobs(String nodeId) {
+                return jobRepository.findAllJobs(Integer.parseInt(nodeId));
+            }
+
+            @Override
+            public ScheduledJobDetail findByJobKey(String jobKey) {
+                return jobRepository.findByJobKey(jobKey);
+            }
+
+            @Override
+            public Long fetchMaxVersionBy(String triggerKey) {
+                final Long versionFromDB = historyRepository.findMaxVersionByJobKey(triggerKey);
+                return versionFromDB == null ? 0L : versionFromDB;
+            }
+
+            @Override
+            public SchedulerDetail retrieveSchedulerDetail() {
+                final List<SchedulerDetail> schedulerDetailList = schedulerDetailRepository.findAllSchedulerDetails();
+                return (schedulerDetailList == null || schedulerDetailList.isEmpty()) ? null : schedulerDetailList.get(0);
+            }
+        };
+        final SchedulerWritePlatformService writeService = new SchedulerWritePlatformServiceJpaRepositoryImpl(jobRepository,
+                historyRepository, schedulerDetailRepository, readService, null);
 
         final BusinessDateReadPlatformService businessDateService = mock(BusinessDateReadPlatformService.class);
         when(businessDateService.getBusinessDates()).thenAnswer(inv -> new HashMap<BusinessDateType, LocalDate>());
@@ -139,18 +168,14 @@ final class MissedRunsFixture implements AutoCloseable {
         }).when(jobStarter).run(any(), any(), any(), anyString());
 
         final SchedulerVetoer vetoer = new SchedulerVetoer(writeService, businessDateService);
-        ReflectionTestUtils.setField(jobRegisterService, "schedularWritePlatformService", writeService);
-        ReflectionTestUtils.setField(jobRegisterService, "schedulerJobListener",
-                new SchedulerJobListener(writeService, tenantDetailsService));
-        ReflectionTestUtils.setField(jobRegisterService, "globalSchedulerTriggerListener",
-                new SchedulerTriggerListener(tenantDetailsService, vetoer));
-        ReflectionTestUtils.setField(jobRegisterService, "fineractProperties", properties);
-        ReflectionTestUtils.setField(jobRegisterService, "jobRegistry", jobRegistry);
-        ReflectionTestUtils.setField(jobRegisterService, "jobStarter", jobStarter);
-        ReflectionTestUtils.setField(jobRegisterService, "jobNameService", jobNameService);
+        final SchedulerJobListener schedulerJobListener = new SchedulerJobListener(tenantDetailsService, readService, writeService);
+        final SchedulerTriggerListener globalSchedulerTriggerListener = new SchedulerTriggerListener(tenantDetailsService, vetoer);
+
+        jobRegisterService = new JobRegisterServiceImpl(writeService, schedulerJobListener, globalSchedulerTriggerListener, properties,
+                jobRegistry, jobStarter, null, jobNameService, readService);
 
         jobSchedulerService = new JobSchedulerServiceImpl(properties, writeService, tenantDetailsService, jobRegisterService,
-                businessDateService);
+                businessDateService, readService);
     }
 
     ScheduledJobDetail addJob(JobName jobName, String cronExpression, Date nextRunTime) {
@@ -218,5 +243,9 @@ final class MissedRunsFixture implements AutoCloseable {
 
     private ScheduledJobDetail byJobKey(String jobKey) {
         return jobs.stream().filter(job -> jobKey.equals(job.getJobKey())).findFirst().orElseThrow();
+    }
+
+    private ScheduledJobDetail byJobId(Long jobId) {
+        return jobs.stream().filter(job -> job.getId().equals(jobId)).findFirst().orElse(null);
     }
 }
