@@ -22,6 +22,70 @@ Feature: Working Capital COB Job
     Then Admin verifies scheduler job "WC_COB" has display name "Working Capital Loan COB"
     Then Admin verifies scheduler job "WC_COB" has active status "false"
 
+  Scenario: Available business steps are exposed for the Working Capital COB job name
+    Then Admin verifies available business steps for "WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS" contain:
+      | stepName                           |
+      | DUMMY_BUSINESS_STEP                |
+      | WC_MISSED_PAYMENT_ACKNOWLEDGEMENT  |
+      | WC_DELINQUENCY_RANGE_SCHEDULE      |
+      | WC_LOAN_DELINQUENCY_CLASSIFICATION |
+      | WC_BREACH_SCHEDULE                 |
+      | WC_NEAR_BREACH_EVALUATION          |
+      | WC_DISCOUNT_FEE_AMORTIZATION       |
+      | WC_CHARGE_ACCRUAL                  |
+
+  @WCBusinessStepConfig
+  Scenario: Working Capital COB job rejects a business step from the Loan COB family
+    Then Admin fails to update business steps for "WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS" with invalid step "APPLY_CHARGE_TO_OVERDUE_LOANS"
+
+  Scenario: Loan COB job rejects a business step from the Working Capital family
+    Then Admin fails to update business steps for "LOAN_CLOSE_OF_BUSINESS" with invalid step "WC_CHARGE_ACCRUAL"
+
+  Scenario: Business step update is rejected for an unknown job name
+    Then Admin fails to update business steps for "NOT_A_COB_JOB" with invalid step "APPLY_CHARGE_TO_OVERDUE_LOANS"
+
+  @WCBusinessStepConfig
+  Scenario: Working Capital COB business step order is updated
+    When Admin updates business steps for "WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS" with:
+      | stepName                           | order |
+      | DUMMY_BUSINESS_STEP                | 1     |
+      | WC_CHARGE_ACCRUAL                  | 2     |
+      | WC_MISSED_PAYMENT_ACKNOWLEDGEMENT  | 3     |
+      | WC_DELINQUENCY_RANGE_SCHEDULE      | 4     |
+      | WC_LOAN_DELINQUENCY_CLASSIFICATION | 5     |
+      | WC_BREACH_SCHEDULE                 | 6     |
+      | WC_NEAR_BREACH_EVALUATION          | 7     |
+      | WC_DISCOUNT_FEE_AMORTIZATION       | 8     |
+    Then Admin verifies configured business steps for "WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS" match:
+      | stepName                           | order |
+      | DUMMY_BUSINESS_STEP                | 1     |
+      | WC_CHARGE_ACCRUAL                  | 2     |
+      | WC_MISSED_PAYMENT_ACKNOWLEDGEMENT  | 3     |
+      | WC_DELINQUENCY_RANGE_SCHEDULE      | 4     |
+      | WC_LOAN_DELINQUENCY_CLASSIFICATION | 5     |
+      | WC_BREACH_SCHEDULE                 | 6     |
+      | WC_NEAR_BREACH_EVALUATION          | 7     |
+      | WC_DISCOUNT_FEE_AMORTIZATION       | 8     |
+
+  @WCBusinessStepConfig
+  Scenario: Working Capital COB runs with a reordered business step configuration
+    When Admin updates business steps for "WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS" with:
+      | stepName                           | order |
+      | WC_MISSED_PAYMENT_ACKNOWLEDGEMENT  | 1     |
+      | WC_DELINQUENCY_RANGE_SCHEDULE      | 2     |
+      | WC_LOAN_DELINQUENCY_CLASSIFICATION | 3     |
+      | WC_BREACH_SCHEDULE                 | 4     |
+      | WC_NEAR_BREACH_EVALUATION          | 5     |
+      | WC_DISCOUNT_FEE_AMORTIZATION       | 6     |
+      | WC_CHARGE_ACCRUAL                  | 7     |
+      | DUMMY_BUSINESS_STEP                | 8     |
+    When Admin sets the business date to "01 January 2024"
+    When Admin creates a client with random data
+    When Admin creates a new Working Capital Loan Product
+    Given Admin inserts an active WC loan into the database
+    When Admin runs WC COB job
+    Then Admin verifies all inserted WC loans have lastClosedBusinessDate "31 December 2023"
+
   @TestRailId:C4696
   Scenario: WC COB and Loan COB coexistence — both jobs listed and execute without interference
     Then Admin checks that configured business jobs contain "LOAN_CLOSE_OF_BUSINESS"
