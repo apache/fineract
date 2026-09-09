@@ -29,6 +29,7 @@ GET /charges/template?chargeAppliesTo=<value>
 When `chargeAppliesTo` is specified, the API returns only the template fields and dropdown options applicable to the selected entity type.
 
 Supported values include:
+
 * `Working Capital Loan`
 
 === chargeTimeType Filter
@@ -42,9 +43,12 @@ GET /charges/template?chargeAppliesTo=<value>&chargeTimeType=<value>
 
 Supported values for WCP Loans:
 
-* `Specified due date`
+* `Disbursement` -- returns `Flat` and `% Amount`
+* `Specified due date` -- returns `Flat`
 
 The API response filters the available `chargeCalculationType` options based on the selected charge time type.
+
+When only `chargeAppliesTo` is provided, `chargeCalculationTypeOptions` contains the union across every supported charge time type (`Flat` and `% Amount` for WCP Loans), and `chargePaymetModeOptions` contains `Regular` only.
 
 == Backward Compatibility
 
