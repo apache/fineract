@@ -27,18 +27,16 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.feign.services.SchedulerJobApi.RetrieveHistoryQueryParams;
-import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.ExecuteJobRequest;
 import org.apache.fineract.client.models.GetJobsJobIDJobRunHistoryResponse;
 import org.apache.fineract.client.models.GetJobsResponse;
 import org.apache.fineract.client.models.GetSchedulerResponse;
 import org.apache.fineract.client.models.JobDetailHistoryDataSwagger;
-import org.apache.fineract.client.models.PutJobsJobIDRequest;
+import org.apache.fineract.client.models.JobUpdateRequest;
 import org.hamcrest.MatcherAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,14 +92,13 @@ public final class SchedulerJobHelper {
         executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().scheduler().handleCommandsScheduler(command));
     }
 
-    public static Map<String, Object> updateSchedulerJob(int jobId, final boolean active) {
+    public static void updateSchedulerJob(int jobId, final boolean active) {
         LOG.info("------------------------ UPDATING SCHEDULER JOB -------------------------");
-        CommandProcessingResult response = ok(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob()
-                .updateJobDetail((long) jobId, new PutJobsJobIDRequest().active(active)));
-        return response.getChanges();
+        executeVoid(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().updateJobDetail((long) jobId,
+                new JobUpdateRequest().active(active)));
     }
 
-    public static void updateSchedulerJob(long jobId, PutJobsJobIDRequest request) {
+    public static void updateSchedulerJob(long jobId, JobUpdateRequest request) {
         ok(() -> FineractFeignClientHelper.getFineractFeignClient().schedulerJob().updateJobDetail(jobId, request));
     }
 
