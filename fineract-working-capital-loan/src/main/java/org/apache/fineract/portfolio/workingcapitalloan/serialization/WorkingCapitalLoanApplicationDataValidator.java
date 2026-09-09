@@ -65,6 +65,7 @@ import org.apache.fineract.portfolio.workingcapitalloanbreach.domain.WorkingCapi
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.domain.WorkingCapitalNearBreach;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanBreachStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
@@ -100,6 +101,7 @@ public class WorkingCapitalLoanApplicationDataValidator {
             WorkingCapitalLoanProductConstants.breachGraceDaysParamName, WorkingCapitalLoanProductConstants.breachStartTypeParamName));
 
     private static final String EIR_NOT_CALCULABLE_CODE = "unable.to.calculate.valid.eir";
+    private static final String SCHEDULE_NOT_CALCULABLE_CODE = "unable.to.calculate.valid.schedule";
 
     private final FromJsonHelper fromApiJsonHelper;
     private final WorkingCapitalPaymentAllocationDataValidator paymentAllocationDataValidator;
@@ -300,7 +302,7 @@ public class WorkingCapitalLoanApplicationDataValidator {
         }
 
         // Once the individual inputs are valid, ensure the derived Total Days / EIR is actually calculable.
-        validateEirCalculable(dataValidationErrors, product, principal, periodPaymentRate, totalPaymentVolume, discount);
+        validateScheduleCalculable(dataValidationErrors, product, principal, periodPaymentRate, totalPaymentVolume, discount);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -338,11 +340,11 @@ public class WorkingCapitalLoanApplicationDataValidator {
             throw new WorkingCapitalLoanApplicationDateException("submitted.on.date.cannot.be.after.expected.disbursement.date",
                     "submittedOnDate cannot be after expectedDisbursementDate.", submittedOnDate, expectedDisbursementDate);
         }
-        validateEirCalculableForLoan(loan);
+        validateScheduleCalculableForLoan(loan);
     }
 
     /** Runs only when no prior errors exist so the produced message is a single, unambiguous validation error. */
-    private void validateEirCalculable(final List<ApiParameterError> dataValidationErrors, final WorkingCapitalLoanProduct product,
+    private void validateScheduleCalculable(final List<ApiParameterError> dataValidationErrors, final WorkingCapitalLoanProduct product,
             final BigDecimal principal, final BigDecimal periodPaymentRate, final BigDecimal totalPaymentVolume,
             final BigDecimal discount) {
         if (!dataValidationErrors.isEmpty() || product == null || product.getRelatedDetail() == null
@@ -352,9 +354,9 @@ public class WorkingCapitalLoanApplicationDataValidator {
         }
         final MathContext mc = MoneyHelper.getMathContext();
         final BigDecimal effectiveDiscount = resolveEffectiveDiscount(discount, product);
-        if (!ProjectedAmortizationScheduleModel.isEirCalculable(effectiveDiscount, principal, totalPaymentVolume, periodPaymentRate,
-                product.getRelatedDetail().getNpvDayCount(), product.getCurrency(), mc)) {
-            dataValidationErrors.add(eirNotCalculableError());
+        if (!ProjectedAmortizationScheduleModel.isScheduleCalculable(product.getRelatedDetail().getAmortizationType(), effectiveDiscount,
+                principal, totalPaymentVolume, periodPaymentRate, product.getRelatedDetail().getNpvDayCount(), product.getCurrency(), mc)) {
+            dataValidationErrors.add(scheduleNotCalculableError(product.getRelatedDetail().getAmortizationType()));
         }
     }
 
@@ -376,17 +378,18 @@ public class WorkingCapitalLoanApplicationDataValidator {
     }
 
     /** Runs on the assembled loan, before persist, so a rejection leaves the stored loan unchanged. */
-    private void validateEirCalculableForLoan(final WorkingCapitalLoan loan) {
+    private void validateScheduleCalculableForLoan(final WorkingCapitalLoan loan) {
         final var details = loan.getLoanProductRelatedDetails();
         if (details == null || details.getNpvDayCount() == null) {
             return;
         }
         final MathContext mc = MoneyHelper.getMathContext();
         final BigDecimal discount = details.getDiscountProposed() != null ? details.getDiscountProposed() : BigDecimal.ZERO;
-        if (!ProjectedAmortizationScheduleModel.isEirCalculable(discount, loan.getProposedPrincipal(), loan.getTotalPaymentVolume(),
-                details.getPeriodPaymentRate(), details.getNpvDayCount(), loan.getLoanProduct().getCurrency(), mc)) {
+        if (!ProjectedAmortizationScheduleModel.isScheduleCalculable(details.getAmortizationType(), discount, loan.getProposedPrincipal(),
+                loan.getTotalPaymentVolume(), details.getPeriodPaymentRate(), details.getNpvDayCount(), loan.getLoanProduct().getCurrency(),
+                mc)) {
             final List<ApiParameterError> errors = new ArrayList<>();
-            errors.add(eirNotCalculableError());
+            errors.add(scheduleNotCalculableError(details.getAmortizationType()));
             throw new PlatformApiDataValidationException(errors);
         }
     }
@@ -395,12 +398,16 @@ public class WorkingCapitalLoanApplicationDataValidator {
      * The code is assembled via {@link DataValidatorBuilder#failWithCode} so it tracks the framework's canonical
      * {@code validation.msg.<resource>.<parameter>.<code>} format instead of a hand-concatenated string.
      */
-    private ApiParameterError eirNotCalculableError() {
+    private ApiParameterError scheduleNotCalculableError(final WorkingCapitalAmortizationType amortizationType) {
+        final boolean flat = amortizationType != null && amortizationType.isFlat();
         final List<ApiParameterError> assembled = new ArrayList<>();
         new DataValidatorBuilder(assembled).resource(WorkingCapitalLoanConstants.WCL_RESOURCE_NAME).reset()
-                .parameter(WorkingCapitalLoanConstants.principalAmountParamName).failWithCode(EIR_NOT_CALCULABLE_CODE);
+                .parameter(WorkingCapitalLoanConstants.principalAmountParamName)
+                .failWithCode(flat ? SCHEDULE_NOT_CALCULABLE_CODE : EIR_NOT_CALCULABLE_CODE);
         final String code = assembled.getFirst().getUserMessageGlobalisationCode();
-        return ApiParameterError.parameterError(code, WorkingCapitalLoanConstants.EIR_NOT_CALCULABLE_USER_MESSAGE,
+        return ApiParameterError.parameterError(code,
+                flat ? WorkingCapitalLoanConstants.SCHEDULE_NOT_CALCULABLE_USER_MESSAGE
+                        : WorkingCapitalLoanConstants.EIR_NOT_CALCULABLE_USER_MESSAGE,
                 WorkingCapitalLoanConstants.principalAmountParamName);
     }
 

@@ -22,17 +22,20 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
 import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
 import com.google.gson.ToNumberPolicy;
 import java.math.MathContext;
 import java.time.LocalDate;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.serialization.gson.JsonExcludeAnnotationBasedExclusionStrategy;
 import org.apache.fineract.infrastructure.core.serialization.gson.LocalDateAdapter;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.domain.Money;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -58,6 +61,10 @@ public class ProjectedAmortizationScheduleModelParserServiceGsonImpl implements 
                 .registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe()) //
                 .registerTypeAdapter(Money.class,
                         (JsonDeserializer<Money>) (json, typeOfT, context) -> Money.of(currency, json.getAsBigDecimal(), mc)) //
+                .registerTypeAdapter(WorkingCapitalAmortizationType.class,
+                        (JsonDeserializer<WorkingCapitalAmortizationType>) (json, typeOfT, context) -> Optional
+                                .ofNullable(WorkingCapitalAmortizationType.fromString(json.getAsString()))
+                                .orElseThrow(() -> new JsonParseException("Unknown amortization type: " + json.getAsString()))) //
                 .setNumberToNumberStrategy(ToNumberPolicy.BIG_DECIMAL) //
                 .registerTypeAdapter(ProjectedAmortizationScheduleModel.class,
                         (InstanceCreator<ProjectedAmortizationScheduleModel>) type -> ProjectedAmortizationScheduleModel

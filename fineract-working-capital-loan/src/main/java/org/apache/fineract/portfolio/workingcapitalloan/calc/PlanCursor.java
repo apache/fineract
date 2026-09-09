@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.calc;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 
 /**
  * How much of the discount fee a given amount of money has earned.
@@ -45,10 +46,17 @@ import org.apache.fineract.infrastructure.core.service.MathUtil;
  * <p>
  * A rate change repositions it onto the day's reality rather than restarting it. Fee earned under the old rate stays
  * earned - the change rewrites what is still to come, not what already happened.
+ *
+ * <p>
+ * Under FLAT the recursion has no accrual: every plan instalment earns the same share of itself, so the fee earned is
+ * simply that share of the money collected, capped at the fee. The cursor walks it the same way so the two types differ
+ * in one step and nowhere else.
  */
 final class PlanCursor {
 
     private final MathContext mc;
+    private final WorkingCapitalAmortizationType amortizationType;
+    private final BigDecimal flatRatio;
     private final BigDecimal totalPaymentVolume;
     private final int npvDayCount;
     private final int currencyScale;
@@ -69,9 +77,17 @@ final class PlanCursor {
     private int stepsInSolve;
     private boolean exhausted;
 
-    PlanCursor(final BigDecimal netDisbursement, final BigDecimal discountFee, final BigDecimal totalPaymentVolume,
-            final BigDecimal periodPaymentRate, final int npvDayCount, final int currencyScale, final MathContext mc) {
+    /**
+     * @param flatRatio
+     *            the walk's own FLAT share, handed over rather than re-derived so the plan and the schedule can never
+     *            earn at two ratios; {@code null} under EIR
+     */
+    PlanCursor(final WorkingCapitalAmortizationType amortizationType, final BigDecimal flatRatio, final BigDecimal netDisbursement,
+            final BigDecimal discountFee, final BigDecimal totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount,
+            final int currencyScale, final MathContext mc) {
         this.mc = mc;
+        this.amortizationType = amortizationType;
+        this.flatRatio = flatRatio;
         this.totalPaymentVolume = totalPaymentVolume;
         this.npvDayCount = npvDayCount;
         this.currencyScale = currencyScale;
@@ -80,8 +96,8 @@ final class PlanCursor {
         this.billed = BigDecimal.ZERO;
         this.previousEarned = BigDecimal.ZERO;
         this.previousBilled = BigDecimal.ZERO;
-        this.solved = AmortizationParams.solve(netDisbursement, discountFee, totalPaymentVolume, periodPaymentRate, npvDayCount,
-                currencyScale, mc);
+        this.solved = AmortizationParams.solve(amortizationType, netDisbursement, discountFee, totalPaymentVolume, periodPaymentRate,
+                npvDayCount, currencyScale, mc);
         this.stepsInSolve = 0;
         this.exhausted = false;
     }
@@ -119,8 +135,8 @@ final class PlanCursor {
         this.previousBilled = collectedSoFar;
         this.stepsInSolve = 0;
         this.exhausted = false;
-        this.solved = AmortizationParams.solve(this.balance, MathUtil.negativeToZero(unearnedFee), totalPaymentVolume, periodPaymentRate,
-                npvDayCount, currencyScale, mc);
+        this.solved = AmortizationParams.solve(amortizationType, this.balance, MathUtil.negativeToZero(unearnedFee), totalPaymentVolume,
+                periodPaymentRate, npvDayCount, currencyScale, mc);
     }
 
     /**
@@ -156,21 +172,20 @@ final class PlanCursor {
     /** One plan instalment: accrue on the balance, bill what the plan asks for, and draw the balance down. */
     private void step() {
         stepsInSolve++;
-        final BigDecimal grown = balance.multiply(BigDecimal.ONE.add(solved.eir(), mc), mc);
         // The instalment, capped at the balance there is to close - the same rule the schedule bills by, so a borrower
         // paying exactly to plan earns exactly what the plan projected rather than nearly it. The plan's last step
         // bills what is left on it, which the cap already gives; naming a separate closing amount here would have that
         // step bill the remainder the plan was solved for even once a repositioning had left it owing more.
-        final BigDecimal instalment = MathUtil.negativeToZero(solved.dailyPayment()).min(MathUtil.negativeToZero(grown));
-        if (instalment.signum() <= 0) {
+        final AmortizationStep.DayStep step = AmortizationStep.project(balance, solved.dailyPayment(), solved.eir(), flatRatio, mc);
+        if (step.instalment().signum() <= 0) {
             // Nothing left to bill: the plan has run out and the fee it holds is all there is to earn.
             exhausted = true;
             return;
         }
         previousEarned = earned;
         previousBilled = billed;
-        earned = earned.add(grown.subtract(balance, mc), mc);
-        billed = billed.add(instalment, mc);
-        balance = grown.subtract(instalment, mc);
+        earned = earned.add(step.fee(), mc);
+        billed = billed.add(step.instalment(), mc);
+        balance = step.balanceAfter();
     }
 }

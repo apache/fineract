@@ -256,12 +256,13 @@ public final class WorkingCapitalLoanApiResourceSwagger {
                 + "the product's NPV day count, not a calendar year, and rounded to six decimals. The base schedule's daily "
                 + "discounting derives from it. A rate change does not restate it - the schedule re-solves its own rate from the day "
                 + "the change takes effect. Comes from discount-fee pricing, not a lending interest rate. Null if schedule not yet "
-                + "generated")
+                + "generated or if the loan amortizes FLAT, which solves no rate")
         public BigDecimal calculatedAnnualEir;
         @Schema(description = "Period payment rate change history, most recently booked first - which for a backdated change is not "
                 + "the same as effective-date order. Each entry carries the annual EIR (as a percentage, e.g. 43.756245, the unit the "
                 + "top-level calculatedAnnualEir is expressed in as well), daily payment amount and segment term the amortization "
-                + "schedule computed when that change was booked; those are null for changes booked before the snapshot was introduced")
+                + "schedule computed when that change was booked; those are null for changes booked before the snapshot was "
+                + "introduced, and the EIR is null on a FLAT loan")
         public List<WorkingCapitalLoanPeriodPaymentRateChangeData> periodPaymentRateHistory;
         @Schema(description = "Working capital breach)")
         public WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanProductsResponse.GetWorkingCapitalLoanBreach breach;
