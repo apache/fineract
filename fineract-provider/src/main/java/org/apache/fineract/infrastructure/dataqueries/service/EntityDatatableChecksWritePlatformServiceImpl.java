@@ -272,7 +272,7 @@ public class EntityDatatableChecksWritePlatformServiceImpl implements EntityData
             msgCode += ".unknown.data.integrity.issue";
             msgArgs = new Object[] { dae };
         }
-        log.error("Error occured.", dae);
+        log.error("Error occurred.", dae);
         throw ErrorHandler.getMappable(dae, msgCode, msg, param, msgArgs);
     }
 }

@@ -189,7 +189,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
                                     }
                                 }
                             } catch (final SchedulerException e) {
-                                log.error("Error occured.", e);
+                                log.error("Error occurred.", e);
                             }
                         }
                         jobDetail.setTriggerMisfired(false);
@@ -277,7 +277,7 @@ public class JobRegisterServiceImpl implements JobRegisterService, ApplicationLi
             try {
                 scheduler.shutdown();
             } catch (final SchedulerException e) {
-                log.error("Error occured.", e);
+                log.error("Error occurred.", e);
             }
         }
     }
