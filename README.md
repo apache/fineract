@@ -109,6 +109,50 @@ Expected response for fresh instance:
 {"totalFilteredRecords":0,"pageItems":[]}
 ```
 
+How to run the tests
+---
+
+Unit tests need nothing running:
+
+```bash
+./gradlew test -x :integration-tests:test -x :twofactor-tests:test -x :oauth2-tests:test
+```
+
+The integration, two-factor, OAuth2 and Cucumber E2E suites all drive a **live Fineract instance over HTTP, and the
+build does not start one for you** — start it first, or every test fails on connection refused. The Docker stack is
+what CI uses, so it is the configuration these suites are actually verified against:
+
+```bash
+# build the image once
+./gradlew :fineract-provider:jibDockerBuild -Djib.to.image=fineract -x test -x cucumber
+
+# start Fineract plus its database, LocalStack and the mock OAuth2 server
+docker compose -f docker-compose-postgresql-test.yml up -d
+./gradlew :integration-tests:waitForFineract
+
+./gradlew :integration-tests:test --tests ClientLoanIntegrationTest
+```
+
+Use `docker-compose-mariadb-test.yml` or `docker-compose-mysql-test.yml` for the other database engines.
+
+Docker is not a requirement, though. Anything that serves `https://localhost:8443/fineract-provider` works just as
+well — `./gradlew devRun` from the Quick Start above, or `ServerApplication` from your IDE — since that is the
+address the suites default to. Point them somewhere else with the `BACKEND_PROTOCOL`, `BACKEND_HOST` and
+`BACKEND_PORT` environment variables.
+
+`:twofactor-tests` and `:oauth2-tests` need the server started in a different authentication mode, so they cannot
+share an instance with `:integration-tests`. Layer the matching override on top and recreate the service:
+
+```bash
+docker compose -f docker-compose-postgresql-test.yml -f docker-compose-twofactor-test.yml \
+  up -d --force-recreate fineract
+./gradlew :twofactor-tests:test
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md#how-to-run-tests) and the
+[Integration Testing](https://fineract.apache.org/docs/current/#testing-integration) chapter for the rest.
+
+
 How to run for production
 ---
 
@@ -152,6 +196,19 @@ Build a traditional WAR file:
 The WAR will be created in the `fineract-war/build/libs` directory. Afterwards deploy the WAR to your Tomcat Servlet Container.
 
 We recommend using the JAR instead of the WAR file deployment, because it's much easier.
+
+CI covers the JAR-based image everywhere and the WAR through one smoke job
+([`build-war-smoke.yml`](.github/workflows/build-war-smoke.yml)), which deploys the WAR into a stock Tomcat and runs
+a single E2E scenario against it. To reproduce that locally:
+
+```bash
+./gradlew :fineract-war:war
+docker compose -f docker-compose-war-test.yml up -d
+curl --retry 60 --retry-all-errors http://localhost:8080/fineract-provider/actuator/health
+```
+
+Tomcat serves the WAR over plain HTTP on port 8080, so point the suites at it with `BASE_URL` (E2E) or
+`BACKEND_PROTOCOL`/`BACKEND_PORT` (integration tests).
 
 
 How to run using Docker or Podman

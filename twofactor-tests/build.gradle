@@ -18,85 +18,10 @@
  */
 description = 'Fineract Integration Tests'
 
-apply plugin: 'com.bmuschko.cargo'
-
-// Configuration for the Gradle Cargo plugin
-// https://github.com/bmuschko/gradle-cargo-plugin
-configurations {
-    tomcat
-}
-
+// The suites in this module run against an already-running Fineract instance that has two-factor authentication enabled.
+// The build does not start one; bring it up with docker-compose-twofactor-test.yml (see
+// fineract-doc/src/docs/en/chapters/testing/integration.adoc) before running the tests.
 apply from: 'dependencies.gradle'
-
-// Allow external drivers to be used for the tests without packaging it
-// mainly due to license incompatibilities
-configurations {
-    driver
-}
-dependencies {
-    driver 'com.mysql:mysql-connector-j'
-    driver 'org.mariadb.jdbc:mariadb-java-client'
-}
-
-cargo {
-    containerId = "tomcat10x"
-
-    // looks like Cargo doesn't detect the WAR file automatically in the multi-module setup
-    deployable {
-        file = file("$rootDir/fineract-war/build/libs/fineract-provider.war")
-        context = 'fineract-provider'
-    }
-
-    local {
-        logLevel = 'low'
-        outputFile = file("$buildDir/cargo/twofactor-tests-output.log")
-        installer {
-            installConfiguration = configurations.tomcat
-            downloadDir = file("$buildDir/download")
-            extractDir = file("$buildDir/tomcat-twofactor-tests")
-        }
-        startStopTimeout = 240000
-        sharedClasspath = configurations.driver
-        containerProperties {
-            def jvmArgs = '--add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/javax.management=ALL-UNNAMED --add-opens=java.naming/javax.naming=ALL-UNNAMED -Dfineract.security.basicauth.enabled=true -Dfineract.security.oauth2.enabled=false -Dfineract.security.2fa.enabled=true '
-            if (project.hasProperty('dbType')) {
-                if ('postgresql'.equalsIgnoreCase(dbType)) {
-                    jvmArgs += '-Dspring.datasource.hikari.driverClassName=org.postgresql.Driver -Dspring.datasource.hikari.jdbcUrl=jdbc:postgresql://localhost:5432/fineract_tenants -Dspring.datasource.hikari.username=root -Dspring.datasource.hikari.password=postgres -Dfineract.tenant.host=localhost -Dfineract.tenant.port=5432 -Dfineract.tenant.username=root -Dfineract.tenant.password=postgres'
-                } else if ('mysql'.equalsIgnoreCase(dbType)) {
-                    jvmArgs += '-Dspring.datasource.hikari.driverClassName=com.mysql.cj.jdbc.Driver -Dspring.datasource.hikari.jdbcUrl=jdbc:mysql://localhost:3306/fineract_tenants -Dspring.datasource.hikari.username=root -Dspring.datasource.hikari.password=mysql -Dfineract.tenant.host=localhost -Dfineract.tenant.port=3306 -Dfineract.tenant.username=root -Dfineract.tenant.password=mysql'
-                } else {
-                    throw new GradleException('Provided dbType is not supported')
-                }
-            } else {
-                jvmArgs += '-Dspring.datasource.hikari.driverClassName=org.mariadb.jdbc.Driver -Dspring.datasource.hikari.jdbcUrl=jdbc:mariadb://localhost:3306/fineract_tenants -Dspring.datasource.hikari.username=root -Dspring.datasource.hikari.password=mysql -Dfineract.tenant.host=localhost -Dfineract.tenant.port=3306 -Dfineract.tenant.username=root -Dfineract.tenant.password=mysql'
-            }
-            jvmArgs += ' -Dspring.profiles.active=test -Dfineract.events.external.enabled=true'
-            property 'cargo.start.jvmargs', jvmArgs
-            property 'cargo.tomcat.connector.keystoreFile', file("$rootDir/fineract-provider/src/main/resources/keystore.jks")
-            property 'cargo.tomcat.connector.keystorePass', 'openmf'
-            property 'cargo.tomcat.connector.keystoreType', 'JKS'
-            property 'cargo.tomcat.httpSecure', true
-            property 'cargo.tomcat.connector.sslProtocol', 'TLS'
-            property 'cargo.tomcat.connector.clientAuth', false
-            property 'cargo.protocol', 'https'
-            property 'cargo.servlet.port', 8443
-        }
-    }
-}
-
-cargoRunLocal.dependsOn ':fineract-war:war'
-cargoStartLocal.dependsOn ':fineract-war:war'
-
-if (!project.hasProperty('cargoDisabled')) {
-    cargoStartLocal.mustRunAfter testClasses
-}
-
-tasks.named('test').configure {
-    if (!project.hasProperty('cargoDisabled')) {
-        dependsOn cargoStartLocal
-        finalizedBy cargoStopLocal
-    }
-}
 
 // NOTE: Gradle suggested these dependencies
 compileTestJava.dependsOn(':fineract-provider:generateGitProperties', ':fineract-provider:processResources', ':fineract-provider:resolve')

@@ -59,7 +59,7 @@ Utility methods on `Utils` that do not touch the transport — `uniqueRandomStri
 
 The report is written to `integration-tests/build/reports/checkstyle/`.
 
-The task compiles the test sources first, which for this module means generating both clients. Cargo is not involved: `integration-tests/build.gradle` attaches it to the `test` task alone, so a static check never starts a container.
+The task compiles the test sources first, which for this module means generating both clients. No server is involved: nothing in the build starts one, so a static check never needs a running instance.
 
 === When the Check Fires
 
@@ -184,8 +184,7 @@ After changing a Swagger DTO, regenerate the client and compile every module tha
 
 # Then compile the consumers
 ./gradlew :fineract-provider:compileTestJava \
-          :integration-tests:compileTestJava \
-          -PcargoDisabled
+          :integration-tests:compileTestJava
 ----
 
 `cleanupGeneratedJavaFiles` depends on `buildJavaSdk`, so it regenerates and then copies the result into `build/generated/java`. Running `buildJavaSdk` on its own stops before that copy and leaves the sources the compiler actually uses unchanged. Neither task compiles anything downstream, which is why the second command is needed — a schema change that breaks a consumer is otherwise found only in CI.
@@ -246,7 +245,7 @@ Adding a field to a response schema and widening a request type are both additiv
 |===
 | Rule | Description
 | IT-18 | Compilation and `spotlessCheck` are not verification. Run the tests you touched against a running instance.
-| IT-19 | Pass `-PcargoDisabled` when running against an instance you started yourself, otherwise the Cargo plugin starts a second Tomcat.
+| IT-19 | The build does not start a server. Bring an instance up first — see <<Fineract Instance>> — or every test in the suite fails on connection refused.
 | IT-20 | Before attributing a failure to your change, run the test at the base commit on the same instance. Some tests fail independently of the change under review.
 |===
 
@@ -254,11 +253,12 @@ Against a locally running instance:
 
 [source,bash]
 ----
-./gradlew :integration-tests:test -PcargoDisabled \
+./gradlew :integration-tests:test \
   --tests FeignLoanCreationTest
 ----
 
-Without `-PcargoDisabled` the Cargo plugin downloads Tomcat, deploys `fineract-provider.war`, and runs the suite against that container instead.
+The suite talks to whatever is listening at `BACKEND_PROTOCOL`://`BACKEND_HOST`:`BACKEND_PORT`, defaulting to
+`https://localhost:8443`. <<Fineract Instance>> covers the ways to bring that instance up.
 
 == Tool Reference
 

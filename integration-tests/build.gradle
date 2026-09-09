@@ -18,81 +18,17 @@
  */
 description = 'Fineract Integration Tests'
 
-apply plugin: 'com.bmuschko.cargo'
-
-// Configuration for the Gradle Cargo plugin
-// https://github.com/bmuschko/gradle-cargo-plugin
-configurations {
-    tomcat
-}
-
+// The suites in this module run against an already-running Fineract instance. The build does not
+// start one; see fineract-doc/src/docs/en/chapters/testing/integration.adoc for the supported ways
+// to bring one up, and use the waitForFineract task below to block until it answers.
 apply from: 'dependencies.gradle'
 
-// Allow external drivers to be used for the tests without packaging it
-// mainly due to license incompatibilities
-configurations {
-    driver
-}
 dependencies {
-    driver 'com.mysql:mysql-connector-j'
-    driver 'org.mariadb.jdbc:mariadb-java-client'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.14.4'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.14.4'
     testRuntimeOnly 'org.junit.platform:junit-platform-suite:1.14.4'
 }
-
-cargo {
-    containerId = "tomcat10x"
-
-    // looks like Cargo doesn't detect the WAR file automatically in the multi-module setup
-    deployable {
-        file = file("$rootDir/fineract-war/build/libs/fineract-provider.war")
-        context = 'fineract-provider'
-    }
-
-    local {
-        logLevel = 'low'
-        outputFile = file("$buildDir/cargo/integration-tests-output.log")
-        installer {
-            installConfiguration = configurations.tomcat
-            downloadDir = file("$buildDir/download")
-            extractDir = file("$buildDir/tomcat-integration-tests")
-        }
-        startStopTimeout = 1200000
-        sharedClasspath = configurations.driver
-        containerProperties {
-            def jvmArgs = '--add-exports=java.naming/com.sun.jndi.ldap=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.management/javax.management=ALL-UNNAMED --add-opens=java.naming/javax.naming=ALL-UNNAMED '
-            if (project.hasProperty('localDebug')) {
-                jvmArgs += ' -agentlib:jdwp=transport=dt_socket,server=y,address=*:9000,suspend=n -Xmx2G -Duser.timezone=Asia/Kolkata '
-            }
-            if (project.hasProperty('dbType')) {
-                if ('postgresql'.equalsIgnoreCase(dbType)) {
-                    jvmArgs += '-Dspring.datasource.hikari.driverClassName=org.postgresql.Driver -Dspring.datasource.hikari.jdbcUrl=jdbc:postgresql://localhost:5432/fineract_tenants -Dspring.datasource.hikari.username=root -Dspring.datasource.hikari.password=postgres -Dfineract.tenant.host=localhost -Dfineract.tenant.port=5432 -Dfineract.tenant.username=root -Dfineract.tenant.password=postgres'
-                } else if ('mysql'.equalsIgnoreCase(dbType)) {
-                    jvmArgs += '-Dspring.datasource.hikari.driverClassName=com.mysql.cj.jdbc.Driver -Dspring.datasource.hikari.jdbcUrl=jdbc:mysql://localhost:3306/fineract_tenants -Dspring.datasource.hikari.username=root -Dspring.datasource.hikari.password=mysql -Dfineract.tenant.host=localhost -Dfineract.tenant.port=3306 -Dfineract.tenant.username=root -Dfineract.tenant.password=mysql'
-                } else {
-                    throw new GradleException('Provided dbType is not supported')
-                }
-            } else {
-                jvmArgs += '-Dspring.datasource.hikari.driverClassName=org.mariadb.jdbc.Driver -Dspring.datasource.hikari.jdbcUrl=jdbc:mariadb://localhost:3306/fineract_tenants -Dspring.datasource.hikari.username=root -Dspring.datasource.hikari.password=mysql -Dfineract.tenant.host=localhost -Dfineract.tenant.port=3306 -Dfineract.tenant.username=root -Dfineract.tenant.password=mysql'
-            }
-            jvmArgs += ' -Dspring.profiles.active=test -Dfineract.events.external.enabled=true'
-            property 'cargo.start.jvmargs', jvmArgs
-            property 'cargo.tomcat.connector.keystoreFile', file("$rootDir/fineract-provider/src/main/resources/keystore.jks")
-            property 'cargo.tomcat.connector.keystorePass', 'openmf'
-            property 'cargo.tomcat.connector.keystoreType', 'JKS'
-            property 'cargo.tomcat.httpSecure', true
-            property 'cargo.tomcat.connector.sslProtocol', 'TLS'
-            property 'cargo.tomcat.connector.clientAuth', false
-            property 'cargo.protocol', 'https'
-            property 'cargo.servlet.port', 8443
-        }
-    }
-}
-
-cargoRunLocal.dependsOn ':fineract-war:war'
-cargoStartLocal.dependsOn ':fineract-war:war'
 
 import java.net.HttpURLConnection
 import java.net.URL
@@ -101,9 +37,18 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
+// Blocks until the Fineract instance the tests will talk to answers its health endpoint. The build
+// never starts that instance, so this is only useful after you have brought one up yourself; it
+// reads the same BACKEND_* environment variables as ConfigProperties.Backend so it always polls the
+// address the tests will actually use.
 tasks.register('waitForFineract') {
+    description = 'Waits until the Fineract instance under test answers /actuator/health'
+    group = 'verification'
+
+    def timeoutSeconds = (project.findProperty('waitForFineractTimeoutSeconds') ?: '600') as int
+    def healthUrl = "${System.getenv('BACKEND_PROTOCOL') ?: 'https'}://${System.getenv('BACKEND_HOST') ?: 'localhost'}:${System.getenv('BACKEND_PORT') ?: '8443'}/fineract-provider/actuator/health".toString()
+
     doLast {
-        int timeoutSeconds = (project.findProperty('waitForFineractTimeoutSeconds') ?: '600') as int
         int waited = 0
         int interval = 5
 
@@ -120,8 +65,8 @@ tasks.register('waitForFineract') {
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory())
         HttpsURLConnection.setDefaultHostnameVerifier({ hostname, session -> true })
 
-        URL url = new URL("https://localhost:8443/fineract-provider/actuator/health")
-        println "Waiting for Fineract startup (timeout: ${timeoutSeconds}s)..."
+        URL url = new URL(healthUrl)
+        println "Waiting for Fineract at ${healthUrl} (timeout: ${timeoutSeconds}s)..."
 
         while (waited < timeoutSeconds) {
             try {
@@ -140,20 +85,8 @@ tasks.register('waitForFineract') {
             println "Still waiting..."
         }
 
-        throw new GradleException("Fineract did not start within ${timeoutSeconds} seconds")
+        throw new GradleException("Fineract at ${healthUrl} did not become healthy within ${timeoutSeconds} seconds")
     }
-}
-
-tasks.named('test').configure {
-    if (!project.hasProperty('cargoDisabled')) {
-        dependsOn cargoStartLocal, waitForFineract
-        finalizedBy cargoStopLocal
-    }
-}
-
-if (!project.hasProperty('cargoDisabled')) {
-    cargoStartLocal.mustRunAfter testClasses
-    waitForFineract.mustRunAfter cargoStartLocal
 }
 
 // Configure proper test output directories

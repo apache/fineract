@@ -43,16 +43,97 @@ There is a separate task per database engine: `createPGDB` for PostgreSQL, `crea
 
 === Fineract Instance
 
-Integration tests run fineract instance from cargo plugin by default. The `test` task starts a Tomcat container, deploys `fineract-provider.war` into it, waits for the instance to come up, and stops it afterwards.
+The build never starts a server. `:integration-tests:test`, `:twofactor-tests:test` and `:oauth2-tests:test` all
+run against whatever is already answering at the address in <<Default Connection Settings>>, so you have to bring
+an instance up yourself first. Start it any of these three ways.
 
-Pass `-PcargoDisabled` to skip all of that and run against an instance you started yourself:
+==== Docker Compose (recommended)
+
+This is what CI does, so it is the configuration the suites are actually verified against. Build the image once,
+then bring up the stack:
 
 [source,bash]
 ----
-./gradlew :integration-tests:test -PcargoDisabled --tests ClientLoanIntegrationTest
+./gradlew :fineract-provider:jibDockerBuild -Djib.to.image=fineract -x test -x cucumber
+
+# PostgreSQL; docker-compose-mariadb-test.yml and docker-compose-mysql-test.yml also exist
+docker compose -f docker-compose-postgresql-test.yml up -d
+
+./gradlew :integration-tests:waitForFineract
 ----
 
-Without it, the suite runs against the Cargo-managed container regardless of any instance already listening on the configured port.
+The compose files bring up the database, LocalStack and the mock OAuth2 server alongside Fineract, and they create
+the `fineract_tenants` and `fineract_default` databases for you — the `createPGDB` step above is only needed when
+you run the server outside Docker.
+
+==== Gradle
+
+[source,bash]
+----
+./gradlew :fineract-provider:bootRun
+----
+
+`bootRun` needs a database reachable on `localhost` and the `createPGDB`/`createDB`/`createMySQLDB` step above.
+Use `:fineract-provider:devRun` for the same thing with the quality checks switched off.
+
+==== IDE
+
+Run `org.apache.fineract.ServerApplication`. The defaults in `application.properties` already put the server on
+`https://localhost:8443/fineract-provider`, which is exactly where the tests look, so no run configuration is
+needed beyond the database settings.
+
+==== Waiting for it to come up
+
+`:integration-tests:waitForFineract` polls `/actuator/health` until the instance answers, using the same
+`BACKEND_PROTOCOL`/`BACKEND_HOST`/`BACKEND_PORT` variables as the tests. It is handy in scripts:
+
+[source,bash]
+----
+./gradlew :integration-tests:waitForFineract -PwaitForFineractTimeoutSeconds=300
+----
+
+==== The WAR deployment
+
+`fineract-war` still ships `fineract-provider.war` in the binary distribution, and one CI job keeps that deployment
+path honest: `.github/workflows/build-war-smoke.yml` deploys the WAR into a stock Tomcat and drives a single E2E
+scenario against it. `docker-compose-war-test.yml` is the same stack, so you can reproduce it locally:
+
+[source,bash]
+----
+./gradlew :fineract-war:war
+docker compose -f docker-compose-war-test.yml up -d
+
+BASE_URL=http://localhost:8080 ./gradlew :fineract-e2e-tests-runner:cucumber \
+  -Pcucumber.features="src/test/resources/features/Client.feature" \
+  -Pcucumber.tags="@Smoke"
+----
+
+`-Pcucumber.features` takes a path relative to `fineract-e2e-tests-runner`, and `-Pcucumber.tags` takes a
+cucumber tag expression. A filter that matches nothing is not an error: cucumber reports `0 scenarios` and
+exits 0, so a scripted run should check the summary line rather than trust the exit code.
+
+Tomcat serves the WAR over plain HTTP on 8080 rather than HTTPS on 8443, which is why `BASE_URL` is set explicitly;
+the integration suites take `BACKEND_PROTOCOL` and `BACKEND_PORT` instead. Every other job in CI runs the Spring
+Boot jar through the jib image, so this is the only place a WAR-specific regression shows up.
+
+==== Authentication modes
+
+`twofactor-tests` and `oauth2-tests` need the server started with a different authentication mode than the default,
+so they cannot run against the same instance as `integration-tests`. Layer the matching compose override on top and
+recreate the `fineract` service:
+
+[source,bash]
+----
+# two-factor authentication
+docker compose -f docker-compose-postgresql-test.yml -f docker-compose-twofactor-test.yml \
+  up -d --force-recreate fineract
+./gradlew :twofactor-tests:test
+
+# OAuth2
+docker compose -f docker-compose-postgresql-test.yml -f docker-compose-oauth2-test.yml \
+  up -d --force-recreate fineract
+./gradlew :oauth2-tests:test
+----
 
 == Configuration
 
@@ -91,13 +172,15 @@ export BACKEND_TENANT=default
 
 ==== Step 1: Start Fineract
 
+Bring up an instance as described in <<Fineract Instance>>, for example:
+
 [source,bash]
 ----
 # Start Fineract in background
-./gradlew bootRun &
+./gradlew :fineract-provider:bootRun &
 
-# Wait for startup (manual check)
-curl -k https://localhost:8443/actuator/health
+# Wait for startup
+curl -k https://localhost:8443/fineract-provider/actuator/health
 ----
 
 Expected response:
@@ -190,6 +273,10 @@ WARNING: Integration tests share the database of the instance under test. Raisin
 # Attach a debugger to the test JVM (suspends until the debugger connects)
 ./gradlew :integration-tests:test --debug-jvm
 ----
+
+To debug the *server* rather than the tests, attach to the instance you started. The compose test stacks already
+run it with a JDWP agent — `JAVA_TOOL_OPTIONS` in `config/docker/env/fineract-common.env` — and publish it on
+port 5005, so a remote JVM debugger pointed at `localhost:5005` connects without any further setup.
 
 The Gradle daemon's own heap is set by `org.gradle.jvmargs` in `gradle.properties`.
 
