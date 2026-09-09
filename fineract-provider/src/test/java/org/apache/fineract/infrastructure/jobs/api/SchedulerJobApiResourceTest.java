@@ -36,7 +36,6 @@ import org.apache.fineract.infrastructure.jobs.data.JobExecuteRequest;
 import org.apache.fineract.infrastructure.jobs.service.JobRegisterService;
 import org.apache.fineract.infrastructure.jobs.service.SchedulerJobRunnerReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
-import org.apache.fineract.infrastructure.security.service.SqlValidator;
 import org.junit.jupiter.api.Test;
 
 class SchedulerJobApiResourceTest {
@@ -49,7 +48,6 @@ class SchedulerJobApiResourceTest {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService = mock(
             PortfolioCommandSourceWritePlatformService.class);
     private final PlatformSecurityContext context = mock(PlatformSecurityContext.class);
-    private final SqlValidator sqlValidator = mock(SqlValidator.class);
     private final CommandDispatcher dispatcher = mock(CommandDispatcher.class);
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -60,7 +58,7 @@ class SchedulerJobApiResourceTest {
         fineractProperties.setMode(mode);
         return new SchedulerJobApiResource(schedulerJobRunnerReadService, jobRegisterService, apiRequestParameterHelper,
                 (ToApiJsonSerializer) toApiJsonSerializer, (ToApiJsonSerializer) jobHistoryToApiJsonSerializer,
-                commandsSourceWritePlatformService, context, fineractProperties, sqlValidator, dispatcher);
+                commandsSourceWritePlatformService, context, fineractProperties, dispatcher);
     }
 
     @Test
