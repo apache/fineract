@@ -49,7 +49,11 @@ public class SpecifiedCacheSupportingCacheManager implements CacheManager, Initi
 
     @Override
     public Cache getCache(String name) {
-        if (supportedCacheNames.contains(name)) {
+        boolean contains;
+        synchronized (supportedCacheNames) {
+            contains = supportedCacheNames.contains(name);
+        }
+        if (contains) {
             Cache cache = delegateCacheManager.getCache(name);
             if (cache != null) {
                 return cache;
@@ -64,7 +68,7 @@ public class SpecifiedCacheSupportingCacheManager implements CacheManager, Initi
     @Override
     public Collection<String> getCacheNames() {
         synchronized (supportedCacheNames) {
-            return Collections.unmodifiableSet(supportedCacheNames);
+            return new LinkedHashSet<>(supportedCacheNames);
         }
     }
 
@@ -77,6 +81,8 @@ public class SpecifiedCacheSupportingCacheManager implements CacheManager, Initi
     }
 
     public void setSupportedCaches(String... cacheNames) {
-        supportedCacheNames.addAll(Arrays.asList(cacheNames));
+        synchronized (supportedCacheNames) {
+            supportedCacheNames.addAll(Arrays.asList(cacheNames));
+        }
     }
 }
