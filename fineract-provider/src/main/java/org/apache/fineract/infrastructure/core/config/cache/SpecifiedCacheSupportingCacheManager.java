@@ -20,7 +20,6 @@ package org.apache.fineract.infrastructure.core.config.cache;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
