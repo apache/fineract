@@ -62,8 +62,14 @@ jobs:
         with:
           validate-wrappers: true
 
+      - name: Apply Gradle memory budget
+        uses: ./.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
       - name: Generate Javadocs
-        run: ./gradlew javadoc
+        run: ./gradlew javadoc -x buildJavaSdk
 
       - name: Archive Javadoc reports
         if: ${{ failure() || inputs.upload_artifacts }}
@@ -121,8 +127,14 @@ jobs:
         with:
           validate-wrappers: true
 
+      - name: Apply Gradle memory budget
+        uses: ./.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
       - name: Run Checkstyle
-        run: ./gradlew checkstyleMain checkstyleTest checkstyleJmh
+        run: ./gradlew checkstyleMain checkstyleTest checkstyleJmh -x buildJavaSdk
 
       - name: Archive Checkstyle reports
         if: ${{ failure() || inputs.upload_artifacts }}
@@ -180,8 +192,14 @@ jobs:
         with:
           validate-wrappers: true
 
+      - name: Apply Gradle memory budget
+        uses: ./.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
       - name: Run RAT
-        run: ./gradlew rat
+        run: ./gradlew rat -x buildJavaSdk
 
       - name: Archive RAT reports
         if: ${{ failure() || inputs.upload_artifacts }}
@@ -239,8 +257,14 @@ jobs:
         with:
           validate-wrappers: true
 
+      - name: Apply Gradle memory budget
+        uses: ./.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
       - name: Run SpotBugs
-        run: ./gradlew spotbugsMain spotbugsTest
+        run: ./gradlew spotbugsMain spotbugsTest -x buildJavaSdk
 
       - name: Archive SpotBugs reports
         if: ${{ failure() || inputs.upload_artifacts }}
@@ -298,5 +322,11 @@ jobs:
         with:
           validate-wrappers: true
 
+      - name: Apply Gradle memory budget
+        uses: ./.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
       - name: Run Spotless
-        run: ./gradlew spotlessCheck
+        run: ./gradlew spotlessCheck -x buildJavaSdk
