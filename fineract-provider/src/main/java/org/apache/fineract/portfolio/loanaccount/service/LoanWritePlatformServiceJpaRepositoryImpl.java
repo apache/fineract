@@ -418,7 +418,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
             }
             disburseLoan(command, isPaymentTypeApplicableForDisbursementCharge, paymentDetail, loan, currentUser, changes,
-                    scheduleGeneratorDTO);
+                    scheduleGeneratorDTO, isAccountTransfer);
             loan.adjustNetDisbursalAmount(amountToDisburse.getAmount());
 
             loanAccrualsProcessingService.reprocessExistingAccruals(loan, true);
@@ -569,7 +569,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void disburseLoan(JsonCommand command, boolean isPaymentTypeApplicableForDisbursementCharge, PaymentDetail paymentDetail,
-            Loan loan, AppUser currentUser, Map<String, Object> changes, ScheduleGeneratorDTO scheduleGeneratorDTO) {
+            Loan loan, AppUser currentUser, Map<String, Object> changes, ScheduleGeneratorDTO scheduleGeneratorDTO,
+            boolean isAccountTransfer) {
         final PaymentDetail paymentDetail1 = isPaymentTypeApplicableForDisbursementCharge ? paymentDetail : null;
         final LocalDate actualDisbursementDate1 = command.localDateValueOfParameterNamed(ACTUAL_DISBURSEMENT_DATE);
 
@@ -593,7 +594,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loan.updateLoanRepaymentPeriodsDerivedFields(actualDisbursementDate1);
         loanTransactionValidator.validateActivityNotBeforeClientOrGroupTransferDate(loan, LoanEvent.LOAN_DISBURSED,
                 actualDisbursementDate1);
-        loanDisbursementService.handleDisbursementTransaction(loan, actualDisbursementDate1, paymentDetail1);
+        loanDisbursementService.handleDisbursementTransaction(loan, actualDisbursementDate1, paymentDetail1, isAccountTransfer);
         loanBalanceService.updateLoanSummaryDerivedFields(loan);
         final Money interestApplied = Money.of(loan.getCurrency(), loan.getSummary().getTotalInterestCharged());
 
@@ -811,7 +812,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     createAndSaveLoanScheduleArchive(loan, scheduleGeneratorDTO);
                 }
                 disburseLoan(command, configurationDomainService.isPaymentTypeApplicableForDisbursementCharge(), paymentDetail, loan,
-                        currentUser, changes, scheduleGeneratorDTO);
+                        currentUser, changes, scheduleGeneratorDTO, isAccountTransfer);
                 if (disbursementTransaction != null) {
                     final long termsAfter = loan.getTermsCount();
                     final LoanTransactionFlagsData additionalDisbursalFlags = new LoanTransactionFlagsData(termsAfter != termsBefore);
