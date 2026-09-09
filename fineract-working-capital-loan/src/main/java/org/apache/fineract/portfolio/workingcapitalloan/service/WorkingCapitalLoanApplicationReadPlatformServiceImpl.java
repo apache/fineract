@@ -45,6 +45,7 @@ import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentType;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
+import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCollectionData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTemplateData;
@@ -93,6 +94,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
     private final WorkingCapitalLoanChargeReadPlatformService chargeReadPlatformService;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final AppUserRepository appUserRepository;
+    private final WorkingCapitalLoanPeriodPaymentRateChangeReadService rateChangeReadService;
 
     @Override
     public WorkingCapitalLoanTemplateData retrieveTemplate(final Long productId, final Long clientId) {
@@ -190,6 +192,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
         enrichWithFullCurrency(data);
         enrichWithSubmittedBy(loan, data);
         enrichWithRateAndTerm(loan, data);
+        data.setPeriodPaymentRateHistory(rateChangeReadService.retrieveRateChangeHistory(loan));
         enrichWithStartDates(loan, data);
         enrichWithOriginators(loanId, data);
         return data;
@@ -232,9 +235,7 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
             data.setPeriodPaymentAmount(model.expectedPaymentAmount() != null ? model.expectedPaymentAmount().getAmount() : null);
             data.setNetDisbursalAmount(model.netDisbursementAmount() != null ? model.netDisbursementAmount().getAmount() : null);
             data.setDailyEir(dailyEir);
-            if (dailyEir != null) {
-                data.setCalculatedAnnualEir(BigDecimal.ONE.add(dailyEir, mc).pow(365, mc).subtract(BigDecimal.ONE, mc));
-            }
+            data.setCalculatedAnnualEir(ProjectedAmortizationScheduleModel.annualiseEir(dailyEir, model.npvDayCount(), mc));
         });
     }
 

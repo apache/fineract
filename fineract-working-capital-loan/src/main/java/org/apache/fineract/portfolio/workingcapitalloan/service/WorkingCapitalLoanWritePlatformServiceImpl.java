@@ -65,6 +65,7 @@ import org.apache.fineract.infrastructure.event.business.domain.workingcapitallo
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
+import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
@@ -73,6 +74,8 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
+import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
+import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel.RateChangeSolve;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
@@ -1033,7 +1036,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // The rate on the loan's product-related details is deliberately left alone. It records the rate the loan was
         // created with - the base every schedule rebuild starts from - and is a loan-product-level value, not a
         // running "current rate". What is in force on any given date is derived from the history above.
-        this.amortizationScheduleWriteService.regenerateAmortizationScheduleOnRateChange(loan);
+        final ProjectedAmortizationScheduleModel model = this.amortizationScheduleWriteService
+                .regenerateAmortizationScheduleOnRateChange(loan);
+        recordCalculatedValues(rateChange, model);
 
         final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName);
         createNote(noteText, loan);
@@ -1053,6 +1058,20 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(rateChange.getId())
                 .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withLoanId(loanId).with(changes).build();
+    }
+
+    void recordCalculatedValues(final WorkingCapitalLoanPeriodPaymentRateChange rateChange,
+            final ProjectedAmortizationScheduleModel model) {
+        final RateChangeSolve solve = model.rateChangeSolveOn(rateChange.getEffectiveDate());
+        if (solve == null) {
+            log.warn("Rebuilt schedule solved no rate change on the effective date of rate change {} ({}); calculated values left unset",
+                    rateChange.getId(), rateChange.getEffectiveDate());
+            return;
+        }
+        rateChange.applyCalculatedValues(
+                ProjectedAmortizationScheduleModel.annualEirPercentage(solve.eir(), model.npvDayCount(), MoneyHelper.getMathContext()),
+                solve.dailyPayment().getAmount(), solve.term());
+        this.rateChangeRepository.save(rateChange);
     }
 
     public CommandProcessingResult undoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
