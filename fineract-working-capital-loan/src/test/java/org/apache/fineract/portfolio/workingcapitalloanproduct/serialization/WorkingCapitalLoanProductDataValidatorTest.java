@@ -127,6 +127,15 @@ class WorkingCapitalLoanProductDataValidatorTest {
     }
 
     @Test
+    void testValidateForCreate_WithFlatAmortization_ShouldPass() {
+        // Given
+        final String json = createJsonWithField(WorkingCapitalLoanProductConstants.amortizationTypeParamName, "FLAT");
+
+        // When & Then
+        assertDoesNotThrow(() -> validator.validateForCreate(json));
+    }
+
+    @Test
     void testValidateForCreate_WithMinGreaterThanMaxPrincipalAmount_ShouldThrowException() {
         // Given
         final String json = createJsonWithPrincipalAmounts(BigDecimal.valueOf(1000), BigDecimal.valueOf(500), BigDecimal.valueOf(2000));
@@ -299,9 +308,6 @@ class WorkingCapitalLoanProductDataValidatorTest {
 
     private String createJsonWithField(final String fieldName, final String value) {
         final JsonObject jsonObject = createBaseJsonObject();
-        if (fieldName.equals(WorkingCapitalLoanProductConstants.amortizationTypeParamName) && value.equals("FLAT")) {
-            jsonObject.addProperty(WorkingCapitalLoanProductConstants.amortizationTypeParamName, "FLAT");
-        }
         jsonObject.addProperty(fieldName, value);
         return toJsonAndSetupMocks(jsonObject);
     }

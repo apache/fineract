@@ -24,6 +24,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -37,10 +43,13 @@ import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 class ProjectedAmortizationScheduleCalculatorTest {
 
@@ -73,8 +82,8 @@ class ProjectedAmortizationScheduleCalculatorTest {
         final BigDecimal initialNetDisbursement = new BigDecimal("450");
         final LocalDate initialDisbursementDate = LocalDate.of(2019, 1, 1);
 
-        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generate(discountFee, initialNetDisbursement,
-                TPV, RATE, DAY_COUNT, initialDisbursementDate, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generateEir(discountFee,
+                initialNetDisbursement, TPV, RATE, DAY_COUNT, initialDisbursementDate, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         final ProjectedAmortizationScheduleModel model1 = initial.regenerate(discountFee, initialNetDisbursement, initialDisbursementDate,
                 initialDisbursementDate);
 
@@ -522,7 +531,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
     @Test
     void testNoDiscountLoan_term180_discountFee0_netDisbursement9000() {
         final BigDecimal zeroDiscount = BigDecimal.ZERO;
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(zeroDiscount, NET_DISBURSEMENT, TPV,
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateEir(zeroDiscount, NET_DISBURSEMENT, TPV,
                 RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
 
         assertEquals(180, model.originalPaymentNumber(), "loanTerm = ceil(9000/50) = 180");
@@ -2179,7 +2188,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
     void testLessPayment_term10_discountFee50_netDisbursement450_pay40() {
         final BigDecimal smallDiscountFee = new BigDecimal("50");
         final BigDecimal smallNetDisbursement = new BigDecimal("450");
-        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generate(smallDiscountFee,
+        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generateEir(smallDiscountFee,
                 smallNetDisbursement, TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         final ProjectedAmortizationScheduleModel model = initial.regenerate(smallDiscountFee, smallNetDisbursement,
                 EXPECTED_DISBURSEMENT_DATE, EXPECTED_DISBURSEMENT_DATE);
@@ -2212,7 +2221,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
     void testExcessPayment_term10_discountFee50_netDisbursement450_pay110() {
         final BigDecimal smallDiscountFee = new BigDecimal("50");
         final BigDecimal smallNetDisbursement = new BigDecimal("450");
-        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generate(smallDiscountFee,
+        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generateEir(smallDiscountFee,
                 smallNetDisbursement, TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         final ProjectedAmortizationScheduleModel model = initial.regenerate(smallDiscountFee, smallNetDisbursement,
                 EXPECTED_DISBURSEMENT_DATE, EXPECTED_DISBURSEMENT_DATE);
@@ -2355,8 +2364,218 @@ class ProjectedAmortizationScheduleCalculatorTest {
         });
     }
 
+    // ----------------------------------------------------------------------------------------------------------------
+    // FLAT amortization: ratio = fee / (net + fee) = 1000 / 10000 = 10 %; every payment earns 10 % of itself.
+    // ----------------------------------------------------------------------------------------------------------------
+
+    @Test
+    void testFlat_projectedSchedule_earnsTenPercentOfEveryPayment() {
+        final ProjectedAmortizationScheduleModel model = generateFlatModel();
+
+        assertNull(model.effectiveInterestRate(), "a FLAT schedule solves no rate");
+        assertEquals(WorkingCapitalAmortizationType.FLAT, model.amortizationType());
+        assertTrue(model.isFlat());
+        assertEquals(TERM, model.originalPaymentNumber(), "10000 gross at 50 a day");
+        assertEquals(TERM + 1, model.projectedPayments().size(), "disbursement row + 200 periods, no tail");
+
+        checkInst(model, 0, 0, EXPECTED_DISBURSEMENT_DATE, 0, -9000.00, null, 1.00000000, -9000.00, 9000.00, 9000.00, null, null, null,
+                1000.00, 1000.00);
+        // balance_n = 9000 - 45n ; feeBalance_n = 1000 - 5n ; DF = 1 throughout, so NPV is the payment itself
+        checkInst(model, 1, 1, EXPECTED_DISBURSEMENT_DATE.plusDays(1), 1, 50.00, null, 1.00000000, 50.00, 8955.00, null, 5.00, null, null,
+                995.00, null);
+        checkInst(model, 100, 100, EXPECTED_DISBURSEMENT_DATE.plusDays(100), 100, 50.00, null, 1.00000000, 50.00, 4500.00, null, 5.00, null,
+                null, 500.00, null);
+        checkInst(model, 200, 200, EXPECTED_DISBURSEMENT_DATE.plusDays(200), 200, 50.00, null, 1.00000000, 50.00, 0.00, null, 5.00, null,
+                null, 0.00, null);
+
+        BigDecimal totalExpected = BigDecimal.ZERO;
+        for (int i = 1; i <= TERM; i++) {
+            final ProjectedPayment p = model.projectedPayments().get(i);
+            assertMoneyValue(5.00, p.expectedAmortizationAmount(), 2, "period " + i + " earns 10% of 50");
+            totalExpected = totalExpected.add(p.expectedAmortizationAmount().getAmount());
+        }
+        assertEquals(0, DISCOUNT_FEE.compareTo(totalExpected), "the plan earns exactly the fee, no rounding settle needed");
+    }
+
+    @Test
+    void testFlat_partialPayments_roundTheCumulativeOnce() {
+        final ProjectedAmortizationScheduleModel model = generateFlatModel();
+
+        // 10 % x 33.33 = 3.333 -> 3.33
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("33.33"));
+        checkInst(model, 1, 1, EXPECTED_DISBURSEMENT_DATE.plusDays(1), 0, 50.00, 33.33, 1.00000000, 33.33, 8955.00, 8970.00, 5.00, 3.33,
+                -1.67, 995.00, 996.67);
+
+        // cumulative 10 % x 99.99 = 9.999 -> 10.00 ; this period shows 10.00 - 3.33
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(2), new BigDecimal("66.66"));
+        final ProjectedPayment second = model.projectedPayments().get(2);
+        assertMoneyValue(6.67, second.actualAmortizationAmount(), 2, "second payment earns the once-rounded cumulative delta");
+        assertMoneyValue(990.00, second.actualDiscountFeeBalance(), 2, "1000 - 10.00");
+        assertMoneyValue(8910.01, second.actualBalance(), 2, "9000 - 99.99 + 10.00");
+        assertEquals(0, new BigDecimal("10.00").compareTo(model.totalActualAmortization()), "10 % of 99.99, rounded once");
+    }
+
+    @Test
+    void testFlat_fullPayoffInUnevenInstalments_earnsExactlyTheFee() {
+        final ProjectedAmortizationScheduleModel model = generateFlatModel();
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("3333.33"));
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(2), new BigDecimal("3333.33"));
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(3), new BigDecimal("3333.34"));
+
+        // 333.333 -> 333.33 ; 666.666 -> 666.67 -> 333.34 ; 1000.00 -> 333.33
+        assertMoneyValue(333.33, model.projectedPayments().get(1).actualAmortizationAmount(), 2, "first");
+        assertMoneyValue(333.34, model.projectedPayments().get(2).actualAmortizationAmount(), 2, "second");
+        assertMoneyValue(333.33, model.projectedPayments().get(3).actualAmortizationAmount(), 2, "closing");
+        assertEquals(0, DISCOUNT_FEE.compareTo(model.totalActualAmortization()), "fully paid: aggregated amortization equals the fee");
+        assertMoneyValue(0.00, model.projectedPayments().get(3).actualBalance(), 2, "nothing left owed");
+        assertMoneyValue(0.00, model.projectedPayments().get(3).actualDiscountFeeBalance(), 2, "nothing left unearned");
+    }
+
+    @Test
+    void testFlat_rateChange_resizesPaymentsButKeepsTheRatio() {
+        final ProjectedAmortizationScheduleModel model = generateFlatModel();
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("50"));
+        model.applyRateChange(new BigDecimal("25"), EXPECTED_DISBURSEMENT_DATE.plusDays(2), EXPECTED_DISBURSEMENT_DATE.plusDays(2));
+
+        // (100000 x 25 %) / 360 = 69.44 ; 10 % x 69.44 = 6.944 a day, reported as the movement of the rounded running
+        // total: 5.00 + 6.944 = 11.944 -> 11.94 ; 18.888 -> 18.89 ; 25.832 -> 25.83
+        final double[] reportedFee = { 6.94, 6.95, 6.94 };
+        for (int i = 2; i <= 4; i++) {
+            final ProjectedPayment p = model.projectedPayments().get(i);
+            assertMoneyValue(69.44, p.expectedPaymentAmount(), 2, "period " + i + " bills the raised daily payment");
+            assertMoneyValue(reportedFee[i - 2], p.expectedAmortizationAmount(), 2, "period " + i + " still earns 10 %");
+        }
+        assertMoneyValue(1000 - 25.83, model.projectedPayments().get(4).expectedDiscountFeeBalance(), 2, "10 % of 258.32 earned in all");
+        assertNull(model.rateChangeSolveOn(EXPECTED_DISBURSEMENT_DATE.plusDays(2)).eir(), "the rate change solves no rate either");
+
+        // cumulative 10 % x 119.44 = 11.944 -> 11.94 ; 11.94 - 5.00 = 6.94
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(2), new BigDecimal("69.44"));
+        assertMoneyValue(6.94, model.projectedPayments().get(2).actualAmortizationAmount(), 2, "10 % of 69.44");
+    }
+
+    @Test
+    void testFlat_noDiscount_earnsNothingAndStaysCalculable() {
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT,
+                BigDecimal.ZERO, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
+                EXPECTED_DISBURSEMENT_DATE);
+
+        assertEquals(180, model.originalPaymentNumber(), "ceil(9000 / 50)");
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("50"));
+        for (int i = 1; i < model.projectedPayments().size(); i++) {
+            final ProjectedPayment p = model.projectedPayments().get(i);
+            assertMoneyValue(0.00, p.expectedAmortizationAmount(), 2, "period " + i + " earns nothing");
+        }
+        assertMoneyValue(0.00, model.projectedPayments().get(1).actualAmortizationAmount(), 2, "a payment earns nothing");
+        assertMoneyValue(8950.00, model.projectedPayments().get(1).actualBalance(), 2, "the payment comes straight off the balance");
+    }
+
+    @Test
+    void testFlat_overpayment_capsTheEarnedFeeAtTheDiscount() {
+        final ProjectedAmortizationScheduleModel model = generateFlatModel();
+
+        // 12000 against a 10000 gross payable: 10 % of it would be 1200, but there is only 1000 of fee to earn
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("12000"));
+
+        assertEquals(0, DISCOUNT_FEE.compareTo(model.totalActualAmortization()), "the earned fee is capped at the discount fee");
+        final ProjectedPayment paid = model.projectedPayments().get(1);
+        assertMoneyValue(1000.00, paid.actualAmortizationAmount(), 2, "the overpaying period earns the whole fee");
+        assertMoneyValue(0.00, paid.actualDiscountFeeBalance(), 2, "nothing is left unearned");
+        for (int i = 2; i < model.projectedPayments().size(); i++) {
+            final ProjectedPayment later = model.projectedPayments().get(i);
+            assertMoneyValue(0.00, later.actualAmortizationAmount(), 2, "period " + i + " must not earn fee after the loan is overpaid");
+            assertMoneyValue(0.00, later.expectedDiscountFeeBalance(), 2, "period " + i + " has no fee left to defer");
+        }
+    }
+
+    @Test
+    void testFlat_subCentInputs_sizeTheTermFromTheStoredAmounts() {
+        // 9000.004 + 1000.004 = 10000.008 raw would need a 201st period for a 0.01 remainder; stored as 9000.00 /
+        // 1000.00
+        // the plan closes on the 200th, so the term must be sized from what the model actually carries
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT,
+                new BigDecimal("1000.004"), new BigDecimal("9000.004"), TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
+                EXPECTED_DISBURSEMENT_DATE);
+
+        assertEquals(TERM, model.originalPaymentNumber(), "the term is sized from the currency-rounded gross payable");
+        assertEquals(TERM + 1, model.projectedPayments().size(), "no zero-payment period after the plan closes");
+        assertMoneyValue(50.00, model.finalPaymentAmount(), 2, "the final payment is a full instalment");
+        assertMoneyValue(0.00, model.projectedPayments().get(TERM).expectedBalance(), 2, "the plan closes on the last period");
+        assertMoneyValue(1000.00, model.discountFeeAmount(), 2, "the fee is stored in the currency");
+        assertEquals(0,
+                model.projectedPayments().stream().filter(p -> p.paymentNo() > 0).filter(p -> p.expectedPaymentAmount().isZero()).count(),
+                "every period bills something");
+
+        final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
+        assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, new BigDecimal("1000.004"),
+                new BigDecimal("9000.004"), TPV, RATE, DAY_COUNT, usd, MC), "the pre-check sizes the term the same way");
+        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                new BigDecimal("0.004"), TPV, RATE, DAY_COUNT, usd, MC), "a sub-cent disbursement is nothing to disburse");
+    }
+
+    @Test
+    void testFlat_subCentPaymentVolume_billsWhatTheStoredVolumeBills() {
+        // 100010.004 x 18% / 360 = 50.005002 -> 50.01 raw, but the model stores 100010.00, which bills 50.005 -> 50.00
+        // (half-even); a plan written from the raw figure would restate itself on the first regeneration
+        final BigDecimal subCentVolume = new BigDecimal("100010.004");
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT,
+                DISCOUNT_FEE, NET_DISBURSEMENT, subCentVolume, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
+                EXPECTED_DISBURSEMENT_DATE);
+
+        assertMoneyValue(100010.00, model.totalPaymentVolume(), 2, "the volume is stored in the currency");
+        assertMoneyValue(50.00, model.expectedPaymentAmount(), 2, "the daily payment is derived from the stored volume");
+
+        final ProjectedAmortizationScheduleModel regenerated = model.regenerate(DISCOUNT_FEE, NET_DISBURSEMENT, EXPECTED_DISBURSEMENT_DATE,
+                EXPECTED_DISBURSEMENT_DATE);
+        assertMoneyValue(50.00, regenerated.expectedPaymentAmount(), 2, "regeneration bills the same instalment");
+        assertEquals(model.originalPaymentNumber(), regenerated.originalPaymentNumber(), "and runs the same term");
+
+        final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
+        assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                NET_DISBURSEMENT, subCentVolume, RATE, DAY_COUNT, usd, MC), "the pre-check accepts what generate() accepts");
+        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                NET_DISBURSEMENT, new BigDecimal("0.004"), RATE, DAY_COUNT, usd, MC), "a sub-cent volume bills nothing");
+    }
+
+    @Test
+    void testFlat_neverSolvesTheIrr() {
+        try (MockedStatic<TvmFunctions> tvm = mockStatic(TvmFunctions.class, CALLS_REAL_METHODS)) {
+            final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
+            final ProjectedAmortizationScheduleModel flat = generateFlatModel();
+            flat.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("50"));
+            flat.applyRateChange(new BigDecimal("25"), EXPECTED_DISBURSEMENT_DATE.plusDays(2), EXPECTED_DISBURSEMENT_DATE.plusDays(2));
+            flat.projectedPayments();
+            assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                    NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, usd, MC));
+            tvm.verify(() -> TvmFunctions.irr(anyList(), any(MathContext.class)), never());
+            tvm.verify(() -> TvmFunctions.irr(anyList(), any(BigDecimal.class), any(MathContext.class)), never());
+
+            generateModel();
+            tvm.verify(() -> TvmFunctions.irr(anyList(), any(MathContext.class)), atLeastOnce());
+        }
+    }
+
+    @Test
+    void testFlat_calculabilityGate_keepsStructuralChecksOnly() {
+        final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
+        assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, usd, MC));
+        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                BigDecimal.ZERO, TPV, RATE, DAY_COUNT, usd, MC), "a FLAT schedule still needs something to disburse");
+        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                NET_DISBURSEMENT, TPV, BigDecimal.ZERO, DAY_COUNT, usd, MC), "a FLAT schedule still needs a positive daily payment");
+        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                new BigDecimal("100000000"), TPV, new BigDecimal("0.01"), DAY_COUNT, usd, MC), "the term cap still applies");
+        assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(null, DISCOUNT_FEE, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, usd,
+                MC), "a missing type is EIR, and the standard inputs admit an IRR");
+    }
+
+    private ProjectedAmortizationScheduleModel generateFlatModel() {
+        return ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE, NET_DISBURSEMENT, TPV, RATE,
+                DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+    }
+
     private ProjectedAmortizationScheduleModel generateModel() {
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateEir(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
                 RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         return model.regenerate(DISCOUNT_FEE, NET_DISBURSEMENT, EXPECTED_DISBURSEMENT_DATE, EXPECTED_DISBURSEMENT_DATE);
     }
@@ -2476,6 +2695,35 @@ class ProjectedAmortizationScheduleCalculatorTest {
             return;
         }
         assertTrue(value.getAmount().signum() >= 0, msg + " should not be negative, was " + value.getAmount());
+    }
+
+    @Test
+    void testFlat_rateChange_nonTerminatingRatio_sizesTheTermFromTheCurrencyRoundedGross() {
+        // 1000 / 10500 = 2/21; 50 paid earns 4.7619.. so the change re-prices 9454.7619.. against 995.2380.. unearned.
+        // The exact gross is 10450 give or take the last decimal place, so a raw ceil(gross / 25) can claim a 419th day
+        // billing nothing; sized from the currency-rounded 10450.00 the plan closes on the 418th with a full
+        // instalment.
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT,
+                new BigDecimal("1000"), new BigDecimal("9500"), TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
+                EXPECTED_DISBURSEMENT_DATE);
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("50"));
+        final LocalDate changeDate = EXPECTED_DISBURSEMENT_DATE.plusDays(2);
+        model.applyRateChange(new BigDecimal("9"), changeDate, changeDate);
+
+        final ProjectedAmortizationScheduleModel.RateChangeSolve solve = model.rateChangeSolveOn(changeDate);
+        assertMoneyValue(25.00, solve.dailyPayment(), 2, "(100000 x 9 %) / 360");
+        assertEquals(418, solve.term(), "ceil(10450.00 / 25)");
+        assertNull(solve.eir(), "no rate is solved");
+
+        final List<ProjectedPayment> payments = model.projectedPayments();
+        final ProjectedPayment last = payments.getLast();
+        assertEquals(model.effectiveTotalTerm(), last.paymentNo(), "the term ends on the last projected payment");
+        assertEquals(419, last.paymentNo(), "2 + 418 - 1");
+        assertMoneyValue(25.00, last.expectedPaymentAmount(), 2, "the closing day bills a full instalment");
+        assertMoneyValue(0.00, last.expectedBalance(), 2, "and closes the balance");
+        assertMoneyValue(0.00, last.expectedDiscountFeeBalance(), 2, "with nothing left unearned");
+        assertEquals(0, payments.stream().filter(p -> p.paymentNo() > 0).filter(p -> p.expectedPaymentAmount().isZero()).count(),
+                "every day bills something");
     }
 
     private void assertMoneyValue(final Double expected, final Money actual, final int scale, final String msg) {

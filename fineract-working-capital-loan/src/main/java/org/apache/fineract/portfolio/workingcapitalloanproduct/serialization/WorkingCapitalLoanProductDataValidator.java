@@ -342,10 +342,9 @@ public class WorkingCapitalLoanProductDataValidator {
     }
 
     private void validateSettingsFields(final JsonElement element, final DataValidatorBuilder baseDataValidator, final boolean required) {
-        final String amortizationTypeValue;
         if (required || this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.amortizationTypeParamName, element)) {
-            amortizationTypeValue = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanProductConstants.amortizationTypeParamName,
-                    element);
+            final String amortizationTypeValue = this.fromApiJsonHelper
+                    .extractStringNamed(WorkingCapitalLoanProductConstants.amortizationTypeParamName, element);
             baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.amortizationTypeParamName).value(amortizationTypeValue)
                     .notBlank();
             if (amortizationTypeValue != null && !amortizationTypeValue.isBlank()) {
@@ -353,11 +352,6 @@ public class WorkingCapitalLoanProductDataValidator {
                 if (amortizationType == null) {
                     baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.amortizationTypeParamName)
                             .failWithCode("invalid.amortization.type");
-                } else {
-                    if (!amortizationType.isEIR()) {
-                        baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.amortizationTypeParamName)
-                                .failWithCode("invalid.amortization.type.only.eir.type.is.supported.for.now");
-                    }
                 }
             }
         }
