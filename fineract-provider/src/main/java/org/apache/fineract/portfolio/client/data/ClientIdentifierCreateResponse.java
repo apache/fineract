@@ -18,38 +18,17 @@
  */
 package org.apache.fineract.portfolio.client.data;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.io.Serial;
-import java.io.Serializable;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+@Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClientIdentifierRequest implements Serializable {
+public class ClientIdentifierCreateResponse {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    @Schema(example = "1")
-    public Long documentTypeId;
-    @Schema(example = "KA-54677")
-    public String documentKey;
-    @Schema(example = "Document has been verified")
-    public String description;
-    @Schema(example = "Active")
-    public String status;
-    @Schema(example = "01 January 2024")
-    public String issuanceDate;
-    @Schema(example = "01 January 2034")
-    public String expiryDate;
-    @Schema(example = "dd MMMM yyyy")
-    public String dateFormat;
-    @Schema(example = "en")
-    public String locale;
-
+    private Long clientId;
+    private Long resourceId;
 }

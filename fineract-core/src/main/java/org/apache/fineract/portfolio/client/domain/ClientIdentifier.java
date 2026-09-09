@@ -25,14 +25,20 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.domain.AbstractAuditableWithUTCDateTimeCustom;
 
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "m_client_identifier", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "document_type_id", "document_key" }, name = "unique_identifier_key"),
@@ -64,93 +70,4 @@ public class ClientIdentifier extends AbstractAuditableWithUTCDateTimeCustom<Lon
 
     @Column(name = "active")
     private Integer active;
-
-    public static ClientIdentifier fromJson(final Client client, final CodeValue documentType, final JsonCommand command) {
-        final String documentKey = command.stringValueOfParameterNamed("documentKey");
-        final String description = command.stringValueOfParameterNamed("description");
-        final String status = command.stringValueOfParameterNamed("status");
-        final LocalDate issuanceDate = command.localDateValueOfParameterNamed("issuanceDate");
-        final LocalDate expiryDate = command.localDateValueOfParameterNamed("expiryDate");
-        return new ClientIdentifier(client, documentType, documentKey, status, description, issuanceDate, expiryDate);
-    }
-
-    protected ClientIdentifier() {
-        //
-    }
-
-    private ClientIdentifier(final Client client, final CodeValue documentType, final String documentKey, final String statusName,
-            final String description, final LocalDate issuanceDate, final LocalDate expiryDate) {
-        this.client = client;
-        this.documentType = documentType;
-        this.documentKey = StringUtils.defaultIfEmpty(documentKey, null);
-        this.description = StringUtils.defaultIfEmpty(description, null);
-        this.issuanceDate = issuanceDate;
-        this.expiryDate = expiryDate;
-        ClientIdentifierStatus statusEnum = ClientIdentifierStatus.valueOf(statusName.toUpperCase(Locale.ROOT));
-        this.active = null;
-        if (statusEnum.isActive()) {
-            this.active = statusEnum.getValue();
-        }
-        this.status = statusEnum.getValue();
-    }
-
-    public void update(final CodeValue documentType) {
-        this.documentType = documentType;
-    }
-
-    public Map<String, Object> update(final JsonCommand command) {
-
-        final Map<String, Object> actualChanges = new LinkedHashMap<>(7);
-
-        final String documentTypeIdParamName = "documentTypeId";
-        if (command.isChangeInLongParameterNamed(documentTypeIdParamName, this.documentType.getId())) {
-            final Long newValue = command.longValueOfParameterNamed(documentTypeIdParamName);
-            actualChanges.put(documentTypeIdParamName, newValue);
-        }
-
-        final String documentKeyParamName = "documentKey";
-        if (command.isChangeInStringParameterNamed(documentKeyParamName, this.documentKey)) {
-            final String newValue = command.stringValueOfParameterNamed(documentKeyParamName);
-            actualChanges.put(documentKeyParamName, newValue);
-            this.documentKey = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        final String descriptionParamName = "description";
-        if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
-            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
-            actualChanges.put(descriptionParamName, newValue);
-            this.description = StringUtils.defaultIfEmpty(newValue, null);
-        }
-
-        final String statusParamName = "status";
-        if (command.isChangeInStringParameterNamed(statusParamName, ClientIdentifierStatus.fromInt(this.status).getCode())) {
-            final String newValue = command.stringValueOfParameterNamed(statusParamName);
-            actualChanges.put(statusParamName, ClientIdentifierStatus.valueOf(newValue));
-            this.status = ClientIdentifierStatus.valueOf(newValue).getValue();
-        }
-
-        final String issuanceDateParamName = "issuanceDate";
-        if (command.isChangeInLocalDateParameterNamed(issuanceDateParamName, this.issuanceDate)) {
-            final LocalDate newValue = command.localDateValueOfParameterNamed(issuanceDateParamName);
-            actualChanges.put(issuanceDateParamName, newValue);
-            this.issuanceDate = newValue;
-        }
-
-        final String expiryDateParamName = "expiryDate";
-        if (command.isChangeInLocalDateParameterNamed(expiryDateParamName, this.expiryDate)) {
-            final LocalDate newValue = command.localDateValueOfParameterNamed(expiryDateParamName);
-            actualChanges.put(expiryDateParamName, newValue);
-            this.expiryDate = newValue;
-        }
-
-        return actualChanges;
-    }
-
-    public String documentKey() {
-        return this.documentKey;
-    }
-
-    public Long documentTypeId() {
-        return this.documentType.getId();
-    }
 }

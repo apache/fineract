@@ -16,16 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.client.service;
+package org.apache.fineract.portfolio.client.command;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.client.data.ClientIdentifierCreateRequest;
 
-public interface ClientIdentifierWritePlatformService {
-
-    CommandProcessingResult addClientIdentifier(Long clientId, JsonCommand command);
-
-    CommandProcessingResult updateClientIdentifier(Long clientId, Long clientIdentifierId, JsonCommand command);
-
-    CommandProcessingResult deleteClientIdentifier(Long clientId, Long clientIdentifierId, Long commandId);
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class ClientIdentifierCreateCommand extends Command<ClientIdentifierCreateRequest> {}
