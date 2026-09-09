@@ -430,7 +430,7 @@ public class ClientChargeWritePlatformServiceImpl implements ClientChargeWritePl
                     "clientChargeId", clientChargeId);
         }
 
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.client.charges.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
