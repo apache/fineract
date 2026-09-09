@@ -164,6 +164,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public LocalDate expectedMaturityDate;
         @Schema(example = "[2024, 12, 31]", description = "Actual maturity date (when loan is fully paid)")
         public LocalDate actualMaturityDate;
+        @Schema(example = "[2024, 2, 1]", description = "Overpaid date")
+        public LocalDate overpaidOnDate;
     }
 
     @Schema(description = "GetWorkingCapitalLoansLoanIdResponse")
@@ -280,6 +282,9 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public GetBalance balance;
         @Schema(description = "Loan summary: principal / fee / penalty totals, income recognition and aggregates")
         public GetWorkingCapitalLoanSummary summary;
+
+        @Schema(example = "2024-01-14", description = "Date on which loan was overpaid otherwise null")
+        public LocalDate overpaidOnDate;
 
         @Schema(description = "Working Capital Loan charge")
         public static final class GetWorkingCapitalLoanCharge {

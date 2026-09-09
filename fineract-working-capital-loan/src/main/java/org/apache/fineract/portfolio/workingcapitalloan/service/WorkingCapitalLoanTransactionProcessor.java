@@ -25,7 +25,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
+import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionDateAndAmountHolder;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
@@ -38,6 +40,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapita
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionAllocationRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -138,10 +141,54 @@ public class WorkingCapitalLoanTransactionProcessor {
         breachScheduleService.applyRepayment(loanId, transactionDate, transactionAmount);
 
         stateMachine.determineAndTransition(loan, transactionDate);
+        recalculateOverpaidOnDate(loan, transaction);
         triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
         // On early closure the loan leaves the COB scope, so any charge whose due-date accrual has not been posted yet
         // is accrued as of the closing date to make sure the income is recognized before the loan is closed.
         chargeAccrualService.accrueOnClosure(loan, transactionDate);
+    }
+
+    /**
+     * Re-derives {@code overpaidOnDate}, correcting the optimistic value the lifecycle state machine stamps when a loan
+     * first becomes overpaid.
+     * <p>
+     * The rule is: the date of the earliest non-reversed repayment-like transaction whose allocation carries an
+     * overpayment portion -- the first day money was actually on the loan in excess of what was due. That is not the
+     * same as the date of whichever transaction triggered the transition, which is all the state machine knows. Two
+     * cases make them differ:
+     * <ul>
+     * <li>a backdated transaction tips an already-settled loan into overpayment: the transition is stamped with the
+     * transaction's own earlier date, but the loan was only fully paid later;</li>
+     * <li>an undo removes the earliest of several overpaying transactions and leaves the loan overpaid: no transition
+     * fires at all, so the stored date survives on a day that no longer carries an overpayment.</li>
+     * </ul>
+     * The guard skips the query when the stored value cannot have gone stale. A transaction dated on the business date
+     * is not backdated, so no reallocation can have moved the earliest overpaying transaction; and one dated after the
+     * stored date cannot become the new earliest either.
+     * <p>
+     * Finding nothing is a deliberate no-op rather than a clear. A loan whose overpayment came from the one-directional
+     * clamp in {@code WorkingCapitalLoanWritePlatformServiceImpl.updateBalanceForDiscountChange}, before that path
+     * reprocessed allocations, has no transaction carrying an overpayment portion at all -- its date is left as the
+     * backfill found it, which for those rows is null.
+     */
+    public void recalculateOverpaidOnDate(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction) {
+        // Mirrors determineAndTransition's own tolerance of a not-yet-established status: it returns without
+        // transitioning when the loan has no balance, which leaves the status unset on a freshly built loan.
+        if (loan.getLoanStatus() == null || !loan.getLoanStatus().isOverpaid()) {
+            return;
+        }
+        final LocalDate storedDate = loan.getOverpaidOnDate();
+        final LocalDate transactionDate = transaction.getTransactionDate();
+        final boolean storedDateMayBeStale = storedDate == null
+                || (!transactionDate.isAfter(storedDate) && !transactionDate.isEqual(DateUtils.getBusinessLocalDate()));
+        if (!storedDateMayBeStale) {
+            return;
+        }
+        final List<TransactionDateAndAmountHolder> firstOverpayingTransaction = transactionRepository
+                .findFirstActiveTransactionDateAndAmountByLoanIdWithOverpaidPortion(loan.getId(),
+                        LoanTransactionType.getRepaymentLikeTransactionTypes(), Pageable.ofSize(1));
+        firstOverpayingTransaction.stream().findFirst().map(TransactionDateAndAmountHolder::transactionDate)
+                .ifPresent(loan::setOverpaidOnDate);
     }
 
     /**
