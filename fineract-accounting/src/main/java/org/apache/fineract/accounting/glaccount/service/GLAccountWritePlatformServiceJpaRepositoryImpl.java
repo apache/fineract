@@ -244,7 +244,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             throw new GLAccountDuplicateException(glCode);
         }
 
-        LOG.error("Error occured.", dve);
+        LOG.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.glAccount.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
     }

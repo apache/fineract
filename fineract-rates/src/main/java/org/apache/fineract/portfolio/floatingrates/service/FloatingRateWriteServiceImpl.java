@@ -152,7 +152,7 @@ public class FloatingRateWriteServiceImpl implements FloatingRateWriteService {
             throw new PlatformDataIntegrityException("error.msg.floatingrates.duplicate.active.fromdate",
                     "Attempt to add multiple floating rate periods with same fromdate", "fromdate", "");
         }
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.floatingrates.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
