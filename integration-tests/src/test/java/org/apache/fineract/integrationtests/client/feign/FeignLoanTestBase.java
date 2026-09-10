@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -678,6 +679,15 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
         journalHelper.checkJournalEntryForExpenseAccount(account, date, entries);
     }
 
+    /**
+     * Codes the server puts at the top of an error body purely as an envelope; the code that names the actual failure
+     * is then the first entry of the nested {@code errors} array. A resource-not-found reply is one of these: every
+     * {@code AbstractPlatformResourceNotFoundException} reports {@code error.msg.resource.not.found} at the top and the
+     * entity-specific code underneath.
+     */
+    private static final Set<String> GENERIC_ERROR_ENVELOPE_CODES = Set.of("validation.msg.validation.errors.exist",
+            "validation.msg.domain.rule.violation", "error.msg.resource.not.found");
+
     protected static void assertErrorGlobalisationCode(CallFailedRuntimeException exception, String expectedCode) {
         assertEquals(expectedCode, extractErrorGlobalisationCode(exception));
     }
@@ -687,8 +697,7 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
             return exception.getUserMessageGlobalisationCode();
         }
         String topLevelCode = feignException.getUserMessageGlobalisationCode();
-        if (topLevelCode != null && !topLevelCode.equals("validation.msg.validation.errors.exist")
-                && !topLevelCode.equals("validation.msg.domain.rule.violation")) {
+        if (topLevelCode != null && !GENERIC_ERROR_ENVELOPE_CODES.contains(topLevelCode)) {
             return topLevelCode;
         }
         try {
@@ -702,6 +711,23 @@ public abstract class FeignLoanTestBase extends FeignIntegrationTest implements 
             // fall through to top-level code
         }
         return topLevelCode;
+    }
+
+    /**
+     * The number of entries in the failed response's {@code errors} array. A validation failure reports one entry per
+     * rejected field, so a test that pinned the count with a REST Assured body matcher keeps that assertion here.
+     */
+    protected static int extractErrorCount(CallFailedRuntimeException exception) {
+        if (!(exception.getCause() instanceof FeignException feignException)) {
+            return 0;
+        }
+        try {
+            Map<String, Object> body = ObjectMapperFactory.getShared().readValue(feignException.responseBodyAsString(),
+                    new TypeReference<Map<String, Object>>() {});
+            return body.get("errors") instanceof List<?> errorList ? errorList.size() : 0;
+        } catch (Exception e) {
+            throw new IllegalStateException("Could not read the errors array from: " + feignException.responseBodyAsString(), e);
+        }
     }
 
     protected LoanTestData.Journal journalEntry(double amount, Account account, String type) {

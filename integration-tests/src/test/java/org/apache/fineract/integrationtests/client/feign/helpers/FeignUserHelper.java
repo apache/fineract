@@ -64,11 +64,18 @@ public final class FeignUserHelper {
      * the generated user id.
      */
     public static PostUsersResponse createUser(Long roleId, Long staffId, String username, String password) {
+        return createUser(new PostUsersRequest().username(username).firstname("Test").lastname("User").email("whatever@mifos.org")
+                .officeId(OfficeHelper.getHeadOffice().getId()).staffId(staffId).roles(List.of(roleId)).password(password)
+                .repeatPassword(password).sendPasswordToEmail(false));
+    }
+
+    /**
+     * Creates a user from a fully specified request, for callers that need to control the office, roles or name fields
+     * the convenience overload fixes. Mirrors {@code UserHelper.createUser(requestSpec, responseSpec, request)}.
+     */
+    public static PostUsersResponse createUser(PostUsersRequest request) {
         FineractFeignClient adminClient = FineractFeignClientHelper.getFineractFeignClient();
-        return ok(() -> adminClient.users()
-                .createUser(new PostUsersRequest().username(username).firstname("Test").lastname("User").email("whatever@mifos.org")
-                        .officeId(OfficeHelper.getHeadOffice().getId()).staffId(staffId).roles(List.of(roleId)).password(password)
-                        .repeatPassword(password).sendPasswordToEmail(false)));
+        return ok(() -> adminClient.users().createUser(request));
     }
 
     private static void createSimpleUser(String username) {
