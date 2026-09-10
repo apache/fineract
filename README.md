@@ -41,6 +41,19 @@ If you believe you have found a new vulnerability, [let us know privately](https
 
 For details about security during development and deployment, see the documentation [here](https://fineract.apache.org/docs/stable/#_security).
 
+OFFICE HIERARCHY ACCESS
+=======================
+
+Fineract represents an office hierarchy as a dot-delimited path. The head
+office uses `"."`, while child offices append their identifiers, for example
+`.1.`, `.1.2.`, and `.1.2.3.`. Access checks use this path as a prefix:
+users can access resources in their own office and subordinate offices, but
+not resources belonging to a parent or unrelated office.
+
+Account transfers validate the office hierarchy of both the source and target
+accounts before processing. This applies to savings-to-savings,
+savings-to-loan, and loan-to-savings transfers.
+
 PRIVATE FORKS
 ============
 

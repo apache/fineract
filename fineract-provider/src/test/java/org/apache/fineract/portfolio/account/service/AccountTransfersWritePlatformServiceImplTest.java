@@ -24,8 +24,11 @@ import static org.apache.fineract.portfolio.account.AccountDetailConstants.toAcc
 import static org.apache.fineract.portfolio.account.AccountDetailConstants.toAccountTypeParamName;
 import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferAmountParamName;
 import static org.apache.fineract.portfolio.account.api.AccountTransfersApiConstants.transferDateParamName;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +39,7 @@ import org.apache.fineract.infrastructure.configuration.domain.ConfigurationDoma
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
+import org.apache.fineract.infrastructure.security.exception.NoAuthorizationException;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.office.domain.Office;
@@ -114,9 +118,56 @@ class AccountTransfersWritePlatformServiceImplTest {
 
     @Test
     void createSavingsToSavingsTransferShouldValidateBothAccountOfficeHierarchies() {
+        JsonCommand command = prepareSavingsToSavingsTransfer(FROM_OFFICE_HIERARCHY, TO_OFFICE_HIERARCHY);
+
+        service.create(command);
+
+        verify(context).validateAccessRights(FROM_OFFICE_HIERARCHY);
+        verify(context).validateAccessRights(TO_OFFICE_HIERARCHY);
+    }
+
+    @Test
+    void createSavingsToSavingsTransferAllowsParentOfficeToAccessChildOfficeResource() {
+        JsonCommand command = prepareSavingsToSavingsTransfer(".1.", ".1.2.3.");
+
+        service.create(command);
+
+        verify(context).validateAccessRights(".1.");
+        verify(context).validateAccessRights(".1.2.3.");
+    }
+
+    @Test
+    void createSavingsToSavingsTransferRejectsChildOfficeAccessToParentOfficeResource() {
+        JsonCommand command = prepareSavingsToSavingsTransfer(".1.2.", ".1.");
+        doThrow(new NoAuthorizationException("The user doesn't have enough permissions to access the resource.")).when(context)
+                .validateAccessRights(".1.");
+
+        assertThrows(NoAuthorizationException.class, () -> service.create(command));
+    }
+
+    @Test
+    void createSavingsToSavingsTransferAllowsAccountsInTheSameOffice() {
+        JsonCommand command = prepareSavingsToSavingsTransfer(".1.2.", ".1.2.");
+
+        service.create(command);
+
+        verify(context, times(2)).validateAccessRights(".1.2.");
+    }
+
+    @Test
+    void createSavingsToSavingsTransferValidatesMultiLevelOfficeHierarchy() {
+        JsonCommand command = prepareSavingsToSavingsTransfer(".1.2.3.", ".1.2.3.4.");
+
+        service.create(command);
+
+        verify(context).validateAccessRights(".1.2.3.");
+        verify(context).validateAccessRights(".1.2.3.4.");
+    }
+
+    private JsonCommand prepareSavingsToSavingsTransfer(final String fromOfficeHierarchy, final String toOfficeHierarchy) {
         JsonCommand command = savingsToSavingsCommand();
-        SavingsAccount fromSavingsAccount = savingsAccount(FROM_OFFICE_HIERARCHY);
-        SavingsAccount toSavingsAccount = savingsAccount(TO_OFFICE_HIERARCHY);
+        SavingsAccount fromSavingsAccount = savingsAccount(fromOfficeHierarchy);
+        SavingsAccount toSavingsAccount = savingsAccount(toOfficeHierarchy);
         SavingsAccountTransaction withdrawal = org.mockito.Mockito.mock(SavingsAccountTransaction.class);
         SavingsAccountTransaction deposit = org.mockito.Mockito.mock(SavingsAccountTransaction.class);
         AccountTransferDetails accountTransferDetails = org.mockito.Mockito.mock(AccountTransferDetails.class);
@@ -130,11 +181,7 @@ class AccountTransfersWritePlatformServiceImplTest {
         when(accountTransferAssembler.assembleSavingsToSavingsTransfer(command, fromSavingsAccount, toSavingsAccount, withdrawal, deposit))
                 .thenReturn(accountTransferDetails);
         when(accountTransferDetails.getId()).thenReturn(99L);
-
-        service.create(command);
-
-        verify(context).validateAccessRights(FROM_OFFICE_HIERARCHY);
-        verify(context).validateAccessRights(TO_OFFICE_HIERARCHY);
+        return command;
     }
 
     private JsonCommand savingsToSavingsCommand() {
