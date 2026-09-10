@@ -18,104 +18,67 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanApplicationRejectionForLoanProductWithPeriodicAccrualAccountingTest {
-
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
-    private LoanTransactionHelper loanTransactionHelper;
-    private AccountHelper accountHelper;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-    }
+public class LoanApplicationRejectionForLoanProductWithPeriodicAccrualAccountingTest extends FeignLoanTestBase {
 
     @Test
     public void loanApplicationRejectionForPeriodicAccrualAccountingLoanProductTest() {
 
-        Account assetAccount = this.accountHelper.createAssetAccount();
-        Account incomeAccount = this.accountHelper.createIncomeAccount();
-        Account expenseAccount = this.accountHelper.createExpenseAccount();
-        Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        Account assetAccount = accountHelper.createAssetAccount();
+        Account incomeAccount = accountHelper.createIncomeAccount();
+        Account expenseAccount = accountHelper.createExpenseAccount();
+        Account overpaymentAccount = accountHelper.createLiabilityAccount();
 
         // Create Loan Product with Periodic Accrual accounting
-        final Integer loanProductID = createLoanProductWithPeriodicAccrualAccounting(assetAccount, incomeAccount, expenseAccount,
+        final Long loanProductId = createLoanProductWithPeriodicAccrualAccounting(assetAccount, incomeAccount, expenseAccount,
                 overpaymentAccount);
 
         // Loan ExternalId
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         // Client and Loan account creation
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Long clientId = createClient();
 
-        final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
+        final Long loanId = createLoanAccount(clientId, loanProductId, loanExternalIdStr);
 
         // verify Loan status as submitted and pending approval
-        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
         assertTrue(loanDetails.getStatus().getPendingApproval());
 
         // Reject Loan application
-        PostLoansLoanIdResponse result = this.loanTransactionHelper.rejectLoan(loanExternalIdStr,
-                new PostLoansLoanIdRequest().rejectedOnDate("3 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+        PostLoansLoanIdResponse result = loanHelper.rejectLoanByExternalId(loanExternalIdStr,
+                LoanRequestBuilders.rejectLoan("3 September 2022"));
 
         // Verify Loan application status is Rejected
-        assertTrue(result.getChanges().getStatus().getValue().equals("Rejected"));
+        assertEquals("Rejected", result.getChanges().getStatus().getValue());
 
     }
 
-    private Integer createLoanProductWithPeriodicAccrualAccounting(final Account... accounts) {
-
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentAfterEvery("1")
-                .withNumberOfRepayments("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
-                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
-                .withAccountingRulePeriodicAccrual(accounts).withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
-                .build(null);
-
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+    private Long createLoanProductWithPeriodicAccrualAccounting(final Account... accounts) {
+        return createLoanProduct(new LoanProductTestBuilder().withPrincipal("1000").withRepaymentAfterEvery("1").withNumberOfRepayments("1")
+                .withRepaymentTypeAsMonth().withinterestRatePerPeriod("0").withInterestRateFrequencyTypeAsMonths()
+                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRulePeriodicAccrual(accounts)
+                .withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0").buildRequest(null));
     }
 
-    private Integer createLoanAccount(final Integer clientID, final Integer loanProductID, final String externalId) {
-
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
-                .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
-
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        return loanId;
+    private Long createLoanAccount(final Long clientId, final Long loanProductId, final String externalId) {
+        return applyForLoan(LoanRequestBuilders.applyLoan(clientId, loanProductId, "01 September 2022", 1000.0, 1)//
+                .expectedDisbursementDate("03 September 2022")//
+                .interestType(LoanTestData.InterestType.FLAT)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .externalId(externalId));
     }
 
 }
