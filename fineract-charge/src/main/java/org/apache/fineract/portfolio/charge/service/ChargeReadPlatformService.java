@@ -92,6 +92,28 @@ public interface ChargeReadPlatformService {
     List<ChargeData> retrieveLoanProductCharges(Long loanProductId, ChargeTimeType chargeTime);
 
     /**
+     * Returns all fees that can be offered by a Working Capital loan product
+     *
+     * @return
+     */
+    List<ChargeData> retrieveWorkingCapitalLoanApplicableFees();
+
+    /**
+     * Returns all penalties that can be offered by a Working Capital loan product
+     *
+     * @return
+     */
+    List<ChargeData> retrieveWorkingCapitalLoanApplicablePenalties();
+
+    /**
+     * Returns all charges associated with a given Working Capital loan product
+     *
+     * @param workingCapitalLoanProductId
+     * @return
+     */
+    List<ChargeData> retrieveWorkingCapitalLoanProductCharges(Long workingCapitalLoanProductId);
+
+    /**
      * Returns all charges applicable for savings
      *
      * @param feeChargesOnly

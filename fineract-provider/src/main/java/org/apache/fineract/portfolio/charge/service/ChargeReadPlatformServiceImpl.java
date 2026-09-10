@@ -200,6 +200,39 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
+    public List<ChargeData> retrieveWorkingCapitalLoanApplicableFees() {
+        final ChargeMapper rm = new ChargeMapper();
+        String sql = "select " + rm.chargeSchema()
+                + " where c.is_deleted=false and c.is_active=true and c.is_penalty=false and c.charge_applies_to_enum=? ";
+        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
+        sql += " order by c.name ";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.WORKING_CAPITAL_LOAN.getValue() }); // NOSONAR
+    }
+
+    @Override
+    public List<ChargeData> retrieveWorkingCapitalLoanApplicablePenalties() {
+        final ChargeMapper rm = new ChargeMapper();
+        String sql = "select " + rm.chargeSchema()
+                + " where c.is_deleted=false and c.is_active=true and c.is_penalty=true and c.charge_applies_to_enum=? ";
+        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
+        sql += " order by c.name ";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.WORKING_CAPITAL_LOAN.getValue() }); // NOSONAR
+    }
+
+    @Override
+    public List<ChargeData> retrieveWorkingCapitalLoanProductCharges(final Long workingCapitalLoanProductId) {
+        final ChargeMapper rm = new ChargeMapper();
+
+        String sql = "select " + rm.wcLoanProductChargeSchema()
+                + " where c.is_deleted=false and c.is_active=true and wcplc.wc_product_id=? ";
+        sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { workingCapitalLoanProductId }); // NOSONAR
+    }
+
+    @Override
     public List<ChargeData> retrieveLoanApplicableFees() {
         final ChargeMapper rm = new ChargeMapper();
         Object[] params = new Object[] { ChargeAppliesTo.LOAN.getValue() };
@@ -308,6 +341,10 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         public String loanProductChargeSchema() {
             return chargeSchema() + " join m_product_loan_charge plc on plc.charge_id = c.id";
+        }
+
+        public String wcLoanProductChargeSchema() {
+            return chargeSchema() + " join m_wc_loan_product_charge wcplc on wcplc.charge_id = c.id";
         }
 
         public String savingsProductChargeSchema() {

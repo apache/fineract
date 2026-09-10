@@ -94,6 +94,9 @@ public class WorkingCapitalLoanProductData implements Serializable {
     // Configurable attributes (allowAttributeOverrides)
     private WorkingCapitalLoanProductConfigurableAttributesData allowAttributeOverrides;
 
+    // Charges offered by the product
+    private Collection<ChargeData> charges;
+
     // Accounting
     private StringEnumOptionData accountingRule;
     private Map<String, GLAccountData> accountingMappings;
