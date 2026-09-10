@@ -1266,7 +1266,12 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             if (rp.getOutstandingPrincipal().isGreaterThan(totalDuePaidDiff)) {
                 Money delta = rp.getOutstandingPrincipal().minus(totalDuePaidDiff);
                 rp.setEmi(rp.getEmi().minus(delta));
-                Money minimumEMI = MathUtil.plus(rp.getPaidInterest(), rp.getPaidPrincipal());
+                // The EMI never contains the credited amounts (a chargeback is carried as creditedPrincipal on the
+                // period and added on top of the EMI by getDuePrincipal), so the floor must be the paid amount net of
+                // them. Flooring at the gross paid amount bakes an already paid chargeback into the EMI and then
+                // getDuePrincipal adds it a second time, leaving the installment short by the charged back amount.
+                Money minimumEMI = MathUtil.negativeToZero(
+                        MathUtil.plus(rp.getPaidInterest(), rp.getPaidPrincipal()).minus(rp.getTotalCreditedAmount(), scheduleModel.mc()));
                 if (rp.getEmi().isLessThan(minimumEMI)) {
                     rp.setEmi(minimumEMI);
                 }
