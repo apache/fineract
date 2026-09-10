@@ -69,7 +69,7 @@ public class WorkingCapitalLoanChargeAccrualService {
      * to real-time), gated by {@code charge-accrual-date}; {@link #isAlreadyAccrued} keeps both paths idempotent.
      */
     public void processOnChargeAdded(final WorkingCapitalLoan loan, final WorkingCapitalLoanCharge charge) {
-        if (isAccrualPostingDisabled(loan)) {
+        if (isAccrualPostingDisabled(loan) || charge.isDisbursementCharge()) {
             return;
         }
         if (isRealTimeChargeAccrual()) {
@@ -88,7 +88,7 @@ public class WorkingCapitalLoanChargeAccrualService {
             return;
         }
         final String accrualDateMode = retrieveChargeAccrualDateConfig();
-        final List<WorkingCapitalLoanCharge> charges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
+        final List<WorkingCapitalLoanCharge> charges = accruableCharges(loan);
         if (SUBMITTED_DATE.equalsIgnoreCase(accrualDateMode)) {
             charges.stream().filter(charge -> charge.getSubmittedOnDate() != null && !charge.getSubmittedOnDate().isAfter(businessDate))
                     .forEach(charge -> createChargeAccrualIfMissing(loan, charge, charge.getSubmittedOnDate()));
@@ -122,8 +122,18 @@ public class WorkingCapitalLoanChargeAccrualService {
         if (isAccrualPostingDisabled(loan)) {
             return;
         }
-        final List<WorkingCapitalLoanCharge> activeCharges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
+        final List<WorkingCapitalLoanCharge> activeCharges = accruableCharges(loan);
         activeCharges.forEach(charge -> createChargeAccrualIfMissing(loan, charge, closingDate));
+    }
+
+    /**
+     * Charges due at disbursement are settled and recognized as income the moment the loan is disbursed, so they never
+     * accrue: not on COB, and not on closure either, where the idempotency guard would not catch them because there is
+     * no ACCRUAL transaction to find.
+     */
+    private List<WorkingCapitalLoanCharge> accruableCharges(final WorkingCapitalLoan loan) {
+        return chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId()).stream()
+                .filter(charge -> !charge.isDisbursementCharge()).toList();
     }
 
     private boolean isAccrualPostingDisabled(final WorkingCapitalLoan loan) {

@@ -70,19 +70,33 @@ Creates or updates a charge product applicable to Working Capital Loans.
 * `flat` (`1`) -- for both `disbursement` and `specified due date`
 * `% amount` (`2`) -- for `disbursement` only
 
+== Loan Product Charge Catalogue
+
+A Working Capital loan product declares the charge products it offers through the optional `charges` array on `POST /working-capital-loan-products` and `PUT /working-capital-loan-products/{productId}`. The association is stored in `m_wc_loan_product_charge` and mirrors `m_product_loan_charge` for term loans.
+
+[source,json]
+----
+{
+  "charges": [ { "id": 12 }, { "id": 15 } ]
+}
+----
+
+* Only charge products with `chargeAppliesTo` `5` (`WorkingCapitalLoan`) can be catalogued; a term-loan, savings, client or shares charge product is rejected with HTTP 403 and `error.msg.wclp.charge.not.applicable.to.working.capital.loan`.
+* The charge product must be in the product currency, otherwise HTTP 403 with `error.msg.charge.attach.to.working.capital.loan.product.invalid.currency`.
+* Both `disbursement` and `specified due date` charge products can be catalogued.
+* On update, `charges` replaces the whole list; an empty array detaches every charge, and omitting the parameter keeps the current list.
+* A charge product attached to a Working Capital loan product can no longer be deleted or modified (`error.msg.charge.cannot.be.deleted.it.is.already.used.in.loan`, `error.msg.charge.cannot.be.updated.it.is.used.in.loan`).
+* `GET /working-capital-loan-products/{productId}` returns the catalogue as `charges`; the product template returns every eligible charge product as `chargeOptions` (fees) and `penaltyOptions` (penalties).
+* The account application template, `GET /working-capital-loans/template?productId={productId}`, expands the selected product, so the catalogue is available to the client application as `loanData.product.charges`.
+
+The catalogue feeds the templates only. It is not applied to a loan by itself: the application decides which charges the
+loan carries (see <<_charges_at_application_time>>).
+
+Origin in code: `WorkingCapitalLoanProductWritePlatformServiceImpl.assembleListOfProductCharges()` and `WorkingCapitalLoanProduct.updateCharges()`.
+
 == Loan Account Level Charges
 
-A charge product being valid for `chargeAppliesTo` `5` does not mean it can be attached to a Working Capital Loan account by hand. The account-level endpoints accept only `specified due date` charge products.
-
-=== Add Charge to Loan Account
-
-[source,http]
-----
-POST /working-capital-loans/{loanId}/charges
-----
-
-* Accepts charge products with `chargeTimeType` `2` (`specified due date`) only. `dueDate` is mandatory, cannot be in the past, and the loan must be active, closed (obligations met) or overpaid.
-* A `disbursement` charge product is rejected with HTTP 403 and the error code `error.msg.wc.loan.charge.time.type.not.supported`. Nothing is persisted on the account.
+A charge product being valid for `chargeAppliesTo` `5` does not mean it can be attached to any Working Capital Loan account at any time. What the account accepts depends on the charge time type and on the loan state.
 
 === Loan Account Charge Template
 
@@ -91,9 +105,196 @@ POST /working-capital-loans/{loanId}/charges
 GET /working-capital-loans/{loanId}/charges/template
 ----
 
-* `chargeOptions` lists only active `specified due date` charge products in the loan currency. `disbursement` charge products are omitted because the endpoint above would reject them.
+`chargeOptions` lists the charge products **catalogued by the loan's own product**, further restricted to the loan currency and to the charge time types the account endpoint accepts. A charge product the product does not catalogue is never offered, even when it is a valid Working Capital charge. A product with an empty catalogue yields an empty template.
 
-[NOTE]
+Origin in code: `ChargeReadPlatformServiceImpl.retrieveWorkingCapitalLoanAccountApplicableCharges()`, which joins `m_wc_loan_product_charge` through `m_wc_loan.product_id`.
+
+=== Add Charge to Loan Account
+
+[source,http]
+----
+POST /working-capital-loans/{loanId}/charges
+----
+
+[cols="1,2,2"]
+|===
+|*Charge time type* |*Accepted when* |*Request shape*
+
+|`specified due date` (`2`)
+|The loan is active, closed (obligations met) or overpaid.
+|`chargeId`, `amount` (mandatory, > 0) and `dueDate` (mandatory, not in the past).
+
+|`disbursement` (`1`)
+|The loan has **not** been disbursed yet (submitted and pending approval, or approved).
+|`chargeId`; `amount` optional (falls back to the charge product's amount); `dueDate` must be omitted.
+|===
+
+* A `disbursement` charge added by hand is not an obligation yet: it does not touch the balance, the lifecycle or the accrual. It is settled together with the catalogued ones when the loan is disbursed.
+* Adding a `disbursement` charge to a loan that is already disbursed is rejected with HTTP 403 and `error.msg.wc.loan.disbursement.charge.loan.already.disbursed`.
+* Sending `dueDate` with a `disbursement` charge is rejected with HTTP 400 (`dueDate.not.allowed.for.disbursement.charge`).
+* For a `% amount` charge the request `amount`, when present, is the rate. The money amount is provisional against the current principal and is re-resolved at disbursement.
+
+Origin in code: `WorkingCapitalLoanChargeDataValidator.validateCreateLoanChargeAgainstLoan()` and `WorkingCapitalLoanChargeWritePlatformServiceImpl.assemblyChargeFromCommand()`.
+
+== Charges at Application Time
+
+The loan application accepts an optional `charges` array on `POST /working-capital-loans` and on
+`PUT /working-capital-loans/{loanId}`, with the same element shape the term-loan application uses. Each entry goes
+through the same assembly and rules as `POST /working-capital-loans/{loanId}/charges` would apply to a loan pending
+approval, so in practice only `disbursement` charge products pass: a `specified due date` charge needs an active loan and
+is rejected with `loan.should.be.active`.
+
+[source,json]
+----
+{
+  "charges": [
+    { "chargeId": 12 },
+    { "chargeId": 15, "amount": 5 },
+    { "id": 301, "chargeId": 12, "amount": 150 }
+  ]
+}
+----
+
+[cols="1,1,3"]
+|===
+|*Field* |*Where* |*Meaning*
+
+|`chargeId`
+|`POST`, `PUT`
+|Charge product. Mandatory unless `id` is given.
+
+|`amount`
+|`POST`, `PUT`
+|Optional. Flat amount, or the rate for a `% amount` charge. Falls back to the charge product's own amount.
+
+|`id`
+|`PUT` only
+|A charge already on the loan: the entry updates its amount instead of adding a new one.
+
+|`dueDate`, `externalId`
+|`POST`, `PUT`
+|Optional; `dueDate` is rejected for a `disbursement` charge.
+|===
+
+On `PUT` the array **replaces** the loan's active charges: omitted keeps them, an empty array removes them all, entries
+with `id` update, entries without `id` add, and active charges not listed are retired (`active = false`). Listing the
+same `chargeId` twice is rejected (`validation.msg.workingCapitalLoan.charges.duplicate.chargeId`); an `id` that is not an
+active charge of that loan answers HTTP 404 `error.msg.wc.loan.charge.id.invalid`; an entry whose `chargeId` differs from
+the charge it addresses by `id` answers HTTP 400 `charge.id.does.not.match.existing.charge`.
+
+[IMPORTANT]
 ====
-Disbursement charge products for Working Capital Loans are currently a product-definition capability only: they can be created, updated and offered through the charge template API, but they are not assessed during a Working Capital Loan disbursement and are not inherited from the loan product. Applying them in the loan lifecycle is outside the scope of this feature.
+The product catalogue is a *default*, not a contract, exactly like the term-loan product catalogue. The loan carries
+exactly the charges its application (or the account endpoint) put on it: a catalogued charge the application did not
+include is **not** applied at disbursement, and one that was removed stays removed.
 ====
+
+A charge added this way behaves exactly like one added through the account endpoint: it appears in `charges[]` with
+`paid: false` and no due date, touches neither the balance nor the accrual, and is settled at disbursement. Adding a
+charge of another domain (for example a term-loan charge product) is rejected with HTTP 403
+`error.msg.charge.cannot.be.applied.toworking.capital.loan`, and a charge in another currency with
+`error.msg.charge.attach.to.working.capital.loan.invalid.currency`.
+
+Origin in code: `WorkingCapitalLoanApplicationWritePlatformServiceImpl.attachChargesIfProvided()` /
+`replaceChargesIfProvided()`, `WorkingCapitalLoanChargeAssembler.assemble()` and
+`WorkingCapitalLoanApplicationDataValidator.validateCharges()`.
+
+== Charges Due at Disbursement
+
+Disbursement charges follow the term-loan model: they are settled out of the disbursed money the moment the loan is disbursed, recognized as income immediately, and netted from the cash handed to the client while the principal owed stays the full amount.
+
+=== What happens on disbursement
+
+.Disbursement with charges due at disbursement
+[plantuml,format=svg]
+....
+@startuml
+actor Operator
+participant "WorkingCapitalLoan\nWritePlatformService" as WPS
+participant "WorkingCapitalLoan\nDisbursementChargeWriteService" as DCS
+participant "Accounting\nProcessor" as ACC
+
+Operator -> WPS : POST /working-capital-loans/{id}?command=disburse
+WPS -> WPS : DISBURSEMENT transaction (transactionAmount)
+WPS -> WPS : DISCOUNT_FEE transaction, if any
+WPS -> DCS : settleChargesAtDisbursement(loan, disbursement, amount, date)
+DCS -> DCS : materialize catalogued DISBURSEMENT charges\nnot yet on the loan (dedupe by chargeId)
+DCS -> DCS : resolve amounts (FLAT, or % of disbursed amount)
+alt sum of charges >= disbursed amount
+  DCS --> Operator : 403 charges.exceed.disbursed.amount
+else
+  DCS -> DCS : one REPAYMENT_AT_DISBURSEMENT transaction\n+ one ChargePaidBy line per charge
+  DCS -> DCS : charges marked paid, dueDate = disbursement date
+  DCS -> ACC : Dr FUND_SOURCE (total)\nCr income per charge
+  DCS -> WPS : netDisbursalAmount = amount - sum
+end
+WPS -> WPS : balance.principal = amount + discount
+@enduml
+....
+
+. The disbursement transaction is created for the full `transactionAmount` and the discount fee transaction, if any, exactly as before.
+. Every active `disbursement` charge on the loan takes part. Nothing is inherited from the product catalogue: a catalogued charge reaches the loan only through the application or the account endpoint (term-loan model).
+. Every disbursement charge amount is resolved: `flat` keeps its amount; `% amount` applies the stored rate to the disbursed amount. Each charge gets the disbursement date as its due date.
+. If the sum of the charges is greater than or equal to the disbursed amount, the disbursement is rejected with HTTP 403 and `error.msg.wc.loan.disbursement.charges.exceed.disbursed.amount`, before anything is persisted.
+. One `REPAYMENT_AT_DISBURSEMENT` transaction is created for the total, linked to the disbursement transaction, with one `WorkingCapitalLoanChargePaidBy` line per charge. Every charge is marked paid. Its `externalId` is auto-generated when the platform is configured to do so, like every other transaction. The loan summary reports the charges as *charged* and *paid* (`fee` / `feePaid`), never as outstanding, exactly as a term loan does.
+. The loan records `netDisbursalAmount = transactionAmount - sum of disbursement charges`, exposed on `GET /working-capital-loans/{loanId}`. A loan without disbursement charges records the full amount and creates no settlement transaction. Before disbursement, and again after undo disbursal, the field falls back to the schedule's *expected* net (the principal), as it did before this feature.
+
+[IMPORTANT]
+====
+The principal owed does not change: it stays `transactionAmount + discount`, as the discount is financed on top of the principal (see the discount feature). Only the disbursement charges reduce the cash handed to the client. The discount is therefore *not* part of the net disbursal formula.
+====
+
+Reprocessing (for example after a backdated repayment) resets every charge's paid state and rebuilds it from the
+repayments. The settlement at disbursement is not a repayment and is never re-allocated: reprocessing restores its
+effect first, so the disbursement charges never show up as outstanding to the replayed repayments.
+
+Origin in code: `WorkingCapitalLoanDisbursementChargeWriteServiceImpl.settleChargesAtDisbursement()` / `reapplyOnReprocess()` and `WorkingCapitalLoanChargeAmountResolver`.
+
+=== Accounting
+
+Under `ACCRUAL_WITH_DEFERRED_REVENUE_AMORTIZATION` the settlement transaction posts, on the disbursement date:
+
+[cols="1,2,3"]
+|===
+|*Entry* |*Account* |*Amount*
+
+|Debit
+|`FUND_SOURCE`
+|Sum of every disbursement charge.
+
+|Credit
+|Income account of each charge
+|One credit per charge. The product's `feeToIncomeAccountMappings` / `penaltyToIncomeAccountMappings` entry for that `chargeId` wins when present; otherwise the product-level `INCOME_FROM_FEES` / `INCOME_FROM_PENALTIES`.
+|===
+
+Income is recognized immediately; disbursement charges are **excluded from every charge accrual sweep** (end of day, real-time on add, and closure), so they are never accrued a second time.
+
+Origin in code: `AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapitalLoan.repaymentAtDisbursementPostings()`, `AccountingProcessorHelper.getLinkedGLAccountForWorkingCapitalLoanCharge()` and `WorkingCapitalLoanChargeAccrualService.accruableCharges()`.
+
+=== Undo Disbursal
+
+Undoing the disbursement reverses the settlement transaction and its journal entries, marks every disbursement charge unpaid again and clears `netDisbursalAmount`. The charges stay on the loan, so a later disbursement settles them again without materializing the catalogued ones a second time.
+
+Origin in code: `WorkingCapitalLoanDisbursementChargeWriteServiceImpl.reverseChargesOnUndoDisbursal()`.
+
+=== Business Rules
+
+[cols="1,1,3,1,2"]
+|===
+|*ID* |*Category* |*Rule* |*Type* |*Origin in code*
+
+|WCC-001 |Catalogue |Only `chargeAppliesTo` `5` charge products in the product currency can be catalogued. |Precondition |`WorkingCapitalLoanProductWritePlatformServiceImpl.assembleListOfProductCharges()`
+|WCC-002 |Template |The account charge template offers only the charge products the loan's product catalogues. |Read rule |`ChargeReadPlatformServiceImpl.retrieveWorkingCapitalLoanAccountApplicableCharges()`
+|WCC-003 |Manual add |A `disbursement` charge can be added only while the loan is not disbursed, without `dueDate`. |Precondition |`WorkingCapitalLoanChargeDataValidator.validateCreateLoanChargeAgainstLoan()`
+|WCC-004 |Disbursement |Only the `disbursement` charges on the loan are settled; the product catalogue is never inherited. |Behaviour |`WorkingCapitalLoanDisbursementChargeWriteServiceImpl.materializeAndResolve()`
+|WCC-011 |Application |`charges[]` on submit / modify follows the account rules for a loan pending approval; only `disbursement` charges pass. |Precondition |`WorkingCapitalLoanChargeAssembler.assemble()`
+|WCC-012 |Application |On modify the array replaces the active charges; unlisted ones are retired, catalogued or not. |Behaviour |`WorkingCapitalLoanApplicationWritePlatformServiceImpl.replaceChargesIfProvided()`
+|WCC-013 |Application |Only `chargeAppliesTo` `5` charge products in the loan currency can be attached to an account. |Precondition |`WorkingCapitalLoanChargeAssembler.assemble()`
+|WCC-005 |Disbursement |`% amount` is resolved against the disbursed amount using the stored rate (`m_wc_loan_charge.percentage`). |Calculation |`WorkingCapitalLoanChargeAmountResolver.resolve()`
+|WCC-006 |Disbursement |The sum of disbursement charges must be lower than the disbursed amount. |Invariant |`WorkingCapitalLoanDisbursementChargeWriteServiceImpl.settleChargesAtDisbursement()`
+|WCC-007 |Disbursement |All disbursement charges settle in one `REPAYMENT_AT_DISBURSEMENT` transaction; principal owed is unchanged; `netDisbursalAmount = amount - sum`. |Behaviour |`WorkingCapitalLoanDisbursementChargeWriteServiceImpl.settleChargesAtDisbursement()`
+|WCC-008 |Accounting |Income is recognized at disbursement, per charge, with charge-specific mapping over product mapping. |Accounting |`...ProcessorForWorkingCapitalLoan.repaymentAtDisbursementPostings()`
+|WCC-009 |Accrual |Disbursement charges never accrue, on any sweep. |Invariant |`WorkingCapitalLoanChargeAccrualService.accruableCharges()`
+|WCC-010 |Undo |Undo disbursal reverses the settlement, un-pays the charges, keeps them on the loan and clears the net amount. |Behaviour |`WorkingCapitalLoanDisbursementChargeWriteServiceImpl.reverseChargesOnUndoDisbursal()`
+|WCC-014 |Reprocess |Reprocessing restores the settlement at disbursement before replaying repayments; the disbursement charges stay paid. |Invariant |`WorkingCapitalLoanDisbursementChargeWriteServiceImpl.reapplyOnReprocess()`
+|===

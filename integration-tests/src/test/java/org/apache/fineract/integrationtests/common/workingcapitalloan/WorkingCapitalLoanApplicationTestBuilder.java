@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.fineract.client.models.PostPaymentAllocationOrder;
 import org.apache.fineract.client.models.PostPaymentAllocationRule;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansChargeData;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansOriginatorData;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansRequest;
@@ -62,6 +63,7 @@ public class WorkingCapitalLoanApplicationTestBuilder {
     private Integer breachGraceDays;
     private String breachStartType;
     private List<PostWorkingCapitalLoansOriginatorData> originators;
+    private List<PostWorkingCapitalLoansChargeData> charges;
 
     public WorkingCapitalLoanApplicationTestBuilder withClientId(final Long clientId) {
         this.clientId = clientId;
@@ -178,6 +180,15 @@ public class WorkingCapitalLoanApplicationTestBuilder {
         return this;
     }
 
+    /**
+     * Charges to send with the application. Null omits the parameter; an empty list sends it empty (removes all on
+     * modify).
+     */
+    public WorkingCapitalLoanApplicationTestBuilder withCharges(final List<PostWorkingCapitalLoansChargeData> charges) {
+        this.charges = charges;
+        return this;
+    }
+
     public PostWorkingCapitalLoansRequest buildSubmitRequest() {
         return populateSubmitRequest(new PostWorkingCapitalLoansRequest())
                 .totalPaymentVolume(totalPaymentVolume != null ? totalPaymentVolume : principal)
@@ -243,6 +254,9 @@ public class WorkingCapitalLoanApplicationTestBuilder {
         if (originators != null && !originators.isEmpty()) {
             request.originators(originators);
         }
+        if (charges != null) {
+            request.charges(charges);
+        }
         return request;
     }
 
@@ -305,6 +319,9 @@ public class WorkingCapitalLoanApplicationTestBuilder {
         }
         if (paymentAllocationTypes != null && !paymentAllocationTypes.isEmpty()) {
             request.paymentAllocation(buildPaymentAllocationRules());
+        }
+        if (charges != null) {
+            request.charges(charges);
         }
         return request;
     }

@@ -57,6 +57,9 @@ public final class WorkingCapitalLoanProductConstants {
     public static final String breachIdParamName = "breachId";
     public static final String nearBreachIdParamName = "nearBreachId";
 
+    // Charges
+    public static final String chargesParamName = "charges";
+
     // Configurable attributes (same as LoanProduct)
     public static final String allowAttributeOverridesParamName = "allowAttributeOverrides";
     public static final String delinquencyBucketClassificationOverridableParamName = "delinquencyBucketClassification";

@@ -39,6 +39,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -97,9 +98,15 @@ public class WorkingCapitalLoanChargeDataValidator {
         baseDataValidator.reset().parameter(WorkingCapitalLoanChargeConstants.chargeIdParamName).value(chargeId).notNull()
                 .integerGreaterThanZero();
 
-        final BigDecimal amount = this.fromJsonHelper.extractBigDecimalWithLocaleNamed(WorkingCapitalLoanChargeConstants.amountParamName,
-                element);
-        baseDataValidator.reset().parameter(WorkingCapitalLoanChargeConstants.amountParamName).value(amount).notNull().positiveAmount();
+        // Mandatory for specified-due-date charges; optional for disbursement charges, which fall back to the charge
+        // definition.
+        // Which one applies is only known once the charge is loaded, so the type-specific rule lives in
+        // validateCreateLoanChargeAgainstLoan.
+        if (this.fromJsonHelper.parameterExists(WorkingCapitalLoanChargeConstants.amountParamName, element)) {
+            final BigDecimal amount = this.fromJsonHelper
+                    .extractBigDecimalWithLocaleNamed(WorkingCapitalLoanChargeConstants.amountParamName, element);
+            baseDataValidator.reset().parameter(WorkingCapitalLoanChargeConstants.amountParamName).value(amount).notNull().positiveAmount();
+        }
 
         if (this.fromJsonHelper.parameterExists(WorkingCapitalLoanChargeConstants.dueDateParamName, element)) {
             final LocalDate dueDate = this.fromJsonHelper.extractLocalDateNamed(WorkingCapitalLoanChargeConstants.dueDateParamName,
@@ -112,15 +119,45 @@ public class WorkingCapitalLoanChargeDataValidator {
     }
 
     /**
+     * Rules that depend on the charge definition and the loan, so they run after both are loaded.
+     *
+     * <p>
+     * A specified-due-date charge needs an amount and a future due date, and only fits an active (or closed / overpaid,
+     * to reopen) loan. A disbursement charge is settled when the loan is disbursed, so it is only accepted while the
+     * loan has not been disbursed yet, never carries a due date of its own, and may omit the amount to use the one of
+     * its definition.
+     *
+     * <p>
      * The WC add-charge path never checks {@code chargeAppliesTo}, so this time-type guard is also what stops a
      * term-loan charge product from being attached to a WC account; removing it requires adding that check instead.
      */
-    public void validateCreateLoanChargeAgainstLoan(final LoanStatus loanStatus, final ChargeTimeType chargeTimeType,
-            final LocalDate dueDate, final LocalDate businessDate) {
-        if (chargeTimeType == null || !ChargeTimeType.validWorkingCapitalLoanAccount().contains(chargeTimeType)) {
+    public void validateCreateLoanChargeAgainstLoan(final WorkingCapitalLoan loan, final ChargeTimeType chargeTimeType,
+            final BigDecimal amount, final LocalDate dueDate, final LocalDate businessDate) {
+        if (chargeTimeType == null || !ChargeTimeType.validWorkingCapitalLoanProduct().contains(chargeTimeType)) {
             final String chargeTimeCode = chargeTimeType == null ? null : chargeTimeType.getCode();
             throw new GeneralPlatformDomainRuleException("error.msg.wc.loan.charge.time.type.not.supported",
                     "Charge time type " + chargeTimeType + " is not supported on a Working Capital Loan.", chargeTimeCode);
+        }
+        final LoanStatus loanStatus = loan.getLoanStatus();
+        if (chargeTimeType.isTimeOfDisbursement()) {
+            if (loan.isDisbursed()) {
+                throw new GeneralPlatformDomainRuleException("error.msg.wc.loan.disbursement.charge.loan.already.disbursed",
+                        "A disbursement charge can only be added before the Working Capital Loan is disbursed.", loan.getId());
+            }
+            if (!(loanStatus.isSubmittedAndPendingApproval() || loanStatus.isApproved())) {
+                throw new PlatformApiDataValidationException("loan.should.be.pending.or.approved",
+                        "Loan should be submitted and pending approval or approved", "workingCapitalLoan");
+            }
+            if (dueDate != null) {
+                throw new PlatformApiDataValidationException("dueDate.not.allowed.for.disbursement.charge",
+                        "A disbursement charge is due on the disbursement date and cannot carry a due date",
+                        WorkingCapitalLoanChargeConstants.dueDateParamName);
+            }
+            return;
+        }
+        if (amount == null) {
+            throw new PlatformApiDataValidationException("field.is.mandatory", "Field is mandatory",
+                    WorkingCapitalLoanChargeConstants.amountParamName);
         }
         if (dueDate == null) {
             throw new PlatformApiDataValidationException("field.is.mandatory", "Field is mandatory",

@@ -261,6 +261,7 @@ Feature: WorkingCapitalLoanChargesFeature
       | WCLP         | 2026-01-01      | 2026-01-01               | Active | 9000.0    | 9000.0            | 100000.0           | 18.0              | null     |
     When Admin sets the business date to "10 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin attaches the created working capital loan charge to the loan product
     Then Admin retrieves working capital loan charge template by loan id
     Then Admin add working capital loan charge by loan id and charge id with amount 45.0 and due date "21-01-2026"
     When Admin fails to delete working capital loan charge with status 403 message "This charge cannot be deleted, it is already used in"
@@ -307,7 +308,7 @@ Feature: WorkingCapitalLoanChargesFeature
     Then Working capital loan rejection was successful
 
   @TestRailId:C102440
-  Scenario: Verify Working Capital Charge on loan account level - UC14: Disbursement charge cannot be added directly to an active loan (Negative)
+  Scenario: Verify Working Capital Charge on loan account level - UC14: Disbursement charge cannot be added once the loan is disbursed (Negative)
     When Admin creates working capital loan charge with "DISBURSEMENT" charge time type and "FLAT" calculation type
     And Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
@@ -316,6 +317,6 @@ Feature: WorkingCapitalLoanChargesFeature
     And Admin sets the business date to "10 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Trying to add working capital loan charge by loan id and charge id with amount 45.0 and due date "10-01-2026" results an error with the following data:
-      | httpCode | errorMessage                                                             |
-      | 403      | Charge time type DISBURSEMENT is not supported on a Working Capital Loan. |
+      | httpCode | errorMessage                                                                          |
+      | 403      | A disbursement charge can only be added before the Working Capital Loan is disbursed. |
     When Admin deletes working capital loan charge

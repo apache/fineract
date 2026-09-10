@@ -1054,6 +1054,29 @@ public class AccountingProcessorHelperImpl implements AccountingProcessorHelper 
     }
 
     @Override
+    public GLAccount getLinkedGLAccountForWorkingCapitalLoanCharge(final Long workingCapitalLoanProductId, final int accountMappingTypeId,
+            final Long chargeId) {
+        ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(
+                workingCapitalLoanProductId, PortfolioProductType.WORKING_CAPITAL_LOAN.getValue(), accountMappingTypeId);
+
+        // Charge-specific mapping wins over the product-level one, exactly like Term Loan's charge routing.
+        if (chargeId != null) {
+            final ProductToGLAccountMapping chargeSpecificAccountMapping = this.accountMappingRepository
+                    .findProductIdAndProductTypeAndFinancialAccountTypeAndChargeId(workingCapitalLoanProductId,
+                            PortfolioProductType.WORKING_CAPITAL_LOAN.getValue(), accountMappingTypeId, chargeId);
+            if (chargeSpecificAccountMapping != null) {
+                accountMapping = chargeSpecificAccountMapping;
+            }
+        }
+
+        if (accountMapping == null) {
+            throw new ProductToGLAccountMappingNotFoundException(PortfolioProductType.WORKING_CAPITAL_LOAN, workingCapitalLoanProductId,
+                    CashAccountsForLoan.fromInt(accountMappingTypeId).toString());
+        }
+        return accountMapping.getGlAccount();
+    }
+
+    @Override
     public GLAccount getLinkedGLAccountForWorkingCapitalLoanProduct(final Long workingCapitalLoanProductId, final int accountMappingTypeId,
             final Long paymentTypeId) {
         ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(

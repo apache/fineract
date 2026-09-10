@@ -130,4 +130,5 @@ public final class WorkingCapitalLoanConstants {
 
     // Loan origination parameters
     public static final String originatorsParameterName = "originators";
+    public static final String chargesParameterName = "charges";
 }

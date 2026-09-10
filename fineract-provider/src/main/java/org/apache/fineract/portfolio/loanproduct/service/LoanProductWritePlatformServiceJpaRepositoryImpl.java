@@ -43,6 +43,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.monetary.exception.InvalidCurrencyException;
 import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.apache.fineract.portfolio.charge.exception.ChargeCannotBeAppliedToException;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
 import org.apache.fineract.portfolio.delinquency.exception.DelinquencyBucketNotFoundException;
@@ -349,6 +350,11 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                         final Long id = jsonObject.get("id").getAsLong();
 
                         final Charge charge = this.chargeRepository.findOneWithNotFoundDetection(id);
+
+                        if (!charge.isLoanCharge()) {
+                            final String errorMessage = "Charge with identifier " + charge.getId() + " cannot be applied to Loan product.";
+                            throw new ChargeCannotBeAppliedToException("loan.product", errorMessage, charge.getId());
+                        }
 
                         if (!loanProductCurrencyCode.equals(charge.getCurrencyCode())) {
                             final String errorMessage = "Charge and Loan Product must have the same currency.";
