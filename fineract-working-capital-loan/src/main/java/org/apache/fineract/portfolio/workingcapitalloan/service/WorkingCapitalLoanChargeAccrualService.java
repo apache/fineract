@@ -50,6 +50,10 @@ public class WorkingCapitalLoanChargeAccrualService {
     private static final String DUE_DATE = "due-date";
     private static final String DEFAULT_ACCRUAL_DATE_CONFIG = DUE_DATE;
 
+    private static final String REAL_TIME = "real-time";
+    private static final String EOD = "eod";
+    private static final String DEFAULT_WC_CHARGE_ACCRUAL_TIME_CONFIG = EOD;
+
     private final GlobalConfigurationRepositoryWrapper globalConfigurationRepository;
     private final WorkingCapitalLoanChargeRepository chargeRepository;
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
@@ -59,26 +63,39 @@ public class WorkingCapitalLoanChargeAccrualService {
     private final WorkingCapitalLoanTransactionFinder transactionFinder;
     private final BusinessEventNotifierService businessEventNotifierService;
 
+    /**
+     * When {@code wcl-charge-accrual-time} is real-time, posts the charge accrual immediately on add. The COB sweep
+     * always remains responsible for catching charges that were not accrued yet (for example after switching from EOD
+     * to real-time), gated by {@code charge-accrual-date}; {@link #isAlreadyAccrued} keeps both paths idempotent.
+     */
     public void processOnChargeAdded(final WorkingCapitalLoan loan, final WorkingCapitalLoanCharge charge) {
         if (isAccrualPostingDisabled(loan)) {
             return;
         }
-        if (!SUBMITTED_DATE.equalsIgnoreCase(retrieveChargeAccrualDateConfig())) {
-            return;
+        if (isRealTimeChargeAccrual()) {
+            createChargeAccrualIfMissing(loan, charge, charge.getSubmittedOnDate());
         }
-        createChargeAccrualIfMissing(loan, charge, charge.getSubmittedOnDate());
     }
 
-    public void processDueDateAccruals(final WorkingCapitalLoan loan, final LocalDate businessDate) {
+    /**
+     * Posts pending charge accruals during COB according to {@code charge-accrual-date}, regardless of
+     * {@code wcl-charge-accrual-time}. Real-time only adds an earlier post-on-add path; it must not disable this sweep,
+     * otherwise charges added under EOD and left unaccrued when the config flips to real-time would only be recognized
+     * at loan closure.
+     */
+    public void processChargeAccrualsOnCOB(final WorkingCapitalLoan loan, final LocalDate businessDate) {
         if (isAccrualPostingDisabled(loan)) {
             return;
         }
-        if (!DUE_DATE.equalsIgnoreCase(retrieveChargeAccrualDateConfig())) {
-            return;
+        final String accrualDateMode = retrieveChargeAccrualDateConfig();
+        final List<WorkingCapitalLoanCharge> charges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
+        if (SUBMITTED_DATE.equalsIgnoreCase(accrualDateMode)) {
+            charges.stream().filter(charge -> charge.getSubmittedOnDate() != null && !charge.getSubmittedOnDate().isAfter(businessDate))
+                    .forEach(charge -> createChargeAccrualIfMissing(loan, charge, charge.getSubmittedOnDate()));
+        } else if (DUE_DATE.equalsIgnoreCase(accrualDateMode)) {
+            charges.stream().filter(charge -> charge.getDueDate() != null && !charge.getDueDate().isAfter(businessDate))
+                    .forEach(charge -> createChargeAccrualIfMissing(loan, charge, charge.getDueDate()));
         }
-        final List<WorkingCapitalLoanCharge> activeCharges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
-        activeCharges.stream().filter(charge -> charge.getDueDate() != null && !charge.getDueDate().isAfter(businessDate))
-                .forEach(charge -> createChargeAccrualIfMissing(loan, charge, charge.getDueDate()));
     }
 
     /**
@@ -97,12 +114,9 @@ public class WorkingCapitalLoanChargeAccrualService {
     /**
      * Posts, on early closure, any pending charge accrual that has not been recognized yet. Once the loan is closed it
      * is no longer picked up by the end-of-day job, so the accrual is accelerated to the closing date to make sure the
-     * income is recognized. This runs regardless of the {@code charge-accrual-date} mode: the idempotency guard skips
-     * charges already accrued (the common case in submitted-date mode, where charges are accrued when added), while
-     * charges that slipped through every accrual step are caught here. That gap is real when the mode changes between
-     * the charge being added and the loan closing: a charge added under due-date with a future due date is never
-     * accrued on add, never reached by the due-date COB step, and would be missed at closure if this were gated on the
-     * mode.
+     * income is recognized. This runs regardless of the {@code charge-accrual-date} / {@code wcl-charge-accrual-time}
+     * modes: the idempotency guard skips charges already accrued (the common case in real-time mode, and in
+     * submitted-date EOD mode after COB), while charges that slipped through every accrual step are caught here.
      */
     public void processClosureAccruals(final WorkingCapitalLoan loan, final LocalDate closingDate) {
         if (isAccrualPostingDisabled(loan)) {
@@ -146,6 +160,28 @@ public class WorkingCapitalLoanChargeAccrualService {
         return !relationRepository
                 .findAllByToChargeAndFromTransactionReversedAndFromTransactionTransactionType(charge, false, LoanTransactionType.ACCRUAL)
                 .isEmpty();
+    }
+
+    private boolean isRealTimeChargeAccrual() {
+        return REAL_TIME.equals(resolveWCChargeAccrualTimeConfig());
+    }
+
+    /**
+     * Resolves {@code wcl-charge-accrual-time} to a known value. Unknown / mistyped values fall back to EOD so charge
+     * income is still recognized through COB instead of silently stopping until loan closure.
+     */
+    private String resolveWCChargeAccrualTimeConfig() {
+        final String configuredValue = globalConfigurationRepository
+                .findOneByNameWithNotFoundDetection(GlobalConfigurationConstants.WCL_CHARGE_ACCRUAL_TIME).getStringValue();
+        if (configuredValue == null || configuredValue.isBlank()) {
+            return DEFAULT_WC_CHARGE_ACCRUAL_TIME_CONFIG;
+        }
+        final String normalized = configuredValue.trim();
+        if (REAL_TIME.equalsIgnoreCase(normalized)) {
+            return REAL_TIME;
+        } else {
+            return EOD;
+        }
     }
 
     private String retrieveChargeAccrualDateConfig() {

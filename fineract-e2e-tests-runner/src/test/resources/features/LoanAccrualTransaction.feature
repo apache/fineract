@@ -1995,7 +1995,7 @@ Feature: LoanAccrualTransaction
     Then LoanAccrualTransactionCreatedBusinessEvent is raised on "17 November 2025"
     Then LoanTransactionAccrualActivityPostBusinessEvent is raised on "18 November 2025"
 
-  @TestRailId:C85643
+  @TestRailId:C85645
   Scenario: Core parity - accrual is posted on early loan closure even when charge-accrual-date is submitted-date
     When Global config "charge-accrual-date" value set to "due-date"
     When Admin sets the business date to "01 June 2023"

@@ -47,6 +47,7 @@ public class GlobalConfigurationStepDef {
     @After("@WorkingCapitalLoanChargeAccrualFeature")
     public void restoreChargeAccrualDateConfig() {
         globalConfigurationHelper.setGlobalConfigValueString("charge-accrual-date", "due-date");
+        globalConfigurationHelper.setGlobalConfigValueString("wcl-charge-accrual-time", "eod");
     }
 
     @After("@BusinessDateDisabledCheck")

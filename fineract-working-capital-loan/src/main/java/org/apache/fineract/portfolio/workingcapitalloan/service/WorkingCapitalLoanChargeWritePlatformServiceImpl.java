@@ -154,6 +154,10 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         }
 
         chargeAccrualService.processOnChargeAdded(loan, loanCharge);
+        // EOD mode does not accrue on add. A charge added to an already overpaid/closed loan may leave the account
+        // overpaid or closed again after overpayment settlement, so COB will never see it — accelerate any pending
+        // accrual here (no-op while the loan is still active; idempotent if real-time already posted).
+        chargeAccrualService.accrueOnClosure(loan, ThreadLocalContextUtil.getBusinessDate());
 
         businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanAddChargeBusinessEvent(loanCharge));
         notifyBalanceChanged(loan);
