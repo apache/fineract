@@ -173,21 +173,39 @@ Feature: Working Capital Loan Write-off
     Then Working Capital loan status will be "CLOSED_WRITTEN_OFF"
     And Working Capital loan balance principalOutstanding is "0.0"
     And Working Capital Loan has transactions:
-      | transactionDate | type                   | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement           | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee           | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Repayment              | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
-      | 15 January 2026 | Close (as written-off) | 62.0              | 62.0             | 0.0               | 0.0                   | false    |
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Close (as written-off)    | 62.0              | 62.0             | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Discount Fee Amortization | 12.0              |                  |                   |                       | false    |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 12.0  |        |
+      | EXPENSE   | e4           | Written off               |       | 12.0   |
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 112.0     | 50.0               | 12.0           | 0.0              | 0.0               |
 # --- undo write-off the working capital loan account--- #
     When Admin undoes the write-off on the Working Capital loan
     Then Working Capital loan status will be "ACTIVE"
     And Working Capital loan balance principalOutstanding is "62.0"
     And Working Capital Loan has transactions:
-      | transactionDate | type                   | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement           | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
-      | 01 January 2026 | Discount Fee           | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Repayment              | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
-      | 15 January 2026 | Close (as written-off) | 62.0              | 62.0             | 0.0               | 0.0                   | true     |
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Close (as written-off)    | 62.0              | 62.0             | 0.0               | 0.0                   | true     |
+      | 15 January 2026 | Discount Fee Amortization | 12.0              |                  |                   |                       | true     |
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE_AMORTIZATION" transaction with date "15 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 12.0  |        |
+      | EXPENSE   | e4           | Written off               |       | 12.0   |
+      | LIABILITY | 240005       | Deferred Interest Revenue |       | 12.0   |
+      | EXPENSE   | e4           | Written off               | 12.0  |        |
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 112.0     | 50.0               | 0.0            | 12.0             | 0.0               |
     Then Admin closes the Working Capital loan with a full repayment on "15 January 2026"
 
   @TestRailId:C94013
@@ -720,4 +738,123 @@ Feature: Working Capital Loan Write-off
       | ASSET   | 112601       | Loans Receivable        | 100.0   |        |
       | EXPENSE | e4           | Written off             |         | 100.0  |
     Then Admin closes the Working Capital loan with a full repayment on "10 January 2026"
+
+  Scenario: Verify Working Capital Write-off: write-off releases remaining unrealized discount fee and undo restores it - UC24
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ADVANCED_ACCOUNTING | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 50 transaction amount on Working Capital loan
+    And Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "02 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 9.61  |        |
+      | INCOME    | 404000       | Interest Income           |       | 9.61   |
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 50.0               | 9.61           | 990.39           | 0.0               |
+# --- write-off recognises the remaining deferred discount fee --- #
+    And Admin writes off the Working Capital loan on "03 January 2026"
+    Then Working Capital loan status will be "CLOSED_WRITTEN_OFF"
+    And Working Capital loan balance principalOutstanding is "0.0"
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 9.61              |                  |                   |                       | false    |
+      | 03 January 2026 | Close (as written-off)    | 9950.0            | 9950.0           | 0.0               | 0.0                   | false    |
+      | 03 January 2026 | Discount Fee Amortization | 990.39            |                  |                   |                       | false    |
+    Then Working Capital Loan Transactions tab has a "WRITE_OFF" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type    | Account code | Account name     | Debit  | Credit |
+      | ASSET   | 112601       | Loans Receivable |        | 9950.0 |
+      | EXPENSE | e4           | Written off      | 9950.0 |        |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 990.39 |        |
+      | EXPENSE   | e4           | Written off               |        | 990.39 |
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 50.0               | 1000.0         | 0.0              | 0.0               |
+# --- later COB on a written-off loan must not change anything --- #
+    When Admin sets the business date to "04 February 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 50.0               | 1000.0         | 0.0              | 0.0               |
+# --- undo write-off reverses the final amortization --- #
+    When Admin undoes the write-off on the Working Capital loan
+    Then Working Capital loan status will be "ACTIVE"
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 9.61              |                  |                   |                       | false    |
+      | 03 January 2026 | Close (as written-off)    | 9950.0            | 9950.0           | 0.0               | 0.0                   | true     |
+      | 03 January 2026 | Discount Fee Amortization | 990.39            |                  |                   |                       | true     |
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE_AMORTIZATION" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | LIABILITY | 240005       | Deferred Interest Revenue | 990.39 |        |
+      | EXPENSE   | e4           | Written off               |        | 990.39 |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 990.39 |
+      | EXPENSE   | e4           | Written off               | 990.39 |        |
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 50.0               | 9.61           | 990.39           | 0.0               |
+    Then Admin closes the Working Capital loan with a full repayment on "04 February 2026"
+
+  Scenario: Verify Working Capital Write-off: write-off with unrealized discount fee on NONE accounting posts transaction only - UC25
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    When Admin sets the business date to "02 January 2026"
+    And Customer makes repayment on "02 January 2026" with 50 transaction amount on Working Capital loan
+    And Admin sets the business date to "03 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 50.0               | 9.61           | 990.39           | 0.0               |
+# --- write-off --- #
+    And Admin writes off the Working Capital loan on "03 January 2026"
+    Then Working Capital loan status will be "CLOSED_WRITTEN_OFF"
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 9.61              |                  |                   |                       | false    |
+      | 03 January 2026 | Close (as written-off)    | 9950.0            | 9950.0           | 0.0               | 0.0                   | false    |
+      | 03 January 2026 | Discount Fee Amortization | 990.39            |                  |                   |                       | false    |
+    Then Working Capital Loan Transactions tab has a "WRITE_OFF" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type | Account code | Account name | Debit | Credit |
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE_AMORTIZATION" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type | Account code | Account name | Debit | Credit |
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 50.0               | 1000.0         | 0.0              | 0.0               |
+# --- undo write-off --- #
+    When Admin undoes the write-off on the Working Capital loan
+    Then Working Capital loan status will be "ACTIVE"
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Repayment                 | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
+      | 02 January 2026 | Discount Fee Amortization | 9.61              |                  |                   |                       | false    |
+      | 03 January 2026 | Close (as written-off)    | 9950.0            | 9950.0           | 0.0               | 0.0                   | true     |
+      | 03 January 2026 | Discount Fee Amortization | 990.39            |                  |                   |                       | true     |
+    Then Working Capital Loan Transactions tab has a reversed "WRITE_OFF" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type | Account code | Account name | Debit | Credit |
+    Then Working Capital Loan Transactions tab has a reversed "DISCOUNT_FEE_AMORTIZATION" transaction with date "03 January 2026" which has the following Journal entries:
+      | Type | Account code | Account name | Debit | Credit |
+    And Working capital loan account has the correct data:
+      | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
+      | 10000.0   | 50.0               | 9.61           | 990.39           | 0.0               |
+    Then Admin closes the Working Capital loan with a full repayment on "03 January 2026"
 

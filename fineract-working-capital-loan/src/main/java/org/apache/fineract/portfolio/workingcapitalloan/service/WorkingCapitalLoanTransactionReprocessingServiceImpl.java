@@ -415,7 +415,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
             // Mirrors the explicit undo-charge-off path: lifting the charge-off must also reverse its linked final
             // discount-fee amortization, or that transaction's journal entries keep crediting the charge-off expense
             // account on a loan that is no longer charged off.
-            discountFeeAmortizationService.undoDiscountFeeAmortizationOnChargeOff(loan, chargeOffTransaction);
+            discountFeeAmortizationService.undoFinalDiscountFeeAmortization(loan, chargeOffTransaction);
 
             chargeOffTransaction.setReversed(true);
             chargeOffTransaction.setReversedOnDate(DateUtils.getBusinessLocalDate());
@@ -462,9 +462,9 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
 
     /**
      * Replays the charge-off's final lump-sum discount-fee amortization (see
-     * {@code WorkingCapitalLoanDiscountFeeAmortizationServiceImpl#processFinalDiscountFeeAmortizationOnChargeOff}), in
-     * place, against the current discount pool. A no-op when nothing is linked (no discount was ever charged off) or
-     * the recomputed amount has not moved.
+     * {@code WorkingCapitalLoanDiscountFeeAmortizationServiceImpl#processFinalDiscountFeeAmortization}), in place,
+     * against the current discount pool. A no-op when nothing is linked (no discount was ever charged off) or the
+     * recomputed amount has not moved.
      * <p>
      * The link is looked up regardless of the amortization's own reversed state: a prior replay can have zeroed the
      * pool and reversed it (see below), and a later backdated change (e.g. undoing the discount-fee adjustment that
