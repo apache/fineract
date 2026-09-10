@@ -26,6 +26,7 @@ The scope of this document includes:
 
 * Working Capital Loan only
 * Loan must be ACTIVE for post-disbursement `discountFee`
+* Loan must not be charged off
 * The related disbursement must not already have an active Discount Fee transaction
 * Post-disbursement `discountFee` can only be run when the business date equals the actual disbursement date
 

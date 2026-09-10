@@ -527,6 +527,11 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
         final String note = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.noteParamName, command.parsedJson());
 
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.wc.loan.is.charged.off",
+                    "Discount fee on Working Capital Loan " + loanId + " is not allowed. The loan is charged off.", loanId);
+        }
+
         validator.validateDiscountTransaction(loan, command.json(), amount, note);
 
         if (!loan.isOpen()) {
