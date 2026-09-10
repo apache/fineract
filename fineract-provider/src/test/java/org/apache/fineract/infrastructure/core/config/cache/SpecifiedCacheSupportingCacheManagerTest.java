@@ -18,13 +18,14 @@
  */
 package org.apache.fineract.infrastructure.core.config.cache;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.jupiter.api.Test;
 
 class SpecifiedCacheSupportingCacheManagerTest {
@@ -44,7 +45,7 @@ class SpecifiedCacheSupportingCacheManagerTest {
                 Collection<String> cacheNames = cacheManager.getCacheNames();
 
                 for (String name : cacheNames) {
-                    name.hashCode();
+                    assertNotNull(name);
                 }
             }
 
