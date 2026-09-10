@@ -5372,8 +5372,8 @@ class ProgressiveEMICalculatorTest {
     }
 
     /**
-     * Progressive declining-balance loan with N = 8 repayments and graceOnPrincipalPayment = N-1 = 7 produces a bullet /
-     * balloon schedule.
+     * Progressive declining-balance loan with N = 8 repayments and graceOnPrincipalPayment = N-1 = 7 produces a balloon
+     * (bullet) schedule.
      *
      * <p>
      * Installments 1..7 are interest-only (principal 0, balance stays at 100) and installment 8 carries the full
