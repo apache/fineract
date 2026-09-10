@@ -21,113 +21,63 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.HashMap;
-import java.util.UUID;
-import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class LoanProductWithRepaymentDueEventConfigurationTest {
+public class LoanProductWithRepaymentDueEventConfigurationTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private ClientHelper clientHelper;
-    private LoanTransactionHelper loanTransactionHelper;
+    private static final Integer DUE_DAYS_FOR_REPAYMENT_EVENT = 1;
+    private static final Integer OVER_DUE_DAYS_FOR_REPAYMENT_EVENT = 2;
 
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-    }
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void loanProductCreationWithDueDaysConfigurationForRepaymentEventTest() {
-        // Loan ExternalId
-        String loanExternalIdStr = UUID.randomUUID().toString();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
-        // Delinquency Bucket
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
-        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
-
-        // event days configuration
-        Integer dueDaysForRepaymentEvent = 1;
-        Integer overDueDaysForRepaymentEvent = 2;
-
-        // Client and Loan account creation
-
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-        Integer loanProductId = createLoanProductWithDueDaysForRepaymentEvent(loanTransactionHelper, delinquencyBucketId,
-                dueDaysForRepaymentEvent, overDueDaysForRepaymentEvent);
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        Long loanProductId = createLoanProductWithDueDaysForRepaymentEvent(delinquencyBucketId, DUE_DAYS_FOR_REPAYMENT_EVENT,
+                OVER_DUE_DAYS_FOR_REPAYMENT_EVENT);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = retrieveLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertNotNull(getLoanProductsProductResponse.getDueDaysForRepaymentEvent());
         assertNotNull(getLoanProductsProductResponse.getOverDueDaysForRepaymentEvent());
-        assertEquals(getLoanProductsProductResponse.getDueDaysForRepaymentEvent(), dueDaysForRepaymentEvent);
-        assertEquals(getLoanProductsProductResponse.getOverDueDaysForRepaymentEvent(), overDueDaysForRepaymentEvent);
+        assertEquals(DUE_DAYS_FOR_REPAYMENT_EVENT, getLoanProductsProductResponse.getDueDaysForRepaymentEvent());
+        assertEquals(OVER_DUE_DAYS_FOR_REPAYMENT_EVENT, getLoanProductsProductResponse.getOverDueDaysForRepaymentEvent());
     }
 
     @Test
     public void loanProductUpdateWithDueDaysConfigurationForRepaymentEventTest() {
-        // Loan ExternalId
-        String loanExternalIdStr = UUID.randomUUID().toString();
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
-        // Delinquency Bucket
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
-        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
-
-        // Client and Loan account creation
-
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
-                delinquencyBucketId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createDefaultLoanProduct(delinquencyBucketId);
         assertNotNull(getLoanProductsProductResponse);
 
-        // Modify Loan Product
-        PutLoanProductsProductIdResponse loanProductModifyResponse = updateLoanProduct(loanTransactionHelper,
-                getLoanProductsProductResponse.getId());
+        PutLoanProductsProductIdResponse loanProductModifyResponse = updateDueDaysForRepaymentEvent(getLoanProductsProductResponse.getId());
         assertNotNull(loanProductModifyResponse);
-
     }
 
-    private PutLoanProductsProductIdResponse updateLoanProduct(LoanTransactionHelper loanTransactionHelper, Long id) {
-        // event days configuration
-        Integer dueDaysForRepaymentEvent = 1;
-        Integer overDueDaysForRepaymentEvent = 2;
+    private PutLoanProductsProductIdResponse updateDueDaysForRepaymentEvent(Long id) {
         final PutLoanProductsProductIdRequest requestModifyLoan = new PutLoanProductsProductIdRequest()
-                .dueDaysForRepaymentEvent(dueDaysForRepaymentEvent).overDueDaysForRepaymentEvent(overDueDaysForRepaymentEvent).locale("en");
-        return loanTransactionHelper.updateLoanProduct(id, requestModifyLoan);
+                .dueDaysForRepaymentEvent(DUE_DAYS_FOR_REPAYMENT_EVENT).overDueDaysForRepaymentEvent(OVER_DUE_DAYS_FOR_REPAYMENT_EVENT)
+                .locale("en");
+        return updateLoanProduct(id, requestModifyLoan);
     }
 
-    private GetLoanProductsProductIdResponse createLoanProduct(final LoanTransactionHelper loanTransactionHelper,
-            final Long delinquencyBucketId) {
-        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().build(null, delinquencyBucketId);
-        final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
-        return loanTransactionHelper.getLoanProduct(loanProductId);
+    private GetLoanProductsProductIdResponse createDefaultLoanProduct(final Long delinquencyBucketId) {
+        final Long loanProductId = createLoanProduct(new LoanProductTestBuilder().buildRequest(null, delinquencyBucketId));
+        return retrieveLoanProduct(loanProductId);
     }
 
-    private Integer createLoanProductWithDueDaysForRepaymentEvent(final LoanTransactionHelper loanTransactionHelper,
-            final Long delinquencyBucketId, Integer dueDaysForRepaymentEvent, Integer overDueDaysForRepaymentEvent) {
-        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withDueDaysForRepaymentEvent(dueDaysForRepaymentEvent)
-                .withOverDueDaysForRepaymentEvent(overDueDaysForRepaymentEvent).build(null, delinquencyBucketId);
-        final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
-        return loanProductId;
+    private Long createLoanProductWithDueDaysForRepaymentEvent(final Long delinquencyBucketId, Integer dueDaysForRepaymentEvent,
+            Integer overDueDaysForRepaymentEvent) {
+        return createLoanProduct(new LoanProductTestBuilder().withDueDaysForRepaymentEvent(dueDaysForRepaymentEvent)
+                .withOverDueDaysForRepaymentEvent(overDueDaysForRepaymentEvent).buildRequest(null, delinquencyBucketId));
     }
 
 }
