@@ -26,6 +26,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -33,7 +35,9 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,6 +45,7 @@ import lombok.Setter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.fund.domain.Fund;
 import org.apache.fineract.portfolio.workingcapitalloanbreach.domain.WorkingCapitalBreach;
@@ -111,6 +116,11 @@ public class WorkingCapitalLoanProduct extends AbstractPersistableCustom<Long> {
     @Embedded
     private WorkingCapitalLoanProductMinMaxConstraints minMaxConstraints;
 
+    // Charges the product offers. Optional: a product may be created without any.
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "m_wc_loan_product_charge", joinColumns = @JoinColumn(name = "wc_product_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
+    private List<Charge> charges;
+
     // Payment allocation rules
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "wcProduct", orphanRemoval = true, fetch = FetchType.EAGER)
     private List<WorkingCapitalLoanProductPaymentAllocationRule> paymentAllocationRules = new ArrayList<>();
@@ -125,7 +135,7 @@ public class WorkingCapitalLoanProduct extends AbstractPersistableCustom<Long> {
             final WorkingCapitalLoanProductRelatedDetail relatedDetail, final WorkingCapitalLoanProductMinMaxConstraints minMaxConstraints,
             final List<WorkingCapitalLoanProductPaymentAllocationRule> paymentAllocationRules,
             final WorkingCapitalLoanProductConfigurableAttributes configurableAttributes, final WorkingCapitalBreach breach,
-            final WorkingCapitalNearBreach nearBreach) {
+            final WorkingCapitalNearBreach nearBreach, final List<Charge> charges) {
         this.name = name;
         this.shortName = shortName;
         this.externalId = externalId;
@@ -140,6 +150,9 @@ public class WorkingCapitalLoanProduct extends AbstractPersistableCustom<Long> {
         this.currency = currency;
         this.relatedDetail = relatedDetail;
         this.minMaxConstraints = minMaxConstraints;
+        if (charges != null) {
+            this.charges = charges;
+        }
         this.paymentAllocationRules = paymentAllocationRules;
         if (this.paymentAllocationRules != null) {
             for (WorkingCapitalLoanProductPaymentAllocationRule rule : this.paymentAllocationRules) {
@@ -150,6 +163,29 @@ public class WorkingCapitalLoanProduct extends AbstractPersistableCustom<Long> {
         if (this.configurableAttributes != null) {
             this.configurableAttributes.setWcProduct(this);
         }
+    }
+
+    /**
+     * Replaces the charges offered by this product.
+     *
+     * @return true when the resulting set of charges differs from the current one
+     */
+    public boolean updateCharges(final List<Charge> newProductCharges) {
+        if (newProductCharges == null) {
+            return false;
+        }
+
+        if (this.charges != null) {
+            final Set<Charge> currentSetOfCharges = new HashSet<>(this.charges);
+            final Set<Charge> newSetOfCharges = new HashSet<>(newProductCharges);
+
+            if (currentSetOfCharges.equals(newSetOfCharges)) {
+                return false;
+            }
+        }
+
+        this.charges = newProductCharges;
+        return true;
     }
 
     public void updatePaymentAllocationRules(final List<WorkingCapitalLoanProductPaymentAllocationRule> newRules) {

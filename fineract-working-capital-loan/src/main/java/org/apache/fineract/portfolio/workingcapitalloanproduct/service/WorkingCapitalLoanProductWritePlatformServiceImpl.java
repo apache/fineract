@@ -18,9 +18,11 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloanproduct.service;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +38,9 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
+import org.apache.fineract.organisation.monetary.exception.InvalidCurrencyException;
+import org.apache.fineract.portfolio.charge.domain.Charge;
+import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucketRepository;
 import org.apache.fineract.portfolio.delinquency.exception.DelinquencyBucketNotFoundException;
@@ -84,6 +89,7 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
     private final WorkingCapitalBreachRepository breachRepository;
     private final WorkingCapitalProductAccountingMappingService wcAccountingMappingService;
     private final WorkingCapitalNearBreachRepository nearBreachRepository;
+    private final ChargeRepositoryWrapper chargeRepository;
 
     @Transactional
     @Override
@@ -107,8 +113,10 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
                         : null);
         final List<WorkingCapitalLoanProductPaymentAllocationRule> paymentAllocationRules = this.advancedPaymentAllocationsJsonParser
                 .assembleWCPaymentAllocationRules(command);
+        final String currencyCode = command.stringValueOfParameterNamed(WorkingCapitalLoanProductConstants.currencyCodeParamName);
+        final List<Charge> charges = assembleListOfProductCharges(command, currencyCode);
         final WorkingCapitalLoanProduct product = createProductFromCommand(fund, delinquencyBucket, breach, nearBreach, command,
-                paymentAllocationRules);
+                paymentAllocationRules, charges);
 
         this.repository.saveAndFlush(product);
 
@@ -310,6 +318,15 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
             }
         }
 
+        // Update the charges offered by the product if changed
+        if (command.parameterExists(WorkingCapitalLoanProductConstants.chargesParamName)) {
+            final List<Charge> productCharges = assembleListOfProductCharges(command, product.getCurrency().getCode());
+            if (product.updateCharges(productCharges)) {
+                changes.put(WorkingCapitalLoanProductConstants.chargesParamName,
+                        command.jsonFragment(WorkingCapitalLoanProductConstants.chargesParamName));
+            }
+        }
+
         // Update configurable attributes if changed
         if (command.parameterExists(WorkingCapitalLoanProductConstants.allowAttributeOverridesParamName)) {
             if (product.getConfigurableAttributes() == null) {
@@ -362,7 +379,7 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
 
     private WorkingCapitalLoanProduct createProductFromCommand(final Fund fund, final DelinquencyBucket delinquencyBucket,
             final WorkingCapitalBreach breach, final WorkingCapitalNearBreach nearBreach, final JsonCommand command,
-            final List<WorkingCapitalLoanProductPaymentAllocationRule> paymentAllocationRules) {
+            final List<WorkingCapitalLoanProductPaymentAllocationRule> paymentAllocationRules, final List<Charge> charges) {
         // Details category
         final String name = command.stringValueOfParameterNamed(WorkingCapitalLoanProductConstants.nameParamName);
         final String shortName = command.stringValueOfParameterNamed(WorkingCapitalLoanProductConstants.shortNameParamName);
@@ -442,7 +459,49 @@ public class WorkingCapitalLoanProductWritePlatformServiceImpl implements Workin
 
         return new WorkingCapitalLoanProduct(name, shortName, externalId, fund, delinquencyBucket, startDate, closeDate, description,
                 accountingRule, currency, relatedDetail, minMaxConstraints, paymentAllocationRules, configurableAttributes, breach,
-                nearBreach);
+                nearBreach, charges);
+    }
+
+    /**
+     * Resolves the optional {@code charges} array of the request into the charge definitions the product offers. Only
+     * charges defined for Working Capital loans and sharing the product currency can be attached.
+     */
+    private List<Charge> assembleListOfProductCharges(final JsonCommand command, final String currencyCode) {
+        final List<Charge> charges = new ArrayList<>();
+
+        if (!command.parameterExists(WorkingCapitalLoanProductConstants.chargesParamName)) {
+            return charges;
+        }
+
+        final JsonArray chargesArray = command.arrayOfParameterNamed(WorkingCapitalLoanProductConstants.chargesParamName);
+        if (chargesArray == null) {
+            return charges;
+        }
+
+        for (int i = 0; i < chargesArray.size(); i++) {
+            final JsonObject jsonObject = chargesArray.get(i).getAsJsonObject();
+            if (!jsonObject.has("id")) {
+                continue;
+            }
+            final Long id = jsonObject.get("id").getAsLong();
+            final Charge charge = this.chargeRepository.findOneWithNotFoundDetection(id);
+
+            if (!charge.isWorkingCapitalLoanCharge()) {
+                throw new GeneralPlatformDomainRuleException("error.msg.wclp.charge.not.applicable.to.working.capital.loan",
+                        "Charge " + id
+                                + " is not defined for Working Capital loans and cannot be attached to a Working Capital loan product.",
+                        id);
+            }
+
+            if (!currencyCode.equals(charge.getCurrencyCode())) {
+                throw new InvalidCurrencyException("charge", "attach.to.working.capital.loan.product",
+                        "Charge and Working Capital Loan Product must have the same currency.");
+            }
+
+            charges.add(charge);
+        }
+
+        return charges;
     }
 
     private WorkingCapitalBreach findBreachByIdIfProvided(final Long breachId) {

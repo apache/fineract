@@ -33,6 +33,8 @@ import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
+import org.apache.fineract.portfolio.charge.data.ChargeData;
+import org.apache.fineract.portfolio.charge.service.ChargeReadPlatformService;
 import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentType;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
@@ -77,6 +79,7 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final WorkingCapitalProductAccountingMappingService wcAccountingMappingService;
     private final WorkingCapitalNearBreachReadPlatformService nearBreachReadPlatformService;
+    private final ChargeReadPlatformService chargeReadPlatformService;
 
     @Override
     public List<WorkingCapitalLoanProductData> retrieveAllWorkingCapitalLoanProducts() {
@@ -89,6 +92,9 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
         final WorkingCapitalLoanProduct product = this.repository.findByIdWithDetails(productId)
                 .orElseThrow(() -> new WorkingCapitalLoanProductNotFoundException(productId));
         final WorkingCapitalLoanProductData productData = this.mapper.toData(product);
+
+        final List<ChargeData> charges = this.chargeReadPlatformService.retrieveWorkingCapitalLoanProductCharges(productId);
+        productData.setCharges(charges.isEmpty() ? null : charges);
 
         if (product.getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
             final Map<String, GLAccountData> accountingMappings = this.wcAccountingMappingService.fetchAccountMappingDetails(productId,
@@ -133,6 +139,8 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
                 .retrieveAllDelinquencyBuckets();
         final List<WorkingCapitalNearBreachData> nearBreachOptions = nearBreachReadPlatformService.retrieveAll();
         final List<PaymentTypeData> paymentTypeOptions = this.paymentTypeReadService.retrieveAllPaymentTypes();
+        final List<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveWorkingCapitalLoanApplicableFees();
+        final List<ChargeData> penaltyOptions = this.chargeReadPlatformService.retrieveWorkingCapitalLoanApplicablePenalties();
 
         final List<StringEnumOptionData> accountingRuleOptions = WorkingCapitalAccountingRuleType.toStringEnumOptions();
         final Map<String, List<GLAccountData>> accountingMappingOptions = this.accountingDropdownReadPlatformService
@@ -156,9 +164,8 @@ public class WorkingCapitalLoanProductReadPlatformServiceImpl implements Working
                 .delinquencyBucketOptions(
                         delinquencyBucketOptions != null && !delinquencyBucketOptions.isEmpty() ? delinquencyBucketOptions : null) //
                 .paymentTypeOptions(paymentTypeOptions != null && !paymentTypeOptions.isEmpty() ? paymentTypeOptions : null) //
-                // TODO: Populate WC-specific charge options when WC charges are introduced.
-                .chargeOptions(List.of()) //
-                .penaltyOptions(List.of()) //
+                .chargeOptions(chargeOptions) //
+                .penaltyOptions(penaltyOptions) //
                 .accountingRuleOptions(accountingRuleOptions) //
                 .accountingMappingOptions(accountingMappingOptions) //
                 .nearBreachOptions(nearBreachOptions) //

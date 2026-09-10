@@ -148,8 +148,10 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
                     // TODO: Change this function to only check the mappings!!!
                     final Boolean isChargeExistWithLoans = isAnyLoanProductsAssociateWithThisCharge(chargeId);
                     final Boolean isChargeExistWithSavings = isAnySavingsProductsAssociateWithThisCharge(chargeId);
+                    final Boolean isChargeExistWithWorkingCapitalLoanProducts = isAnyWorkingCapitalLoanProductsAssociateWithThisCharge(
+                            chargeId);
 
-                    if (isChargeExistWithLoans || isChargeExistWithSavings) {
+                    if (isChargeExistWithLoans || isChargeExistWithSavings || isChargeExistWithWorkingCapitalLoanProducts) {
                         throw new ChargeCannotBeUpdatedException("error.msg.charge.cannot.be.updated.it.is.used.in.loan",
                                 "This charge cannot be updated, it is used in loan");
                     }
@@ -230,9 +232,11 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         final Boolean isChargeExistWithSavings = isAnySavingsAssociateWithThisCharge(chargeId);
         final Boolean isChargeExistWithWorkingCapitalLoan = chargeRepository.isAnyWorkingCapitalLoansAssociateWithThisCharge(chargeId)
                 .isPresent();
+        final Boolean isChargeExistWithWorkingCapitalLoanProducts = isAnyWorkingCapitalLoanProductsAssociateWithThisCharge(chargeId);
 
         // TODO: Change error messages around:
-        if (!loanProducts.isEmpty() || isChargeExistWithLoans || isChargeExistWithSavings || isChargeExistWithWorkingCapitalLoan) {
+        if (!loanProducts.isEmpty() || isChargeExistWithLoans || isChargeExistWithSavings || isChargeExistWithWorkingCapitalLoan
+                || isChargeExistWithWorkingCapitalLoanProducts) {
             throw new ChargeCannotBeDeletedException("error.msg.charge.cannot.be.deleted.it.is.already.used.in.loan",
                     "This charge cannot be deleted, it is already used in loan");
         }
@@ -281,6 +285,13 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         final String sql = "select (CASE WHEN exists (select 1 from m_product_loan_charge lc where lc.charge_id = ?) THEN 'true' ELSE 'false' END)";
         final String isLoansUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
         return Boolean.valueOf(isLoansUsingCharge);
+    }
+
+    private boolean isAnyWorkingCapitalLoanProductsAssociateWithThisCharge(final Long chargeId) {
+        final String sql = "select (CASE WHEN exists (select 1 from m_wc_loan_product_charge wcplc where wcplc.charge_id = ?) THEN 'true' ELSE 'false' END)";
+        final String isWorkingCapitalLoanProductsUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class,
+                new Object[] { chargeId });
+        return Boolean.valueOf(isWorkingCapitalLoanProductsUsingCharge);
     }
 
     private boolean isAnySavingsProductsAssociateWithThisCharge(final Long chargeId) {

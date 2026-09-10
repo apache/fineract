@@ -44,6 +44,15 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
 
     private WorkingCapitalLoanProductApiResourceSwagger() {}
 
+    @Schema(description = "WorkingCapitalLoanProductChargeData")
+    public static final class WorkingCapitalLoanProductChargeData {
+
+        private WorkingCapitalLoanProductChargeData() {}
+
+        @Schema(example = "1")
+        public Long id;
+    }
+
     @Schema(description = "GetWorkingCapitalLoanNearBreach")
     public static final class GetWorkingCapitalLoanNearBreach {
 
@@ -176,6 +185,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public Long receivableFeeAccountId;
         @Schema(example = "20")
         public Long receivablePenaltyAccountId;
+        @Schema(description = "Charges offered by the product. Optional; only charges defined for Working Capital loans are accepted.")
+        public List<WorkingCapitalLoanProductChargeData> charges;
         public List<WorkingCapitalLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
         public List<WorkingCapitalLoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings;
         public List<WorkingCapitalLoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
@@ -339,6 +350,9 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
 
         // Configurable attributes
         public GetConfigurableAttributes allowAttributeOverrides;
+
+        // Charges offered by the product
+        public List<ChargeData> charges;
 
         // Accounting
         public StringEnumOptionData accountingRule;
@@ -527,6 +541,9 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         // Configurable attributes
         public GetWorkingCapitalLoanProductsResponse.GetConfigurableAttributes allowAttributeOverrides;
 
+        // Charges offered by the product
+        public List<ChargeData> charges;
+
         // Accounting
         public StringEnumOptionData accountingRule;
         public Map<String, GLAccountData> accountingMappings;
@@ -653,6 +670,8 @@ public final class WorkingCapitalLoanProductApiResourceSwagger {
         public Long receivableFeeAccountId;
         @Schema(example = "20")
         public Long receivablePenaltyAccountId;
+        @Schema(description = "Charges offered by the product. Replaces the current list when provided.")
+        public List<WorkingCapitalLoanProductChargeData> charges;
         public List<PostWorkingCapitalLoanProductsRequest.WorkingCapitalLoanPaymentChannelToFundSourceMappings> paymentChannelToFundSourceMappings;
         public List<PostWorkingCapitalLoanProductsRequest.WorkingCapitalLoanProductChargeToGLAccountMapper> feeToIncomeAccountMappings;
         public List<PostWorkingCapitalLoanProductsRequest.WorkingCapitalLoanProductChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
