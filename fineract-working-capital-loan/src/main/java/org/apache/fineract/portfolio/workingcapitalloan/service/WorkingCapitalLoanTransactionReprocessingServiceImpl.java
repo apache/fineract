@@ -74,6 +74,7 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
     private final BusinessEventNotifierService businessEventNotifierService;
     private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     private final WorkingCapitalLoanAdjustTransactionEventPublisher adjustTransactionEventPublisher;
+    private final WorkingCapitalLoanDisbursementChargeWriteService disbursementChargeWriteService;
 
     @Override
     public void reprocessTransactions(final WorkingCapitalLoan loan) {
@@ -261,6 +262,9 @@ public class WorkingCapitalLoanTransactionReprocessingServiceImpl implements Wor
         chargePaidByRepository.deleteByLoanId(loan.getId());
 
         final List<WorkingCapitalLoanChargePaidBy> rebuiltChargesPaidBy = new ArrayList<>();
+        // The charges settled at disbursement are a fixed fact, not a repayment to re-allocate: restore them first so
+        // the replayed repayments never see them as outstanding.
+        rebuiltChargesPaidBy.addAll(disbursementChargeWriteService.reapplyOnReprocess(loan, balance, charges, allTransactions));
 
         final Map<Long, WorkingCapitalLoanCharge> chargesById = charges.stream()
                 .collect(Collectors.toMap(WorkingCapitalLoanCharge::getId, Function.identity()));

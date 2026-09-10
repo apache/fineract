@@ -192,6 +192,11 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
         final Long chargeDefinitionId = command.longValueOfParameterNamed("chargeId");
         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
 
+        if (!chargeDefinition.isLoanCharge()) {
+            final String errorMessage = "Charge with identifier " + chargeDefinition.getId() + " cannot be applied to Loan account.";
+            throw new ChargeCannotBeAppliedToException("loan", errorMessage, chargeDefinition.getId());
+        }
+
         if (loan.isDisbursed() && chargeDefinition.isDisbursementCharge()) {
             // validates whether any pending disbursements are available to
             // apply this charge

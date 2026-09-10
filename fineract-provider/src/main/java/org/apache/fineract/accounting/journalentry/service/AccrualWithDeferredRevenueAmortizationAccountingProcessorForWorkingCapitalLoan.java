@@ -41,8 +41,10 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanChargePaidBy;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargePaidByRepository;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -54,6 +56,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
 
     private final AccountingProcessorHelper helper;
     private final JournalEntryRepository journalEntryRepository;
+    private final WorkingCapitalLoanChargePaidByRepository chargePaidByRepository;
 
     @Override
     public void postJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
@@ -90,6 +93,10 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
 
         static LedgerPosting credit(final CashAccountsForLoan account, final BigDecimal amount) {
             return new LedgerPosting(account, null, false, MathUtil.nullToZero(amount), true);
+        }
+
+        static LedgerPosting credit(final GLAccount account, final BigDecimal amount) {
+            return new LedgerPosting(null, account, false, MathUtil.nullToZero(amount), true);
         }
 
         static LedgerPosting creditWithoutPaymentDetail(final CashAccountsForLoan account, final BigDecimal amount) {
@@ -132,6 +139,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             case LoanTransactionType.CHARGE_OFF -> chargeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion);
             case LoanTransactionType.WRITEOFF -> writeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion, isChargedOff);
             case LoanTransactionType.RECOVERY_REPAYMENT -> recoveryPaymentPostings(txn);
+            case LoanTransactionType.REPAYMENT_AT_DISBURSEMENT -> repaymentAtDisbursementPostings(loan, txn);
             default -> throw new NotImplementedException(
                     "Post Journal Entries is not implemented yet for " + txn.getTypeOf().getCode() + " for Working Capital Loan");
         };
@@ -206,6 +214,29 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
                 LedgerPosting.credit(CashAccountsForLoan.LOAN_PORTFOLIO, principalPortion),
                 LedgerPosting.credit(CashAccountsForLoan.FEES_RECEIVABLE, feesPortion),
                 LedgerPosting.credit(CashAccountsForLoan.PENALTIES_RECEIVABLE, penaltiesPortion));
+    }
+
+    /**
+     * Charges settled out of the disbursed money: income is recognized immediately, one credit leg per charge so each
+     * one can route to its own income account when the product maps it (charge-specific advanced accounting mapping),
+     * falling back to the product-level fee / penalty income account. The debit is the whole amount against the fund
+     * source. Mirrors Term Loan's repayment-at-disbursement under accrual accounting.
+     */
+    private List<LedgerPosting> repaymentAtDisbursementPostings(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn) {
+        final Long productId = loan.getLoanProduct().getId();
+        final List<WorkingCapitalLoanChargePaidBy> paidLines = chargePaidByRepository.findByTransactionIdIn(List.of(txn.getId()));
+
+        final List<LedgerPosting> postings = new java.util.ArrayList<>();
+        postings.add(LedgerPosting.debit(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount()));
+        for (final WorkingCapitalLoanChargePaidBy line : paidLines) {
+            final boolean penalty = line.getWcLoanCharge().isPenaltyCharge();
+            final CashAccountsForLoan incomeType = penalty ? CashAccountsForLoan.INCOME_FROM_PENALTIES
+                    : CashAccountsForLoan.INCOME_FROM_FEES;
+            final GLAccount incomeAccount = helper.getLinkedGLAccountForWorkingCapitalLoanCharge(productId, incomeType.getValue(),
+                    line.getWcLoanCharge().getCharge().getId());
+            postings.add(LedgerPosting.credit(incomeAccount, line.getAmount()));
+        }
+        return postings;
     }
 
     /**

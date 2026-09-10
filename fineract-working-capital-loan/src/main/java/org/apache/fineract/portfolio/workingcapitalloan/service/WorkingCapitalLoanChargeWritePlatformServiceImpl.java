@@ -45,9 +45,6 @@ import org.apache.fineract.infrastructure.event.business.domain.workingcapitallo
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanChargeAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
-import org.apache.fineract.portfolio.charge.domain.Charge;
-import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
-import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRelationTypeEnum;
@@ -90,7 +87,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
 
     private final WorkingCapitalLoanChargeDataValidator loanChargeDataValidator;
     private final WorkingCapitalLoanRepository workingCapitalLoanRepository;
-    private final ChargeRepositoryWrapper chargeRepository;
+    private final WorkingCapitalLoanChargeAssembler chargeAssembler;
     private final WorkingCapitalLoanChargeRepository loanChargeRepository;
     private final ExternalIdFactory externalIdFactory;
     private final WorkingCapitalLoanBalanceRepository balanceRepository;
@@ -129,6 +126,20 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         WorkingCapitalLoanCharge loanCharge = assemblyChargeFromCommand(loan, command);
 
         loanCharge = loanChargeRepository.saveAndFlush(loanCharge);
+
+        // A disbursement charge is not an obligation yet: it is settled out of the disbursed money when the loan is
+        // disbursed, so it touches neither the balance nor the lifecycle nor the accrual until then.
+        if (loanCharge.isDisbursementCharge()) {
+            businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanAddChargeBusinessEvent(loanCharge));
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(loanCharge.getId()) //
+                    .withEntityExternalId(loanCharge.getExternalId()) //
+                    .withOfficeId(loan.getOfficeId()) //
+                    .withClientId(loan.getClientId()) //
+                    .withLoanId(loanId) //
+                    .build();
+        }
 
         final WorkingCapitalLoanBalance balance = balanceRepository.findByWcLoan_Id(loan.getId())
                 .orElseGet(() -> WorkingCapitalLoanBalance.createFor(loan));
@@ -452,12 +463,7 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         final LocalDate dueDate = command.dateValueOfParameterNamed("dueDate");
         final Long chargeId = command.longValueOfParameterNamed("chargeId");
         final ExternalId externalId = externalIdFactory.createFromCommand(command, WorkingCapitalLoanConstants.externalIdParameterName);
-
-        final Charge chargeDefinition = chargeRepository.findOneWithNotFoundDetection(chargeId);
-        loanChargeDataValidator.validateCreateLoanChargeAgainstLoan(loan.getLoanStatus(),
-                ChargeTimeType.fromInt(chargeDefinition.getChargeTimeType()), dueDate, ThreadLocalContextUtil.getBusinessDate());
-        return WorkingCapitalLoanCharge.build(loan, externalId, chargeDefinition, amount, dueDate,
-                ThreadLocalContextUtil.getBusinessDate());
+        return chargeAssembler.assemble(loan, chargeId, amount, dueDate, externalId);
     }
 
     private void addChargeToBalance(final WorkingCapitalLoanBalance balance, final WorkingCapitalLoanCharge loanCharge) {

@@ -214,6 +214,12 @@ public interface AccountingProcessorHelper {
     GLAccount getLinkedGLAccountForWorkingCapitalLoanProduct(Long workingCapitalLoanProductId, int accountMappingTypeId,
             Long paymentTypeId);
 
+    /**
+     * Resolves the account for a charge on a Working Capital loan product: the charge-specific mapping when the product
+     * has one for that charge, otherwise the product-level mapping of the given account type.
+     */
+    GLAccount getLinkedGLAccountForWorkingCapitalLoanCharge(Long workingCapitalLoanProductId, int accountMappingTypeId, Long chargeId);
+
     void createCreditJournalEntryForWorkingCapitalLoan(Office office, String currencyCode, GLAccount account, Long workingCapitalLoanId,
             Long workingCapitalLoanTransactionId, LocalDate transactionDate, BigDecimal amount, PaymentDetail paymentDetail);
 

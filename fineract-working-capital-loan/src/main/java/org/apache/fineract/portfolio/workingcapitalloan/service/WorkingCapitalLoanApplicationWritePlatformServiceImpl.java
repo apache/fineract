@@ -19,28 +19,47 @@
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import jakarta.persistence.PersistenceException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.infrastructure.core.service.ExternalIdFactory;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanApplicationModifiedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanCreatedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.portfolio.loanaccount.service.LoanOriginatorLinkingService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanNote;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanApplicationNotInSubmittedStateCannotBeDeletedException;
+import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanChargeNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.ProjectedAmortizationLoanModelRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanChargeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanNoteRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanApplicationDataValidator;
+import org.apache.fineract.portfolio.workingcapitalloan.serialization.WorkingCapitalLoanChargeConstants;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -57,12 +76,17 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
     private final ProjectedAmortizationLoanModelRepository projectedAmortizationLoanModelRepository;
     private final Optional<LoanOriginatorLinkingService> loanOriginatorLinkingService;
     private final BusinessEventNotifierService businessEventNotifierService;
+    private final WorkingCapitalLoanChargeAssembler chargeAssembler;
+    private final WorkingCapitalLoanChargeRepository chargeRepository;
+    private final FromJsonHelper fromApiJsonHelper;
+    private final ExternalIdFactory externalIdFactory;
 
     public WorkingCapitalLoanApplicationWritePlatformServiceImpl(WorkingCapitalLoanApplicationDataValidator validator,
             WorkingCapitalLoanRepository repository, WorkingCapitalLoanAssembler assembler, WorkingCapitalLoanNoteRepository noteRepository,
             ProjectedAmortizationLoanModelRepository projectedAmortizationLoanModelRepository,
             @Qualifier("workingCapitalLoanOriginatorLinkingServiceImpl") Optional<LoanOriginatorLinkingService> loanOriginatorLinkingService,
-            BusinessEventNotifierService businessEventNotifierService) {
+            BusinessEventNotifierService businessEventNotifierService, WorkingCapitalLoanChargeAssembler chargeAssembler,
+            WorkingCapitalLoanChargeRepository chargeRepository, FromJsonHelper fromApiJsonHelper, ExternalIdFactory externalIdFactory) {
         this.validator = validator;
         this.repository = repository;
         this.assembler = assembler;
@@ -70,6 +94,10 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
         this.projectedAmortizationLoanModelRepository = projectedAmortizationLoanModelRepository;
         this.loanOriginatorLinkingService = loanOriginatorLinkingService;
         this.businessEventNotifierService = businessEventNotifierService;
+        this.chargeAssembler = chargeAssembler;
+        this.chargeRepository = chargeRepository;
+        this.fromApiJsonHelper = fromApiJsonHelper;
+        this.externalIdFactory = externalIdFactory;
     }
 
     @Transactional
@@ -84,6 +112,7 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
             final String submittedOnNote = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.submittedOnNoteParameterName);
             createNote(submittedOnNote, saved);
             attachOriginatorsIfProvided(command, saved);
+            attachChargesIfProvided(command, saved);
 
             this.businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanCreatedBusinessEvent(saved));
 
@@ -113,10 +142,11 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
             // Validations (prior assembling)
             this.validator.validateForUpdate(command, loan);
             // Assembling
-            final Map<String, Object> changes = this.assembler.updateFrom(command, loan);
+            final Map<String, Object> changes = new LinkedHashMap<>(this.assembler.updateFrom(command, loan));
             // Validations (further validations which require the assembled entity)
             this.validator.validateForModify(loan);
             final WorkingCapitalLoan saved = this.repository.saveAndFlush(loan);
+            replaceChargesIfProvided(command, saved, changes);
             final String submittedOnNote = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.submittedOnNoteParameterName);
             createNote(submittedOnNote, saved);
 
@@ -179,6 +209,130 @@ public class WorkingCapitalLoanApplicationWritePlatformServiceImpl implements Wo
             if (originatorsArray != null && !originatorsArray.isEmpty()) {
                 this.loanOriginatorLinkingService.get().processOriginatorsForLoanApplication(loan.getId(), originatorsArray);
             }
+        }
+    }
+
+    /** One entry of the request's {@code charges} array, already parsed. */
+    private record ChargeRequestItem(Long id, Long chargeId, BigDecimal amount, LocalDate dueDate, ExternalId externalId) {
+    }
+
+    /** @return the parsed entries, or null when the request carries no {@code charges} array at all */
+    private List<ChargeRequestItem> parseChargeItems(final JsonCommand command) {
+        if (!command.parameterExists(WorkingCapitalLoanConstants.chargesParameterName)) {
+            return null;
+        }
+        final JsonArray array = command.arrayOfParameterNamed(WorkingCapitalLoanConstants.chargesParameterName);
+        if (array == null) {
+            return null;
+        }
+        final JsonObject topLevel = command.parsedJson().getAsJsonObject();
+        final String dateFormat = this.fromApiJsonHelper.extractDateFormatParameter(topLevel);
+        final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevel);
+
+        final List<ChargeRequestItem> items = new ArrayList<>();
+        for (final JsonElement element : array) {
+            final JsonObject chargeElement = element.getAsJsonObject();
+            final Long id = this.fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanConstants.idParameterName, chargeElement);
+            final Long chargeId = this.fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanChargeConstants.chargeIdParamName,
+                    chargeElement);
+            final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanChargeConstants.amountParamName,
+                    chargeElement, locale);
+            final LocalDate dueDate = this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanChargeConstants.dueDateParamName,
+                    chargeElement)
+                            ? this.fromApiJsonHelper.extractLocalDateNamed(WorkingCapitalLoanChargeConstants.dueDateParamName,
+                                    chargeElement, dateFormat, locale)
+                            : null;
+            final ExternalId externalId = externalIdFactory.create(
+                    this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanChargeConstants.externalIdParamName, chargeElement));
+            items.add(new ChargeRequestItem(id, chargeId, amount, dueDate, externalId));
+        }
+        return items;
+    }
+
+    /**
+     * Charges sent with the application. Each one goes through the same assembly and rules as {@code POST
+     * /working-capital-loans/{loanId}/charges} would apply to a loan pending approval, so in practice only disbursement
+     * charges pass. Nothing else happens on creation: no balance, no lifecycle, no accrual - a disbursement charge is
+     * settled when the loan is disbursed.
+     */
+    private void attachChargesIfProvided(final JsonCommand command, final WorkingCapitalLoan loan) {
+        final List<ChargeRequestItem> items = parseChargeItems(command);
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+        final Set<Long> seenChargeIds = new HashSet<>();
+        final List<WorkingCapitalLoanCharge> charges = new ArrayList<>();
+        for (final ChargeRequestItem item : items) {
+            rejectDuplicateChargeId(seenChargeIds, item.chargeId());
+            charges.add(chargeAssembler.assemble(loan, item.chargeId(), item.amount(), item.dueDate(), item.externalId()));
+        }
+        chargeRepository.saveAllAndFlush(charges);
+    }
+
+    /**
+     * Replaces the loan's active charges with the request's list: an entry with {@code id} updates that charge's
+     * amount, an entry without {@code id} adds a new charge, and active charges not referenced are retired
+     * ({@code active =
+     * false}). The disbursement settles exactly the charges left on the loan.
+     */
+    private void replaceChargesIfProvided(final JsonCommand command, final WorkingCapitalLoan loan, final Map<String, Object> changes) {
+        final List<ChargeRequestItem> items = parseChargeItems(command);
+        if (items == null) {
+            return;
+        }
+        final List<WorkingCapitalLoanCharge> activeCharges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loan.getId());
+        final Map<Long, WorkingCapitalLoanCharge> activeById = activeCharges.stream()
+                .collect(Collectors.toMap(WorkingCapitalLoanCharge::getId, Function.identity()));
+        final Set<Long> keptIds = new HashSet<>();
+
+        for (final ChargeRequestItem item : items) {
+            if (item.id() == null) {
+                continue;
+            }
+            final WorkingCapitalLoanCharge existing = activeById.get(item.id());
+            if (existing == null) {
+                throw new WorkingCapitalLoanChargeNotFoundException(item.id());
+            }
+            if (item.chargeId() != null && !existing.getCharge().getId().equals(item.chargeId())) {
+                throw new PlatformApiDataValidationException(
+                        "charge.id.does.not.match.existing.charge", "chargeId " + item.chargeId() + " does not match charge "
+                                + existing.getCharge().getId() + " of loan charge " + item.id(),
+                        WorkingCapitalLoanChargeConstants.chargeIdParamName);
+            }
+            if (item.amount() != null) {
+                chargeAssembler.updateAmount(loan, existing, item.amount());
+            }
+            keptIds.add(item.id());
+        }
+
+        // The product catalogue is a default, not a contract: the loan carries exactly the charges the application
+        // decided on, so any of them may be retired here.
+        final Set<Long> seenChargeIds = new HashSet<>();
+        for (final WorkingCapitalLoanCharge existing : activeCharges) {
+            if (keptIds.contains(existing.getId())) {
+                seenChargeIds.add(existing.getCharge().getId());
+                continue;
+            }
+            existing.setActive(false);
+        }
+
+        final List<WorkingCapitalLoanCharge> toSave = new ArrayList<>(activeCharges);
+        for (final ChargeRequestItem item : items) {
+            if (item.id() != null) {
+                continue;
+            }
+            rejectDuplicateChargeId(seenChargeIds, item.chargeId());
+            toSave.add(chargeAssembler.assemble(loan, item.chargeId(), item.amount(), item.dueDate(), item.externalId()));
+        }
+        chargeRepository.saveAllAndFlush(toSave);
+        changes.put(WorkingCapitalLoanConstants.chargesParameterName,
+                command.jsonFragment(WorkingCapitalLoanConstants.chargesParameterName));
+    }
+
+    private static void rejectDuplicateChargeId(final Set<Long> seenChargeIds, final Long chargeId) {
+        if (!seenChargeIds.add(chargeId)) {
+            throw new PlatformApiDataValidationException("validation.msg.workingCapitalLoan.charges.duplicate.chargeId",
+                    "Charge " + chargeId + " is listed more than once", WorkingCapitalLoanConstants.chargesParameterName, chargeId);
         }
     }
 }

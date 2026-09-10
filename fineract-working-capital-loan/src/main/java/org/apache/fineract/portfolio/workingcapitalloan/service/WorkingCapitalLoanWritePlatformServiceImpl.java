@@ -133,6 +133,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
     private final WorkingCapitalLoanTransactionProcessor transactionProcessor;
     private final WorkingCapitalLoanChargeAccrualService chargeAccrualService;
+    private final WorkingCapitalLoanDisbursementChargeWriteService disbursementChargeWriteService;
     private final WorkingCapitalLoanTransactionFinder transactionFinder;
 
     @Override
@@ -394,6 +395,10 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             discountTransactionId = discountTransaction.getId();
             discountTxnExternalId = discountTransaction.getExternalId();
         }
+        // Charges due at disbursement are settled out of the disbursed money; the principal owed stays the full amount.
+        disbursementChargeWriteService.settleChargesAtDisbursement(loan, disbursementTransaction, transactionAmount, actualDisbursementDate,
+                paymentDetail);
+
         updateBalanceOnDisburse(loan, transactionAmount);
         amortizationScheduleWriteService.generateAndSaveAmortizationScheduleOnDisbursement(loan, transactionAmount, actualDisbursementDate);
         generateInitialDelinquencyAndBreachPeriods(loan);
@@ -444,6 +449,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final WorkingCapitalLoanTransaction reversedTransaction = reverseDisbursementTransactionAndResetBalance(loan);
         businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent(reversedTransaction, loan.getId()));
+        disbursementChargeWriteService.reverseChargesOnUndoDisbursal(loan);
 
         if (loan.getDisbursementDetails() != null) {
             for (WorkingCapitalLoanDisbursementDetails detail : loan.getDisbursementDetails()) {
@@ -1351,6 +1357,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 continue;
             }
             if (txn.getTypeOf() != LoanTransactionType.DISBURSEMENT && txn.getTypeOf() != LoanTransactionType.DISCOUNT_FEE
+                    && txn.getTypeOf() != LoanTransactionType.REPAYMENT_AT_DISBURSEMENT
                     && txn.getTypeOf() != LoanTransactionType.DISCOUNT_FEE_ADJUSTMENT
                     && txn.getTypeOf() != LoanTransactionType.DISCOUNT_FEE_AMORTIZATION
                     && txn.getTypeOf() != LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT

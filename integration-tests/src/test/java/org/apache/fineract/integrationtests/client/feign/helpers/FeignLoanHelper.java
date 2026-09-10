@@ -153,6 +153,10 @@ public class FeignLoanHelper {
         return ok(() -> fineractClient.loanProducts().createLoanProduct(request));
     }
 
+    public CallFailedRuntimeException createLoanProductExpectingError(PostLoanProductsRequest request) {
+        return fail(() -> fineractClient.loanProducts().createLoanProduct(request));
+    }
+
     @SuppressWarnings("unchecked")
     private <T> T extractErrorAttribute(CallFailedRuntimeException exception, String jsonAttributeToGetBack) {
         if (!(exception.getCause() instanceof org.apache.fineract.client.feign.FeignException feignException)) {
@@ -193,6 +197,10 @@ public class FeignLoanHelper {
 
     public PostLoansResponse applyForLoan(PostLoansRequest request) {
         return ok(() -> fineractClient.loans().calculateOrSubmitLoanApplication(request, (String) null));
+    }
+
+    public CallFailedRuntimeException applyForLoanExpectingError(PostLoansRequest request) {
+        return fail(() -> fineractClient.loans().calculateOrSubmitLoanApplication(request, (String) null));
     }
 
     public PostLoansResponse calculateLoanSchedule(PostLoansRequest request) {

@@ -78,6 +78,10 @@ public class WorkingCapitalLoanCharge extends AbstractAuditableWithUTCDateTimeCu
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
+    /** Rate of a percentage-based charge; null for flat charges. Kept to re-resolve the amount at disbursement. */
+    @Column(name = "percentage", scale = 6, precision = 19)
+    private BigDecimal percentage;
+
     @Column(name = "amount_paid", scale = 6, precision = 19)
     private BigDecimal amountPaid;
 
@@ -116,9 +120,23 @@ public class WorkingCapitalLoanCharge extends AbstractAuditableWithUTCDateTimeCu
         return MathUtil.subtract(getAmount(), getAmountPaid(), getAmountWrittenOff());
     }
 
+    public boolean isDisbursementCharge() {
+        return ChargeTimeType.DISBURSEMENT.equals(this.chargeTimeType);
+    }
+
+    public boolean isPercentageBased() {
+        return this.chargeCalculationType != null && this.chargeCalculationType.isPercentageBased();
+    }
+
     public static WorkingCapitalLoanCharge build(WorkingCapitalLoan loan, ExternalId externalId, Charge charge, BigDecimal amount,
             LocalDate dueDate, LocalDate submittedOnDate) {
+        return build(loan, externalId, charge, amount, null, dueDate, submittedOnDate);
+    }
+
+    public static WorkingCapitalLoanCharge build(WorkingCapitalLoan loan, ExternalId externalId, Charge charge, BigDecimal amount,
+            BigDecimal percentage, LocalDate dueDate, LocalDate submittedOnDate) {
         WorkingCapitalLoanCharge res = new WorkingCapitalLoanCharge();
+        res.setPercentage(percentage);
         res.setLoan(loan);
         res.setCharge(charge);
         res.setChargeTimeType(ChargeTimeType.fromInt(charge.getChargeTimeType()));

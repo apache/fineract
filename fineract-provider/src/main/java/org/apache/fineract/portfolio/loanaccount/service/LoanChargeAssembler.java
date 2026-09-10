@@ -41,6 +41,7 @@ import org.apache.fineract.portfolio.charge.domain.ChargeCalculationType;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.charge.domain.ChargeTimeType;
+import org.apache.fineract.portfolio.charge.exception.ChargeCannotBeAppliedToException;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.apache.fineract.portfolio.charge.exception.LoanChargeWithoutMandatoryFieldException;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
@@ -120,6 +121,11 @@ public class LoanChargeAssembler {
                     final ExternalId externalId = externalIdFactory.create(externalIdStr);
                     if (loanChargeId == null) {
                         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeId);
+                        if (!chargeDefinition.isLoanCharge()) {
+                            final String errorMessage = "Charge with identifier " + chargeDefinition.getId()
+                                    + " cannot be applied to Loan account.";
+                            throw new ChargeCannotBeAppliedToException("loan", errorMessage, chargeDefinition.getId());
+                        }
                         ChargeTimeType chargeTime = null;
                         if (chargeTimeType != null) {
                             chargeTime = ChargeTimeType.fromInt(chargeTimeType);

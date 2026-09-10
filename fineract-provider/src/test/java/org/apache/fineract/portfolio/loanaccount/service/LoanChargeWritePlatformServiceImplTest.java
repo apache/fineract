@@ -172,6 +172,7 @@ class LoanChargeWritePlatformServiceImplTest {
     void setUp() {
         when(loanAssembler.assembleFrom(LOAN_ID)).thenReturn(loan);
         when(chargeRepository.findOneWithNotFoundDetection(anyLong())).thenReturn(chargeDefinition);
+        when(chargeDefinition.isLoanCharge()).thenReturn(true);
         when(chargeDefinition.getChargeTimeType()).thenReturn(SPECIFIED_DUE_DATE);
         when(chargeDefinition.getCurrencyCode()).thenReturn(CURRENCY_CODE);
         when(loanChargeAssembler.createNewFromJson(loan, chargeDefinition, jsonCommand)).thenReturn(loanCharge);
