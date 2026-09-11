@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
@@ -55,6 +56,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
@@ -62,7 +64,9 @@ import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlat
 import org.apache.fineract.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.apache.fineract.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.apache.fineract.portfolio.note.domain.NoteRepository;
+import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.apache.fineract.portfolio.savings.api.SavingsApiConstants;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountChargeDataValidator;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountDataValidator;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountTransactionDataValidator;
@@ -243,6 +247,39 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         when(savingsAccount.getTransactions()).thenReturn(List.of(transaction));
 
         assertThatNoException().isThrownBy(() -> validateTransactionsForTransfer.invoke(service, savingsAccount, transferDate));
+    }
+
+    @Test
+    void deposit_validatesOfficeHierarchyAccess() {
+        Long savingsId = 1L;
+        LocalDate transactionDate = LocalDate.of(2024, 4, 2);
+        BigDecimal amount = BigDecimal.TEN;
+        ExternalId externalId = ExternalId.generate();
+        Office office = mock(Office.class);
+        SavingsAccount account = mock(SavingsAccount.class);
+        SavingsAccountTransaction deposit = mock(SavingsAccountTransaction.class);
+        JsonCommand command = mock(JsonCommand.class);
+        PaymentDetail paymentDetail = mock(PaymentDetail.class);
+
+        when(command.extractLocale()).thenReturn(Locale.ENGLISH);
+        when(command.dateFormat()).thenReturn("dd MMM yyyy");
+        when(command.localDateValueOfParameterNamed("transactionDate")).thenReturn(transactionDate);
+        when(command.bigDecimalValueOfParameterNamed("transactionAmount")).thenReturn(amount);
+        when(command.stringValueOfParameterNamed("note")).thenReturn(null);
+        when(this.externalIdFactory.createFromCommand(command, SavingsApiConstants.externalIdParamName)).thenReturn(externalId);
+        when(this.savingAccountAssembler.getPivotConfigStatus()).thenReturn(false);
+        when(this.savingAccountAssembler.assembleFrom(savingsId, false)).thenReturn(account);
+        when(account.office()).thenReturn(office);
+        when(office.getHierarchy()).thenReturn("1.2");
+        when(this.paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, any())).thenReturn(paymentDetail);
+        when(this.savingsAccountDomainService.handleDeposit(account, any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean()))
+                .thenReturn(deposit);
+        when(deposit.getId()).thenReturn(1L);
+        when(this.savingsAccountTransactionRepository.save(deposit)).thenReturn(deposit);
+
+        service.deposit(savingsId, command);
+
+        verify(context).validateAccessRights("1.2");
     }
 
     @Test
