@@ -23,9 +23,10 @@ jobs:
           PR_SHA: ${{ github.event.pull_request.head.sha }}
           PR_BASE_REF: ${{ github.base_ref }}
           PR_HEAD_REF: ${{ github.head_ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          payload=$(python3 -c 'import json,os; print(json.dumps({"owner":os.environ["PR_OWNER"],"repo":os.environ["PR_REPO"],"sha":os.environ["PR_SHA"],"base_ref":os.environ["PR_BASE_REF"],"pr_ref":os.environ["PR_HEAD_REF"]}))')
+          payload=$(python3 -c 'import json,os; print(json.dumps({"owner":os.environ["PR_OWNER"],"repo":os.environ["PR_REPO"],"sha":os.environ["PR_SHA"],"base_ref":os.environ["PR_BASE_REF"],"pr_ref":os.environ["PR_HEAD_REF"],"pull_request_number":int(os.environ["PR_NUMBER"])}))')
           # The gate is invoked asynchronously (API Gateway returns 202 immediately);
           # the verdict is posted out-of-band to this PR's Checks card by the App.
           code=$(curl -sS -o /dev/null -w "%{http_code}" -X POST "$API_URL" \
