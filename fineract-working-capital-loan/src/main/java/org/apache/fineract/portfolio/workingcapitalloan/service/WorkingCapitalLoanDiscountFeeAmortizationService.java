@@ -27,18 +27,18 @@ public interface WorkingCapitalLoanDiscountFeeAmortizationService {
     void processDiscountFeeAmortization(WorkingCapitalLoan loan, LocalDate transactionDate);
 
     /**
-     * Recognizes the entire unreleased discount-fee deferred income balance as of charge-off in one shot, crediting the
-     * charge-off expense account instead of discount-fee income, and links the resulting transaction to
-     * {@code chargeOffTransaction} so it can be found and reversed on undo. No-op if there is nothing left to
-     * recognize.
+     * Recognizes the entire unreleased discount-fee deferred income balance in one shot as of a terminal event
+     * (charge-off or write-off), crediting the matching expense account instead of discount-fee income, and links the
+     * resulting transaction to {@code relatedTransaction} so it can be found and reversed on undo. No-op if there is
+     * nothing left to recognize.
      */
-    void processFinalDiscountFeeAmortizationOnChargeOff(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction chargeOffTransaction);
+    void processFinalDiscountFeeAmortization(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction relatedTransaction);
 
     /**
      * Reverses the discount-fee amortization transaction (and its journal entries) created by
-     * {@link #processFinalDiscountFeeAmortizationOnChargeOff} for {@code chargeOffTransaction}, if any.
+     * {@link #processFinalDiscountFeeAmortization} for {@code relatedTransaction}, if any.
      */
-    void undoDiscountFeeAmortizationOnChargeOff(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction chargeOffTransaction);
+    void undoFinalDiscountFeeAmortization(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction relatedTransaction);
 
     /**
      * Recomputes {@code realizedIncomeFromDiscountFee} on the loan balance from the database aggregate of non-reversed
