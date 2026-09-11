@@ -102,4 +102,5 @@
   <include relativeToChangelogFile="true" file="parts/0078_wc_loan_overpaid_on_date.xml"/>
   <include relativeToChangelogFile="true" file="parts/0079_wc_period_payment_rate_change_eir_history.xml"/>
   <include relativeToChangelogFile="true" file="parts/0080_wc_charge_accrual_time.xml"/>
+  <include relativeToChangelogFile="true" file="parts/0081_wc_loan_charge_waiver.xml"/>
 </databaseChangeLog>

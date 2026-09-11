@@ -16,17 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.test.messaging.event.workingcapitalloan.transaction;
 
-package org.apache.fineract.portfolio.workingcapitalloan.service;
+public class WorkingCapitalLoanChargeWaiverTransactionBusinessEvent extends AbstractWorkingCapitalLoanTransactionEvent {
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-
-public interface WorkingCapitalLoanChargeWritePlatformService {
-
-    CommandProcessingResult createLoanCharge(Long loanId, JsonCommand command);
-
-    CommandProcessingResult adjustmentForLoanCharge(Long loanId, Long wcLoanChargeId, JsonCommand command);
-
-    CommandProcessingResult waiveLoanCharge(Long loanId, Long wcLoanChargeId, JsonCommand command);
+    @Override
+    public String getEventName() {
+        return "WorkingCapitalLoanChargeWaiverTransactionBusinessEvent";
+    }
 }

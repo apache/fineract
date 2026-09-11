@@ -1192,6 +1192,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder waiveWorkingCapitalLoanCharge(final Long loanId, final Long loanChargeId) {
+        this.actionName = ACTION_WAIVE;
+        this.entityName = ENTITY_WORKINGCAPITALLOANCHARGE;
+        this.entityId = loanChargeId;
+        this.loanId = loanId;
+        this.href = "/working-capital-loans/" + loanId + "/charges/" + loanChargeId;
+        return this;
+    }
+
     public CommandWrapperBuilder updateLoanCharge(final Long loanId, final Long loanChargeId) {
         this.actionName = ACTION_UPDATE;
         this.entityName = ENTITY_LOANCHARGE;

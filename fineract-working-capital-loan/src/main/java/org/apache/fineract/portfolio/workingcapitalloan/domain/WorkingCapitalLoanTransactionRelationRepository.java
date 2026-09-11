@@ -19,6 +19,8 @@
 
 package org.apache.fineract.portfolio.workingcapitalloan.domain;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
@@ -60,4 +62,35 @@ public interface WorkingCapitalLoanTransactionRelationRepository
             """)
     List<ChargeIdAndAmountHolder> fetchTransactionAmountPerCharge(@Param("wcLoanId") Long wcLoanId,
             @Param("transactionType") LoanTransactionType transactionType);
+
+    @Query("""
+            SELECT COALESCE(SUM(r.fromTransaction.transactionAmount), 0)
+            FROM WorkingCapitalLoanTransactionRelation r
+            WHERE r.toCharge = :charge
+            AND r.fromTransaction.reversed = FALSE
+            AND r.fromTransaction.transactionType = :transactionType
+            """)
+    BigDecimal fetchTransactionAmountForCharge(@Param("charge") WorkingCapitalLoanCharge charge,
+            @Param("transactionType") LoanTransactionType transactionType);
+
+    /**
+     * Charge-linked transactions that sort after the given one, split by whether the charge they address is a penalty.
+     * The order is the replay order of {@link WorkingCapitalLoanTransactionComparator}: the transaction date decides,
+     * and same-date transactions fall back to the id. The id stands in for the comparator's submitted-on and creation
+     * keys, which it agrees with as long as the business date does not run backwards: ids come from an identity column,
+     * and the submitted-on date is the business date the transaction was booked on.
+     */
+    @Query("""
+            SELECT COALESCE(SUM(r.fromTransaction.transactionAmount), 0)
+            FROM WorkingCapitalLoanTransactionRelation r
+            WHERE r.fromTransaction.wcLoan.id = :wcLoanId
+            AND r.fromTransaction.transactionType = :transactionType
+            AND r.fromTransaction.reversed = FALSE
+            AND r.toCharge.penaltyCharge = :penalty
+            AND (r.fromTransaction.transactionDate > :afterTransactionDate
+                 OR (r.fromTransaction.transactionDate = :afterTransactionDate AND r.fromTransaction.id > :afterTransactionId))
+            """)
+    BigDecimal sumAmountForChargesSortingAfter(@Param("wcLoanId") Long wcLoanId,
+            @Param("transactionType") LoanTransactionType transactionType, @Param("afterTransactionDate") LocalDate afterTransactionDate,
+            @Param("afterTransactionId") Long afterTransactionId, @Param("penalty") boolean penalty);
 }
