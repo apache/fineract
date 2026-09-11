@@ -34,4 +34,7 @@ public interface EntityDatatableChecksWritePlatformService {
 
     boolean saveDatatables(Integer status, String entity, Long entityId, Long productId, JsonArray data);
 
+    boolean saveDatatables(Integer status, String entity, Long entityId, Long productId,
+            java.util.List<org.apache.fineract.portfolio.group.data.DatatableEntry> datatableEntries);
+
 }

@@ -29,10 +29,10 @@ import org.apache.fineract.client.models.DeleteGroupsGroupIdResponse;
 import org.apache.fineract.client.models.GetGroupsGroupIdClientMembers;
 import org.apache.fineract.client.models.GetGroupsGroupIdResponse;
 import org.apache.fineract.client.models.GetGroupsPageItems;
+import org.apache.fineract.client.models.GroupCreateResponse;
 import org.apache.fineract.client.models.PostGroupsGroupIdChanges;
 import org.apache.fineract.client.models.PostGroupsGroupIdRequest;
 import org.apache.fineract.client.models.PostGroupsRequest;
-import org.apache.fineract.client.models.PostGroupsResponse;
 import org.apache.fineract.client.models.PutGroupsGroupIdRequest;
 import org.apache.fineract.client.models.PutGroupsGroupIdResponse;
 import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
@@ -60,12 +60,12 @@ public class FeignGroupHelper {
     }
 
     /** Creates a group in {@code pending} status (active=false) in the default office. */
-    public PostGroupsResponse createGroup() {
+    public GroupCreateResponse createGroup() {
         return createGroup(DEFAULT_OFFICE_ID);
     }
 
     /** Creates a group in {@code pending} status (active=false). */
-    public PostGroupsResponse createGroup(Long officeId) {
+    public GroupCreateResponse createGroup(Long officeId) {
         PostGroupsRequest request = new PostGroupsRequest()//
                 .officeId(officeId)//
                 .name(Utils.uniqueRandomStringGenerator("Group_Name_", 5))//
@@ -78,11 +78,11 @@ public class FeignGroupHelper {
     }
 
     /** Creates an {@code active} group in the default office. */
-    public PostGroupsResponse createActiveGroup() {
+    public GroupCreateResponse createActiveGroup() {
         return createActiveGroup(DEFAULT_OFFICE_ID, DEFAULT_ACTIVATION_DATE);
     }
 
-    public PostGroupsResponse createActiveGroup(Long officeId, String activationDate) {
+    public GroupCreateResponse createActiveGroup(Long officeId, String activationDate) {
         PostGroupsRequest request = new PostGroupsRequest()//
                 .officeId(officeId)//
                 .name(Utils.uniqueRandomStringGenerator("Group_Name_", 5))//
@@ -94,7 +94,7 @@ public class FeignGroupHelper {
         return createGroup(request);
     }
 
-    public PostGroupsResponse createGroup(PostGroupsRequest request) {
+    public GroupCreateResponse createGroup(PostGroupsRequest request) {
         return ok(() -> fineractClient.groups().createGroup(request));
     }
 

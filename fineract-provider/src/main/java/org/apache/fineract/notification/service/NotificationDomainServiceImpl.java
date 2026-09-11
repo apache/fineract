@@ -46,6 +46,7 @@ import org.apache.fineract.infrastructure.event.business.domain.share.ShareProdu
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.portfolio.client.domain.Client;
+import org.apache.fineract.portfolio.group.domain.Group;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransaction;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProduct;
@@ -120,9 +121,9 @@ public class NotificationDomainServiceImpl implements NotificationDomainService 
 
         @Override
         public void onBusinessEvent(GroupsCreateBusinessEvent event) {
-            CommandProcessingResult commandProcessingResult = event.get();
-            buildNotification("ACTIVATE_GROUP", "group", commandProcessingResult.getGroupId(), "New group created", "created",
-                    context.authenticatedUser().getId(), commandProcessingResult.getOfficeId());
+            Group group = event.get();
+            buildNotification("ACTIVATE_GROUP", "group", group.getId(), "New group created", "created", context.authenticatedUser().getId(),
+                    group.getOffice().getId());
         }
     }
 

@@ -26,8 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.UUID;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.GetGroupsGroupIdResponse;
+import org.apache.fineract.client.models.GroupCreateResponse;
 import org.apache.fineract.client.models.PostGroupsRequest;
-import org.apache.fineract.client.models.PostGroupsResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
@@ -87,7 +87,7 @@ public class GroupTest extends FeignLoanTestBase {
         globalConfigurationHelper.manageConfigurations(GlobalConfigurationConstants.ENABLE_AUTO_GENERATED_EXTERNAL_ID, true);
         try {
             final PostGroupsRequest request = groupRequest(null);
-            final PostGroupsResponse response = Calls.ok(FineractClientHelper.getFineractClient().groups.createGroup(request));
+            final GroupCreateResponse response = Calls.ok(FineractClientHelper.getFineractClient().groups.createGroup(request));
 
             final GetGroupsGroupIdResponse group = Calls
                     .ok(FineractClientHelper.getFineractClient().groups.retrieveOneGroup(response.getGroupId(), false, null));
@@ -102,7 +102,7 @@ public class GroupTest extends FeignLoanTestBase {
     public void testGroupCreationWithExternalIdIsPersisted() {
         final String externalId = UUID.randomUUID().toString();
         final PostGroupsRequest request = groupRequest(externalId);
-        final PostGroupsResponse response = Calls.ok(FineractClientHelper.getFineractClient().groups.createGroup(request));
+        final GroupCreateResponse response = Calls.ok(FineractClientHelper.getFineractClient().groups.createGroup(request));
 
         final GetGroupsGroupIdResponse group = Calls
                 .ok(FineractClientHelper.getFineractClient().groups.retrieveOneGroup(response.getGroupId(), false, null));
