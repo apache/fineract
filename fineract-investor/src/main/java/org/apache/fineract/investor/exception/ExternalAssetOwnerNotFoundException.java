@@ -27,8 +27,4 @@ public class ExternalAssetOwnerNotFoundException extends AbstractPlatformResourc
         super("error.msg.external.asset.owner.external.id",
                 String.format("External asset owner with external id: %s does not found", externalId.getValue()), externalId.getValue());
     }
-
-    public ExternalAssetOwnerNotFoundException(Long id) {
-        super("error.msg.external.asset.owner.id", String.format("External asset owner with id: %s does not found", id), id);
-    }
 }

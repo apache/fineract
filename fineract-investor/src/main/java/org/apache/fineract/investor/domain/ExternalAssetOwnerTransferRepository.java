@@ -44,9 +44,6 @@ public interface ExternalAssetOwnerTransferRepository
     @Query("SELECT e FROM ExternalAssetOwnerTransfer e WHERE e.externalId = :externalId")
     Page<ExternalAssetOwnerTransfer> findAllByExternalId(@Param("externalId") ExternalId externalId, PageRequest pageable);
 
-    @Query("select e from ExternalAssetOwnerTransfer e where e.loanId = :loanId and e.id = (select max(ex.id) from ExternalAssetOwnerTransfer ex where ex.loanId = :loanId)")
-    Optional<ExternalAssetOwnerTransfer> findLatestByLoanId(@Param("loanId") Long loanId);
-
     @Query("select m.ownerTransfer from ExternalAssetOwnerTransferLoanMapping m inner join fetch m.ownerTransfer o where m.loanId = :loanId")
     Optional<ExternalAssetOwnerTransfer> findActiveByLoanId(@Param("loanId") Long loanId);
 
