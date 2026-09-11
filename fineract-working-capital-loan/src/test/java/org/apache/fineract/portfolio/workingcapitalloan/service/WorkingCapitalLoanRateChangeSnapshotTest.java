@@ -97,13 +97,14 @@ class WorkingCapitalLoanRateChangeSnapshotTest {
                 new BigDecimal("18"), new BigDecimal("17"));
         final MonetaryCurrency currency = new MonetaryCurrency("EUR", 2, null);
         final Money dailyPayment = Money.of(currency, new BigDecimal("47.22"), MoneyHelper.getMathContext());
-        final RateChangeSolve solve = new RateChangeSolve(EFFECTIVE_DATE, dailyPayment, 212, new BigDecimal("0.001008699894"));
+        final RateChangeSolve solve = new RateChangeSolve(EFFECTIVE_DATE, dailyPayment, 212, new BigDecimal("0.001008699894"),
+                new BigDecimal("43.756245"));
         when(model.rateChangeSolveOn(EFFECTIVE_DATE)).thenReturn(solve);
-        when(model.npvDayCount()).thenReturn(360);
 
         service.recordCalculatedValues(rateChange, model);
 
-        // (1 + 0.001008699894)^360 - 1 = 0.4375624512..., stored as a percentage at scale 6 (HALF_EVEN)
+        // Carried across from the segment the schedule solved, not annualised a second time off the daily rate beside
+        // it
         assertEquals(new BigDecimal("43.756245"), rateChange.getCalculatedAnnualEir());
         assertEquals(0, new BigDecimal("47.22").compareTo(rateChange.getDailyPaymentAmount()));
         assertEquals(212, rateChange.getSegmentTerm());

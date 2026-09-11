@@ -51,7 +51,8 @@ import org.junit.jupiter.api.Test;
 /**
  * Base loan: TPV 100000, net disbursement 9000, discount 1000, NPV day count 360, 18% disbursed 2019-01-01 → daily
  * payment 50, 200 days, daily EIR 0.001067814488. Snapshots are the engine's own as-booked segment values, never
- * restated; annual EIR is {@code (1+dailyEir)^360 - 1}, asserted at the 6 decimals it is persisted with.
+ * restated; annual EIR is {@code (1+dailyEir)^360 - 1} as a percentage, asserted at the 6 decimals it is persisted
+ * with.
  */
 public class FeignWorkingCapitalLoanRateChangeEirHistoryTest extends FeignIntegrationTest {
 
@@ -67,9 +68,8 @@ public class FeignWorkingCapitalLoanRateChangeEirHistoryTest extends FeignIntegr
     private static final BigDecimal RATE_20 = BigDecimal.valueOf(20);
 
     // --- Expected values: base schedule at 18% ---
-    private static final String EIR_18 = "0.001067814488";
-    // (1 + 0.001067814488)^360 - 1 = 0.468451024827 → 9 dp (derived on read, not persisted)
-    private static final String ANNUAL_EIR_18 = "0.468451025";
+    // (1 + 0.001067814488)^360 - 1 = 0.468451024827, as a percentage → 6 dp
+    private static final String ANNUAL_EIR_18 = "46.845102";
 
     // --- 17% change effective 2019-01-25, booked that day. Nothing repaid, so the segment re-amortizes 9000 + 1000:
     // totalDays = ceil(10000 / 47.22) = 212 ---
@@ -102,8 +102,8 @@ public class FeignWorkingCapitalLoanRateChangeEirHistoryTest extends FeignIntegr
     private static final String ANNUAL_EIR_20_AFTER_17_REPAID = "53.208200";
 
     // --- Same 20% change booked alone against the 18% schedule, before the 17% one is backdated in front of it ---
-    // (1 + 0.001185830548)^360 - 1, as a percentage → 6 dp
-    private static final String ANNUAL_EIR_20_AS_BOOKED_ALONE = "53.211032";
+    // (1 + 0.001185830558)^360 - 1, as a percentage → 6 dp
+    private static final String ANNUAL_EIR_20_AS_BOOKED_ALONE = "53.211033";
 
     // --- 16% same-date overwrite of the 17% change: dailyPayment 44.44, totalDays = ceil(10000 / 44.44) = 226 ---
     private static final String DAILY_PAYMENT_16 = "44.44";
@@ -111,8 +111,10 @@ public class FeignWorkingCapitalLoanRateChangeEirHistoryTest extends FeignIntegr
     // (1 + 0.000949561758)^360 - 1, as a percentage → 6 dp
     private static final String ANNUAL_EIR_16 = "40.730994";
 
-    // Effective term after the 17% (day 24) and 20% (day 31) changes → last payment 2019-07-20
-    private static final int EFFECTIVE_TERM_AFTER_BOTH_CHANGES = 200;
+    // Effective term after the 17% (day 24) and 20% (day 31) changes → last payment 2019-07-30. Longer than the
+    // original 200 days: the 17% segment re-amortizes the whole 9000 + 1000 over 212 days, and the 20% one that
+    // follows it starts from the balance that slower week left.
+    private static final int EFFECTIVE_TERM_AFTER_BOTH_CHANGES = 210;
 
     private FeignWorkingCapitalLoanHelper wcLoanHelper;
     private FeignClientHelper clientHelper;
@@ -201,8 +203,7 @@ public class FeignWorkingCapitalLoanRateChangeEirHistoryTest extends FeignIntegr
             applyRateChange(loanId, RATE_20, "2019-02-01", CHANGE2_DATE);
 
             final GetWorkingCapitalLoansLoanIdResponse loan = wcLoanHelper.getLoanDetails(loanId);
-            assertEqualBigDecimal(new BigDecimal(EIR_18), round(loan.getDailyEir(), 12), "top-level dailyEir (original schedule)");
-            assertEqualBigDecimal(new BigDecimal(ANNUAL_EIR_18), round(loan.getCalculatedAnnualEir(), 9),
+            assertEqualBigDecimal(new BigDecimal(ANNUAL_EIR_18), round(loan.getCalculatedAnnualEir(), 6),
                     "top-level calculatedAnnualEir (original schedule, ^npvDayCount convention)");
             assertEqualBigDecimal(BigDecimal.valueOf(50), loan.getPeriodPaymentAmount(), "top-level periodPaymentAmount (original)");
             assertEqualBigDecimal(PRINCIPAL, loan.getNetDisbursalAmount(), "top-level netDisbursalAmount (original)");

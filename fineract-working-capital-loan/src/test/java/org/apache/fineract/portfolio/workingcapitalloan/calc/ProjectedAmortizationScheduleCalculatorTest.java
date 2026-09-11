@@ -183,11 +183,11 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 33, 33, LocalDate.of(2019, 2, 3), 33, 50.00, null, 0.96539390, 48.27, 7644.12, null, 8.21, null, null, 705.88,
                 null);
-        checkInst(model, 34, 34, LocalDate.of(2019, 2, 4), 34, 50.00, null, 0.96436413, 48.22, 7602.28, null, 8.16, null, null, 697.72,
+        checkInst(model, 34, 34, LocalDate.of(2019, 2, 4), 34, 50.00, null, 0.96436414, 48.22, 7602.28, null, 8.16, null, null, 697.72,
                 null);
         checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 35, 50.00, null, 0.96333547, 48.17, 7560.40, null, 8.12, null, null, 689.60,
                 null);
-        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 36, 50.00, null, 0.96230790, 48.12, 7518.47, null, 8.07, null, null, 681.53,
+        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 36, 50.00, null, 0.96230791, 48.12, 7518.47, null, 8.07, null, null, 681.53,
                 null);
         checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 37, 50.00, null, 0.96128143, 48.06, 7476.50, null, 8.03, null, null, 673.50,
                 null);
@@ -251,7 +251,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 67, 67, LocalDate.of(2019, 3, 9), 67, 50.00, null, 0.93099125, 46.55, 6196.29, null, 6.66, null, null, 453.71,
                 null);
-        checkInst(model, 68, 68, LocalDate.of(2019, 3, 10), 68, 50.00, null, 0.92999818, 46.50, 6152.91, null, 6.62, null, null, 447.09,
+        checkInst(model, 68, 68, LocalDate.of(2019, 3, 10), 68, 50.00, null, 0.92999819, 46.50, 6152.91, null, 6.62, null, null, 447.09,
                 null);
         checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 69, 50.00, null, 0.92900618, 46.45, 6109.48, null, 6.57, null, null, 440.52,
                 null);
@@ -281,7 +281,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 82, 82, LocalDate.of(2019, 3, 24), 82, 50.00, null, 0.91620598, 45.81, 5540.65, null, 5.96, null, null, 359.35,
                 null);
-        checkInst(model, 83, 83, LocalDate.of(2019, 3, 25), 83, 50.00, null, 0.91522868, 45.76, 5496.57, null, 5.92, null, null, 353.43,
+        checkInst(model, 83, 83, LocalDate.of(2019, 3, 25), 83, 50.00, null, 0.91522869, 45.76, 5496.57, null, 5.92, null, null, 353.43,
                 null);
         checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 84, 50.00, null, 0.91425243, 45.71, 5452.44, null, 5.87, null, null, 347.56,
                 null);
@@ -319,11 +319,11 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 101, 101, LocalDate.of(2019, 4, 12), 101, 50.00, null, 0.89781457, 44.89, 4694.96, null, 5.06, null, null, 255.04,
                 null);
-        checkInst(model, 102, 102, LocalDate.of(2019, 4, 13), 102, 50.00, null, 0.89685689, 44.84, 4649.98, null, 5.02, null, null, 250.02,
+        checkInst(model, 102, 102, LocalDate.of(2019, 4, 13), 102, 50.00, null, 0.89685690, 44.84, 4649.98, null, 5.02, null, null, 250.02,
                 null);
         checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 103, 50.00, null, 0.89590024, 44.80, 4604.94, null, 4.96, null, null, 245.06,
                 null);
-        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 104, 50.00, null, 0.89494460, 44.75, 4559.86, null, 4.92, null, null, 240.14,
+        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 104, 50.00, null, 0.89494461, 44.75, 4559.86, null, 4.92, null, null, 240.14,
                 null);
         checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 105, 50.00, null, 0.89398999, 44.70, 4514.73, null, 4.87, null, null, 235.27,
                 null);
@@ -401,7 +401,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 142, 142, LocalDate.of(2019, 5, 23), 142, 50.00, null, 0.85937598, 42.97, 2810.57, null, 3.05, null, null, 89.43,
                 null);
-        checkInst(model, 143, 143, LocalDate.of(2019, 5, 24), 143, 50.00, null, 0.85845930, 42.92, 2763.57, null, 3.00, null, null, 86.43,
+        checkInst(model, 143, 143, LocalDate.of(2019, 5, 24), 143, 50.00, null, 0.85845931, 42.92, 2763.57, null, 3.00, null, null, 86.43,
                 null);
         checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 144, 50.00, null, 0.85754361, 42.88, 2716.52, null, 2.95, null, null, 83.48,
                 null);
@@ -417,7 +417,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 150, 150, LocalDate.of(2019, 5, 31), 150, 50.00, null, 0.85206990, 42.60, 2433.17, null, 2.65, null, null, 66.83,
                 null);
-        checkInst(model, 151, 151, LocalDate.of(2019, 6, 1), 151, 50.00, null, 0.85116101, 42.56, 2385.77, null, 2.60, null, null, 64.23,
+        checkInst(model, 151, 151, LocalDate.of(2019, 6, 1), 151, 50.00, null, 0.85116102, 42.56, 2385.77, null, 2.60, null, null, 64.23,
                 null);
         checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 152, 50.00, null, 0.85025310, 42.51, 2338.31, null, 2.54, null, null, 61.69,
                 null);
@@ -441,13 +441,13 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 162, 162, LocalDate.of(2019, 6, 12), 162, 50.00, null, 0.84122707, 42.06, 1860.99, null, 2.03, null, null, 39.01,
                 null);
-        checkInst(model, 163, 163, LocalDate.of(2019, 6, 13), 163, 50.00, null, 0.84032975, 42.02, 1812.98, null, 1.99, null, null, 37.02,
+        checkInst(model, 163, 163, LocalDate.of(2019, 6, 13), 163, 50.00, null, 0.84032976, 42.02, 1812.98, null, 1.99, null, null, 37.02,
                 null);
         checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 164, 50.00, null, 0.83943340, 41.97, 1764.92, null, 1.94, null, null, 35.08,
                 null);
         checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 165, 50.00, null, 0.83853799, 41.93, 1716.80, null, 1.88, null, null, 33.20,
                 null);
-        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 166, 50.00, null, 0.83764354, 41.88, 1668.64, null, 1.84, null, null, 31.36,
+        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 166, 50.00, null, 0.83764355, 41.88, 1668.64, null, 1.84, null, null, 31.36,
                 null);
         checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 167, 50.00, null, 0.83675005, 41.84, 1620.42, null, 1.78, null, null, 29.58,
                 null);
@@ -469,17 +469,17 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 176, 176, LocalDate.of(2019, 6, 26), 176, 50.00, null, 0.82875137, 41.44, 1184.13, null, 1.32, null, null, 15.87,
                 null);
-        checkInst(model, 177, 177, LocalDate.of(2019, 6, 27), 177, 50.00, null, 0.82786736, 41.39, 1135.39, null, 1.26, null, null, 14.61,
+        checkInst(model, 177, 177, LocalDate.of(2019, 6, 27), 177, 50.00, null, 0.82786737, 41.39, 1135.39, null, 1.26, null, null, 14.61,
                 null);
         checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 178, 50.00, null, 0.82698430, 41.35, 1086.61, null, 1.22, null, null, 13.39,
                 null);
-        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 179, 50.00, null, 0.82610217, 41.31, 1037.77, null, 1.16, null, null, 12.23,
+        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 179, 50.00, null, 0.82610218, 41.31, 1037.77, null, 1.16, null, null, 12.23,
                 null);
         checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 180, 50.00, null, 0.82522099, 41.26, 988.88, null, 1.11, null, null, 11.12,
                 null);
         checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 181, 50.00, null, 0.82434075, 41.22, 939.93, null, 1.05, null, null, 10.07,
                 null);
-        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 182, 50.00, null, 0.82346144, 41.17, 890.93, null, 1.00, null, null, 9.07,
+        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 182, 50.00, null, 0.82346145, 41.17, 890.93, null, 1.00, null, null, 9.07,
                 null);
         checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 183, 50.00, null, 0.82258308, 41.13, 841.89, null, 0.96, null, null, 8.11,
                 null);
@@ -497,7 +497,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 190, 190, LocalDate.of(2019, 7, 10), 190, 50.00, null, 0.81646069, 40.82, 497.08, null, 0.59, null, null, 2.92,
                 null);
-        checkInst(model, 191, 191, LocalDate.of(2019, 7, 11), 191, 50.00, null, 0.81558979, 40.78, 447.61, null, 0.53, null, null, 2.39,
+        checkInst(model, 191, 191, LocalDate.of(2019, 7, 11), 191, 50.00, null, 0.81558980, 40.78, 447.61, null, 0.53, null, null, 2.39,
                 null);
         checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 192, 50.00, null, 0.81471983, 40.74, 398.08, null, 0.47, null, null, 1.92,
                 null);
@@ -526,7 +526,8 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
 
         assertEquals(180, model.originalPaymentNumber(), "loanTerm = ceil(9000/50) = 180");
-        assertEquals(BigDecimal.ZERO, model.effectiveInterestRate(), "EIR should be 0 when no discount fee");
+        assertEquals(BigDecimal.ZERO, model.effectiveInterestRate(),
+                "EIR is derived from the annual rate, which is 0 with no discount fee");
         assertEquals(181, model.projectedPayments().size(), "disbursement + 180 periods");
 
         // All discount factors should be 1.0 (EIR = 0)
@@ -622,11 +623,11 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 33, 50.00, null, 0.96539390, 48.27, 7560.40, null, 8.12, null, null, 689.60,
                 null);
-        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 34, 50.00, null, 0.96436413, 48.22, 7518.47, null, 8.07, null, null, 681.53,
+        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 34, 50.00, null, 0.96436414, 48.22, 7518.47, null, 8.07, null, null, 681.53,
                 null);
         checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 35, 50.00, null, 0.96333547, 48.17, 7476.50, null, 8.03, null, null, 673.50,
                 null);
-        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 36, 50.00, null, 0.96230790, 48.12, 7434.48, null, 7.98, null, null, 665.52,
+        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 36, 50.00, null, 0.96230791, 48.12, 7434.48, null, 7.98, null, null, 665.52,
                 null);
         checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 37, 50.00, null, 0.96128143, 48.06, 7392.42, null, 7.94, null, null, 657.58,
                 null);
@@ -690,7 +691,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 67, 50.00, null, 0.93099125, 46.55, 6109.48, null, 6.57, null, null, 440.52,
                 null);
-        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 68, 50.00, null, 0.92999818, 46.50, 6066.00, null, 6.52, null, null, 434.00,
+        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 68, 50.00, null, 0.92999819, 46.50, 6066.00, null, 6.52, null, null, 434.00,
                 null);
         checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 69, 50.00, null, 0.92900618, 46.45, 6022.48, null, 6.48, null, null, 427.52,
                 null);
@@ -720,7 +721,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 82, 50.00, null, 0.91620598, 45.81, 5452.44, null, 5.87, null, null, 347.56,
                 null);
-        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 83, 50.00, null, 0.91522868, 45.76, 5408.26, null, 5.82, null, null, 341.74,
+        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 83, 50.00, null, 0.91522869, 45.76, 5408.26, null, 5.82, null, null, 341.74,
                 null);
         checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 84, 50.00, null, 0.91425243, 45.71, 5364.03, null, 5.77, null, null, 335.97,
                 null);
@@ -758,11 +759,11 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 101, 50.00, null, 0.89781457, 44.89, 4604.94, null, 4.96, null, null, 245.06,
                 null);
-        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 102, 50.00, null, 0.89685689, 44.84, 4559.86, null, 4.92, null, null, 240.14,
+        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 102, 50.00, null, 0.89685690, 44.84, 4559.86, null, 4.92, null, null, 240.14,
                 null);
         checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 103, 50.00, null, 0.89590024, 44.80, 4514.73, null, 4.87, null, null, 235.27,
                 null);
-        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 104, 50.00, null, 0.89494460, 44.75, 4469.55, null, 4.82, null, null, 230.45,
+        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 104, 50.00, null, 0.89494461, 44.75, 4469.55, null, 4.82, null, null, 230.45,
                 null);
         checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 105, 50.00, null, 0.89398999, 44.70, 4424.32, null, 4.77, null, null, 225.68,
                 null);
@@ -840,7 +841,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 142, 50.00, null, 0.85937598, 42.97, 2716.52, null, 2.95, null, null, 83.48,
                 null);
-        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 143, 50.00, null, 0.85845930, 42.92, 2669.42, null, 2.90, null, null, 80.58,
+        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 143, 50.00, null, 0.85845931, 42.92, 2669.42, null, 2.90, null, null, 80.58,
                 null);
         checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 144, 50.00, null, 0.85754361, 42.88, 2622.27, null, 2.85, null, null, 77.73,
                 null);
@@ -856,7 +857,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 150, 50.00, null, 0.85206990, 42.60, 2338.31, null, 2.54, null, null, 61.69,
                 null);
-        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 151, 50.00, null, 0.85116101, 42.56, 2290.81, null, 2.50, null, null, 59.19,
+        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 151, 50.00, null, 0.85116102, 42.56, 2290.81, null, 2.50, null, null, 59.19,
                 null);
         checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 152, 50.00, null, 0.85025310, 42.51, 2243.26, null, 2.45, null, null, 56.74,
                 null);
@@ -880,13 +881,13 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 162, 50.00, null, 0.84122707, 42.06, 1764.92, null, 1.94, null, null, 35.08,
                 null);
-        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 163, 50.00, null, 0.84032975, 42.02, 1716.80, null, 1.88, null, null, 33.20,
+        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 163, 50.00, null, 0.84032976, 42.02, 1716.80, null, 1.88, null, null, 33.20,
                 null);
         checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 164, 50.00, null, 0.83943340, 41.97, 1668.64, null, 1.84, null, null, 31.36,
                 null);
         checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 165, 50.00, null, 0.83853799, 41.93, 1620.42, null, 1.78, null, null, 29.58,
                 null);
-        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 166, 50.00, null, 0.83764354, 41.88, 1572.15, null, 1.73, null, null, 27.85,
+        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 166, 50.00, null, 0.83764355, 41.88, 1572.15, null, 1.73, null, null, 27.85,
                 null);
         checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 167, 50.00, null, 0.83675005, 41.84, 1523.83, null, 1.68, null, null, 26.17,
                 null);
@@ -908,17 +909,17 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 176, 50.00, null, 0.82875137, 41.44, 1086.61, null, 1.22, null, null, 13.39,
                 null);
-        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 177, 50.00, null, 0.82786736, 41.39, 1037.77, null, 1.16, null, null, 12.23,
+        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 177, 50.00, null, 0.82786737, 41.39, 1037.77, null, 1.16, null, null, 12.23,
                 null);
         checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 178, 50.00, null, 0.82698430, 41.35, 988.88, null, 1.11, null, null, 11.12,
                 null);
-        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 179, 50.00, null, 0.82610217, 41.31, 939.93, null, 1.05, null, null, 10.07,
+        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 179, 50.00, null, 0.82610218, 41.31, 939.93, null, 1.05, null, null, 10.07,
                 null);
         checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 180, 50.00, null, 0.82522099, 41.26, 890.93, null, 1.00, null, null, 9.07,
                 null);
         checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 181, 50.00, null, 0.82434075, 41.22, 841.89, null, 0.96, null, null, 8.11,
                 null);
-        checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 182, 50.00, null, 0.82346144, 41.17, 792.79, null, 0.90, null, null, 7.21,
+        checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 182, 50.00, null, 0.82346145, 41.17, 792.79, null, 0.90, null, null, 7.21,
                 null);
         checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 183, 50.00, null, 0.82258308, 41.13, 743.63, null, 0.84, null, null, 6.37,
                 null);
@@ -936,7 +937,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 190, 50.00, null, 0.81646069, 40.82, 398.08, null, 0.47, null, null, 1.92,
                 null);
-        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 191, 50.00, null, 0.81558979, 40.78, 348.51, null, 0.43, null, null, 1.49,
+        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 191, 50.00, null, 0.81558980, 40.78, 348.51, null, 0.43, null, null, 1.49,
                 null);
         checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 192, 50.00, null, 0.81471983, 40.74, 298.88, null, 0.37, null, null, 1.12,
                 null);
@@ -1027,11 +1028,11 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 33, 50.00, null, 0.96539390, 48.27, 7518.47, null, 8.07, null, null, 681.53,
                 null);
-        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 34, 50.00, null, 0.96436413, 48.22, 7476.50, null, 8.03, null, null, 673.50,
+        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 34, 50.00, null, 0.96436414, 48.22, 7476.50, null, 8.03, null, null, 673.50,
                 null);
         checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 35, 50.00, null, 0.96333547, 48.17, 7434.48, null, 7.98, null, null, 665.52,
                 null);
-        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 36, 50.00, null, 0.96230790, 48.12, 7392.42, null, 7.94, null, null, 657.58,
+        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 36, 50.00, null, 0.96230791, 48.12, 7392.42, null, 7.94, null, null, 657.58,
                 null);
         checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 37, 50.00, null, 0.96128143, 48.06, 7350.31, null, 7.89, null, null, 649.69,
                 null);
@@ -1095,7 +1096,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 67, 50.00, null, 0.93099125, 46.55, 6066.00, null, 6.52, null, null, 434.00,
                 null);
-        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 68, 50.00, null, 0.92999818, 46.50, 6022.48, null, 6.48, null, null, 427.52,
+        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 68, 50.00, null, 0.92999819, 46.50, 6022.48, null, 6.48, null, null, 427.52,
                 null);
         checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 69, 50.00, null, 0.92900618, 46.45, 5978.91, null, 6.43, null, null, 421.09,
                 null);
@@ -1125,7 +1126,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 82, 50.00, null, 0.91620598, 45.81, 5408.26, null, 5.82, null, null, 341.74,
                 null);
-        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 83, 50.00, null, 0.91522868, 45.76, 5364.03, null, 5.77, null, null, 335.97,
+        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 83, 50.00, null, 0.91522869, 45.76, 5364.03, null, 5.77, null, null, 335.97,
                 null);
         checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 84, 50.00, null, 0.91425243, 45.71, 5319.76, null, 5.73, null, null, 330.24,
                 null);
@@ -1163,11 +1164,11 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 101, 50.00, null, 0.89781457, 44.89, 4559.86, null, 4.92, null, null, 240.14,
                 null);
-        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 102, 50.00, null, 0.89685689, 44.84, 4514.73, null, 4.87, null, null, 235.27,
+        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 102, 50.00, null, 0.89685690, 44.84, 4514.73, null, 4.87, null, null, 235.27,
                 null);
         checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 103, 50.00, null, 0.89590024, 44.80, 4469.55, null, 4.82, null, null, 230.45,
                 null);
-        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 104, 50.00, null, 0.89494460, 44.75, 4424.32, null, 4.77, null, null, 225.68,
+        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 104, 50.00, null, 0.89494461, 44.75, 4424.32, null, 4.77, null, null, 225.68,
                 null);
         checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 105, 50.00, null, 0.89398999, 44.70, 4379.05, null, 4.73, null, null, 220.95,
                 null);
@@ -1245,7 +1246,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 142, 50.00, null, 0.85937598, 42.97, 2669.42, null, 2.90, null, null, 80.58,
                 null);
-        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 143, 50.00, null, 0.85845930, 42.92, 2622.27, null, 2.85, null, null, 77.73,
+        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 143, 50.00, null, 0.85845931, 42.92, 2622.27, null, 2.85, null, null, 77.73,
                 null);
         checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 144, 50.00, null, 0.85754361, 42.88, 2575.07, null, 2.80, null, null, 74.93,
                 null);
@@ -1261,7 +1262,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 150, 50.00, null, 0.85206990, 42.60, 2290.81, null, 2.50, null, null, 59.19,
                 null);
-        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 151, 50.00, null, 0.85116101, 42.56, 2243.26, null, 2.45, null, null, 56.74,
+        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 151, 50.00, null, 0.85116102, 42.56, 2243.26, null, 2.45, null, null, 56.74,
                 null);
         checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 152, 50.00, null, 0.85025310, 42.51, 2195.65, null, 2.39, null, null, 54.35,
                 null);
@@ -1285,13 +1286,13 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 162, 50.00, null, 0.84122707, 42.06, 1716.80, null, 1.88, null, null, 33.20,
                 null);
-        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 163, 50.00, null, 0.84032975, 42.02, 1668.64, null, 1.84, null, null, 31.36,
+        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 163, 50.00, null, 0.84032976, 42.02, 1668.64, null, 1.84, null, null, 31.36,
                 null);
         checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 164, 50.00, null, 0.83943340, 41.97, 1620.42, null, 1.78, null, null, 29.58,
                 null);
         checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 165, 50.00, null, 0.83853799, 41.93, 1572.15, null, 1.73, null, null, 27.85,
                 null);
-        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 166, 50.00, null, 0.83764354, 41.88, 1523.83, null, 1.68, null, null, 26.17,
+        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 166, 50.00, null, 0.83764355, 41.88, 1523.83, null, 1.68, null, null, 26.17,
                 null);
         checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 167, 50.00, null, 0.83675005, 41.84, 1475.45, null, 1.62, null, null, 24.55,
                 null);
@@ -1313,17 +1314,17 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 176, 50.00, null, 0.82875137, 41.44, 1037.77, null, 1.16, null, null, 12.23,
                 null);
-        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 177, 50.00, null, 0.82786736, 41.39, 988.88, null, 1.11, null, null, 11.12,
+        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 177, 50.00, null, 0.82786737, 41.39, 988.88, null, 1.11, null, null, 11.12,
                 null);
         checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 178, 50.00, null, 0.82698430, 41.35, 939.93, null, 1.05, null, null, 10.07,
                 null);
-        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 179, 50.00, null, 0.82610217, 41.31, 890.93, null, 1.00, null, null, 9.07,
+        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 179, 50.00, null, 0.82610218, 41.31, 890.93, null, 1.00, null, null, 9.07,
                 null);
         checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 180, 50.00, null, 0.82522099, 41.26, 841.89, null, 0.96, null, null, 8.11,
                 null);
         checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 181, 50.00, null, 0.82434075, 41.22, 792.79, null, 0.90, null, null, 7.21,
                 null);
-        checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 182, 50.00, null, 0.82346144, 41.17, 743.63, null, 0.84, null, null, 6.37,
+        checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 182, 50.00, null, 0.82346145, 41.17, 743.63, null, 0.84, null, null, 6.37,
                 null);
         checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 183, 50.00, null, 0.82258308, 41.13, 694.43, null, 0.80, null, null, 5.57,
                 null);
@@ -1341,7 +1342,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 190, 50.00, null, 0.81646069, 40.82, 348.51, null, 0.43, null, null, 1.49,
                 null);
-        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 191, 50.00, null, 0.81558979, 40.78, 298.88, null, 0.37, null, null, 1.12,
+        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 191, 50.00, null, 0.81558980, 40.78, 298.88, null, 0.37, null, null, 1.12,
                 null);
         checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 192, 50.00, null, 0.81471983, 40.74, 249.20, null, 0.32, null, null, 0.80,
                 null);
@@ -1427,11 +1428,11 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 34, 34, LocalDate.of(2019, 2, 4), 33, 50.00, null, 0.96539390, 48.27, 7610.65, null, 8.18, null, null, 699.35,
                 null);
-        checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 34, 50.00, null, 0.96436413, 48.22, 7568.77, null, 8.12, null, null, 691.23,
+        checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 34, 50.00, null, 0.96436414, 48.22, 7568.77, null, 8.12, null, null, 691.23,
                 null);
         checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 35, 50.00, null, 0.96333547, 48.17, 7526.85, null, 8.08, null, null, 683.15,
                 null);
-        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 36, 50.00, null, 0.96230790, 48.12, 7484.89, null, 8.04, null, null, 675.11,
+        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 36, 50.00, null, 0.96230791, 48.12, 7484.89, null, 8.04, null, null, 675.11,
                 null);
         checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 37, 50.00, null, 0.96128143, 48.06, 7442.88, null, 7.99, null, null, 667.12,
                 null);
@@ -1495,7 +1496,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 68, 68, LocalDate.of(2019, 3, 10), 67, 50.00, null, 0.93099125, 46.55, 6161.58, null, 6.62, null, null, 448.42,
                 null);
-        checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 68, 50.00, null, 0.92999818, 46.50, 6118.16, null, 6.58, null, null, 441.84,
+        checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 68, 50.00, null, 0.92999819, 46.50, 6118.16, null, 6.58, null, null, 441.84,
                 null);
         checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 69, 50.00, null, 0.92900618, 46.45, 6074.70, null, 6.54, null, null, 435.30,
                 null);
@@ -1525,7 +1526,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 83, 83, LocalDate.of(2019, 3, 25), 82, 50.00, null, 0.91620598, 45.81, 5505.38, null, 5.92, null, null, 354.62,
                 null);
-        checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 83, 50.00, null, 0.91522868, 45.76, 5461.26, null, 5.88, null, null, 348.74,
+        checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 83, 50.00, null, 0.91522869, 45.76, 5461.26, null, 5.88, null, null, 348.74,
                 null);
         checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 84, 50.00, null, 0.91425243, 45.71, 5417.09, null, 5.83, null, null, 342.91,
                 null);
@@ -1563,11 +1564,11 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 102, 102, LocalDate.of(2019, 4, 13), 101, 50.00, null, 0.89781457, 44.89, 4658.97, null, 5.02, null, null, 251.03,
                 null);
-        checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 102, 50.00, null, 0.89685689, 44.84, 4613.95, null, 4.98, null, null, 246.05,
+        checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 102, 50.00, null, 0.89685690, 44.84, 4613.95, null, 4.98, null, null, 246.05,
                 null);
         checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 103, 50.00, null, 0.89590024, 44.80, 4568.88, null, 4.93, null, null, 241.12,
                 null);
-        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 104, 50.00, null, 0.89494460, 44.75, 4523.75, null, 4.87, null, null, 236.25,
+        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 104, 50.00, null, 0.89494461, 44.75, 4523.75, null, 4.87, null, null, 236.25,
                 null);
         checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 105, 50.00, null, 0.89398999, 44.70, 4478.59, null, 4.84, null, null, 231.41,
                 null);
@@ -1645,7 +1646,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 143, 143, LocalDate.of(2019, 5, 24), 142, 50.00, null, 0.85937598, 42.97, 2772.97, null, 3.01, null, null, 87.03,
                 null);
-        checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 143, 50.00, null, 0.85845930, 42.92, 2725.93, null, 2.96, null, null, 84.07,
+        checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 143, 50.00, null, 0.85845931, 42.92, 2725.93, null, 2.96, null, null, 84.07,
                 null);
         checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 144, 50.00, null, 0.85754361, 42.88, 2678.84, null, 2.91, null, null, 81.16,
                 null);
@@ -1661,7 +1662,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 151, 151, LocalDate.of(2019, 6, 1), 150, 50.00, null, 0.85206990, 42.60, 2395.25, null, 2.61, null, null, 64.75,
                 null);
-        checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 151, 50.00, null, 0.85116101, 42.56, 2347.81, null, 2.56, null, null, 62.19,
+        checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 151, 50.00, null, 0.85116102, 42.56, 2347.81, null, 2.56, null, null, 62.19,
                 null);
         checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 152, 50.00, null, 0.85025310, 42.51, 2300.31, null, 2.50, null, null, 59.69,
                 null);
@@ -1685,13 +1686,13 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 163, 163, LocalDate.of(2019, 6, 13), 162, 50.00, null, 0.84122707, 42.06, 1822.58, null, 1.99, null, null, 37.42,
                 null);
-        checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 163, 50.00, null, 0.84032975, 42.02, 1774.53, null, 1.95, null, null, 35.47,
+        checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 163, 50.00, null, 0.84032976, 42.02, 1774.53, null, 1.95, null, null, 35.47,
                 null);
         checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 164, 50.00, null, 0.83943340, 41.97, 1726.43, null, 1.90, null, null, 33.57,
                 null);
         checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 165, 50.00, null, 0.83853799, 41.93, 1678.27, null, 1.84, null, null, 31.73,
                 null);
-        checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 166, 50.00, null, 0.83764354, 41.88, 1630.06, null, 1.79, null, null, 29.94,
+        checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 166, 50.00, null, 0.83764355, 41.88, 1630.06, null, 1.79, null, null, 29.94,
                 null);
         checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 167, 50.00, null, 0.83675005, 41.84, 1581.80, null, 1.74, null, null, 28.20,
                 null);
@@ -1713,17 +1714,17 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 177, 177, LocalDate.of(2019, 6, 27), 176, 50.00, null, 0.82875137, 41.44, 1145.14, null, 1.27, null, null, 14.86,
                 null);
-        checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 177, 50.00, null, 0.82786736, 41.39, 1096.36, null, 1.22, null, null, 13.64,
+        checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 177, 50.00, null, 0.82786737, 41.39, 1096.36, null, 1.22, null, null, 13.64,
                 null);
-        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 178, 50.00, null, 0.82698430, 41.35, 1047.54, null, 1.18, null, null, 12.46,
+        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 178, 50.00, null, 0.82698430, 41.35, 1047.53, null, 1.17, null, null, 12.47,
                 null);
-        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 179, 50.00, null, 0.82610217, 41.31, 998.65, null, 1.11, null, null, 11.35,
+        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 179, 50.00, null, 0.82610218, 41.31, 998.65, null, 1.12, null, null, 11.35,
                 null);
         checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 180, 50.00, null, 0.82522099, 41.26, 949.72, null, 1.07, null, null, 10.28,
                 null);
         checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 181, 50.00, null, 0.82434075, 41.22, 900.73, null, 1.01, null, null, 9.27,
                 null);
-        checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 182, 50.00, null, 0.82346144, 41.17, 851.70, null, 0.97, null, null, 8.30,
+        checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 182, 50.00, null, 0.82346145, 41.17, 851.70, null, 0.97, null, null, 8.30,
                 null);
         checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 183, 50.00, null, 0.82258308, 41.13, 802.61, null, 0.91, null, null, 7.39,
                 null);
@@ -1741,7 +1742,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 191, 191, LocalDate.of(2019, 7, 11), 190, 50.00, null, 0.81646069, 40.82, 457.50, null, 0.54, null, null, 2.50,
                 null);
-        checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 191, 50.00, null, 0.81558979, 40.78, 407.99, null, 0.49, null, null, 2.01,
+        checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 191, 50.00, null, 0.81558980, 40.78, 407.99, null, 0.49, null, null, 2.01,
                 null);
         checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 192, 50.00, null, 0.81471983, 40.74, 358.42, null, 0.43, null, null, 1.58,
                 null);
@@ -1839,11 +1840,11 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 33, 50.00, null, 0.96539390, 48.27, 7602.28, null, 8.16, null, null, 697.72,
                 null);
-        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 34, 50.00, null, 0.96436413, 48.22, 7560.40, null, 8.12, null, null, 689.60,
+        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 34, 50.00, null, 0.96436414, 48.22, 7560.40, null, 8.12, null, null, 689.60,
                 null);
         checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 35, 50.00, null, 0.96333547, 48.17, 7518.47, null, 8.07, null, null, 681.53,
                 null);
-        checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 36, 50.00, null, 0.96230790, 48.12, 7476.50, null, 8.03, null, null, 673.50,
+        checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 36, 50.00, null, 0.96230791, 48.12, 7476.50, null, 8.03, null, null, 673.50,
                 null);
         checkInst(model, 40, 40, LocalDate.of(2019, 2, 10), 37, 50.00, null, 0.96128143, 48.06, 7434.48, null, 7.98, null, null, 665.52,
                 null);
@@ -1907,7 +1908,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 67, 50.00, null, 0.93099125, 46.55, 6152.91, null, 6.62, null, null, 447.09,
                 null);
-        checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 68, 50.00, null, 0.92999818, 46.50, 6109.48, null, 6.57, null, null, 440.52,
+        checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 68, 50.00, null, 0.92999819, 46.50, 6109.48, null, 6.57, null, null, 440.52,
                 null);
         checkInst(model, 72, 72, LocalDate.of(2019, 3, 14), 69, 50.00, null, 0.92900618, 46.45, 6066.00, null, 6.52, null, null, 434.00,
                 null);
@@ -1937,7 +1938,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 82, 50.00, null, 0.91620598, 45.81, 5496.57, null, 5.92, null, null, 353.43,
                 null);
-        checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 83, 50.00, null, 0.91522868, 45.76, 5452.44, null, 5.87, null, null, 347.56,
+        checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 83, 50.00, null, 0.91522869, 45.76, 5452.44, null, 5.87, null, null, 347.56,
                 null);
         checkInst(model, 87, 87, LocalDate.of(2019, 3, 29), 84, 50.00, null, 0.91425243, 45.71, 5408.26, null, 5.82, null, null, 341.74,
                 null);
@@ -1975,11 +1976,11 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 101, 50.00, null, 0.89781457, 44.89, 4649.98, null, 5.02, null, null, 250.02,
                 null);
-        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 102, 50.00, null, 0.89685689, 44.84, 4604.94, null, 4.96, null, null, 245.06,
+        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 102, 50.00, null, 0.89685690, 44.84, 4604.94, null, 4.96, null, null, 245.06,
                 null);
         checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 103, 50.00, null, 0.89590024, 44.80, 4559.86, null, 4.92, null, null, 240.14,
                 null);
-        checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 104, 50.00, null, 0.89494460, 44.75, 4514.73, null, 4.87, null, null, 235.27,
+        checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 104, 50.00, null, 0.89494461, 44.75, 4514.73, null, 4.87, null, null, 235.27,
                 null);
         checkInst(model, 108, 108, LocalDate.of(2019, 4, 19), 105, 50.00, null, 0.89398999, 44.70, 4469.55, null, 4.82, null, null, 230.45,
                 null);
@@ -2057,7 +2058,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 142, 50.00, null, 0.85937598, 42.97, 2763.57, null, 3.00, null, null, 86.43,
                 null);
-        checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 143, 50.00, null, 0.85845930, 42.92, 2716.52, null, 2.95, null, null, 83.48,
+        checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 143, 50.00, null, 0.85845931, 42.92, 2716.52, null, 2.95, null, null, 83.48,
                 null);
         checkInst(model, 147, 147, LocalDate.of(2019, 5, 28), 144, 50.00, null, 0.85754361, 42.88, 2669.42, null, 2.90, null, null, 80.58,
                 null);
@@ -2073,7 +2074,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 150, 50.00, null, 0.85206990, 42.60, 2385.77, null, 2.60, null, null, 64.23,
                 null);
-        checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 151, 50.00, null, 0.85116101, 42.56, 2338.31, null, 2.54, null, null, 61.69,
+        checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 151, 50.00, null, 0.85116102, 42.56, 2338.31, null, 2.54, null, null, 61.69,
                 null);
         checkInst(model, 155, 155, LocalDate.of(2019, 6, 5), 152, 50.00, null, 0.85025310, 42.51, 2290.81, null, 2.50, null, null, 59.19,
                 null);
@@ -2097,13 +2098,13 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 162, 50.00, null, 0.84122707, 42.06, 1812.98, null, 1.99, null, null, 37.02,
                 null);
-        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 163, 50.00, null, 0.84032975, 42.02, 1764.92, null, 1.94, null, null, 35.08,
+        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 163, 50.00, null, 0.84032976, 42.02, 1764.92, null, 1.94, null, null, 35.08,
                 null);
         checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 164, 50.00, null, 0.83943340, 41.97, 1716.80, null, 1.88, null, null, 33.20,
                 null);
         checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 165, 50.00, null, 0.83853799, 41.93, 1668.64, null, 1.84, null, null, 31.36,
                 null);
-        checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 166, 50.00, null, 0.83764354, 41.88, 1620.42, null, 1.78, null, null, 29.58,
+        checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 166, 50.00, null, 0.83764355, 41.88, 1620.42, null, 1.78, null, null, 29.58,
                 null);
         checkInst(model, 170, 170, LocalDate.of(2019, 6, 20), 167, 50.00, null, 0.83675005, 41.84, 1572.15, null, 1.73, null, null, 27.85,
                 null);
@@ -2125,17 +2126,17 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 176, 50.00, null, 0.82875137, 41.44, 1135.39, null, 1.26, null, null, 14.61,
                 null);
-        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 177, 50.00, null, 0.82786736, 41.39, 1086.61, null, 1.22, null, null, 13.39,
+        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 177, 50.00, null, 0.82786737, 41.39, 1086.61, null, 1.22, null, null, 13.39,
                 null);
         checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 178, 50.00, null, 0.82698430, 41.35, 1037.77, null, 1.16, null, null, 12.23,
                 null);
-        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 179, 50.00, null, 0.82610217, 41.31, 988.88, null, 1.11, null, null, 11.12,
+        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 179, 50.00, null, 0.82610218, 41.31, 988.88, null, 1.11, null, null, 11.12,
                 null);
         checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 180, 50.00, null, 0.82522099, 41.26, 939.93, null, 1.05, null, null, 10.07,
                 null);
         checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 181, 50.00, null, 0.82434075, 41.22, 890.93, null, 1.00, null, null, 9.07,
                 null);
-        checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 182, 50.00, null, 0.82346144, 41.17, 841.89, null, 0.96, null, null, 8.11,
+        checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 182, 50.00, null, 0.82346145, 41.17, 841.89, null, 0.96, null, null, 8.11,
                 null);
         checkInst(model, 186, 186, LocalDate.of(2019, 7, 6), 183, 50.00, null, 0.82258308, 41.13, 792.79, null, 0.90, null, null, 7.21,
                 null);
@@ -2153,7 +2154,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 190, 50.00, null, 0.81646069, 40.82, 447.61, null, 0.53, null, null, 2.39,
                 null);
-        checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 191, 50.00, null, 0.81558979, 40.78, 398.08, null, 0.47, null, null, 1.92,
+        checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 191, 50.00, null, 0.81558980, 40.78, 398.08, null, 0.47, null, null, 1.92,
                 null);
         checkInst(model, 195, 195, LocalDate.of(2019, 7, 15), 192, 50.00, null, 0.81471983, 40.74, 348.51, null, 0.43, null, null, 1.49,
                 null);

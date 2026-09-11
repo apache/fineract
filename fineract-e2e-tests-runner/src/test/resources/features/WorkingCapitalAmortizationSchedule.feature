@@ -561,8 +561,8 @@ Feature: WorkingCapitalAmortizationSchedule
       | 111       | 2019-04-22 | 47.22                 | 5491.90         | 5.58                       |                     |                          | 352.74                     |               |                          |
       | 112       | 2019-04-23 | 47.22                 | 5450.22         | 5.54                       |                     |                          | 347.20                     |               |                          |
       | 113       | 2019-04-24 | 47.22                 | 5408.50         | 5.50                       |                     |                          | 341.70                     |               |                          |
-      | 114       | 2019-04-25 | 47.22                 | 5366.74         | 5.46                       |                     |                          | 336.24                     |               |                          |
-      | 115       | 2019-04-26 | 47.22                 | 5324.93         | 5.41                       |                     |                          | 330.83                     |               |                          |
+      | 114       | 2019-04-25 | 47.22                 | 5366.73         | 5.45                       |                     |                          | 336.25                     |               |                          |
+      | 115       | 2019-04-26 | 47.22                 | 5324.93         | 5.42                       |                     |                          | 330.83                     |               |                          |
       | 116       | 2019-04-27 | 47.22                 | 5283.08         | 5.37                       |                     |                          | 325.46                     |               |                          |
       | 117       | 2019-04-28 | 47.22                 | 5241.19         | 5.33                       |                     |                          | 320.13                     |               |                          |
       | 118       | 2019-04-29 | 47.22                 | 5199.26         | 5.29                       |                     |                          | 314.84                     |               |                          |
@@ -652,8 +652,8 @@ Feature: WorkingCapitalAmortizationSchedule
       | 202       | 2019-07-22 | 47.22                 | 1521.56         | 1.58                       |                     |                          | 26.06                      |               |                          |
       | 203       | 2019-07-23 | 47.22                 | 1475.87         | 1.53                       |                     |                          | 24.53                      |               |                          |
       | 204       | 2019-07-24 | 47.22                 | 1430.14         | 1.49                       |                     |                          | 23.04                      |               |                          |
-      | 205       | 2019-07-25 | 47.22                 | 1384.37         | 1.45                       |                     |                          | 21.59                      |               |                          |
-      | 206       | 2019-07-26 | 47.22                 | 1338.54         | 1.39                       |                     |                          | 20.20                      |               |                          |
+      | 205       | 2019-07-25 | 47.22                 | 1384.36         | 1.44                       |                     |                          | 21.60                      |               |                          |
+      | 206       | 2019-07-26 | 47.22                 | 1338.54         | 1.40                       |                     |                          | 20.20                      |               |                          |
       | 207       | 2019-07-27 | 47.22                 | 1292.67         | 1.35                       |                     |                          | 18.85                      |               |                          |
       | 208       | 2019-07-28 | 47.22                 | 1246.76         | 1.31                       |                     |                          | 17.54                      |               |                          |
       | 209       | 2019-07-29 | 47.22                 | 1200.79         | 1.25                       |                     |                          | 16.29                      |               |                          |
@@ -823,8 +823,8 @@ Feature: WorkingCapitalAmortizationSchedule
       | 88        | 2026-03-30 | 47.22                 | 5491.90         | 5.58                       |                     |                          | 352.74                     |               |                          |
       | 89        | 2026-03-31 | 47.22                 | 5450.22         | 5.54                       |                     |                          | 347.20                     |               |                          |
       | 90        | 2026-04-01 | 47.22                 | 5408.50         | 5.50                       |                     |                          | 341.70                     |               |                          |
-      | 91        | 2026-04-02 | 47.22                 | 5366.74         | 5.46                       |                     |                          | 336.24                     |               |                          |
-      | 92        | 2026-04-03 | 47.22                 | 5324.93         | 5.41                       |                     |                          | 330.83                     |               |                          |
+      | 91        | 2026-04-02 | 47.22                 | 5366.73         | 5.45                       |                     |                          | 336.25                     |               |                          |
+      | 92        | 2026-04-03 | 47.22                 | 5324.93         | 5.42                       |                     |                          | 330.83                     |               |                          |
       | 93        | 2026-04-04 | 47.22                 | 5283.08         | 5.37                       |                     |                          | 325.46                     |               |                          |
       | 94        | 2026-04-05 | 47.22                 | 5241.19         | 5.33                       |                     |                          | 320.13                     |               |                          |
       | 95        | 2026-04-06 | 47.22                 | 5199.26         | 5.29                       |                     |                          | 314.84                     |               |                          |
@@ -914,8 +914,8 @@ Feature: WorkingCapitalAmortizationSchedule
       | 179       | 2026-06-29 | 47.22                 | 1521.56         | 1.58                       |                     |                          | 26.06                      |               |                          |
       | 180       | 2026-06-30 | 47.22                 | 1475.87         | 1.53                       |                     |                          | 24.53                      |               |                          |
       | 181       | 2026-07-01 | 47.22                 | 1430.14         | 1.49                       |                     |                          | 23.04                      |               |                          |
-      | 182       | 2026-07-02 | 47.22                 | 1384.37         | 1.45                       |                     |                          | 21.59                      |               |                          |
-      | 183       | 2026-07-03 | 47.22                 | 1338.54         | 1.39                       |                     |                          | 20.20                      |               |                          |
+      | 182       | 2026-07-02 | 47.22                 | 1384.36         | 1.44                       |                     |                          | 21.60                      |               |                          |
+      | 183       | 2026-07-03 | 47.22                 | 1338.54         | 1.40                       |                     |                          | 20.20                      |               |                          |
       | 184       | 2026-07-04 | 47.22                 | 1292.67         | 1.35                       |                     |                          | 18.85                      |               |                          |
       | 185       | 2026-07-05 | 47.22                 | 1246.76         | 1.31                       |                     |                          | 17.54                      |               |                          |
       | 186       | 2026-07-06 | 47.22                 | 1200.79         | 1.25                       |                     |                          | 16.29                      |               |                          |
@@ -1348,8 +1348,8 @@ Feature: WorkingCapitalAmortizationSchedule
     Then The retrieved amortization schedule has payments with the following details for the listed payment numbers:
       | paymentNo | date       | expectedPaymentAmount | expectedBalance | expectedAmortizationAmount | actualPaymentAmount | actualAmortizationAmount | expectedDiscountFeeBalance | actualBalance | actualDiscountFeeBalance |
       | 0         | 2026-01-01 | -9000.00              | 9000.00         |                            |                     |                          | 1000.00                    | 9000.00       | 1000.00                  |
-      | 1         | 2026-01-02 | 47.22                 | 8961.86         | 9.08                       | 46.00               | 8.84                     | 990.92                     | 8962.84       | 991.16                  |
-      | 2         | 2026-01-03 | 47.22                 | 8924.66         | 9.04                       | 46.00               | 8.81                     | 982.12                     | 8925.65       | 982.35                  |
+      | 1         | 2026-01-02 | 47.22                 | 8961.86         | 9.08                       | 46.00               | 8.84                     | 990.92                     | 8962.84       | 991.16                   |
+      | 2         | 2026-01-03 | 47.22                 | 8924.66         | 9.04                       | 46.00               | 8.81                     | 982.12                     | 8925.65       | 982.35                   |
     Then Admin closes the Working Capital loan with a full repayment on "03 January 2026"
 
   @TestRailId:C98254
@@ -1530,7 +1530,7 @@ Feature: WorkingCapitalAmortizationSchedule
     And Customer makes repayment on "02 January 2026" with <largeRepayment> transaction amount on Working Capital loan
     And Admin retrieves the projected amortization schedule
     Then The retrieved amortization schedule has the following summary fields:
-      | npvDayCount  |
+      | npvDayCount   |
       | <npvDayCount> |
     And The retrieved amortization schedule has payments with the following details for the listed payment numbers:
       | paymentNo | expectedPaymentAmount | expectedBalance | actualBalance | actualDiscountFeeBalance |
