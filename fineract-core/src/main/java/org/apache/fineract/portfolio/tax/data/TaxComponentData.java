@@ -44,6 +44,9 @@ public final class TaxComponentData implements Serializable {
     private final LocalDate startDate;
     private final Collection<TaxComponentHistoryData> taxComponentHistories;
 
+    // editability indicator
+    private final Boolean accountsEditable;
+
     // template options
     private final Map<String, List<GLAccountData>> glAccountOptions;
     private final Collection<EnumOptionData> glAccountTypeOptions;
@@ -51,10 +54,20 @@ public final class TaxComponentData implements Serializable {
     public static TaxComponentData instance(final Long id, final String name, final BigDecimal percentage,
             final EnumOptionData debitAccountType, final GLAccountData debitAccount, final EnumOptionData creditAccountType,
             final GLAccountData creditAccount, final LocalDate startDate, final Collection<TaxComponentHistoryData> taxComponentHistories) {
+        final Boolean accountsEditable = null;
         final Map<String, List<GLAccountData>> glAccountOptions = null;
         final Collection<EnumOptionData> glAccountTypeOptions = null;
         return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
-                taxComponentHistories, glAccountOptions, glAccountTypeOptions);
+                taxComponentHistories, accountsEditable, glAccountOptions, glAccountTypeOptions);
+    }
+
+    public static TaxComponentData instance(final Long id, final String name, final BigDecimal percentage,
+            final EnumOptionData debitAccountType, final GLAccountData debitAccount, final EnumOptionData creditAccountType,
+            final GLAccountData creditAccount, final LocalDate startDate, final Collection<TaxComponentHistoryData> taxComponentHistories,
+            final Boolean accountsEditable, final Map<String, List<GLAccountData>> glAccountOptions,
+            final Collection<EnumOptionData> glAccountTypeOptions) {
+        return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
+                taxComponentHistories, accountsEditable, glAccountOptions, glAccountTypeOptions);
     }
 
     public static TaxComponentData lookup(final Long id, final String name) {
@@ -65,10 +78,11 @@ public final class TaxComponentData implements Serializable {
         final GLAccountData creditAccount = null;
         final LocalDate startDate = null;
         final Collection<TaxComponentHistoryData> taxComponentHistories = null;
+        final Boolean accountsEditable = null;
         final Map<String, List<GLAccountData>> glAccountOptions = null;
         final Collection<EnumOptionData> glAccountTypeOptions = null;
         return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
-                taxComponentHistories, glAccountOptions, glAccountTypeOptions);
+                taxComponentHistories, accountsEditable, glAccountOptions, glAccountTypeOptions);
     }
 
     public static TaxComponentData template(final Map<String, List<GLAccountData>> glAccountOptions,
@@ -82,8 +96,9 @@ public final class TaxComponentData implements Serializable {
         final GLAccountData creditAccount = null;
         final LocalDate startDate = null;
         final Collection<TaxComponentHistoryData> taxComponentHistories = null;
+        final Boolean accountsEditable = null;
         return new TaxComponentData(id, name, percentage, debitAccountType, debitAccount, creditAccountType, creditAccount, startDate,
-                taxComponentHistories, glAccountOptions, glAccountTypeOptions);
+                taxComponentHistories, accountsEditable, glAccountOptions, glAccountTypeOptions);
     }
 
     private TaxComponentData(final Long id, final BigDecimal percentage, final GLAccountData debitAccount,
@@ -97,6 +112,7 @@ public final class TaxComponentData implements Serializable {
         this.creditAccount = creditAccount;
         this.startDate = null;
         this.taxComponentHistories = null;
+        this.accountsEditable = null;
         this.glAccountOptions = null;
         this.glAccountTypeOptions = null;
     }

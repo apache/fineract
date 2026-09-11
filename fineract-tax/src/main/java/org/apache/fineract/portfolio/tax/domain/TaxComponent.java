@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.accounting.glaccount.domain.GLAccount;
@@ -103,6 +104,11 @@ public class TaxComponent extends AbstractAuditableCustom {
     }
 
     public Map<String, Object> update(final JsonCommand command) {
+        return update(command, null, null, null, null);
+    }
+
+    public Map<String, Object> update(final JsonCommand command, final GLAccountType debitAccountType, final GLAccount debitAccount,
+            final GLAccountType creditAccountType, final GLAccount creditAccount) {
         final Map<String, Object> changes = new HashMap<>();
 
         if (command.isChangeInStringParameterNamed(TaxApiConstants.nameParamName, this.name)) {
@@ -111,11 +117,27 @@ public class TaxComponent extends AbstractAuditableCustom {
             this.name = StringUtils.defaultIfEmpty(newValue, null);
         }
 
+        // Track whether startDate was changed independently of percentage updates
+        LocalDate previousStartDate = this.startDate;
+
+        // Handle independent startDate update if provided and changed
+        if (command.parameterExists(TaxApiConstants.startDateParamName)) {
+            LocalDate requestedStartDate = command.localDateValueOfParameterNamed(TaxApiConstants.startDateParamName);
+            if ((requestedStartDate != null && !requestedStartDate.equals(this.startDate))
+                    || (requestedStartDate == null && this.startDate != null)) {
+                // Only update start date (no history here); history is handled for percentage changes below
+                updateStartDate(command, changes, false);
+            }
+        }
+
         if (command.isChangeInBigDecimalParameterNamed(TaxApiConstants.percentageParamName, this.percentage)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(TaxApiConstants.percentageParamName);
             changes.put(TaxApiConstants.percentageParamName, newValue);
 
-            LocalDate oldStartDate = this.startDate;
+            // For percentage change, history must capture old and new start dates. Use the
+            // start date as it was before any percentage-change-driven adjustment.
+            LocalDate oldStartDate = previousStartDate;
+            // Adjust start date for the new percentage; this may honor provided startDate
             updateStartDate(command, changes, true);
             LocalDate newStartDate = this.startDate;
 
@@ -123,6 +145,66 @@ public class TaxComponent extends AbstractAuditableCustom {
             this.taxComponentHistories.add(history);
             this.percentage = newValue;
 
+        }
+
+        // Handle debit account type
+        if (command.isChangeInIntegerParameterNamed(TaxApiConstants.debitAccountTypeParamName, this.debitAccountType)) {
+            final Integer newValue = command.integerValueSansLocaleOfParameterNamed(TaxApiConstants.debitAccountTypeParamName);
+            changes.put(TaxApiConstants.debitAccountTypeParamName, newValue);
+            if (debitAccountType != null) {
+                this.debitAccountType = debitAccountType.getValue();
+            } else if (newValue != null) {
+                final GLAccountType accountType = GLAccountType.fromInt(newValue);
+                this.debitAccountType = accountType != null ? accountType.getValue() : null;
+            } else {
+                this.debitAccountType = null;
+            }
+        }
+
+        // Handle debit account ID
+        final Long currentDebitAccountId = this.debitAccount != null ? this.debitAccount.getId() : null;
+        if (command.isChangeInLongParameterNamed(TaxApiConstants.debitAccountIdParamName, currentDebitAccountId)) {
+            final Long newValue = command.longValueOfParameterNamed(TaxApiConstants.debitAccountIdParamName);
+            changes.put(TaxApiConstants.debitAccountIdParamName, newValue);
+            // debitAccount is loaded in service layer if newValue is not null, otherwise it's null
+            this.debitAccount = debitAccount;
+            // If account ID is set to null, also clear account type
+            if (newValue == null && command.parameterExists(TaxApiConstants.debitAccountIdParamName)) {
+                this.debitAccountType = null;
+                if (!changes.containsKey(TaxApiConstants.debitAccountTypeParamName)) {
+                    changes.put(TaxApiConstants.debitAccountTypeParamName, null);
+                }
+            }
+        }
+
+        // Handle credit account type
+        if (command.isChangeInIntegerParameterNamed(TaxApiConstants.creditAccountTypeParamName, this.creditAccountType)) {
+            final Integer newValue = command.integerValueSansLocaleOfParameterNamed(TaxApiConstants.creditAccountTypeParamName);
+            changes.put(TaxApiConstants.creditAccountTypeParamName, newValue);
+            if (creditAccountType != null) {
+                this.creditAccountType = creditAccountType.getValue();
+            } else if (newValue != null) {
+                final GLAccountType accountType = GLAccountType.fromInt(newValue);
+                this.creditAccountType = accountType != null ? accountType.getValue() : null;
+            } else {
+                this.creditAccountType = null;
+            }
+        }
+
+        // Handle credit account ID
+        final Long currentCreditAccountId = this.creditAccount != null ? this.creditAccount.getId() : null;
+        if (command.isChangeInLongParameterNamed(TaxApiConstants.creditAccountIdParamName, currentCreditAccountId)) {
+            final Long newValue = command.longValueOfParameterNamed(TaxApiConstants.creditAccountIdParamName);
+            changes.put(TaxApiConstants.creditAccountIdParamName, newValue);
+            // creditAccount is loaded in service layer if newValue is not null, otherwise it's null
+            this.creditAccount = creditAccount;
+            // If account ID is set to null, also clear account type
+            if (newValue == null && command.parameterExists(TaxApiConstants.creditAccountIdParamName)) {
+                this.creditAccountType = null;
+                if (!changes.containsKey(TaxApiConstants.creditAccountTypeParamName)) {
+                    changes.put(TaxApiConstants.creditAccountTypeParamName, null);
+                }
+            }
         }
 
         return changes;
@@ -203,5 +285,25 @@ public class TaxComponent extends AbstractAuditableCustom {
 
     public GLAccount getCreditAccount() {
         return this.creditAccount;
+    }
+
+    /**
+     * Checks if this tax component is in use. A tax component is considered "in use" ONLY if: - It is linked to
+     * TaxGroupMappings (mapped to tax groups) - AND at least one Charge exists that references a TaxGroup containing
+     * this TaxComponent
+     *
+     * Being mapped to TaxGroup alone is NOT considered in use.
+     *
+     * @param chargeUsageChecker
+     *            a supplier that checks if any Charge exists using this tax component via tax groups
+     * @return true if the tax component is in use (linked to charges via tax groups), false otherwise
+     */
+    public boolean isInUse(final Supplier<Boolean> chargeUsageChecker) {
+        // First check if component is mapped to any tax groups
+        if (this.taxGroupMappings == null || this.taxGroupMappings.isEmpty()) {
+            return false;
+        }
+        // Then check if any charges exist using those tax groups
+        return chargeUsageChecker != null && Boolean.TRUE.equals(chargeUsageChecker.get());
     }
 }
