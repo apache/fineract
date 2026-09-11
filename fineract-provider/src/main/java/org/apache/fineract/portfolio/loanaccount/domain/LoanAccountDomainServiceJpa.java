@@ -569,6 +569,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
         }
         loanChargeValidator.validateRepaymentTypeTransactionNotBeforeAChargeRefund(loanTransaction.getLoan(), loanTransaction, "reversed");
         loanTransaction.reverse();
+        loanTransaction.manuallyAdjustedOrReversed();
         loanAccountService.saveLoanTransactionWithDataIntegrityViolationChecks(loanTransaction);
     }
 

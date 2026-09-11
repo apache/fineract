@@ -56,6 +56,17 @@ public class AccountTransferStepDef extends AbstractStepDef {
         createAccountTransfer(clientId, savingsId, SAVINGS_ACCOUNT_TYPE, loanId, LOAN_ACCOUNT_TYPE, date, amount);
     }
 
+    @When("Initiate account transfer from loan to savings on {string} for {double}")
+    public void initiateLoanToSavingsTransfer(String date, double amount) {
+        PostClientsResponse clientResponse = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
+        long clientId = clientResponse.getClientId();
+        long loanId = ((PostLoansResponse) testContext().get(TestContextKey.LOAN_CREATE_RESPONSE)).getLoanId();
+        long savingsId = ((PostSavingsAccountsResponse) testContext().get(TestContextKey.EUR_SAVINGS_ACCOUNT_CREATE_RESPONSE))
+                .getSavingsId();
+
+        createAccountTransfer(clientId, loanId, LOAN_ACCOUNT_TYPE, savingsId, SAVINGS_ACCOUNT_TYPE, date, amount);
+    }
+
     @When("Initiate account transfer from savings {string} to savings {string} on {string} for {double}")
     public void initiateAccountTransferBetweenSavings(String fromAlias, String toAlias, String date, double amount) {
         PostClientsResponse clientResponse = testContext().get(TestContextKey.CLIENT_CREATE_RESPONSE);
