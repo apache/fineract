@@ -92,7 +92,7 @@ The objective includes building a loan framework capable of:
 | `amortizationType`
 | ENUM
 | Yes
-| Amortization type. Current supported value: `EIR`.
+| Amortization type: `EIR` (discount fee earned as the effective rate accrues on the balance) or `FLAT` (discount fee earned as a fixed share of every payment, see <<flat-amortization>>). A loan snapshots the product's value at creation; changing the product afterwards does not affect existing loans.
 
 | `repaymentEvery`
 | INT
@@ -328,6 +328,24 @@ The rate is solved against the cash flow the borrower actually pays, closing rem
 included, rather than against a uniform annuity. That is what makes the recursion below
 close on exactly zero on the last day, with its daily accruals summing to exactly the
 discount fee — the property the whole schedule rests on.
+
+[[flat-amortization]]
+=== FLAT amortization
+
+With `amortizationType = FLAT` the schedule keeps the same payment grid, term and final payment, but the discount fee is earned as a fixed share of every payment instead of accruing on the balance:
+
+----
+ratio                  = payableDiscountFee / initialLoanBalance
+payableDiscountFee     = discountFee − discountFeeAdjustments
+initialLoanBalance     = netDisbursement + discountFee − discountFeeAdjustments
+expectedAmortization   = ratio × expectedPayment          // per period
+actualAmortization     = ratio × actualPayment            // per repayment, cumulative rounded once
+balance[i]             = balance[i-1] − payment × (1 − ratio)
+----
+
+Example: 9000 disbursed with a 1000 discount fee gives a ratio of `1000 / 10000 = 10%`; a repayment of 50 earns 5.00 of discount fee. Because the ratio is applied to what is actually paid, a fully paid loan has earned exactly its payable discount fee. A discount fee adjustment changes the ratio and restates the amortization already earned (the COB posts the difference as a discount fee amortization adjustment); a period payment rate change resizes the payments and the term but leaves the ratio unchanged.
+
+No effective interest rate is solved for a FLAT schedule: `effectiveInterestRate` on the schedule and `dailyEir` / `calculatedAnnualEir` on the loan are `null`, and the discount factor is 1 for every period. The structural checks of the "EIR not calculable" validation still apply to a FLAT loan (a positive daily payment, a term within the calculable cap); when they fail, a FLAT loan is rejected with `error.msg.workingcapitalloan.schedule.not.calculable` / "unable to calculate a valid amortization schedule" instead of the EIR-worded error.
 
 === Stored Values at Loan Account Level
 

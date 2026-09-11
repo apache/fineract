@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel.RateChange;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 
 /**
  * The amortization schedule, walked one day at a time until the loan is square.
@@ -47,6 +48,12 @@ import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizati
  * by with nothing on it - it is restated from that reality rather than from instalments it merely assumed. The actual
  * track is what the money received has really earned, read off {@link PlanCursor}.
  *
+ * <h3>Amortization type</h3> Under EIR the balance accrues at the solved rate and a day earns that accrual. Under FLAT
+ * nothing accrues: a day earns a fixed share of what it bills, {@code discountFee / (netDisbursement + discountFee)},
+ * and the balance falls by the rest. The share is a property of the loan, not of the rate in force: a rate change
+ * resizes the instalments without moving it, and re-deriving it from the balance and unearned fee reached on the day
+ * would let the rounding of those two figures move it. See {@link AmortizationStep#project}.
+ *
  * <h3>Rounding</h3> Nothing in here is rounded except through {@link #normalize}, and that rounds a <em>running
  * total</em>, never a single day's figure. A day's reported share of the fee is the difference between two rounded
  * totals, so it is always a whole number of minor units and the totals never drift from the high-precision figures they
@@ -56,6 +63,8 @@ import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizati
 @Slf4j
 final class AmortizationWalk {
 
+    private final WorkingCapitalAmortizationType amortizationType;
+    private final BigDecimal flatRatio;
     private final BigDecimal netDisbursement;
     private final BigDecimal discountFee;
     private final BigDecimal totalPaymentVolume;
@@ -70,10 +79,13 @@ final class AmortizationWalk {
     private final int currencyScale;
     private final MathContext mc;
 
-    AmortizationWalk(final BigDecimal netDisbursement, final BigDecimal discountFee, final BigDecimal totalPaymentVolume,
-            final BigDecimal basePeriodPaymentRate, final int npvDayCount, final LocalDate expectedDisbursementDate,
-            final int firstPeriodDayOffset, final LocalDate calculatedTillDate, final Map<LocalDate, BigDecimal> paymentsByDate,
-            final List<RateChange> rateChanges, final int minimumDays, final CurrencyData currency, final MathContext mc) {
+    AmortizationWalk(final WorkingCapitalAmortizationType amortizationType, final BigDecimal netDisbursement, final BigDecimal discountFee,
+            final BigDecimal totalPaymentVolume, final BigDecimal basePeriodPaymentRate, final int npvDayCount,
+            final LocalDate expectedDisbursementDate, final int firstPeriodDayOffset, final LocalDate calculatedTillDate,
+            final Map<LocalDate, BigDecimal> paymentsByDate, final List<RateChange> rateChanges, final int minimumDays,
+            final CurrencyData currency, final MathContext mc) {
+        this.amortizationType = amortizationType;
+        this.flatRatio = AmortizationParams.flatRatio(amortizationType, netDisbursement, discountFee, mc);
         this.netDisbursement = netDisbursement;
         this.discountFee = discountFee;
         this.totalPaymentVolume = totalPaymentVolume;
@@ -127,8 +139,8 @@ final class AmortizationWalk {
         final List<AmortizationDay> days = new ArrayList<>();
         final int appliedCount = paymentsByDate.size();
 
-        final PlanCursor plan = new PlanCursor(netDisbursement, discountFee, totalPaymentVolume, basePeriodPaymentRate, npvDayCount,
-                currencyScale, mc);
+        final PlanCursor plan = new PlanCursor(amortizationType, flatRatio, netDisbursement, discountFee, totalPaymentVolume,
+                basePeriodPaymentRate, npvDayCount, currencyScale, mc);
 
         BigDecimal balance = netDisbursement;
         BigDecimal actualBalanceExact = netDisbursement;
@@ -194,8 +206,8 @@ final class AmortizationWalk {
                 final BigDecimal unearnedFee = discountFee.subtract(aggregatedHighPrecisionActual, mc);
                 if (balance.signum() > 0 && unearnedFee.signum() > 0) {
                     try {
-                        projection = AmortizationParams.solve(balance, unearnedFee, totalPaymentVolume, rateInForce, npvDayCount,
-                                currencyScale, mc);
+                        projection = AmortizationParams.solve(amortizationType, balance, unearnedFee, totalPaymentVolume, rateInForce,
+                                npvDayCount, currencyScale, mc);
                     } catch (final IllegalArgumentException | IllegalStateException | ArithmeticException e) {
                         // A position no rate can be solved from keeps the one it had. The projection is then the stale
                         // one it would have been anyway, which is worse than re-priced but better than no schedule.
@@ -206,17 +218,11 @@ final class AmortizationWalk {
             }
             final AmortizationParams.Solved rate = projection;
 
-            final BigDecimal grown = balance.multiply(BigDecimal.ONE.add(rate.eir(), mc), mc);
             final int dayWithinRate = dayIndex - rateStartDay + 1;
-            // Every day asks for the instalment, and no day can ask for more than the balance it has to close. That
-            // second clause is what closes the loan: on the day it runs out the balance is less than an instalment, so
-            // the day bills the balance and nothing is left. It needs no separate closing amount to do it - the rate
-            // was solved so that the balance reaches exactly that remainder on exactly that day, and where a payment
-            // has restated the balance since, what is owed is what the day should bill rather than what the plan once
-            // predicted would be.
-            final BigDecimal instalment = MathUtil.negativeToZero(rate.dailyPayment()).min(MathUtil.negativeToZero(grown));
-            final BigDecimal highPrecisionExpectedFee = grown.subtract(balance, mc);
-            final BigDecimal balanceAfter = grown.subtract(instalment, mc);
+            final AmortizationStep.DayStep step = AmortizationStep.project(balance, rate.dailyPayment(), rate.eir(), flatRatio, mc);
+            final BigDecimal instalment = step.instalment();
+            final BigDecimal highPrecisionExpectedFee = step.fee();
+            final BigDecimal balanceAfter = step.balanceAfter();
 
             final boolean hasPayment = paid != null && paid.signum() > 0;
             final boolean elapsed = calculatedTillDate != null && date.isBefore(calculatedTillDate);
@@ -311,7 +317,11 @@ final class AmortizationWalk {
         return new Result(days, rateStartDay + plan.solved().term() - 1, rateChangeSolves);
     }
 
+    /** Present value weight of a day; a FLAT schedule has no rate to discount at, so it weighs every day at par. */
     private BigDecimal safeDiscountFactor(final BigDecimal eir, final long paymentsLeft) {
+        if (eir == null) {
+            return BigDecimal.ONE;
+        }
         final BigDecimal df = TvmFunctions.discountFactor(eir, paymentsLeft, mc);
         return df.signum() <= 0 ? BigDecimal.ONE : df;
     }

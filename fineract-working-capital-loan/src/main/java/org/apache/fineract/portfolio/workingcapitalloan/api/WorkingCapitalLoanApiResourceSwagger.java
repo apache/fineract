@@ -246,15 +246,18 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public Integer numberOfRepayments;
         @Schema(example = "116.67", description = "Daily expected payment amount from the amortization schedule; null if schedule not yet generated")
         public BigDecimal periodPaymentAmount;
-        @Schema(example = "0.000435", description = "Periodic (daily) effective interest rate computed via RATE(); null if schedule not yet generated")
+        @Schema(example = "0.000435", description = "Periodic (daily) effective interest rate computed via RATE(); "
+                + "null if schedule not yet generated or if the loan amortizes FLAT, which solves no rate")
         public BigDecimal dailyEir;
-        @Schema(example = "0.1691", description = "Annualized EIR as a fraction (0.1691 = 16.91%): (1 + dailyEir)^npvDayCount − 1; null if schedule not yet generated. "
+        @Schema(example = "0.1691", description = "Annualized EIR as a fraction (0.1691 = 16.91%): (1 + dailyEir)^npvDayCount − 1; "
+                + "null if schedule not yet generated or if the loan amortizes FLAT. "
                 + "Note: periodPaymentRateHistory[].calculatedAnnualEir is a percentage")
         public BigDecimal calculatedAnnualEir;
         @Schema(description = "Period payment rate change history, most recently booked first - which for a backdated change is not "
-                + "the same as effective-date order. Each entry carries the annual EIR (as a percentage, e.g. 43.756245 - unlike the top-level calculatedAnnualEir, which is a fraction), daily payment "
-                + "amount and segment term the amortization schedule computed when that change was booked; those are null for changes "
-                + "booked before the snapshot was introduced")
+                + "the same as effective-date order. Each entry carries the annual EIR (as a percentage, e.g. 43.756245 - unlike "
+                + "the top-level calculatedAnnualEir, which is a fraction), daily payment amount and segment term the amortization "
+                + "schedule computed when that change was booked; those are null for changes booked before the snapshot was "
+                + "introduced, and the EIR is null on a FLAT loan")
         public List<WorkingCapitalLoanPeriodPaymentRateChangeData> periodPaymentRateHistory;
         @Schema(description = "Working capital breach)")
         public WorkingCapitalLoanProductApiResourceSwagger.GetWorkingCapitalLoanProductsResponse.GetWorkingCapitalLoanBreach breach;
