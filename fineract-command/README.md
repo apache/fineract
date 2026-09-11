@@ -83,7 +83,7 @@ TBD
 
 - synchronously (required): this is pretty much as we do right now (use virtual threads optionally)
 - asynchronously (optional): with executor service and completable futures (use virtual threads optionally)
-- non-blocking (optional): high perfomance LMAX Disruptor non-blocking implementation
+- non-blocking (optional): high performance LMAX Disruptor non-blocking implementation
 
 These different perfromance level implementations need to be absolute drop-in replacements (for each other). It is expected that more performant implementations need more testing due to increased complexity and possible unforseen side effects. In case any problems show up we can always roll back to the required default implementation (synchronous).
 
