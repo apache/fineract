@@ -3500,7 +3500,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         WorkingCapitalLoanTransactionTemplateResponse templateResponse = ok(() -> fineractClient.workingCapitalLoanTransactions()
                 .getWorkingCapitalLoanTransactionTemplateById(loanId, "prepayLoan", DATE_FORMAT, transactionDate, "en"));
         Assertions.assertNotNull(templateResponse);
-        final BigDecimal transactionAmount = templateResponse.getTransactionAmount();
+        final BigDecimal transactionAmount = templateResponse.getExpectedAmount();
         final PostWorkingCapitalLoanTransactionsRequest repaymentRequest = workingCapitalProductRequestFactory
                 .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate).transactionAmount(transactionAmount);
         final PostWorkingCapitalLoanTransactionsResponse response = executeRepaymentLikeById(loanId, "repayment", repaymentRequest);
@@ -3519,7 +3519,7 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         final String loanExternalId = retrieveLoanExternalId(loanId);
         final WorkingCapitalLoanTransactionTemplateResponse templateResponse = fetchPrepaymentTemplateByExternalId(loanExternalId,
                 transactionDate);
-        final BigDecimal transactionAmount = templateResponse.getTransactionAmount();
+        final BigDecimal transactionAmount = templateResponse.getExpectedAmount();
         final PostWorkingCapitalLoanTransactionsRequest repaymentRequest = workingCapitalProductRequestFactory
                 .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate).transactionAmount(transactionAmount);
         final PostWorkingCapitalLoanTransactionsResponse response = executeRepaymentByExternalId(loanExternalId, repaymentRequest);
@@ -3607,8 +3607,8 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
                 .isEqualByComparingTo(expected.get("feeChargesPortion"));
         assertThat(templateResponse.getPenaltyChargesPortion()).as("prepayment template penaltyChargesPortion")
                 .isEqualByComparingTo(expected.get("penaltyChargesPortion"));
-        assertThat(templateResponse.getTransactionAmount()).as("prepayment template transactionAmount")
-                .isEqualByComparingTo(expected.get("transactionAmount"));
+        assertThat(templateResponse.getExpectedAmount()).as("prepayment template expectedAmount")
+                .isEqualByComparingTo(expected.get("expectedAmount"));
     }
 
     @Then("Customer fails to make repayment on {string} with {double} EUR transaction amount outcomes with error message")
@@ -3620,6 +3620,18 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionById(loanId, "repayment", repaymentRequest));
         assertThat(exception.getStatus()).as(errorMessage).isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).contains(errorMessage);
+    }
+
+    @Then("Customer fails to make repayment on {string} with {double} transaction amount on Working Capital loan due to future date")
+    public void repaymentWCLoanFailureFutureDate(final String transactionDate, final double transactionAmount) {
+        final Long loanId = getCreatedLoanId();
+        final PostWorkingCapitalLoanTransactionsRequest repaymentRequest = buildRepaymentRequest(transactionDate, transactionAmount, null);
+
+        String errorMessage = "cannot.be.a.future.date";
+        CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "repayment", repaymentRequest));
+        assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(400);
         assertThat(exception.getDeveloperMessage()).contains(errorMessage);
     }
 
