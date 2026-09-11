@@ -330,6 +330,33 @@ public class WorkingCapitalAmortizationScheduleStepDef extends AbstractStepDef {
         assertions.assertAll();
     }
 
+    @Then("The last projected payment amount is the smaller tail remainder")
+    public void verifyLastProjectedPaymentIsSmallerTail() {
+        final ProjectedAmortizationScheduleData response = getRetrievedSchedule();
+        final List<ProjectedAmortizationSchedulePaymentData> payments = response.getPayments();
+        assertThat(payments).as("payments list").hasSizeGreaterThan(1);
+        final ProjectedAmortizationSchedulePaymentData last = payments.getLast();
+        assertThat(last.getPaymentNo()).as("last paymentNo").isGreaterThan(0);
+        assertThat(last.getExpectedBalance()).as("last expectedBalance").isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(last.getExpectedDiscountFeeBalance()).as("last expectedDiscountFeeBalance").isEqualByComparingTo(BigDecimal.ZERO);
+        final ProjectedAmortizationSchedulePaymentData firstPayment = payments.get(1);
+        assertThat(last.getExpectedPaymentAmount()).as("tail expectedPaymentAmount must be positive").isPositive();
+        assertThat(last.getExpectedPaymentAmount()).as("tail expectedPaymentAmount must be strictly less than the regular instalment %s",
+                firstPayment.getExpectedPaymentAmount()).isLessThan(firstPayment.getExpectedPaymentAmount());
+    }
+
+    @Then("The retrieved amortization schedule has at least {int} payment rows")
+    public void verifyAmortizationScheduleHasAtLeastPaymentRows(final int minRows) {
+        final ProjectedAmortizationScheduleData response = getRetrievedSchedule();
+        assertThat(response.getPayments()).as("amortization schedule payment row count").hasSizeGreaterThanOrEqualTo(minRows);
+    }
+
+    @Then("The retrieved amortization schedule has exactly {int} payment rows")
+    public void verifyAmortizationScheduleHasExactlyPaymentRows(final int exactRows) {
+        final ProjectedAmortizationScheduleData response = getRetrievedSchedule();
+        assertThat(response.getPayments()).as("amortization schedule payment row count").hasSize(exactRows);
+    }
+
     @Then("The retrieved amortization schedule has no negative amounts")
     public void verifyRetrievedScheduleHasNoNegativeAmounts() {
         final ProjectedAmortizationScheduleData response = TestContext.INSTANCE.get(WC_AMORT_SCHEDULE_KEY);
