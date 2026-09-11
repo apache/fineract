@@ -1,0 +1,34 @@
+name: Semantic Drift Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# The verdict is computed server-side (AWS Lambda) and posted to the PR's
+# native Checks card by the GitHub App. This job only calls the gate; its own
+# status is deliberately NOT tied to the verdict (it fails only if the HTTP
+# call itself fails), so a real VIOLATION doesn't look like broken plumbing.
+jobs:
+  drift-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call semantic drift gate
+        env:
+          API_URL: https://qgd63ljozc.execute-api.us-east-1.amazonaws.com/demo/verify-semantic
+          API_KEY: ${{ secrets.DRIFT_GATE_API_KEY }}
+          # PR-supplied values via env (not interpolated into the script) to
+          # avoid shell-injection from branch names etc.
+          PR_OWNER: ${{ github.repository_owner }}
+          PR_REPO: ${{ github.event.repository.name }}
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BASE_REF: ${{ github.base_ref }}
+          PR_HEAD_REF: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          payload=$(python3 -c 'import json,os; print(json.dumps({"owner":os.environ["PR_OWNER"],"repo":os.environ["PR_REPO"],"sha":os.environ["PR_SHA"],"base_ref":os.environ["PR_BASE_REF"],"pr_ref":os.environ["PR_HEAD_REF"]}))')
+          code=$(curl -sS -o /tmp/resp.json -w "%{http_code}" -X POST "$API_URL" \
+            -H "Content-Type: application/json" -H "x-api-key: $API_KEY" -d "$payload")
+          echo "HTTP $code"; cat /tmp/resp.json; echo
+          [ "$code" = "200" ] || { echo "drift gate call failed (HTTP $code)"; exit 1; }
+          verdict=$(python3 -c "import json;print(json.load(open('/tmp/resp.json')).get('verdict','?'))")
+          echo "Verdict: $verdict  (see the 'CodeIntent Drift Gate' check on this PR)"
