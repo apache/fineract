@@ -32,6 +32,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.fineract.commands.data.PendingMakerCheckerData;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
 import org.apache.fineract.infrastructure.core.jersey.serializer.legacy.JsonLocalDateArrayFormat;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
@@ -95,6 +96,8 @@ public final class SavingsAccountData implements Serializable {
     private final Integer daysToDormancy;
     private final Integer daysToEscheat;
     private final BigDecimal savingsAmountOnHold;
+
+    private List<PendingMakerCheckerData> pendingMakerCheckerApprovals;
     // associations
     private final SavingsAccountSummaryData summary;
     @SuppressWarnings("unused")
