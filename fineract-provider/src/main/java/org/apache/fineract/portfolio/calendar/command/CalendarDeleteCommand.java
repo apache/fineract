@@ -16,18 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.calendar.exception;
+package org.apache.fineract.portfolio.calendar.command;
 
-import org.apache.fineract.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
 
-public class CalendarEntityTypeNotSupportedException extends AbstractPlatformResourceNotFoundException {
-
-    public CalendarEntityTypeNotSupportedException(final String resource) {
-        super("calendar.entitytype.not.supported", "Calendar does not support resource " + resource);
-    }
-
-    public CalendarEntityTypeNotSupportedException(final String resource, final Throwable cause) {
-        super("calendar.entitytype.not.supported", "Calendar does not support resource " + resource);
-        initCause(cause);
-    }
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class CalendarDeleteCommand extends Command<Long> {}

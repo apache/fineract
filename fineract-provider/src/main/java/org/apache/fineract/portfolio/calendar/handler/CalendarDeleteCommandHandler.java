@@ -18,25 +18,30 @@
  */
 package org.apache.fineract.portfolio.calendar.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.calendar.data.CalendarDeleteResponse;
 import org.apache.fineract.portfolio.calendar.service.CalendarWritePlatformService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 
-@Service
-@CommandType(entity = "CALENDAR", action = "DELETE")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class DeleteCalendarCommandHandler implements NewCommandSourceHandler {
+public class CalendarDeleteCommandHandler implements CommandHandler<Long, CalendarDeleteResponse> {
 
-    private final CalendarWritePlatformService writePlatformService;
+    private final CalendarWritePlatformService writeService;
 
-    @Transactional
+    @Retry(name = "commandCalendarDelete", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.deleteCalendar(command.entityId());
+    public CalendarDeleteResponse handle(Command<Long> command) {
+        return writeService.deleteCalendar(command.getPayload());
+    }
+
+    @Override
+    public CalendarDeleteResponse fallback(Command<Long> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
     }
 }
