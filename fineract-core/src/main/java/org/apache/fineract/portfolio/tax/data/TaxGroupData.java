@@ -35,21 +35,32 @@ public final class TaxGroupData implements Serializable {
     @SuppressWarnings("unused")
     private final Collection<TaxComponentData> taxComponents;
 
+    // Edit control flag: false if tax group is linked to charge products and none of its components has a
+    // not-yet-effective start date, true otherwise
+    @SuppressWarnings("unused")
+    private final Boolean groupEditable;
+
     public static TaxGroupData lookup(final Long id, final String name) {
         final Collection<TaxComponentData> taxComponents = null;
         final Collection<TaxGroupMappingsData> taxAssociations = null;
-        return new TaxGroupData(id, name, taxAssociations, taxComponents);
+        return new TaxGroupData(id, name, taxAssociations, taxComponents, null);
     }
 
     public static TaxGroupData template(final Collection<TaxComponentData> taxComponents) {
         final Long id = null;
         final String name = null;
         final Collection<TaxGroupMappingsData> taxAssociations = null;
-        return new TaxGroupData(id, name, taxAssociations, taxComponents);
+        return new TaxGroupData(id, name, taxAssociations, taxComponents, null);
     }
 
     public static TaxGroupData template(final TaxGroupData taxGroupData, final Collection<TaxComponentData> taxComponents) {
-        return new TaxGroupData(taxGroupData.id, taxGroupData.name, taxGroupData.taxAssociations, taxComponents);
+        return new TaxGroupData(taxGroupData.id, taxGroupData.name, taxGroupData.taxAssociations, taxComponents,
+                taxGroupData.groupEditable);
+    }
+
+    public static TaxGroupData template(final TaxGroupData taxGroupData, final Collection<TaxComponentData> taxComponents,
+            final Boolean groupEditable) {
+        return new TaxGroupData(taxGroupData.id, taxGroupData.name, taxGroupData.taxAssociations, taxComponents, groupEditable);
     }
 
 }

@@ -28,4 +28,7 @@ public interface ChargeRepository extends JpaRepository<Charge, Long>, JpaSpecif
 
     @Query("select lc.id from WorkingCapitalLoanCharge lc where lc.charge.id = :chargeId and lc.active = true")
     Optional<Long> isAnyWorkingCapitalLoansAssociateWithThisCharge(@Param("chargeId") Long chargeId);
+
+    @Query("select case when count(c) > 0 then true else false end from Charge c where c.taxGroup.id = :taxGroupId")
+    boolean existsByTaxGroupId(@Param("taxGroupId") Long taxGroupId);
 }

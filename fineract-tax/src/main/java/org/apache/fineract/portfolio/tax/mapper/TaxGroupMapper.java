@@ -30,6 +30,7 @@ public interface TaxGroupMapper {
 
     @Mapping(target = "taxAssociations", source = "taxGroup.taxGroupMappings")
     @Mapping(target = "taxComponents", ignore = true)
+    @Mapping(target = "groupEditable", ignore = true)
     TaxGroupData map(TaxGroup taxGroup);
 
     List<TaxGroupData> map(List<TaxGroup> taxGroups);

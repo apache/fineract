@@ -65,15 +65,22 @@ public class TaxGroupMappings extends AbstractAuditableCustom {
 
     }
 
-    public static TaxGroupMappings createTaxGroupMappings(final Long id, final TaxComponent taxComponent, final LocalDate endDate) {
-        final LocalDate startDate = null;
+    public static TaxGroupMappings createTaxGroupMappings(final Long id, final TaxComponent taxComponent, final LocalDate startDate,
+            final LocalDate endDate) {
         TaxGroupMappings groupMappings = new TaxGroupMappings(taxComponent, startDate, endDate);
         groupMappings.setId(id);
         return groupMappings;
 
     }
 
-    public void update(final LocalDate endDate, final List<Map<String, Object>> changes) {
+    public void update(final LocalDate startDate, final LocalDate endDate, final List<Map<String, Object>> changes) {
+        if (startDate != null && !DateUtils.isEqual(startDate, this.startDate)) {
+            this.startDate = startDate;
+            Map<String, Object> map = new HashMap<>(2);
+            map.put(TaxApiConstants.startDateParamName, startDate);
+            map.put(TaxApiConstants.taxComponentIdParamName, this.getTaxComponent().getId());
+            changes.add(map);
+        }
         if (endDate != null && this.endDate == null) {
             this.endDate = endDate;
             Map<String, Object> map = new HashMap<>(2);
