@@ -689,11 +689,23 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     @Override
     public OutstandingDetails getOutstandingAmountsTillDate(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate targetDate) {
+        return getOutstandingAmountsTillDate(scheduleModel, targetDate, false);
+    }
+
+    @Override
+    public OutstandingDetails getOutstandingAmountsTillDate(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate targetDate,
+            boolean fixedInterestTillDate) {
         MathContext mc = scheduleModel.mc();
         ProgressiveLoanInterestScheduleModel scheduleModelCopy = scheduleModel.deepCopy(mc);
         calculateRateFactorForScheduleTillDateInclusive(scheduleModelCopy, targetDate);
         calculateOutstandingBalance(scheduleModelCopy);
         calculateLastUnpaidRepaymentPeriodEMI(scheduleModelCopy, targetDate);
+        if (fixedInterestTillDate) {
+            // Scaled last on purpose: the EMI pass uses fixed interest as a floor (paid principal + fixed interest),
+            // so scaling before it would let a reporting-only adjustment lower that floor and with it the EMI cap on
+            // the reported due interest.
+            scaleFixedInterestTillDate(scheduleModelCopy, targetDate);
+        }
 
         Money totalOutstandingPrincipal = MathUtil
                 .negativeToZero(scheduleModelCopy.getTotalDuePrincipal().minus(scheduleModelCopy.getTotalPaidPrincipal()));
@@ -1875,6 +1887,25 @@ public final class ProgressiveEMICalculator implements EMICalculator {
                     ip.setRateFactor(BigDecimal.ZERO);
                     ip.setRateFactorTillPeriodDueDate(BigDecimal.ZERO);
                 }));
+    }
+
+    /**
+     * Fixed interest (e.g. equal-amortization re-aged periods) bypasses rate factors entirely, so unlike
+     * rate-factor-based interest it counts as fully due from day one of its period regardless of the target date. An
+     * "as of target date" view of accrued interest has to scale it the same way rate factors are truncated: nothing for
+     * periods that have not started yet, and the day-prorated amount for the period the target date falls in, so it
+     * grows day by day instead of jumping to the period's full amount immediately. Periods already past their due date
+     * keep their full fixed interest, since that is genuinely due.
+     * <p>
+     * This is only valid for a "how much has accrued so far" view. Figures that must reflect everything ultimately
+     * payable - payoff and closure amounts, re-aging amounts - need the untruncated fixed interest, which is why this
+     * is applied selectively by the callers that want the accrued-to-date view rather than inside the shared rate
+     * factor calculation.
+     */
+    private void scaleFixedInterestTillDate(ProgressiveLoanInterestScheduleModel scheduleModelCopy, LocalDate targetDate) {
+        scheduleModelCopy.repaymentPeriods().stream() //
+                .filter(rp -> rp.getFixedInterest().isGreaterThanZero()) //
+                .forEach(rp -> rp.setFixedInterest(rp.calculateFixedInterestTillDate(targetDate)));
     }
 
     private Optional<RepaymentPeriod> getPeriodWithUnrecognizedInterest(RepaymentPeriod lastUnpaidRepaymentPeriod,
