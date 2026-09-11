@@ -130,23 +130,32 @@ public class FeignJournalEntryHelper {
     }
 
     public void checkJournalEntryForAssetAccount(Account assetAccount, String date, LoanTestData.Journal... accountEntries) {
-        checkJournalEntryForAccount(assetAccount, date, accountEntries);
+        checkJournalEntryForAccount(null, assetAccount, date, accountEntries);
     }
 
     public void checkJournalEntryForLiabilityAccount(Account liabilityAccount, String date, LoanTestData.Journal... accountEntries) {
-        checkJournalEntryForAccount(liabilityAccount, date, accountEntries);
+        checkJournalEntryForAccount(null, liabilityAccount, date, accountEntries);
+    }
+
+    /** Scoped to one office: an account transfer between offices posts to the same account in both of them. */
+    public void checkJournalEntryForLiabilityAccount(Long officeId, Account liabilityAccount, String date,
+            LoanTestData.Journal... accountEntries) {
+        checkJournalEntryForAccount(officeId, liabilityAccount, date, accountEntries);
     }
 
     public void checkJournalEntryForIncomeAccount(Account incomeAccount, String date, LoanTestData.Journal... accountEntries) {
-        checkJournalEntryForAccount(incomeAccount, date, accountEntries);
+        checkJournalEntryForAccount(null, incomeAccount, date, accountEntries);
     }
 
     public void checkJournalEntryForExpenseAccount(Account expenseAccount, String date, LoanTestData.Journal... accountEntries) {
-        checkJournalEntryForAccount(expenseAccount, date, accountEntries);
+        checkJournalEntryForAccount(null, expenseAccount, date, accountEntries);
     }
 
-    private void checkJournalEntryForAccount(Account account, String date, LoanTestData.Journal... accountEntries) {
+    private void checkJournalEntryForAccount(Long officeId, Account account, String date, LoanTestData.Journal... accountEntries) {
         Map<String, Object> queryParams = new HashMap<>();
+        if (officeId != null) {
+            queryParams.put("officeId", officeId);
+        }
         queryParams.put("glAccountId", account.getAccountID());
         queryParams.put("type", account.getAccountType());
         queryParams.put("fromDate", date);
