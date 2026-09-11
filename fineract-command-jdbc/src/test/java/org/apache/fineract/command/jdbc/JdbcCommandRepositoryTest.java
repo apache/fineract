@@ -22,8 +22,8 @@ import static org.apache.fineract.command.core.CommandState.ERROR;
 
 import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.command.jdbc.store.domain.CommandRepository;
-import org.apache.fineract.command.jdbc.store.mapping.CommandMapper;
+import org.apache.fineract.command.jdbc.store.domain.JdbcCommandRepository;
+import org.apache.fineract.command.jdbc.store.mapping.JdbcCommandMapper;
 import org.apache.fineract.command.test.CommandBaseTest;
 import org.apache.fineract.command.test.sample.command.DummyCommand;
 import org.apache.fineract.command.test.sample.data.DummyRequest;
@@ -36,13 +36,13 @@ import org.springframework.test.context.ContextConfiguration;
 @Slf4j
 @SpringBootTest
 @ContextConfiguration(classes = TestConfiguration.class)
-class CommandRepositoryTest extends CommandBaseTest {
+class JdbcCommandRepositoryTest extends CommandBaseTest {
 
     @Autowired
-    protected CommandRepository commandRepository;
+    protected JdbcCommandRepository commandRepository;
 
     @Autowired
-    protected CommandMapper commandMapper;
+    protected JdbcCommandMapper commandMapper;
 
     @Test
     void save() {

@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.command.disruptor.starter;
 
+import static org.apache.fineract.command.disruptor.DisruptorCommandConstants.COMMAND_DISRUPTOR_BASE_PACKAGE;
+import static org.apache.fineract.command.disruptor.DisruptorCommandConstants.COMMAND_DISRUPTOR_PROPERTY_ENABLED;
+
 import org.apache.fineract.command.disruptor.DisruptorCommandProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -27,7 +30,7 @@ import org.springframework.context.annotation.Import;
 
 @AutoConfiguration
 @EnableConfigurationProperties(DisruptorCommandProperties.class)
-@ComponentScan("org.apache.fineract.command.disruptor.implementation")
+@ComponentScan(COMMAND_DISRUPTOR_BASE_PACKAGE)
 @Import({ DisruptorCommandConfiguration.class })
-@ConditionalOnProperty(value = "fineract.command.disruptor.enabled", havingValue = "true")
+@ConditionalOnProperty(value = COMMAND_DISRUPTOR_PROPERTY_ENABLED, havingValue = "true")
 public class DisruptorCommandAutoConfiguration {}

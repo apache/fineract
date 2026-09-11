@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.command.async.starter;
 
+import static org.apache.fineract.command.async.AsyncCommandConstants.COMMAND_ASYNC_BASE_PACKAGE;
+import static org.apache.fineract.command.async.AsyncCommandConstants.COMMAND_ASYNC_PROPERTY_ENABLED;
+
 import org.apache.fineract.command.async.AsyncCommandProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -26,6 +29,6 @@ import org.springframework.context.annotation.ComponentScan;
 
 @AutoConfiguration
 @EnableConfigurationProperties(AsyncCommandProperties.class)
-@ComponentScan("org.apache.fineract.command.async.implementation")
-@ConditionalOnProperty(value = "fineract.command.async.enabled", havingValue = "true")
+@ComponentScan(COMMAND_ASYNC_BASE_PACKAGE)
+@ConditionalOnProperty(value = COMMAND_ASYNC_PROPERTY_ENABLED, havingValue = "true")
 public class AsyncCommandAutoConfiguration {}

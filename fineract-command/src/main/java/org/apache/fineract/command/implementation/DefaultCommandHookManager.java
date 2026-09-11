@@ -21,7 +21,7 @@ package org.apache.fineract.command.implementation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandHookAfter;
 import org.apache.fineract.command.core.CommandHookBefore;
 import org.apache.fineract.command.core.CommandHookError;
@@ -41,17 +41,50 @@ public class DefaultCommandHookManager implements CommandHookManager {
     private final List<CommandHookError> errorHooks;
 
     @Override
-    public void before(Command command) {
-        beforeHooks.forEach(processor -> processor.onBefore(command));
+    public void before(CommandContext ctx) {
+        for (var hookBefore : beforeHooks) {
+            hookBefore.onBefore(ctx);
+
+            if (ctx.isSkipHooks()) {
+                ctx.setSkipHooks(false);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping remaining pre hooks after: {}", hookBefore.getClass().getCanonicalName());
+                }
+                return;
+            }
+        }
     }
 
     @Override
-    public void after(Command command, Object response) {
-        afterHooks.forEach(processor -> processor.onAfter(command, response));
+    public void after(CommandContext ctx) {
+        for (var hookAfter : afterHooks) {
+            hookAfter.onAfter(ctx);
+
+            if (ctx.isSkipHooks()) {
+                ctx.setSkipHooks(false);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping remaining post hooks after: {}", hookAfter.getClass().getCanonicalName());
+                }
+                return;
+            }
+        }
     }
 
     @Override
-    public void error(Command command, Throwable error) {
-        errorHooks.forEach(processor -> processor.onError(command, error));
+    public void error(CommandContext ctx) {
+        for (var hookError : errorHooks) {
+            hookError.onError(ctx);
+
+            if (ctx.isSkipHooks()) {
+                ctx.setSkipHooks(false);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping remaining error hooks after: {}", hookError.getClass().getCanonicalName());
+                }
+                return;
+            }
+        }
     }
 }

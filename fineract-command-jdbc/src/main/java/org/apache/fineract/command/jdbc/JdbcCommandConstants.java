@@ -16,13 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.command.jdbc.store.domain;
+package org.apache.fineract.command.jdbc;
 
-import java.util.Optional;
-import org.springframework.data.repository.ListCrudRepository;
-import org.springframework.data.repository.query.QueryByExampleExecutor;
+import static org.apache.fineract.command.core.CommandConstants.COMMAND_PROPERTIES_PREFIX;
 
-public interface CommandRepository extends ListCrudRepository<CommandEntity, Long>, QueryByExampleExecutor<CommandEntity> {
+public final class JdbcCommandConstants {
 
-    Optional<CommandEntity> findOneByIdempotencyKey(String idempotencyKey);
+    private JdbcCommandConstants() {}
+
+    public static final String COMMAND_JDBC_PROPERTIES_PREFIX = COMMAND_PROPERTIES_PREFIX + ".jdbc";
+    public static final String COMMAND_JDBC_PROPERTY_ENABLED = COMMAND_JDBC_PROPERTIES_PREFIX + ".enabled";
+    public static final String COMMAND_JDBC_STORE_BASE_PACKAGE = "org.apache.fineract.command.jdbc.store";
 }

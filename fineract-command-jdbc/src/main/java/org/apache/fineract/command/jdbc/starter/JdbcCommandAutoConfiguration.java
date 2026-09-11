@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.command.jdbc.starter;
 
+import static org.apache.fineract.command.jdbc.JdbcCommandConstants.COMMAND_JDBC_PROPERTY_ENABLED;
+import static org.apache.fineract.command.jdbc.JdbcCommandConstants.COMMAND_JDBC_STORE_BASE_PACKAGE;
+
 import java.util.List;
 import org.apache.fineract.command.jdbc.JdbcCommandProperties;
 import org.apache.fineract.command.jdbc.store.converter.JsonNodeReadingConverter;
@@ -31,8 +34,8 @@ import org.springframework.data.jdbc.core.convert.JdbcCustomConversions;
 
 @AutoConfiguration
 @EnableConfigurationProperties(JdbcCommandProperties.class)
-@ComponentScan("org.apache.fineract.command.jdbc.store")
-@ConditionalOnProperty(value = "fineract.command.jdbc.enabled", havingValue = "true")
+@ComponentScan(COMMAND_JDBC_STORE_BASE_PACKAGE)
+@ConditionalOnProperty(value = COMMAND_JDBC_PROPERTY_ENABLED, havingValue = "true")
 public class JdbcCommandAutoConfiguration {
 
     @Bean

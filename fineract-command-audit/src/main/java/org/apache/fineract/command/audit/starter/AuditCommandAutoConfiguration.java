@@ -18,6 +18,9 @@
  */
 package org.apache.fineract.command.audit.starter;
 
+import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_HOOK_BASE_PACKAGE;
+import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_PROPERTY_ENABLED;
+
 import org.apache.fineract.command.audit.AuditCommandProperties;
 import org.apache.fineract.command.core.CommandProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -27,6 +30,6 @@ import org.springframework.context.annotation.ComponentScan;
 
 @AutoConfiguration
 @EnableConfigurationProperties({ CommandProperties.class, AuditCommandProperties.class })
-@ComponentScan("org.apache.fineract.command.audit.hook")
-@ConditionalOnProperty(value = "fineract.command.audit.enabled", havingValue = "true")
+@ComponentScan(COMMAND_AUDIT_HOOK_BASE_PACKAGE)
+@ConditionalOnProperty(value = COMMAND_AUDIT_PROPERTY_ENABLED, havingValue = "true")
 public class AuditCommandAutoConfiguration {}

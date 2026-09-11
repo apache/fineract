@@ -18,13 +18,14 @@
  */
 package org.apache.fineract.command.audit.hook;
 
-import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_HOOK_AUDIT_ERROR;
+import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_HOOK_ERROR;
+import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_PROPERTY_HOOK_ERROR_ENABLED;
 import static org.apache.fineract.command.core.CommandState.ERROR;
 
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandHookError;
 import org.apache.fineract.command.core.CommandStore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,20 +35,24 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-@Order(COMMAND_HOOK_AUDIT_ERROR)
-@ConditionalOnProperty(value = "fineract.command.hooks.audit-error", havingValue = "true")
-final class AuditCommandHookError implements CommandHookError<Object> {
+@Order(COMMAND_AUDIT_HOOK_ERROR)
+@ConditionalOnProperty(value = COMMAND_AUDIT_PROPERTY_HOOK_ERROR_ENABLED, havingValue = "true")
+final class AuditCommandHookError implements CommandHookError<Object, Object> {
 
     private final CommandStore store;
 
     @Override
-    public void onError(Command<Object> command, Throwable error) {
+    public void onError(CommandContext<Object, Object> ctx) {
         final var now = Instant.now();
 
-        command.setError(error.getMessage());
+        ctx.setState(ERROR);
+
+        var command = ctx.getCommand();
+
+        command.setError(ctx.getError().getMessage());
         command.setUpdatedAt(now);
         command.setExecutedAt(now);
 
-        store.store(command, null, ERROR);
+        store.store(ctx);
     }
 }

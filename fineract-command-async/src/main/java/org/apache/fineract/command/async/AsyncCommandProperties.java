@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.command.async;
 
+import static org.apache.fineract.command.async.AsyncCommandConstants.COMMAND_ASYNC_PROPERTIES_PREFIX;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Duration;
@@ -33,7 +35,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
-@ConfigurationProperties(prefix = "fineract.command.async")
+@ConfigurationProperties(prefix = COMMAND_ASYNC_PROPERTIES_PREFIX)
 public final class AsyncCommandProperties implements Serializable {
 
     @Serial

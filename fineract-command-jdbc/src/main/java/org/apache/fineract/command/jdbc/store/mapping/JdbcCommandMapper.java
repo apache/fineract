@@ -27,8 +27,8 @@ import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = SPRING, injectionStrategy = CONSTRUCTOR, uses = { CommandJsonMapper.class })
-public interface CommandMapper {
+@Mapper(componentModel = SPRING, injectionStrategy = CONSTRUCTOR, uses = { JsonCommandMapper.class })
+public interface JdbcCommandMapper {
 
     @Mapping(source = "commandId", target = "id")
     @Mapping(source = "createdAt", target = "createdAt")

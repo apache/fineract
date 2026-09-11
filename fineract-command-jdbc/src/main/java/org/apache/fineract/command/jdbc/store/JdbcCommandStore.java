@@ -21,7 +21,6 @@ package org.apache.fineract.command.jdbc.store;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.isNull;
 import static org.apache.fineract.command.core.CommandConstants.COMMAND_JSON_CLASS_ATTRIBUTE;
-import static org.apache.fineract.command.core.CommandState.UNKNOWN;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -34,12 +33,12 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.fineract.command.core.Command;
-import org.apache.fineract.command.core.CommandState;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandStore;
 import org.apache.fineract.command.jdbc.JdbcCommandProperties;
 import org.apache.fineract.command.jdbc.store.domain.CommandEntity;
-import org.apache.fineract.command.jdbc.store.domain.CommandRepository;
-import org.apache.fineract.command.jdbc.store.mapping.CommandMapper;
+import org.apache.fineract.command.jdbc.store.domain.JdbcCommandRepository;
+import org.apache.fineract.command.jdbc.store.mapping.JdbcCommandMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
@@ -51,35 +50,30 @@ import org.springframework.stereotype.Component;
 @ConditionalOnMissingBean(value = CommandStore.class, ignored = JdbcCommandStore.class)
 public class JdbcCommandStore implements CommandStore {
 
-    private final CommandMapper mapper;
-    private final CommandRepository repository;
+    private final JdbcCommandMapper mapper;
+    private final JdbcCommandRepository repository;
     private final ObjectMapper objectMapper;
     private final JdbcCommandProperties properties;
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getRequestById(Long id) {
-        return (T) repository.findById(id).map(CommandEntity::getRequest)
-                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asText()))).orElse(null);
+    public Command<Object> getById(Long id) {
+        return repository.findById(id).map(mapper::map).orElse(null);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getResponseById(Long id) {
-        return (T) repository.findById(id).map(CommandEntity::getResponse)
-                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asText()))).orElse(null);
+    public Command<Object> getByKey(String key) {
+        return repository.findOneByIdempotencyKey(key).map(mapper::map).orElse(null);
     }
 
     @Override
-    public org.apache.fineract.command.core.CommandState getStateById(Long id) {
-        return repository.findById(id).map(CommandEntity::getState).orElse(UNKNOWN);
+    public boolean existsByKey(String key) {
+        return repository.existsByIdempotencyKey(key);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getRequestByKey(String key) {
-        return (T) repository.findOneByIdempotencyKey(key).map(CommandEntity::getRequest)
-                .map(json -> objectMapper.convertValue(json, forName(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asText()))).orElse(null);
+    public boolean checkRequestInstanceByKey(String key, Class<?> clazz) {
+        return repository.findOneByIdempotencyKey(key).map(CommandEntity::getResponse)
+                .map(json -> clazz.getCanonicalName().equals(json.get(COMMAND_JSON_CLASS_ATTRIBUTE).asText())).orElse(false);
     }
 
     @Override
@@ -90,14 +84,14 @@ public class JdbcCommandStore implements CommandStore {
     }
 
     @Override
-    public CommandState getStateByKey(String key) {
-        return repository.findOneByIdempotencyKey(key).map(CommandEntity::getState).orElse(UNKNOWN);
-    }
-
-    @Override
     @Retry(name = "commandStore", fallbackMethod = "fallback")
-    public void store(Command<?> command, Object response, CommandState state) {
+    public void store(CommandContext<?, ?> ctx) {
         final long startedAt = System.nanoTime();
+
+        final var command = ctx.getCommand();
+        final var response = ctx.getResponse();
+        final var state = ctx.getState();
+
         final var commandEntity = isNull(response) ? mapper.map(command) : mapper.map(command, response);
 
         if (state != null) {
@@ -119,7 +113,10 @@ public class JdbcCommandStore implements CommandStore {
         }
     }
 
-    void fallback(Command<?> command, Object response, CommandState state, Throwable t) throws Exception {
+    void fallback(CommandContext<?, ?> ctx, Throwable t) throws Exception {
+        final var command = ctx.getCommand();
+        final var state = ctx.getState();
+
         log.warn("Command store fallback idempotencyKey={}, state={}, payloadType={}, deadLetterQueueEnabled={}",
                 command.getIdempotencyKey(), state, payloadType(command), properties.getFileDeadLetterQueueEnabled(), t);
         if (Boolean.TRUE.equals(properties.getFileDeadLetterQueueEnabled())) {
