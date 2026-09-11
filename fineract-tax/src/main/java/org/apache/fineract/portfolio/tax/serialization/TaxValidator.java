@@ -286,13 +286,8 @@ public class TaxValidator {
         for (TaxGroupMappings mapping : groupMappings) {
             if (mapping.getId() != null) {
                 TaxGroupMappings existing = taxGroup.findOneBy(mapping);
-                if (existing.endDate() != null && mapping.endDate() != null && !DateUtils.isEqual(existing.endDate(), mapping.endDate())) {
-                    baseDataValidator.reset().parameter(TaxApiConstants.endDateParamName)
-                            .failWithCode("can.not.modify.end.date.once.updated");
-                } else {
-                    baseDataValidator.reset().parameter(TaxApiConstants.endDateParamName).value(mapping.endDate()).ignoreIfNull()
-                            .validateDateAfter(existing.startDate());
-                }
+                baseDataValidator.reset().parameter(TaxApiConstants.endDateParamName).value(mapping.endDate()).ignoreIfNull()
+                        .validateDateAfter(existing.startDate());
                 if (mapping.getTaxComponent() != null && !existing.getTaxComponent().getId().equals(mapping.getTaxComponent().getId())) {
                     baseDataValidator.reset().parameter(TaxApiConstants.taxComponentIdParamName).failWithCode("update.not.supported");
                 }
