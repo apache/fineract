@@ -25,11 +25,10 @@ import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.data.AccountGLJournalEntryAnnualSummaryData;
 import org.apache.fineract.infrastructure.jobs.service.retainedearning.listener.RetainedEarningJobListener;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,8 +57,9 @@ public class RetainedEarningJobConfiguration {
     public Step retainedEarningSummaryStep() {
         return new StepBuilder(JOB_SUMMARY_STEP_NAME, jobRepository)
                 .<AccountGLJournalEntryAnnualSummaryData, AccountGLJournalEntryAnnualSummaryData>chunk(
-                        fineractProperties.getJob().getRetainedEarningChunkSize(), transactionManager)
-                .reader(retainedEarningJobReader).writer(retainedEarningItemWriter).allowStartIfComplete(true).build();
+                        fineractProperties.getJob().getRetainedEarningChunkSize())
+                .transactionManager(transactionManager).reader(retainedEarningJobReader).writer(retainedEarningItemWriter)
+                .allowStartIfComplete(true).build();
     }
 
     /**
@@ -70,7 +70,7 @@ public class RetainedEarningJobConfiguration {
     @Bean(name = "retainedEarning")
     public Job retainedEarning() {
         return new JobBuilder(JobName.RETAINED_EARNING.name(), jobRepository).listener(retainedEarningJobListener)
-                .start(retainedEarningSummaryStep()).incrementer(new RunIdIncrementer()).build();
+                .start(retainedEarningSummaryStep()).build();
     }
 
 }

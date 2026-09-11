@@ -43,7 +43,7 @@ import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.JsonParserHelper;
 import org.apache.logging.log4j.util.Strings;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 public final class DateUtils {
 

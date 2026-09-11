@@ -28,10 +28,10 @@ import org.apache.fineract.accounting.provisioning.service.ProvisioningEntriesWr
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.organisation.provisioning.data.ProvisioningCriteriaData;
 import org.apache.fineract.organisation.provisioning.service.ProvisioningCriteriaReadPlatformService;
-import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.StepContribution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 
 @Slf4j
 @RequiredArgsConstructor

@@ -25,8 +25,8 @@ import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
-import org.springframework.batch.item.Chunk;
-import org.springframework.batch.item.data.RepositoryItemWriter;
+import org.springframework.batch.infrastructure.item.Chunk;
+import org.springframework.batch.infrastructure.item.data.RepositoryItemWriter;
 import org.springframework.data.repository.CrudRepository;
 
 @Slf4j
@@ -36,8 +36,8 @@ public abstract class AbstractWorkingCapitalLoanCOBWorkerItemWriter extends Repo
 
     public AbstractWorkingCapitalLoanCOBWorkerItemWriter(LockingService loanLockingService,
             CrudRepository<WorkingCapitalLoan, Long> repository) {
+        super(repository);
         this.loanLockingService = loanLockingService;
-        setRepository(repository);
     }
 
     @Override

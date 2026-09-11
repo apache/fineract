@@ -25,7 +25,7 @@ import org.apache.fineract.infrastructure.core.config.TaskExecutorConstant;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
 import org.apache.fineract.infrastructure.jobs.domain.ScheduledJobDetailRepository;
 import org.apache.fineract.infrastructure.jobs.service.JobStarter;
-import org.springframework.batch.core.configuration.JobLocator;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -35,9 +35,9 @@ import org.springframework.stereotype.Service;
 @Conditional(LoanCOBEnabledCondition.class)
 public class AsyncLoanCOBExecutorServiceImpl extends AsyncCommonCOBExecutorService implements AsyncLoanCOBExecutorService {
 
-    public AsyncLoanCOBExecutorServiceImpl(JobLocator jobLocator, ScheduledJobDetailRepository scheduledJobDetailRepository,
+    public AsyncLoanCOBExecutorServiceImpl(JobRegistry jobRegistry, ScheduledJobDetailRepository scheduledJobDetailRepository,
             JobStarter jobStarter, RetrieveLoanIdService retrieveIdService) {
-        super(jobLocator, scheduledJobDetailRepository, jobStarter, retrieveIdService);
+        super(jobRegistry, scheduledJobDetailRepository, jobStarter, retrieveIdService);
     }
 
     @Override

@@ -19,21 +19,25 @@
 package org.apache.fineract.cob.loan;
 
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.domain.Loan;
-import org.springframework.batch.item.Chunk;
-import org.springframework.batch.item.data.RepositoryItemWriter;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
+import org.springframework.batch.infrastructure.item.Chunk;
+import org.springframework.batch.infrastructure.item.data.RepositoryItemWriter;
+import org.springframework.data.repository.CrudRepository;
 
 @Slf4j
-@RequiredArgsConstructor
 public abstract class AbstractLoanItemWriter extends RepositoryItemWriter<Loan> {
 
     private final LockingService loanLockingService;
+
+    protected AbstractLoanItemWriter(LockingService loanLockingService, CrudRepository<Loan, Long> repository) {
+        super(repository);
+        this.loanLockingService = loanLockingService;
+    }
 
     @Override
     public void write(@NonNull Chunk<? extends Loan> items) throws Exception {

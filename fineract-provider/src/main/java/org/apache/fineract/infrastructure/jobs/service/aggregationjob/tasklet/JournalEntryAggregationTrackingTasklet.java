@@ -26,13 +26,13 @@ import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.service.aggregationjob.JournalEntryAggregationJobConstant;
 import org.apache.fineract.infrastructure.jobs.service.aggregationjob.data.JournalEntryAggregationTrackingData;
 import org.apache.fineract.infrastructure.jobs.service.aggregationjob.services.JournalEntryAggregationWriterService;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.StepExecution;
+import org.jspecify.annotations.NonNull;
+import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.StepContribution;
+import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.lang.NonNull;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor

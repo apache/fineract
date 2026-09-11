@@ -37,7 +37,10 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 @Table(name = "m_external_event")
 @Getter
 @NoArgsConstructor
-public class ExternalEvent extends AbstractPersistableCustom<Long> {
+// implementing the view makes Spring Data return the entity directly instead of generating a
+// projection query whose per-property aliases (id, type, schema, data) EclipseLink 5 rejects as
+// JPQL reserved identifiers
+public class ExternalEvent extends AbstractPersistableCustom<Long> implements ExternalEventView {
 
     @Column(name = "type", nullable = false)
     private String type;

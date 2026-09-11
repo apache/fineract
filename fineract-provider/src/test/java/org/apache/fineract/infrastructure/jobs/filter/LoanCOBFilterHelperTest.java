@@ -32,7 +32,6 @@ import org.apache.fineract.portfolio.loanaccount.domain.GLIMAccountInfoRepositor
 import org.apache.fineract.portfolio.loanaccount.domain.LoanRepository;
 import org.apache.fineract.portfolio.loanaccount.rescheduleloan.domain.LoanRescheduleRequestRepository;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -63,11 +62,6 @@ public class LoanCOBFilterHelperTest {
 
     @InjectMocks
     private LoanCOBFilterHelperImpl helper;
-
-    @BeforeEach
-    public void initLoanCOBFilterHelper() throws Exception {
-        helper.afterPropertiesSet();
-    }
 
     @Test
     public void testCOBFilterUnescapedChars() throws IOException {

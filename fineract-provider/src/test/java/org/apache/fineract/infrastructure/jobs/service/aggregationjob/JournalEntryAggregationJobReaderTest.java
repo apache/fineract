@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.jobs.service.aggregationjob;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import com.zaxxer.hikari.HikariDataSource;
@@ -46,9 +47,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.scope.context.JobSynchronizationManager;
-import org.springframework.batch.item.ExecutionContext;
+import org.springframework.batch.infrastructure.item.ExecutionContext;
 
 @ExtendWith(MockitoExtension.class)
 public class JournalEntryAggregationJobReaderTest {
@@ -75,6 +76,7 @@ public class JournalEntryAggregationJobReaderTest {
     public void setUp() {
         tenant = new FineractPlatformTenant(1L, "default", "Default Tenant", "default", fineractPlatformTenantConnection);
         ThreadLocalContextUtil.setTenant(tenant);
+        lenient().when(tenantDataSourceFactory.create(tenant)).thenReturn(dataSource);
         ThreadLocalContextUtil
                 .setBusinessDates(new HashMap<>(Map.of(BusinessDateType.BUSINESS_DATE, LocalDate.now(ZoneId.systemDefault()))));
     }

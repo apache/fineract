@@ -42,8 +42,8 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Pageable;
-import org.springframework.lang.NonNull;
 
 public interface LoanReadPlatformService {
 
