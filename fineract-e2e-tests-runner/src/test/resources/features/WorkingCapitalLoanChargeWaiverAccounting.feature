@@ -3,7 +3,8 @@
 @WorkingCapitalLoanChargeWaiverAccountingFeature
 Feature: Working Capital Loan Charge Waiver Accounting
 
-  Scenario: Waiving an accrued fee charge books Write-off Expense against Fees Receivable
+  @TestRailId:C102471
+  Scenario: Waiving an accrued fee charge books Write-off Expense against Fees Receivable - UC1
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -32,8 +33,10 @@ Feature: Working Capital Loan Charge Waiver Accounting
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 0.0             | 0.0      | 0.0            | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "16 January 2026"
 
-  Scenario: Waiving an accrued penalty charge books against Penalties Receivable
+  @TestRailId:C102472
+  Scenario: Waiving an accrued penalty charge books against Penalties Receivable - UC2
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -58,8 +61,10 @@ Feature: Working Capital Loan Charge Waiver Accounting
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 0.0        | 0.0             | 0.0      | 50.0           | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "16 January 2026"
 
-  Scenario: Waiving a charge that was never accrued books no journal entries
+  @TestRailId:C102473
+  Scenario: Waiving a charge that was never accrued books no journal entries - UC3
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -70,14 +75,19 @@ Feature: Working Capital Loan Charge Waiver Accounting
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 January 2026" due date and 100.0 transaction amount
     And Admin waives the last added charge on working capital loan
     Then a Working Capital Loan Charge Waiver transaction business event is raised with "100.0" EUR amount
+    And a Working Capital Loan Balance Changed business event is raised with charges:
+      | amount | amountWaived | amountAccrued | amountUnrecognized |
+      | 100.0  | 100.0        | 0.0           | 0.0                |
 # There is no receivable behind income that was never recognized, so crediting one would drive it negative.
     And Working Capital Loan Transactions tab has a "WAIVE_CHARGES" transaction with date "10 January 2026" which has the following Journal entries:
       | Type | Account code | Account name | Debit | Credit |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 0.0             | 0.0      | 0.0            | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
-  Scenario: Undoing a charge waiver reverses its journal entries
+  @TestRailId:C102474
+  Scenario: Undoing a charge waiver reverses its journal entries - UC4
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -101,8 +111,10 @@ Feature: Working Capital Loan Charge Waiver Accounting
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 100.0           | 0.0      | 0.0            | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "16 January 2026"
 
-  Scenario: A waiver dated before the charge-off credits the receivable and takes the fee back out of the charge-off
+  @TestRailId:C102475
+  Scenario: A waiver dated before the charge-off credits the receivable and takes the fee back out of the charge-off - UC5
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -117,11 +129,19 @@ Feature: Working Capital Loan Charge Waiver Accounting
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 100.0 |        |
       | INCOME | 404007       | Fee Income              |       | 100.0  |
+# The first delinquency period expires before the charge-off, so the schedule carries a day count that only a
+# rebuild moves: nothing between this COB and the waiver touches it.
+    When Admin sets the business date to "31 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 1              |
+      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
 # The waiver is dated on the charge due date, so it sorts before the charge-off even though it is booked after it.
 # As of that date the borrower no longer owed the fee, so the charge-off must stop writing it off.
-    When Admin sets the business date to "18 January 2026"
-    And Admin charges off the Working Capital loan on "18 January 2026"
-    When Admin sets the business date to "20 January 2026"
+    When Admin sets the business date to "05 February 2026"
+    And Admin charges off the Working Capital loan on "05 February 2026"
+    When Admin sets the business date to "10 February 2026"
     And Admin waives the last added charge on working capital loan
     Then a Working Capital Loan Charge Waiver transaction business event is raised with "100.0" EUR amount
     And Working Capital Loan Transactions tab has a "WAIVE_CHARGES" transaction with date "15 January 2026" which has the following Journal entries:
@@ -129,16 +149,24 @@ Feature: Working Capital Loan Charge Waiver Accounting
       | EXPENSE | e4           | Written off             | 100.0 |        |
       | ASSET   | 112603       | Interest/Fee Receivable |       | 100.0  |
     And Working Capital Loan has transactions:
-      | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 15 January 2026 | Accrual            | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
-      | 15 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
-      | 18 January 2026 | Charge-off         | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | transactionDate  | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026  | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 15 January 2026  | Accrual            | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+      | 15 January 2026  | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+      | 05 February 2026 | Charge-off         | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 0.0             | 0.0      | 0.0            | 0.0                 | 0.0          |
+# The replay the backdated waiver runs restates the charge-off, and the delinquency periods are re-derived with it:
+# the day count catches up to the day the waiver was granted.
+    And Working Capital loan delinquency range schedule has the following data:
+      | periodNumber | fromDate   | toDate     | expectedAmount | paidAmount | outstandingAmount | minPaymentCriteriaMet | delinquentAmount | delinquentDays |
+      | 1            | 2026-01-01 | 2026-01-30 | 270.0          | 0.0        | 270.0             | false                 | 270.0            | 11             |
+      | 2            | 2026-01-31 | 2026-03-01 | 270.0          | 0.0        | 270.0             | null                  | null             | null           |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 February 2026"
 
-  Scenario: Waiving the remainder of a partially paid charge before it is accrued accrues only the paid portion
+  @TestRailId:C102476
+  Scenario: Waiving the remainder of a partially paid charge before it is accrued accrues only the paid portion - UC6
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -158,14 +186,16 @@ Feature: Working Capital Loan Charge Waiver Accounting
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Charge Adjustment  | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
-      | 10 January 2026 | Waive loan charges | 60.0              | 0.0              | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Waive loan charges | 60.0              | 0.0              | 60.0              | 0.0                   | false    |
       | 10 January 2026 | Accrual            | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
     And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "10 January 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 40.0  |        |
       | INCOME | 404007       | Fee Income              |       | 40.0   |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "11 January 2026"
 
-  Scenario: Undoing a charge waiver tops the reduced accrual back up to the full charge amount
+  @TestRailId:C102477
+  Scenario: Undoing a charge waiver tops the reduced accrual back up to the full charge amount - UC7
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -189,7 +219,7 @@ Feature: Working Capital Loan Charge Waiver Accounting
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Charge Adjustment  | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
-      | 10 January 2026 | Waive loan charges | 60.0              | 0.0              | 0.0               | 0.0                   | true     |
+      | 10 January 2026 | Waive loan charges | 60.0              | 0.0              | 60.0              | 0.0                   | true     |
       | 10 January 2026 | Accrual            | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
       | 10 January 2026 | Accrual            | 60.0              | 0.0              | 60.0              | 0.0                   | false    |
     And Working Capital Loan Transactions tab has 2 "ACCRUAL" transactions with date "10 January 2026" which have the following Journal entries:
@@ -201,8 +231,10 @@ Feature: Working Capital Loan Charge Waiver Accounting
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 60.0            | 40.0     | 0.0            | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "12 January 2026"
 
-  Scenario: Re-waiving a charge before the accrual catches up books no journal entries
+  @TestRailId:C102478
+  Scenario: Re-waiving a charge before the accrual catches up books no journal entries - UC8
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -227,8 +259,10 @@ Feature: Working Capital Loan Charge Waiver Accounting
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 0.0             | 40.0     | 0.0            | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "11 January 2026"
 
-  Scenario: A waiver dated after the charge-off leaves the fee the charge-off wrote off in place
+  @TestRailId:C102479
+  Scenario: A waiver dated after the charge-off leaves the fee the charge-off wrote off in place - UC9
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -268,8 +302,10 @@ Feature: Working Capital Loan Charge Waiver Accounting
       | 18 January 2026 | Charge-off         | 8100.0            | 8000.0           | 100.0             | 0.0                   | false    |
       | 25 January 2026 | Accrual            | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
       | 25 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "26 January 2026"
 
-  Scenario: Undoing a waiver on a charged-off loan gives the fee back to the charge-off
+  @TestRailId:C102480
+  Scenario: Undoing a waiver on a charged-off loan gives the fee back to the charge-off - UC10
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -294,7 +330,7 @@ Feature: Working Capital Loan Charge Waiver Accounting
     And Working Capital Loan has transactions:
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | true     |
+      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
       | 15 January 2026 | Charge-off         | 9100.0            | 9000.0           | 100.0             | 0.0                   | false    |
 # The receivable the restated charge-off credited is matched by the accrual the undo made due again.
     When Admin sets the business date to "21 January 2026"
@@ -309,3 +345,4 @@ Feature: Working Capital Loan Charge Waiver Accounting
       | Type    | Account code | Account name   | Debit | Credit |
       | EXPENSE | e4           | Written off    | 100.0 |        |
       | INCOME  | 404008       | Fee Charge Off |       | 100.0  |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "21 January 2026"
