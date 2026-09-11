@@ -18,71 +18,48 @@
  */
 package org.apache.fineract.integrationtests;
 
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.Collections;
-import net.minidev.json.JSONArray;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.math.BigDecimal;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanValidationIntegrationTest {
+public class LoanValidationIntegrationTest extends FeignLoanTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanValidationIntegrationTest.class);
-
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private AccountHelper accountHelper;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-    }
+    private static final String NEW_USER_PASSWORD = "A1b2c3d4e5f$";
 
     @Test
     public void checkPrincipalErrors() {
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Long staffId = new FeignStaffHelper(FineractFeignClientHelper.getFineractFeignClient()).createStaff().getResourceId();
         String username = Utils.uniqueRandomStringGenerator("user", 8);
-        UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "A1b2c3d4e5f$", "resourceId");
+        FeignUserHelper.createUser(1L, staffId, username, NEW_USER_PASSWORD);
 
         LOG.info("-------------------------Creating Client---------------------------");
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
+        final Long clientId = createClient();
+        Assertions.assertNotNull(clientHelper.getClient(clientId));
 
         LOG.info("-------------------------Creating Loan---------------------------");
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
 
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder() //
+        final Long loanProductId = createLoanProduct(new LoanProductTestBuilder() //
                 .withPrincipal("10000000.00") //
                 .withNumberOfRepayments("24") //
                 .withRepaymentAfterEvery("1") //
@@ -93,43 +70,17 @@ public class LoanValidationIntegrationTest {
                 .withAmortizationTypeAsEqualPrincipalPayment() //
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "0")
-                .withAccounting("2", new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount }).build(null);
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+                .withAccounting("2", new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount }).buildRequest(null));
 
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal("-1") //
-                .withLoanTermFrequency("6") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("6") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsFlatBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate("12 July 2022") //
-                .withSubmittedOnDate("10 July 2022") //
-                .withRepaymentStrategy(LoanApplicationTestBuilder.DEFAULT_STRATEGY) //
-                .withCharges(Collections.emptyList()) //
-                .build(clientID.toString(), loanProductID.toString(), null);
+        // a negative principal is rejected, and the rejection names exactly one offending field
+        CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> applyForLoan(LoanRequestBuilders
+                        .legacyIndividualApplication(clientId, loanProductId, "-1", 6, BigDecimal.valueOf(2), "12 July 2022")//
+                        .interestType(LoanTestData.InterestType.FLAT)//
+                        .submittedOnDate("10 July 2022")));
 
-        ResponseSpecification failedResponseSpec = new ResponseSpecBuilder().expectStatusCode(400).expectBody(new BaseMatcher<String>() {
-
-            @Override
-            public boolean matches(Object body) {
-                DocumentContext json = JsonPath.parse(body.toString());
-                LOG.error(body.toString());
-                JSONArray errors = json.read("$.errors[*].developerMessage");
-                LOG.info("errors: {}", errors);
-                return errors.size() == 1;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-
-            }
-        }).build();
-        final Integer loanID = this.loanTransactionHelper.getLoanId(loanApplicationJSON, requestSpec, failedResponseSpec);
+        assertEquals(400, exception.getStatus());
+        assertEquals(1, extractErrorCount(exception));
     }
 }

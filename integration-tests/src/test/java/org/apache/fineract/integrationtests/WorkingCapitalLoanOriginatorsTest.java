@@ -23,15 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -45,6 +40,8 @@ import org.apache.fineract.client.models.LoanOriginatorsResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.client.models.PostUsersResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansOriginatorData;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignRoleHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
 import org.apache.fineract.integrationtests.client.feign.helpers.WorkingCapitalLoanOriginatorHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
@@ -54,8 +51,6 @@ import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCap
 import org.apache.fineract.integrationtests.common.workingcapitalloan.WorkingCapitalLoanHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductHelper;
 import org.apache.fineract.integrationtests.common.workingcapitalloanproduct.WorkingCapitalLoanProductTestBuilder;
-import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
-import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.junit.jupiter.api.Test;
 
 public class WorkingCapitalLoanOriginatorsTest {
@@ -251,25 +246,18 @@ public class WorkingCapitalLoanOriginatorsTest {
 
     @Test
     public void testUserWithoutPermissionsCannotAttachOrDetachOriginator() {
-        Utils.initializeRESTAssured();
-        RequestSpecification requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-
-        final Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
+        final Long roleId = FeignRoleHelper.createRole();
         assertNotNull(roleId);
 
-        final HashMap<String, Boolean> permissions = new HashMap<>();
-        permissions.put("READ_WORKINGCAPITALLOAN", true);
-        RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissions);
+        FeignRoleHelper.addPermissionsToRole(roleId, Map.of("READ_WORKINGCAPITALLOAN", true));
 
         final String username = Utils.uniqueRandomStringGenerator("WCLOriginatorUser", 4);
         final String password = "Str0ngP@sw0rd!";
         final GetOfficesResponse headOffice = OfficeHelper.getHeadOffice();
         final PostUsersRequest createUserRequest = new PostUsersRequest().username(username).firstname(Utils.randomFirstNameGenerator())
                 .lastname(Utils.randomLastNameGenerator()).email("wcloriginator@test.org").password(password).repeatPassword(password)
-                .sendPasswordToEmail(false).roles(List.of(roleId.longValue())).officeId(headOffice.getId());
-        final PostUsersResponse userResponse = UserHelper.createUser(requestSpec, responseSpec, createUserRequest);
+                .sendPasswordToEmail(false).roles(List.of(roleId)).officeId(headOffice.getId());
+        final PostUsersResponse userResponse = FeignUserHelper.createUser(createUserRequest);
         assertNotNull(userResponse.getResourceId());
 
         final FineractFeignClient userClient = FineractFeignClientHelper.createNewFineractFeignClient(username, password);
@@ -294,9 +282,7 @@ public class WorkingCapitalLoanOriginatorsTest {
                 .failVoid(() -> userClient.workingCapitalLoanOriginators().attachOriginatorToWorkingCapitalLoan(loanId, originatorId));
         assertThat(attachException.getStatus()).isEqualTo(403);
 
-        final HashMap<String, Boolean> attachPermission = new HashMap<>();
-        attachPermission.put("ATTACH_WORKING_CAPITAL_LOAN_ORIGINATOR", true);
-        RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, attachPermission);
+        FeignRoleHelper.addPermissionsToRole(roleId, Map.of("ATTACH_WORKING_CAPITAL_LOAN_ORIGINATOR", true));
 
         FeignCalls.ok(() -> userClient.workingCapitalLoanOriginators().attachOriginatorToWorkingCapitalLoan(loanId, originatorId));
 
@@ -304,9 +290,7 @@ public class WorkingCapitalLoanOriginatorsTest {
                 .failVoid(() -> userClient.workingCapitalLoanOriginators().detachOriginatorFromWorkingCapitalLoan(loanId, originatorId));
         assertThat(detachException.getStatus()).isEqualTo(403);
 
-        final HashMap<String, Boolean> detachPermission = new HashMap<>();
-        detachPermission.put("DETACH_WORKING_CAPITAL_LOAN_ORIGINATOR", true);
-        RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, detachPermission);
+        FeignRoleHelper.addPermissionsToRole(roleId, Map.of("DETACH_WORKING_CAPITAL_LOAN_ORIGINATOR", true));
 
         FeignCalls.ok(() -> userClient.workingCapitalLoanOriginators().detachOriginatorFromWorkingCapitalLoan(loanId, originatorId));
 

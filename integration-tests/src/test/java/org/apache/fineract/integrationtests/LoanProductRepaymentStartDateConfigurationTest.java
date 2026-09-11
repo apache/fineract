@@ -21,80 +21,54 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.UUID;
-import org.apache.fineract.client.models.DelinquencyBucketResponse;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.client.models.PutLoanProductsProductIdResponse;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
-import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
-import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignDelinquencyHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.products.DelinquencyBucketsHelper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class LoanProductRepaymentStartDateConfigurationTest {
+public class LoanProductRepaymentStartDateConfigurationTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private ClientHelper clientHelper;
-    private GlobalConfigurationHelper globalConfigurationHelper;
+    private static final Integer REPAYMENT_START_DATE_TYPE_DISBURSEMENT_DATE = 1;
+    private static final Integer REPAYMENT_START_DATE_TYPE_SUBMITTED_ON_DATE = 2;
 
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        this.globalConfigurationHelper = new GlobalConfigurationHelper();
-    }
+    private final FeignDelinquencyHelper delinquencyHelper = new FeignDelinquencyHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void loanProductWithRepaymentStartDateTypeConfigurationCreateAndModifyTest() {
         // create product with repayment start date configuration, get , modify
 
         // Delinquency Bucket
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
-        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
-
-        final Integer repaymentStartDateType = 2;
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
         // create loan product with repayment start date configuration
-        Integer loanProductId = createLoanProductWithRepaymentStartDateTypeConfiguration(loanTransactionHelper, delinquencyBucketId,
-                repaymentStartDateType);
+        Long loanProductId = createLoanProductWithRepaymentStartDateTypeConfiguration(delinquencyBucketId,
+                REPAYMENT_START_DATE_TYPE_SUBMITTED_ON_DATE);
 
-        GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        GetLoanProductsProductIdResponse getLoanProductsProductResponse = retrieveLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
-        assertEquals(repaymentStartDateType, getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
+        assertEquals(REPAYMENT_START_DATE_TYPE_SUBMITTED_ON_DATE,
+                getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
         assertEquals("repaymentStartDateType.submittedOnDate", getLoanProductsProductResponse.getRepaymentStartDateType().getCode());
 
         // modify loan product repayment start date configuration to disbursement date
 
-        PutLoanProductsProductIdResponse loanProductModifyResponse = updateLoanProduct(loanTransactionHelper,
-                getLoanProductsProductResponse.getId());
+        PutLoanProductsProductIdResponse loanProductModifyResponse = updateRepaymentStartDateType(getLoanProductsProductResponse.getId());
         assertNotNull(loanProductModifyResponse);
 
-        getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        getLoanProductsProductResponse = retrieveLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
-        assertEquals(1, getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
+        assertEquals(REPAYMENT_START_DATE_TYPE_DISBURSEMENT_DATE,
+                getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
         assertEquals("repaymentStartDateType.disbursementDate", getLoanProductsProductResponse.getRepaymentStartDateType().getCode());
 
     }
@@ -104,18 +78,15 @@ public class LoanProductRepaymentStartDateConfigurationTest {
         // create loan product with no configuration for repayment start date and verify that it is disbursement date by
         // default
         // Delinquency Bucket
-        final Long delinquencyBucketId = DelinquencyBucketsHelper.createDefaultBucket();
-        final DelinquencyBucketResponse delinquencyBucket = DelinquencyBucketsHelper.getBucket(delinquencyBucketId);
-
-        final Integer repaymentStartDateType = null;
+        final Long delinquencyBucketId = delinquencyHelper.createDefaultBucket();
 
         // create loan product with repayment start date configuration
-        Integer loanProductId = createLoanProductWithRepaymentStartDateTypeConfiguration(loanTransactionHelper, delinquencyBucketId,
-                repaymentStartDateType);
+        Long loanProductId = createLoanProductWithRepaymentStartDateTypeConfiguration(delinquencyBucketId, null);
 
-        GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        GetLoanProductsProductIdResponse getLoanProductsProductResponse = retrieveLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
-        assertEquals(1, getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
+        assertEquals(REPAYMENT_START_DATE_TYPE_DISBURSEMENT_DATE,
+                getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
         assertEquals("repaymentStartDateType.disbursementDate", getLoanProductsProductResponse.getRepaymentStartDateType().getCode());
     }
 
@@ -123,39 +94,30 @@ public class LoanProductRepaymentStartDateConfigurationTest {
     public void loanAccountWithLoanProductRepaymentStartDateTypeAsSubmittedOnDateScheduleTest() {
         // create loan account with product with repayment start date type configuration as submitted on date, verify
         // repayment schedule is according to submitted on date, before and after disbursements
-        try {
-
-            // Set business date
-            LocalDate businessDate = LocalDate.of(2023, 3, 3);
-
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+        runAt("2023-03-03", () -> {
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-
-            // set repayment start date type as submittedOn date
-            final Integer repaymentStartDateType = 2;
+            final Long clientId = createClient();
 
             // Loan Product creation with repayment start date type configuration
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithRepaymentStartDateTypeConfigurationAndMultipleDisbursements(
-                    loanTransactionHelper, repaymentStartDateType);
+                    REPAYMENT_START_DATE_TYPE_SUBMITTED_ON_DATE);
 
             assertNotNull(getLoanProductsProductResponse);
-            assertEquals(repaymentStartDateType, getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
+            assertEquals(REPAYMENT_START_DATE_TYPE_SUBMITTED_ON_DATE,
+                    getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
             assertEquals("repaymentStartDateType.submittedOnDate", getLoanProductsProductResponse.getRepaymentStartDateType().getCode());
 
             // create loan account with submitted date as business date (03 March 2023) and expected disbursement date
             // as future date (07 March 2023)
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
                     loanExternalIdStr);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails);
 
@@ -163,7 +125,7 @@ public class LoanProductRepaymentStartDateConfigurationTest {
 
             assertNotNull(loanDetails.getRepaymentSchedule());
             // loan term
-            assertEquals(92, loanDetails.getRepaymentSchedule().getLoanTermInDays());
+            assertEquals(92L, loanDetails.getRepaymentSchedule().getLoanTermInDays());
 
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().size());
 
@@ -171,41 +133,27 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
 
             // first period [2023-03-03 to 2023-04-03]
-            assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
-            assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
-            assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(333.33,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 1, 1, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3), 333.33);
 
             // second period [2023-04-03 to 2023-05-03]
-            assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
-            assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
-            assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(333.33,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 2, 2, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3), 333.33);
 
             // third period [2023-05-03 to 2023-06-03]
-            assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
-            assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
-            assertEquals(LocalDate.of(2023, 6, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(333.34,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 3, 3, LocalDate.of(2023, 5, 3), LocalDate.of(2023, 6, 3), 333.34);
 
             // first disbursement on a future date (7 March 2023)
 
-            LocalDate disbursementDate = LocalDate.of(2023, 3, 7);
+            updateBusinessDate("07 March 2023");
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
+            disburseLoan(loanId, LoanRequestBuilders.disburseLoan(500.0, "07 March 2023"));
 
-            loanTransactionHelper.disburseLoanWithTransactionAmount("07 March 2023", loanId, "500");
-
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             // verify loan schedule is according to submitted on date after first disbursement
             assertNotNull(loanDetails);
             assertNotNull(loanDetails.getRepaymentSchedule());
             // loan term
-            assertEquals(92, loanDetails.getRepaymentSchedule().getLoanTermInDays());
+            assertEquals(92L, loanDetails.getRepaymentSchedule().getLoanTermInDays());
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().size());
 
             // verify amounts
@@ -213,42 +161,28 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             assertEquals(500.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalDisbursed()));
 
             // first period [2023-03-03 to 2023-04-03]
-            assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
-            assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
-            assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(166.67,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 1, 1, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3), 166.67);
 
             // second period [2023-04-03 to 2023-05-03]
-            assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
-            assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
-            assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(166.67,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 2, 2, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3), 166.67);
 
             // third period [2023-05-03 to 2023-06-03]
-            assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
-            assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
-            assertEquals(LocalDate.of(2023, 6, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(166.66,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 3, 3, LocalDate.of(2023, 5, 3), LocalDate.of(2023, 6, 3), 166.66);
 
             // second disbursement next month (7 April 2023)
 
-            disbursementDate = LocalDate.of(2023, 4, 7);
+            updateBusinessDate("07 April 2023");
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
+            disburseLoan(loanId, LoanRequestBuilders.disburseLoan(500.0, "07 April 2023"));
 
-            loanTransactionHelper.disburseLoanWithTransactionAmount("07 April 2023", loanId, "500");
-
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             // verify loan schedule is according to submitted on date after second disbursement
 
             assertNotNull(loanDetails);
             assertNotNull(loanDetails.getRepaymentSchedule());
             // loan term
-            assertEquals(92, loanDetails.getRepaymentSchedule().getLoanTermInDays());
+            assertEquals(92L, loanDetails.getRepaymentSchedule().getLoanTermInDays());
             assertEquals(5, loanDetails.getRepaymentSchedule().getPeriods().size());
 
             // verify amounts
@@ -256,30 +190,14 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalDisbursed()));
 
             // first period [2023-03-03 to 2023-04-03]
-            assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
-            assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
-            assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(333.33,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 1, 1, LocalDate.of(2023, 3, 3), LocalDate.of(2023, 4, 3), 333.33);
 
             // second period [2023-04-03 to 2023-05-03]
-            assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
-            assertEquals(LocalDate.of(2023, 4, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
-            assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(333.33,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 3, 2, LocalDate.of(2023, 4, 3), LocalDate.of(2023, 5, 3), 333.33);
 
             // third period [2023-05-03 to 2023-06-03]
-            assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
-            assertEquals(LocalDate.of(2023, 5, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
-            assertEquals(LocalDate.of(2023, 6, 3), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(333.34,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
-
-        } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(false));
-        }
+            verifyPeriod(loanDetails, 4, 3, LocalDate.of(2023, 5, 3), LocalDate.of(2023, 6, 3), 333.34);
+        });
 
     }
 
@@ -288,39 +206,30 @@ public class LoanProductRepaymentStartDateConfigurationTest {
         // create loan account with loan product with repayment start date type configuration as disbursement date ,
         // verify repayment schedule is as per disbursement date before and after disbursements
 
-        try {
-
-            // Set business date
-            LocalDate businessDate = LocalDate.of(2023, 3, 3);
-
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+        runAt("2023-03-03", () -> {
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
-
-            // set repayment start date type as default, disbursement date
-            final Integer repaymentStartDateType = 1;
+            final Long clientId = createClient();
 
             // Loan Product creation with repayment date type configuration
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithRepaymentStartDateTypeConfigurationAndMultipleDisbursements(
-                    loanTransactionHelper, repaymentStartDateType);
+                    REPAYMENT_START_DATE_TYPE_DISBURSEMENT_DATE);
 
             assertNotNull(getLoanProductsProductResponse);
-            assertEquals(repaymentStartDateType, getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
+            assertEquals(REPAYMENT_START_DATE_TYPE_DISBURSEMENT_DATE,
+                    getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
             assertEquals("repaymentStartDateType.disbursementDate", getLoanProductsProductResponse.getRepaymentStartDateType().getCode());
 
             // create loan account with submitted date as business date (03 March 2023) and expected disbursement date
             // (07 March 2023)
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
                     loanExternalIdStr);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails);
 
@@ -329,7 +238,7 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // loan term
-            assertEquals(92, loanDetails.getRepaymentSchedule().getLoanTermInDays());
+            assertEquals(92L, loanDetails.getRepaymentSchedule().getLoanTermInDays());
 
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().size());
 
@@ -337,42 +246,28 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalExpected()));
 
             // first period [2023-03-07 to 2023-04-07]
-            assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
-            assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
-            assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(333.33,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 1, 1, LocalDate.of(2023, 3, 7), LocalDate.of(2023, 4, 7), 333.33);
 
             // second period [2023-04-07 to 2023-05-07]
-            assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
-            assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
-            assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(333.33,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 2, 2, LocalDate.of(2023, 4, 7), LocalDate.of(2023, 5, 7), 333.33);
 
             // third period [2023-05-07 to 2023-06-07]
-            assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
-            assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
-            assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(333.34,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 3, 3, LocalDate.of(2023, 5, 7), LocalDate.of(2023, 6, 7), 333.34);
 
             // first disbursement (7 March 2023)
 
-            LocalDate disbursementDate = LocalDate.of(2023, 3, 7);
+            updateBusinessDate("07 March 2023");
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
+            disburseLoan(loanId, LoanRequestBuilders.disburseLoan(500.0, "07 March 2023"));
 
-            loanTransactionHelper.disburseLoanWithTransactionAmount("07 March 2023", loanId, "500");
-
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             // verify loan schedule is according to disbursement date
             assertNotNull(loanDetails);
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // loan term
-            assertEquals(92, loanDetails.getRepaymentSchedule().getLoanTermInDays());
+            assertEquals(92L, loanDetails.getRepaymentSchedule().getLoanTermInDays());
             assertEquals(4, loanDetails.getRepaymentSchedule().getPeriods().size());
 
             // verify amounts
@@ -380,35 +275,21 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             assertEquals(500.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalDisbursed()));
 
             // first period [2023-03-07 to 2023-04-07]
-            assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(1).getPeriod());
-            assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getFromDate());
-            assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(1).getDueDate());
-            assertEquals(166.67,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(1).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 1, 1, LocalDate.of(2023, 3, 7), LocalDate.of(2023, 4, 7), 166.67);
 
             // second period [2023-04-07 to 2023-05-07]
-            assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
-            assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
-            assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(166.67,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 2, 2, LocalDate.of(2023, 4, 7), LocalDate.of(2023, 5, 7), 166.67);
 
             // third period [2023-05-07 to 2023-06-07]
-            assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
-            assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
-            assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(166.66,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 3, 3, LocalDate.of(2023, 5, 7), LocalDate.of(2023, 6, 7), 166.66);
 
             // second disbursement next month (7 April 2023)
 
-            disbursementDate = LocalDate.of(2023, 4, 7);
+            updateBusinessDate("07 April 2023");
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
+            disburseLoan(loanId, LoanRequestBuilders.disburseLoan(500.0, "07 April 2023"));
 
-            loanTransactionHelper.disburseLoanWithTransactionAmount("07 April 2023", loanId, "500");
-
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             // verify loan schedule is according to disbursement after second disbursement
 
@@ -416,7 +297,7 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             assertNotNull(loanDetails.getRepaymentSchedule());
 
             // loan term
-            assertEquals(92, loanDetails.getRepaymentSchedule().getLoanTermInDays());
+            assertEquals(92L, loanDetails.getRepaymentSchedule().getLoanTermInDays());
             assertEquals(5, loanDetails.getRepaymentSchedule().getPeriods().size());
 
             // verify amounts
@@ -424,75 +305,57 @@ public class LoanProductRepaymentStartDateConfigurationTest {
             assertEquals(1000.0, Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getTotalPrincipalDisbursed()));
 
             // first period [2023-03-07 to 2023-04-07]
-            assertEquals(1, loanDetails.getRepaymentSchedule().getPeriods().get(2).getPeriod());
-            assertEquals(LocalDate.of(2023, 3, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getFromDate());
-            assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
-            assertEquals(333.33,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(2).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 2, 1, LocalDate.of(2023, 3, 7), LocalDate.of(2023, 4, 7), 333.33);
 
             // second period [2023-04-07 to 2023-05-07]
-            assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().get(3).getPeriod());
-            assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getFromDate());
-            assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(3).getDueDate());
-            assertEquals(333.33,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
+            verifyPeriod(loanDetails, 3, 2, LocalDate.of(2023, 4, 7), LocalDate.of(2023, 5, 7), 333.33);
 
             // third period [2023-05-07 to 2023-06-07]
-            assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().get(4).getPeriod());
-            assertEquals(LocalDate.of(2023, 5, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getFromDate());
-            assertEquals(LocalDate.of(2023, 6, 7), loanDetails.getRepaymentSchedule().getPeriods().get(4).getDueDate());
-            assertEquals(333.34,
-                    Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
-
-        } finally {
-            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
-                    new PutGlobalConfigurationsRequest().enabled(false));
-        }
+            verifyPeriod(loanDetails, 4, 3, LocalDate.of(2023, 5, 7), LocalDate.of(2023, 6, 7), 333.34);
+        });
 
     }
 
-    private PutLoanProductsProductIdResponse updateLoanProduct(LoanTransactionHelper loanTransactionHelper, Long id) {
+    private void verifyPeriod(GetLoansLoanIdResponse loanDetails, int index, int expectedPeriod, LocalDate expectedFromDate,
+            LocalDate expectedDueDate, double expectedInstallmentAmount) {
+        var period = loanDetails.getRepaymentSchedule().getPeriods().get(index);
+        assertEquals(expectedPeriod, period.getPeriod());
+        assertEquals(expectedFromDate, period.getFromDate());
+        assertEquals(expectedDueDate, period.getDueDate());
+        assertEquals(expectedInstallmentAmount, Utils.getDoubleValue(period.getTotalInstallmentAmountForPeriod()));
+    }
+
+    private PutLoanProductsProductIdResponse updateRepaymentStartDateType(Long id) {
         // repayment start date configuration
-        final Integer repaymentStartDateType = 1;
         final PutLoanProductsProductIdRequest requestModifyLoan = new PutLoanProductsProductIdRequest()
-                .repaymentStartDateType(repaymentStartDateType).locale("en");
-        return loanTransactionHelper.updateLoanProduct(id, requestModifyLoan);
+                .repaymentStartDateType(REPAYMENT_START_DATE_TYPE_DISBURSEMENT_DATE).locale("en");
+        return updateLoanProduct(id, requestModifyLoan);
     }
 
-    private Integer createLoanProductWithRepaymentStartDateTypeConfiguration(final LoanTransactionHelper loanTransactionHelper,
-            final Long delinquencyBucketId, final Integer repaymentStartDateType) {
-        final HashMap<String, Object> loanProductMap = new LoanProductTestBuilder().withRepaymentStartDateType(repaymentStartDateType)
-                .build(null, delinquencyBucketId);
-        final Integer loanProductId = loanTransactionHelper.getLoanProductId(Utils.convertToJson(loanProductMap));
-        return loanProductId;
-
+    private Long createLoanProductWithRepaymentStartDateTypeConfiguration(final Long delinquencyBucketId,
+            final Integer repaymentStartDateType) {
+        return createLoanProduct(
+                new LoanProductTestBuilder().withRepaymentStartDateType(repaymentStartDateType).buildRequest(null, delinquencyBucketId));
     }
 
-    private Integer createLoanAccountMultipleRepaymentsDisbursement(final Integer clientID, final Long loanProductID,
-            final String externalId) {
-
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("3")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("3").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("07 March 2023").withSubmittedOnDate("03 March 2023").withLoanType("individual")
-                .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
-
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan("03 March 2023", "1000", loanId, null);
+    private Long createLoanAccountMultipleRepaymentsDisbursement(final Long clientId, final Long loanProductId, final String externalId) {
+        final Long loanId = applyForLoan(LoanRequestBuilders.applyLoan(clientId, loanProductId, "03 March 2023", 1000.0, 3)//
+                .expectedDisbursementDate("07 March 2023")//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .externalId(externalId));
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "03 March 2023"));
         return loanId;
     }
 
     private GetLoanProductsProductIdResponse createLoanProductWithRepaymentStartDateTypeConfigurationAndMultipleDisbursements(
-            LoanTransactionHelper loanTransactionHelper, final Integer repaymentStartDateType) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+            final Integer repaymentStartDateType) {
+        final Long loanProductId = createLoanProduct(new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("3").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30").withDaysInYear("365")
                 .withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true)
-                .withRepaymentStartDateType(repaymentStartDateType).build(null);
-        final Integer loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
-        return loanTransactionHelper.getLoanProduct(loanProductId);
+                .withRepaymentStartDateType(repaymentStartDateType).buildRequest());
+        return retrieveLoanProduct(loanProductId);
     }
 
 }
