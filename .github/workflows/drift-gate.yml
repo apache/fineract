@@ -26,9 +26,9 @@ jobs:
         run: |
           set -euo pipefail
           payload=$(python3 -c 'import json,os; print(json.dumps({"owner":os.environ["PR_OWNER"],"repo":os.environ["PR_REPO"],"sha":os.environ["PR_SHA"],"base_ref":os.environ["PR_BASE_REF"],"pr_ref":os.environ["PR_HEAD_REF"]}))')
-          code=$(curl -sS -o /tmp/resp.json -w "%{http_code}" -X POST "$API_URL" \
+          # The gate is invoked asynchronously (API Gateway returns 202 immediately);
+          # the verdict is posted out-of-band to this PR's Checks card by the App.
+          code=$(curl -sS -o /dev/null -w "%{http_code}" -X POST "$API_URL" \
             -H "Content-Type: application/json" -H "x-api-key: $API_KEY" -d "$payload")
-          echo "HTTP $code"; cat /tmp/resp.json; echo
-          [ "$code" = "200" ] || { echo "drift gate call failed (HTTP $code)"; exit 1; }
-          verdict=$(python3 -c "import json;print(json.load(open('/tmp/resp.json')).get('verdict','?'))")
-          echo "Verdict: $verdict  (see the 'CodeIntent Drift Gate' check on this PR)"
+          echo "Gate triggered (HTTP $code). The verdict will appear on this PR's Checks card shortly."
+          case "$code" in 200|202) exit 0 ;; *) echo "gate trigger failed (HTTP $code)"; exit 1 ;; esac
