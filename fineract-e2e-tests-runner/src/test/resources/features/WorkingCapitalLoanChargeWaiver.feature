@@ -3,7 +3,8 @@
 @WorkingCapitalLoanChargeWaiverFeature
 Feature: Working Capital Loan Charge Waiver
 
-  Scenario: Waive an unpaid fee charge with a past due date
+  @TestRailId:C102458
+  Scenario: Waive an unpaid fee charge with a past due date - UC1
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -24,8 +25,10 @@ Feature: Working Capital Loan Charge Waiver
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 0.0             | 0.0      | 0.0            | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "20 January 2026"
 
-  Scenario: Waive an unpaid fee charge with a future due date
+  @TestRailId:C102459
+  Scenario: Waive an unpaid fee charge with a future due date - UC2
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -43,8 +46,10 @@ Feature: Working Capital Loan Charge Waiver
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 0.0             | 0.0      | 0.0            | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
 
-  Scenario: Waive a partially paid charge waives only the remainder
+  @TestRailId:C102460
+  Scenario: Waive a partially paid charge waives only the remainder - UC3
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -70,8 +75,10 @@ Feature: Working Capital Loan Charge Waiver
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 0.0             | 40.0     | 0.0            | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
-  Scenario: Waiving a fully paid charge is rejected
+  @TestRailId:C102461
+  Scenario: Waiving a fully paid charge is rejected - UC4
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -84,8 +91,10 @@ Feature: Working Capital Loan Charge Waiver
     Then Waiving the last added charge on working capital loan results an error with the following data:
       | httpCode | errorMessage                        |
       | 403      | has no outstanding amount to waive  |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
-  Scenario: Undo a charge waiver restores the charge to outstanding
+  @TestRailId:C102462
+  Scenario: Undo a charge waiver restores the charge to outstanding - UC5
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -99,6 +108,10 @@ Feature: Working Capital Loan Charge Waiver
     And Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Amount Paid | Amount Waived | Amount Outstanding |
       | Working Capital Loan Fee | 10 January 2026 | 100.0  | 0.0         | 100.0         | 0.0                |
+    Then Working Capital Loan has transactions:
+      | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | false    |
     When Admin reverts the last charge waiver on working capital loan
     Then a Working Capital Loan Adjust Transaction business event is raised for the reversed "waiveCharges" transaction
     And Working Capital Loan has charges with the following data:
@@ -107,13 +120,24 @@ Feature: Working Capital Loan Charge Waiver
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 100.0           | 0.0      | 0.0            | 0.0                 | 0.0          |
+    Then Working Capital Loan has transactions:
+      | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | true     |
 # Moved back to outstanding state means back in the allocation pipeline, not only a changed number.
     When Customer makes repayment on "10 January 2026" with 100.0 transaction amount on Working Capital loan
     Then Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
+    Then Working Capital Loan has transactions:
+      | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | true     |
+      | 10 January 2026 | Repayment          | 100.0             | 0.0              | 100.0              | 0.0                   | false    |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
-  Scenario: Re-waiving a charge after its waiver was undone succeeds
+  @TestRailId:C102463
+  Scenario: Re-waiving a charge after its waiver was undone succeeds - UC6
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -136,8 +160,10 @@ Feature: Working Capital Loan Charge Waiver
     And Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Amount Paid | Amount Waived | Amount Outstanding |
       | Working Capital Loan Fee | 10 January 2026 | 100.0  | 0.0         | 100.0         | 0.0                |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
-  Scenario: Waiver closes the loan and accrues the income of the part that was paid
+  @TestRailId:C102464
+  Scenario: Waiver closes the loan and accrues the income of the part that was paid - UC7
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -171,7 +197,8 @@ Feature: Working Capital Loan Charge Waiver
       | ASSET  | 112603       | Interest/Fee Receivable | 40.0  |        |
       | INCOME | 404007       | Fee Income              |       | 40.0   |
 
-  Scenario: Waiver on a written-off loan is rejected
+  @TestRailId:C102465
+  Scenario: Waiver on a written-off loan is rejected - UC8
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -187,7 +214,8 @@ Feature: Working Capital Loan Charge Waiver
       | httpCode | errorMessage                                       |
       | 403      | Charge waiver is not supported for the status of   |
 
-  Scenario: A repayment backdated before a charge waiver leaves the waived amount untouched
+  @TestRailId:C102466
+  Scenario: A repayment backdated before a charge waiver leaves the waived amount untouched - UC9
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -213,8 +241,10 @@ Feature: Working Capital Loan Charge Waiver
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 0.0             | 0.0      | 0.0            | 0.0                 | 0.0          |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "20 January 2026"
 
-  Scenario: A waived charge is reported with its waived amount and zero outstanding
+  @TestRailId:C102467
+  Scenario: A waived charge is reported with its waived amount and zero outstanding - UC10
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -230,8 +260,10 @@ Feature: Working Capital Loan Charge Waiver
     And Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Amount Paid | Amount Waived | Amount Outstanding | Paid  |
       | Working Capital Loan Fee | 10 January 2026 | 100.0  | 0.0         | 100.0         | 0.0                | false |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
-  Scenario: A waived charge is not accrued afterwards
+  @TestRailId:C102468
+  Scenario: A waived charge is not accrued afterwards - UC11
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -248,8 +280,10 @@ Feature: Working Capital Loan Charge Waiver
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | false    |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "16 January 2026"
 
-  Scenario: Adjusting a fully waived charge is rejected
+  @TestRailId:C102469
+  Scenario: Adjusting a fully waived charge is rejected - UC12
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -265,8 +299,10 @@ Feature: Working Capital Loan Charge Waiver
     And Making a charge adjustment with 100.0 amount on working capital loan results an error with the following data:
       | httpCode | errorMessage                                                                        |
       | 403      | Transaction amount cannot be higher than the available charge amount for adjustment |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
-  Scenario: Passing an amount to the charge waiver request is rejected
+  @TestRailId:C102470
+  Scenario: Passing an amount to the charge waiver request is rejected - UC13
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -279,3 +315,37 @@ Feature: Working Capital Loan Charge Waiver
     Then Waiving the last added charge on working capital loan with an amount results an error with the following data:
       | httpCode | errorMessage                          |
       | 400      | The parameter amount is not supported |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
+
+  @TestRailId:C102542
+  Scenario: Waive charge after repayment waives outstanding charge amount - UC14
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 1000            | 100000       | 18                | 0        |
+    And Global config "charge-accrual-date" value set to "due-date"
+    When Admin sets the business date to "01 June 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 June 2026" due date and 100.0 transaction amount
+    Then Working Capital loan status will be "ACTIVE"
+    When Admin makes a charge adjustment for the last added charge with 40.0 amount on working capital loan
+    Then Working Capital loan status will be "ACTIVE"
+    And Customer makes repayment on "01 June 2026" with 50.0 transaction amount on Working Capital loan
+    And Working Capital Loan has transactions:
+      | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement       | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 01 June 2026    | Charge Adjustment  | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
+      | 01 June 2026    | Repayment          | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+    When Admin waives the last added charge on working capital loan
+    Then a Working Capital Loan Charge Waiver transaction business event is raised with "10.0" EUR amount
+    And Working Capital Loan charge balances has the following data:
+      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
+      | 100.0      | 0.0             | 90.0     | 0.0            | 0.0                 | 0.0          |
+    And Working Capital Loan has transactions:
+      | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement       | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 01 June 2026    | Charge Adjustment  | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
+      | 01 June 2026    | Repayment          | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
+      | 01 June 2026    | Waive loan charges | 10.0              | 0.0              | 0.0               | 0.0                   | false    |
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 June 2026"
+
