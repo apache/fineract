@@ -53,4 +53,5 @@ public class StandingInstructionCreationRequest implements Serializable {
     private String name;
     private String transferType;
     private String status;
+    private Boolean allowPartialTransfer;
 }

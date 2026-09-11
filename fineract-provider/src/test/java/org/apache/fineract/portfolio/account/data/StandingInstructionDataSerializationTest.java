@@ -81,7 +81,8 @@ public class StandingInstructionDataSerializationTest {
                 null, // recurrenceType
                 null, // recurrenceFrequency
                 null, // recurrenceInterval
-                null // recurrenceOnMonthDay
+                null, // recurrenceOnMonthDay
+                false // allowPartialTransfer
         );
 
         // Serialize to JSON
@@ -179,7 +180,8 @@ public class StandingInstructionDataSerializationTest {
                 null, // recurrenceType
                 null, // recurrenceFrequency
                 null, // recurrenceInterval
-                null // recurrenceOnMonthDay
+                null, // recurrenceOnMonthDay
+                false // allowPartialTransfer
         );
     }
 }

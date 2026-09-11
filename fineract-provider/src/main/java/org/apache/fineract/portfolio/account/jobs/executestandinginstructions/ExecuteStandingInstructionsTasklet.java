@@ -29,6 +29,7 @@ import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.AbstractPlatformServiceUnavailableException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
+import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.account.PortfolioAccountType;
@@ -44,6 +45,7 @@ import org.apache.fineract.portfolio.common.domain.PeriodFrequencyType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.DefaultScheduledDateGenerator;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.ScheduledDateGenerator;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.savings.domain.SavingsAccountAssembler;
 import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -59,6 +61,7 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
     private final JdbcTemplate jdbcTemplate;
     private final DatabaseSpecificSQLGenerator sqlGenerator;
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
+    private final SavingsAccountAssembler savingsAccountAssembler;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -103,7 +106,27 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
             }
 
             if (isDueForTransfer && transactionAmount != null && transactionAmount.compareTo(BigDecimal.ZERO) > 0) {
-                final SavingsAccount fromSavingsAccount = null;
+                SavingsAccount fromSavingsAccount = null;
+                boolean partialTransfer = false;
+                if (data.isAllowPartialTransfer() && PortfolioAccountType.SAVINGS.equals(data.getFromAccountTypeEnum())) {
+                    // The account is loaded here rather than inside transferFunds, which would otherwise assemble it
+                    // itself, so reading the available balance costs no additional fetch.
+                    fromSavingsAccount = savingsAccountAssembler.assembleFrom(data.getFromAccount().getId(), false);
+                    final BigDecimal withdrawableBalance = fromSavingsAccount.getWithdrawableBalance();
+                    if (!MathUtil.isGreaterThanZero(withdrawableBalance)) {
+                        log.info("Skipping standing instruction {}: nothing available to transfer from savings account {}", data.getId(),
+                                data.getFromAccount().getId());
+                        continue;
+                    }
+                    partialTransfer = MathUtil.isLessThan(withdrawableBalance, transactionAmount);
+                    if (partialTransfer) {
+                        log.info(
+                                "Standing instruction {} transferring {} of the {} due, limited by the balance available on savings "
+                                        + "account {}",
+                                data.getId(), withdrawableBalance, transactionAmount, data.getFromAccount().getId());
+                        transactionAmount = withdrawableBalance;
+                    }
+                }
                 final boolean isRegularTransaction = true;
                 final boolean isExceptionForBalanceCheck = false;
                 AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, transactionAmount,
@@ -111,7 +134,7 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
                         data.getToAccount().getId(), data.getName() + " Standing instruction trasfer ", null, null, null, null,
                         data.toTransferType(), null, null, data.getTransferTypeEnum().getValue(), null, null, ExternalId.empty(), null,
                         null, fromSavingsAccount, isRegularTransaction, isExceptionForBalanceCheck);
-                final boolean transferCompleted = transferAmount(errors, accountTransferDTO, data.getId());
+                final boolean transferCompleted = transferAmount(errors, accountTransferDTO, data.getId(), partialTransfer);
 
                 if (transferCompleted) {
                     final String updateQuery = "UPDATE m_account_transfer_standing_instructions SET last_run_date = ? where id = ?";
@@ -126,7 +149,8 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
         return RepeatStatus.FINISHED;
     }
 
-    private boolean transferAmount(final List<Throwable> errors, final AccountTransferDTO accountTransferDTO, final Long instructionId) {
+    private boolean transferAmount(final List<Throwable> errors, final AccountTransferDTO accountTransferDTO, final Long instructionId,
+            final boolean partialTransfer) {
         boolean transferCompleted = true;
         StringBuilder errorLog = new StringBuilder();
         StringBuilder updateQuery = new StringBuilder(
@@ -156,6 +180,8 @@ public class ExecuteStandingInstructionsTasklet implements Tasklet {
         if (errorLog.length() > 0) {
             transferCompleted = false;
             updateQuery.append("'failed'").append(",");
+        } else if (partialTransfer) {
+            updateQuery.append("'partial'").append(",");
         } else {
             updateQuery.append("'success'").append(",");
         }
