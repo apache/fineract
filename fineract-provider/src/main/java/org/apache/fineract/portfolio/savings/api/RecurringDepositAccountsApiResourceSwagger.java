@@ -300,6 +300,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
         public Integer recurringFrequencyType;
         @Schema(example = "2000")
         public Long mandatoryRecommendedDepositAmount;
+        @Schema(example = "false", description = "Determines whether product level interest rate chart is overridden by custom nominal annual interest rate")
+        public Boolean isRateChartOverridden;
     }
 
     @Schema(description = "PostRecurringDepositAccountsResponse")
@@ -436,6 +438,8 @@ final class RecurringDepositAccountsApiResourceSwagger {
         public GetRecurringDepositAccountsResponse.GetRecurringDepositAccountsRecurringDepositFrequencyType recurringDepositFrequencyType;
         @Schema(example = "6")
         public Integer depositPeriod;
+        @Schema(example = "false", description = "Determines whether product level interest rate chart is overridden by custom nominal annual interest rate")
+        public Boolean isRateChartOverridden;
         public GetRecurringDepositAccountsResponse.GetRecurringDepositAccountsDepositPeriodFrequency depositPeriodFrequency;
         public GetRecurringDepositAccountsResponse.GetRecurringDepositAccountsSummary summary;
         public GetRecurringDepositAccountsAccountChart accountChart;

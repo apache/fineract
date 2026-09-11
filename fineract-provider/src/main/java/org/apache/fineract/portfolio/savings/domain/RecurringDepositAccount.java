@@ -208,9 +208,11 @@ public class RecurringDepositAccount extends SavingsAccount {
     protected BigDecimal getEffectiveInterestRateAsFraction(final MathContext mc, final LocalDate interestPostingUpToDate,
             final boolean isPreMatureClosure) {
 
+        BigDecimal applicableInterestRate = this.nominalAnnualInterestRate;
         boolean applyPreMaturePenalty = false;
         BigDecimal penalInterest = BigDecimal.ZERO;
         LocalDate depositCloseDate = calculateMaturityDate();
+
         if (isPreMatureClosure) {
             if (this.accountTermAndPreClosure.isPreClosurePenalApplicable()) {
                 applyPreMaturePenalty = true;
@@ -225,13 +227,14 @@ public class RecurringDepositAccount extends SavingsAccount {
             }
         }
 
-        if (depositCloseDate == null) {
-            depositCloseDate = DateUtils.getBusinessLocalDate();
-        }
+        if (this.chart != null && !this.accountTermAndPreClosure.isRateChartOverridden()) {
+            if (depositCloseDate == null) {
+                depositCloseDate = DateUtils.getBusinessLocalDate();
+            }
 
-        final BigDecimal depositAmount = accountTermAndPreClosure.depositAmount();
-        BigDecimal applicableInterestRate = this.chart.getApplicableInterestRate(depositAmount, depositStartDate(), depositCloseDate,
-                this.client);
+            final BigDecimal depositAmount = accountTermAndPreClosure.depositAmount();
+            applicableInterestRate = this.chart.getApplicableInterestRate(depositAmount, depositStartDate(), depositCloseDate, this.client);
+        }
 
         if (applyPreMaturePenalty) {
             applicableInterestRate = applicableInterestRate.subtract(penalInterest);
@@ -1039,7 +1042,7 @@ public class RecurringDepositAccount extends SavingsAccount {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(RECURRING_DEPOSIT_ACCOUNT_RESOURCE_NAME);
         LocalDate maturityDate = calculateMaturityDate();
-        if (this.chart != null) {
+        if (this.chart != null && !this.accountTermAndPreClosure.isRateChartOverridden()) {
             final LocalDate chartFromDate = this.chart.getFromDate();
             LocalDate chartEndDate = this.chart.getEndDate();
             chartEndDate = chartEndDate == null ? DateUtils.getBusinessLocalDate() : chartEndDate;
