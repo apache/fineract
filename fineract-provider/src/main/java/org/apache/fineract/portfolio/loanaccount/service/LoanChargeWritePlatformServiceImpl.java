@@ -135,6 +135,8 @@ import org.apache.fineract.portfolio.note.domain.NoteRepository;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.savings.domain.SavingsAccount;
+import org.apache.fineract.portfolio.tax.domain.TaxGroup;
+import org.apache.fineract.portfolio.tax.service.TaxUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -665,6 +667,23 @@ public class LoanChargeWritePlatformServiceImpl implements LoanChargeWritePlatfo
             }
             loanInstallmentNumber = chargePerInstallment.getRepaymentInstallment().getInstallmentNumber();
             amount = chargePerInstallment.getAmountOutstanding();
+        }
+
+        // Loan-charge payments should transfer the tax-inclusive amount, the same way disbursement-time
+        // charge collection and charge application transactions do.
+        final LocalDate effectiveTransactionDate = transactionDate != null ? transactionDate : DateUtils.getBusinessLocalDate();
+        final TaxGroup taxGroup = loanCharge.getCharge().getTaxGroup();
+        if (taxGroup != null && log.isInfoEnabled()) {
+            log.info(
+                    "Charge payment tax evaluation: loanId={}, loanChargeId={}, installmentNumber={}, txDate={}, baseAmount={}, applicableTaxComponents={}",
+                    loanId, loanChargeId, loanInstallmentNumber, effectiveTransactionDate, amount,
+                    TaxUtils.getApplicableTaxComponentSummaries(taxGroup, effectiveTransactionDate));
+        }
+        amount = TaxUtils.calculateChargeAmountWithTax(amount, taxGroup, effectiveTransactionDate,
+                loan.getCurrency().getDigitsAfterDecimal());
+        if (taxGroup != null && log.isInfoEnabled()) {
+            log.info("Charge payment tax result: loanId={}, loanChargeId={}, installmentNumber={}, txDate={}, amountAfterTax={}", loanId,
+                    loanChargeId, loanInstallmentNumber, effectiveTransactionDate, amount);
         }
 
         final PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService.retriveLoanLinkedAssociation(loanId);

@@ -20,14 +20,17 @@ package org.apache.fineract.portfolio.tax.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
 import org.apache.fineract.portfolio.tax.data.TaxComponentData;
 import org.apache.fineract.portfolio.tax.data.TaxGroupMappingsData;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
+import org.apache.fineract.portfolio.tax.domain.TaxGroup;
 import org.apache.fineract.portfolio.tax.domain.TaxGroupMappings;
 
 public final class TaxUtils {
@@ -125,5 +128,51 @@ public final class TaxUtils {
             totalAmount = BigDecimal.valueOf(total).setScale(scale, MoneyHelper.getRoundingMode());
         }
         return totalAmount;
+    }
+
+    public static BigDecimal calculateChargeAmountWithTax(final BigDecimal baseAmount, final TaxGroup taxGroup,
+            final LocalDate transactionDate, final int scale) {
+        if (baseAmount == null) {
+            return null;
+        }
+        if (taxGroup == null) {
+            return baseAmount;
+        }
+        final Set<TaxGroupMappings> taxGroupMappings = taxGroup.getTaxGroupMappings();
+        if (taxGroupMappings == null || taxGroupMappings.isEmpty()) {
+            return baseAmount;
+        }
+        final List<TaxGroupMappings> mappingsList = new ArrayList<>(taxGroupMappings);
+        final BigDecimal totalAmount = addTax(baseAmount, transactionDate, mappingsList, scale);
+        return totalAmount != null ? totalAmount : baseAmount;
+    }
+
+    /**
+     * Returns applicable tax components (name, id, percentage) for a transaction date after filtering by mapping
+     * start/end date and effective occurrence rules.
+     */
+    public static List<String> getApplicableTaxComponentSummaries(final TaxGroup taxGroup, final LocalDate transactionDate) {
+        if (taxGroup == null || transactionDate == null || taxGroup.getTaxGroupMappings() == null
+                || taxGroup.getTaxGroupMappings().isEmpty()) {
+            return List.of();
+        }
+        return taxGroup.getTaxGroupMappings().stream().filter(mapping -> isApplicableOnDate(mapping, transactionDate)).map(mapping -> {
+            final TaxComponent component = mapping.getTaxComponent();
+            final BigDecimal percentage = component != null ? component.getApplicablePercentage(transactionDate) : null;
+            if (component == null || percentage == null) {
+                return null;
+            }
+            return "id=" + component.getId() + ",name=" + component.getName() + ",percentage=" + percentage.toPlainString();
+        }).filter(value -> value != null && !value.isBlank()).collect(Collectors.toList());
+    }
+
+    private static boolean isApplicableOnDate(final TaxGroupMappings groupMappings, final LocalDate transactionDate) {
+        if (groupMappings.startDate() != null && transactionDate.isBefore(groupMappings.startDate())) {
+            return false;
+        }
+        if (groupMappings.endDate() != null && transactionDate.isAfter(groupMappings.endDate())) {
+            return false;
+        }
+        return groupMappings.occursOnDayFromAndUpToAndIncluding(transactionDate);
     }
 }
