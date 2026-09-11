@@ -18,26 +18,31 @@
  */
 package org.apache.fineract.portfolio.calendar.handler;
 
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
-import org.apache.fineract.commands.annotation.CommandType;
-import org.apache.fineract.commands.handler.NewCommandSourceHandler;
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandHandler;
+import org.apache.fineract.portfolio.calendar.data.CalendarCreateRequest;
+import org.apache.fineract.portfolio.calendar.data.CalendarCreateResponse;
 import org.apache.fineract.portfolio.calendar.service.CalendarWritePlatformService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Component;
 
-@Service
-@CommandType(entity = "CALENDAR", action = "CREATE")
+@Slf4j
+@Component
 @RequiredArgsConstructor
-public class CreateCalendarCommandHandler implements NewCommandSourceHandler {
+public class CalendarCreateCommandHandler implements CommandHandler<CalendarCreateRequest, CalendarCreateResponse> {
 
-    private final CalendarWritePlatformService writePlatformService;
+    private final CalendarWritePlatformService writeService;
 
-    @Transactional
+    @Retry(name = "commandCalendarCreate", fallbackMethod = "fallback")
     @Override
-    public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.createCalendar(command);
+    public CalendarCreateResponse handle(Command<CalendarCreateRequest> command) {
+        return writeService.createCalendar(command.getPayload());
     }
 
+    @Override
+    public CalendarCreateResponse fallback(Command<CalendarCreateRequest> command, Throwable t) {
+        return CommandHandler.super.fallback(command, t);
+    }
 }
