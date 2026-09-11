@@ -80,6 +80,7 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
     private final ExternalIdFactory externalIdFactory;
     private final PlatformSecurityContext context;
     private final WorkingCapitalLoanAccountingProcessor accountingProcessor;
+    private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     private final BusinessEventNotifierService businessEventNotifierService;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
 
@@ -139,6 +140,7 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
             this.accountingProcessor.postJournalEntries(loan, writeOffTransaction, allocation, loan.isChargedOff());
         }
+        this.discountFeeAmortizationService.processFinalDiscountFeeAmortization(loan, writeOffTransaction);
         this.businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanWriteOffTransactionBusinessEvent(writeOffTransaction, loan.getId()));
         notifyBalanceChanged(loan);
@@ -171,6 +173,8 @@ public class WorkingCapitalLoanWriteOffWriteServiceImpl implements WorkingCapita
                 .findActiveByTypeOrderByIdDesc(loanId, LoanTransactionType.WRITEOFF).stream().findFirst()
                 .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.wc.loan.write.off.transaction.not.found",
                         "No active write-off transaction found for loan " + loanId, loanId));
+
+        this.discountFeeAmortizationService.undoFinalDiscountFeeAmortization(loan, writeOffTransaction);
 
         // createFromCommand tolerates a bodiless request, which validateUndoWriteOff explicitly permits.
         final ExternalId reversalExternalId = this.externalIdFactory.createFromCommand(command,

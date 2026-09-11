@@ -27,18 +27,19 @@ public interface WorkingCapitalLoanDiscountFeeAmortizationService {
     void processDiscountFeeAmortization(WorkingCapitalLoan loan, LocalDate transactionDate);
 
     /**
-     * Recognizes the entire unreleased discount-fee deferred income balance as of charge-off in one shot, crediting the
-     * charge-off expense account instead of discount-fee income, and links the resulting transaction to
-     * {@code chargeOffTransaction} so it can be found and reversed on undo. No-op if there is nothing left to
-     * recognize.
+     * Reconciles posted discount-fee amortization to the net discount as of a terminal event (charge-off or write-off).
+     * Derives the signed delta from active amortization transactions versus the net discount pool -- not from the
+     * clipped unrealized balance -- so an over-recognition after a same-day discount-fee adjustment still posts a
+     * negative correction. Links the resulting transaction to {@code relatedTransaction} for undo. No-op when already
+     * aligned.
      */
-    void processFinalDiscountFeeAmortizationOnChargeOff(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction chargeOffTransaction);
+    void processFinalDiscountFeeAmortization(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction relatedTransaction);
 
     /**
-     * Reverses the discount-fee amortization transaction (and its journal entries) created by
-     * {@link #processFinalDiscountFeeAmortizationOnChargeOff} for {@code chargeOffTransaction}, if any.
+     * Reverses the discount-fee amortization or amortization-adjustment transaction (and its journal entries) created
+     * by {@link #processFinalDiscountFeeAmortization} for {@code relatedTransaction}, if any.
      */
-    void undoDiscountFeeAmortizationOnChargeOff(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction chargeOffTransaction);
+    void undoFinalDiscountFeeAmortization(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction relatedTransaction);
 
     /**
      * Recomputes {@code realizedIncomeFromDiscountFee} on the loan balance from the database aggregate of non-reversed

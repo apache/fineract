@@ -248,15 +248,20 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
      * product does not map it.
      */
     private LedgerPosting writeOffLossDebit(final WorkingCapitalLoan loan, final BigDecimal amount) {
+        return LedgerPosting.debit(writeOffExpenseAccount(loan), amount);
+    }
+
+    private GLAccount writeOffExpenseAccount(final WorkingCapitalLoan loan) {
         final CodeValue writeOffReason = loan.getWriteOffReason();
         if (writeOffReason != null) {
             final ProductToGLAccountMapping mapping = helper.getWriteOffMappingByCodeValue(loan.getLoanProduct().getId(),
                     PortfolioProductType.WORKING_CAPITAL_LOAN, writeOffReason.getId());
             if (mapping != null) {
-                return LedgerPosting.debit(mapping.getGlAccount(), amount);
+                return mapping.getGlAccount();
             }
         }
-        return LedgerPosting.debit(CashAccountsForLoan.LOSSES_WRITTEN_OFF, amount);
+        return helper.getLinkedGLAccountForWorkingCapitalLoanProduct(loan.getLoanProduct().getId(),
+                CashAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(), null);
     }
 
     private boolean isAdjustedChargeAPenalty(final WorkingCapitalLoanTransaction txn) {
@@ -473,9 +478,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             helper.createDebitJournalEntryForWorkingCapitalLoan(office, currencyCode, deferredIncomeAccount, loanId, txnId, transactionDate,
                     amount, null);
 
-            final CashAccountsForLoan creditAccountType = resolveChargeOffExpenseAccount(loan, isChargedOff);
-            final GLAccount creditAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, creditAccountType.getValue(),
-                    null);
+            final GLAccount creditAccount = resolveAmortizationCreditAccount(loan, productId, isChargedOff);
             helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, creditAccount, loanId, txnId, transactionDate,
                     amount, null);
         }
@@ -508,9 +511,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         if (MathUtil.isGreaterThanZero(amount)) {
             final GLAccount deferredIncomeAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId,
                     CashAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), null);
-            final CashAccountsForLoan creditAccountType = resolveChargeOffExpenseAccount(loan, isChargedOff);
-            final GLAccount creditAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, creditAccountType.getValue(),
-                    null);
+            final GLAccount creditAccount = resolveAmortizationCreditAccount(loan, productId, isChargedOff);
             planned.merge(new PostingKey(deferredIncomeAccount.getId(), true), amount, BigDecimal::add);
             planned.merge(new PostingKey(creditAccount.getId(), false), amount, BigDecimal::add);
         }
@@ -541,9 +542,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, deferredIncomeAccount, loanId, txnId,
                     transactionDate, amount, null);
 
-            final CashAccountsForLoan debitAccountType = resolveChargeOffExpenseAccount(loan, isChargedOff);
-            final GLAccount debitAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, debitAccountType.getValue(),
-                    null);
+            final GLAccount debitAccount = resolveAmortizationCreditAccount(loan, productId, isChargedOff);
             helper.createDebitJournalEntryForWorkingCapitalLoan(office, currencyCode, debitAccount, loanId, txnId, transactionDate, amount,
                     null);
         }
@@ -591,11 +590,20 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         return null;
     }
 
-    private CashAccountsForLoan resolveChargeOffExpenseAccount(final WorkingCapitalLoan loan, final boolean isChargedOff) {
-        if (!isChargedOff) {
-            return CashAccountsForLoan.INCOME_FROM_DISCOUNT_FEE;
+    /**
+     * Credit (or debit, for amortization adjustments) for discount-fee amortization. Terminal charge-off / write-off
+     * routes to the matching expense so a same-day income correction is not left stranded when COB will never run.
+     * Written-off takes precedence because the final correction on write-off runs after {@code CLOSED_WRITTEN_OFF}.
+     */
+    private GLAccount resolveAmortizationCreditAccount(final WorkingCapitalLoan loan, final Long productId, final boolean routeToExpense) {
+        if (!routeToExpense) {
+            return helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, CashAccountsForLoan.INCOME_FROM_DISCOUNT_FEE.getValue(),
+                    null);
         }
-        return chargeOffExpenseAccount(loan);
+        if (loan.isClosedWrittenOff()) {
+            return writeOffExpenseAccount(loan);
+        }
+        return helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, chargeOffExpenseAccount(loan).getValue(), null);
     }
 
     private class JournalEntryPostingHelper {
