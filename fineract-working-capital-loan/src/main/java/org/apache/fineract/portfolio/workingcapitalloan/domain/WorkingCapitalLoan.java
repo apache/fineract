@@ -179,7 +179,7 @@ public class WorkingCapitalLoan extends AbstractAuditableWithUTCDateTimeCustom<L
     private WorkingCapitalLoanProductRelatedDetails loanProductRelatedDetails;
 
     @Setter
-    @Column(name = "total_payment_volume", scale = 6, precision = 19, nullable = false)
+    @Column(name = "total_payment_volume", scale = 6, precision = 19)
     private BigDecimal totalPaymentVolume;
 
     /**

@@ -35,6 +35,7 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCap
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductMinMaxConstraints;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -85,6 +86,22 @@ public class WorkingCapitalLoanProductUpdateUtil {
             final String newValue = command.stringValueOfParameterNamed(WorkingCapitalLoanProductConstants.amortizationTypeParamName);
             changes.put(WorkingCapitalLoanProductConstants.amortizationTypeParamName, newValue);
             relatedDetail.setAmortizationType(WorkingCapitalAmortizationType.fromString(newValue));
+        }
+        final String currentStrategy = relatedDetail.getPaymentAmountCalculationStrategy() != null
+                ? relatedDetail.getPaymentAmountCalculationStrategy().name()
+                : WorkingCapitalPaymentAmountCalculationStrategy.TPV.name();
+        if (command.isChangeInStringParameterNamed(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName,
+                currentStrategy)) {
+            final String newValue = command
+                    .stringValueOfParameterNamed(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName);
+            changes.put(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName, newValue);
+            relatedDetail.setPaymentAmountCalculationStrategy(WorkingCapitalPaymentAmountCalculationStrategy.fromString(newValue));
+        }
+        if (command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanProductConstants.annualEirParamName,
+                relatedDetail.getAnnualEir())) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.annualEirParamName);
+            changes.put(WorkingCapitalLoanProductConstants.annualEirParamName, newValue);
+            relatedDetail.setAnnualEir(newValue);
         }
         if (command.isChangeInIntegerParameterNamed(WorkingCapitalLoanProductConstants.npvDayCountParamName,
                 relatedDetail.getNpvDayCount())) {
@@ -187,6 +204,18 @@ public class WorkingCapitalLoanProductUpdateUtil {
                     .bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.maxPeriodPaymentRateParamName);
             changes.put(WorkingCapitalLoanProductConstants.maxPeriodPaymentRateParamName, newValue);
             minMaxConstraints.setMaxPeriodPaymentRate(newValue);
+        }
+        if (command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanProductConstants.minAnnualEirParamName,
+                minMaxConstraints.getMinAnnualEir())) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.minAnnualEirParamName);
+            changes.put(WorkingCapitalLoanProductConstants.minAnnualEirParamName, newValue);
+            minMaxConstraints.setMinAnnualEir(newValue);
+        }
+        if (command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanProductConstants.maxAnnualEirParamName,
+                minMaxConstraints.getMaxAnnualEir())) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.maxAnnualEirParamName);
+            changes.put(WorkingCapitalLoanProductConstants.maxAnnualEirParamName, newValue);
+            minMaxConstraints.setMaxAnnualEir(newValue);
         }
         return changes;
     }

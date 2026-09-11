@@ -65,7 +65,7 @@ final class AmortizationParams {
     }
 
     /**
-     * Solves the parameters for a balance and the fee still unearned against it.
+     * Solves the parameters for a balance and the fee still unearned against it from TPV and period payment rate.
      *
      * @throws IllegalArgumentException
      *             when the inputs cannot produce a payable schedule
@@ -73,11 +73,22 @@ final class AmortizationParams {
     static Solved solve(final BigDecimal balance, final BigDecimal unearnedFee, final BigDecimal totalPaymentVolume,
             final BigDecimal periodPaymentRate, final int npvDayCount, final int currencyScale, final MathContext mc) {
         final BigDecimal daily = dailyPayment(totalPaymentVolume, periodPaymentRate, npvDayCount, currencyScale, mc);
-        if (daily.signum() <= 0) {
-            throw new IllegalArgumentException("daily payment must be positive (check totalPaymentVolume and periodPaymentRate)");
+        return solveFromKnownPayment(balance, unearnedFee, daily, mc);
+    }
+
+    /**
+     * Solves term, closing payment and IRR from an already-known daily payment.
+     *
+     * @throws IllegalArgumentException
+     *             when the inputs cannot produce a payable schedule
+     */
+    static Solved solveFromKnownPayment(final BigDecimal balance, final BigDecimal unearnedFee, final BigDecimal dailyPayment,
+            final MathContext mc) {
+        if (dailyPayment == null || dailyPayment.signum() <= 0) {
+            throw new IllegalArgumentException("daily payment must be positive");
         }
         final BigDecimal grossPayable = balance.add(unearnedFee, mc);
-        final BigDecimal fractionalTerm = grossPayable.divide(daily, mc);
+        final BigDecimal fractionalTerm = grossPayable.divide(dailyPayment, mc);
         // Checked on the BigDecimal so int overflow cannot slip past the cap; the rate solver may still succeed on an
         // over-cap term via its zero-rate shortcut, so relying on that call to fail is not enough.
         if (fractionalTerm.compareTo(BigDecimal.valueOf(ProjectedAmortizationScheduleModel.MAX_CALCULABLE_TOTAL_DAYS)) > 0) {
@@ -90,9 +101,101 @@ final class AmortizationParams {
         }
         // The closing day pays only the remainder of the gross payable after the (term - 1) full daily payments. When
         // the schedule divides evenly this equals the daily payment.
-        final BigDecimal closing = grossPayable.subtract(daily.multiply(BigDecimal.valueOf(term - 1L), mc), mc);
-        final BigDecimal eir = TvmFunctions.irr(cashFlows(balance, daily, closing, term), mc);
-        return new Solved(daily, closing, term, eir);
+        final BigDecimal closing = grossPayable.subtract(dailyPayment.multiply(BigDecimal.valueOf(term - 1L), mc), mc);
+        final BigDecimal eir = TvmFunctions.irr(cashFlows(balance, dailyPayment, closing, term), mc);
+        return new Solved(dailyPayment, closing, term, eir);
+    }
+
+    /**
+     * Finds the currency-rounded daily payment whose NPV at the compounded daily rate from {@code annualEirPercent}
+     * equals {@code netDisbursement}, then derives term / closing / IRR exactly as TPV does for the same daily payment
+     * — so the walk produces the same schedule as an equivalent period-payment-rate product.
+     */
+    static Solved solveFromAnnualEir(final BigDecimal netDisbursement, final BigDecimal discountFee, final BigDecimal annualEirPercent,
+            final int npvDayCount, final int currencyScale, final MathContext mc) {
+        if (discountFee == null || discountFee.signum() <= 0) {
+            throw new IllegalArgumentException("discountFeeAmount must be positive for annual EIR strategy");
+        }
+        if (netDisbursement == null || netDisbursement.signum() <= 0) {
+            throw new IllegalArgumentException("netDisbursementAmount must be positive");
+        }
+        if (npvDayCount <= 0) {
+            throw new IllegalArgumentException("npvDayCount must be positive");
+        }
+        if (annualEirPercent == null || annualEirPercent.signum() <= 0) {
+            throw new IllegalArgumentException("annualEir must be positive");
+        }
+        final BigDecimal dailyRate = TvmFunctions.dailyRateFromAnnualEir(annualEirPercent, npvDayCount, mc);
+        final BigDecimal daily = computeDailyPaymentFromAnnualEir(netDisbursement, discountFee, dailyRate, currencyScale, mc);
+        return solveFromKnownPayment(netDisbursement, discountFee, daily, mc);
+    }
+
+    /**
+     * Solves for the currency-rounded daily payment whose discounted repayment stream has NPV equal to
+     * {@code netDisbursement}, using binary search over whole-cent candidates and a final three-cent tie-break.
+     */
+    static BigDecimal computeDailyPaymentFromAnnualEir(final BigDecimal netDisbursement, final BigDecimal discountFee,
+            final BigDecimal dailyRate, final int currencyScale, final MathContext mc) {
+        final BigDecimal totalRepayment = netDisbursement.add(discountFee, mc);
+
+        BigDecimal lower = BigDecimal.ONE.movePointLeft(currencyScale);
+        BigDecimal upper = totalRepayment;
+        BigDecimal candidate;
+
+        while (lower.compareTo(upper) < 0) {
+            candidate = roundDownToCent(lower.add(upper, mc).divide(BigDecimal.valueOf(2), mc), currencyScale);
+            final BigDecimal candidateNpv = npvForDailyPayment(candidate, totalRepayment, dailyRate, mc);
+            if (candidateNpv.compareTo(netDisbursement) < 0) {
+                lower = candidate.add(BigDecimal.ONE.movePointLeft(currencyScale), mc);
+            } else {
+                upper = candidate;
+            }
+        }
+
+        candidate = roundDownToCent(lower.add(upper, mc).divide(BigDecimal.valueOf(2), mc), currencyScale);
+        final BigDecimal cent = BigDecimal.ONE.movePointLeft(currencyScale);
+        BigDecimal bestPayment = candidate;
+        BigDecimal bestError = npvError(candidate, totalRepayment, netDisbursement, dailyRate, mc);
+        for (final BigDecimal neighbour : List.of(candidate.subtract(cent, mc), candidate.add(cent, mc))) {
+            if (neighbour.compareTo(cent) >= 0 && neighbour.compareTo(totalRepayment) <= 0) {
+                final BigDecimal error = npvError(neighbour, totalRepayment, netDisbursement, dailyRate, mc);
+                if (error.compareTo(bestError) < 0) {
+                    bestError = error;
+                    bestPayment = neighbour;
+                }
+            }
+        }
+        return bestPayment.setScale(currencyScale, mc.getRoundingMode());
+    }
+
+    private static BigDecimal npvError(final BigDecimal payment, final BigDecimal totalRepayment, final BigDecimal netDisbursement,
+            final BigDecimal dailyRate, final MathContext mc) {
+        return npvForDailyPayment(payment, totalRepayment, dailyRate, mc).subtract(netDisbursement, mc).abs();
+    }
+
+    private static BigDecimal npvForDailyPayment(final BigDecimal payment, final BigDecimal totalRepayment, final BigDecimal dailyRate,
+            final MathContext mc) {
+        final int fullPaymentCount = totalRepayment.divide(payment, mc).setScale(0, RoundingMode.FLOOR).intValueExact();
+        final BigDecimal totalRegularPayments = payment.multiply(BigDecimal.valueOf(fullPaymentCount), mc);
+        final BigDecimal remainder = totalRepayment.subtract(totalRegularPayments, mc);
+
+        if (dailyRate.signum() == 0) {
+            return totalRegularPayments.add(remainder, mc);
+        }
+
+        final BigDecimal onePlusRate = BigDecimal.ONE.add(dailyRate, mc);
+        final BigDecimal discountBase = BigDecimal.ONE.divide(onePlusRate.pow(fullPaymentCount, mc), mc);
+        final BigDecimal pvRegular = payment.multiply(BigDecimal.ONE.subtract(discountBase, mc), mc).divide(dailyRate, mc);
+
+        if (remainder.signum() == 0) {
+            return pvRegular;
+        }
+        final BigDecimal pvRemainder = remainder.divide(onePlusRate.pow(fullPaymentCount + 1, mc), mc);
+        return pvRegular.add(pvRemainder, mc);
+    }
+
+    private static BigDecimal roundDownToCent(final BigDecimal value, final int currencyScale) {
+        return value.setScale(currencyScale, RoundingMode.DOWN);
     }
 
     /**

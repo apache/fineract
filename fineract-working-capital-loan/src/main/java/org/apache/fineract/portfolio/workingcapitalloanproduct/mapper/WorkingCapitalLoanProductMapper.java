@@ -42,6 +42,7 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCap
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductConfigurableAttributes;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductPaymentAllocationRule;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAllocationType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -64,6 +65,10 @@ public interface WorkingCapitalLoanProductMapper {
     @Mapping(target = "minPeriodPaymentRate", source = "minMaxConstraints.minPeriodPaymentRate")
     @Mapping(target = "periodPaymentRate", source = "relatedDetail.periodPaymentRate")
     @Mapping(target = "maxPeriodPaymentRate", source = "minMaxConstraints.maxPeriodPaymentRate")
+    @Mapping(target = "minAnnualEir", source = "minMaxConstraints.minAnnualEir")
+    @Mapping(target = "maxAnnualEir", source = "minMaxConstraints.maxAnnualEir")
+    @Mapping(target = "paymentAmountCalculationStrategy", source = "relatedDetail.paymentAmountCalculationStrategy", qualifiedByName = "paymentAmountCalculationStrategyToStringEnumOptionData")
+    @Mapping(target = "annualEir", source = "relatedDetail.annualEir")
     @Mapping(target = "discount", source = "relatedDetail.discount")
     @Mapping(target = "repaymentEvery", source = "relatedDetail.repaymentEvery")
     @Mapping(target = "repaymentFrequencyType", source = "relatedDetail.repaymentFrequencyType", qualifiedByName = "periodFrequencyTypeToStringEnumOptionData")
@@ -89,6 +94,7 @@ public interface WorkingCapitalLoanProductMapper {
     @Mapping(target = "penaltyOptions", ignore = true)
     @Mapping(target = "currencyOptions", ignore = true)
     @Mapping(target = "amortizationTypeOptions", ignore = true)
+    @Mapping(target = "paymentAmountCalculationStrategyOptions", ignore = true)
     @Mapping(target = "periodFrequencyTypeOptions", ignore = true)
     @Mapping(target = "breachOptions", ignore = true)
     @Mapping(target = "advancedPaymentAllocationTypes", ignore = true)
@@ -126,6 +132,12 @@ public interface WorkingCapitalLoanProductMapper {
     @Named("amortizationToStringEnumOptionData")
     default StringEnumOptionData amortizationToStringEnumOptionData(final WorkingCapitalAmortizationType amortizationType) {
         return amortizationType != null ? amortizationType.getValueAsStringEnumOptionData() : null;
+    }
+
+    @Named("paymentAmountCalculationStrategyToStringEnumOptionData")
+    default StringEnumOptionData paymentAmountCalculationStrategyToStringEnumOptionData(
+            final WorkingCapitalPaymentAmountCalculationStrategy strategy) {
+        return strategy != null ? strategy.getValueAsStringEnumOptionData() : null;
     }
 
     @Named("periodFrequencyTypeToStringEnumOptionData")
