@@ -89,8 +89,8 @@ import org.apache.fineract.client.models.ProjectedAmortizationSchedulePaymentDat
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRateRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdResponse;
-import org.apache.fineract.client.models.WorkingCapitalLoanCommandTemplateData;
 import org.apache.fineract.client.models.WorkingCapitalLoanPeriodPaymentRateChangeData;
+import org.apache.fineract.client.models.WorkingCapitalLoanTransactionTemplateResponse;
 import org.apache.fineract.test.api.FineractClientConfiguration;
 import org.apache.fineract.test.data.FundId;
 import org.apache.fineract.test.data.LoanStatus;
@@ -3403,22 +3403,118 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @Then("Admin closes the Working Capital loan with a full repayment on {string}")
     public void closeWorkingCapitalLoanWithFullRepayment(final String transactionDate) {
         final Long loanId = getCreatedLoanId();
-        final GetWorkingCapitalLoansLoanIdResponse loanDetails = ok(
-                () -> fineractClient.workingCapitalLoans().retrieveWorkingCapitalLoanById(loanId));
-        Assertions.assertNotNull(loanDetails.getBalance());
-        Assertions.assertNotNull(loanDetails.getBalance().getTotalOutstanding());
-        final BigDecimal totalOutstanding = loanDetails.getBalance().getTotalOutstanding();
+        WorkingCapitalLoanTransactionTemplateResponse templateResponse = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .getWorkingCapitalLoanTransactionTemplateById(loanId, "prepayLoan", DATE_FORMAT, transactionDate, "en"));
+        Assertions.assertNotNull(templateResponse);
+        final BigDecimal transactionAmount = templateResponse.getTransactionAmount();
         final PostWorkingCapitalLoanTransactionsRequest repaymentRequest = workingCapitalProductRequestFactory
-                .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate).transactionAmount(totalOutstanding);
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate).transactionAmount(transactionAmount);
         final PostWorkingCapitalLoanTransactionsResponse response = executeRepaymentLikeById(loanId, "repayment", repaymentRequest);
-        Assertions.assertNotNull(loanDetails.getBalance());
-        validateRepaymentResponse(response, totalOutstanding.doubleValue(), transactionDate, loanId);
+        validateRepaymentResponse(response, transactionAmount.doubleValue(), transactionDate, loanId);
     }
 
     @Then("Admin closes the Working Capital loan with all obligations met with a full repayment on {string}")
     public void closeObligationsMetWorkingCapitalLoanWithFullRepayment(final String transactionDate) {
         closeWorkingCapitalLoanWithFullRepayment(transactionDate);
         loanWCStatus("CLOSED_OBLIGATIONS_MET");
+    }
+
+    @Then("Admin closes the Working Capital loan with a full repayment by loan external ID on {string}")
+    public void closeWorkingCapitalLoanWithFullRepaymentByExternalId(final String transactionDate) {
+        final Long loanId = getCreatedLoanId();
+        final String loanExternalId = retrieveLoanExternalId(loanId);
+        final WorkingCapitalLoanTransactionTemplateResponse templateResponse = fetchPrepaymentTemplateByExternalId(loanExternalId,
+                transactionDate);
+        final BigDecimal transactionAmount = templateResponse.getTransactionAmount();
+        final PostWorkingCapitalLoanTransactionsRequest repaymentRequest = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().transactionDate(transactionDate).transactionAmount(transactionAmount);
+        final PostWorkingCapitalLoanTransactionsResponse response = executeRepaymentByExternalId(loanExternalId, repaymentRequest);
+        validateRepaymentResponse(response, transactionAmount.doubleValue(), transactionDate, loanId);
+    }
+
+    @Then("Admin closes the Working Capital loan with all obligations met with a full repayment by loan external ID on {string}")
+    public void closeObligationsMetWorkingCapitalLoanWithFullRepaymentByExternalId(final String transactionDate) {
+        closeWorkingCapitalLoanWithFullRepaymentByExternalId(transactionDate);
+        loanWCStatus("CLOSED_OBLIGATIONS_MET");
+    }
+
+    @Then("Working Capital loan prepayment template on {string} has the following data:")
+    public void verifyPrepaymentTemplate(final String transactionDate, final DataTable table) {
+        final Long loanId = getCreatedLoanId();
+        verifyPrepaymentTemplate(loanId, fetchPrepaymentTemplateById(loanId, transactionDate), transactionDate, table);
+    }
+
+    @Then("Working Capital loan prepayment template by loan external ID on {string} has the following data:")
+    public void verifyPrepaymentTemplateByExternalId(final String transactionDate, final DataTable table) {
+        final Long loanId = getCreatedLoanId();
+        final String loanExternalId = retrieveLoanExternalId(loanId);
+        verifyPrepaymentTemplate(loanId, fetchPrepaymentTemplateByExternalId(loanExternalId, transactionDate), transactionDate, table);
+    }
+
+    @Then("Working Capital loan prepayment template without an explicit transaction date has the following data:")
+    public void verifyPrepaymentTemplateWithoutTransactionDate(final DataTable table) {
+        final Long loanId = getCreatedLoanId();
+        final WorkingCapitalLoanTransactionTemplateResponse templateResponse = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .getWorkingCapitalLoanTransactionTemplateById(loanId, "prepayLoan", null, null, null));
+        Assertions.assertNotNull(templateResponse, "Prepayment template should not be null");
+        verifyPrepaymentTemplateAmounts(templateResponse, table);
+    }
+
+    @Then("Fetching the Working Capital loan transaction template with command {string} results an error with the following data:")
+    public void fetchTransactionTemplateWithUnsupportedCommand(final String commandParam, final DataTable table) {
+        final Long loanId = getCreatedLoanId();
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .getWorkingCapitalLoanTransactionTemplateById(loanId, commandParam, DATE_FORMAT, null, "en"));
+        verifyErrorResponse(exception, table);
+    }
+
+    @Then("Fetching the Working Capital loan prepayment template for a non-existent loan results an error with the following data:")
+    public void fetchPrepaymentTemplateForMissingLoan(final DataTable table) {
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .getWorkingCapitalLoanTransactionTemplateById(NON_EXISTENT_LOAN_ID, "prepayLoan", DATE_FORMAT, null, "en"));
+        verifyErrorResponse(exception, table);
+    }
+
+    private WorkingCapitalLoanTransactionTemplateResponse fetchPrepaymentTemplateById(final Long loanId, final String transactionDate) {
+        final WorkingCapitalLoanTransactionTemplateResponse templateResponse = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .getWorkingCapitalLoanTransactionTemplateById(loanId, "prepayLoan", DATE_FORMAT, transactionDate, "en"));
+        Assertions.assertNotNull(templateResponse, "Prepayment template should not be null");
+        return templateResponse;
+    }
+
+    private WorkingCapitalLoanTransactionTemplateResponse fetchPrepaymentTemplateByExternalId(final String loanExternalId,
+            final String transactionDate) {
+        final WorkingCapitalLoanTransactionTemplateResponse templateResponse = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .getWorkingCapitalLoanTransactionTemplateByExternalId(loanExternalId, "prepayLoan", DATE_FORMAT, transactionDate, "en"));
+        Assertions.assertNotNull(templateResponse, "Prepayment template should not be null");
+        return templateResponse;
+    }
+
+    private void verifyPrepaymentTemplate(final Long loanId, final WorkingCapitalLoanTransactionTemplateResponse templateResponse,
+            final String transactionDate, final DataTable table) {
+        verifyPrepaymentTemplateAmounts(templateResponse, table);
+        // The payoff is quoted as a plain Repayment: that is what makes the existing repayment endpoint the one the
+        // caller posts it back to, with the repayment allocation and accounting treatment that comes with it.
+        Assertions.assertNotNull(templateResponse.getType(), "Prepayment template transaction type should not be null");
+        assertThat(templateResponse.getType().getCode()).as("prepayment template transaction type")
+                .isEqualTo("loanTransactionType." + TransactionType.REPAYMENT.getValue());
+        assertThat(templateResponse.getWcLoanId()).as("prepayment template loan id").isEqualTo(loanId);
+        assertThat(FORMATTER.format(templateResponse.getTransactionDate())).as("prepayment template transaction date")
+                .isEqualTo(transactionDate);
+        Assertions.assertNotNull(templateResponse.getCurrency(), "Prepayment template currency should not be null");
+    }
+
+    private void verifyPrepaymentTemplateAmounts(final WorkingCapitalLoanTransactionTemplateResponse templateResponse,
+            final DataTable table) {
+        final Map<String, String> expected = table.asMaps().getFirst();
+        assertThat(templateResponse.getPrincipalPortion()).as("prepayment template principalPortion")
+                .isEqualByComparingTo(expected.get("principalPortion"));
+        assertThat(templateResponse.getFeeChargesPortion()).as("prepayment template feeChargesPortion")
+                .isEqualByComparingTo(expected.get("feeChargesPortion"));
+        assertThat(templateResponse.getPenaltyChargesPortion()).as("prepayment template penaltyChargesPortion")
+                .isEqualByComparingTo(expected.get("penaltyChargesPortion"));
+        assertThat(templateResponse.getTransactionAmount()).as("prepayment template transactionAmount")
+                .isEqualByComparingTo(expected.get("transactionAmount"));
     }
 
     @Then("Customer fails to make repayment on {string} with {double} EUR transaction amount outcomes with error message")
@@ -3430,6 +3526,18 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionById(loanId, "repayment", repaymentRequest));
         assertThat(exception.getStatus()).as(errorMessage).isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).contains(errorMessage);
+    }
+
+    @Then("Customer fails to make repayment on {string} with {double} transaction amount on Working Capital loan due to future date")
+    public void repaymentWCLoanFailureFutureDate(final String transactionDate, final double transactionAmount) {
+        final Long loanId = getCreatedLoanId();
+        final PostWorkingCapitalLoanTransactionsRequest repaymentRequest = buildRepaymentRequest(transactionDate, transactionAmount, null);
+
+        String errorMessage = "cannot.be.a.future.date";
+        CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "repayment", repaymentRequest));
+        assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(400);
         assertThat(exception.getDeveloperMessage()).contains(errorMessage);
     }
 
@@ -3850,14 +3958,14 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
     @When("Admin requests the Working Capital loan transaction template for command {string}")
     public void requestWorkingCapitalLoanTransactionTemplate(final String command) {
         final Long loanId = getCreatedLoanId();
-        final WorkingCapitalLoanCommandTemplateData template = ok(
-                () -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanActionTemplate(loanId, command));
+        final WorkingCapitalLoanTransactionTemplateResponse template = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .getWorkingCapitalLoanTransactionTemplateById(loanId, command, null, null, null));
         testContext().set(WC_CBR_TEMPLATE_RESPONSE, template);
     }
 
     @Then("The Working Capital loan transaction template expectedAmount is {string}")
     public void assertWorkingCapitalLoanTransactionTemplateExpectedAmount(final String expected) {
-        final WorkingCapitalLoanCommandTemplateData template = testContext().get(WC_CBR_TEMPLATE_RESPONSE);
+        final WorkingCapitalLoanTransactionTemplateResponse template = testContext().get(WC_CBR_TEMPLATE_RESPONSE);
         assertNotNull(template, "Template response should not be null");
         assertThat(template.getExpectedAmount()).as("Template expectedAmount").isNotNull();
         assertThat(template.getExpectedAmount().compareTo(new BigDecimal(expected)))

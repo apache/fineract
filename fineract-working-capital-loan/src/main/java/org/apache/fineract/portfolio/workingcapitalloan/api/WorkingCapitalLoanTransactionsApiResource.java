@@ -41,12 +41,16 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.commands.domain.CommandWrapper;
 import org.apache.fineract.commands.service.CommandWrapperBuilder;
 import org.apache.fineract.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.apache.fineract.infrastructure.core.api.DateParam;
 import org.apache.fineract.infrastructure.core.api.jersey.Pagination;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.infrastructure.core.data.DateFormat;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.apache.fineract.infrastructure.core.service.CommandParameterUtil;
@@ -55,6 +59,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCommandTemplateData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionData;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionTemplateData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanTransactionNotFoundException;
@@ -161,27 +166,27 @@ public class WorkingCapitalLoanTransactionsApiResource {
     @GET
     @Path("{loanId}/template")
     @Produces({ MediaType.APPLICATION_JSON })
-    @Operation(operationId = "retrieveWorkingCapitalLoanActionTemplate", summary = "Retrieve Working Capital Loan action template", description = "Returns loan data for applying the proper loan action")
+    @Operation(operationId = "retrieveWorkingCapitalLoanActionTemplate", summary = "Retrieve Working Capital Loan action template", description = "Loan approval only - it is the one action that posts no transaction. Supported templateType query parameter: approve. Everything else, disbursement included, lives on {loanId}/transactions/template?command=...")
     public WorkingCapitalLoanCommandTemplateData retrieveWorkingCapitalLoanTemplate(
             @PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
             @QueryParam("templateType") @Parameter(description = "templateType") final String templateType,
             @Context final UriInfo uriInfo) {
         this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
 
-        return handleLoanTransactionTemplate(loanId, null, templateType);
+        return handleLoanActionTemplate(loanId, null, templateType);
     }
 
-    private WorkingCapitalLoanCommandTemplateData handleLoanTransactionTemplate(final Long loanId, final String loanExternalIdStr,
+    private WorkingCapitalLoanCommandTemplateData handleLoanActionTemplate(final Long loanId, final String loanExternalIdStr,
             final String templateType) {
         final Long resolvedLoanId = resolveLoanId(loanId, loanExternalIdStr);
 
-        final WorkingCapitalLoanCommandTemplateData loanTransactionTemplateData = transactionReadPlatformService
-                .retrieveLoanTransactionTemplate(resolvedLoanId, templateType);
-        if (loanTransactionTemplateData == null) {
+        final WorkingCapitalLoanCommandTemplateData loanActionTemplateData = transactionReadPlatformService
+                .retrieveLoanActionTemplate(resolvedLoanId, templateType);
+        if (loanActionTemplateData == null) {
             throw new UnrecognizedQueryParamException("command", templateType);
         }
 
-        return loanTransactionTemplateData;
+        return loanActionTemplateData;
     }
 
     @POST
@@ -287,6 +292,56 @@ public class WorkingCapitalLoanTransactionsApiResource {
             @QueryParam("command") @Parameter(description = "command", required = true) final String command,
             @Parameter(hidden = true) final String apiRequestBodyAsJson) {
         return executeWorkingCapitalLoanTransactionCommand(loanId, null, null, transactionExternalId, command, apiRequestBodyAsJson);
+    }
+
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "getWorkingCapitalLoanTransactionTemplateById", summary = "Get Working Capital Loan transaction template by loan id", description = "Supported command query parameters: disburse, repayment, goodwillCredit, creditBalanceRefund, recoveryPayment, discountFee, discountFeeAdjustment, chargeOff, prepayLoan.")
+    @Path("{loanId}/transactions/template")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.WorkingCapitalLoanTransactionTemplateResponse.class))) })
+    public WorkingCapitalLoanTransactionTemplateData getWorkingCapitalLoanTransactionTemplateById(
+            @PathParam("loanId") @Parameter(description = "loanId", required = true) final Long loanId,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam,
+            @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String rawDateFormat,
+            @QueryParam("transactionDate") @Parameter(description = "transactionDate") final DateParam transactionDateParam,
+            @QueryParam("locale") @Parameter(description = "locale") final String locale) {
+
+        return getWorkingCapitalLoanTransactionTemplate(commandParam, loanId, null, locale, rawDateFormat, transactionDateParam);
+    }
+
+    @GET
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Operation(operationId = "getWorkingCapitalLoanTransactionTemplateByExternalId", summary = "Get Working Capital Loan transaction template by loan external id", description = "Supported command query parameters: disburse, repayment, goodwillCredit, creditBalanceRefund, recoveryPayment, discountFee, discountFeeAdjustment, chargeOff, prepayLoan.")
+    @Path("external-id/{loanExternalId}/transactions/template")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = WorkingCapitalLoanTransactionsApiResourceSwagger.WorkingCapitalLoanTransactionTemplateResponse.class))) })
+    public WorkingCapitalLoanTransactionTemplateData getWorkingCapitalLoanTransactionTemplateByExternalId(
+            @PathParam("loanExternalId") @Parameter(description = "loanExternalId", required = true) final String loanExternalId,
+            @QueryParam("command") @Parameter(description = "command") final String commandParam,
+            @QueryParam("dateFormat") @Parameter(description = "dateFormat") final String rawDateFormat,
+            @QueryParam("transactionDate") @Parameter(description = "transactionDate") final DateParam transactionDateParam,
+            @QueryParam("locale") @Parameter(description = "locale") final String locale) {
+        return getWorkingCapitalLoanTransactionTemplate(commandParam, null, loanExternalId, locale, rawDateFormat, transactionDateParam);
+    }
+
+    private WorkingCapitalLoanTransactionTemplateData getWorkingCapitalLoanTransactionTemplate(String commandParam, Long loanId,
+            String externalId, String locale, String rawDateFormat, DateParam transactionDateParam) {
+        this.context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
+        final Long resolvedLoanId = resolveLoanId(loanId, externalId);
+        final DateFormat dateFormat = StringUtils.isBlank(rawDateFormat) ? null : new DateFormat(rawDateFormat);
+        // transactionDate is optional: only the prepayment quote reads it, and the service falls back to the business
+        // date, so a caller that does not care about the date can leave dateFormat and locale off too.
+        final LocalDate transactionDate = transactionDateParam == null ? null
+                : transactionDateParam.getDate("transactionDate", dateFormat, locale);
+
+        final WorkingCapitalLoanTransactionTemplateData templateData = this.transactionReadPlatformService
+                .retrieveTransactionTemplate(resolvedLoanId, commandParam, transactionDate);
+        if (templateData == null) {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
+
+        return templateData;
     }
 
     @POST
