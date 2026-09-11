@@ -16,15 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.portfolio.client.data;
 
-package org.apache.fineract.portfolio.client.service;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.client.domain.Client;
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class FamilyMemberDeleteResponse {
 
-public interface ClientFamilyMembersWritePlatformService {
-
-    CommandProcessingResult addClientFamilyMember(Client client, JsonCommand command);
-
+    private Long clientId;
+    private Long resourceId;
 }

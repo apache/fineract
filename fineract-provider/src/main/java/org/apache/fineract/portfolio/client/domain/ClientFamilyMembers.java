@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.fineract.portfolio.client.domain;
 
 import jakarta.persistence.Column;
@@ -25,9 +24,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.fineract.infrastructure.codes.domain.CodeValue;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "m_family_members")
 public class ClientFamilyMembers extends AbstractPersistableCustom<Long> {
@@ -76,138 +79,23 @@ public class ClientFamilyMembers extends AbstractPersistableCustom<Long> {
     @Column(name = "date_of_birth", nullable = true)
     private LocalDate dateOfBirth;
 
-    private ClientFamilyMembers(final Client client, final String firstName, final String middleName, final String lastName,
-            final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
-            final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession) {
-
-        this.client = client;
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.lastName = lastName;
-        this.qualification = qualification;
-        this.age = age;
-        this.mobileNumber = mobileNumber;
-        this.isDependent = isDependent;
-        this.relationship = relationship;
-        this.maritalStatus = maritalStatus;
-        this.gender = gender;
-        this.dateOfBirth = dateOfBirth;
-        this.profession = profession;
-    }
-
-    public ClientFamilyMembers() {
-
-    }
-
     public static ClientFamilyMembers fromJson(final Client client, final String firstName, final String middleName, final String lastName,
             final String qualification, final String mobileNumber, final Long age, final Boolean isDependent, final CodeValue relationship,
             final CodeValue maritalStatus, final CodeValue gender, final LocalDate dateOfBirth, final CodeValue profession) {
-        return new ClientFamilyMembers(client, firstName, middleName, lastName, qualification, mobileNumber, age, isDependent, relationship,
-                maritalStatus, gender, dateOfBirth, profession);
+        ClientFamilyMembers entity = new ClientFamilyMembers();
+        entity.setClient(client);
+        entity.setFirstName(firstName);
+        entity.setMiddleName(middleName);
+        entity.setLastName(lastName);
+        entity.setQualification(qualification);
+        entity.setMobileNumber(mobileNumber);
+        entity.setAge(age);
+        entity.setIsDependent(isDependent);
+        entity.setRelationship(relationship);
+        entity.setMaritalStatus(maritalStatus);
+        entity.setGender(gender);
+        entity.setDateOfBirth(dateOfBirth);
+        entity.setProfession(profession);
+        return entity;
     }
-
-    public Client getClient() {
-        return this.client;
-    }
-
-    public void setClient(Client client) {
-        this.client = client;
-    }
-
-    public String getFirstName() {
-        return this.firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getMiddleName() {
-        return this.middleName;
-    }
-
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
-    }
-
-    public String getLastName() {
-        return this.lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getQualification() {
-        return this.qualification;
-    }
-
-    public void setQualification(String qualification) {
-        this.qualification = qualification;
-    }
-
-    public CodeValue getRelationship() {
-        return this.relationship;
-    }
-
-    public void setRelationship(CodeValue relationship) {
-        this.relationship = relationship;
-    }
-
-    public CodeValue getMaritalStatus() {
-        return this.maritalStatus;
-    }
-
-    public void setMaritalStatus(CodeValue maritalStatus) {
-        this.maritalStatus = maritalStatus;
-    }
-
-    public CodeValue getGender() {
-        return this.gender;
-    }
-
-    public void setGender(CodeValue gender) {
-        this.gender = gender;
-    }
-
-    public CodeValue getProfession() {
-        return this.profession;
-    }
-
-    public void setProfession(CodeValue profession) {
-        this.profession = profession;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return this.dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
-    public String getMobileNumber() {
-        return this.mobileNumber;
-    }
-
-    public void setMobileNumber(String mobileNumber) {
-        this.mobileNumber = mobileNumber;
-    }
-
-    public Long getAge() {
-        return this.age;
-    }
-
-    public void setAge(Long age) {
-        this.age = age;
-    }
-
-    public Boolean getIsDependent() {
-        return this.isDependent;
-    }
-
-    public void setIsDependent(Boolean isDependent) {
-        this.isDependent = isDependent;
-    }
-
 }

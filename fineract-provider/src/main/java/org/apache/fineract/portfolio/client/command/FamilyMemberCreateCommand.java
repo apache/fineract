@@ -16,15 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.portfolio.client.command;
 
-package org.apache.fineract.portfolio.client.service;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.fineract.command.core.Command;
+import org.apache.fineract.portfolio.client.data.FamilyMemberCreateRequest;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
-import org.apache.fineract.portfolio.client.domain.Client;
-
-public interface ClientFamilyMembersWritePlatformService {
-
-    CommandProcessingResult addClientFamilyMember(Client client, JsonCommand command);
-
-}
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class FamilyMemberCreateCommand extends Command<FamilyMemberCreateRequest> {}
