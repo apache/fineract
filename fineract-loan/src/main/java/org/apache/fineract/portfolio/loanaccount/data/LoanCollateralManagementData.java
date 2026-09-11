@@ -19,11 +19,9 @@
 package org.apache.fineract.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
 public class LoanCollateralManagementData {
 
     private Long clientCollateralId;
@@ -35,4 +33,22 @@ public class LoanCollateralManagementData {
     private BigDecimal totalCollateral;
 
     private Long id;
+
+    private String name;
+
+    private BigDecimal unitPrice;
+
+    private BigDecimal pctToBase;
+
+    public LoanCollateralManagementData(Long clientCollateralId, BigDecimal quantity, BigDecimal total, BigDecimal totalCollateral, Long id,
+            String name, BigDecimal unitPrice, BigDecimal pctToBase) {
+        this.clientCollateralId = clientCollateralId;
+        this.quantity = quantity;
+        this.total = total;
+        this.totalCollateral = totalCollateral;
+        this.id = id;
+        this.name = name;
+        this.unitPrice = unitPrice;
+        this.pctToBase = pctToBase;
+    }
 }
