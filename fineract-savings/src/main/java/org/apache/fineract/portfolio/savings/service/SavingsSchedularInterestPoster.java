@@ -128,8 +128,8 @@ public class SavingsSchedularInterestPoster {
                     final String key = savingsAccountTransactionData.getRefNo();
                     final SavingsAccountTransactionData dataFromFetch = savingsAccountTransactionDataHashMap.get(key);
                     savingsAccountTransactionData.setId(dataFromFetch.getId());
-                    if (savingsAccountData.getGlAccountIdForSavingsControl() != 0
-                            && savingsAccountData.getGlAccountIdForInterestOnSavings() != 0) {
+                    if (isResolvedGlAccount(savingsAccountTransactionData.getAccountCredit())
+                            && isResolvedGlAccount(savingsAccountTransactionData.getAccountDebit())) {
                         OffsetDateTime auditDatetime = DateUtils.getAuditOffsetDateTime();
                         paramsForGLInsertion.add(
                                 new Object[] { savingsAccountTransactionData.getAccountCredit(), savingsAccountData.getOfficeId(), null,
@@ -150,6 +150,17 @@ public class SavingsSchedularInterestPoster {
                                         savingsAccountData.getId(), auditDatetime, auditDatetime, false, BigDecimal.ZERO, BigDecimal.ZERO,
                                         null, savingsAccountTransactionData.getTransactionDate(), null, userId, userId,
                                         DateUtils.getBusinessLocalDate() });
+                    } else {
+                        // this transaction's GL accounts could not be resolved, either because the product has no
+                        // accounting mapping at all or because the mapping does not cover it (e.g. an accrual-only
+                        // mapping on a cash-based product): skip its journal entries instead of aborting the whole
+                        // batch with a foreign key violation on acc_gl_journal_entry. Products without accounting
+                        // reach this branch on every run, so it is logged at debug rather than warn
+                        log.debug(
+                                "Skipping journal entries for interest posting transaction {} on savings account {}:"
+                                        + " unresolved GL account (debit={}, credit={})",
+                                savingsAccountTransactionData.getId(), savingsAccountData.getId(),
+                                savingsAccountTransactionData.getAccountDebit(), savingsAccountTransactionData.getAccountCredit());
                     }
 
                 }
@@ -159,6 +170,10 @@ public class SavingsSchedularInterestPoster {
         if (paramsForGLInsertion != null && !paramsForGLInsertion.isEmpty()) {
             this.jdbcTemplate.batchUpdate(queryForJGLUpdate, paramsForGLInsertion);
         }
+    }
+
+    private static boolean isResolvedGlAccount(final Long glAccountId) {
+        return glAccountId != null && glAccountId != 0;
     }
 
     private String batchQueryForJournalEntries() {
