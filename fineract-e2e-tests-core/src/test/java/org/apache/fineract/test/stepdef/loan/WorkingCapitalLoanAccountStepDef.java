@@ -3515,6 +3515,18 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertThat(exception.getDeveloperMessage()).contains(errorMessage);
     }
 
+    @Then("Customer fails to make repayment on {string} with {double} transaction amount on Working Capital loan due to future date")
+    public void repaymentWCLoanFailureFutureDate(final String transactionDate, final double transactionAmount) {
+        final Long loanId = getCreatedLoanId();
+        final PostWorkingCapitalLoanTransactionsRequest repaymentRequest = buildRepaymentRequest(transactionDate, transactionAmount, null);
+
+        String errorMessage = "cannot.be.a.future.date";
+        CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "repayment", repaymentRequest));
+        assertThat(exception.getStatus()).as("HTTP status code").isEqualTo(400);
+        assertThat(exception.getDeveloperMessage()).contains(errorMessage);
+    }
+
     @Then("Customer makes credit balance refund on {string} with {double} transaction amount on Working Capital loan")
     public void makeWorkingCapitalLoanCreditBalanceRefund(final String transactionDate, final double transactionAmount) {
         final Long loanId = getCreatedLoanId();
