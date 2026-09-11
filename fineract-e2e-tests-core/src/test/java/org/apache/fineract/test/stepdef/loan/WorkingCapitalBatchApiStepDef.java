@@ -625,6 +625,15 @@ public class WorkingCapitalBatchApiStepDef extends AbstractStepDef {
         assertThat(response.getStatusCode()).as("Step %d should result %d", step, errorCode).isEqualTo(errorCode);
     }
 
+    @Then("Verify that WCL step {int} throws an error with error code {int} and message {string}")
+    public void verifyWCStepThrowsErrorWithCodeAndMessage(final int step, final int errorCode, final String errorMessage) {
+        final List<BatchResponse> responses = testContext().get(TestContextKey.BATCH_API_CALL_RESPONSE);
+        final BatchResponse response = responses.stream().filter(r -> r.getRequestId() == step).findFirst()
+                .orElseThrow(() -> new IllegalStateException(String.format("Step %d is not found in batch responses", step)));
+        assertThat(response.getStatusCode()).as("Step %d should result %d", step, errorCode).isEqualTo(errorCode);
+        assertThat(response.getBody()).as("Step %d error body should contain message \"%s\"", step, errorMessage).contains(errorMessage);
+    }
+
     @Then("Nr. {int} Working capital loan was created")
     public void verifyWCLoanCreated(int index) {
         final List<BatchResponse> responses = testContext().get(TestContextKey.BATCH_API_CALL_RESPONSE);

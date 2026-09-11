@@ -103,6 +103,7 @@ Feature: Working Capital Batch API
       | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Discount Fee | 12.0              | 12.0             | 0.0               | 0.0                   | false    |
 
+  @TestRailId:C102522
   Scenario: Verify Batch API - discount fee on a charged-off Working Capital loan is rejected
     When Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data
@@ -113,7 +114,14 @@ Feature: Working Capital Batch API
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "100" EUR transaction amount
     And Admin charges off the Working Capital loan on "01 January 2026"
     When Batch API adds discount fee with "12" amount on the working capital loan
-    Then Verify that WCL step 1 throws an error with error code 403
+    Then Verify that WCL step 1 throws an error with error code 403 and message "error.msg.wc.loan.is.charged.off"
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Charge-off   | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
+    And Working capital loan account has the correct data:
+      | discount | chargedOff |
+      | null     | true       |
 
   @TestRailId:C83096
   Scenario: Verify Batch API - UC8: Fetch Working Capital Loan Details via Batch API by ID
