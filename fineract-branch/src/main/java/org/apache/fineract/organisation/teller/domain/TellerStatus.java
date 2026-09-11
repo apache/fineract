@@ -57,24 +57,4 @@ public enum TellerStatus {
         return status;
     }
 
-    public boolean hasStateOf(final TellerStatus state) {
-        return this.value.equals(state.getValue());
-    }
-
-    public boolean isPending() {
-        return this.value.equals(TellerStatus.PENDING.getValue());
-    }
-
-    public boolean isActive() {
-        return this.value.equals(TellerStatus.ACTIVE.getValue());
-    }
-
-    public boolean isClosed() {
-        return this.value.equals(TellerStatus.CLOSED.getValue());
-    }
-
-    public boolean isInactive() {
-        return this.value.equals(TellerStatus.INACTIVE.getValue());
-    }
-
 }
