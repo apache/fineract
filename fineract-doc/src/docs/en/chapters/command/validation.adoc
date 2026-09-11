@@ -1,12 +1,46 @@
 = Validation
 
-TBD
+Historically Fineract validated incoming requests deep inside the business logic services. Every service had to inject a `DataValidatorBuilder`, walk the parsed JSON blob, and check field presence, length and numeric ranges by hand. That was tedious to write, tedious to read, and tedious to test.
 
-Jakarta Validation...
+With the new command processing infrastructure we push all of this to the REST API boundary using https://jakarta.ee/specifications/bean-validation/[Jakarta Bean Validation] (Hibernate Validator as the implementation). If a request fails validation, JAX-RS aborts the call with `400` before the dispatcher or any handler is touched.
 
-.Validation Messages
+== Wiring
+
+Annotate the request parameter with `@Valid` on the JAX-RS method. That's it.
+
+[source,java]
+----
+public CalendarCreateResponse createCalendar(@PathParam("entityType") String entityType,
+        @PathParam("entityId") Long entityId,
+        @Valid CalendarCreateRequest request) {
+    // ...dispatch...
+}
+----
+
+The DTO carries the constraints. Follow the DTO conventions from the xref:refactoring.adoc[refactoring guide] (Lombok, `Serializable`, `serialVersionUID = 1L`, no records for now). URL-derived fields (`entityId`, path variables) stay on the DTO but are marked `@Hidden` so they don't show up in OpenAPI.
+
+.Anatomy of a validated request DTO
+[source,java]
+----
+include::{rootdir}/fineract-provider/src/main/java/org/apache/fineract/portfolio/calendar/data/CalendarCreateRequest.java[lines=30..]
+----
+
+The annotations we tend to reach for cover almost every case: `@NotNull`, `@NotBlank`, `@Positive` / `@PositiveOrZero`, `@Length(max = ...)` (from Hibernate Validator, nicer message key than `@Size`), and `@Valid` to cascade into a nested object.
+
+== Message keys
+
+Each annotation message points to a key in `fineract-validation/src/main/resources/ValidationMessages.properties`. Convention: `{package}.{entity}.{field}.{constraint}`, all lowercase, dashes for word boundaries. Do not hard-code the English string on the annotation; use the `{key}` form so Hibernate Validator resolves it from the bundle.
+
 [source,properties]
 ----
-include::{rootdir}/fineract-validation/src/main/resources/ValidationMessages.properties[]
+org.apache.fineract.portfolio.calendar.title.not-blank=The parameter 'title' is mandatory
+org.apache.fineract.portfolio.calendar.title.max=The parameter 'title' exceeds the maximum size of {max} characters
 ----
 
+Please keep the wording aligned with the rest of the file. Clients pattern-match on these strings today, and inconsistent wording breaks them.
+
+== Custom constraints
+
+For rules that don't fit the built-in annotations, add a custom annotation and `ConstraintValidator` under the module's `validation` sub-package (see the package structure rules in xref:refactoring.adoc[refactoring guide]). Keep them focused on the *shape* of the request. Business invariants belong in the service layer.
+
+NOTE: The legacy `DataValidatorBuilder` still exists because most un-migrated endpoints depend on it. Do not use it in new code paths.
