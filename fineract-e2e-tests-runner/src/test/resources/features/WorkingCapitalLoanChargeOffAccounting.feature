@@ -490,6 +490,74 @@ Feature: Working Capital Charge-Off Accounting Entries
       | 403      | error.msg.wc.loan.is.charged.off |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "08 January 2026"
 
+  @TestRailId:C102523
+  Scenario: Verify Working Capital charge-off accounting - discount fee on a charged-off loan is rejected
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin charges off the Working Capital loan on "01 January 2026"
+    Then Adding Discount fee with "1000" amount on Working Capital loan account results an error with the following data:
+      | httpCode | message                          |
+      | 403      | error.msg.wc.loan.is.charged.off |
+    And Adding Discount fee with "1000" amount by loan external-id on Working Capital loan account results an error with the following data:
+      | httpCode | message                          |
+      | 403      | error.msg.wc.loan.is.charged.off |
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Charge-off   | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    And Working capital loan account has the correct data:
+      | discount |
+      | null     |
+    And Working Capital loan balance payload contains the following fields:
+      | field                | value  |
+      | principalOutstanding | 9000.0 |
+      | unrealizedIncome     | 0.0    |
+    Then Admin undoes the charge-off on the Working Capital loan
+
+  @TestRailId:C102524
+  Scenario: Verify Working Capital charge-off accounting - undo charge-off re-enables the discount fee and a new charge-off re-arms both discount guards
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct         | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP_ACC_DEF_REV_AM | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin charges off the Working Capital loan on "01 January 2026"
+    Then Adding Discount fee with "1000" amount on Working Capital loan account results an error with the following data:
+      | httpCode | message                          |
+      | 403      | error.msg.wc.loan.is.charged.off |
+# --- The rejected discount fee left the charge-off as the last user transaction, so it can still be undone ---
+    When Admin undoes the charge-off on the Working Capital loan
+    Then Working capital loan account has the correct data:
+      | status | chargedOff | chargedOffOnDate | discount |
+      | Active | false      | null             | null     |
+# --- The guard follows the live charged-off flag: the same discount fee is accepted once the charge-off is undone ---
+    When Admin adds Discount fee with "1000" amount on Working Capital loan account for last disbursement
+    Then Working Capital Loan Transactions tab has a "DISCOUNT_FEE" transaction with date "01 January 2026" which has the following Journal entries:
+      | Type      | Account code | Account name              | Debit  | Credit |
+      | ASSET     | 112601       | Loans Receivable          | 1000.0 |        |
+      | LIABILITY | 240005       | Deferred Interest Revenue |        | 1000.0 |
+    And Working Capital loan balance payload contains the following fields:
+      | field                | value   |
+      | principalOutstanding | 10000.0 |
+      | unrealizedIncome     | 1000.0  |
+# --- A new charge-off re-arms both guards: no second discount fee, no adjustment on/after the charge-off date ---
+    When Admin charges off the Working Capital loan on "01 January 2026"
+    Then Adding Discount fee with "500" amount on Working Capital loan account results an error with the following data:
+      | httpCode | message                          |
+      | 403      | error.msg.wc.loan.is.charged.off |
+    And Adding Discount fee adjustment with "100" amount on transaction date "01 January 2026" on Working Capital loan account for last discount results an error with the following data:
+      | httpCode | message                          |
+      | 403      | error.msg.wc.loan.is.charged.off |
+    And Working Capital Loan has transactions:
+      | transactionDate | type                      | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 January 2026 | Disbursement              | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Charge-off                | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+      | 01 January 2026 | Discount Fee              | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Charge-off                | 10000.0           | 10000.0          | 0.0               | 0.0                   | false    |
+      | 01 January 2026 | Discount Fee Amortization | 1000.0            |                  |                   |                       | false    |
+    Then Admin undoes the charge-off on the Working Capital loan
+
   @TestRailId:C93956
   Scenario: Verify Working Capital charge-off accounting - UC16: CBR after charge-off keeps regular overpayment accounting
     Given Admin sets the business date to "01 January 2026"

@@ -2102,6 +2102,21 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         verifyErrorResponse(exception, table);
     }
 
+    @Then("Adding Discount fee with {string} amount by loan external-id on Working Capital loan account results an error with the following data:")
+    public void addingDiscountFeeWCLoanByExternalIdResultsAnError(final String discountAmount, final DataTable table) {
+        final PostWorkingCapitalLoansLoanIdResponse lastDisbursementResponse = testContext().get(TestContextKey.LOAN_DISBURSE_RESPONSE);
+        Assertions.assertNotNull(lastDisbursementResponse);
+
+        final String loanExternalId = retrieveLoanExternalId(getCreatedLoanId());
+        final PostWorkingCapitalLoanTransactionsRequest request = workingCapitalProductRequestFactory
+                .defaultWorkingCapitalLoanRepaymentRequest().relatedResourceId(lastDisbursementResponse.getResourceId())
+                .transactionAmount(new BigDecimal(discountAmount));
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionByExternalId(loanExternalId, "discountFee", request));
+        verifyErrorResponse(exception, table);
+    }
+
     @And("Admin adds Discount fee adjustment with {string} amount on Working Capital loan account for last discount")
     public void addDiscountFeeAdjustmentWCLoan(final String adjustmentAmount) {
         final PostWorkingCapitalLoanTransactionsResponse lastDiscountResponse = testContext()
