@@ -32,10 +32,6 @@ public class FloatingRateRepositoryWrapper {
         this.floatingRateRepository = floatingRateRepository;
     }
 
-    public FloatingRate retrieveBaseLendingRate() {
-        return this.floatingRateRepository.retrieveBaseLendingRate();
-    }
-
     public FloatingRate findOneWithNotFoundDetection(final Long id) {
         return this.floatingRateRepository.findById(id).orElseThrow(() -> new FloatingRateNotFoundException(id));
     }

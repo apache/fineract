@@ -51,10 +51,6 @@ public class InterestRatePeriodData {
         return this.isDifferentialToBLR;
     }
 
-    public boolean isIsDifferentialToBLR() {
-        return this.isDifferentialToBLR;
-    }
-
     public void setLoanDifferentialInterestRate(BigDecimal loanDifferentialInterestRate) {
         this.loanDifferentialInterestRate = loanDifferentialInterestRate;
     }
