@@ -175,9 +175,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     List<Loan> findByIdsAndLoanStatusAndLoanType(@Param("ids") Collection<Long> ids,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses, @Param("loanTypes") Collection<AccountType> loanTypes);
 
-    @Query("select loan.id from Loan loan where loan.actualDisbursementDate > :disbursalDate order by loan.actualDisbursementDate")
-    List<Long> getLoansDisbursedAfter(@Param("disbursalDate") LocalDate disbursalDate);
-
     @Query("select loan from Loan loan where loan.client.office.id IN :officeIds and loan.loanStatus IN :loanStatuses")
     List<Loan> findByClientOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
@@ -279,9 +276,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_ALL_LOANS_BEHIND_ON_DISBURSEMENT_DATE)
     List<COBIdAndLastClosedBusinessDate> findAllLoansBehindOnDisbursementDate(@Param("cobBusinessDate") LocalDate cobBusinessDate,
             @Param("loanIds") List<Long> loanIds, @Param("loanStatuses") Collection<LoanStatus> loanStatuses);
-
-    @Query("SELECT CASE WHEN COUNT(l) > 0 THEN TRUE ELSE FALSE END FROM Loan l WHERE l.id = :loanId and l.loanRepaymentScheduleDetail.loanScheduleType = org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType.PROGRESSIVE")
-    Boolean isProgressiveLoan(@Param("loanId") Long loanId);
 
     @Query("SELECT CASE WHEN COUNT(l) > 0 THEN TRUE ELSE FALSE END FROM Loan l WHERE l.id = :loanId and l.loanStatus in :allowedLoanStatuses")
     Boolean isLoanInAllowedStatus(@Param("loanId") Long loanId, @Param("allowedLoanStatuses") List<LoanStatus> allowedLoanStatuses);
