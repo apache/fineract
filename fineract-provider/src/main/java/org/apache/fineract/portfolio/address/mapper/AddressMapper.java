@@ -16,12 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.portfolio.address.service;
+package org.apache.fineract.portfolio.address.mapper;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.address.data.AddressCreateRequest;
+import org.apache.fineract.portfolio.address.domain.Address;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-public interface AddressWritePlatformService {
+@Mapper(componentModel = "spring")
+public interface AddressMapper {
 
-    CommandProcessingResult updateClientAddress(Long clientId, JsonCommand command);
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "clientaddress", ignore = true)
+    @Mapping(target = "stateProvince", ignore = true)
+    @Mapping(target = "country", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "updatedOn", ignore = true)
+    Address toAddress(AddressCreateRequest request);
 }
