@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseSpecificSQLGenerator;
 import org.apache.fineract.infrastructure.dataqueries.service.DatatableReadService;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableUtil;
 import org.apache.fineract.infrastructure.dataqueries.service.GenericDataService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.infrastructure.security.service.SqlValidator;
@@ -67,6 +68,8 @@ class ReadSurveyServiceImplTest {
     @Mock
     private DatabaseSpecificSQLGenerator sqlGenerator;
     @Mock
+    private DatatableUtil datatableUtil;
+    @Mock
     private AppUser appUser;
 
     private ReadSurveyServiceImpl underTest;
@@ -75,7 +78,8 @@ class ReadSurveyServiceImplTest {
     void setUp() {
         when(context.authenticatedUser()).thenReturn(appUser);
         when(appUser.getId()).thenReturn(USER_ID);
-        underTest = new ReadSurveyServiceImpl(context, jdbcTemplate, sqlValidator, genericDataService, datatableReadService, sqlGenerator);
+        underTest = new ReadSurveyServiceImpl(context, jdbcTemplate, sqlValidator, genericDataService, datatableReadService, sqlGenerator,
+                datatableUtil);
     }
 
     @Test
