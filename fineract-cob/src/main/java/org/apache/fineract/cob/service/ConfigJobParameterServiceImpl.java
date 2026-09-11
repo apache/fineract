@@ -20,7 +20,10 @@ package org.apache.fineract.cob.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.COBBusinessStep;
 import org.apache.fineract.cob.data.BusinessStep;
@@ -44,14 +47,24 @@ public class ConfigJobParameterServiceImpl implements ConfigJobParameterService,
 
     private final BatchBusinessStepRepository batchBusinessStepRepository;
     private final BusinessStepConfigDataParser dataParser;
-    private final BusinessStepCategoryService businessStepCategoryService;
+    private final List<BusinessStepCategoryService> businessStepCategoryServices;
     private final ApplicationContext applicationContext;
     private final BusinessStepMapper mapper;
     private JobBusinessStepDetail availableBusinessStepsForLoan;
+    private Map<String, JobBusinessStepDetail> availableBusinessStepsByJobName;
 
     @Override
     public void afterPropertiesSet() throws Exception {
         availableBusinessStepsForLoan = getAvailableBusinessStepsByJobName(BusinessStepCategory.LOAN.name());
+        // Pre-load the available business steps for every registered category (LOAN, SAVINGS, ...), keyed by the COB
+        // job name they are configured under, so updates can be validated against the steps of the job being changed.
+        availableBusinessStepsByJobName = new HashMap<>();
+        for (BusinessStepCategoryService categoryService : businessStepCategoryServices) {
+            JobBusinessStepDetail availableBusinessSteps = getAvailableBusinessStepsByJobName(categoryService.getCategory().name());
+            if (availableBusinessSteps != null) {
+                availableBusinessStepsByJobName.put(categoryService.getJobName(), availableBusinessSteps);
+            }
+        }
     }
 
     @Override
@@ -70,7 +83,10 @@ public class ConfigJobParameterServiceImpl implements ConfigJobParameterService,
         if (businessSteps.isEmpty()) {
             throw new BusinessStepException("A job needs to have 1 business step at least.");
         }
-        List<String> availableBusinessStepNames = availableBusinessStepsForLoan.getAvailableBusinessSteps().stream()
+        // Resolve the available steps from the job being configured (falling back to the Loan list to preserve the
+        // pre-existing behaviour for job names that are not explicitly registered).
+        JobBusinessStepDetail availableBusinessSteps = availableBusinessStepsByJobName.getOrDefault(jobName, availableBusinessStepsForLoan);
+        List<String> availableBusinessStepNames = availableBusinessSteps.getAvailableBusinessSteps().stream()
                 .map(BusinessStepDetail::getStepName).toList();
         List<String> notValidBusinessStepNames = businessSteps.stream().map(BusinessStep::getStepName)
                 .filter(businessStepName -> !availableBusinessStepNames.contains(businessStepName)).toList();
@@ -93,7 +109,9 @@ public class ConfigJobParameterServiceImpl implements ConfigJobParameterService,
 
     @Override
     public JobBusinessStepDetail getAvailableBusinessStepsByJobName(String jobName) {
-        Class<? extends COBBusinessStep> businessStepClass = businessStepCategoryService.getBusinessStepByCategory(jobName);
+        Class<? extends COBBusinessStep> businessStepClass = businessStepCategoryServices.stream()
+                .map(categoryService -> categoryService.getBusinessStepByCategory(jobName)).filter(Objects::nonNull).findFirst()
+                .orElse(null);
         if (businessStepClass == null) {
             return null;
         }

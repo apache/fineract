@@ -23,12 +23,12 @@ import static org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanCOBCo
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.common.ContextAwareTaskDecorator;
 import org.apache.fineract.cob.common.InitialisationTasklet;
 import org.apache.fineract.cob.common.ResetContextTasklet;
 import org.apache.fineract.cob.conditions.BatchWorkerCondition;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.listener.CobWorkerStepListener;
-import org.apache.fineract.cob.loan.ContextAwareTaskDecorator;
 import org.apache.fineract.cob.service.BeforeStepLockingItemReaderHelper;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.apache.fineract.infrastructure.jobs.service.JobName;

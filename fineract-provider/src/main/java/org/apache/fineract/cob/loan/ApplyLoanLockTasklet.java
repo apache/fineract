@@ -18,8 +18,10 @@
  */
 package org.apache.fineract.cob.loan;
 
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBConstant;
+import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.service.RetrieveIdService;
@@ -30,9 +32,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Slf4j
 public class ApplyLoanLockTasklet extends ApplyCommonLockTasklet {
 
+    private final RetrieveIdService retrieveIdService;
+
     public ApplyLoanLockTasklet(FineractProperties fineractProperties, LockingService loanLockingService,
             RetrieveIdService retrieveIdService, TransactionTemplate requiresNewTransactionJdbcTemplate) {
-        super(fineractProperties, loanLockingService, retrieveIdService, requiresNewTransactionJdbcTemplate);
+        super(fineractProperties, loanLockingService, requiresNewTransactionJdbcTemplate);
+        this.retrieveIdService = retrieveIdService;
     }
 
     @Override
@@ -43,5 +48,10 @@ public class ApplyLoanLockTasklet extends ApplyCommonLockTasklet {
     @Override
     public LockOwner getLockOwner() {
         return LockOwner.LOAN_COB_CHUNK_PROCESSING;
+    }
+
+    @Override
+    protected List<Long> retrieveAccountIds(COBParameter cobParameter, boolean isCatchUp) {
+        return retrieveIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(cobParameter, isCatchUp);
     }
 }

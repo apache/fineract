@@ -32,7 +32,6 @@ import org.apache.fineract.cob.domain.LockOwner;
 import org.apache.fineract.cob.domain.LockingService;
 import org.apache.fineract.cob.exceptions.LockCannotBeAppliedException;
 import org.apache.fineract.cob.resolver.CatchUpFlagResolver;
-import org.apache.fineract.cob.service.RetrieveIdService;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -53,12 +52,16 @@ public abstract class ApplyCommonLockTasklet implements Tasklet {
 
     private final FineractProperties fineractProperties;
     private final LockingService loanLockingService;
-    private final RetrieveIdService retrieveIdService;
     private final TransactionTemplate requiresNewTransactionJdbcTemplate;
 
     public abstract String getCOBParameter();
 
     public abstract LockOwner getLockOwner();
+
+    /**
+     * Retrieves the not-yet-closed account ids in the partition bounds. Each account type supplies its own query.
+     */
+    protected abstract List<Long> retrieveAccountIds(COBParameter cobParameter, boolean isCatchUp);
 
     @Override
     @SuppressFBWarnings("SLF4J_SIGN_ONLY_FORMAT")
@@ -73,8 +76,7 @@ public abstract class ApplyCommonLockTasklet implements Tasklet {
                 || (loanCOBParameter.getMinAccountId().equals(0L) && loanCOBParameter.getMaxAccountId().equals(0L))) {
             loanIds = Collections.emptyList();
         } else {
-            loanIds = new ArrayList<>(
-                    retrieveIdService.retrieveAllNonClosedLoansByLastClosedBusinessDateAndMinAndMaxLoanId(loanCOBParameter, isCatchUp));
+            loanIds = new ArrayList<>(retrieveAccountIds(loanCOBParameter, isCatchUp));
         }
         List<List<Long>> loanIdPartitions = Lists.partition(loanIds, getInClauseParameterSizeLimit());
         List<Long> alreadyLockedIds = new ArrayList<>();

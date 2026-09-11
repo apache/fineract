@@ -18,7 +18,19 @@
  */
 package org.apache.fineract.cob.savings;
 
-public enum SavingsLockOwner {
-    SAVINGS_COB_CHUNK_PROCESSING, //
-    SAVINGS_INLINE_COB_PROCESSING; //
+import org.apache.fineract.cob.COBBusinessStepService;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.annotation.BeforeStep;
+
+public class InlineCOBSavingsItemProcessor extends AbstractSavingsItemProcessor {
+
+    public InlineCOBSavingsItemProcessor(COBBusinessStepService cobBusinessStepService) {
+        super(cobBusinessStepService);
+    }
+
+    @BeforeStep
+    public void beforeStep(StepExecution stepExecution) {
+        setExecutionContext(stepExecution.getJobExecution().getExecutionContext());
+        setBusinessDate(stepExecution);
+    }
 }

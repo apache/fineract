@@ -43,16 +43,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.PagedLocalRequestAdvancedQueryRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
+import org.apache.fineract.client.models.PostSavingsAccountsRequest;
+import org.apache.fineract.client.models.PostSavingsAccountsResponse;
+import org.apache.fineract.client.models.SavingsAccountData;
+import org.apache.fineract.client.models.SavingsAccountSubStatusEnumData;
 import org.apache.fineract.client.models.SavingsAccountTransactionsSearchResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.client.util.JSON;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.FineractClientHelper;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -124,6 +131,85 @@ public class SavingsAccountHelper {
 
     public static List<Long> getSavingsIdsByStatusId(int status) {
         return Calls.ok(FineractClientHelper.getFineractClient().legacy.getSavingsAccountsByStatus(status));
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // fineract-client (Feign) based, strongly-typed API.
+    //
+    // These overloads are the preferred replacement for the RestAssured-based methods further down (which are kept for
+    // backwards compatibility and marked @Deprecated). They take typed request models / Long ids and return the
+    // generated client response models, mirroring the style of the Feign helpers under
+    // org.apache.fineract.integrationtests.client.feign.helpers.
+    // ----------------------------------------------------------------------------------------------------------------
+
+    private static final String CLIENT_DATE_FORMAT = "dd MMMM yyyy";
+    private static final String CLIENT_LOCALE = "en";
+
+    private static FineractFeignClient feignClient() {
+        return FineractFeignClientHelper.getFineractFeignClient();
+    }
+
+    /**
+     * Submits a savings application using the typed Feign client.
+     *
+     * @param accountType
+     *            only {@link #ACCOUNT_TYPE_INDIVIDUAL} is supported by this typed overload; group accounts must keep
+     *            using the deprecated RestAssured overload.
+     */
+    public PostSavingsAccountsResponse applyForSavingsApplicationOnDate(final Long clientId, final Long savingsProductId,
+            final String accountType, final String submittedOnDate) {
+        if (accountType != null && !ACCOUNT_TYPE_INDIVIDUAL.equals(accountType)) {
+            throw new IllegalArgumentException(
+                    "The typed applyForSavingsApplicationOnDate overload only supports INDIVIDUAL accounts; got: " + accountType);
+        }
+        final PostSavingsAccountsRequest request = new PostSavingsAccountsRequest() //
+                .clientId(clientId) //
+                .productId(savingsProductId) //
+                .submittedOnDate(submittedOnDate) //
+                .dateFormat(CLIENT_DATE_FORMAT) //
+                .locale(CLIENT_LOCALE);
+        return applyForSavingsApplicationOnDate(request);
+    }
+
+    public PostSavingsAccountsResponse applyForSavingsApplicationOnDate(final PostSavingsAccountsRequest request) {
+        return FeignCalls.ok(() -> feignClient().savingsAccount().submitSavingsApplication(request));
+    }
+
+    public PostSavingsAccountsAccountIdResponse approveSavingsOnDate(final Long savingsId, final String approvalDate) {
+        final PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest() //
+                .approvedOnDate(approvalDate) //
+                .dateFormat(CLIENT_DATE_FORMAT) //
+                .locale(CLIENT_LOCALE);
+        return FeignCalls
+                .ok(() -> feignClient().savingsAccount().handleCommandsSavingsAccount(savingsId, request, APPROVE_SAVINGS_COMMAND));
+    }
+
+    public PostSavingsAccountsAccountIdResponse activateSavingsAccount(final Long savingsId, final String activationDate) {
+        final PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest() //
+                .activatedOnDate(activationDate) //
+                .dateFormat(CLIENT_DATE_FORMAT) //
+                .locale(CLIENT_LOCALE);
+        return FeignCalls
+                .ok(() -> feignClient().savingsAccount().handleCommandsSavingsAccount(savingsId, request, ACTIVATE_SAVINGS_COMMAND));
+    }
+
+    public PostSavingsAccountTransactionsResponse depositToSavingsAccount(final Long savingsId, final String amount, final String date) {
+        final PostSavingsAccountTransactionsRequest request = new PostSavingsAccountTransactionsRequest() //
+                .transactionAmount(new BigDecimal(amount)) //
+                .transactionDate(date) //
+                .dateFormat(CLIENT_DATE_FORMAT) //
+                .locale(CLIENT_LOCALE) //
+                .paymentTypeId(PAYMENT_TYPE_ID.intValue());
+        return FeignCalls.ok(() -> feignClient().savingsAccountTransactions().createSavingsAccountTransaction(savingsId, request,
+                DEPOSIT_SAVINGS_COMMAND));
+    }
+
+    public SavingsAccountData getSavingsAccountData(final Long savingsId) {
+        return FeignCalls.ok(() -> feignClient().savingsAccount().retrieveSavingsAccount(savingsId, Map.of()));
+    }
+
+    public SavingsAccountSubStatusEnumData getSavingsSubStatus(final Long savingsId) {
+        return getSavingsAccountData(savingsId).getSubStatus();
     }
 
     public RequestSpecification getRequestSpec() {
