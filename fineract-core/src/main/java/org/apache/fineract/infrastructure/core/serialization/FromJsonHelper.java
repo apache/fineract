@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.MonthDay;
+import java.time.OffsetTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -221,6 +222,10 @@ public class FromJsonHelper {
 
     public LocalDateTime extractLocalDateTimeNamed(final String parameterName, final JsonElement element) {
         return this.helperDelegator.extractLocalDateTimeNamed(parameterName, element, new HashSet<>());
+    }
+
+    public OffsetTime extractOffsetTimeNamed(final String parameterName, final JsonElement element) {
+        return this.helperDelegator.extractOffsetTimeNamed(parameterName, element, new HashSet<>());
     }
 
     public LocalTime extractLocalTimeNamed(final String parameterName, final JsonElement element, final String dateFormat,

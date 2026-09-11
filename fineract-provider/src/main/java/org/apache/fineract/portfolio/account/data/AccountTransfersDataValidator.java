@@ -47,16 +47,17 @@ public class AccountTransfersDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final AccountTransfersDetailDataValidator accountTransfersDetailDataValidator;
-    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(AccountDetailConstants.localeParamName,
-            AccountDetailConstants.dateFormatParamName, AccountDetailConstants.fromOfficeIdParamName,
-            AccountDetailConstants.fromClientIdParamName, AccountDetailConstants.fromAccountTypeParamName,
-            AccountDetailConstants.fromAccountIdParamName, AccountDetailConstants.toOfficeIdParamName,
-            AccountDetailConstants.toClientIdParamName, AccountDetailConstants.toAccountTypeParamName,
-            AccountDetailConstants.toAccountIdParamName, AccountTransfersApiConstants.transferDateParamName,
-            AccountTransfersApiConstants.transferAmountParamName, AccountTransfersApiConstants.transferDescriptionParamName,
-            PaymentDetailConstants.paymentTypeParamName, PaymentDetailConstants.accountNumberParamName,
-            PaymentDetailConstants.checkNumberParamName, PaymentDetailConstants.routingCodeParamName,
-            PaymentDetailConstants.receiptNumberParamName, PaymentDetailConstants.bankNumberParamName));
+    private static final Set<String> REQUEST_DATA_PARAMETERS = new HashSet<>(
+            Arrays.asList(AccountDetailConstants.localeParamName, AccountDetailConstants.dateFormatParamName,
+                    AccountDetailConstants.fromOfficeIdParamName, AccountDetailConstants.fromClientIdParamName,
+                    AccountDetailConstants.fromAccountTypeParamName, AccountDetailConstants.fromAccountIdParamName,
+                    AccountDetailConstants.toOfficeIdParamName, AccountDetailConstants.toClientIdParamName,
+                    AccountDetailConstants.toAccountTypeParamName, AccountDetailConstants.toAccountIdParamName,
+                    AccountTransfersApiConstants.transferDateParamName, AccountTransfersApiConstants.transferTimeParamName,
+                    AccountTransfersApiConstants.transferAmountParamName, AccountTransfersApiConstants.transferDescriptionParamName,
+                    PaymentDetailConstants.paymentTypeParamName, PaymentDetailConstants.accountNumberParamName,
+                    PaymentDetailConstants.checkNumberParamName, PaymentDetailConstants.routingCodeParamName,
+                    PaymentDetailConstants.receiptNumberParamName, PaymentDetailConstants.bankNumberParamName));
 
     @Autowired
     public AccountTransfersDataValidator(final FromJsonHelper fromApiJsonHelper,
@@ -87,6 +88,7 @@ public class AccountTransfersDataValidator {
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(AccountTransfersApiConstants.transferDateParamName,
                 element);
         baseDataValidator.reset().parameter(AccountTransfersApiConstants.transferDateParamName).value(transactionDate).notNull();
+        this.fromApiJsonHelper.extractOffsetTimeNamed(AccountTransfersApiConstants.transferTimeParamName, element);
 
         final BigDecimal transactionAmount = this.fromApiJsonHelper
                 .extractBigDecimalWithLocaleNamed(AccountTransfersApiConstants.transferAmountParamName, element);

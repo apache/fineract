@@ -26,6 +26,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetTime;
+import java.time.ZoneOffset;
 import lombok.Getter;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
@@ -69,6 +71,9 @@ public class AccountTransferTransaction extends AbstractPersistableCustom<Long> 
     @Column(name = "transaction_date")
     private LocalDate date;
 
+    @Column(name = "transaction_time")
+    private OffsetTime transactionTime;
+
     @Embedded
     private MonetaryCurrency currency;
 
@@ -89,8 +94,24 @@ public class AccountTransferTransaction extends AbstractPersistableCustom<Long> 
             final SavingsAccountTransaction withdrawal, final SavingsAccountTransaction deposit, final LocalDate transactionDate,
             final Money transactionAmount, final String description, final PaymentDetail paymentDetail) {
 
-        return new AccountTransferTransaction(accountTransferDetails, withdrawal, deposit, null, null, transactionDate, transactionAmount,
-                description, paymentDetail);
+        return savingsToSavingsTransfer(accountTransferDetails, withdrawal, deposit, transactionDate, null, transactionAmount, description,
+                paymentDetail);
+    }
+
+    public static AccountTransferTransaction savingsToSavingsTransfer(final AccountTransferDetails accountTransferDetails,
+            final SavingsAccountTransaction withdrawal, final SavingsAccountTransaction deposit, final LocalDate transactionDate,
+            final OffsetTime transactionTime, final Money transactionAmount, final String description) {
+
+        return savingsToSavingsTransfer(accountTransferDetails, withdrawal, deposit, transactionDate, transactionTime, transactionAmount,
+                description, null);
+    }
+
+    public static AccountTransferTransaction savingsToSavingsTransfer(final AccountTransferDetails accountTransferDetails,
+            final SavingsAccountTransaction withdrawal, final SavingsAccountTransaction deposit, final LocalDate transactionDate,
+            final OffsetTime transactionTime, final Money transactionAmount, final String description, final PaymentDetail paymentDetail) {
+
+        return new AccountTransferTransaction(accountTransferDetails, withdrawal, deposit, null, null, transactionDate, transactionTime,
+                transactionAmount, description, paymentDetail);
     }
 
     public static AccountTransferTransaction savingsToLoanTransfer(final AccountTransferDetails accountTransferDetails,
@@ -103,8 +124,22 @@ public class AccountTransferTransaction extends AbstractPersistableCustom<Long> 
     public static AccountTransferTransaction savingsToLoanTransfer(final AccountTransferDetails accountTransferDetails,
             final SavingsAccountTransaction withdrawal, final LoanTransaction loanRepaymentTransaction, final LocalDate transactionDate,
             final Money transactionAmount, final String description, final PaymentDetail paymentDetail) {
+        return savingsToLoanTransfer(accountTransferDetails, withdrawal, loanRepaymentTransaction, transactionDate, null, transactionAmount,
+                description, paymentDetail);
+    }
+
+    public static AccountTransferTransaction savingsToLoanTransfer(final AccountTransferDetails accountTransferDetails,
+            final SavingsAccountTransaction withdrawal, final LoanTransaction loanRepaymentTransaction, final LocalDate transactionDate,
+            final OffsetTime transactionTime, final Money transactionAmount, final String description) {
+        return savingsToLoanTransfer(accountTransferDetails, withdrawal, loanRepaymentTransaction, transactionDate, transactionTime,
+                transactionAmount, description, null);
+    }
+
+    public static AccountTransferTransaction savingsToLoanTransfer(final AccountTransferDetails accountTransferDetails,
+            final SavingsAccountTransaction withdrawal, final LoanTransaction loanRepaymentTransaction, final LocalDate transactionDate,
+            final OffsetTime transactionTime, final Money transactionAmount, final String description, final PaymentDetail paymentDetail) {
         return new AccountTransferTransaction(accountTransferDetails, withdrawal, null, loanRepaymentTransaction, null, transactionDate,
-                transactionAmount, description, paymentDetail);
+                transactionTime, transactionAmount, description, paymentDetail);
     }
 
     public static AccountTransferTransaction loanTosavingsTransfer(final AccountTransferDetails accountTransferDetails,
@@ -117,8 +152,22 @@ public class AccountTransferTransaction extends AbstractPersistableCustom<Long> 
     public static AccountTransferTransaction loanTosavingsTransfer(final AccountTransferDetails accountTransferDetails,
             final SavingsAccountTransaction deposit, final LoanTransaction loanRefundTransaction, final LocalDate transactionDate,
             final Money transactionAmount, final String description, final PaymentDetail paymentDetail) {
+        return loanTosavingsTransfer(accountTransferDetails, deposit, loanRefundTransaction, transactionDate, null, transactionAmount,
+                description, paymentDetail);
+    }
+
+    public static AccountTransferTransaction loanTosavingsTransfer(final AccountTransferDetails accountTransferDetails,
+            final SavingsAccountTransaction deposit, final LoanTransaction loanRefundTransaction, final LocalDate transactionDate,
+            final OffsetTime transactionTime, final Money transactionAmount, final String description) {
+        return loanTosavingsTransfer(accountTransferDetails, deposit, loanRefundTransaction, transactionDate, transactionTime,
+                transactionAmount, description, null);
+    }
+
+    public static AccountTransferTransaction loanTosavingsTransfer(final AccountTransferDetails accountTransferDetails,
+            final SavingsAccountTransaction deposit, final LoanTransaction loanRefundTransaction, final LocalDate transactionDate,
+            final OffsetTime transactionTime, final Money transactionAmount, final String description, final PaymentDetail paymentDetail) {
         return new AccountTransferTransaction(accountTransferDetails, null, deposit, null, loanRefundTransaction, transactionDate,
-                transactionAmount, description, paymentDetail);
+                transactionTime, transactionAmount, description, paymentDetail);
     }
 
     protected AccountTransferTransaction() {
@@ -127,8 +176,8 @@ public class AccountTransferTransaction extends AbstractPersistableCustom<Long> 
 
     private AccountTransferTransaction(final AccountTransferDetails accountTransferDetails, final SavingsAccountTransaction withdrawal,
             final SavingsAccountTransaction deposit, final LoanTransaction loanRepaymentTransaction,
-            final LoanTransaction loanRefundTransaction, final LocalDate transactionDate, final Money transactionAmount,
-            final String description, final PaymentDetail paymentDetail) {
+            final LoanTransaction loanRefundTransaction, final LocalDate transactionDate, final OffsetTime transactionTime,
+            final Money transactionAmount, final String description, final PaymentDetail paymentDetail) {
         this.accountTransferDetails = accountTransferDetails;
         this.fromLoanTransaction = loanRefundTransaction;
         this.fromSavingsTransaction = withdrawal;
@@ -136,6 +185,7 @@ public class AccountTransferTransaction extends AbstractPersistableCustom<Long> 
         this.toLoanTransaction = loanRepaymentTransaction;
         this.paymentDetail = paymentDetail;
         this.date = transactionDate;
+        this.transactionTime = transactionTime == null ? null : transactionTime.withOffsetSameInstant(ZoneOffset.UTC);
         this.currency = transactionAmount.getCurrency();
         this.amount = transactionAmount.getAmountDefaultedToNullIfZero();
         this.description = description;
@@ -188,6 +238,6 @@ public class AccountTransferTransaction extends AbstractPersistableCustom<Long> 
             LoanTransaction disburseTransaction, LoanTransaction repaymentTransaction, LocalDate transactionDate,
             Money transactionMonetaryAmount, String description, PaymentDetail paymentDetail) {
         return new AccountTransferTransaction(accountTransferDetails, null, null, repaymentTransaction, disburseTransaction,
-                transactionDate, transactionMonetaryAmount, description, paymentDetail);
+                transactionDate, null, transactionMonetaryAmount, description, paymentDetail);
     }
 }

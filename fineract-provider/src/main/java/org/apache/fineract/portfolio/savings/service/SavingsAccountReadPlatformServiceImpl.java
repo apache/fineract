@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.OffsetTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1111,16 +1112,16 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         protected static String buildSelect() {
             return "tr.id as transactionId, tr.transaction_type_enum as transactionType, "
-                    + "tr.transaction_date as transactionDate, tr.external_id as externalId, tr.amount as transactionAmount, "
+                    + "tr.transaction_date as transactionDate, tr.transaction_time as transactionTime, tr.external_id as externalId, tr.amount as transactionAmount, "
                     + "tr.release_id_of_hold_amount as releaseTransactionId, tr.reason_for_block as reasonForBlock, "
                     + "tr.submitted_on_date as submittedOnDate, au.username as submittedByUsername, nt.note as transactionNote, "
                     + "tr.running_balance_derived as runningBalance, tr.is_reversed as reversed, "
                     + "tr.is_reversal as isReversal, tr.original_transaction_id as originalTransactionId, tr.is_lien_transaction as lienTransaction, "
                     + "fromtran.id as fromTransferId, fromtran.is_reversed as fromTransferReversed, "
-                    + "fromtran.transaction_date as fromTransferDate, fromtran.amount as fromTransferAmount, "
+                    + "fromtran.transaction_date as fromTransferDate, fromtran.transaction_time as fromTransferTime, fromtran.amount as fromTransferAmount, "
                     + "fromtran.description as fromTransferDescription, "
                     + "totran.id as toTransferId, totran.is_reversed as toTransferReversed, "
-                    + "totran.transaction_date as toTransferDate, totran.amount as toTransferAmount, "
+                    + "totran.transaction_date as toTransferDate, totran.transaction_time as toTransferTime, totran.amount as toTransferAmount, "
                     + "totran.description as toTransferDescription, sa.id as savingsId, sa.account_no as accountNo, "
                     + "pd.payment_type_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, "
                     + "pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, "
@@ -1158,6 +1159,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations.transactionType(transactionTypeInt);
 
             final LocalDate date = JdbcSupport.getLocalDate(rs, "transactionDate");
+            final OffsetTime transactionTime = JdbcSupport.getOffsetTime(rs, "transactionTime");
             final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
             final ExternalId externalId = ExternalIdFactory.produce(rs.getString("externalId"));
             final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "transactionAmount");
@@ -1204,26 +1206,29 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final Long toTransferId = JdbcSupport.getLong(rs, "toTransferId");
             if (fromTransferId != null) {
                 final LocalDate fromTransferDate = JdbcSupport.getLocalDate(rs, "fromTransferDate");
+                final OffsetTime fromTransferTime = JdbcSupport.getOffsetTime(rs, "fromTransferTime");
                 final BigDecimal fromTransferAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "fromTransferAmount");
                 final boolean fromTransferReversed = rs.getBoolean("fromTransferReversed");
                 final String fromTransferDescription = rs.getString("fromTransferDescription");
 
                 transfer = AccountTransferData.transferBasicDetails(fromTransferId, currency, fromTransferAmount, fromTransferDate,
-                        fromTransferDescription, fromTransferReversed);
+                        fromTransferTime, fromTransferDescription, fromTransferReversed);
             } else if (toTransferId != null) {
                 final LocalDate toTransferDate = JdbcSupport.getLocalDate(rs, "toTransferDate");
+                final OffsetTime toTransferTime = JdbcSupport.getOffsetTime(rs, "toTransferTime");
                 final BigDecimal toTransferAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "toTransferAmount");
                 final boolean toTransferReversed = rs.getBoolean("toTransferReversed");
                 final String toTransferDescription = rs.getString("toTransferDescription");
 
                 transfer = AccountTransferData.transferBasicDetails(toTransferId, currency, toTransferAmount, toTransferDate,
-                        toTransferDescription, toTransferReversed);
+                        toTransferTime, toTransferDescription, toTransferReversed);
             }
             final String submittedByUsername = rs.getString("submittedByUsername");
             final String note = rs.getString("transactionNote");
             return SavingsAccountTransactionData.create(id, transactionType, paymentDetailData, savingsId, accountNo, externalId, date,
                     currency, amount, outstandingChargeAmount, runningBalance, reversed, transfer, submittedOnDate, postInterestAsOn,
-                    submittedByUsername, note, isReversal, originalTransactionId, lienTransaction, releaseTransactionId, reasonForBlock);
+                    submittedByUsername, note, isReversal, originalTransactionId, lienTransaction, releaseTransactionId, reasonForBlock)
+                    .withTransactionTime(transactionTime);
         }
     }
 
