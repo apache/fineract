@@ -37,6 +37,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapita
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionData;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionRelation;
@@ -126,65 +127,87 @@ public class WorkingCapitalLoanDiscountFeeAmortizationServiceImpl implements Wor
 
     @Override
     @Transactional
-    public void processFinalDiscountFeeAmortizationOnChargeOff(final WorkingCapitalLoan loan,
-            final WorkingCapitalLoanTransaction chargeOffTransaction) {
-        // The amortization transaction (and the balance it feeds) is tracked regardless of accounting rule, matching
-        // the periodic amortization path; only the journal entry posting below is conditional on the accounting rule.
-        final BigDecimal unrealizedAmount = loan.getBalance() != null ? loan.getBalance().getUnrealizedIncomeFromDiscountFee()
-                : BigDecimal.ZERO;
-        if (!MathUtil.isGreaterThanZero(unrealizedAmount)) {
+    public void processFinalDiscountFeeAmortization(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction relatedTransaction) {
+        // Derive the correction from posted amortization transactions versus the net discount pool.
+        final WorkingCapitalLoanBalance balance = loan.getBalance();
+        final BigDecimal netDiscount = balance == null ? BigDecimal.ZERO
+                : MathUtil.subtract(MathUtil.nullToZero(balance.getTotalDiscountFee()),
+                        MathUtil.nullToZero(balance.getTotalDiscountFeeAdjustment()));
+        final BigDecimal alreadyPosted = queryNetAmortized(loan.getId());
+        final BigDecimal delta = MathUtil.subtract(netDiscount, alreadyPosted);
+        if (MathUtil.isZero(delta)) {
             log.debug("Skipping final discount fee amortization for WC loan [{}] - nothing left to recognize", loan.getId());
             return;
         }
 
-        final WorkingCapitalLoanTransaction amortizationTxn = WorkingCapitalLoanTransaction.discountFeeAmortization(loan, unrealizedAmount,
-                chargeOffTransaction.getTransactionDate(), externalIdFactory.create());
-        linkToChargeOffTransaction(amortizationTxn, chargeOffTransaction);
-        transactionRepository.saveAndFlush(amortizationTxn);
-        businessEventNotifierService.notifyPostBusinessEvent(
-                new WorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEvent(amortizationTxn, loan.getId()));
-        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntriesForDiscountFeeAmortization(loan, amortizationTxn, true);
+        final LocalDate transactionDate = relatedTransaction.getTransactionDate();
+        final boolean accountingEnabled = loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization();
+        if (MathUtil.isGreaterThanZero(delta)) {
+            final WorkingCapitalLoanTransaction amortizationTxn = WorkingCapitalLoanTransaction.discountFeeAmortization(loan, delta,
+                    transactionDate, externalIdFactory.create());
+            linkToRelatedTransaction(amortizationTxn, relatedTransaction);
+            transactionRepository.saveAndFlush(amortizationTxn);
+            businessEventNotifierService.notifyPostBusinessEvent(
+                    new WorkingCapitalLoanDiscountFeeAmortizationTransactionBusinessEvent(amortizationTxn, loan.getId()));
+            if (accountingEnabled) {
+                accountingProcessor.postJournalEntriesForDiscountFeeAmortization(loan, amortizationTxn, true);
+            }
+        } else {
+            final BigDecimal adjustmentAmount = delta.negate();
+            final WorkingCapitalLoanTransaction adjustmentTxn = WorkingCapitalLoanTransaction.discountFeeAmortizationAdjustment(loan,
+                    adjustmentAmount, transactionDate, externalIdFactory.create());
+            linkToRelatedTransaction(adjustmentTxn, relatedTransaction);
+            transactionRepository.saveAndFlush(adjustmentTxn);
+            businessEventNotifierService.notifyPostBusinessEvent(
+                    new WorkingCapitalLoanDiscountFeeAmortizationAdjustmentTransactionBusinessEvent(adjustmentTxn, loan.getId()));
+            if (accountingEnabled) {
+                accountingProcessor.postJournalEntriesForDiscountFeeAmortizationAdjustment(loan, adjustmentTxn, true);
+            }
         }
 
         recalculateRealizedIncome(loan);
 
-        log.debug("Posted final discount fee amortization of {} for WC loan [{}] on charge-off", unrealizedAmount, loan.getId());
+        log.debug("Posted final discount fee correction of {} for WC loan [{}]", delta, loan.getId());
     }
 
     @Override
     @Transactional
-    public void undoDiscountFeeAmortizationOnChargeOff(final WorkingCapitalLoan loan,
-            final WorkingCapitalLoanTransaction chargeOffTransaction) {
-        final var linkedAmortizations = transactionRelationRepository
-                .findAllByToTransactionAndFromTransactionReversedAndFromTransactionTransactionType(chargeOffTransaction, false,
-                        LoanTransactionType.DISCOUNT_FEE_AMORTIZATION);
-        if (linkedAmortizations.isEmpty()) {
+    public void undoFinalDiscountFeeAmortization(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction relatedTransaction) {
+        // A terminal event may have linked either a amortization or a amortization adjustment.
+        undoLinkedFinalCorrections(loan, relatedTransaction, LoanTransactionType.DISCOUNT_FEE_AMORTIZATION);
+        undoLinkedFinalCorrections(loan, relatedTransaction, LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT);
+    }
+
+    private void undoLinkedFinalCorrections(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction relatedTransaction,
+            final LoanTransactionType transactionType) {
+        final var linked = transactionRelationRepository.findAllByToTransactionAndFromTransactionReversedAndFromTransactionTransactionType(
+                relatedTransaction, false, transactionType);
+        if (linked.isEmpty()) {
             return;
         }
 
-        for (final WorkingCapitalLoanTransactionRelation relation : linkedAmortizations) {
-            final WorkingCapitalLoanTransaction amortizationTxn = relation.getFromTransaction();
-            amortizationTxn.setReversed(true);
-            amortizationTxn.setReversedOnDate(DateUtils.getBusinessLocalDate());
-            transactionRepository.saveAndFlush(amortizationTxn);
+        for (final WorkingCapitalLoanTransactionRelation relation : linked) {
+            final WorkingCapitalLoanTransaction correctionTxn = relation.getFromTransaction();
+            correctionTxn.setReversed(true);
+            correctionTxn.setReversedOnDate(DateUtils.getBusinessLocalDate());
+            transactionRepository.saveAndFlush(correctionTxn);
             if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-                accountingProcessor.postReversalJournalEntries(loan, amortizationTxn);
+                accountingProcessor.postReversalJournalEntries(loan, correctionTxn);
             }
-            final WorkingCapitalLoanTransactionData reversedTxnData = transactionDataFactory.create(amortizationTxn);
+            final WorkingCapitalLoanTransactionData reversedTxnData = transactionDataFactory.create(correctionTxn);
             businessEventNotifierService.notifyPostBusinessEvent(new WorkingCapitalLoanAdjustTransactionBusinessEvent(
                     WorkingCapitalLoanAdjustTransactionBusinessEvent.Data.reversal(reversedTxnData), loan.getId()));
         }
 
         recalculateRealizedIncome(loan);
 
-        log.debug("Reversed final discount fee amortization for WC loan [{}] on undo charge-off", loan.getId());
+        log.debug("Reversed final discount fee {} for WC loan [{}]", transactionType, loan.getId());
     }
 
-    private void linkToChargeOffTransaction(final WorkingCapitalLoanTransaction amortizationTransaction,
-            final WorkingCapitalLoanTransaction chargeOffTransaction) {
-        amortizationTransaction.getLoanTransactionRelations().add(new WorkingCapitalLoanTransactionRelation(amortizationTransaction,
-                chargeOffTransaction, LoanTransactionRelationTypeEnum.RELATED));
+    private void linkToRelatedTransaction(final WorkingCapitalLoanTransaction correctionTransaction,
+            final WorkingCapitalLoanTransaction relatedTransaction) {
+        correctionTransaction.getLoanTransactionRelations().add(new WorkingCapitalLoanTransactionRelation(correctionTransaction,
+                relatedTransaction, LoanTransactionRelationTypeEnum.RELATED));
     }
 
     @Override
