@@ -36,10 +36,6 @@ public class InteropIdentifierData {
 
     private final String subIdOrType;
 
-    protected InteropIdentifierData(@NotNull InteropIdentifierType idType, @NotNull String idValue) {
-        this(idType, idValue, null);
-    }
-
     public static InteropIdentifierData build(InteropIdentifier identifier) {
         return new InteropIdentifierData(identifier.getType(), identifier.getValue(), identifier.getSubType());
     }
