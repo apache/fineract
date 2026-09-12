@@ -153,6 +153,24 @@ public class LoanRepaymentStepDef extends AbstractStepDef {
         eventCheckHelper.loanBalanceChangedEventCheck(loanId);
     }
 
+    @Then("Created user cannot make {string} repayment on {string} with {double} EUR transaction amount")
+    public void createdUserCannotMakeRepayment(String repaymentType, String transactionDate, double transactionAmount) {
+        PostLoansResponse loanResponse = testContext().get(TestContextKey.LOAN_CREATE_RESPONSE);
+        long loanId = loanResponse.getLoanId();
+        DefaultPaymentType paymentType = DefaultPaymentType.valueOf(repaymentType);
+        long paymentTypeValue = paymentTypeResolver.resolve(paymentType);
+        PostLoansLoanIdTransactionsRequest repaymentRequest = loanRequestFactory.defaultRepaymentRequest().transactionDate(transactionDate)
+                .transactionAmount(transactionAmount).paymentTypeId(paymentTypeValue).dateFormat(DATE_FORMAT).locale(DEFAULT_LOCALE);
+
+        String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
+        String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
+        FineractFeignClient userClient = fineractClientConfiguration.fineractFeignClientForUser(username, password);
+
+        CallFailedRuntimeException exception = fail(() -> userClient.loanTransactions().handleCommandsLoanTransaction(loanId,
+                repaymentRequest, Map.<String, Object>of("command", "repayment")));
+        assertThat(exception.getStatus()).isIn(403, 404);
+    }
+
     @And("Customer makes externalID controlled {string} repayment on {string} with {double} EUR transaction amount")
     public void makeRepaymentByExternalId(String repaymentType, String transactionDate, double transactionAmount) throws IOException {
         eventStore.reset();
