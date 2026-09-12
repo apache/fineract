@@ -2162,6 +2162,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private void checkClientOrGroupActive(final Loan loan) {
+        validateLoanAccess(loan);
         final Client client = loan.client();
         if (client != null && client.isNotActive()) {
             throw new ClientNotActiveException(client.getId());
@@ -2170,6 +2171,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (group != null && group.isNotActive()) {
             throw new GroupNotActiveException(group.getId());
         }
+    }
+
+    private void validateLoanAccess(final Loan loan) {
+        this.context.validateAccessRights(loan.getOffice().getHierarchy());
     }
 
     @Override

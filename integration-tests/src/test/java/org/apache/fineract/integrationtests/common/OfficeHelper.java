@@ -40,8 +40,12 @@ public class OfficeHelper {
     }
 
     public PostOfficesResponse createOffice(final LocalDate openingDate) {
+        return createOffice(HEAD_OFFICE_ID, openingDate);
+    }
+
+    public PostOfficesResponse createOffice(final Long parentId, final LocalDate openingDate) {
         PostOfficesRequest request = new PostOfficesRequest()//
-                .parentId(HEAD_OFFICE_ID)//
+                .parentId(parentId)//
                 .name(Utils.uniqueRandomStringGenerator("O_", 9))//
                 .openingDate(openingDate)//
                 .dateFormat("yyyy-MM-dd")//
