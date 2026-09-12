@@ -22,7 +22,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -285,11 +287,12 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
         }
         final EffectiveBreachRescheduleParams params = resolveEffectiveRescheduleParams(loan.getId(), breachOpt.get());
         final List<WorkingCapitalLoanPausePeriod> effectivePauses = findEffectivePauses(loan.getId());
+        final List<LocalDate> restartResetDates = activeRestartResetDates(loan.getId());
         final LocalDate businessDate = DateUtils.getBusinessLocalDate();
         LocalDate fromDate = periods.getFirst().getFromDate();
         for (final WorkingCapitalLoanBreachSchedule period : periods) {
             period.setFromDate(fromDate);
-            period.setToDate(naturalToDate(loan, period.getPeriodNumber(), fromDate, params));
+            period.setToDate(baseToDate(loan, period.getPeriodNumber(), fromDate, params, restartResetDates));
             applyRecordedPauses(period, effectivePauses);
             recomputeBreach(period, businessDate);
             fromDate = period.getToDate().plusDays(1);
@@ -474,6 +477,37 @@ public class WorkingCapitalLoanBreachScheduleServiceImpl implements WorkingCapit
         final int graceDays = periodNumber == 1 ? getBreachGraceDays(loan) : 0;
         return WorkingCapitalLoanBreachScheduleEvaluationUtils.calculateToDate(fromDate, params.frequency(), params.frequencyType())
                 .plusDays(graceDays);
+    }
+
+    /**
+     * End date of a period before the pauses are replayed on top of it: the natural end, closed one day early when a
+     * reset that restarted the schedule falls inside the period.
+     *
+     * A restart reset cuts its period short and starts a new one on the reset date, and that cut is not recoverable
+     * from the frequency alone. Rebuilding the geometry from the natural lengths only would stretch the cut period back
+     * to full length and swallow the period the reset started, which also moves the reset flag onto the merged period
+     * and un-evaluates a breach that was already settled.
+     */
+    private LocalDate baseToDate(final WorkingCapitalLoan loan, final int periodNumber, final LocalDate fromDate,
+            final EffectiveBreachRescheduleParams params, final List<LocalDate> restartResetDates) {
+        final LocalDate naturalToDate = naturalToDate(loan, periodNumber, fromDate, params);
+        return restartResetDates.stream() //
+                .filter(resetDate -> resetDate.isAfter(fromDate) && !resetDate.isAfter(naturalToDate)) //
+                .min(Comparator.naturalOrder()) //
+                .map(resetDate -> resetDate.minusDays(1)) //
+                .orElse(naturalToDate);
+    }
+
+    /**
+     * Start dates of the active resets that restarted the schedule. A reset that only flags its period leaves the
+     * geometry untouched and is therefore not a cut.
+     */
+    private List<LocalDate> activeRestartResetDates(final Long loanId) {
+        return activeBreachResetResolver.activeResets(loanId).stream() //
+                .filter(reset -> Boolean.TRUE.equals(reset.getRestartPeriodFromResetDate())) //
+                .map(WorkingCapitalLoanBreachAction::getStartDate) //
+                .filter(Objects::nonNull) //
+                .toList();
     }
 
     private Integer getBreachGraceDays(final WorkingCapitalLoan loan) {

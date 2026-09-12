@@ -37,6 +37,8 @@ import org.junit.jupiter.api.Test;
 public class FeignWorkingCapitalLoanBreachResetUndoTest extends FeignWorkingCapitalTestBase {
 
     private static final int BREACH_FREQUENCY = 60;
+    // Short frequency used by the tests that need several periods inside a couple of weeks.
+    private static final int SHORT_BREACH_FREQUENCY = 6;
     private static final String BREACH_FREQUENCY_TYPE = "DAYS";
     private static final String BREACH_AMOUNT_CALCULATION_TYPE = "PERCENTAGE";
     private static final BigDecimal BREACH_AMOUNT_PERCENT = BigDecimal.valueOf(50);
@@ -401,8 +403,8 @@ public class FeignWorkingCapitalLoanBreachResetUndoTest extends FeignWorkingCapi
     }
 
     @Test
-    @DisplayName("A pause recorded after a restart reset keeps the reset flag on the period holding the reset date")
-    void pauseAfterRestartReset_keepsTheFlagOnThePeriodHoldingTheResetDate() {
+    @DisplayName("A pause recorded after a restart reset keeps the split and extends only the restarted period")
+    void pauseAfterRestartReset_keepsTheSplitAndExtendsOnlyTheRestartedPeriod() {
         runAt("2026-01-01", () -> {
             final Long loanId = setupCommonBreachLoan();
 
@@ -413,19 +415,56 @@ public class FeignWorkingCapitalLoanBreachResetUndoTest extends FeignWorkingCapi
             advanceBusinessDateWithCob(loanId, "2026-04-15", "2026-04-20");
             createBreachPause(loanId, "20 April 2026", "29 April 2026");
 
+            // The reset closed period 2 on 14 Apr and started period 3 on the reset date. The pause must leave both
+            // boundaries alone and only push the end of the restarted period out by its 10 days.
             validateBreachSchedule(getBreachSchedule(loanId), //
                     period(1, "2026-01-01", "2026-03-01", 60, "400.00", "100.00", true, false), //
-                    period(2, "2026-03-02", "2026-05-10", 70, "400.00", "400.00", null, true), //
-                    period(3, "2026-05-11", "2026-07-09", 60, "400.00", "400.00", null, false));
+                    period(2, "2026-03-02", "2026-04-14", 44, "400.00", "400.00", true, false), //
+                    period(3, "2026-04-15", "2026-06-23", 70, "400.00", "400.00", null, true));
             validateBreachPastDueAmount(getBreachPastDueAmount(loanId), "0");
 
             advanceBusinessDateWithCob(loanId, "2026-04-20", "2026-06-01");
 
+            // The pause bought time on the restarted period: it has not expired yet, so nothing new is past due and
+            // the two periods the reset had already settled keep their breach flags.
             validateBreachSchedule(getBreachSchedule(loanId), //
                     period(1, "2026-01-01", "2026-03-01", 60, "400.00", "100.00", true, false), //
-                    period(2, "2026-03-02", "2026-05-10", 70, "400.00", "400.00", true, true), //
-                    period(3, "2026-05-11", "2026-07-09", 60, "400.00", "400.00", null, false));
-            validateBreachPastDueAmount(getBreachPastDueAmount(loanId), "400");
+                    period(2, "2026-03-02", "2026-04-14", 44, "400.00", "400.00", true, false), //
+                    period(3, "2026-04-15", "2026-06-23", 70, "400.00", "400.00", null, true));
+            validateBreachPastDueAmount(getBreachPastDueAmount(loanId), "0");
+        });
+    }
+
+    @Test
+    @DisplayName("A pause starting on the reset date itself extends the restarted period and leaves the earlier ones settled")
+    void pauseOnTheResetDate_extendsOnlyTheRestartedPeriod() {
+        runAt("2026-01-01", () -> {
+            final Long clientId = createClient("01 January 2026");
+            final Long productId = createWcProductWithBreachConfig(SHORT_BREACH_FREQUENCY, BREACH_FREQUENCY_TYPE,
+                    BREACH_AMOUNT_CALCULATION_TYPE, BREACH_AMOUNT_PERCENT, BREACH_GRACE_DAYS);
+            final Long loanId = createApproveAndDisburseWcLoan(clientId, productId, PRINCIPAL, "01 January 2026");
+            runInlineWcCob(loanId);
+
+            advanceBusinessDateWithCob(loanId, "2026-01-01", "2026-01-08");
+            advanceBusinessDateWithCob(loanId, "2026-01-08", "2026-01-12");
+            createBreachResetWithRestartPeriod(loanId);
+
+            validateBreachSchedule(getBreachSchedule(loanId), //
+                    period(1, "2026-01-01", "2026-01-06", 6, "400.00", "400.00", true, false), //
+                    period(2, "2026-01-07", "2026-01-11", 5, "400.00", "400.00", true, false), //
+                    period(3, "2026-01-12", "2026-01-17", 6, "400.00", "400.00", null, true));
+
+            createBreachPause(loanId, "12 January 2026", "13 January 2026");
+
+            // The pause shares its start date with the restarted period, so only the end date moves.
+            validateBreachSchedule(getBreachSchedule(loanId), //
+                    period(1, "2026-01-01", "2026-01-06", 6, "400.00", "400.00", true, false), //
+                    period(2, "2026-01-07", "2026-01-11", 5, "400.00", "400.00", true, false), //
+                    period(3, "2026-01-12", "2026-01-19", 8, "400.00", "400.00", null, true));
+            validateBreachPastDueAmount(getBreachPastDueAmount(loanId), "0");
+            validateBreachActions(getBreachActions(loanId), //
+                    action("RESET", "2026-01-12"), //
+                    action("PAUSE", "2026-01-12"));
         });
     }
 

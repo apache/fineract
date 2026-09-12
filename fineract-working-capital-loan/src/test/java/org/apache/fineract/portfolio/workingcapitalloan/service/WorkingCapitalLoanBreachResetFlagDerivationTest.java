@@ -209,9 +209,13 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
         return sb.toString();
     }
 
-    /** The pause recalculation still re-dates every period, so the flag must follow the reset date to its new row. */
+    /**
+     * The pause recalculation rebuilds the geometry from the natural lengths, so it has to reproduce the cut the
+     * restart reset made. Otherwise period 2 stretches back to its full 60 days, swallows the restarted period and
+     * drags the reset flag with it.
+     */
     @Test
-    void pauseAfterRestartReset_keepsTheFlagOnThePeriodHoldingTheResetDate() {
+    void pauseAfterRestartReset_keepsTheSplitAndExtendsOnlyTheRestartedPeriod() {
         givenBreachConfig(60);
         businessDate(LocalDate.of(2026, 7, 1));
         final LocalDate resetDate = LocalDate.of(2026, 4, 15);
@@ -225,11 +229,15 @@ class WorkingCapitalLoanBreachResetFlagDerivationTest {
         final String state = dump();
         final WorkingCapitalLoanBreachSchedule holdingReset = periodContaining(resetDate);
         assertAll(state, //
-                () -> assertEquals(2, holdingReset.getPeriodNumber(), "the re-dated period 2 holds the reset date"),
+                () -> assertEquals(3, holdingReset.getPeriodNumber(), "the restarted period 3 still holds the reset date"),
                 () -> assertTrue(holdingReset.isReset(), "period holding the reset date is flagged"),
                 () -> assertEquals(1, sorted().stream().filter(WorkingCapitalLoanBreachSchedule::isReset).count(), "one flag"),
+                () -> assertEquals(LocalDate.of(2026, 4, 14), sorted().get(1).getToDate(),
+                        "the cut the reset made on period 2 survives the pause"),
+                () -> assertEquals(LocalDate.of(2026, 6, 23), sorted().get(2).getToDate(),
+                        "only the restarted period absorbs the 10 paused days"),
                 () -> assertEquals(0, BigDecimal.valueOf(100).compareTo(balance.getBreachPastDueAmount()),
-                        "past due anchored on the flagged period 2, ended unpaid on 05-10"));
+                        "past due anchored on the restarted period 3, ended unpaid on 06-23"));
     }
 
     /**
