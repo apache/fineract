@@ -590,7 +590,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         boolean isVertical = scheduleModel.loanProductRelatedDetail()
                 .getLoanScheduleProcessingType() == LoanScheduleProcessingType.VERTICAL;
 
-        adjustEmiIfRequired(repaymentPeriod, recalculatedScheduleModelTillDate, targetDate, notFullyRepaidRepaymentPeriodCount);
+        adjustEmiIfRequired(repaymentPeriod, recalculatedScheduleModelTillDate, targetDate, notFullyRepaidRepaymentPeriodCount,
+                scheduleModel);
 
         Money duePrincipal = isVertical && notFullyRepaidRepaymentPeriodCount > 1
                 ? repaymentPeriod.getEmiPlusCreditedAmountsPlusFutureUnrecognizedInterest()
@@ -613,9 +614,21 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
     private void adjustEmiIfRequired(RepaymentPeriod repaymentPeriod,
             ProgressiveLoanInterestScheduleModel recalculatedScheduleModelTillDate, LocalDate targetDate,
-            long notFullyRepaidRepaymentPeriodCount) {
+            long notFullyRepaidRepaymentPeriodCount, ProgressiveLoanInterestScheduleModel sourceScheduleModel) {
 
         if (targetDate.isAfter(repaymentPeriod.getFromDate())) {
+            return;
+        }
+
+        if (repaymentPeriod.isReAged()) {
+            // A re-aged period carries a contractual EMI: its amortization and payable interest were frozen at
+            // re-age time, and the last re-aged period may hold a remainder-cent adjustment on top of the original
+            // EMI. Re-deriving it from originalEmi drops that cent and leaves the due amounts one cent below what
+            // the repayment schedule installment expects, which starves the horizontal allocation loop (it pays the
+            // recalculated amount, the model sync restores the outstanding cent, and the installment is re-selected
+            // forever with nothing left to allocate). Restore the EMI from the source model instead.
+            sourceScheduleModel.findRepaymentPeriodByFromAndDueDate(repaymentPeriod.getFromDate(), repaymentPeriod.getDueDate())
+                    .ifPresent(sourcePeriod -> repaymentPeriod.setEmi(sourcePeriod.getEmi()));
             return;
         }
 
@@ -1253,7 +1266,12 @@ public final class ProgressiveEMICalculator implements EMICalculator {
             if (rp.getOutstandingPrincipal().isGreaterThan(totalDuePaidDiff)) {
                 Money delta = rp.getOutstandingPrincipal().minus(totalDuePaidDiff);
                 rp.setEmi(rp.getEmi().minus(delta));
-                Money minimumEMI = MathUtil.plus(rp.getPaidInterest(), rp.getPaidPrincipal());
+                // The EMI never contains the credited amounts (a chargeback is carried as creditedPrincipal on the
+                // period and added on top of the EMI by getDuePrincipal), so the floor must be the paid amount net of
+                // them. Flooring at the gross paid amount bakes an already paid chargeback into the EMI and then
+                // getDuePrincipal adds it a second time, leaving the installment short by the charged back amount.
+                Money minimumEMI = MathUtil.negativeToZero(
+                        MathUtil.plus(rp.getPaidInterest(), rp.getPaidPrincipal()).minus(rp.getTotalCreditedAmount(), scheduleModel.mc()));
                 if (rp.getEmi().isLessThan(minimumEMI)) {
                     rp.setEmi(minimumEMI);
                 }

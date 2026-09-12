@@ -5587,4 +5587,75 @@ class ProgressiveEMICalculatorTest {
                 "Expected LoanTransactionProcessingException when getPeriodInterestTillDate is "
                         + "called with an 'additional' installment's dates");
     }
+
+    @Test
+    public void test_getDueAmounts_reAgedFixedInterestModel_futurePeriodKeepsItsDues() throws Exception {
+        // given: the persisted interest schedule model of a loan that was re-aged with
+        // EQUAL_AMORTIZATION_PAYABLE_INTEREST (rate frozen to zero, interest carried as fixedInterest per re-aged
+        // period) and then received an additional disbursement. Reduced from the persisted model of a live
+        // reproduction of the MIR-after-re-age infinite allocation loop: opener, re-age holder, one mid
+        // re-aged period and the last re-aged period, which carries the remainder-cent EMI adjustment
+        // (emi 45.42 vs originalEmi 45.41).
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(BigDecimal.valueOf(9.99));
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+
+        // Inlined as a text block: JSON cannot carry the ASF license header, so it must not live in a
+        // standalone resource file. Kept verbatim so the production Gson parser rebuilds the exact state.
+        final String json = """
+                {"repaymentPeriods":[{"fromDate":"2026-04-21","dueDate":"2026-05-21","interestPeriods":[{"fromDate":"2026-04-21",
+                "dueDate":"2026-04-21","rateFactor":0.0,"rateFactorTillPeriodDueDate":0.008325,"creditedPrincipal":0.0,"creditedInterest":0.0,
+                "disbursementAmount":300.0,"balanceCorrectionAmount":0.0,"outstandingLoanBalance":0.0,"capitalizedIncomePrincipal":0.0,
+                "isPaused":false},{"fromDate":"2026-04-21","dueDate":"2026-05-21","rateFactor":0.008325,"rateFactorTillPeriodDueDate":0.008325,
+                "creditedPrincipal":0.0,"creditedInterest":0.0,"disbursementAmount":0.0,"balanceCorrectionAmount":99.17,"outstandingLoanBalance":300.0,
+                "capitalizedIncomePrincipal":0.0,"isPaused":false}],"emi":0.0,"originalEmi":101.67,"paidPrincipal":0.0,"paidInterest":0.0,
+                "futureUnrecognizedInterest":0.0,"isInterestMovedUpward":false,"interestPaymentGrace":false,"totalDisbursedAmount":300.0,
+                "creditedPrincipalMovedDueReAge":0.0,"creditedInterestMovedDueReAge":0.0,"isInterestMovedDownward":true,"reAged":false,
+                "reAgedEarlyRepaymentHolder":false,"fixedInterest":0.0},{"fromDate":"2026-05-21","dueDate":"2026-06-10","interestPeriods":[{"fromDate":"2026-05-21",
+                "dueDate":"2026-06-10","rateFactor":0.008325,"rateFactorTillPeriodDueDate":0.005370967741935484,"creditedPrincipal":0.0,
+                "creditedInterest":0.0,"disbursementAmount":150.0,"balanceCorrectionAmount":-99.17,"outstandingLoanBalance":399.17,
+                "capitalizedIncomePrincipal":0.0,"isPaused":false},{"fromDate":"2026-06-10","dueDate":"2026-06-10","rateFactor":0.0,
+                "rateFactorTillPeriodDueDate":0.0,"creditedPrincipal":0.0,"creditedInterest":0.0,"disbursementAmount":0.0,"balanceCorrectionAmount":0.0,
+                "outstandingLoanBalance":450.0,"capitalizedIncomePrincipal":0.0,"isPaused":false}],"emi":0.0,"originalEmi":101.67,
+                "paidPrincipal":0.0,"paidInterest":0.0,"futureUnrecognizedInterest":0.0,"isInterestMovedUpward":false,"interestPaymentGrace":false,
+                "totalDisbursedAmount":300.0,"creditedPrincipalMovedDueReAge":0.0,"creditedInterestMovedDueReAge":0.0,"isInterestMovedDownward":true,
+                "reAged":true,"reAgedEarlyRepaymentHolder":true,"fixedInterest":0.0},{"fromDate":"2026-06-10","dueDate":"2026-07-10",
+                "interestPeriods":[{"fromDate":"2026-06-10","dueDate":"2026-07-10","rateFactor":0.0,"rateFactorTillPeriodDueDate":0.0,
+                "creditedPrincipal":0.0,"creditedInterest":0.0,"disbursementAmount":0.0,"balanceCorrectionAmount":0.0,"outstandingLoanBalance":450.0,
+                "capitalizedIncomePrincipal":0.0,"isPaused":false}],"emi":45.41,"originalEmi":45.41,"paidPrincipal":0.0,"paidInterest":0.0,
+                "futureUnrecognizedInterest":0.0,"isInterestMovedUpward":false,"interestPaymentGrace":false,"totalDisbursedAmount":450.0,
+                "totalCapitalizedIncomeAmount":0.0,"creditedInterestMovedDueReAge":0.0,"isInterestMovedDownward":false,"reAged":true,
+                "reAgedEarlyRepaymentHolder":false,"fixedInterest":0.41},{"fromDate":"2026-07-10","dueDate":"2026-08-10","interestPeriods":[{"fromDate":"2026-07-10",
+                "dueDate":"2026-08-10","rateFactor":0.0,"rateFactorTillPeriodDueDate":0.0,"creditedPrincipal":0.0,"creditedInterest":0.0,
+                "disbursementAmount":0.0,"balanceCorrectionAmount":0.0,"outstandingLoanBalance":405.0,"capitalizedIncomePrincipal":0.0,
+                "isPaused":false}],"emi":45.42,"originalEmi":45.41,"paidPrincipal":0.0,"paidInterest":0.0,"futureUnrecognizedInterest":0.0,
+                "isInterestMovedUpward":false,"interestPaymentGrace":false,"totalDisbursedAmount":450.0,"totalCapitalizedIncomeAmount":0.0,
+                "creditedInterestMovedDueReAge":0.0,"isInterestMovedDownward":false,"reAged":true,"reAgedEarlyRepaymentHolder":false,
+                "fixedInterest":0.42}],"interestRates":[{"effectiveFrom":"2026-06-10","interestRate":0}],"modifiers":{"COPY":false,
+                "EMI_RECALCULATION":true,"INTEREST_PAUSE_FOR_EMI_CALCULATION":false,"INTEREST_RECALCULATION_ENABLED":true},"lastOverdueBalanceChange":"2026-06-10",
+                "overdueCorrections":[{"correctionDate":"2026-05-21","amount":99.17,"affectedRpDueDate":"2026-05-21"},{"correctionDate":"2026-06-10",
+                "amount":-99.17,"affectedRpDueDate":"2026-06-21"}]}\
+                """;
+        final ProgressiveLoanInterestScheduleModel model = interestScheduleModelService.fromJson(json, loanProductRelatedDetail, mc, null);
+        Assertions.assertNotNull(model);
+        Assertions.assertEquals(4, model.repaymentPeriods().size());
+
+        // when: a MERCHANT_ISSUED_REFUND with LAST_INSTALLMENT allocation targets the last re-aged period
+        // (2026-07-10 - 2026-08-10) while the business date is 2026-06-10
+        final PeriodDueDetails dueAmounts = emiCalculator.getDueAmounts(model, LocalDate.of(2026, 7, 10), LocalDate.of(2026, 8, 10),
+                LocalDate.of(2026, 6, 10));
+
+        log.info("reAged last period dueAmounts: emi={} duePrincipal={} dueInterest={}", dueAmounts.getEmi(), dueAmounts.getDuePrincipal(),
+                dueAmounts.getDueInterest());
+
+        // then: the re-aged period must keep its contractual dues (EMI 45.42 = 45.00 principal + 0.42 fixed
+        // interest). Returning zero dues here starves the horizontal allocation loop: the installment is added to
+        // the skip list with zero payable amounts, keeps being re-selected and the LoopGuard aborts the transaction.
+        Assertions.assertTrue(dueAmounts.getDuePrincipal().isGreaterThanZero(),
+                "duePrincipal of a future re-aged period must not collapse to zero on early payment");
+        Assertions.assertEquals(BigDecimal.valueOf(45.00).setScale(2), dueAmounts.getDuePrincipal().getAmount().setScale(2));
+        Assertions.assertEquals(BigDecimal.valueOf(0.42).setScale(2), dueAmounts.getDueInterest().getAmount().setScale(2));
+    }
 }
