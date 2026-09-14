@@ -98,17 +98,8 @@ public class WorkingCapitalLoanProductUpdateUtil {
             final WorkingCapitalPaymentAmountCalculationStrategy newStrategy = WorkingCapitalPaymentAmountCalculationStrategy
                     .fromString(newValue);
             relatedDetail.setPaymentAmountCalculationStrategy(newStrategy);
-            // Drop fields the new strategy forbids
-            if (newStrategy != null && newStrategy.isAnnualEir()) {
-                if (relatedDetail.getPeriodPaymentRate() != null) {
-                    changes.put(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, null);
-                    relatedDetail.setPeriodPaymentRate(null);
-                }
-            } else if (newStrategy != null && newStrategy.isTpv()) {
-                if (relatedDetail.getAnnualEir() != null) {
-                    changes.put(WorkingCapitalLoanProductConstants.annualEirParamName, null);
-                    relatedDetail.setAnnualEir(null);
-                }
+            if (newStrategy != null) {
+                clearInputsOfOtherStrategies(relatedDetail, newStrategy, changes);
             }
         }
         if (command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanProductConstants.annualEirParamName,
@@ -116,6 +107,12 @@ public class WorkingCapitalLoanProductUpdateUtil {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.annualEirParamName);
             changes.put(WorkingCapitalLoanProductConstants.annualEirParamName, newValue);
             relatedDetail.setAnnualEir(newValue);
+        }
+        if (command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanProductConstants.paymentAmountParamName,
+                relatedDetail.getPaymentAmount())) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.paymentAmountParamName);
+            changes.put(WorkingCapitalLoanProductConstants.paymentAmountParamName, newValue);
+            relatedDetail.setPaymentAmount(newValue);
         }
         if (command.isChangeInIntegerParameterNamed(WorkingCapitalLoanProductConstants.npvDayCountParamName,
                 relatedDetail.getNpvDayCount())) {
@@ -188,7 +185,8 @@ public class WorkingCapitalLoanProductUpdateUtil {
     }
 
     /**
-     * Clears min/max rate bounds that conflict with the product's current payment-amount strategy
+     * Clears the min/max bounds of the strategies the product no longer uses, so a switch does not keep (and report)
+     * bounds the new strategy rejects.
      */
     public Map<String, Object> clearMinMaxIncompatibleWithPaymentStrategy(
             final WorkingCapitalLoanProductMinMaxConstraints minMaxConstraints,
@@ -197,7 +195,7 @@ public class WorkingCapitalLoanProductUpdateUtil {
         if (minMaxConstraints == null || strategy == null) {
             return changes;
         }
-        if (strategy.isAnnualEir()) {
+        if (!strategy.isTpv()) {
             if (minMaxConstraints.getMinPeriodPaymentRate() != null) {
                 changes.put(WorkingCapitalLoanProductConstants.minPeriodPaymentRateParamName, null);
                 minMaxConstraints.setMinPeriodPaymentRate(null);
@@ -206,7 +204,8 @@ public class WorkingCapitalLoanProductUpdateUtil {
                 changes.put(WorkingCapitalLoanProductConstants.maxPeriodPaymentRateParamName, null);
                 minMaxConstraints.setMaxPeriodPaymentRate(null);
             }
-        } else if (strategy.isTpv()) {
+        }
+        if (!strategy.isAnnualEir()) {
             if (minMaxConstraints.getMinAnnualEir() != null) {
                 changes.put(WorkingCapitalLoanProductConstants.minAnnualEirParamName, null);
                 minMaxConstraints.setMinAnnualEir(null);
@@ -216,7 +215,37 @@ public class WorkingCapitalLoanProductUpdateUtil {
                 minMaxConstraints.setMaxAnnualEir(null);
             }
         }
+        if (!strategy.isPaymentAmount()) {
+            if (minMaxConstraints.getMinPaymentAmount() != null) {
+                changes.put(WorkingCapitalLoanProductConstants.minPaymentAmountParamName, null);
+                minMaxConstraints.setMinPaymentAmount(null);
+            }
+            if (minMaxConstraints.getMaxPaymentAmount() != null) {
+                changes.put(WorkingCapitalLoanProductConstants.maxPaymentAmountParamName, null);
+                minMaxConstraints.setMaxPaymentAmount(null);
+            }
+        }
         return changes;
+    }
+
+    /**
+     * A strategy switch leaves the old strategy's input behind unless it is cleared here: the request only carries the
+     * new strategy's field, and the mapper reports every stored input regardless of strategy.
+     */
+    private void clearInputsOfOtherStrategies(final WorkingCapitalLoanProductRelatedDetail relatedDetail,
+            final WorkingCapitalPaymentAmountCalculationStrategy strategy, final Map<String, Object> changes) {
+        if (!strategy.isTpv() && relatedDetail.getPeriodPaymentRate() != null) {
+            relatedDetail.setPeriodPaymentRate(null);
+            changes.put(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, null);
+        }
+        if (!strategy.isAnnualEir() && relatedDetail.getAnnualEir() != null) {
+            relatedDetail.setAnnualEir(null);
+            changes.put(WorkingCapitalLoanProductConstants.annualEirParamName, null);
+        }
+        if (!strategy.isPaymentAmount() && relatedDetail.getPaymentAmount() != null) {
+            relatedDetail.setPaymentAmount(null);
+            changes.put(WorkingCapitalLoanProductConstants.paymentAmountParamName, null);
+        }
     }
 
     /**
@@ -262,6 +291,20 @@ public class WorkingCapitalLoanProductUpdateUtil {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.maxAnnualEirParamName);
             changes.put(WorkingCapitalLoanProductConstants.maxAnnualEirParamName, newValue);
             minMaxConstraints.setMaxAnnualEir(newValue);
+        }
+        if (command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanProductConstants.minPaymentAmountParamName,
+                minMaxConstraints.getMinPaymentAmount())) {
+            final BigDecimal newValue = command
+                    .bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.minPaymentAmountParamName);
+            changes.put(WorkingCapitalLoanProductConstants.minPaymentAmountParamName, newValue);
+            minMaxConstraints.setMinPaymentAmount(newValue);
+        }
+        if (command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanProductConstants.maxPaymentAmountParamName,
+                minMaxConstraints.getMaxPaymentAmount())) {
+            final BigDecimal newValue = command
+                    .bigDecimalValueOfParameterNamed(WorkingCapitalLoanProductConstants.maxPaymentAmountParamName);
+            changes.put(WorkingCapitalLoanProductConstants.maxPaymentAmountParamName, newValue);
+            minMaxConstraints.setMaxPaymentAmount(newValue);
         }
         return changes;
     }

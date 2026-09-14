@@ -32,6 +32,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizati
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel.PrincipalAdjustment;
 import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedPayment;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.junit.jupiter.api.Test;
 
 class ProjectedAmortizationScheduleModelParserServiceGsonImplTest {
@@ -157,5 +158,43 @@ class ProjectedAmortizationScheduleModelParserServiceGsonImplTest {
 
         assertNotNull(restored);
         assertTrue(restored.principalAdjustments().isEmpty());
+    }
+
+    @Test
+    void roundTripsThePaymentAmountStrategy() {
+        final ProjectedAmortizationScheduleModel model = paymentAmountModel();
+
+        final String json = parser.toJson(model);
+        assertTrue(json.contains("\"paymentAmountCalculationStrategy\":\"PAYMENT_AMOUNT\""));
+        assertTrue(json.contains("\"paymentAmount\":47.22"));
+
+        final ProjectedAmortizationScheduleModel restored = parser.fromJson(json, MC, CURRENCY);
+        assertNotNull(restored);
+        assertEquals(WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, restored.paymentAmountCalculationStrategy());
+        assertEquals(0, new BigDecimal("47.22").compareTo(restored.paymentAmount()));
+        assertEquals(model.originalPaymentNumber(), restored.originalPaymentNumber());
+        assertEquals(model.projectedPayments().size(), restored.projectedPayments().size(), "the schedule rebuilds on the same plan");
+        assertEquals(0, new BigDecimal("36.58").compareTo(restored.projectedPayments().getLast().expectedPaymentAmount().getAmount()));
+    }
+
+    /** Models persisted before the strategy was stored only record it through which input they carry. */
+    @Test
+    void readsAPaymentAmountModelPersistedWithoutTheStrategy() {
+        final String legacyJson = parser.toJson(paymentAmountModel()).replace("\"paymentAmountCalculationStrategy\":\"PAYMENT_AMOUNT\",",
+                "");
+        assertFalse(legacyJson.contains("paymentAmountCalculationStrategy"), "the legacy fixture must not carry the field");
+
+        final ProjectedAmortizationScheduleModel restored = parser.fromJson(legacyJson, MC, CURRENCY);
+        assertNotNull(restored);
+        assertNull(restored.paymentAmountCalculationStrategy());
+        final ProjectedAmortizationScheduleModel regenerated = restored.regenerate(new BigDecimal("500"), new BigDecimal("9000"),
+                DISBURSEMENT, DISBURSEMENT);
+        assertEquals(WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, regenerated.paymentAmountCalculationStrategy());
+        assertEquals(0, new BigDecimal("47.22").compareTo(regenerated.expectedPaymentAmount().getAmount()));
+    }
+
+    private ProjectedAmortizationScheduleModel paymentAmountModel() {
+        return ProjectedAmortizationScheduleModel.generateFromPaymentAmount(WorkingCapitalAmortizationType.EIR, new BigDecimal("1000"),
+                new BigDecimal("9000"), new BigDecimal("47.22"), 360, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT);
     }
 }

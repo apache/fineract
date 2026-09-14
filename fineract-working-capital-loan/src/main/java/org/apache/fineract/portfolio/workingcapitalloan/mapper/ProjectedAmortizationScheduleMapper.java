@@ -39,6 +39,9 @@ public class ProjectedAmortizationScheduleMapper {
                 .netDisbursementAmount(roundMoney(model.netDisbursementAmount())) //
                 .totalPaymentVolume(roundMoney(model.totalPaymentVolume())) //
                 .periodPaymentRate(model.periodPaymentRate()) //
+                .paymentAmountCalculationStrategy(model.strategy().getValueAsStringEnumOptionData()) //
+                .annualEir(model.annualEir()) //
+                .paymentAmount(model.paymentAmount()) //
                 .npvDayCount(model.npvDayCount()) //
                 .expectedDisbursementDate(model.expectedDisbursementDate()) //
                 .expectedPaymentAmount(roundMoney(model.expectedPaymentAmount())) //

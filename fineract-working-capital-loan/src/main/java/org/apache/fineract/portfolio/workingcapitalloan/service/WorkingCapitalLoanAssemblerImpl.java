@@ -165,17 +165,24 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                 : productDetail.getPrincipal());
         detail.setPaymentAmountCalculationStrategy(productDetail.getPaymentAmountCalculationStrategy());
         if (productDetail.getPaymentAmountCalculationStrategy() != null
-                && productDetail.getPaymentAmountCalculationStrategy().isAnnualEir()) {
-            detail.setAnnualEir(fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.annualEirParamName, element)
-                    ? fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.annualEirParamName, element, new HashSet<>())
-                    : productDetail.getAnnualEir());
+                && productDetail.getPaymentAmountCalculationStrategy().isPaymentAmount()) {
+            detail.setPaymentAmount(requestedOrProductDefault(WorkingCapitalLoanProductConstants.paymentAmountParamName, element,
+                    productDetail.getPaymentAmount()));
             detail.setPeriodPaymentRate(null);
+            detail.setAnnualEir(null);
+        } else if (productDetail.getPaymentAmountCalculationStrategy() != null
+                && productDetail.getPaymentAmountCalculationStrategy().isAnnualEir()) {
+            detail.setAnnualEir(
+                    requestedOrProductDefault(WorkingCapitalLoanConstants.annualEirParamName, element, productDetail.getAnnualEir()));
+            detail.setPeriodPaymentRate(null);
+            detail.setPaymentAmount(null);
         } else {
             detail.setPeriodPaymentRate(fromApiJsonHelper.parameterExists(WorkingCapitalLoanConstants.periodPaymentRateParamName, element)
                     ? fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanConstants.periodPaymentRateParamName, element,
                             new HashSet<>())
                     : productDetail.getPeriodPaymentRate());
             detail.setAnnualEir(null);
+            detail.setPaymentAmount(null);
         }
         detail.setRepaymentEvery(fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.repaymentEveryParamName, element)
                 ? fromApiJsonHelper.extractIntegerWithLocaleNamed(WorkingCapitalLoanProductConstants.repaymentEveryParamName, element)
@@ -247,6 +254,15 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
         }
 
         return detail;
+    }
+
+    /**
+     * The strategy input the request sets, else the product default. An explicit null falls back too, as the validator
+     * resolved it: storing null would leave the loan without the input every later schedule check reads from it.
+     */
+    private BigDecimal requestedOrProductDefault(final String paramName, final JsonElement element, final BigDecimal productDefault) {
+        final BigDecimal requested = fromApiJsonHelper.extractBigDecimalNamed(paramName, element, new HashSet<>());
+        return requested != null ? requested : productDefault;
     }
 
     private List<WorkingCapitalPaymentAllocationData> copyPaymentAllocationRules(final WorkingCapitalLoan loan, final JsonCommand command,
@@ -389,6 +405,14 @@ public class WorkingCapitalLoanAssemblerImpl implements WorkingCapitalLoanAssemb
                         element, new HashSet<>());
                 detail.setAnnualEir(annualEir);
                 changes.put(WorkingCapitalLoanConstants.annualEirParamName, annualEir);
+            }
+            if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.paymentAmountParamName, element)
+                    && command.isChangeInBigDecimalParameterNamed(WorkingCapitalLoanProductConstants.paymentAmountParamName,
+                            detail.getPaymentAmount())) {
+                final BigDecimal paymentAmount = fromApiJsonHelper
+                        .extractBigDecimalNamed(WorkingCapitalLoanProductConstants.paymentAmountParamName, element, new HashSet<>());
+                detail.setPaymentAmount(paymentAmount);
+                changes.put(WorkingCapitalLoanProductConstants.paymentAmountParamName, paymentAmount);
             }
             if (fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.repaymentEveryParamName, element)
                     && command.isChangeInIntegerParameterNamed(WorkingCapitalLoanProductConstants.repaymentEveryParamName,

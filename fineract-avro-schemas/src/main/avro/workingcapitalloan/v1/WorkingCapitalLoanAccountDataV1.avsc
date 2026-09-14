@@ -333,7 +333,7 @@
         {
             "default": null,
             "name": "periodPaymentAmount",
-            "doc": "Daily payment amount the loan was priced at: totalPaymentVolume x paymentRate / 100 / npvDayCount, rounded to the currency. A rate change does not restate it - what is billed from the day a change takes effect follows the rate then in force.",
+            "doc": "Daily payment amount the loan was priced at, following paymentAmountCalculationStrategy: totalPaymentVolume x paymentRate / 100 / npvDayCount rounded to the currency under TPV, solved from annualEir under ANNUAL_EIR, and paymentAmount itself under PAYMENT_AMOUNT. A rate change does not restate it - what is billed from the day a change takes effect follows the rate then in force.",
             "type": [
                 "null",
                 "bigdecimal"
@@ -360,6 +360,34 @@
         {
             "default": null,
             "name": "totalPaymentVolume",
+            "doc": "Total payment volume the daily payment is sized from. Only for the TPV payment amount calculation strategy.",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "paymentAmountCalculationStrategy",
+            "doc": "How the daily payment is calculated, copied from the product when the loan is created: TPV (from totalPaymentVolume and paymentRate), ANNUAL_EIR (from annualEir) or PAYMENT_AMOUNT (paymentAmount as given).",
+            "type": [
+                "null",
+                "org.apache.fineract.avro.generic.v1.StringEnumOptionDataV1"
+            ]
+        },
+        {
+            "default": null,
+            "name": "annualEir",
+            "doc": "Contractual annual EIR percentage the daily payment is solved from. Only for the ANNUAL_EIR payment amount calculation strategy.",
+            "type": [
+                "null",
+                "bigdecimal"
+            ]
+        },
+        {
+            "default": null,
+            "name": "paymentAmount",
+            "doc": "Fixed daily payment amount the schedule is built from. Only for the PAYMENT_AMOUNT payment amount calculation strategy.",
             "type": [
                 "null",
                 "bigdecimal"

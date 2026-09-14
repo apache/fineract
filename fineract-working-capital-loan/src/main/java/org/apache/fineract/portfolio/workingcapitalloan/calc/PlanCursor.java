@@ -89,22 +89,9 @@ final class PlanCursor {
     PlanCursor(final WorkingCapitalAmortizationType amortizationType, final BigDecimal flatRatio, final BigDecimal netDisbursement,
             final BigDecimal discountFee, final BigDecimal totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount,
             final int currencyScale, final MathContext mc) {
-        this.mc = mc;
-        this.amortizationType = amortizationType;
-        this.flatRatio = flatRatio;
-        this.totalPaymentVolume = totalPaymentVolume;
-        this.npvDayCount = npvDayCount;
-        this.currencyScale = currencyScale;
-        this.strategy = WorkingCapitalPaymentAmountCalculationStrategy.TPV;
-        this.balance = netDisbursement;
-        this.earned = BigDecimal.ZERO;
-        this.billed = BigDecimal.ZERO;
-        this.previousEarned = BigDecimal.ZERO;
-        this.previousBilled = BigDecimal.ZERO;
-        this.solved = AmortizationParams.solve(amortizationType, netDisbursement, discountFee, totalPaymentVolume, periodPaymentRate,
-                npvDayCount, currencyScale, mc);
-        this.stepsInSolve = 0;
-        this.exhausted = false;
+        this(amortizationType, flatRatio, WorkingCapitalPaymentAmountCalculationStrategy.TPV, netDisbursement, totalPaymentVolume,
+                npvDayCount, currencyScale, mc, AmortizationParams.solve(amortizationType, netDisbursement, discountFee, totalPaymentVolume,
+                        periodPaymentRate, npvDayCount, currencyScale, mc));
     }
 
     /**
@@ -114,20 +101,41 @@ final class PlanCursor {
     PlanCursor(final WorkingCapitalAmortizationType amortizationType, final BigDecimal flatRatio, final BigDecimal netDisbursement,
             final BigDecimal discountFee, final BigDecimal annualEir, final int npvDayCount, final int currencyScale,
             final MathContext mc) {
+        this(amortizationType, flatRatio, WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR, netDisbursement, null, npvDayCount,
+                currencyScale, mc, AmortizationParams.solveFromAnnualEir(amortizationType, netDisbursement, discountFee, annualEir,
+                        npvDayCount, currencyScale, mc));
+    }
+
+    /**
+     * Payment Amount cursor: the plan instalment is the product's fixed daily payment, so nothing is solved for it -
+     * only the term, closing payment and IRR that follow from it. Rate changes are not supported on this path.
+     */
+    static PlanCursor forPaymentAmount(final WorkingCapitalAmortizationType amortizationType, final BigDecimal flatRatio,
+            final BigDecimal netDisbursement, final BigDecimal discountFee, final BigDecimal paymentAmount, final int npvDayCount,
+            final int currencyScale, final MathContext mc) {
+        return new PlanCursor(amortizationType, flatRatio, WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, netDisbursement,
+                null, npvDayCount, currencyScale, mc, AmortizationParams.solveFromKnownPayment(amortizationType, netDisbursement,
+                        discountFee, paymentAmount, mc, npvDayCount, currencyScale));
+    }
+
+    /** Positions the cursor at disbursement on a plan each strategy has already solved from its own input. */
+    private PlanCursor(final WorkingCapitalAmortizationType amortizationType, final BigDecimal flatRatio,
+            final WorkingCapitalPaymentAmountCalculationStrategy strategy, final BigDecimal netDisbursement,
+            final BigDecimal totalPaymentVolume, final int npvDayCount, final int currencyScale, final MathContext mc,
+            final AmortizationParams.Solved solved) {
         this.mc = mc;
         this.amortizationType = amortizationType;
         this.flatRatio = flatRatio;
-        this.totalPaymentVolume = null;
+        this.totalPaymentVolume = totalPaymentVolume;
         this.npvDayCount = npvDayCount;
         this.currencyScale = currencyScale;
-        this.strategy = WorkingCapitalPaymentAmountCalculationStrategy.ANNUAL_EIR;
+        this.strategy = strategy;
         this.balance = netDisbursement;
         this.earned = BigDecimal.ZERO;
         this.billed = BigDecimal.ZERO;
         this.previousEarned = BigDecimal.ZERO;
         this.previousBilled = BigDecimal.ZERO;
-        this.solved = AmortizationParams.solveFromAnnualEir(amortizationType, netDisbursement, discountFee, annualEir, npvDayCount,
-                currencyScale, mc);
+        this.solved = solved;
         this.stepsInSolve = 0;
         this.exhausted = false;
     }
@@ -150,8 +158,9 @@ final class PlanCursor {
      */
     void changeRateTo(final BigDecimal periodPaymentRate, final BigDecimal balanceNow, final BigDecimal unearnedFee,
             final BigDecimal collectedSoFar) {
-        if (strategy.isAnnualEir()) {
-            throw new IllegalStateException("rate change is not supported for Annual EIR payment amount calculation strategy");
+        if (!strategy.isTpv()) {
+            throw new IllegalStateException(
+                    "rate change is not supported for the " + strategy.name() + " payment amount calculation strategy");
         }
         if (balanceNow.signum() <= 0) {
             throw new IllegalArgumentException("balance at a rate change must be positive, got: " + balanceNow);
