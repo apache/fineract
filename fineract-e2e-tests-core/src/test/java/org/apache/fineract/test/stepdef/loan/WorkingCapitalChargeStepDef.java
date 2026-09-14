@@ -585,10 +585,22 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     public void revertLastWcChargeWaiver() {
         final Long loanId = getLoanId();
         final GetWorkingCapitalLoanTransactionIdResponse waiverTxn = getLastChargeWaiverTransaction(loanId, false);
-        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest();
+        final String reversalExternalId = Utils.randomStringGenerator("wcl-reversal-ext-id", 8);
+        final ExecuteWorkingCapitalLoanTransactionCommandRequest request = new ExecuteWorkingCapitalLoanTransactionCommandRequest()
+                .reversalExternalId(reversalExternalId);
         ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId,
                 waiverTxn.getId(), "undo", request));
+        testContext().set(TestContextKey.WORKING_CAPITAL_CHARGE_WAIVER_REVERSAL_EXTERNAL_ID, reversalExternalId);
         log.debug("Reverted WC charge waiver transaction id={} on loan {}", waiverTxn.getId(), loanId);
+    }
+
+    @Then("Working Capital Loan reversed charge waiver transaction has the reversalExternalId sent with the undo")
+    public void reversedWcChargeWaiverHasSentReversalExternalId() {
+        final Long loanId = getLoanId();
+        final GetWorkingCapitalLoanTransactionIdResponse waiverTxn = getLastChargeWaiverTransaction(loanId, null);
+        final String expectedReversalExternalId = testContext().get(TestContextKey.WORKING_CAPITAL_CHARGE_WAIVER_REVERSAL_EXTERNAL_ID);
+        assertThat(waiverTxn.getReversed()).as("Charge waiver reversed").isTrue();
+        assertThat(waiverTxn.getReversalExternalId()).as("Charge waiver reversal external id").isEqualTo(expectedReversalExternalId);
     }
 
     @When("Admin reverts the last charge adjustment on working capital loan")

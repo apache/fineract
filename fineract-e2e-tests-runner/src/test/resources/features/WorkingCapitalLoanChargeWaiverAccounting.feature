@@ -169,7 +169,7 @@ Feature: Working Capital Loan Charge Waiver Accounting
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Charge Adjustment  | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
-      | 10 January 2026 | Waive loan charges | 60.0              | 0.0              | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Waive loan charges | 60.0              | 0.0              | 60.0              | 0.0                   | false    |
       | 10 January 2026 | Accrual            | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
     And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "10 January 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
@@ -202,7 +202,7 @@ Feature: Working Capital Loan Charge Waiver Accounting
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Charge Adjustment  | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
-      | 10 January 2026 | Waive loan charges | 60.0              | 0.0              | 0.0               | 0.0                   | true     |
+      | 10 January 2026 | Waive loan charges | 60.0              | 0.0              | 60.0              | 0.0                   | true     |
       | 10 January 2026 | Accrual            | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
       | 10 January 2026 | Accrual            | 60.0              | 0.0              | 60.0              | 0.0                   | false    |
     And Working Capital Loan Transactions tab has 2 "ACCRUAL" transactions with date "10 January 2026" which have the following Journal entries:
@@ -313,7 +313,7 @@ Feature: Working Capital Loan Charge Waiver Accounting
     And Working Capital Loan has transactions:
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | true     |
+      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
       | 15 January 2026 | Charge-off         | 9100.0            | 9000.0           | 100.0             | 0.0                   | false    |
 # The receivable the restated charge-off credited is matched by the accrual the undo made due again.
     When Admin sets the business date to "21 January 2026"

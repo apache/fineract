@@ -417,8 +417,9 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
      * </p>
      *
      * <p>
-     * The allocation carries the recognized part of the waiver, which can fall short of its full amount: income that
-     * was never accrued has no receivable to credit. Same split the term-loan waiver makes.
+     * The allocation carries the whole relief as the transaction's split, as a write-off does. Only the recognized part
+     * of it reaches the ledger, which can fall short of the full amount: income that was never accrued has no
+     * receivable to credit. Same split the term-loan waiver makes in its postings.
      * </p>
      */
     @Transactional
@@ -460,10 +461,9 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         transactionRepository.saveAndFlush(waiverTx);
 
         final BigDecimal recognizedPortion = calculateRecognizedWaiverPortion(wcCharge, waivedAmount);
-        final BigDecimal feePortion = wcCharge.isPenaltyCharge() ? BigDecimal.ZERO : recognizedPortion;
-        final BigDecimal penaltyPortion = wcCharge.isPenaltyCharge() ? recognizedPortion : BigDecimal.ZERO;
+        final boolean isPenalty = wcCharge.isPenaltyCharge();
         final WorkingCapitalLoanTransactionAllocation allocation = WorkingCapitalLoanTransactionAllocation.forPortions(waiverTx,
-                BigDecimal.ZERO, feePortion, penaltyPortion, BigDecimal.ZERO);
+                BigDecimal.ZERO, isPenalty ? BigDecimal.ZERO : waivedAmount, isPenalty ? waivedAmount : BigDecimal.ZERO, BigDecimal.ZERO);
         allocationRepository.saveAndFlush(allocation);
 
         chargeWaiverDomainService.applyWaived(wcCharge, balance, waivedAmount);
@@ -471,7 +471,8 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
         balanceRepository.saveAndFlush(balance);
 
         if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
-            accountingProcessor.postJournalEntries(loan, waiverTx, allocation,
+            accountingProcessor.postJournalEntriesForChargeWaiver(loan, waiverTx, isPenalty ? BigDecimal.ZERO : recognizedPortion,
+                    isPenalty ? recognizedPortion : BigDecimal.ZERO,
                     transactionFinder.isAfterActiveChargeOffForAccountingRouting(loan, waiverTx));
         }
 
@@ -588,9 +589,13 @@ public class WorkingCapitalLoanChargeWritePlatformServiceImpl implements Working
                 .findAllByToChargeAndFromTransactionReversedAndFromTransactionTransactionType(wcCharge, false,
                         LoanTransactionType.CHARGE_ADJUSTMENT)
                 .stream().map(rel -> rel.getFromTransaction().getTransactionAmount()).reduce(BigDecimal.ZERO, BigDecimal::add);
-        // The waived part is subtracted too: without it an adjustment on a fully waived charge would pass this check
-        // and then hit a charge the allocator caps at a zero outstanding, quietly settling principal instead. The
-        // written-off part needs no such guard - a write-off is terminal, so no adjustment can follow it.
+        // Waived and adjusted relief together cannot exceed the charge: without the waived part here, an adjustment on
+        // a
+        // fully waived charge would credit the borrower for a fee they never paid and no longer owe. The paid part
+        // stays
+        // adjustable on purpose - relief beyond the outstanding lands on principal or overpayment, as on any settled
+        // charge.
+        // The written-off part needs no such guard - a write-off is terminal, so no adjustment can follow it.
         return MathUtil.subtract(wcCharge.getAmount(), previouslyAdjusted, wcCharge.getAmountWaived());
     }
 

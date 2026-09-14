@@ -751,7 +751,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
             final JsonCommand command) {
         validator.validateUndoTransaction(command, loan, waiverTransaction);
 
-        reverseTransaction(waiverTransaction);
+        final ExternalId reversalExternalId = externalIdFactory
+                .create(command.stringValueOfParameterNamedAllowingNull(WorkingCapitalLoanConstants.reversalExternalIdParamName));
+        reverseTransaction(waiverTransaction, reversalExternalId);
 
         final WorkingCapitalLoanCharge charge = waiverTransaction.getLoanTransactionRelations().stream()
                 .map(WorkingCapitalLoanTransactionRelation::getToCharge).filter(Objects::nonNull).findFirst()
@@ -765,11 +767,14 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         chargeRepository.saveAndFlush(charge);
         balanceRepository.saveAndFlush(balance);
 
-        // Giving the waived amount back raises the outstanding the charge-off snapshot is built from, so the
-        // charge-off has to cover the restored charge again. Mirrors undoDiscountFeeAdjustment.
-        if (loan.isChargedOff()) {
-            transactionReprocessingService.reprocessTransactions(loan);
-        }
+        // While the charge was waived the allocator saw nothing owed on it, so a repayment booked in that window
+        // settled
+        // principal instead. The waived bucket applies to the whole history at once, so no date narrows what has to be
+        // replayed - the full replay the generic undo runs whenever charges are involved. It also makes a charge-off
+        // cover the restored charge again, and the principal it moves shifts the cap the delinquency periods are built
+        // on.
+        transactionReprocessingService.reprocessTransactions(loan);
+        delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
         final LocalDate reversedOnDate = waiverTransaction.getReversedOnDate();
         final LoanStatus oldStatus = loan.getLoanStatus();
@@ -789,6 +794,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         notifyStatusChanged(loan, oldStatus);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
+        changes.put("reversed", true);
+        changes.put(WorkingCapitalLoanConstants.reversalExternalIdParamName, reversalExternalId);
+        changes.put("reversedOnDate", reversedOnDate);
         changes.put("status", loan.getLoanStatus());
         if (StringUtils.isNotBlank(noteText)) {
             changes.put(WorkingCapitalLoanConstants.noteParamName, noteText);
@@ -1344,6 +1352,13 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
     private void reverseTransaction(final WorkingCapitalLoanTransaction txn) {
         markReversed(txn);
+        this.transactionRepository.save(txn);
+        this.transactionRepository.flush();
+    }
+
+    private void reverseTransaction(final WorkingCapitalLoanTransaction txn, final ExternalId reversalExternalId) {
+        markReversed(txn);
+        txn.setReversalExternalId(reversalExternalId);
         this.transactionRepository.save(txn);
         this.transactionRepository.flush();
     }

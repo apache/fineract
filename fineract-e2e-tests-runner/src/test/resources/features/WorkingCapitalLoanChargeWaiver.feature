@@ -21,7 +21,7 @@ Feature: Working Capital Loan Charge Waiver
     And Working Capital Loan has transactions:
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 15 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 0.0             | 0.0      | 0.0            | 0.0                 | 0.0          |
@@ -42,7 +42,7 @@ Feature: Working Capital Loan Charge Waiver
     And Working Capital Loan has transactions:
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 0.0             | 0.0      | 0.0            | 0.0                 | 0.0          |
@@ -68,7 +68,7 @@ Feature: Working Capital Loan Charge Waiver
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Charge Adjustment  | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
-      | 10 January 2026 | Waive loan charges | 60.0              | 0.0              | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Waive loan charges | 60.0              | 0.0              | 60.0              | 0.0                   | false    |
     And Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Amount Paid | Amount Waived | Amount Outstanding |
       | Working Capital Loan Fee | 10 January 2026 | 100.0  | 40.0        | 60.0          | 0.0                |
@@ -108,32 +108,35 @@ Feature: Working Capital Loan Charge Waiver
     And Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Amount Paid | Amount Waived | Amount Outstanding |
       | Working Capital Loan Fee | 10 January 2026 | 100.0  | 0.0         | 100.0         | 0.0                |
+    And Working Capital loan balance payload contains the following fields:
+      | field     | value |
+      | feeWaived | 100.0 |
+# While the charge is waived the allocator sees nothing owed on it, so the repayment settles principal.
+    When Customer makes repayment on "10 January 2026" with 100.0 transaction amount on Working Capital loan
     Then Working Capital Loan has transactions:
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
+      | 10 January 2026 | Repayment          | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
     When Admin reverts the last charge waiver on working capital loan
     Then a Working Capital Loan Adjust Transaction business event is raised for the reversed "waiveCharges" transaction
+    And Working Capital Loan reversed charge waiver transaction has the reversalExternalId sent with the undo
+# Restoring the charge replays the repayment, which now finds the fee due and pays it instead of principal.
+    And a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "10 January 2026" with principal portion changed from "100.0" to "0.0" and fee portion changed from "0.0" to "100.0"
     And Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Amount Paid | Amount Waived | Amount Outstanding |
-      | Working Capital Loan Fee | 10 January 2026 | 100.0  | 0.0         | 0.0           | 100.0              |
+      | Working Capital Loan Fee | 10 January 2026 | 100.0  | 100.0       | 0.0           | 0.0                |
     And Working Capital Loan charge balances has the following data:
       | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
-      | 100.0      | 100.0           | 0.0      | 0.0            | 0.0                 | 0.0          |
-    Then Working Capital Loan has transactions:
-      | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
-      | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | true     |
-# Moved back to outstanding state means back in the allocation pipeline, not only a changed number.
-    When Customer makes repayment on "10 January 2026" with 100.0 transaction amount on Working Capital loan
-    Then Working Capital Loan charge balances has the following data:
-      | Fee Amount | Fee Outstanding | Fee Paid | Penalty Amount | Penalty Outstanding | Penalty Paid |
       | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
+    And Working Capital loan balance payload contains the following fields:
+      | field     | value |
+      | feeWaived | 0.0   |
     Then Working Capital Loan has transactions:
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | true     |
-      | 10 January 2026 | Repayment          | 100.0             | 0.0              | 100.0              | 0.0                   | false    |
+      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
+      | 10 January 2026 | Repayment          | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "10 January 2026"
 
   @TestRailId:C102463
@@ -155,8 +158,8 @@ Feature: Working Capital Loan Charge Waiver
     And Working Capital Loan has transactions:
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | true     |
-      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | true     |
+      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
     And Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Amount Paid | Amount Waived | Amount Outstanding |
       | Working Capital Loan Fee | 10 January 2026 | 100.0  | 0.0         | 100.0         | 0.0                |
@@ -190,7 +193,7 @@ Feature: Working Capital Loan Charge Waiver
       | 01 January 2026 | Disbursement       | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
       | 01 January 2026 | Repayment          | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
       | 01 June 2026    | Charge Adjustment  | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
-      | 01 June 2026    | Waive loan charges | 60.0              | 0.0              | 0.0               | 0.0                   | false    |
+      | 01 June 2026    | Waive loan charges | 60.0              | 0.0              | 60.0              | 0.0                   | false    |
       | 01 June 2026    | Accrual            | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
     And Working Capital Loan Transactions tab has a "ACCRUAL" transaction with date "01 June 2026" which has the following Journal entries:
       | Type   | Account code | Account name            | Debit | Credit |
@@ -234,7 +237,7 @@ Feature: Working Capital Loan Charge Waiver
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 12 January 2026 | Repayment          | 50.0              | 50.0             | 0.0               | 0.0                   | false    |
-      | 15 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | false    |
+      | 15 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
     And Working Capital Loan has charges with the following data:
       | Charge Name              | Due Date        | Amount | Amount Paid | Amount Waived | Amount Outstanding |
       | Working Capital Loan Fee | 15 January 2026 | 100.0  | 0.0         | 100.0         | 0.0                |
@@ -279,7 +282,7 @@ Feature: Working Capital Loan Charge Waiver
     Then Working Capital Loan has transactions:
       | transactionDate | type               | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement       | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
-      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 0.0               | 0.0                   | false    |
+      | 10 January 2026 | Waive loan charges | 100.0             | 0.0              | 100.0             | 0.0                   | false    |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "16 January 2026"
 
   @TestRailId:C102469
@@ -294,8 +297,8 @@ Feature: Working Capital Loan Charge Waiver
     And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "10 January 2026" due date and 100.0 transaction amount
     And Admin waives the last added charge on working capital loan
     Then a Working Capital Loan Charge Waiver transaction business event is raised with "100.0" EUR amount
-# Without the waived part taken out of the amount available for adjustment, this call would pass and then settle
-# principal instead of the charge it names, because the allocator caps every charge at its outstanding.
+# The waived part is taken out of the amount available for adjustment: otherwise this adjustment would credit the
+# borrower for a fee that was never paid and is no longer owed.
     And Making a charge adjustment with 100.0 amount on working capital loan results an error with the following data:
       | httpCode | errorMessage                                                                        |
       | 403      | Transaction amount cannot be higher than the available charge amount for adjustment |
@@ -346,6 +349,6 @@ Feature: Working Capital Loan Charge Waiver
       | 01 January 2026 | Disbursement       | 1000.0            | 1000.0           | 0.0               | 0.0                   | false    |
       | 01 June 2026    | Charge Adjustment  | 40.0              | 0.0              | 40.0              | 0.0                   | false    |
       | 01 June 2026    | Repayment          | 50.0              | 0.0              | 50.0              | 0.0                   | false    |
-      | 01 June 2026    | Waive loan charges | 10.0              | 0.0              | 0.0               | 0.0                   | false    |
+      | 01 June 2026    | Waive loan charges | 10.0              | 0.0              | 10.0              | 0.0                   | false    |
     Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 June 2026"
 

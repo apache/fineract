@@ -60,6 +60,12 @@ public class WorkingCapitalLoanBalanceData implements Serializable {
     private BigDecimal totalRecovered;
     /** What is still recoverable: {@code totalWrittenOff - totalRecovered}. Caps the next recovery payment. */
     private BigDecimal writtenOffOutstanding;
+    /**
+     * Netted off {@code feeOutstanding} and {@code penaltyOutstanding} like the written-off portions, for the same
+     * reconciliation.
+     */
+    private BigDecimal feeWaived;
+    private BigDecimal penaltyWaived;
     private BigDecimal realizedIncomeFromDiscountFee;
     private BigDecimal unrealizedIncomeFromDiscountFee;
     private BigDecimal overpaymentAmount;
