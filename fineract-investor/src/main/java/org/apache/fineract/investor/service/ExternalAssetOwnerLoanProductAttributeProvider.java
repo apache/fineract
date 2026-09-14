@@ -20,6 +20,7 @@ package org.apache.fineract.investor.service;
 
 import static org.reflections.scanners.Scanners.SubTypes;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +32,7 @@ import org.springframework.stereotype.Component;
 /**
  * Discovers every {@link ExternalAssetOwnerLoanProductAttribute} implementation on the classpath and exposes them as
  * ready to use instances. Enum implementations contribute one instance per constant, non enum implementations are
- * instantiated through their no-arg constructor.
+ * instantiated through their no-arg constructor. Interfaces and abstract classes are skipped.
  */
 @Component
 public final class ExternalAssetOwnerLoanProductAttributeProvider {
@@ -45,6 +46,9 @@ public final class ExternalAssetOwnerLoanProductAttributeProvider {
                 .get(SubTypes.of(ExternalAssetOwnerLoanProductAttribute.class).asClass());
         List<ExternalAssetOwnerLoanProductAttribute> resolved = new ArrayList<>();
         for (Class<?> implementingClass : implementingClasses) {
+            if (implementingClass.isInterface() || Modifier.isAbstract(implementingClass.getModifiers())) {
+                continue;
+            }
             if (implementingClass.isEnum()) {
                 Arrays.stream(implementingClass.getEnumConstants()).map(ExternalAssetOwnerLoanProductAttribute.class::cast)
                         .forEach(resolved::add);

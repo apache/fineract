@@ -18,13 +18,13 @@
  */
 package org.apache.fineract.investor.data.attribute;
 
-public enum BuyDownFeeAmortizationStrategyExternalAssetOwnerLoanProductAttribute implements
-        CaseInsensitiveEnumExternalAssetOwnerLoanProductAttribute<BuyDownFeeAmortizationStrategyExternalAssetOwnerLoanProductAttribute> {
+public enum CapitalizedIncomeAmortizationStrategyExternalAssetOwnerLoanProductAttribute implements
+        CaseInsensitiveEnumExternalAssetOwnerLoanProductAttribute<CapitalizedIncomeAmortizationStrategyExternalAssetOwnerLoanProductAttribute> {
 
     DEFERRED, //
     IMMEDIATE; //
 
-    public static final String ATTRIBUTE_KEY = "BUY_DOWN_FEE_AMORTIZATION_STRATEGY";
+    public static final String ATTRIBUTE_KEY = "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY";
 
     @Override
     public String getAttributeKey() {
