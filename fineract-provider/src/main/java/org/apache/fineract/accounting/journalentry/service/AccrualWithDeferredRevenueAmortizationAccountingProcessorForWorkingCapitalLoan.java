@@ -55,9 +55,16 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     private final AccountingProcessorHelper helper;
     private final JournalEntryRepository journalEntryRepository;
 
+    private boolean isAccountingDisabled(final WorkingCapitalLoan loan) {
+        return !loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization();
+    }
+
     @Override
     public void postJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
             final WorkingCapitalLoanTransactionAllocation allocation, final boolean isChargedOff) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         final Office office = loan.getClient().getOffice();
         helper.checkForBranchClosures(helper.getLatestClosureByBranch(office.getId()), txn.getTransactionDate());
 
@@ -346,6 +353,9 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     @Override
     public void restateJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
             final WorkingCapitalLoanTransactionAllocation allocation, final boolean isChargedOff) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
         if (!splitDiffersFromLedger(loan, txn, allocation, effectiveEntries, isChargedOff)) {
             // The ledger already reflects the recomputed split; re-posting would only add cancelling noise.
@@ -429,6 +439,9 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
 
     @Override
     public void postReversalJournalEntries(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         reverseExistingEntries(loan, txn, false);
     }
 
@@ -468,6 +481,9 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     @Override
     public void postJournalEntriesForDiscountFeeAmortization(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
             final boolean routeToExpense) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         final Office office = loan.getClient().getOffice();
         final Long productId = loan.getLoanProduct().getId();
         final String currencyCode = loan.getCurrencyCode();
@@ -493,6 +509,9 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     @Override
     public void restateJournalEntriesForDiscountFeeAmortization(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
             final boolean isChargedOff) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
         if (!discountFeeAmortizationSplitDiffersFromLedger(loan, txn, effectiveEntries, isChargedOff, false)) {
             // The ledger already reflects the recomputed amount; re-posting would only add cancelling noise.
@@ -505,6 +524,9 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     @Override
     public void restateJournalEntriesForDiscountFeeAmortizationAdjustment(final WorkingCapitalLoan loan,
             final WorkingCapitalLoanTransaction txn, final boolean isChargedOff) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
         if (!discountFeeAmortizationSplitDiffersFromLedger(loan, txn, effectiveEntries, isChargedOff, true)) {
             return;
@@ -550,6 +572,9 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     @Override
     public void postJournalEntriesForDiscountFeeAmortizationAdjustment(final WorkingCapitalLoan loan,
             final WorkingCapitalLoanTransaction txn, final boolean routeToExpense) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         final Office office = loan.getClient().getOffice();
         final Long productId = loan.getLoanProduct().getId();
         final String currencyCode = loan.getCurrencyCode();
@@ -574,11 +599,17 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
 
     @Override
     public void postJournalEntriesForDiscountFee(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         postDiscountFeeDeferralEntries(loan, txn, CashAccountsForLoan.LOAN_PORTFOLIO, CashAccountsForLoan.DEFERRED_INCOME_LIABILITY);
     }
 
     @Override
     public void postJournalEntriesForDiscountFeeAdjustment(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn) {
+        if (isAccountingDisabled(loan)) {
+            return;
+        }
         postDiscountFeeDeferralEntries(loan, txn, CashAccountsForLoan.DEFERRED_INCOME_LIABILITY, CashAccountsForLoan.LOAN_PORTFOLIO);
     }
 
