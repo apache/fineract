@@ -1024,7 +1024,8 @@ Feature: Working Capital Loan Write-off
       | 10000.0   | 0.0                | 0.0            | 1000.0           | 0.0               |
     Then Admin closes the Working Capital loan with a full repayment on "05 January 2026"
 
-  Scenario: Verify Working Capital Write-off: same-day discount fee adjustment below realized income posts amortization adjustment - UC24
+  @TestRailId:C106655
+  Scenario: Verify Working Capital Write-off: same-day discount fee adjustment below realized income posts amortization adjustment - UC30
     Given Admin sets the business date to "01 January 2026"
     And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
       | LoanProduct              | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
@@ -1084,4 +1085,3 @@ Feature: Working Capital Loan Write-off
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9005.0    | 50.0               | 9.61           | 0.0              | 0.0               |
     Then Admin closes the Working Capital loan with a full repayment on "04 February 2026"
-
