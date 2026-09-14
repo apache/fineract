@@ -4123,6 +4123,8 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
             case "totalWrittenOff" -> balance.getTotalWrittenOff();
             case "totalRecovered" -> balance.getTotalRecovered();
             case "writtenOffOutstanding" -> balance.getWrittenOffOutstanding();
+            case "feeWaived" -> balance.getFeeWaived();
+            case "penaltyWaived" -> balance.getPenaltyWaived();
             default -> throw new IllegalArgumentException("Unknown balance field: " + field);
         };
         assertNotNull(actual, "Balance field " + field + " should not be null");

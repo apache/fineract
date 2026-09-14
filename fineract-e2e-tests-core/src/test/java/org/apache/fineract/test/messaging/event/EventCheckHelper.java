@@ -811,15 +811,22 @@ public class EventCheckHelper {
             final List<WorkingCapitalLoanChargeDataV1> eventCharges = event.getCharges();
             assertThat(eventCharges).isNotNull().hasSize(expectedCharges.size());
             IntStream.range(0, expectedCharges.size()).forEach(i -> {
-                final Map<String, String> expected = expectedCharges.get(i);
                 final WorkingCapitalLoanChargeDataV1 actual = eventCharges.get(i);
-                assertAmountEquals("charges[" + i + "].amount", actual.getAmount(), new BigDecimal(expected.get("amount")));
-                assertAmountEquals("charges[" + i + "].amountAccrued", actual.getAmountAccrued(),
-                        new BigDecimal(expected.get("amountAccrued")));
-                assertAmountEquals("charges[" + i + "].amountUnrecognized", actual.getAmountUnrecognized(),
-                        new BigDecimal(expected.get("amountUnrecognized")));
+                expectedCharges.get(i).forEach((column, expectedValue) -> assertAmountEquals("charges[" + i + "]." + column,
+                        chargeAmountOf(actual, column), new BigDecimal(expectedValue)));
             });
         });
+    }
+
+    private BigDecimal chargeAmountOf(final WorkingCapitalLoanChargeDataV1 charge, final String columnName) {
+        return switch (columnName) {
+            case "amount" -> charge.getAmount();
+            case "amountWaived" -> charge.getAmountWaived();
+            case "amountWrittenOff" -> charge.getAmountWrittenOff();
+            case "amountAccrued" -> charge.getAmountAccrued();
+            case "amountUnrecognized" -> charge.getAmountUnrecognized();
+            default -> throw new IllegalArgumentException("Unsupported charge amount column: " + columnName);
+        };
     }
 
     public void workingCapitalLoanBalanceChangedEventAnnualEirCheck(final Long loanId, final String expectedAnnualEir) {

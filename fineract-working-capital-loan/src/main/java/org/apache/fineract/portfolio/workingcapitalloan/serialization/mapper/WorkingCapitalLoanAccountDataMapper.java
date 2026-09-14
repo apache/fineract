@@ -117,7 +117,6 @@ public interface WorkingCapitalLoanAccountDataMapper {
 
     @Mapping(target = "amountAccrued", ignore = true)
     @Mapping(target = "amountUnrecognized", ignore = true)
-    @Mapping(target = "amountWrittenOff", ignore = true)
     @Mapping(target = "customData", ignore = true)
     WorkingCapitalLoanChargeDataV1 map(WorkingCapitalLoanChargeData source);
 

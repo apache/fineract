@@ -65,6 +65,16 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         plannedPostings(loan, txn, allocation, isChargedOff).forEach(accountPostHelper::post);
     }
 
+    @Override
+    public void postJournalEntriesForChargeWaiver(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final BigDecimal recognizedFeePortion, final BigDecimal recognizedPenaltyPortion, final boolean isChargedOff) {
+        final Office office = loan.getClient().getOffice();
+        helper.checkForBranchClosures(helper.getLatestClosureByBranch(office.getId()), txn.getTransactionDate());
+
+        final JournalEntryPostingHelper accountPostHelper = new JournalEntryPostingHelper(loan, txn);
+        chargeWaiverPostings(recognizedFeePortion, recognizedPenaltyPortion, isChargedOff).forEach(accountPostHelper::post);
+    }
+
     /**
      * One entry a transaction's split books: which account, which side, how much.
      *
@@ -132,7 +142,6 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             case LoanTransactionType.CHARGE_OFF -> chargeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion);
             case LoanTransactionType.WRITEOFF -> writeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion, isChargedOff);
             case LoanTransactionType.RECOVERY_REPAYMENT -> recoveryPaymentPostings(txn);
-            case LoanTransactionType.WAIVE_CHARGES -> chargeWaiverPostings(feesPortion, penaltiesPortion, isChargedOff);
             default -> throw new NotImplementedException(
                     "Post Journal Entries is not implemented yet for " + txn.getTypeOf().getCode() + " for Working Capital Loan");
         };
@@ -250,11 +259,11 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     }
 
     /**
-     * Only the recognized part of the waiver reaches the allocation, so a charge whose income was never accrued books
-     * nothing - crediting a receivable that does not exist would drive it negative. A waiver addresses exactly one
-     * charge, so one credit leg is always zero, and it carries no write-off reason to map the debit onto. On a
-     * charged-off loan the receivables are already off the books, so the credits go to the charged-off income accounts,
-     * as in {@link #writeOffPostings}.
+     * Books only the recognized part of the waiver, passed in separately because the allocation carries the whole
+     * relief: a charge whose income was never accrued books nothing - crediting a receivable that does not exist would
+     * drive it negative. A waiver addresses exactly one charge, so one credit leg is always zero, and it carries no
+     * write-off reason to map the debit onto. On a charged-off loan the receivables are already off the books, so the
+     * credits go to the charged-off income accounts, as in {@link #writeOffPostings}.
      */
     private List<LedgerPosting> chargeWaiverPostings(final BigDecimal feesPortion, final BigDecimal penaltiesPortion,
             final boolean isChargedOff) {

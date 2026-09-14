@@ -400,6 +400,10 @@ Feature: Working Capital Loan Write-off
     And Admin sets the business date to "15 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     And Admin writes off the Working Capital loan on "15 January 2026"
+    Then a Working Capital Loan Write Off transaction business event is raised with "135.0" EUR amount
+    And a Working Capital Loan Balance Changed business event is raised with charges:
+      | amount | amountWrittenOff |
+      | 35.0   | 35.0             |
     And Working Capital Loan has transactions:
       | transactionDate | type                   | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement           | 100.0             | 100.0            | 0.0               | 0.0                   | false    |
