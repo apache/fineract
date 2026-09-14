@@ -17,45 +17,35 @@ permissions:
 jobs:
   drift-gate:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_SHA: ${{ github.event.pull_request.head.sha }}
+      PR_OWNER: ${{ github.repository_owner }}
+      PR_REPO: ${{ github.event.repository.name }}
+      LIVE_URL: https://scottswindell-hub.github.io/fineract/?sha=${{ github.event.pull_request.head.sha }}&api=https://qgd63ljozc.execute-api.us-east-1.amazonaws.com/demo&pr=${{ github.event.pull_request.number }}&repo=${{ github.repository }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
-      - name: Post live status page link
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Pin live governance view to PR description (start)
         # Runs first, the instant the PR opens — independent of the (async,
-        # cold-startable) Lambda — so the live page URL is on the PR immediately.
-        # The page shows "waiting…" then animates as the gate writes status.
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_SHA: ${{ github.event.pull_request.head.sha }}
-          PR_OWNER: ${{ github.repository_owner }}
-          PR_REPO: ${{ github.event.repository.name }}
-          PAGE_BASE: https://scottswindell-hub.github.io/fineract/
-          STATUS_API: https://qgd63ljozc.execute-api.us-east-1.amazonaws.com/demo
+        # cold-startable) Lambda — so the live page URL is on the PR
+        # immediately. Lives in the PR *description*, not a comment: GitHub
+        # has no "pin comment to top" API, and comment order can't be
+        # changed after posting, so the description is the only place this
+        # can be guaranteed to stay above every comment. Run history is kept
+        # inside the same block (see update_live_status.py) since a
+        # stateless job has nowhere else to remember past runs.
         run: |
-          set -uo pipefail   # best-effort: never abort the gate on a comment hiccup
-          URL="${PAGE_BASE}?sha=${PR_SHA}&api=${STATUS_API}&pr=${PR_NUMBER}&repo=${PR_OWNER}/${PR_REPO}"
-          BODY=$(printf '%s\n' \
-            "<!-- codeintent-live-status -->" \
-            "### 🛰️ CodeIntent — live governance view" \
-            "" \
-            "Watch this change go through the semantic-change gate in real time:" \
-            "" \
-            "**▶ [Open the live status page ↗](${URL})**" \
-            "" \
-            "_Fills in as the gate runs (assemble → analyze → evaluate). The verdict also posts to this PR's Checks card._")
-          # gh api needs no local checkout (gh pr comment does); upsert by marker
-          # so re-runs update the same comment instead of stacking.
-          CID=$(gh api "repos/${GH_REPO}/issues/${PR_NUMBER}/comments" \
-                  --jq '.[] | select(.body|contains("codeintent-live-status")) | .id' 2>/dev/null | head -1 || true)
-          if [ -n "${CID:-}" ]; then
-            gh api -X PATCH "repos/${GH_REPO}/issues/comments/${CID}" -f body="$BODY" >/dev/null \
-              && echo "updated live-status comment ${CID}" \
-              || echo "::warning::could not update the live-status comment"
-          else
-            gh api -X POST "repos/${GH_REPO}/issues/${PR_NUMBER}/comments" -f body="$BODY" >/dev/null \
-              && echo "posted live-status comment" \
-              || echo "::warning::could not post the live-status comment"
-          fi
+          set -uo pipefail   # best-effort: never abort the gate on a description-update hiccup
+          python3 .github/scripts/update_live_status.py start \
+            --repo "$GH_REPO" --pr "$PR_NUMBER" --sha "$PR_SHA" \
+            --live-url "$LIVE_URL" --run-url "$RUN_URL" \
+            || echo "::warning::could not update the live-status PR description"
 
       - name: Call semantic drift gate
         env:
@@ -63,12 +53,8 @@ jobs:
           API_KEY: ${{ secrets.DRIFT_GATE_API_KEY }}
           # PR-supplied values via env (not interpolated into the script) to
           # avoid shell-injection from branch names etc.
-          PR_OWNER: ${{ github.repository_owner }}
-          PR_REPO: ${{ github.event.repository.name }}
-          PR_SHA: ${{ github.event.pull_request.head.sha }}
           PR_BASE_REF: ${{ github.base_ref }}
           PR_HEAD_REF: ${{ github.head_ref }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
           payload=$(python3 -c 'import json,os; print(json.dumps({"owner":os.environ["PR_OWNER"],"repo":os.environ["PR_REPO"],"sha":os.environ["PR_SHA"],"base_ref":os.environ["PR_BASE_REF"],"pr_ref":os.environ["PR_HEAD_REF"],"pull_request_number":int(os.environ["PR_NUMBER"])}))')
@@ -81,11 +67,6 @@ jobs:
           case "$code" in 200|202) exit 0 ;; *) echo "gate trigger failed (HTTP $code)"; exit 1 ;; esac
 
       - name: Await CodeIntent verdict
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_OWNER: ${{ github.repository_owner }}
-          PR_REPO: ${{ github.event.repository.name }}
-          PR_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           # Poll this PR's Checks card for the governance verdict and fail the
@@ -97,6 +78,12 @@ jobs:
           # Read one field of the CodeIntent check-run from the cached response.
           # $1 is a python expression over `c` (the check-run dict, or {}).
           py() { python3 -c "import json;d=json.load(open('/tmp/cr.json'));c=next((x for x in d.get('check_runs',[]) if x.get('name')=='$check'),{});print(($1) or '')"; }
+          finish() {   # $1 = result text for the run-history row
+            python3 .github/scripts/update_live_status.py finish \
+              --repo "$GH_REPO" --pr "$PR_NUMBER" --sha "$PR_SHA" \
+              --live-url "$LIVE_URL" --run-url "$RUN_URL" --result "$1" \
+              || echo "::warning::could not update the live-status PR description with the verdict"
+          }
           for i in $(seq 1 60); do   # ~60 * 5s = 300s ceiling
             curl -sS -H "Authorization: Bearer $GH_TOKEN" \
               -H "Accept: application/vnd.github+json" \
@@ -111,6 +98,8 @@ jobs:
               echo "poll $i: waiting for the CodeIntent check to appear…"
             elif [ "$status" = "completed" ]; then
               echo "poll $i: completed — ${title:-verdict} → ${concl:-none}"
+              case "$concl" in success) icon="✅" ;; failure) icon="❌" ;; *) icon="⚠️" ;; esac
+              finish "$icon ${title:-$concl}"
               if [ "$concl" = "failure" ]; then
                 echo "::error::CodeIntent governance VIOLATION — a governed behavior was removed. See the CodeIntent Drift Gate check."
                 exit 1
@@ -122,4 +111,5 @@ jobs:
             sleep 5
           done
           echo "::warning::Timed out awaiting the CodeIntent verdict; see this PR's Checks card."
+          finish "⏳ timed out — see Checks card"
           exit 0
