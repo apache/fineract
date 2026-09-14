@@ -18,46 +18,26 @@
  */
 package org.apache.fineract.cob.loan;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.cob.exceptions.LockedReadException;
+import org.apache.fineract.cob.AbstractAccountItemReader;
 import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.portfolio.loanaccount.exception.LoanNotFoundException;
-import org.springframework.batch.core.ExitStatus;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.annotation.AfterStep;
-import org.springframework.batch.item.ItemReader;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.lang.NonNull;
 
+/**
+ * Loan-flavoured {@link AbstractAccountItemReader} that raises a {@link LoanNotFoundException} when a loan id cannot be
+ * resolved. Shared by the loan and working-capital-loan COB readers.
+ */
 @Slf4j
-@RequiredArgsConstructor
-public abstract class AbstractLoanItemReader<T extends AbstractPersistableCustom<Long>> implements ItemReader<T> {
+public abstract class AbstractLoanItemReader<T extends AbstractPersistableCustom<Long>> extends AbstractAccountItemReader<T> {
 
-    protected final CrudRepository<T, Long> loanRepository;
-
-    @Setter(AccessLevel.PROTECTED)
-    private LinkedBlockingQueue<Long> remainingData;
-
-    @Override
-    public T read() throws Exception {
-        final Long loanId = remainingData.poll();
-        if (loanId != null) {
-            try {
-                return loanRepository.findById(loanId).orElseThrow(() -> new LoanNotFoundException(loanId));
-            } catch (Exception e) {
-                throw new LockedReadException(loanId, e);
-            }
-        }
-        return null;
+    protected AbstractLoanItemReader(CrudRepository<T, Long> loanRepository) {
+        super(loanRepository);
     }
 
-    @AfterStep
-    public ExitStatus afterStep(@NonNull StepExecution stepExecution) {
-        return ExitStatus.COMPLETED;
+    @Override
+    protected RuntimeException notFound(Long loanId) {
+        return new LoanNotFoundException(loanId);
     }
 
 }

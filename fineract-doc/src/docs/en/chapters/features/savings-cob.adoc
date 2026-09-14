@@ -1,0 +1,413 @@
+= Savings COB (Close of Business)
+
+== Overview
+
+The Savings Close of Business (COB) feature is a Spring Batch–based, partitioned pipeline that executes daily end-of-day processing on every non-closed savings account. It mirrors the manager/worker architecture used by Loan COB but operates on `SavingsAccount` aggregates: a manager node partitions the account population by id ranges, dispatches partitions through a message channel, and one or more worker nodes pull partitions, lock the accounts, run an ordered list of business steps against each account, persist the result, and release the lock.
+
+=== Purpose
+
+A modern core banking platform needs a deterministic, fault-tolerant, horizontally scalable mechanism to advance the state of every savings account once per business day — posting interest, applying scheduled charges, marking dormancy, and so on. The legacy `POST_INTEREST_FOR_SAVINGS` job processed accounts sequentially in a single tasklet without distributed locking, fault tolerance, or extensibility. Savings COB replaces that with the same partitioned framework already used by Loan COB so that:
+
+* the work can be split across worker nodes and threads,
+* each account is processed in its own transaction,
+* per-account failures are isolated (skipped and recorded on the lock) rather than aborting the batch,
+* the list of operations performed at COB is configurable per tenant through `m_batch_business_steps`.
+
+=== Scope
+
+The scope of this document includes:
+
+* The `SAVINGS_COB` Spring Batch job and its manager/worker step topology
+* The `SavingsCOBBusinessStep` extension point and the five bundled steps (`POST_INTEREST_FOR_SAVINGS`, `PAY_DUE_SAVINGS_CHARGES`, `APPLY_ANNUAL_FEE_FOR_SAVINGS`, `UPDATE_SAVINGS_DORMANT_STATUS`, `UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS`)
+* Distributed locking via `m_savings_account_locks` and the `SavingsLockOwner` enum
+* The `last_closed_business_date` tracking column on `m_savings_account`
+* Partitioning, catch-up mode, retry/skip semantics, and the stayed-locked business event
+* Tenant-level configuration through `application.properties`
+
+=== Applicability
+
+* All savings accounts in a non-closed status: `SUBMITTED_AND_PENDING_APPROVAL`, `APPROVED`, `ACTIVE`, `TRANSFER_IN_PROGRESS`, `TRANSFER_ON_HOLD`.
+* Tenants that have at least one row in `m_batch_business_steps` with `job_name = 'SAVINGS_CLOSE_OF_BUSINESS'`. If no business steps are configured, the partitioner stops the job execution.
+
+=== Definitions and Key Concepts
+
+*COB business date:* The business date being closed by this run, obtained via `BusinessDateType.COB_DATE` from the tenant's `ThreadLocalContextUtil`. Stored in the job's execution context as `BusinessDate`.
+
+*Catch-up mode:* When `IS_CATCH_UP=true`, the partitioner and reader only consider accounts whose `last_closed_business_date` equals the target date (i.e. accounts already partially processed for that date), as opposed to advancing accounts that have never been processed.
+
+*Partition:* A contiguous range of savings account ids (`minId`–`maxId`) of size `partition-size`. Each partition is dispatched as a separate worker step via the `outboundRequests` channel and pulled by a worker through `inboundRequests`.
+
+*Business step:* A `SavingsCOBBusinessStep` bean executed inside the worker's item processor. The ordered list of steps per tenant is stored in `m_batch_business_steps` and resolved by `COBBusinessStepService.getCOBBusinessSteps(SavingsCOBBusinessStep.class, "SAVINGS_CLOSE_OF_BUSINESS")`.
+
+*Lock owner:* The role under which a lock row in `m_savings_account_locks` was placed — `SAVINGS_COB_CHUNK_PROCESSING` for batch processing or `SAVINGS_INLINE_COB_PROCESSING` for the inline catch-up job (`INLINE_SAVINGS_COB`).
+
+*Stayed-locked account:* An account whose lock row was not removed by the end of the run because chunk processing failed for it. Surfaced via the `SavingsAccountsStayedLockedBusinessEvent` event.
+
+== Design Decisions and Considerations
+
+=== Reusing the COB framework instead of forking
+
+The job reuses `COBBusinessStepService`, `CustomJobParameterResolver`, `InitialisationTasklet`, `ResetContextTasklet`, `CobWorkerStepListener`, `RemotePartitioningManagerStepBuilderFactory`, and `RemotePartitioningWorkerStepBuilderFactory` from `fineract-cob`. Only the savings-specific pieces (entity, lock, partitioner, reader/processor/writer, business step interface) are new. This keeps the operational behavior — partition size, poll interval, chunk size, retry/skip — identical to Loan COB and configurable through the same `fineract.partitioned-job.partitioned-job-properties[*]` keys.
+
+=== Per-account lock with version column
+
+`m_savings_account_locks` uses `savings_id` as the primary key plus an optimistic-lock `version` column. The lock is inserted by `ApplySavingsLockTasklet` *before* chunk processing starts and is removed by `AbstractSavingsItemWriter` after the account is successfully saved. This prevents two workers (or worker + inline COB) from updating the same savings account concurrently, and lets per-chunk listeners record errors against the lock row without losing the lock.
+
+=== Skip-and-record over fail-fast
+
+The worker step is `faultTolerant()` with `retry(Exception.class)`, `retryLimit`, `skip(Exception.class)` and `skipLimit = chunkSize + 1`. A failure on a single account is caught by `ChunkProcessingSavingsItemListener`, which writes the error message and serialized stacktrace to that account's lock row in a new transaction and lets the rest of the chunk continue. The lock is intentionally *not* released on failure — the row remains so an operator can investigate, and the `StayedLockedSavingsTasklet` at the end of the job publishes a `SavingsAccountsStayedLockedBusinessEvent` listing those accounts.
+
+=== Account-agnostic item listener shared with Loan COB
+
+The read/process/write error handling is identical between Loan COB and Savings COB, so it lives once in the abstract base `AbstractItemListener<S extends AbstractPersistableCustom<Long>>` (`fineract-cob/src/main/java/org/apache/fineract/cob/listener/AbstractItemListener.java`). It implements the `@OnReadError`, `@OnProcessError` and `@OnWriteError` callbacks and, for each failed account id, calls `LockingService.updateLockError(...)` inside a `REQUIRES_NEW` transaction. Concrete listeners supply only what differs:
+
+[cols="2,3"]
+|===
+|*Hook* |*Purpose*
+
+|`getLockOwner()`
+|The `LockOwner` that scopes the lock-row updates — `SAVINGS_COB_CHUNK_PROCESSING` for `ChunkProcessingSavingsItemListener`, `LOAN_COB_CHUNK_PROCESSING` / `LOAN_INLINE_COB_PROCESSING` for the loan listeners.
+
+|`getAccountTypeLabel()`
+|The human-readable noun used to build the lock-error message. Defaults to the generic `"Account"`; `ChunkProcessingSavingsItemListener` overrides it to `"Savings"` and the loan listeners to `"Loan"`, so messages read `"Savings (id: %d) processing is failed"` and `"Loan (id: %d) reading is failed"` respectively.
+|===
+
+[NOTE]
+====
+The label is intentionally a per-subclass override rather than a hardcoded string in the base class: it keeps each domain's diagnostic message stable (and its tests green) while the shared error-recording logic stays in one place. Adding a new account type to COB means subclassing `AbstractItemListener` and overriding these two hooks — no error-handling code is duplicated.
+====
+
+=== Garbage-collecting orphaned locks
+
+Because the lock-release happens inside the chunk-writer transaction, a crash between business-step success and writer commit can leave a row in `m_savings_account_locks` whose `error` is `null` but whose account was actually advanced. `UnlockProcessedSavingsTasklet`, the last step of the job, runs the `removeOrphanedLocksForProcessedAccounts` JPQL delete to clear those rows.
+
+== Database Design
+
+=== Overview
+
+Savings COB adds one new table (`m_savings_account_locks`) and one new column on the existing `m_savings_account` table for date tracking, plus rows in the standard `job` and `m_batch_business_steps` tables.
+
+=== Existing Tables
+
+*m_savings_account*: Read by `RetrieveSavingsIdServiceImpl` for partitioning and chunk loading, then updated by the writer to advance `last_closed_business_date`.
+
+*m_batch_business_steps*: Holds the per-tenant ordered list of `SavingsCOBBusinessStep` step names under `job_name = 'SAVINGS_CLOSE_OF_BUSINESS'`.
+
+*job*: Standard scheduled-job table — a `Savings COB` row is inserted so the scheduler can trigger the batch job.
+
+*m_external_event_configuration*: Receives an entry for `SavingsAccountsStayedLockedBusinessEvent` so the event can be externalized.
+
+=== Table: m_savings_account_locks
+
+The `m_savings_account_locks` table stores one row per savings account that is currently held by a COB run. Created by changelog `2006_add_last_cob_business_date_to_savings_account.xml`.
+
+[cols="1,2,1,3",options="header"]
+|===
+| Column Name | Type | Constraints | Description
+| savings_id | BIGINT | PK, FK to `m_savings_account.id`, not null | The locked savings account
+| lock_owner | VARCHAR(100) | not null | `SavingsLockOwner` enum value: `SAVINGS_COB_CHUNK_PROCESSING` or `SAVINGS_INLINE_COB_PROCESSING`
+| lock_placed_on_cob_business_date | DATE |  | The COB business date the lock belongs to; used by stayed-locked and orphaned-lock cleanup queries
+| error | VARCHAR(255) |  | Per-account failure message; populated by `ChunkProcessingSavingsItemListener` when the chunk listener fires
+| stacktrace | TEXT |  | Serialized throwable that produced `error`
+| version | BIGINT | not null | JPA `@Version` optimistic-lock counter, incremented by `upgradeLock`
+| lock_placed_on | DATETIME / TIMESTAMP WITH TIME ZONE | not null | Audit timestamp when the lock was placed (DB-specific column type)
+|===
+
+=== Changes to Existing Tables
+
+==== m_savings_account
+
+The `last_closed_business_date` column is added by changelog `2004_add_savings_account_cob_infrastructure.xml`. An index `FK_savings_account_last_closed_business_date` is added on the same column to keep the partitioner query selective on large account populations.
+
+[cols="1,2,1,3",options="header"]
+|===
+| Column Name | Type | Constraints | Description
+| last_closed_business_date | DATE |  | The most recent COB business date for which all configured business steps completed for this account. Set by `AbstractSavingsItemProcessor.setLastRun(...)` after the business-step chain returns.
+|===
+
+=== Reference rows inserted
+
+`2007_add_savings_cob_job_data.xml` inserts the schedulable job:
+
+[source,sql]
+----
+INSERT INTO job (name, display_name, cron_expression, job_key, short_name, is_active, ...)
+VALUES ('Savings COB', 'Savings COB', '0 0 1 * * ?',
+        'Savings COB dayJobDetail1 _ DEFAULT', 'SAV_COB', false, ...);
+----
+
+`2008_add_savings_cob_business_steps.xml` seeds the default step list (five steps, executed in `step_order`):
+
+[source,sql]
+----
+INSERT INTO m_batch_business_steps (job_name, step_name, step_order) VALUES
+  ('SAVINGS_CLOSE_OF_BUSINESS', 'POST_INTEREST_FOR_SAVINGS',             1),
+  ('SAVINGS_CLOSE_OF_BUSINESS', 'PAY_DUE_SAVINGS_CHARGES',               2),
+  ('SAVINGS_CLOSE_OF_BUSINESS', 'APPLY_ANNUAL_FEE_FOR_SAVINGS',          3),
+  ('SAVINGS_CLOSE_OF_BUSINESS', 'UPDATE_SAVINGS_DORMANT_STATUS',         4),
+  ('SAVINGS_CLOSE_OF_BUSINESS', 'UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS', 5);
+----
+
+== Configuration
+
+=== Job properties
+
+The job is registered as a partitioned job in `application.properties` and inherits all standard partitioned-job knobs. The defaults below can be overridden via environment variables.
+
+[source,properties]
+----
+fineract.partitioned-job.partitioned-job-properties[1].job-name=SAVINGS_COB
+fineract.partitioned-job.partitioned-job-properties[1].chunk-size=${SAVINGS_COB_CHUNK_SIZE:100}
+fineract.partitioned-job.partitioned-job-properties[1].partition-size=${SAVINGS_COB_PARTITION_SIZE:100}
+fineract.partitioned-job.partitioned-job-properties[1].thread-pool-core-pool-size=${SAVINGS_COB_THREAD_POOL_CORE_POOL_SIZE:5}
+fineract.partitioned-job.partitioned-job-properties[1].thread-pool-max-pool-size=${SAVINGS_COB_THREAD_POOL_MAX_POOL_SIZE:5}
+fineract.partitioned-job.partitioned-job-properties[1].thread-pool-queue-capacity=${SAVINGS_COB_THREAD_POOL_QUEUE_CAPACITY:20}
+fineract.partitioned-job.partitioned-job-properties[1].retry-limit=${SAVINGS_COB_RETRY_LIMIT:5}
+fineract.partitioned-job.partitioned-job-properties[1].poll-interval=${SAVINGS_COB_POLL_INTERVAL:500}
+----
+
+[NOTE]
+====
+When `thread-pool-max-pool-size = 1` the worker step uses a `SyncTaskExecutor` and runs accounts sequentially. With a larger pool, work is dispatched through a `ThreadPoolTaskExecutor` decorated by `SavingsContextAwareTaskDecorator`, which propagates the `FineractContext` (tenant, business date, authenticated user) into each worker thread.
+====
+
+=== Business step configuration
+
+The ordered list of steps executed per account is read from `m_batch_business_steps` filtered by `job_name = 'SAVINGS_CLOSE_OF_BUSINESS'` and ordered by `step_order`. Operators add or remove steps per tenant by editing this table. A step is only resolvable if its `step_name` matches a `SavingsCOBBusinessStep` bean's `getEnumStyledName()`.
+
+By default the seed migration installs five steps in this order: `POST_INTEREST_FOR_SAVINGS` (1), `PAY_DUE_SAVINGS_CHARGES` (2), `APPLY_ANNUAL_FEE_FOR_SAVINGS` (3), `UPDATE_SAVINGS_DORMANT_STATUS` (4) and `UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS` (5).
+
+=== Manager vs Worker mode
+
+`SavingsCOBManagerConfiguration` is only active when `BatchManagerCondition` evaluates to true and `SavingsCOBWorkerConfiguration` only when `BatchWorkerCondition` does. In a single-node deployment both conditions are true and the same JVM does both roles; in a manager/worker deployment they activate on different nodes.
+
+== Job Topology
+
+The `savingsCOBJob` is composed of four sequential steps on the manager node:
+
+[source]
+----
+savingsCOBJob (JobName.SAVINGS_COB)
+  ├── Resolve custom job parameters - Savings Step
+  ├── Savings COB partition - Step              (partitioner -> outboundRequests)
+  ├── Stayed locked savings accounts - Step
+  └── Unlock processed savings accounts - Step
+----
+
+Each worker partition runs the following flow (driven by `CobWorkerStepListener`):
+
+[source]
+----
+savingsCOBWorkerStep
+  ├── savingsInitialiseContext      (InitialisationTasklet — sets up FineractContext)
+  ├── savingsApplyLock              (ApplySavingsLockTasklet — inserts locks)
+  ├── chunk(SavingsAccount)         (reader -> processor -> writer)
+  │     reader   : SavingsItemReader
+  │     processor: SavingsItemProcessor      (runs the SavingsCOBBusinessStep chain)
+  │     writer   : SavingsItemWriter         (saveAll + delete locks)
+  └── savingsResetContext           (ResetContextTasklet)
+----
+
+The chunk step is fault tolerant: it retries up to `retryLimit` on any `Exception`, then skips with `skipLimit = chunkSize + 1`. `ChunkProcessingSavingsItemListener` intercepts `@OnReadError`, `@OnProcessError`, and `@OnWriteError` and records the failure against the per-account lock row in a `REQUIRES_NEW` transaction.
+
+=== Partitioning logic
+
+`SavingsCOBPartitioner.partition(int)` computes its partitions by paging through eligible account ids. The SQL is dialect-portable through `NamedParameterJdbcTemplate` and uses `row_number()` window-paging:
+
+* Filter: `status_enum IN (SUBMITTED_AND_PENDING_APPROVAL, APPROVED, ACTIVE, TRANSFER_IN_PROGRESS, TRANSFER_ON_HOLD)`.
+* When `isCatchUp = true`: only accounts where `last_closed_business_date = businessDate - 1`.
+* When `isCatchUp = false`: accounts where `last_closed_business_date = businessDate - 1 OR last_closed_business_date IS NULL`.
+* Output: a list of `COBPartition(min, max, page, count)` rows whose ids fall into the same `floor((rowNumber - 1) / partitionSize)` bucket.
+
+If the configured business steps list is empty the partitioner calls `jobOperator.stop(jobId)` and returns no partitions. If there are no eligible accounts, a synthetic `(0, 0, 1, 0)` partition is emitted so the downstream worker step still runs cleanly.
+
+=== Reader filter
+
+`SavingsItemReader.beforeStep` re-runs `retrieveAllNonClosedSavingsByLastClosedBusinessDateAndMinAndMaxSavingsId` to get the savings ids within the partition's `[min, max]` range, then *retains only* those that actually have a `SAVINGS_COB_CHUNK_PROCESSING` lock placed for them by the `ApplySavingsLockTasklet`. This guarantees the chunk processor never touches an account that was not successfully locked first.
+
+== Business Steps
+
+Business steps are implementations of `SavingsCOBBusinessStep extends COBBusinessStep<SavingsAccount>`. They are Spring beans, discovered by `COBBusinessStepService`, and invoked in `step_order` for every `SavingsAccount` flowing through the chunk processor.
+
+[source,java]
+----
+public interface SavingsCOBBusinessStep extends COBBusinessStep<SavingsAccount> {
+    // String getEnumStyledName();   // matches m_batch_business_steps.step_name
+    // String getHumanReadableName();
+    // SavingsAccount execute(SavingsAccount input);
+}
+----
+
+The commit ships five business steps, all enabled by default. They run in `step_order` for every account in the chunk:
+
+[cols="1,1,1,3",options="header"]
+|===
+| Step name (`getEnumStyledName()`) | Human-readable name | Default order | Behaviour
+| `POST_INTEREST_FOR_SAVINGS` | Post interest for savings | 1 | Posts interest for the account up to the current business date.
+| `PAY_DUE_SAVINGS_CHARGES` | Pay due savings charges | 2 | Applies every active, not-fully-paid charge whose due date has arrived on the business date.
+| `APPLY_ANNUAL_FEE_FOR_SAVINGS` | Apply annual fee for savings | 3 | Applies active, not-fully-paid annual-fee charges whose due date is on or before the business date.
+| `UPDATE_SAVINGS_DORMANT_STATUS` | Update savings dormant status | 4 | Advances the dormancy sub-status (NONE → INACTIVE → DORMANT → ESCHEAT) based on the product's inactivity thresholds.
+| `UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS` | Update deposit accounts maturity details | 5 | Recomputes maturity details for fixed/recurring deposit accounts; plain savings deposits are skipped.
+|===
+
+==== POST_INTEREST_FOR_SAVINGS
+
+`PostInterestForSavingsBusinessStep` delegates to `SavingsAccountWritePlatformService.postInterest(account, false, businessDate, backdatedTxnsAllowedTill)`, where `backdatedTxnsAllowedTill` is read from `ConfigurationDomainService.retrievePivotDateConfig()`.
+
+==== PAY_DUE_SAVINGS_CHARGES
+
+`PayDueSavingsChargesBusinessStep` iterates `savingsAccount.charges()` and, for each charge that is active, not fully paid, has a due date, and is due on the business date (`charge.isChargeIsDue(businessDate)`), calls `SavingsAccountWritePlatformService.applyChargeDue(chargeId, savingsId)`.
+
+==== APPLY_ANNUAL_FEE_FOR_SAVINGS
+
+`ApplyAnnualFeeForSavingsBusinessStep` iterates the charges and, for each charge that is an annual fee, active, not fully paid, has a due date, and whose due date is not after the business date, calls `SavingsAccountWritePlatformService.applyAnnualFee(chargeId, savingsId)`.
+
+==== UPDATE_SAVINGS_DORMANT_STATUS
+
+`UpdateSavingsDormantStatusBusinessStep` asks `SavingsDormancyService.deriveDormancyTransition(account, businessDate)` for the next sub-status and applies it via the write service:
+
+* `INACTIVE` → `setSubStatusInactive(savingsId)`
+* `DORMANT` → `setSubStatusDormant(savingsId)`
+* `ESCHEAT` → `escheat(savingsId)`
+
+`SavingsDormancyServiceImpl` only acts on active accounts whose product has dormancy tracking enabled. It measures days since the last active (non-reversed deposit/withdrawal) transaction — falling back to the activation date — and compares that against the product's `daysToInactive`, `daysToDormancy` and `daysToEscheat` thresholds to derive the single next transition (or `null` when no transition applies).
+
+==== UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS
+
+`UpdateDepositMaturityDetailsBusinessStep` reads `savingsAccount.depositAccountType()` and, only when it is a deposit type other than `SAVINGS_DEPOSIT` (i.e. fixed or recurring deposits), calls `DepositAccountWritePlatformService.updateMaturityDetails(savingsId, depositAccountType)`. Plain savings deposits carry no maturity and are skipped.
+
+== Locking
+
+=== Lock ownership
+
+`SavingsLockOwner` enumerates who placed the lock:
+
+[cols="1,3",options="header"]
+|===
+| Value | Description
+| `SAVINGS_COB_CHUNK_PROCESSING` | Held by the batch worker while a chunk is being processed
+| `SAVINGS_INLINE_COB_PROCESSING` | Held by the inline catch-up job (`INLINE_SAVINGS_COB`) while it advances a single account on demand
+|===
+
+NOTE: The inline catch-up job (`INLINE_SAVINGS_COB`) and the `SAVINGS_INLINE_COB_PROCESSING` lock owner are wired as an inline job and can be invoked programmatically, but — unlike Loan COB — there is currently no servlet filter (no `SavingsCOBApiFilter` equivalent to `LoanCOBApiFilter`) that auto-triggers a catch-up COB when a write API is called against a savings account that is behind on COB. That write-API trigger is not part of this change.
+
+=== Lock lifecycle
+
+. `ApplySavingsLockTasklet` selects all eligible ids in the partition, removes those already locked (so it never re-locks), and bulk-inserts rows into `m_savings_account_locks` via `SavingsLockingServiceImpl.applyLock(...)`. The insert runs in a `PROPAGATION_REQUIRES_NEW` transaction. It retries up to 3 commit-count cycles before raising `LockCannotBeAppliedException`.
+. The chunk reader filters its working set down to ids that actually have a `SAVINGS_COB_CHUNK_PROCESSING` lock.
+. The processor runs the business-step chain and sets `lastClosedBusinessDate = businessDate` on the account.
+. The writer persists the chunk via `RepositoryItemWriter` and then calls `deleteBySavingsIdInAndLockOwner(ids, SAVINGS_COB_CHUNK_PROCESSING)` in the same transaction.
+. If any read/process/write error occurs, `ChunkProcessingSavingsItemListener` writes the error message and stacktrace to the lock row and the lock is *kept*.
+. The `StayedLockedSavingsTasklet` at the end of the job calls `findAllStayedLockedByCobBusinessDate(cobBusinessDate)` and, if any rows come back, publishes a `SavingsAccountsStayedLockedBusinessEvent`.
+. The `UnlockProcessedSavingsTasklet` runs `removeOrphanedLocksForProcessedAccounts`, which deletes any `SAVINGS_COB_CHUNK_PROCESSING` lock row whose `error` is `null` (i.e. processing actually finished but the writer's lock delete didn't land).
+
+=== Locking SQL
+
+`SavingsLockingServiceImpl` uses two JDBC batch statements:
+
+[source,sql]
+----
+-- applyLock
+INSERT INTO m_savings_account_locks
+  (savings_id, version, lock_owner, lock_placed_on, lock_placed_on_cob_business_date)
+VALUES (?, ?, ?, ?, ?);
+
+-- upgradeLock
+UPDATE m_savings_account_locks
+SET version = version + 1, lock_owner = ?, lock_placed_on = ?
+WHERE savings_id = ?;
+----
+
+Both are batched in slices of `fineract.query.in-clause-parameter-size-limit` rows.
+
+== Business Events
+
+=== Overview
+
+The COB job emits one business event when accounts could not be unlocked at the end of the run.
+
+=== SavingsAccountsStayedLockedBusinessEvent
+
+*Category:* `Savings COB`
+
+*Type:* `SavingsAccountsStayedLockedBusinessEvent`
+
+Emitted by `StayedLockedSavingsTasklet` at the end of `savingsCOBJob` whenever
+`findAllStayedLockedByCobBusinessDate(cobBusinessDate)` returns a non-empty list. The payload `SavingsAccountsStayedLockedData` contains a list of `COBIdAndExternalIdAndAccountNo(id, externalId, accountNo)` for every savings account whose lock row remained associated with the current COB business date.
+
+The event is registered in `m_external_event_configuration` (migration `2004_add_savings_account_cob_infrastructure.xml`) with `enabled = false` by default — operators turn it on per tenant to receive externalized notifications.
+
+== Validation Rules
+
+The job has no user-facing input and therefore no API-level validation. Internal invariants enforced by the pipeline:
+
+* The partitioner refuses to dispatch any partition when no `SavingsCOBBusinessStep` is configured for `SAVINGS_CLOSE_OF_BUSINESS` in `m_batch_business_steps`; it stops the job execution.
+* The reader filters out any partition member that does not currently hold a `SAVINGS_COB_CHUNK_PROCESSING` lock.
+* `ApplySavingsLockTasklet` only retries lock acquisition while `stepExecution.commitCount <= 3`; beyond that it raises `LockCannotBeAppliedException`.
+
+== Business Rules
+
+=== Account selection
+
+* Only savings accounts in `SUBMITTED_AND_PENDING_APPROVAL`, `APPROVED`, `ACTIVE`, `TRANSFER_IN_PROGRESS`, or `TRANSFER_ON_HOLD` are eligible.
+* Accounts whose `last_closed_business_date` is already at or beyond `cobBusinessDate - NUMBER_OF_DAYS_BEHIND` (i.e. already processed for that date) are skipped.
+* `NUMBER_OF_DAYS_BEHIND` is inherited from `COBConstant.NUMBER_OF_DAYS_BEHIND = 1L`.
+
+=== Catch-up mode
+
+* When the job parameter `IS_CATCH_UP = true`, the partitioner and reader only consider accounts where `last_closed_business_date = cobBusinessDate - 1`. This is the entry point used to re-process accounts whose previous COB run left them in a stayed-locked state, after manual intervention has cleared the lock.
+
+=== Idempotence
+
+* The processor sets `lastClosedBusinessDate` to the current business date as the last action of `process(...)`. A re-run for the same business date will therefore skip already-advanced accounts at partition selection time.
+* Business steps are expected to be idempotent within a single business date; a chunk-level retry will re-invoke `execute(...)` for the same account.
+
+== Example Scenarios
+
+=== Scenario #1: Nightly COB advances a healthy tenant
+
+*Setup:*
+
+* `m_batch_business_steps` for `SAVINGS_CLOSE_OF_BUSINESS` contains the five seeded steps (`POST_INTEREST_FOR_SAVINGS`, `PAY_DUE_SAVINGS_CHARGES`, `APPLY_ANNUAL_FEE_FOR_SAVINGS`, `UPDATE_SAVINGS_DORMANT_STATUS`, `UPDATE_DEPOSITS_ACCOUNT_MATURITY_DETAILS`).
+* `BusinessDate` is 2026-06-09; all eligible savings accounts have `last_closed_business_date = 2026-06-08` or `NULL`.
+* `partition-size = 100`, `chunk-size = 100`, `thread-pool-max-pool-size = 5`.
+
+*Action:*
+
+The `Savings COB` scheduled job fires. The manager partitions accounts into id-range buckets of 100 and pushes them onto `outboundRequests`. Workers pull each partition, place locks, run the five business steps in order against each account, persist, release locks.
+
+*Expected Behavior:*
+
+* Every eligible account has `last_closed_business_date` advanced to 2026-06-09.
+* `m_savings_account_locks` is empty at the end of the run.
+* `StayedLockedSavingsTasklet` finds no rows and emits no event.
+* `UnlockProcessedSavingsTasklet` deletes 0 rows.
+
+=== Scenario #2: A single account fails interest posting
+
+*Setup:*
+
+* Same configuration as Scenario #1.
+* Account `12345` is in an inconsistent state that makes `postInterest` throw a `RuntimeException` every time, including on retry.
+
+*Action:*
+
+The chunk-step retries `12345` up to `retryLimit` times, then skips it. `ChunkProcessingSavingsItemListener.onProcessError` writes `"Savings (id: 12345) processing is failed"` and the serialized stacktrace to the row in `m_savings_account_locks` for that account.
+
+*Expected Behavior:*
+
+* All accounts other than `12345` advance and have their locks released.
+* The lock row for `12345` remains, with `error` and `stacktrace` populated.
+* `StayedLockedSavingsTasklet` finds `12345` and publishes a `SavingsAccountsStayedLockedBusinessEvent` containing `(12345, externalId, accountNo)`.
+* `UnlockProcessedSavingsTasklet` does *not* delete `12345` because its `error` column is non-null.
+* On the next day's run, `12345` is excluded from partitioning until the lock is manually cleared (e.g. via `removeLockByOwner` after operator review).
+
+== Summary
+
+Savings COB ports the proven LoanCOB partitioned-batch architecture to savings accounts, providing a configurable, fault-tolerant, horizontally scalable end-of-day pipeline. Key aspects:
+
+* Manager/worker Spring Batch topology with `RemotePartitioningManagerStepBuilderFactory` and `RemotePartitioningWorkerStepBuilderFactory`, activated through `BatchManagerCondition` / `BatchWorkerCondition`.
+* Per-account distributed lock in `m_savings_account_locks` with two ownership flavours (chunk processing and inline) and explicit stayed-lock + orphaned-lock cleanup steps.
+* Extensible pipeline through the `SavingsCOBBusinessStep` interface and the tenant-scoped `m_batch_business_steps` table, shipping with five steps enabled by default: interest posting, due-charge payment, annual-fee application, dormancy-status update and deposit-maturity update.
+* Catch-up mode that targets only accounts whose previous COB run did not complete, enabling safe re-processing.
+* Business-event `SavingsAccountsStayedLockedBusinessEvent` that surfaces every account left locked at end-of-run, so downstream tooling can alert or auto-remediate.

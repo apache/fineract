@@ -29,7 +29,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
 @Conditional(BatchWorkerCondition.class)
-public class WorkingCapitalChunkProcessingLoanItemListener extends AbstractLoanItemListener<WorkingCapitalLoan> {
+public class WorkingCapitalChunkProcessingLoanItemListener extends AbstractItemListener<WorkingCapitalLoan> {
 
     public WorkingCapitalChunkProcessingLoanItemListener(
             @Qualifier("workingCapitalLoanLockingService") LockingService workingCapitalLoanAccountLockLockingService,
@@ -40,6 +40,11 @@ public class WorkingCapitalChunkProcessingLoanItemListener extends AbstractLoanI
     @Override
     protected LockOwner getLockOwner() {
         return LockOwner.LOAN_COB_CHUNK_PROCESSING;
+    }
+
+    @Override
+    protected String getAccountTypeLabel() {
+        return "Loan";
     }
 
 }

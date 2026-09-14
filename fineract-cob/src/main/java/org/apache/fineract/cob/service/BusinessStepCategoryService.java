@@ -23,4 +23,16 @@ import org.apache.fineract.cob.COBBusinessStep;
 public interface BusinessStepCategoryService {
 
     Class<? extends COBBusinessStep> getBusinessStepByCategory(String category);
+
+    /**
+     * @return the business step category handled by this service (e.g. LOAN, SAVINGS).
+     */
+    BusinessStepCategory getCategory();
+
+    /**
+     * @return the COB job name whose business steps are configurable through this category (e.g.
+     *         {@code LOAN_CLOSE_OF_BUSINESS}, {@code SAVINGS_CLOSE_OF_BUSINESS}). This is the value used as the
+     *         {@code job_name} key when persisting the step configuration.
+     */
+    String getJobName();
 }

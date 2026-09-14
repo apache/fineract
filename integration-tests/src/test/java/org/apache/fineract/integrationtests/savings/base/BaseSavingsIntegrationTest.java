@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.integrationtests.savings.base;
 
+import com.google.gson.Gson;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
@@ -28,6 +29,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -214,6 +216,16 @@ public class BaseSavingsIntegrationTest extends IntegrationTest {
 
     private String getFullAdminAuthKey() {
         return Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey();
+    }
+
+    protected void executeInlineSavingsCOB(final List<Long> savingsIds) {
+        final String inlineSavingsCOBUrl = "/fineract-provider/api/v1/jobs/SAVINGS_COB/inline?" + Utils.TENANT_IDENTIFIER;
+        final Map<String, Object> body = Map.of("savingsIds", savingsIds);
+        Utils.performServerPost(requestSpec, responseSpec, inlineSavingsCOBUrl, new Gson().toJson(body), null);
+    }
+
+    protected Long createClient() {
+        return ClientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
     }
 
     @ToString

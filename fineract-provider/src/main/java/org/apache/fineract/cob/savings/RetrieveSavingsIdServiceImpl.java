@@ -110,8 +110,6 @@ public class RetrieveSavingsIdServiceImpl implements RetrieveSavingsIdService {
 
     @Override
     public List<COBIdAndExternalIdAndAccountNo> findAllStayedLockedByCobBusinessDate(LocalDate cobBusinessDate) {
-        // This will be implemented when we add the query to join with SavingsAccountLock
-        // For now, return empty list as the lock table doesn't exist yet
-        return List.of();
+        return savingsAccountRepository.findAllStayedLockedByCobBusinessDate(cobBusinessDate);
     }
 }

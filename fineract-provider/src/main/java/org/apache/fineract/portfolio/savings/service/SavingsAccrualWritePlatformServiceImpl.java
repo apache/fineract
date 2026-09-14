@@ -70,6 +70,19 @@ public class SavingsAccrualWritePlatformServiceImpl implements SavingsAccrualWri
     @Override
     public void addAccrualEntries(LocalDate tillDate) throws JobExecutionException {
         final List<SavingsAccrualData> savingsAccrualData = savingsAccountReadPlatformService.retrievePeriodicAccrualData(tillDate, null);
+        processAccrualData(savingsAccrualData, tillDate);
+    }
+
+    @Transactional
+    @Override
+    public void addAccrualEntries(SavingsAccount savingsAccount, LocalDate tillDate) throws JobExecutionException {
+        final List<SavingsAccrualData> savingsAccrualData = savingsAccountReadPlatformService.retrievePeriodicAccrualData(tillDate,
+                savingsAccount);
+        processAccrualData(savingsAccrualData, tillDate);
+    }
+
+    private void processAccrualData(final List<SavingsAccrualData> savingsAccrualData, final LocalDate tillDate)
+            throws JobExecutionException {
         final Integer financialYearBeginningMonth = configurationDomainService.retrieveFinancialYearBeginningMonth();
         final boolean isSavingsInterestPostingAtCurrentPeriodEnd = this.configurationDomainService
                 .isSavingsInterestPostingAtCurrentPeriodEnd();

@@ -32,7 +32,6 @@ import org.apache.fineract.cob.data.COBParameter;
 import org.apache.fineract.cob.data.COBPartition;
 import org.apache.fineract.cob.resolver.BusinessDateResolver;
 import org.apache.fineract.cob.resolver.CatchUpFlagResolver;
-import org.apache.fineract.cob.service.RetrieveIdService;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.JobOperator;
@@ -47,7 +46,21 @@ public abstract class CommonPartitioner {
     private final JobOperator jobOperator;
     private final StepExecution stepExecution;
     private final Long numberOfDays;
-    private final RetrieveIdService retrieveIdService;
+
+    /**
+     * Retrieves the account-id partitions to be processed by this COB job. Each account type supplies its own query
+     * (loans, savings, ...).
+     */
+    protected abstract List<COBPartition> retrievePartitions(Long numberOfDays, LocalDate businessDate, boolean isCatchUp,
+            int partitionSize);
+
+    /**
+     * Execution-context key under which the per-partition {@link COBParameter} (min/max account id) is stored. Defaults
+     * to the loan key; other account types override it so reader/tasklet pick up the right partition bounds.
+     */
+    protected String getCobParameterKey() {
+        return COBConstant.COB_PARAMETER;
+    }
 
     public Map<String, ExecutionContext> getPartitions(int partitionSize, Set<BusinessStepNameAndOrder> cobBusinessSteps) {
         if (cobBusinessSteps.isEmpty()) {
@@ -58,31 +71,30 @@ public abstract class CommonPartitioner {
         boolean isCatchUp = CatchUpFlagResolver.resolve(stepExecution);
         StopWatch sw = new StopWatch();
         sw.start();
-        List<COBPartition> partitions = new ArrayList<>(
-                retrieveIdService.retrieveLoanCOBPartitions(numberOfDays, businessDate, isCatchUp, partitionSize));
+        List<COBPartition> partitions = new ArrayList<>(retrievePartitions(numberOfDays, businessDate, isCatchUp, partitionSize));
         sw.stop();
-        // if there is no loan to be closed, we still would like to create at least one partition
+        // if there is no account to be closed, we still would like to create at least one partition
 
         if (partitions.isEmpty()) {
             partitions.add(new COBPartition(0L, 0L, 1L, 0L));
         }
         log.info(
-                "{}} found {} loans to be processed as part of COB. {} partitions were created using partition size {}. RetrieveLoanCOBPartitions was executed in {} ms.",
-                getClass().getName(), getLoanCount(partitions), partitions.size(), partitionSize, sw.getTotalTimeMillis());
+                "{} found {} accounts to be processed as part of COB. {} partitions were created using partition size {}. Partition retrieval was executed in {} ms.",
+                getClass().getName(), getAccountCount(partitions), partitions.size(), partitionSize, sw.getTotalTimeMillis());
         return partitions.stream().collect(Collectors.toMap(l -> COBConstant.PARTITION_PREFIX + l.getPageNo(),
                 l -> createExecutionContextForPartition(cobBusinessSteps, l, businessDate, isCatchUp)));
     }
 
-    private long getLoanCount(List<COBPartition> loanCOBPartitions) {
-        return loanCOBPartitions.stream().map(COBPartition::getCount).reduce(0L, Long::sum);
+    private long getAccountCount(List<COBPartition> cobPartitions) {
+        return cobPartitions.stream().map(COBPartition::getCount).reduce(0L, Long::sum);
     }
 
-    private ExecutionContext createExecutionContextForPartition(Set<BusinessStepNameAndOrder> cobBusinessSteps,
-            COBPartition loanCOBPartition, LocalDate businessDate, boolean isCatchUp) {
+    private ExecutionContext createExecutionContextForPartition(Set<BusinessStepNameAndOrder> cobBusinessSteps, COBPartition cobPartition,
+            LocalDate businessDate, boolean isCatchUp) {
         ExecutionContext executionContext = new ExecutionContext();
         executionContext.put(COBConstant.BUSINESS_STEPS, cobBusinessSteps);
-        executionContext.put(COBConstant.COB_PARAMETER, new COBParameter(loanCOBPartition.getMinId(), loanCOBPartition.getMaxId()));
-        executionContext.put(COBConstant.PARTITION_KEY, COBConstant.PARTITION_PREFIX + loanCOBPartition.getPageNo());
+        executionContext.put(getCobParameterKey(), new COBParameter(cobPartition.getMinId(), cobPartition.getMaxId()));
+        executionContext.put(COBConstant.PARTITION_KEY, COBConstant.PARTITION_PREFIX + cobPartition.getPageNo());
         executionContext.put(COBConstant.BUSINESS_DATE_PARAMETER_NAME, businessDate.toString());
         executionContext.put(COBConstant.IS_CATCH_UP_PARAMETER_NAME, Boolean.toString(isCatchUp));
         return executionContext;

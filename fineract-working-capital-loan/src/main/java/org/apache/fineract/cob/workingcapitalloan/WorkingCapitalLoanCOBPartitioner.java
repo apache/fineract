@@ -21,12 +21,15 @@ package org.apache.fineract.cob.workingcapitalloan;
 import static org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanCOBConstant.WORKING_CAPITAL_JOB_NAME;
 import static org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanCOBConstant.WORKING_CAPITAL_LOAN_COB_JOB_NAME;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.COBBusinessStepService;
 import org.apache.fineract.cob.common.CommonPartitioner;
 import org.apache.fineract.cob.data.BusinessStepNameAndOrder;
+import org.apache.fineract.cob.data.COBPartition;
 import org.apache.fineract.cob.workingcapitalloan.businessstep.WorkingCapitalLoanCOBBusinessStep;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
 import org.springframework.batch.core.StepExecution;
@@ -40,13 +43,20 @@ public class WorkingCapitalLoanCOBPartitioner extends CommonPartitioner implemen
 
     private final COBBusinessStepService cobBusinessStepService;
     private final PropertyService propertyService;
+    private final WorkingCapitalLoanRetrieveIdService retrieveIdService;
 
     public WorkingCapitalLoanCOBPartitioner(JobOperator jobOperator, StepExecution stepExecution, Long numberOfDays,
             WorkingCapitalLoanRetrieveIdService retrieveIdService, COBBusinessStepService cobBusinessStepService,
             PropertyService propertyService) {
-        super(jobOperator, stepExecution, numberOfDays, retrieveIdService);
+        super(jobOperator, stepExecution, numberOfDays);
         this.cobBusinessStepService = cobBusinessStepService;
         this.propertyService = propertyService;
+        this.retrieveIdService = retrieveIdService;
+    }
+
+    @Override
+    protected List<COBPartition> retrievePartitions(Long numberOfDays, LocalDate businessDate, boolean isCatchUp, int partitionSize) {
+        return retrieveIdService.retrieveLoanCOBPartitions(numberOfDays, businessDate, isCatchUp, partitionSize);
     }
 
     @NonNull

@@ -36,18 +36,23 @@ import org.springframework.batch.item.Chunk;
 import org.springframework.lang.NonNull;
 import org.springframework.transaction.support.TransactionTemplate;
 
+/**
+ * Account-agnostic Spring Batch item listener for COB chunk processing. It records read/process/write errors against
+ * the corresponding account lock so a failed account can be diagnosed and unlocked. Concrete account types (loan,
+ * savings, ...) supply the {@link LockOwner} to scope the lock updates.
+ */
 @Slf4j
 @RequiredArgsConstructor
-public abstract class AbstractLoanItemListener<S extends AbstractPersistableCustom<Long>> {
+public abstract class AbstractItemListener<S extends AbstractPersistableCustom<Long>> {
 
-    private final LockingService loanLockingService;
+    private final LockingService lockingService;
     private final TransactionTemplate requiresNewTransactionJdbcTemplate;
 
-    private void updateAccountLockWithError(List<Long> loanIds, String msg, Throwable e) {
+    private void updateAccountLockWithError(List<Long> accountIds, String msg, Throwable e) {
         requiresNewTransactionJdbcTemplate.executeWithoutResult(status -> {
             String stacktrace = ThrowableSerialization.serialize(e);
-            for (Long loanId : loanIds) {
-                loanLockingService.updateLockError(loanId, getLockOwner(), String.format(msg, loanId), stacktrace);
+            for (Long accountId : accountIds) {
+                lockingService.updateLockError(accountId, getLockOwner(), String.format(msg, accountId), stacktrace);
             }
         });
     }
@@ -55,8 +60,8 @@ public abstract class AbstractLoanItemListener<S extends AbstractPersistableCust
     @OnReadError
     public void onReadError(Exception e) {
         if (e instanceof LockedReadException ee) {
-            log.warn("Error was triggered during reading of Loan (id={}) due to: {}", ee.getId(), ThrowableSerialization.serialize(e));
-            updateAccountLockWithError(List.of(ee.getId()), "Loan (id: %d) reading is failed", e);
+            log.warn("Error was triggered during reading of account (id={}) due to: {}", ee.getId(), ThrowableSerialization.serialize(e));
+            updateAccountLockWithError(List.of(ee.getId()), getAccountTypeLabel() + " (id: %d) reading is failed", e);
         } else {
             log.error("Could not handle read error", e);
         }
@@ -64,15 +69,15 @@ public abstract class AbstractLoanItemListener<S extends AbstractPersistableCust
 
     @OnProcessError
     public void onProcessError(@NonNull S item, Exception e) {
-        log.warn("Error was triggered during processing of Loan (id={}) due to: {}", item.getId(), ThrowableSerialization.serialize(e));
-        updateAccountLockWithError(List.of(item.getId()), "Loan (id: %d) processing is failed", e);
+        log.warn("Error was triggered during processing of account (id={}) due to: {}", item.getId(), ThrowableSerialization.serialize(e));
+        updateAccountLockWithError(List.of(item.getId()), getAccountTypeLabel() + " (id: %d) processing is failed", e);
     }
 
     @OnWriteError
     public void onWriteError(Exception e, @NonNull Chunk<? extends S> items) {
-        List<Long> loanIds = items.getItems().stream().map(AbstractPersistableCustom::getId).toList();
-        log.warn("Error was triggered during writing of Loans (ids={}) due to: {}", loanIds, ThrowableSerialization.serialize(e));
-        updateAccountLockWithError(loanIds, "Loan (id: %d) writing is failed", e);
+        List<Long> accountIds = items.getItems().stream().map(AbstractPersistableCustom::getId).toList();
+        log.warn("Error was triggered during writing of accounts (ids={}) due to: {}", accountIds, ThrowableSerialization.serialize(e));
+        updateAccountLockWithError(accountIds, getAccountTypeLabel() + " (id: %d) writing is failed", e);
     }
 
     @OnSkipInRead
@@ -82,14 +87,23 @@ public abstract class AbstractLoanItemListener<S extends AbstractPersistableCust
 
     @OnSkipInProcess
     public void onSkipInProcess(@NonNull S item, @NonNull Throwable e) {
-        log.warn("Skipping was triggered during processing of Loan (id={})", item.getId());
+        log.warn("Skipping was triggered during processing of account (id={})", item.getId());
     }
 
     @OnSkipInWrite
     public void onSkipInWrite(@NonNull S item, @NonNull Throwable e) {
-        log.warn("Skipping was triggered during writing of Loan (id={})", item.getId());
+        log.warn("Skipping was triggered during writing of account (id={})", item.getId());
     }
 
     protected abstract LockOwner getLockOwner();
+
+    /**
+     * Human-readable noun for the account type handled by this listener (e.g. {@code "Loan"}, {@code "Savings"}). Used
+     * to build the lock error messages. Concrete account types may override it; defaults to the generic
+     * {@code "Account"}.
+     */
+    protected String getAccountTypeLabel() {
+        return "Account";
+    }
 
 }

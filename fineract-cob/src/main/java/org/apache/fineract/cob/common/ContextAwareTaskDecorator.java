@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.cob.loan;
+package org.apache.fineract.cob.common;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.domain.FineractContext;
@@ -25,7 +25,7 @@ import org.springframework.core.task.TaskDecorator;
 import org.springframework.lang.NonNull;
 
 /**
- * Task decorator to ensure proper thread context propagation and cleanup
+ * Task decorator to ensure proper thread context propagation and cleanup for COB worker threads.
  */
 @Slf4j
 public class ContextAwareTaskDecorator implements TaskDecorator {
