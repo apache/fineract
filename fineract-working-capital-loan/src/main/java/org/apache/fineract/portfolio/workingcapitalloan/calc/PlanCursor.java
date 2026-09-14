@@ -113,6 +113,30 @@ final class PlanCursor {
         this.exhausted = false;
     }
 
+    static PlanCursor forPaymentAmount(final BigDecimal netDisbursement, final BigDecimal discountFee, final BigDecimal paymentAmount,
+            final int npvDayCount, final int currencyScale, final MathContext mc) {
+        return new PlanCursor(WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, netDisbursement, discountFee, paymentAmount,
+                npvDayCount, currencyScale, mc);
+    }
+
+    private PlanCursor(final WorkingCapitalPaymentAmountCalculationStrategy strategy, final BigDecimal netDisbursement,
+            final BigDecimal discountFee, final BigDecimal paymentAmount, final int npvDayCount, final int currencyScale,
+            final MathContext mc) {
+        this.mc = mc;
+        this.totalPaymentVolume = null;
+        this.npvDayCount = npvDayCount;
+        this.currencyScale = currencyScale;
+        this.strategy = strategy;
+        this.balance = netDisbursement;
+        this.earned = BigDecimal.ZERO;
+        this.billed = BigDecimal.ZERO;
+        this.previousEarned = BigDecimal.ZERO;
+        this.previousBilled = BigDecimal.ZERO;
+        this.solved = AmortizationParams.solveFromKnownPayment(netDisbursement, discountFee, paymentAmount, mc, npvDayCount);
+        this.stepsInSolve = 0;
+        this.exhausted = false;
+    }
+
     /** The rate currently driving the plan, which is also the rate the schedule bills at. */
     AmortizationParams.Solved solved() {
         return solved;
@@ -131,8 +155,9 @@ final class PlanCursor {
      */
     void changeRateTo(final BigDecimal periodPaymentRate, final BigDecimal balanceNow, final BigDecimal unearnedFee,
             final BigDecimal collectedSoFar) {
-        if (strategy.isAnnualEir()) {
-            throw new IllegalStateException("rate change is not supported for Annual EIR payment amount calculation strategy");
+        if (!strategy.isTpv()) {
+            throw new IllegalStateException(
+                    "rate change is not supported for the " + strategy.name() + " payment amount calculation strategy");
         }
         if (balanceNow.signum() <= 0) {
             throw new IllegalArgumentException("balance at a rate change must be positive, got: " + balanceNow);

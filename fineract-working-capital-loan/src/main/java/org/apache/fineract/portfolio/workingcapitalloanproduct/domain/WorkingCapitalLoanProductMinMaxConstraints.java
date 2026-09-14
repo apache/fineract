@@ -56,4 +56,10 @@ public class WorkingCapitalLoanProductMinMaxConstraints {
 
     @Column(name = "max_annual_eir", scale = 6, precision = 19)
     private BigDecimal maxAnnualEir;
+
+    @Column(name = "min_payment_amount", scale = 6, precision = 19)
+    private BigDecimal minPaymentAmount;
+
+    @Column(name = "max_payment_amount", scale = 6, precision = 19)
+    private BigDecimal maxPaymentAmount;
 }

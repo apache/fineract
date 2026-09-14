@@ -31,7 +31,8 @@ import org.springframework.util.StringUtils;
 public enum WorkingCapitalPaymentAmountCalculationStrategy implements ApiFacingEnum<WorkingCapitalPaymentAmountCalculationStrategy> {
 
     TPV(1, "TPV", "Total Payment Volume"), //
-    ANNUAL_EIR(2, "ANNUAL_EIR", "Annual EIR") //
+    ANNUAL_EIR(2, "ANNUAL_EIR", "Annual EIR"), //
+    PAYMENT_AMOUNT(3, "PAYMENT_AMOUNT", "Payment Amount") //
     ;
 
     private final Integer value;
@@ -49,6 +50,9 @@ public enum WorkingCapitalPaymentAmountCalculationStrategy implements ApiFacingE
         if (trimmed.equalsIgnoreCase(ANNUAL_EIR.name())) {
             return ANNUAL_EIR;
         }
+        if (trimmed.equalsIgnoreCase(PAYMENT_AMOUNT.name())) {
+            return PAYMENT_AMOUNT;
+        }
         return null;
     }
 
@@ -58,5 +62,9 @@ public enum WorkingCapitalPaymentAmountCalculationStrategy implements ApiFacingE
 
     public boolean isAnnualEir() {
         return this == ANNUAL_EIR;
+    }
+
+    public boolean isPaymentAmount() {
+        return this == PAYMENT_AMOUNT;
     }
 }

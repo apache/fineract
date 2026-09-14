@@ -85,11 +85,14 @@ public class WorkingCapitalLoanProductData implements Serializable {
     private BigDecimal maxPeriodPaymentRate;
     private BigDecimal minAnnualEir;
     private BigDecimal maxAnnualEir;
+    private BigDecimal minPaymentAmount;
+    private BigDecimal maxPaymentAmount;
     private BigDecimal discount;
     private Integer repaymentEvery;
     private StringEnumOptionData repaymentFrequencyType;
     private StringEnumOptionData paymentAmountCalculationStrategy;
     private BigDecimal annualEir;
+    private BigDecimal paymentAmount;
     private Integer delinquencyGraceDays;
     private StringEnumOptionData delinquencyStartType;
     private Integer breachGraceDays;

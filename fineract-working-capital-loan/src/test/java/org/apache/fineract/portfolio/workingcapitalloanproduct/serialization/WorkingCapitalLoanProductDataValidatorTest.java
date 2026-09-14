@@ -19,20 +19,29 @@
 package org.apache.fineract.portfolio.workingcapitalloanproduct.serialization;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.exception.InvalidJsonException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAdvancedPaymentAllocationsJsonParser;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.repository.WorkingCapitalLoanProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -267,6 +276,166 @@ class WorkingCapitalLoanProductDataValidatorTest {
         final JsonObject jsonObject = createBaseJsonObject();
         jsonObject.addProperty(WorkingCapitalLoanProductConstants.breachIdParamName, 0);
         assertThrows(PlatformApiDataValidationException.class, () -> validator.validateForCreate(jsonObject.toString()));
+    }
+
+    @Test
+    void paymentAmountStrategy_WithValidInputs_ShouldNotThrow() {
+        assertDoesNotThrow(() -> validator.validateForCreate(paymentAmountJson(BigDecimal.valueOf(47.22), BigDecimal.valueOf(1000))));
+    }
+
+    @Test
+    void paymentAmountStrategy_WithZeroPaymentAmount_ShouldReportNotGreaterThanZero() {
+        assertCodes(paymentAmountJson(BigDecimal.ZERO, BigDecimal.valueOf(1000)), WCLP + "paymentAmount.not.greater.than.zero");
+    }
+
+    @Test
+    void paymentAmountStrategy_WithZeroDiscount_ShouldReportDiscountMustBePositive() {
+        assertCodes(paymentAmountJson(BigDecimal.valueOf(47.22), BigDecimal.ZERO),
+                WCLP + "discount.must.be.greater.than.zero.for.payment.amount.strategy");
+    }
+
+    @Test
+    void paymentAmountStrategy_WithBoundsFinerThanTheCurrency_ShouldReportScaleErrors() {
+        final JsonObject json = paymentAmountJsonObject(BigDecimal.valueOf(47.22), BigDecimal.valueOf(1000));
+        json.addProperty(WorkingCapitalLoanProductConstants.minPaymentAmountParamName, new BigDecimal("40.005"));
+        json.addProperty(WorkingCapitalLoanProductConstants.maxPaymentAmountParamName, new BigDecimal("60.0001"));
+        assertCodes(json.toString(), WCLP + "minPaymentAmount.scale.is.greater.than.2", WCLP + "maxPaymentAmount.scale.is.greater.than.2");
+    }
+
+    @Test
+    void paymentAmountStrategy_WithoutPaymentAmount_ShouldReportItMandatory() {
+        assertCodes(paymentAmountJson(null, BigDecimal.valueOf(1000)), WCLP + "paymentAmount.cannot.be.blank");
+    }
+
+    @Test
+    void tpvStrategy_RejectsPaymentAmountAndItsMinMax() {
+        assertCodes(tpvJsonWith(WorkingCapitalLoanProductConstants.paymentAmountParamName, BigDecimal.valueOf(47.22)),
+                WCLP + "paymentAmount.not.allowed.for.tpv.strategy");
+        assertCodes(tpvJsonWith(WorkingCapitalLoanProductConstants.minPaymentAmountParamName, BigDecimal.valueOf(40)),
+                WCLP + "minPaymentAmount.not.allowed.for.tpv.strategy");
+        assertCodes(tpvJsonWith(WorkingCapitalLoanProductConstants.maxPaymentAmountParamName, BigDecimal.valueOf(60)),
+                WCLP + "maxPaymentAmount.not.allowed.for.tpv.strategy");
+    }
+
+    @Test
+    void annualEirStrategy_RejectsPaymentAmountAndItsMinMax() {
+        assertCodes(annualEirJsonWith(WorkingCapitalLoanProductConstants.paymentAmountParamName, BigDecimal.valueOf(47.22)),
+                WCLP + "paymentAmount.not.allowed.for.annual.eir.strategy");
+        assertCodes(annualEirJsonWith(WorkingCapitalLoanProductConstants.minPaymentAmountParamName, BigDecimal.valueOf(40)),
+                WCLP + "minPaymentAmount.not.allowed.for.annual.eir.strategy");
+        assertCodes(annualEirJsonWith(WorkingCapitalLoanProductConstants.maxPaymentAmountParamName, BigDecimal.valueOf(60)),
+                WCLP + "maxPaymentAmount.not.allowed.for.annual.eir.strategy");
+    }
+
+    @Test
+    void paymentAmountStrategy_WithNonPositiveMin_ShouldReportNotGreaterThanZero() {
+        final JsonObject json = paymentAmountJsonObject(BigDecimal.valueOf(47.22), BigDecimal.valueOf(1000));
+        json.addProperty(WorkingCapitalLoanProductConstants.minPaymentAmountParamName, BigDecimal.ZERO);
+        assertCodes(json.toString(), WCLP + "minPaymentAmount.not.greater.than.zero");
+    }
+
+    @Test
+    void paymentAmountStrategy_WithNonPositiveMax_ShouldReportNotGreaterThanZero() {
+        final JsonObject json = paymentAmountJsonObject(BigDecimal.valueOf(47.22), BigDecimal.valueOf(1000));
+        json.addProperty(WorkingCapitalLoanProductConstants.maxPaymentAmountParamName, BigDecimal.valueOf(-1));
+        assertCodes(json.toString(), WCLP + "maxPaymentAmount.not.greater.than.zero",
+                WCLP + "paymentAmount.must.be.less.than.or.equal.to.max");
+    }
+
+    @Test
+    void storedPaymentAmountProduct_UpdatingOnlyTheValue_ShouldNotThrow() {
+        final JsonObject json = new JsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.paymentAmountParamName, BigDecimal.valueOf(55.00));
+        assertDoesNotThrow(() -> validator.validateForUpdate(json.toString(),
+                storedProduct(WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, 2)));
+    }
+
+    @Test
+    void storedPaymentAmountProduct_UpdatingPeriodPaymentRate_ShouldReportNotAllowed() {
+        final JsonObject json = new JsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, BigDecimal.valueOf(1.0));
+        assertUpdateCodes(json, WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, 2,
+                WCLP + "periodPaymentRate.not.allowed.for.payment.amount.strategy");
+    }
+
+    @Test
+    void storedTpvProduct_UpdatingPaymentAmount_ShouldReportNotAllowed() {
+        final JsonObject json = new JsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.paymentAmountParamName, BigDecimal.valueOf(47.22));
+        assertUpdateCodes(json, WorkingCapitalPaymentAmountCalculationStrategy.TPV, 2, WCLP + "paymentAmount.not.allowed.for.tpv.strategy");
+    }
+
+    @Test
+    void storedPaymentAmountProduct_UpdatingValueFinerThanTheStoredCurrency_ShouldReportScaleError() {
+        final JsonObject json = new JsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.paymentAmountParamName, BigDecimal.valueOf(47.22));
+        assertUpdateCodes(json, WorkingCapitalPaymentAmountCalculationStrategy.PAYMENT_AMOUNT, 0,
+                WCLP + "paymentAmount.scale.is.greater.than.0");
+    }
+
+    private static final String WCLP = "validation.msg." + WorkingCapitalLoanProductConstants.WCLP_RESOURCE_NAME + ".";
+
+    private WorkingCapitalLoanProduct storedProduct(final WorkingCapitalPaymentAmountCalculationStrategy strategy,
+            final int digitsAfterDecimal) {
+        final WorkingCapitalLoanProduct product = mock(WorkingCapitalLoanProduct.class);
+        final WorkingCapitalLoanProductRelatedDetail relatedDetail = mock(WorkingCapitalLoanProductRelatedDetail.class);
+        lenient().when(relatedDetail.getPaymentAmountCalculationStrategy()).thenReturn(strategy);
+        lenient().when(product.getRelatedDetail()).thenReturn(relatedDetail);
+        final MonetaryCurrency currency = mock(MonetaryCurrency.class);
+        lenient().when(currency.getDigitsAfterDecimal()).thenReturn(digitsAfterDecimal);
+        lenient().when(product.getCurrency()).thenReturn(currency);
+        return product;
+    }
+
+    private void assertUpdateCodes(final JsonObject json, final WorkingCapitalPaymentAmountCalculationStrategy storedStrategy,
+            final int storedDigitsAfterDecimal, final String... expectedCodes) {
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateForUpdate(json.toString(), storedProduct(storedStrategy, storedDigitsAfterDecimal)));
+        assertEquals(List.of(expectedCodes),
+                exception.getErrors().stream().map(ApiParameterError::getUserMessageGlobalisationCode).toList(),
+                "expected exactly these validation codes for " + json);
+    }
+
+    private JsonObject paymentAmountJsonObject(final BigDecimal paymentAmount, final BigDecimal discount) {
+        final JsonObject json = createBaseJsonObject();
+        json.remove(WorkingCapitalLoanProductConstants.periodPaymentRateParamName);
+        json.addProperty(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName, "PAYMENT_AMOUNT");
+        if (paymentAmount != null) {
+            json.addProperty(WorkingCapitalLoanProductConstants.paymentAmountParamName, paymentAmount);
+        }
+        if (discount != null) {
+            json.addProperty(WorkingCapitalLoanProductConstants.discountParamName, discount);
+        }
+        return json;
+    }
+
+    private String paymentAmountJson(final BigDecimal paymentAmount, final BigDecimal discount) {
+        return paymentAmountJsonObject(paymentAmount, discount).toString();
+    }
+
+    private String tpvJsonWith(final String parameter, final BigDecimal value) {
+        final JsonObject json = createBaseJsonObject();
+        json.addProperty(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName, "TPV");
+        json.addProperty(parameter, value);
+        return json.toString();
+    }
+
+    private String annualEirJsonWith(final String parameter, final BigDecimal value) {
+        final JsonObject json = createBaseJsonObject();
+        json.remove(WorkingCapitalLoanProductConstants.periodPaymentRateParamName);
+        json.addProperty(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName, "ANNUAL_EIR");
+        json.addProperty(WorkingCapitalLoanProductConstants.annualEirParamName, BigDecimal.valueOf(43.7562));
+        json.addProperty(WorkingCapitalLoanProductConstants.discountParamName, BigDecimal.valueOf(1000));
+        json.addProperty(parameter, value);
+        return json.toString();
+    }
+
+    private void assertCodes(final String json, final String... expectedCodes) {
+        final PlatformApiDataValidationException exception = assertThrows(PlatformApiDataValidationException.class,
+                () -> validator.validateForCreate(json));
+        assertEquals(List.of(expectedCodes),
+                exception.getErrors().stream().map(ApiParameterError::getUserMessageGlobalisationCode).toList(),
+                "expected exactly these validation codes for " + json);
     }
 
     // Helper methods

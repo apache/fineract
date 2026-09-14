@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.Validate;
@@ -44,9 +45,12 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanEirNotCalculableException;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
+import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanPaymentAmountNotCalculableException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -129,6 +133,13 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
                 "npvDayCount must not be null");
 
         final WorkingCapitalPaymentAmountCalculationStrategy strategy = resolvePaymentAmountCalculationStrategy(loan);
+        if (strategy.isPaymentAmount()) {
+            final BigDecimal paymentAmount = resolvePaymentAmount(loan);
+            Validate.notNull(paymentAmount, "paymentAmount must not be null");
+            assertPaymentAmountCalculable(discount, disbursedAmount, paymentAmount, npvDayCount, mc);
+            return ProjectedAmortizationScheduleModel.generateFromPaymentAmount(discount, disbursedAmount, paymentAmount, npvDayCount,
+                    disbursementDate, mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan), DateUtils.getBusinessLocalDate());
+        }
         if (strategy.isAnnualEir()) {
             final BigDecimal annualEir = resolveAnnualEir(loan);
             Validate.notNull(annualEir, "annualEir must not be null");
@@ -161,13 +172,33 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
     }
 
     private static BigDecimal resolveAnnualEir(final WorkingCapitalLoan loan) {
-        if (loan.getLoanProductRelatedDetails() != null && loan.getLoanProductRelatedDetails().getAnnualEir() != null) {
-            return loan.getLoanProductRelatedDetails().getAnnualEir();
+        return resolveLoanOverrideOrProductDefault(loan, WorkingCapitalLoanProductRelatedDetails::getAnnualEir,
+                WorkingCapitalLoanProductRelatedDetail::getAnnualEir);
+    }
+
+    private static BigDecimal resolvePaymentAmount(final WorkingCapitalLoan loan) {
+        return resolveLoanOverrideOrProductDefault(loan, WorkingCapitalLoanProductRelatedDetails::getPaymentAmount,
+                WorkingCapitalLoanProductRelatedDetail::getPaymentAmount);
+    }
+
+    private static BigDecimal resolveLoanOverrideOrProductDefault(final WorkingCapitalLoan loan,
+            final Function<WorkingCapitalLoanProductRelatedDetails, BigDecimal> fromLoan,
+            final Function<WorkingCapitalLoanProductRelatedDetail, BigDecimal> fromProduct) {
+        if (loan.getLoanProductRelatedDetails() != null && fromLoan.apply(loan.getLoanProductRelatedDetails()) != null) {
+            return fromLoan.apply(loan.getLoanProductRelatedDetails());
         }
         if (loan.getLoanProduct() != null && loan.getLoanProduct().getRelatedDetail() != null) {
-            return loan.getLoanProduct().getRelatedDetail().getAnnualEir();
+            return fromProduct.apply(loan.getLoanProduct().getRelatedDetail());
         }
         return null;
+    }
+
+    private void assertPaymentAmountCalculable(final BigDecimal discount, final BigDecimal netDisbursementAmount,
+            final BigDecimal paymentAmount, final int npvDayCount, final MathContext mc) {
+        if (!ProjectedAmortizationScheduleModel.isPaymentAmountCalculable(discount, netDisbursementAmount, paymentAmount, npvDayCount,
+                mc)) {
+            throw new WorkingCapitalLoanPaymentAmountNotCalculableException();
+        }
     }
 
     private void assertAnnualEirCalculable(final BigDecimal discount, final BigDecimal netDisbursementAmount, final BigDecimal annualEir,
@@ -424,6 +455,9 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         try {
             model = reconstructScheduleModel(loan, payments, adjustments);
         } catch (final IllegalStateException | IllegalArgumentException | ArithmeticException e) {
+            if (resolvePaymentAmountCalculationStrategy(loan).isPaymentAmount()) {
+                throw new WorkingCapitalLoanPaymentAmountNotCalculableException(e);
+            }
             throw new WorkingCapitalLoanEirNotCalculableException(e);
         }
 
