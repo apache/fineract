@@ -168,6 +168,11 @@ public class FeignWorkingCapitalLoanHelper {
         return response.getResourceId();
     }
 
+    public CallFailedRuntimeException makeDiscountFeeExpectingFailure(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId, "discountFee",
+                request));
+    }
+
     public Long makeDiscountFeeAdjustment(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
         PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionById(loanId, "discountFeeAdjustment", request));
