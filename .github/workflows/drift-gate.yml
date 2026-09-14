@@ -5,13 +5,58 @@ on:
     types: [opened, synchronize, reopened]
 
 # The verdict is computed server-side (AWS Lambda) and posted to the PR's
-# native Checks card by the GitHub App. This job only calls the gate; its own
-# status is deliberately NOT tied to the verdict (it fails only if the HTTP
-# call itself fails), so a real VIOLATION doesn't look like broken plumbing.
+# native Checks card by the GitHub App. The gate is invoked asynchronously
+# (API Gateway returns 202 immediately), so the trigger step can't know the
+# verdict — a second step polls this PR's Checks card and fails the job on
+# VIOLATION, so the job status agrees with the governance outcome.
+permissions:
+  checks: read
+  contents: read
+  pull-requests: write
+
 jobs:
   drift-gate:
     runs-on: ubuntu-latest
     steps:
+      - name: Post live status page link
+        # Runs first, the instant the PR opens — independent of the (async,
+        # cold-startable) Lambda — so the live page URL is on the PR immediately.
+        # The page shows "waiting…" then animates as the gate writes status.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_OWNER: ${{ github.repository_owner }}
+          PR_REPO: ${{ github.event.repository.name }}
+          PAGE_BASE: https://scottswindell-hub.github.io/fineract/
+          STATUS_API: https://qgd63ljozc.execute-api.us-east-1.amazonaws.com/demo
+        run: |
+          set -uo pipefail   # best-effort: never abort the gate on a comment hiccup
+          URL="${PAGE_BASE}?sha=${PR_SHA}&api=${STATUS_API}&pr=${PR_NUMBER}&repo=${PR_OWNER}/${PR_REPO}"
+          BODY=$(printf '%s\n' \
+            "<!-- codeintent-live-status -->" \
+            "### 🛰️ CodeIntent — live governance view" \
+            "" \
+            "Watch this change go through the semantic-change gate in real time:" \
+            "" \
+            "**▶ [Open the live status page ↗](${URL})**" \
+            "" \
+            "_Fills in as the gate runs (assemble → analyze → evaluate). The verdict also posts to this PR's Checks card._")
+          # gh api needs no local checkout (gh pr comment does); upsert by marker
+          # so re-runs update the same comment instead of stacking.
+          CID=$(gh api "repos/${GH_REPO}/issues/${PR_NUMBER}/comments" \
+                  --jq '.[] | select(.body|contains("codeintent-live-status")) | .id' 2>/dev/null | head -1 || true)
+          if [ -n "${CID:-}" ]; then
+            gh api -X PATCH "repos/${GH_REPO}/issues/comments/${CID}" -f body="$BODY" >/dev/null \
+              && echo "updated live-status comment ${CID}" \
+              || echo "::warning::could not update the live-status comment"
+          else
+            gh api -X POST "repos/${GH_REPO}/issues/${PR_NUMBER}/comments" -f body="$BODY" >/dev/null \
+              && echo "posted live-status comment" \
+              || echo "::warning::could not post the live-status comment"
+          fi
+
       - name: Call semantic drift gate
         env:
           API_URL: https://qgd63ljozc.execute-api.us-east-1.amazonaws.com/demo/verify-semantic
@@ -28,8 +73,53 @@ jobs:
           set -euo pipefail
           payload=$(python3 -c 'import json,os; print(json.dumps({"owner":os.environ["PR_OWNER"],"repo":os.environ["PR_REPO"],"sha":os.environ["PR_SHA"],"base_ref":os.environ["PR_BASE_REF"],"pr_ref":os.environ["PR_HEAD_REF"],"pull_request_number":int(os.environ["PR_NUMBER"])}))')
           # The gate is invoked asynchronously (API Gateway returns 202 immediately);
-          # the verdict is posted out-of-band to this PR's Checks card by the App.
+          # the verdict is posted out-of-band to this PR's Checks card by the App,
+          # and the next step waits for it.
           code=$(curl -sS -o /dev/null -w "%{http_code}" -X POST "$API_URL" \
             -H "Content-Type: application/json" -H "x-api-key: $API_KEY" -d "$payload")
-          echo "Gate triggered (HTTP $code). The verdict will appear on this PR's Checks card shortly."
+          echo "Gate triggered (HTTP $code). Awaiting the CodeIntent verdict…"
           case "$code" in 200|202) exit 0 ;; *) echo "gate trigger failed (HTTP $code)"; exit 1 ;; esac
+
+      - name: Await CodeIntent verdict
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_OWNER: ${{ github.repository_owner }}
+          PR_REPO: ${{ github.event.repository.name }}
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          # Poll this PR's Checks card for the governance verdict and fail the
+          # job on VIOLATION, so the job status agrees with the check run
+          # (which the async trigger step above cannot know). REVIEW/UNKNOWN keep
+          # the job green — they are surfaced amber/grey on the check run itself,
+          # the authoritative signal.
+          check="CodeIntent Drift Gate"
+          # Read one field of the CodeIntent check-run from the cached response.
+          # $1 is a python expression over `c` (the check-run dict, or {}).
+          py() { python3 -c "import json;d=json.load(open('/tmp/cr.json'));c=next((x for x in d.get('check_runs',[]) if x.get('name')=='$check'),{});print(($1) or '')"; }
+          for i in $(seq 1 60); do   # ~60 * 5s = 300s ceiling
+            curl -sS -H "Authorization: Bearer $GH_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$PR_OWNER/$PR_REPO/commits/$PR_SHA/check-runs?per_page=100" \
+              -o /tmp/cr.json
+            status=$(py "c.get('status')")
+            concl=$(py "c.get('conclusion')")
+            # output.title is what the Lambda updates live as each stage advances
+            # ("Analyze changed behaviors (1/3)"), so the log tracks real progress.
+            title=$(py "(c.get('output') or {}).get('title')")
+            if [ -z "$status" ]; then
+              echo "poll $i: waiting for the CodeIntent check to appear…"
+            elif [ "$status" = "completed" ]; then
+              echo "poll $i: completed — ${title:-verdict} → ${concl:-none}"
+              if [ "$concl" = "failure" ]; then
+                echo "::error::CodeIntent governance VIOLATION — a governed behavior was removed. See the CodeIntent Drift Gate check."
+                exit 1
+              fi
+              exit 0
+            else
+              echo "poll $i: $status — ${title:-in progress}"
+            fi
+            sleep 5
+          done
+          echo "::warning::Timed out awaiting the CodeIntent verdict; see this PR's Checks card."
+          exit 0
