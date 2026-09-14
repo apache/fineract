@@ -18,13 +18,9 @@
  */
 package org.apache.fineract.investor.service;
 
-import static org.reflections.scanners.Scanners.SubTypes;
-
 import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
@@ -35,7 +31,6 @@ import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanProductAttribut
 import org.apache.fineract.investor.domain.ExternalAssetOwnerLoanProductAttributesRepository;
 import org.apache.fineract.portfolio.loanproduct.domain.LoanProductRepository;
 import org.apache.fineract.portfolio.loanproduct.exception.LoanProductNotFoundException;
-import org.reflections.Reflections;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -48,26 +43,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ExternalAssetOwnerLoanProductAttributesReadServiceImpl implements ExternalAssetOwnerLoanProductAttributesReadService {
 
-    private static final String INVESTOR_PATH = "org.apache.fineract.investor";
-
     private final ExternalAssetOwnerLoanProductAttributesRepository externalAssetOwnerLoanProductAttributesRepository;
     private final LoanProductRepository loanProductRepository;
     private final ExternalAssetOwnerLoanProductAttributesMapper mapper;
-    private final Set<Class<?>> implementingClasses = new Reflections(INVESTOR_PATH)
-            .get(SubTypes.of(ExternalAssetOwnerLoanProductAttribute.class).asClass());
+    private final ExternalAssetOwnerLoanProductAttributeProvider attributeProvider;
 
     @Override
     public List<ExternalTransferLoanProductAttributesTemplateData> retrieveExternalAssetOwnerLoanProductAttributesTemplate() {
         List<ExternalTransferLoanProductAttributesTemplateData> result = new ArrayList<>();
 
-        for (Class<?> implementingClass : implementingClasses) {
-            if (implementingClass.isEnum()) {
-                Arrays.stream(implementingClass.getEnumConstants()).map(ExternalAssetOwnerLoanProductAttribute.class::cast)
-                        .forEach(attribute -> addAttributeValues(result, attribute));
-            } else {
-                addAttributeValues(result, createAttribute(implementingClass));
-            }
-        }
+        attributeProvider.retrieveAll().forEach(attribute -> addAttributeValues(result, attribute));
 
         return result;
     }
@@ -99,15 +84,6 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceImpl implements E
         data.setAttributeValues(attribute.getAttributeValues());
         data.setMultiValue(attribute.isMultiValue());
         result.add(data);
-    }
-
-    private static ExternalAssetOwnerLoanProductAttribute createAttribute(final Class<?> implementingClass) {
-        try {
-            return (ExternalAssetOwnerLoanProductAttribute) implementingClass.getDeclaredConstructor().newInstance();
-        } catch (ReflectiveOperationException | ClassCastException exception) {
-            throw new IllegalStateException("Unable to create external asset owner loan product attribute: " + implementingClass.getName(),
-                    exception);
-        }
     }
 
     private void validateLoanProduct(final Long loanProductId) {
