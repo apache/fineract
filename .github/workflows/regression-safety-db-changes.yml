@@ -107,6 +107,9 @@ jobs:
       TEST_TENANT_ID: default
       INITIALIZATION_ENABLED: true
       EVENT_VERIFICATION_ENABLED: false
+      # The scenarios this workflow gates on. Kept in one place so the guard's error message and
+      # the three instances cannot drift apart.
+      REGRESSION_SAFETY_TAGS: "@RegressionSafety"
       # devRun connection args (reused across instances)
       DEVRUN_ARGS: >-
         --spring.datasource.hikari.driverClassName=org.postgresql.Driver
@@ -248,11 +251,18 @@ jobs:
         env:
           JAVA_TOOL_OPTIONS: -Xmx2g
         run: |
+          set -o pipefail
           ./gradlew --no-daemon --console=plain \
             :fineract-e2e-tests-runner:cucumber \
-            -Pcucumber.tags="@RegressionSafety" \
+            -Pcucumber.tags="$REGRESSION_SAFETY_TAGS" \
             -x spotlessCheck \
-            -x buildJavaSdk
+            -x buildJavaSdk \
+            2>&1 | tee cucumber-instance1.log
+
+          # Cucumber exits 0 when its tag expression matches nothing, so without this the
+          # instance would report success having executed no scenario at all.
+          .github/scripts/assert-cucumber-ran.sh cucumber-instance1.log \
+            "Check that some scenario still carries REGRESSION_SAFETY_TAGS ($REGRESSION_SAFETY_TAGS)."
 
       - name: "Instance #1: Stop backend"
         if: always()
@@ -350,11 +360,18 @@ jobs:
         env:
           JAVA_TOOL_OPTIONS: -Xmx2g
         run: |
+          set -o pipefail
           ./gradlew --no-daemon --console=plain \
             :fineract-e2e-tests-runner:cucumber \
-            -Pcucumber.tags="@RegressionSafety" \
+            -Pcucumber.tags="$REGRESSION_SAFETY_TAGS" \
             -x spotlessCheck \
-            -x buildJavaSdk
+            -x buildJavaSdk \
+            2>&1 | tee cucumber-instance2.log
+
+          # Cucumber exits 0 when its tag expression matches nothing, so without this the
+          # instance would report success having executed no scenario at all.
+          .github/scripts/assert-cucumber-ran.sh cucumber-instance2.log \
+            "Check that some scenario still carries REGRESSION_SAFETY_TAGS ($REGRESSION_SAFETY_TAGS)."
 
       - name: "Instance #2: Stop backend"
         if: always()
@@ -417,11 +434,18 @@ jobs:
         env:
           JAVA_TOOL_OPTIONS: -Xmx2g
         run: |
+          set -o pipefail
           ./gradlew --no-daemon --console=plain \
             :fineract-e2e-tests-runner:cucumber \
-            -Pcucumber.tags="@RegressionSafety" \
+            -Pcucumber.tags="$REGRESSION_SAFETY_TAGS" \
             -x spotlessCheck \
-            -x buildJavaSdk
+            -x buildJavaSdk \
+            2>&1 | tee cucumber-instance3.log
+
+          # Cucumber exits 0 when its tag expression matches nothing, so without this the
+          # instance would report success having executed no scenario at all.
+          .github/scripts/assert-cucumber-ran.sh cucumber-instance3.log \
+            "Check that some scenario still carries REGRESSION_SAFETY_TAGS ($REGRESSION_SAFETY_TAGS)."
 
       - name: "Instance #3: Stop backend"
         if: always()
@@ -468,6 +492,7 @@ jobs:
         with:
           name: regression-safety-results
           path: |
+            cucumber-instance*.log
             fineract-e2e-tests-runner/build/reports/
           retention-days: 5
           compression-level: 9
