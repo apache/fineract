@@ -31,4 +31,13 @@ public interface ExternalAssetOwnerLoanProductAttribute {
     boolean validate(String attributeValue);
 
     boolean isMultiValue();
+
+    /**
+     * Converts an already validated attribute value into its canonical, storable form. Implementations that accept
+     * loosely formatted input (different casing, padding around separators) return the normalised value here, so that
+     * the persisted value is always canonical.
+     */
+    default String normalize(String attributeValue) {
+        return attributeValue;
+    }
 }
