@@ -2717,10 +2717,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             // Clear any previously skipped installments before re-evaluating
             ProgressiveTransactionCtx progressiveTransactionCtx = (ProgressiveTransactionCtx) ctx;
             progressiveTransactionCtx.getSkipRepaymentScheduleInstallments().clear();
+            // The skip list must exclude an installment from re-selection in both branches: a not-fully-paid
+            // installment which could not absorb any amount in a previous iteration (e.g. its model dues diverge
+            // from the schedule by a rounding cent, or it is not represented in the interest schedule model) would
+            // otherwise be selected again forever with zero allocation progress until the LoopGuard aborts.
             paymentAllocationContext
                     .setInAdvanceInstallmentsFilteringRules(installment -> loanTransaction.isBefore(installment.getDueDate())
-                            && (installment.isNotFullyPaidOff() || (installment.isDueBalanceZero()
-                                    && !progressiveTransactionCtx.getSkipRepaymentScheduleInstallments().contains(installment))));
+                            && !progressiveTransactionCtx.getSkipRepaymentScheduleInstallments().contains(installment)
+                            && (installment.isNotFullyPaidOff() || installment.isDueBalanceZero()));
         } else {
             paymentAllocationContext.setInAdvanceInstallmentsFilteringRules(
                     installment -> loanTransaction.isBefore(installment.getDueDate()) && installment.isNotFullyPaidOff());
@@ -2731,6 +2735,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         && context.getCtx().getInstallments().stream().anyMatch(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
                         && context.getTransactionAmountUnprocessed().isGreaterThanZero(), //
                 context -> {
+                    final Money unprocessedAtIterationStart = context.getTransactionAmountUnprocessed();
                     LoanRepaymentScheduleInstallment oldestPastDueInstallment = context.getCtx().getInstallments().stream()
                             .filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
                             .filter(e -> context.getLoanTransaction().isAfter(e.getDueDate()))
@@ -2886,6 +2891,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                 }
                             }
                         }
+                    }
+                    if (isInterestRecalculationSupported(ctx, loanTransaction.getLoan()) && !inAdvanceInstallments.isEmpty() && context
+                            .getTransactionAmountUnprocessed().getAmount().compareTo(unprocessedAtIterationStart.getAmount()) == 0) {
+                        // Nothing could be allocated to the selected in-advance installments in this iteration. The
+                        // selection is deterministic, so re-running the same iteration would allocate nothing again;
+                        // mark them as skipped to let the selector move on to the remaining installments instead of
+                        // spinning until the LoopGuard aborts the whole transaction.
+                        ((ProgressiveTransactionCtx) ctx).getSkipRepaymentScheduleInstallments().addAll(inAdvanceInstallments);
                     }
                 });
         return paymentAllocationContext.getTransactionAmountUnprocessed();
