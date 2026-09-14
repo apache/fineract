@@ -617,7 +617,7 @@ Feature: Working Capital Period Payment Rate
       | 31 March 2026   | 20.0         | 25.0    | 70.243771           | 69.44              | 89          | false    |
       | 10 January 2026 | 18.0         | 13.0    | 32.031862           | 36.11              | 277         | false    |
       | 15 January 2026 | 13.0         | 19.0    | 49.997914           | 52.78              | 190         | false    |
-      | 31 March 2026   | 20.0         | 15.0    | 37.816468           | 41.67              | 147         | true     |
+      | 31 March 2026   | 20.0         | 15.0    | 37.816469           | 41.67              | 147         | true     |
       | 20 January 2026 | 19.0         | 20.0    | 53.217322           | 55.56              | 180         | false    |
       | 10 January 2026 | 18.0         | 11.0    | 26.528775           | 30.56              | 328         | true     |
     Then Admin closes the Working Capital loan with a full repayment on "20 January 2026"

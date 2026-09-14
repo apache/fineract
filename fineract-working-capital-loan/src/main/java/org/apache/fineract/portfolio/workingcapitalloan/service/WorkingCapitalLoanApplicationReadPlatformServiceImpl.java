@@ -19,7 +19,6 @@
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import jakarta.persistence.criteria.Predicate;
-import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,7 +44,6 @@ import org.apache.fineract.portfolio.delinquency.data.DelinquencyBucketData;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyMinimumPaymentType;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
 import org.apache.fineract.portfolio.loanorigination.data.LoanOriginatorData;
-import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCollectionData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTemplateData;
@@ -230,12 +228,10 @@ public class WorkingCapitalLoanApplicationReadPlatformServiceImpl implements Wor
         final MathContext mc = MoneyHelper.getMathContext();
         final CurrencyData currency = WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan);
         scheduleRepositoryWrapper.readModel(loan.getId(), mc, currency).ifPresent(model -> {
-            final BigDecimal dailyEir = model.effectiveInterestRate();
             data.setNumberOfRepayments(model.effectiveTotalTerm());
             data.setPeriodPaymentAmount(model.expectedPaymentAmount() != null ? model.expectedPaymentAmount().getAmount() : null);
             data.setNetDisbursalAmount(model.netDisbursementAmount() != null ? model.netDisbursementAmount().getAmount() : null);
-            data.setDailyEir(dailyEir);
-            data.setCalculatedAnnualEir(ProjectedAmortizationScheduleModel.annualiseEir(dailyEir, model.npvDayCount(), mc));
+            data.setCalculatedAnnualEir(model.calculatedAnnualEir());
         });
     }
 

@@ -299,6 +299,7 @@
         {
             "default": null,
             "name": "paymentRate",
+            "doc": "The loan's own period payment rate. A rate change does not move it - the rate in force on a given date comes from the rate-change history.",
             "type": [
                 "null",
                 "bigdecimal"
@@ -332,15 +333,7 @@
         {
             "default": null,
             "name": "periodPaymentAmount",
-            "type": [
-                "null",
-                "bigdecimal"
-            ]
-        },
-        {
-            "default": null,
-            "name": "dailyEir",
-            "doc": "Daily effective interest rate derived from discount-fee pricing, not a lending interest rate.",
+            "doc": "Daily payment amount the loan was priced at: totalPaymentVolume x paymentRate / 100 / npvDayCount, rounded to the currency. A rate change does not restate it - what is billed from the day a change takes effect follows the rate then in force.",
             "type": [
                 "null",
                 "bigdecimal"
@@ -349,7 +342,7 @@
         {
             "default": null,
             "name": "calculatedAnnualEir",
-            "doc": "Annualised dailyEir.",
+            "doc": "Annual effective rate the loan was priced at, as a percentage: compounded over the product's NPV day count, not a calendar year, and rounded to six decimals. The base schedule's daily discounting derives from it. A rate change does not restate it - the schedule re-solves its own rate from the day the change takes effect. Comes from discount-fee pricing, not a lending interest rate.",
             "type": [
                 "null",
                 "bigdecimal"

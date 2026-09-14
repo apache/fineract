@@ -206,7 +206,7 @@ Feature: WorkingCapitalAmortizationScheduleMatrixPt2
       | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000             | 18                | 1000     |
     When Admin successfully approves the working capital loan on "01 January 2026" with "9000" amount and "1000" discount amount and expected disbursement date on "01 January 2026"
     And Admin successfully disburse the Working Capital loan on "01 January 2026" with "9000" EUR transaction amount and "1000" discount amount
-    Then Working capital loan details has annual EIR "0.468451024804980076"
+    Then Working capital loan details has annual EIR "46.845102"
 
   # =============================================================================
   # Scope 10: Rate changes
