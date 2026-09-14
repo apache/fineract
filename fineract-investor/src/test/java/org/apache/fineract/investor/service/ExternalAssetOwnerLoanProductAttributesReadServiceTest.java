@@ -114,12 +114,16 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceTest {
                 .retrieveExternalAssetOwnerLoanProductAttributesTemplate();
 
         // then
+        // verify available attribute size
+        assertEquals(3, result.size());
+
+        // verify SETTLEMENT_MODEL
         ExternalTransferLoanProductAttributesTemplateData settlementModel = result.stream()
                 .filter(attribute -> "SETTLEMENT_MODEL".equals(attribute.getAttributeKey())).findFirst().orElseThrow();
-        assertEquals(2, result.size());
         assertEquals(List.of("DEFAULT_SETTLEMENT", "DELAYED_SETTLEMENT"), settlementModel.getAttributeValues());
         assertFalse(settlementModel.isMultiValue());
 
+        // verify EXCLUDED_TRANSACTION_TYPES
         ExternalTransferLoanProductAttributesTemplateData excludedTransactionTypes = result.stream()
                 .filter(attribute -> ExcludedTransactionTypesExternalAssetOwnerLoanProductAttribute.ATTRIBUTE_KEY
                         .equals(attribute.getAttributeKey()))
@@ -127,6 +131,13 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceTest {
         assertTrue(excludedTransactionTypes.isMultiValue());
         assertEquals(Arrays.stream(LoanTransactionType.values()).filter(type -> !LoanTransactionType.INVALID.equals(type)).map(Enum::name)
                 .toList(), excludedTransactionTypes.getAttributeValues());
+
+        // verify CAPITALIZED_INCOME_AMORTIZATION_STRATEGY
+        ExternalTransferLoanProductAttributesTemplateData capitalizedIncomeAmortizationStrategy = result.stream()
+                .filter(attribute -> "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY".equals(attribute.getAttributeKey())).findFirst()
+                .orElseThrow();
+        assertEquals(List.of("DEFERRED", "IMMEDIATE"), capitalizedIncomeAmortizationStrategy.getAttributeValues());
+        assertFalse(capitalizedIncomeAmortizationStrategy.isMultiValue());
     }
 
     @Test
@@ -190,6 +201,7 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceTest {
     }
 
     private static Stream<Arguments> testRetrieveAllLoanProductAttributesByLoanProductIdDataProvider() {
-        return Stream.of(Arguments.of(1L, "SETTLEMENT_MODEL"), Arguments.of(1L, null));
+        return Stream.of(Arguments.of(1L, "CAPITALIZED_INCOME_AMORTIZATION_STRATEGY"), Arguments.of(1L, "SETTLEMENT_MODEL"),
+                Arguments.of(1L, null));
     }
 }
