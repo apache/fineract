@@ -287,6 +287,13 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         if (breachStartType != null) {
             loansRequest.breachStartType(breachStartType);
         }
+        if (rawData.get("repaymentEvery") != null) {
+            loansRequest.repaymentEvery(Integer.parseInt(rawData.get("repaymentEvery")));
+        }
+        if (rawData.get("repaymentFrequencyType") != null) {
+            loansRequest.repaymentFrequencyType(
+                    PostWorkingCapitalLoansRequest.RepaymentFrequencyTypeEnum.valueOf(rawData.get("repaymentFrequencyType")));
+        }
         testContext().set(TestContextKey.LOAN_CREATE_REQUEST, loansRequest);
 
         final PostWorkingCapitalLoansResponse response = ok(
@@ -350,6 +357,12 @@ public class WorkingCapitalLoanAccountStepDef extends AbstractStepDef {
         assertThat(response.getAccountNo()).as("accountNo").isNotNull();
         assertThat(response.getExternalId()).as("externalId").isNotNull();
         assertThat(response.getClientId()).as("clientId").isNotNull();
+    }
+
+    @Then("Working capital loan details has annual EIR {string}")
+    public void verifyWorkingCapitalLoanDetailsAnnualEir(final String expectedAnnualEir) {
+        final GetWorkingCapitalLoansLoanIdResponse response = retrieveLoanDetails(getCreatedLoanId());
+        assertThat(response.getCalculatedAnnualEir()).as("calculatedAnnualEir").isEqualByComparingTo(new BigDecimal(expectedAnnualEir));
     }
 
     @Then("Working capital loan details has the following field values:")
