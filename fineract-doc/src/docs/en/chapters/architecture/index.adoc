@@ -26,6 +26,8 @@ include::batch-jobs.adoc[leveloffset=+1]
 
 include::loan-locking.adoc[leveloffset=+1]
 
+include::office-hierarchy-access.adoc[leveloffset=+1]
+
 include::technology.adoc[leveloffset=+1]
 
 include::modules.adoc[leveloffset=+1]

@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
+import org.apache.fineract.client.models.PostUsersRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
@@ -54,6 +55,8 @@ import org.apache.fineract.integrationtests.common.savings.AccountTransferHelper
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.integrationtests.useradministration.roles.RolesHelper;
+import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -247,6 +250,87 @@ public class AccountTransferTest {
         this.journalEntryHelper.checkJournalEntryForLiabilityAccount(toOfficeId, liabilityTransferAccount,
                 AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office2LiabilityEntries);
 
+    }
+
+    @Test
+    public void testSavingsToSavingsAccountTransferRejectsSiblingOfficeUser() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
+
+        SavingsTransferFixture fixture = createSavingsTransferFixture();
+        RequestSpecification fromOfficeUserRequestSpec = createSuperUserRequestSpecForOffice(fixture.fromOfficeId);
+        AccountTransferHelper restrictedAccountTransferHelper = new AccountTransferHelper(fromOfficeUserRequestSpec,
+                new ResponseSpecBuilder().expectStatusCode(403).build());
+
+        restrictedAccountTransferHelper.accountTransfer(fixture.fromClientId, fixture.fromSavingsId, fixture.toClientId,
+                fixture.toSavingsId, FROM_SAVINGS_ACCOUNT_TYPE, TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
+
+        this.accountTransferHelper.accountTransfer(fixture.fromClientId, fixture.fromSavingsId, fixture.toClientId, fixture.toSavingsId,
+                FROM_SAVINGS_ACCOUNT_TYPE, TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
+    }
+
+    @Test
+    public void testSavingsToSavingsAccountTransferAllowsParentOfficeUserToAccessChildOfficeAccounts() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
+
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer parentOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
+        Integer childOfficeId = officeHelper.createOffice(parentOfficeId.longValue(), LocalDate.of(2011, 1, 1)).getResourceId().intValue();
+        SavingsTransferFixture fixture = createSavingsTransferFixture(parentOfficeId, childOfficeId);
+        AccountTransferHelper parentOfficeTransferHelper = new AccountTransferHelper(createSuperUserRequestSpecForOffice(parentOfficeId),
+                this.responseSpec);
+
+        parentOfficeTransferHelper.accountTransfer(fixture.fromClientId, fixture.fromSavingsId, fixture.toClientId, fixture.toSavingsId,
+                FROM_SAVINGS_ACCOUNT_TYPE, TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
+    }
+
+    @Test
+    public void testSavingsToSavingsAccountTransferRejectsChildOfficeUserAccessToParentOfficeAccount() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
+
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer parentOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
+        Integer childOfficeId = officeHelper.createOffice(parentOfficeId.longValue(), LocalDate.of(2011, 1, 1)).getResourceId().intValue();
+        SavingsTransferFixture fixture = createSavingsTransferFixture(childOfficeId, parentOfficeId);
+        AccountTransferHelper childOfficeTransferHelper = new AccountTransferHelper(createSuperUserRequestSpecForOffice(childOfficeId),
+                new ResponseSpecBuilder().expectStatusCode(403).build());
+
+        childOfficeTransferHelper.accountTransfer(fixture.fromClientId, fixture.fromSavingsId, fixture.toClientId, fixture.toSavingsId,
+                FROM_SAVINGS_ACCOUNT_TYPE, TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
+    }
+
+    @Test
+    public void testSavingsToSavingsAccountTransferAllowsSameOfficeUser() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
+
+        Integer officeId = new OfficeHelper().createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
+        SavingsTransferFixture fixture = createSavingsTransferFixture(officeId, officeId);
+        AccountTransferHelper officeTransferHelper = new AccountTransferHelper(createSuperUserRequestSpecForOffice(officeId),
+                this.responseSpec);
+
+        officeTransferHelper.accountTransfer(fixture.fromClientId, fixture.fromSavingsId, fixture.toClientId, fixture.toSavingsId,
+                FROM_SAVINGS_ACCOUNT_TYPE, TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
+    }
+
+    @Test
+    public void testSavingsToSavingsAccountTransferAllowsMultiLevelChildOfficeUserToAccessDescendantAccounts() {
+        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
+
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer parentOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
+        Integer childOfficeId = officeHelper.createOffice(parentOfficeId.longValue(), LocalDate.of(2011, 1, 1)).getResourceId().intValue();
+        Integer grandchildOfficeId = officeHelper.createOffice(childOfficeId.longValue(), LocalDate.of(2011, 1, 1)).getResourceId()
+                .intValue();
+        SavingsTransferFixture fixture = createSavingsTransferFixture(childOfficeId, grandchildOfficeId);
+        AccountTransferHelper childOfficeTransferHelper = new AccountTransferHelper(createSuperUserRequestSpecForOffice(childOfficeId),
+                this.responseSpec);
+
+        childOfficeTransferHelper.accountTransfer(fixture.fromClientId, fixture.fromSavingsId, fixture.toClientId, fixture.toSavingsId,
+                FROM_SAVINGS_ACCOUNT_TYPE, TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
     }
 
     @Test
@@ -976,14 +1060,17 @@ public class AccountTransferTest {
     }
 
     private SavingsTransferFixture createSavingsTransferFixture() {
+        OfficeHelper officeHelper = new OfficeHelper();
+        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
+        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
+        return createSavingsTransferFixture(fromOfficeId, toOfficeId);
+    }
+
+    private SavingsTransferFixture createSavingsTransferFixture(final Integer fromOfficeId, final Integer toOfficeId) {
         final Account assetAccount = this.accountHelper.createAssetAccount();
         final Account incomeAccount = this.accountHelper.createIncomeAccount();
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
-
-        OfficeHelper officeHelper = new OfficeHelper();
-        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
 
         final Integer savingsProductId = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
                 incomeAccount, expenseAccount, liabilityAccount);
@@ -996,7 +1083,20 @@ public class AccountTransferTest {
                 String.valueOf(toOfficeId));
         final Integer toSavingsId = createActiveSavingsAccount(toClientId, savingsProductId);
 
-        return new SavingsTransferFixture(fromClientId, fromSavingsId, toClientId, toSavingsId);
+        return new SavingsTransferFixture(fromOfficeId, fromClientId, fromSavingsId, toOfficeId, toClientId, toSavingsId);
+    }
+
+    private RequestSpecification createSuperUserRequestSpecForOffice(final Integer officeId) {
+        final String password = "QwE!5rTy#9uP0";
+        final String username = Utils.uniqueRandomStringGenerator("OfficeUser", 5);
+        PostUsersRequest createUserRequest = new PostUsersRequest().username(username).firstname(Utils.randomFirstNameGenerator())
+                .lastname(Utils.randomLastNameGenerator()).email(username + "@mifos.org").password(password).repeatPassword(password)
+                .sendPasswordToEmail(false).officeId(officeId.longValue()).roles(List.of(RolesHelper.SUPER_USER_ROLE_ID));
+        UserHelper.createUser(this.requestSpec, this.responseSpec, createUserRequest);
+
+        RequestSpecification userRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        userRequestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, password));
+        return userRequestSpec;
     }
 
     private Integer createActiveSavingsAccount(final Integer clientId, final Integer savingsProductId) {
@@ -1074,6 +1174,7 @@ public class AccountTransferTest {
         return collateral;
     }
 
-    private record SavingsTransferFixture(Integer fromClientId, Integer fromSavingsId, Integer toClientId, Integer toSavingsId) {
+    private record SavingsTransferFixture(Integer fromOfficeId, Integer fromClientId, Integer fromSavingsId, Integer toOfficeId,
+            Integer toClientId, Integer toSavingsId) {
     }
 }

@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.PostOfficesResponse;
 import org.apache.fineract.client.models.PostRolesRequest;
 import org.apache.fineract.client.models.PostRolesResponse;
 import org.apache.fineract.client.models.PostUsersRequest;
@@ -46,6 +47,16 @@ public class UserStepDef extends AbstractStepDef {
 
     @When("Admin creates new user with {string} username, {string} role name and given permissions:")
     public void createUserWithUsernameAndRoles(String username, String roleName, List<String> permissions) {
+        createUserWithUsernameAndRoles(username, roleName, permissions, 1L);
+    }
+
+    @When("Admin creates new user with {string} username, {string} role name, assigned to the last created office and given permissions:")
+    public void createUserInLastCreatedOffice(String username, String roleName, List<String> permissions) {
+        PostOfficesResponse officeResponse = testContext().get(TestContextKey.OFFICE_CREATE_RESPONSE);
+        createUserWithUsernameAndRoles(username, roleName, permissions, officeResponse.getOfficeId());
+    }
+
+    private void createUserWithUsernameAndRoles(String username, String roleName, List<String> permissions, Long officeId) {
         ok(() -> fineractClient.roles().retrieveAllRoles());
         PostRolesRequest newRoleRequest = new PostRolesRequest().name(Utils.randomStringGenerator(roleName, 8)).description(roleName);
         PostRolesResponse createNewRole = ok(() -> fineractClient.roles().createRole(newRoleRequest));
@@ -63,7 +74,7 @@ public class UserStepDef extends AbstractStepDef {
                 .firstname(Utils.randomFirstNameGenerator()) //
                 .lastname(Utils.randomLastNameGenerator()) //
                 .sendPasswordToEmail(Boolean.FALSE) //
-                .officeId(1L) //
+                .officeId(officeId) //
                 .password(PWD_USER_WITH_ROLE) //
                 .repeatPassword(PWD_USER_WITH_ROLE) //
                 .roles(List.of(roleId));

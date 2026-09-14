@@ -55,6 +55,7 @@ import org.apache.fineract.infrastructure.security.service.PlatformSecurityConte
 import org.apache.fineract.organisation.holiday.domain.HolidayRepositoryWrapper;
 import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.MoneyHelper;
+import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.organisation.staff.domain.StaffRepositoryWrapper;
 import org.apache.fineract.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.apache.fineract.portfolio.account.domain.StandingInstructionRepository;
@@ -271,6 +272,7 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         when(externalIdFactory.createFromCommand(command, "externalId")).thenReturn(externalId);
         when(account.getClient()).thenReturn(null);
         when(account.group()).thenReturn(null);
+        stubOfficeHierarchy(account, ".1.2.");
         when(account.getCurrency()).thenReturn(currency);
         when(account.getAccountBalance()).thenReturn(BigDecimal.valueOf(100));
         when(account.getSavingsHoldAmount()).thenReturn(null);
@@ -285,6 +287,7 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
 
         verify(transaction).updateExternalId(externalId);
         verify(savingsAccountTransactionRepository).saveAndFlush(transaction);
+        verify(context).validateAccessRights(".1.2.");
     }
 
     @Test
@@ -310,6 +313,7 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         when(savingAccountAssembler.assembleFrom(savingsId, false)).thenReturn(account);
         when(account.getClient()).thenReturn(null);
         when(account.group()).thenReturn(null);
+        stubOfficeHierarchy(account, ".1.2.");
         when(account.getCurrency()).thenReturn(currency);
         when(account.getAccountBalance()).thenReturn(BigDecimal.valueOf(100));
         when(account.getSavingsHoldAmount()).thenReturn(BigDecimal.TEN);
@@ -365,6 +369,7 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         when(savingAccountAssembler.assembleFrom(savingsId, false)).thenReturn(account);
         when(account.getClient()).thenReturn(null);
         when(account.group()).thenReturn(null);
+        stubOfficeHierarchy(account, ".1.2.");
         when(account.getTransactions()).thenReturn(transactions);
         when(account.accountSubmittedOrActivationDate()).thenReturn(transactionDate.minusDays(1));
         when(account.getNominalAnnualInterestRate()).thenReturn(BigDecimal.ONE);
@@ -406,6 +411,7 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         setupTenantContext(businessDate);
         when(savingAccountAssembler.getPivotConfigStatus()).thenReturn(false);
         when(savingAccountAssembler.assembleFrom(savingsId, false)).thenReturn(account);
+        stubOfficeHierarchy(account, ".1.2.");
         when(account.findExistingTransactionIds()).thenReturn(Set.of(10L));
         when(account.findExistingReversedTransactionIds()).thenReturn(Set.of(11L));
         when(account.officeId()).thenReturn(1L);
@@ -419,6 +425,12 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
         final var inOrder = Mockito.inOrder(savingAccountRepositoryWrapper, savingsAccountDomainService);
         inOrder.verify(savingAccountRepositoryWrapper).saveAndFlush(account);
         inOrder.verify(savingsAccountDomainService).postJournalEntries(account, Set.of(10L), Set.of(11L), false);
+    }
+
+    private void stubOfficeHierarchy(final SavingsAccount account, final String hierarchy) {
+        Office office = mock(Office.class);
+        when(office.getHierarchy()).thenReturn(hierarchy);
+        when(account.office()).thenReturn(office);
     }
 
     private void setupTenantContext(final LocalDate businessDate) {
@@ -447,6 +459,7 @@ class SavingsAccountWritePlatformServiceJpaRepositoryImplTest {
 
         SavingsAccount savingsAccount = mock(SavingsAccount.class);
         when(savingsAccount.getId()).thenReturn(savingsAccountId);
+        stubOfficeHierarchy(savingsAccount, ".1.2.");
         when(savingsAccount.officeId()).thenReturn(1L);
         when(savingsAccount.clientId()).thenReturn(1L);
         when(savingsAccount.groupId()).thenReturn(1L);

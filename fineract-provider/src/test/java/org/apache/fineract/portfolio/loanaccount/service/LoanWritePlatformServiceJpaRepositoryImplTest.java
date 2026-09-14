@@ -712,6 +712,7 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         when(externalIdFactory.createFromCommand(fixture.command, LoanApiConstants.externalIdParameterName)).thenReturn(ExternalId.empty());
         when(loan.getTotalOverpaidAsMoney()).thenReturn(Money.zero(currency));
         when(loan.getOffice()).thenReturn(office);
+        when(office.getHierarchy()).thenReturn(".1.2.");
         when(loan.getRepaymentScheduleInstallments()).thenReturn(List.of(installment));
         when(loan.fetchRepaymentScheduleInstallment(1)).thenReturn(installment);
         when(installment.getDueDate()).thenReturn(actualDisbursementDate.plusMonths(1));

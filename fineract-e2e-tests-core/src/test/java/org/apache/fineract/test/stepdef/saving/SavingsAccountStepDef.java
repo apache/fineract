@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.feign.util.FeignCalls;
 import org.apache.fineract.client.models.GetSavingsProductsResponse;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostSavingsAccountTransactionsRequest;
@@ -46,6 +48,7 @@ import org.apache.fineract.client.models.PostSavingsProductsRequest;
 import org.apache.fineract.client.models.PostSavingsProductsResponse;
 import org.apache.fineract.client.models.SavingsAccountData;
 import org.apache.fineract.client.models.SavingsAccountTransactionData;
+import org.apache.fineract.test.api.FineractClientConfiguration;
 import org.apache.fineract.test.factory.SavingsAccountRequestFactory;
 import org.apache.fineract.test.factory.SavingsProductRequestFactory;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
@@ -63,6 +66,9 @@ public class SavingsAccountStepDef extends AbstractStepDef {
 
     @Autowired
     private GlobalConfigurationHelper globalConfigurationHelper;
+
+    @Autowired
+    private FineractClientConfiguration fineractClientConfiguration;
 
     public static final String DATE_FORMAT = "dd MMMM yyyy";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
@@ -215,6 +221,20 @@ public class SavingsAccountStepDef extends AbstractStepDef {
         PostSavingsAccountTransactionsResponse depositResponse = ok(() -> fineractClient.savingsAccountTransactions()
                 .createSavingsAccountTransaction(savingsAccountID, depositRequest, Map.of("command", "deposit")));
         testContext().set(TestContextKey.EUR_SAVINGS_ACCOUNT_DEPOSIT_RESPONSE, depositResponse);
+    }
+
+    @Then("Created user cannot deposit {double} EUR to the savings account on {string} date")
+    public void createdUserCannotDeposit(double depositAmount, String depositDate) {
+        PostSavingsAccountsResponse savingsAccountResponse = testContext().get(TestContextKey.EUR_SAVINGS_ACCOUNT_CREATE_RESPONSE);
+        PostSavingsAccountTransactionsRequest depositRequest = SavingsAccountRequestFactory.defaultDepositRequest()
+                .transactionDate(depositDate).transactionAmount(BigDecimal.valueOf(depositAmount));
+        String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
+        String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
+        FineractFeignClient userClient = fineractClientConfiguration.fineractFeignClientForUser(username, password);
+
+        CallFailedRuntimeException exception = FeignCalls.fail(() -> userClient.savingsAccountTransactions()
+                .createSavingsAccountTransaction(savingsAccountResponse.getSavingsId(), depositRequest, Map.of("command", "deposit")));
+        assertThat(exception.getStatus()).isEqualTo(403);
     }
 
     @And("Client successfully deposits {double} USD to the savings account on {string} date")
