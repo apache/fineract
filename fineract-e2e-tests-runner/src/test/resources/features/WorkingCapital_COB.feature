@@ -22,7 +22,8 @@ Feature: Working Capital COB Job
     Then Admin verifies scheduler job "WC_COB" has display name "Working Capital Loan COB"
     Then Admin verifies scheduler job "WC_COB" has active status "false"
 
-  Scenario: Available business steps are exposed for the Working Capital COB job name
+  @TestRailId:C106656
+  Scenario: Verify available business steps are exposed for the Working Capital COB job name
     Then Admin verifies available business steps for "WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS" contain:
       | stepName                           |
       | DUMMY_BUSINESS_STEP                |
@@ -34,18 +35,20 @@ Feature: Working Capital COB Job
       | WC_DISCOUNT_FEE_AMORTIZATION       |
       | WC_CHARGE_ACCRUAL                  |
 
-  @WCBusinessStepConfig
-  Scenario: Working Capital COB job rejects a business step from the Loan COB family
+  @TestRailId:C106657 @WCBusinessStepConfig
+  Scenario: Verify Working Capital COB job rejects a business step from the Loan COB family
     Then Admin fails to update business steps for "WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS" with invalid step "APPLY_CHARGE_TO_OVERDUE_LOANS"
 
-  Scenario: Loan COB job rejects a business step from the Working Capital family
+  @TestRailId:C106658
+  Scenario: Verify Loan COB job rejects a business step from the Working Capital family
     Then Admin fails to update business steps for "LOAN_CLOSE_OF_BUSINESS" with invalid step "WC_CHARGE_ACCRUAL"
 
-  Scenario: Business step update is rejected for an unknown job name
+  @TestRailId:C106659
+  Scenario: Verify Business step update is rejected for an unknown job name
     Then Admin fails to update business steps for "NOT_A_COB_JOB" with invalid step "APPLY_CHARGE_TO_OVERDUE_LOANS"
 
-  @WCBusinessStepConfig
-  Scenario: Working Capital COB business step order is updated
+  @TestRailId:C106660 @WCBusinessStepConfig
+  Scenario: Verify Working Capital COB business step order is updated
     When Admin updates business steps for "WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS" with:
       | stepName                           | order |
       | DUMMY_BUSINESS_STEP                | 1     |
@@ -67,8 +70,8 @@ Feature: Working Capital COB Job
       | WC_NEAR_BREACH_EVALUATION          | 7     |
       | WC_DISCOUNT_FEE_AMORTIZATION       | 8     |
 
-  @WCBusinessStepConfig
-  Scenario: Working Capital COB runs with a reordered business step configuration
+  @TestRailId:C106661 @WCBusinessStepConfig
+  Scenario: Verify Working Capital COB runs with a reordered business step configuration
     When Admin updates business steps for "WORKING_CAPITAL_LOAN_CLOSE_OF_BUSINESS" with:
       | stepName                           | order |
       | WC_MISSED_PAYMENT_ACKNOWLEDGEMENT  | 1     |
