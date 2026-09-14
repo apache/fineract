@@ -1309,7 +1309,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         // Reverse the journal entries of any charge accrual so the recognized income/receivable is backed out with the
         // disbursement; marking the transaction reversed alone would leave the GL postings in place.
-        accrualsToReverse.forEach(accrual -> accountingProcessor.postReversalJournalEntries(loan, accrual));
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            accrualsToReverse.forEach(accrual -> accountingProcessor.postReversalJournalEntries(loan, accrual));
+        }
         accrualsToReverse.forEach(accrual -> businessEventNotifierService
                 .notifyPostBusinessEvent(new WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent(accrual, loan.getId())));
 
@@ -1365,7 +1367,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT).forEach(relation -> {
                     final WorkingCapitalLoanTransaction txn = relation.getFromTransaction();
                     reverseTransaction(txn);
-                    accountingProcessor.postReversalJournalEntries(loan, txn);
+                    if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+                        accountingProcessor.postReversalJournalEntries(loan, txn);
+                    }
                 });
         // Realized income is recomputed from the (now-reversed) transactions by its single owner, not adjusted here.
         discountFeeAmortizationService.recalculateRealizedIncome(loan);
