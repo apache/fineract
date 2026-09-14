@@ -16,28 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.fineract.investor.data.attribute;
+package org.apache.fineract.investor.exception;
 
-import java.util.List;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public interface ExternalAssetOwnerLoanProductAttribute {
+public class ExternalAssetOwnerLoanProductAttributeInvalidValueException extends AbstractPlatformDomainRuleException {
 
-    String getAttributeKey();
+    private static final String errorCode = "error.msg.externalAssetOwnerLoanProductAttribute.invalidAttributeValue";
 
-    String getAttributeValue();
-
-    List<String> getAttributeValues();
-
-    boolean validate(String attributeValue);
-
-    boolean isMultiValue();
-
-    /**
-     * Converts an already validated attribute value into its canonical, storable form. Implementations that accept
-     * loosely formatted input (padding around separators) return the normalised value here, so that the persisted value
-     * is always canonical.
-     */
-    default String normalize(String attributeValue) {
-        return attributeValue;
+    public ExternalAssetOwnerLoanProductAttributeInvalidValueException(String attributeKey) {
+        super(errorCode, "The given attribute value is not valid for the attribute key: " + attributeKey + ".", attributeKey);
     }
+
 }
