@@ -2725,6 +2725,9 @@ Feature: LoanReAgingEqualAmortization - Part3
   Scenario: Re-aging considers the down payment installment while add additional disbursement with following charge-off - UC6
     When Admin sets the business date to "21 April 2026"
     When Admin creates a client with random data
+    When Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "MERCHANT_ISSUED_REFUND" transaction type to "REAMORTIZATION" future installment allocation rule
+    When Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "PAYOUT_REFUND" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "GOODWILL_CREDIT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
     When Admin set "LP2_ADV_PYMNT_INT_DAILY_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_AUTO_DOWNPAYMENT_ACCELERATE_MATURITY" loan product "DEFAULT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
@@ -2753,7 +2756,7 @@ Feature: LoanReAgingEqualAmortization - Part3
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 600.0         | 5.54     | 0.0  | 0.0       | 605.54 | 150.0 | 0.0        | 0.0  | 455.54      |
     Then Loan status will be "ACTIVE"
-    Then Loan has 0.0 overpaid amount
+    Then Loan has 455.54 outstanding amount
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 21 April 2026    | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
