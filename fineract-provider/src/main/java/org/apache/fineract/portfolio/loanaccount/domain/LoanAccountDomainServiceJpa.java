@@ -118,6 +118,7 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.data.PostDatedChecksStatus;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecks;
 import org.apache.fineract.portfolio.repaymentwithpostdatedchecks.domain.PostDatedChecksRepository;
+import org.apache.fineract.portfolio.tax.service.TaxUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -448,10 +449,22 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 charge = loanCharge;
             }
         }
-        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, charge.amount(), null);
+        if (charge != null && charge.getCharge().getTaxGroup() != null && log.isInfoEnabled()) {
+            log.info(
+                    "Repayment-at-disbursement charge tax evaluation: loanId={}, loanChargeId={}, txDate={}, baseAmount={}, applicableTaxComponents={}",
+                    loan.getId(), charge.getId(), chargesPayment.getTransactionDate(), charge.amountOutstanding(),
+                    TaxUtils.getApplicableTaxComponentSummaries(charge.getCharge().getTaxGroup(), chargesPayment.getTransactionDate()));
+        }
+        final BigDecimal chargeAmountWithTax = TaxUtils.calculateChargeAmountWithTax(charge.amountOutstanding(),
+                charge.getCharge().getTaxGroup(), chargesPayment.getTransactionDate(), loan.getCurrency().getDigitsAfterDecimal());
+        if (charge != null && charge.getCharge().getTaxGroup() != null && log.isInfoEnabled()) {
+            log.info("Repayment-at-disbursement charge tax result: loanId={}, loanChargeId={}, txDate={}, amountAfterTax={}", loan.getId(),
+                    charge.getId(), chargesPayment.getTransactionDate(), chargeAmountWithTax);
+        }
+        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, chargeAmountWithTax, null);
         chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
         final Money zero = Money.zero(loan.getCurrency());
-        chargesPayment.updateComponents(zero, zero, charge.getAmount(loan.getCurrency()), zero);
+        chargesPayment.updateComponents(zero, zero, Money.of(loan.getCurrency(), chargeAmountWithTax), zero);
         chargesPayment.updateLoan(loan);
         loan.addLoanTransaction(chargesPayment);
         loanBalanceService.updateLoanOutstandingBalances(loan);
