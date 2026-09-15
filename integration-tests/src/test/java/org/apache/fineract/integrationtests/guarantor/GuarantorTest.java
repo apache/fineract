@@ -100,7 +100,7 @@ public class GuarantorTest extends FeignLoanTestBase {
         final Long externalSavingsId1 = openSavingsAccount(clientIdExternal, EXTERNAL1_BALANCE);
         final Long externalSavingsId2 = openSavingsAccount(clientIdExternal2, EXTERNAL2_BALANCE);
 
-        final Long loanProductId = createLoanProductWithHoldFunds("50", "20", "20");
+        final Long loanProductId = createLoanProductWithHoldFunds("40", "20", "20");
         final String loanDisbursementDate = daysAgo(7 * 4);
         final Long loanId = applyForCollateralisedLoan(clientId, loanProductId, loanDisbursementDate);
         assertNotNull(loanId);
@@ -216,7 +216,7 @@ public class GuarantorTest extends FeignLoanTestBase {
         final Long externalSavingsId3 = openSavingsAccount(clientIdExternal, EXTERNAL1_BALANCE);
         final Long externalSavingsId2 = openSavingsAccount(clientIdExternal2, EXTERNAL2_BALANCE);
 
-        final Long loanProductId = createLoanProductWithHoldFunds("50", "20", "20");
+        final Long loanProductId = createLoanProductWithHoldFunds("40", "20", "20");
         final String loanDisbursementDate = daysAgo(7 * 4);
         final Long loanId = applyForCollateralisedLoan(clientId, loanProductId, loanDisbursementDate);
         assertNotNull(loanId);
