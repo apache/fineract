@@ -319,3 +319,18 @@ Feature: WorkingCapitalLoanChargesFeature
       | httpCode | errorMessage                                                             |
       | 403      | Charge time type DISBURSEMENT is not supported on a Working Capital Loan. |
     When Admin deletes working capital loan charge
+
+  Scenario: Verify Working Capital Charge on loan account level - user with CREATE_WORKINGCAPITALLOANCHARGE permission can add a charge
+    Then Permission "CREATE_WORKINGCAPITALLOANCHARGE" is returned with grouping "transaction_loan", entity "WORKINGCAPITALLOANCHARGE" and action "CREATE"
+    Given Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 January 2026 | 01 January 2026          | 9000            | 100000       | 18                | 0        |
+    And Admin creates new user with "WC_ADD_CHARGE_USER" username, "WC_ADD_CHARGE_ROLE" role name and given permissions:
+      | CREATE_WORKINGCAPITALLOANCHARGE |
+    When Created user adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "01 January 2026" due date and 35.0 transaction amount
+    Then Working Capital Loan has charges with the following data:
+      | Charge Name              | Due Date        | Amount | Currency | isPenalty | Charge Time Type   | Charge Calculation Type | Charge Payment mode |
+      | Working Capital Loan Fee | 01 January 2026 | 35.0   | EUR      | false     | Specified due date | Flat                    | Regular             |
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    Then Admin closes the Working Capital loan with all obligations met with a full repayment on "01 January 2026"
