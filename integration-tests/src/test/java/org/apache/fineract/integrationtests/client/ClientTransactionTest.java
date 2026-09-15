@@ -89,6 +89,11 @@ public class ClientTransactionTest {
         GetClientsClientIdTransactionsTransactionIdResponse clientTransactionByExternalId = clientHelper
                 .getClientTransactionByExternalId(clientExternalId, clientChargePaidTransactionId1);
         assertEquals(Integer.parseInt(clientChargePaidTransactionId1), clientTransactionByExternalId.getId());
+        final Integer returnedClientChargeId = Utils.performServerGet(requestSpec, responseSpec,
+                "/fineract-provider/api/v1/clients/external-id/" + clientExternalId + "/transactions/" + clientChargePaidTransactionId1
+                        + "?" + Utils.TENANT_IDENTIFIER,
+                "clientChargeId");
+        assertEquals(clientChargeId1, returnedClientChargeId);
 
         GetClientsClientIdTransactionsTransactionIdResponse clientTransactionByTransactionExternalId = clientHelper
                 .getClientTransactionByTransactionExternalId(clientId, clientChargePaidTransactionExternalId);
