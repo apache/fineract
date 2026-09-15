@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
+import org.apache.fineract.commands.service.MakerCheckerReadService;
 import org.apache.fineract.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.PaginationHelper;
@@ -76,6 +77,8 @@ class ClientReadPlatformServiceImplTest {
     private ClientRepositoryWrapper clientRepositoryWrapper;
     @Mock
     private ClientMapper clientMapper;
+    @Mock
+    private MakerCheckerReadService makerCheckerReadService;
 
     @InjectMocks
     private ClientReadPlatformServiceImpl clientReadPlatformService;
@@ -98,6 +101,7 @@ class ClientReadPlatformServiceImplTest {
 
         // Mock the groups query to return an empty list
         when(jdbcTemplate.query(anyString(), any(RowMapper.class), anyLong())).thenReturn(Collections.emptyList());
+        when(makerCheckerReadService.retrievePendingByClientId(clientId)).thenReturn(Collections.emptyList());
 
         // Act
         ClientData result = clientReadPlatformService.retrieveOne(clientId);
