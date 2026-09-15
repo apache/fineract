@@ -116,7 +116,7 @@ public class ExternalAssetOwnerLoanProductAttributesReadServiceTest {
         // then
         ExternalTransferLoanProductAttributesTemplateData settlementModel = result.stream()
                 .filter(attribute -> "SETTLEMENT_MODEL".equals(attribute.getAttributeKey())).findFirst().orElseThrow();
-        assertEquals(2, result.size());
+        assertEquals(3, result.size());
         assertEquals(List.of("DEFAULT_SETTLEMENT", "DELAYED_SETTLEMENT"), settlementModel.getAttributeValues());
         assertFalse(settlementModel.isMultiValue());
 
