@@ -19,6 +19,7 @@
 package org.apache.fineract.portfolio.savings.api;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -52,14 +53,24 @@ final class RecurringDepositProductsApiResourceSwagger {
                 public Integer toPeriod;
                 @Schema(example = "4.5")
                 public Double annualInterestRate;
+                @Schema(example = "1000")
+                public BigDecimal amountRangeFrom;
+                @Schema(example = "5000")
+                public BigDecimal amountRangeTo;
+                @Schema(example = "en")
+                public String locale;
             }
 
             @Schema(example = "01 Jan 2014")
             public String fromDate;
+            @Schema(example = "01 Jan 2015")
+            public String endDate;
             @Schema(example = "en")
             public String locale;
             @Schema(example = "dd MMMM yyyy")
             public String dateFormat;
+            @Schema(example = "false")
+            public Boolean isPrimaryGroupingByAmount;
             public Set<PostRecurringDepositProductsChartSlabs> chartSlabs;
         }
 
@@ -101,12 +112,42 @@ final class RecurringDepositProductsApiResourceSwagger {
         public Integer maxDepositTerm;
         @Schema(example = "3")
         public Integer maxDepositTermTypeId;
+        @Schema(example = "2")
+        public Integer inMultiplesOfDepositTerm;
+        @Schema(example = "2")
+        public Integer inMultiplesOfDepositTermTypeId;
         @Schema(example = "10000")
-        public Long depositAmount;
+        public BigDecimal depositAmount;
         @Schema(example = "100")
-        public Long minDepositAmount;
+        public BigDecimal minDepositAmount;
         @Schema(example = "1000000")
-        public Long maxDepositAmount;
+        public BigDecimal maxDepositAmount;
+        @Schema(example = "1")
+        public Integer lockinPeriodFrequency;
+        @Schema(example = "2")
+        public Integer lockinPeriodFrequencyType;
+        @Schema(example = "true")
+        public Boolean isMandatoryDeposit;
+        @Schema(example = "1")
+        public Integer recurringFrequency;
+        @Schema(example = "2")
+        public Integer recurringFrequencyType;
+        @Schema(example = "false")
+        public Boolean withHoldTax;
+        @Schema(example = "1")
+        public Long taxGroupId;
+        @Schema(example = "1")
+        public Long savingsReferenceAccountId;
+        @Schema(example = "2")
+        public Long savingsControlAccountId;
+        @Schema(example = "3")
+        public Long transfersInSuspenseAccountId;
+        @Schema(example = "4")
+        public Long interestOnSavingsAccountId;
+        @Schema(example = "5")
+        public Long incomeFromFeeAccountId;
+        @Schema(example = "6")
+        public Long incomeFromPenaltyAccountId;
         public Set<PostRecurringDepositProductsCharts> charts;
     }
 

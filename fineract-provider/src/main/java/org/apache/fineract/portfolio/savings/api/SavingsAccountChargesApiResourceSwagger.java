@@ -213,6 +213,10 @@ final class SavingsAccountChargesApiResourceSwagger {
         public String dateFormat;
         @Schema(example = "29 April 2013")
         public String dueDate;
+        @Schema(example = "dd MMMM", description = "Required with feeOnMonthDay")
+        public String monthDayFormat;
+        @Schema(example = "04 March", description = "The recurring day an annual or monthly fee falls due")
+        public String feeOnMonthDay;
     }
 
     @Schema(description = "PostSavingsAccountsSavingsAccountIdChargesResponse")

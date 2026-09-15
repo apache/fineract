@@ -18,12 +18,15 @@
  */
 package org.apache.fineract.integrationtests.client.feign.helpers;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.fail;
 import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.DeleteSavingsAccountsAccountIdResponse;
+import org.apache.fineract.client.models.DepositAccountOnHoldTransactionData;
 import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesResponse;
 import org.apache.fineract.client.models.GetSavingsAccountsSavingsAccountIdChargesSavingsAccountChargeIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsAccountIdRequest;
@@ -34,10 +37,14 @@ import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChar
 import org.apache.fineract.client.models.PostSavingsAccountsSavingsAccountIdChargesResponse;
 import org.apache.fineract.client.models.PutSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PutSavingsAccountsAccountIdResponse;
+import org.apache.fineract.client.models.SavingsAccountChargeData;
 import org.apache.fineract.client.models.SavingsAccountData;
 import org.apache.fineract.client.models.SavingsAccountStatusEnumData;
+import org.apache.fineract.client.models.SavingsAccountSubStatusEnumData;
 import org.apache.fineract.client.models.SavingsAccountSummaryData;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
+import org.apache.fineract.integrationtests.common.Utils;
 
 public class FeignSavingsHelper {
 
@@ -53,6 +60,15 @@ public class FeignSavingsHelper {
 
     public PostSavingsAccountsResponse submitApplication(Long clientId, Long productId, String submittedOnDate) {
         return submitApplication(SavingsRequestBuilders.submitSavingsApplication(clientId, productId, submittedOnDate));
+    }
+
+    public PostSavingsAccountsResponse submitGroupApplication(Long groupId, Long productId, String submittedOnDate) {
+        return submitApplication(SavingsRequestBuilders.submitGroupSavingsApplication(groupId, productId, submittedOnDate));
+    }
+
+    public PutSavingsAccountsAccountIdResponse updateGroupSavingsApplication(Long savingsId, Long groupId, Long productId,
+            String submittedOnDate) {
+        return updateSavingsAccount(savingsId, SavingsRequestBuilders.updateGroupSavingsApplication(groupId, productId, submittedOnDate));
     }
 
     public PostSavingsAccountsAccountIdResponse approveSavings(Long savingsId, String approvedOnDate) {
@@ -75,6 +91,39 @@ public class FeignSavingsHelper {
         return ok(() -> fineractClient.savingsAccount().handleCommandsSavingsAccount(savingsId, request, "reject"));
     }
 
+    public CallFailedRuntimeException closeSavingsExpectingError(Long savingsId, String closedOnDate, boolean withdrawBalance) {
+        PostSavingsAccountsAccountIdRequest request = SavingsRequestBuilders.closeSavings(closedOnDate, withdrawBalance);
+        return fail(() -> fineractClient.savingsAccount().handleCommandsSavingsAccount(savingsId, request, "close"));
+    }
+
+    /** Closing with this flag on makes the server refuse the close unless interest has already been posted. */
+    public CallFailedRuntimeException closeSavingsValidatingPostedInterestExpectingError(Long savingsId, String closedOnDate,
+            boolean withdrawBalance) {
+        PostSavingsAccountsAccountIdRequest request = SavingsRequestBuilders.closeSavings(closedOnDate, withdrawBalance)
+                .postInterestValidationOnClosure(true);
+        return fail(() -> fineractClient.savingsAccount().handleCommandsSavingsAccount(savingsId, request, "close"));
+    }
+
+    public PostSavingsAccountsAccountIdResponse closeSavingsValidatingPostedInterest(Long savingsId, String closedOnDate,
+            boolean withdrawBalance) {
+        PostSavingsAccountsAccountIdRequest request = SavingsRequestBuilders.closeSavings(closedOnDate, withdrawBalance)
+                .postInterestValidationOnClosure(true);
+        return ok(() -> fineractClient.savingsAccount().handleCommandsSavingsAccount(savingsId, request, "close"));
+    }
+
+    public CallFailedRuntimeException rejectSavingsExpectingError(Long savingsId, String rejectedOnDate) {
+        PostSavingsAccountsAccountIdRequest request = SavingsRequestBuilders.rejectSavings(rejectedOnDate);
+        return fail(() -> fineractClient.savingsAccount().handleCommandsSavingsAccount(savingsId, request, "reject"));
+    }
+
+    public CallFailedRuntimeException deleteSavingsApplicationExpectingError(Long savingsId) {
+        return fail(() -> fineractClient.savingsAccount().deleteSavingsAccount(savingsId));
+    }
+
+    public CallFailedRuntimeException getSavingsDetailsExpectingError(Long savingsId) {
+        return fail(() -> fineractClient.savingsAccount().retrieveSavingsAccount(savingsId, Map.of()));
+    }
+
     public PostSavingsAccountsAccountIdResponse closeSavings(Long savingsId, String closedOnDate, boolean withdrawBalance) {
         PostSavingsAccountsAccountIdRequest request = SavingsRequestBuilders.closeSavings(closedOnDate, withdrawBalance);
         return ok(() -> fineractClient.savingsAccount().handleCommandsSavingsAccount(savingsId, request, "close"));
@@ -82,6 +131,87 @@ public class FeignSavingsHelper {
 
     public SavingsAccountData getSavingsDetails(Long savingsId) {
         return ok(() -> fineractClient.savingsAccount().retrieveSavingsAccount(savingsId, Map.of("associations", "all")));
+    }
+
+    public PostSavingsAccountsAccountIdResponse commandByExternalId(String externalId, PostSavingsAccountsAccountIdRequest request,
+            String command) {
+        return ok(() -> fineractClient.savingsAccount().handleCommandsSavingsAccountByExternalId(externalId, request, command));
+    }
+
+    public PostSavingsAccountsAccountIdResponse approveSavingsByExternalId(String externalId, String approvedOnDate) {
+        return commandByExternalId(externalId, SavingsRequestBuilders.approveSavings(approvedOnDate), "approve");
+    }
+
+    public PostSavingsAccountsAccountIdResponse undoApprovalByExternalId(String externalId) {
+        return commandByExternalId(externalId, new PostSavingsAccountsAccountIdRequest(), "undoapproval");
+    }
+
+    public PutSavingsAccountsAccountIdResponse updateSavingsByExternalId(String externalId, PutSavingsAccountsAccountIdRequest request) {
+        return ok(() -> fineractClient.savingsAccount().updateSavingsAccountByExternalId(externalId, request, ""));
+    }
+
+    public SavingsAccountData getSavingsDetailsByExternalId(String externalId, String associations) {
+        return ok(() -> fineractClient.savingsAccount().retrieveSavingsAccountByExternalId(externalId, null, null, associations));
+    }
+
+    public CallFailedRuntimeException getSavingsDetailsByExternalIdExpectingError(String externalId) {
+        return fail(() -> fineractClient.savingsAccount().retrieveSavingsAccountByExternalId(externalId, null, null, "all"));
+    }
+
+    public DeleteSavingsAccountsAccountIdResponse deleteSavingsByExternalId(String externalId) {
+        return ok(() -> fineractClient.savingsAccount().deleteSavingsAccountByExternalId(externalId));
+    }
+
+    /**
+     * The block commands carry a reason; their unblock counterparts do not, which is why they take different bodies.
+     */
+    public PostSavingsAccountsAccountIdResponse blockSavings(Long savingsId, String reasonForBlock) {
+        return command(savingsId, blockRequest(reasonForBlock), "block");
+    }
+
+    public PostSavingsAccountsAccountIdResponse unblockSavings(Long savingsId) {
+        return command(savingsId, unblockRequest(), "unblock");
+    }
+
+    public PostSavingsAccountsAccountIdResponse blockCredit(Long savingsId, String reasonForBlock) {
+        return command(savingsId, blockRequest(reasonForBlock), "blockCredit");
+    }
+
+    public PostSavingsAccountsAccountIdResponse unblockCredit(Long savingsId) {
+        return command(savingsId, unblockRequest(), "unblockCredit");
+    }
+
+    public PostSavingsAccountsAccountIdResponse blockDebit(Long savingsId, String reasonForBlock) {
+        return command(savingsId, blockRequest(reasonForBlock), "blockDebit");
+    }
+
+    public PostSavingsAccountsAccountIdResponse unblockDebit(Long savingsId) {
+        return command(savingsId, unblockRequest(), "unblockDebit");
+    }
+
+    public PostSavingsAccountsAccountIdResponse command(Long savingsId, PostSavingsAccountsAccountIdRequest request, String command) {
+        return ok(() -> fineractClient.savingsAccount().handleCommandsSavingsAccount(savingsId, request, command));
+    }
+
+    /** Toggles withholding tax on an existing account; the command takes that one field. */
+    public PutSavingsAccountsAccountIdResponse updateWithHoldTaxStatus(Long savingsId, boolean withHoldTax) {
+        PutSavingsAccountsAccountIdRequest request = new PutSavingsAccountsAccountIdRequest().withHoldTax(withHoldTax);
+        return ok(() -> fineractClient.savingsAccount().updateSavingsAccount(savingsId, request, "updateWithHoldTax"));
+    }
+
+    private PostSavingsAccountsAccountIdRequest blockRequest(String reasonForBlock) {
+        return new PostSavingsAccountsAccountIdRequest()//
+                .locale(SavingsTestData.LOCALE)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .activatedOnDate(Utils.dateFormatter.format(Utils.getLocalDateOfTenant()))//
+                .reasonForBlock(reasonForBlock);
+    }
+
+    private PostSavingsAccountsAccountIdRequest unblockRequest() {
+        return new PostSavingsAccountsAccountIdRequest()//
+                .locale(SavingsTestData.LOCALE)//
+                .dateFormat(SavingsTestData.DATETIME_PATTERN)//
+                .activatedOnDate(Utils.dateFormatter.format(Utils.getLocalDateOfTenant()));
     }
 
     public SavingsAccountData getSavingsDetails(Long savingsId, String associations) {
@@ -118,6 +248,29 @@ public class FeignSavingsHelper {
     /** The status is on the account itself, so no associations are requested. */
     public SavingsAccountStatusEnumData getSavingsStatus(Long savingsId) {
         return ok(() -> fineractClient.savingsAccount().retrieveSavingsAccount(savingsId, Map.of())).getStatus();
+    }
+
+    /** The guarantor holds standing against the account, which is what an account pledged as collateral carries. */
+    public List<DepositAccountOnHoldTransactionData> getOnHoldTransactions(Long savingsId) {
+        return ok(() -> fineractClient.depositAccountOnHoldFundTransactions().retrieveAllDepositAccountOnHoldFundTransactions(savingsId,
+                Map.of())).getPageItems();
+    }
+
+    public SavingsAccountSubStatusEnumData getSavingsSubStatus(Long savingsId) {
+        return ok(() -> fineractClient.savingsAccount().retrieveSavingsAccount(savingsId, Map.of())).getSubStatus();
+    }
+
+    /**
+     * The charges listing endpoint answers a projection without the due date or the fee interval, so the charges a test
+     * has to reason about are read off the account itself.
+     */
+    public List<SavingsAccountChargeData> getSavingsAccountCharges(Long savingsId) {
+        return getSavingsDetails(savingsId, "charges").getCharges();
+    }
+
+    public PutSavingsAccountsAccountIdResponse updateSavingsApplication(Long savingsId, Long clientId, Long productId,
+            String submittedOnDate) {
+        return updateSavingsAccount(savingsId, SavingsRequestBuilders.updateSavingsApplication(clientId, productId, submittedOnDate));
     }
 
     public Long createApproveActivateSavings(Long clientId, Long productId, String date) {

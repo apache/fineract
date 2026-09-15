@@ -19,1061 +19,442 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.apache.fineract.accounting.common.AccountingConstants.FinancialActivity;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.AccountTransferRequest;
+import org.apache.fineract.client.models.GetAccountTransfersPageItems;
+import org.apache.fineract.client.models.GetAccountTransfersPageItemsPaymentDetailData;
+import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PaymentTypeCreateRequest;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.OfficeHelper;
-import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
+import org.apache.fineract.client.models.PostLoanProductsRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansRequestCollateralData;
+import org.apache.fineract.client.models.PostSavingsProductsRequest;
+import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignFinancialActivityAccountHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignOfficeHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.AccountTransferRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.ClientRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
+import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.Account.AccountType;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.savings.AccountTransferHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsProductHelper;
-import org.apache.fineract.integrationtests.common.savings.SavingsStatusChecker;
+import org.apache.fineract.portfolio.account.PortfolioAccountType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * JUnit Test Cases for Account Transfer for.
  */
-@SuppressWarnings({ "rawtypes", "unused" })
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(LoanTestLifecycleExtension.class)
-public class AccountTransferTest {
+public class AccountTransferTest extends FeignSavingsTestBase {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AccountTransferTest.class);
-    public static final String MINIMUM_OPENING_BALANCE = "30000.0";
-    public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    public static final String ACCOUNT_TRANSFER_AMOUNT = "15000.0";
-    public static final String ACCOUNT_TRANSFER_NEGATIVE_AMOUNT = "-15000.0";
-    public static final String ACCOUNT_TRANSFER_AMOUNT_ADJUST = "3000.0";
-    public static final String ACCOUNT_TRANSFER_LARGE_AMOUNT = "100000.0";
-    public static final String ACCOUNT_TRANSFER_NEGATIVE_AMOUNT_ADJUST = "-3000.0";
-    public static final String FROM_LOAN_ACCOUNT_TYPE = "1";
-    public static final String INVALID_LOAN_ACCOUNT_TYPE = "999";
-    public static final String FROM_SAVINGS_ACCOUNT_TYPE = "2";
-    public static final String INVALID_SAVINGS_ACCOUNT_TYPE = "999";
-    public static final String TO_LOAN_ACCOUNT_TYPE = "1";
-    public static final String TO_SAVINGS_ACCOUNT_TYPE = "2";
+    private static final Integer LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID = FinancialActivity.LIABILITY_TRANSFER.getValue();
 
-    public static final Integer INVALID_LOAN_ID = 123123123;
+    private static final String MINIMUM_OPENING_BALANCE = "30000.0";
+    private static final String ACCOUNT_TRANSFER_AMOUNT = "15000.0";
+    private static final String ACCOUNT_TRANSFER_NEGATIVE_AMOUNT = "-15000.0";
+    private static final String ACCOUNT_TRANSFER_AMOUNT_ADJUST = "3000.0";
+    private static final String ACCOUNT_TRANSFER_LARGE_AMOUNT = "100000.0";
+    private static final String INVALID_ACCOUNT_TYPE = "999";
+    private static final Long INVALID_LOAN_ID = 123123123L;
 
-    public static final String LOAN_APPROVAL_DATE = "10 January 2013";
-    public static final String LOAN_APPROVAL_DATE_PLUS_ONE = "11 January 2013";
-    public static final String LOAN_DISBURSAL_DATE = "10 January 2013";
+    /** The invisible default the RestAssured {@code LoanApplicationTestBuilder} put on every application. */
+    private static final BigDecimal MAX_OUTSTANDING_LOAN_BALANCE = new BigDecimal("36000");
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private SavingsAccountHelper savingsAccountHelper;
-    private AccountTransferHelper accountTransferHelper;
-    private LoanTransactionHelper loanTransactionHelper;
-    private AccountHelper accountHelper;
-    private JournalEntryHelper journalEntryHelper;
+    private static final String ACCOUNT_TRANSFER_DATE = "01 March 2013";
+    private static final String ACCOUNT_TRANSFER_INVALID_DATE = "01 05 2013";
+    private static final String LOAN_APPROVAL_DATE = "10 January 2013";
+    private static final String LOAN_DISBURSAL_DATE = "10 January 2013";
+    private static final String LOAN_SUBMITTED_ON_DATE = "10 January 2013";
+    private static final String CLIENT_ACTIVATION_DATE = "01 January 2011";
+    private static final String SAVINGS_SUBMITTED_ON_DATE = "08 January 2013";
+    private static final String SAVINGS_APPROVED_ON_DATE = "09 January 2013";
+    private static final String SAVINGS_ACTIVATED_ON_DATE = "01 March 2013";
+    private static final LocalDate OFFICE_OPENING_DATE = LocalDate.of(2011, 1, 1);
 
-    static Float TRANSFER_AMOUNT = Float.valueOf(ACCOUNT_TRANSFER_AMOUNT);
-    static Float TRANSFER_AMOUNT_ADJUST = Float.valueOf(ACCOUNT_TRANSFER_AMOUNT_ADJUST);
+    private static FeignOfficeHelper officeHelper;
+    private static FeignLoanHelper loanHelper;
+    private static FeignFinancialActivityAccountHelper financialActivityAccountHelper;
+    private static FeignCollateralHelper collateralHelper;
 
-    private FinancialActivityAccountHelper financialActivityAccountHelper;
-    private Integer financialActivityAccountId;
-    private Account liabilityTransferAccount;
+    private static Long financialActivityAccountId;
+    private static Account liabilityTransferAccount;
 
+    /** Account transfers post to the liability transfer account, so the mapping has to exist before any test runs. */
     @BeforeAll
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
-        this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
+    public static void setupLiabilityTransferAccount() {
+        FineractFeignClient client = FineractFeignClientHelper.getFineractFeignClient();
+        officeHelper = new FeignOfficeHelper(client);
+        loanHelper = new FeignLoanHelper(client);
+        financialActivityAccountHelper = new FeignFinancialActivityAccountHelper(client);
+        collateralHelper = new FeignCollateralHelper(client);
 
-        List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
-        if (financialActivities.stream()
-                .noneMatch(financialActivityAccount -> FinancialActivityAccountsTest.LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID
-                        .equals(financialActivityAccount.get("id")))) {
-            /* Setup liability transfer account **/
-            /* Create a Liability and an Asset Transfer Account **/
+        GetFinancialActivityAccountsResponse existing = financialActivityAccountHelper.getAllMappings().stream()
+                .filter(mapping -> mapping.getFinancialActivityData() != null
+                        && LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID.equals(mapping.getFinancialActivityData().getId()))
+                .findFirst().orElse(null);
+
+        if (existing == null) {
             liabilityTransferAccount = accountHelper.createLiabilityAccount();
-            Assertions.assertNotNull(liabilityTransferAccount);
-
-            /* Create A Financial Activity to Account Mapping **/
-            financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
-                    FinancialActivityAccountsTest.LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityTransferAccount.getAccountID(),
-                    responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
-            Assertions.assertNotNull(financialActivityAccountId);
+            financialActivityAccountId = financialActivityAccountHelper
+                    .createMapping(LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID, liabilityTransferAccount).getResourceId();
         } else {
-            for (HashMap financialActivity : financialActivities) {
-                HashMap financialActivityData = (HashMap) financialActivity.get("financialActivityData");
-                if (financialActivityData.get("id").equals(FinancialActivityAccountsTest.LIABILITY_TRANSFER_FINANCIAL_ACTIVITY_ID)) {
-                    HashMap glAccountData = (HashMap) financialActivity.get("glAccountData");
-                    liabilityTransferAccount = new Account((Integer) glAccountData.get("id"), AccountType.LIABILITY);
-                    financialActivityAccountId = (Integer) financialActivity.get("id");
-                    break;
-                }
-            }
+            liabilityTransferAccount = new Account(existing.getGlAccountData().getId().intValue(), AccountType.LIABILITY);
+            financialActivityAccountId = existing.getId();
         }
+        assertNotNull(financialActivityAccountId);
     }
 
-    /**
-     * Delete the Liability transfer account
-     */
     @AfterAll
-    public void tearDown() {
-        Integer deletedFinancialActivityAccountId = financialActivityAccountHelper
-                .deleteFinancialActivityAccount(financialActivityAccountId, responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
-        Assertions.assertNotNull(deletedFinancialActivityAccountId);
-        Assertions.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
+    public static void tearDown() {
+        assertEquals(financialActivityAccountId, financialActivityAccountHelper.deleteMapping(financialActivityAccountId).getResourceId());
     }
 
     @Test
     public void testFromSavingsToSavingsAccountTransfer() {
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
+        Long toOfficeId = createOffice();
+        Long toClientId = createClientInOffice(toOfficeId);
+        Long toSavingsId = createActiveSavingsAccount(toClientId, createCashBasedSavingsProduct());
 
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        Long fromOfficeId = createOffice();
+        Long fromClientId = createClientInOffice(fromOfficeId);
+        Long fromSavingsId = createActiveSavingsAccount(fromClientId, createCashBasedSavingsProduct());
 
-        OfficeHelper officeHelper = new OfficeHelper();
-        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(toOfficeId);
+        accountTransferHelper
+                .createAccountTransfer(savingsToSavings(fromClientId, fromSavingsId, fromClientId, toSavingsId, ACCOUNT_TRANSFER_AMOUNT));
 
-        // Creating Savings Account to which fund to be Transferred
-        final Integer toClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(toOfficeId));
-        Assertions.assertNotNull(toClientID);
-
-        final Integer toSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
-                incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(toSavingsProductID);
-
-        final Integer toSavingsID = this.savingsAccountHelper.applyForSavingsApplication(toClientID, toSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(toSavingsProductID);
-
-        HashMap toSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, toSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(toSavingsStatusHashMap);
-
-        final HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
-
-        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(fromOfficeId);
-
-        // Creating Savings Account from which the Fund has to be Transferred
-        final Integer fromClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(fromOfficeId));
-        Assertions.assertNotNull(fromClientID);
-
-        final Integer fromSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
-                assetAccount, incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(fromSavingsProductID);
-
-        final Integer fromSavingsID = this.savingsAccountHelper.applyForSavingsApplication(fromClientID, fromSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(fromSavingsID);
-
-        HashMap fromSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(fromSavingsStatusHashMap);
-
-        final HashMap fromSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
-
-        Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-        Float toSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-
-        this.accountTransferHelper.accountTransfer(fromClientID, fromSavingsID, fromClientID, toSavingsID, FROM_SAVINGS_ACCOUNT_TYPE,
-                TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
-
-        fromSavingsBalance -= Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT);
-        toSavingsBalance += Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT);
-
-        HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
-        assertEquals(fromSavingsBalance, fromSavingsSummaryAfter.get("accountBalance"),
+        BigDecimal openingBalance = new BigDecimal(MINIMUM_OPENING_BALANCE);
+        BigDecimal transferred = new BigDecimal(ACCOUNT_TRANSFER_AMOUNT);
+        SavingsTestValidators.verifyAmount(openingBalance.subtract(transferred),
+                savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance(),
                 "Verifying From Savings Account Balance after Account Transfer");
-
-        HashMap toSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
-        assertEquals(toSavingsBalance, toSavingsSummaryAfter.get("accountBalance"),
+        SavingsTestValidators.verifyAmount(openingBalance.add(transferred),
+                savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance(),
                 "Verifying To Savings Account Balance after Account Transfer");
-        final JournalEntry[] office1LiabilityEntries = {
-                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT), JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] office2LiabilityEntries = {
-                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT), JournalEntry.TransactionType.DEBIT) };
 
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
-                AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(toOfficeId, liabilityTransferAccount,
-                AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office2LiabilityEntries);
-
+        verifyLiabilityTransferEntries(fromOfficeId, toOfficeId, ACCOUNT_TRANSFER_AMOUNT);
     }
 
     @Test
     public void testFromSavingsToSavingsAccountTransferWithoutPaymentDetailsReadResponseRemainsCompatible() {
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
-
         SavingsTransferFixture fixture = createSavingsTransferFixture();
-        Long accountTransferDetailId = this.accountTransferHelper.accountTransferReturningResourceId(fixture.fromClientId,
-                fixture.fromSavingsId, fixture.toClientId, fixture.toSavingsId, FROM_SAVINGS_ACCOUNT_TYPE, TO_SAVINGS_ACCOUNT_TYPE,
-                ACCOUNT_TRANSFER_AMOUNT, null);
 
-        ArrayList<HashMap> transfers = this.accountTransferHelper.retrieveTransfersByAccountDetailId(accountTransferDetailId);
-        Assertions.assertEquals(1, transfers.size());
-        Assertions.assertTrue(!transfers.get(0).containsKey("paymentDetailData") || transfers.get(0).get("paymentDetailData") == null);
+        Long accountTransferDetailId = accountTransferHelper.createAccountTransfer(savingsToSavings(fixture.fromClientId,
+                fixture.fromSavingsId, fixture.toClientId, fixture.toSavingsId, ACCOUNT_TRANSFER_AMOUNT)).getResourceId();
+
+        List<GetAccountTransfersPageItems> transfers = accountTransferHelper.retrieveTransfersByAccountDetailId(accountTransferDetailId);
+        assertEquals(1, transfers.size());
+        assertNull(transfers.get(0).getPaymentDetailData(), "A transfer made without payment details should report none");
     }
 
     @Test
     public void testFromSavingsToSavingsAccountTransferWithPaymentDetailsPersistsAndReadsPaymentDetails() {
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
-
         SavingsTransferFixture fixture = createSavingsTransferFixture();
         Long paymentTypeId = createPaymentType();
-        Map<String, Object> paymentDetails = Map.of("paymentTypeId", paymentTypeId, "accountNumber", "ACC-2733", "checkNumber", "CHK-2733",
-                "routingCode", "RT-2733", "receiptNumber", "RC-2733", "bankNumber", "BNK-2733");
 
-        Long accountTransferDetailId = this.accountTransferHelper.accountTransferReturningResourceId(fixture.fromClientId,
-                fixture.fromSavingsId, fixture.toClientId, fixture.toSavingsId, FROM_SAVINGS_ACCOUNT_TYPE, TO_SAVINGS_ACCOUNT_TYPE,
-                ACCOUNT_TRANSFER_AMOUNT, paymentDetails);
+        AccountTransferRequest request = AccountTransferRequestBuilders.withPaymentDetails(savingsToSavings(fixture.fromClientId,
+                fixture.fromSavingsId, fixture.toClientId, fixture.toSavingsId, ACCOUNT_TRANSFER_AMOUNT), paymentTypeId, "ACC-2733",
+                "CHK-2733", "RT-2733", "RC-2733", "BNK-2733");
+        Long accountTransferDetailId = accountTransferHelper.createAccountTransfer(request).getResourceId();
 
-        ArrayList<HashMap> transfers = this.accountTransferHelper.retrieveTransfersByAccountDetailId(accountTransferDetailId);
-        Assertions.assertEquals(1, transfers.size());
-        HashMap paymentDetailData = (HashMap) transfers.get(0).get("paymentDetailData");
-        Assertions.assertNotNull(paymentDetailData);
-        HashMap paymentType = (HashMap) paymentDetailData.get("paymentType");
-        Assertions.assertEquals(paymentTypeId, ((Number) paymentType.get("id")).longValue());
-        Assertions.assertEquals("ACC-2733", paymentDetailData.get("accountNumber"));
-        Assertions.assertEquals("CHK-2733", paymentDetailData.get("checkNumber"));
-        Assertions.assertEquals("RT-2733", paymentDetailData.get("routingCode"));
-        Assertions.assertEquals("RC-2733", paymentDetailData.get("receiptNumber"));
-        Assertions.assertEquals("BNK-2733", paymentDetailData.get("bankNumber"));
+        List<GetAccountTransfersPageItems> transfers = accountTransferHelper.retrieveTransfersByAccountDetailId(accountTransferDetailId);
+        assertEquals(1, transfers.size());
+
+        GetAccountTransfersPageItemsPaymentDetailData paymentDetailData = transfers.get(0).getPaymentDetailData();
+        assertNotNull(paymentDetailData);
+        assertEquals(paymentTypeId, paymentDetailData.getPaymentType().getId());
+        assertEquals("ACC-2733", paymentDetailData.getAccountNumber());
+        assertEquals("CHK-2733", paymentDetailData.getCheckNumber());
+        assertEquals("RT-2733", paymentDetailData.getRoutingCode());
+        assertEquals("RC-2733", paymentDetailData.getReceiptNumber());
+        assertEquals("BNK-2733", paymentDetailData.getBankNumber());
     }
 
+    /**
+     * Payment details are rejected before the accounts are resolved, so the transfer names seeded ids rather than
+     * building two accounts it never reaches.
+     */
     @Test
     public void testAccountTransferRejectsPaymentDetailsWithoutPaymentType() {
-        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
-
-        this.accountTransferHelper.invalidAccountTransferWithPaymentDetails(Map.of("accountNumber", "ACC-2733"));
+        AccountTransferRequest request = AccountTransferRequestBuilders
+                .transfer(ACCOUNT_TRANSFER_DATE, 1L, 1L, PortfolioAccountType.SAVINGS, 1L, 2L, PortfolioAccountType.SAVINGS, "100.0")
+                .accountNumber("ACC-2733");
+        assertEquals(400, accountTransferHelper.createAccountTransferExpectingError(request).getStatus());
     }
 
     @Test
     public void testFromSavingsToLoanAccountTransfer() {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        Long toOfficeId = createOffice();
+        Long toClientId = createClientInOffice(toOfficeId);
+        Long toLoanId = createActiveLoan(toClientId);
 
-        final Account loanAssetAccount = this.accountHelper.createAssetAccount();
-        final Account loanIncomeAccount = this.accountHelper.createIncomeAccount();
-        final Account loanExpenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        Long fromOfficeId = createOffice();
+        Long fromClientId = createClientInOffice(fromOfficeId);
+        Long fromSavingsId = createActiveSavingsAccount(fromClientId, createCashBasedSavingsProduct());
 
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
+        accountTransferHelper
+                .createAccountTransfer(AccountTransferRequestBuilders.transfer(ACCOUNT_TRANSFER_DATE, fromClientId, fromSavingsId,
+                        PortfolioAccountType.SAVINGS, toClientId, toLoanId, PortfolioAccountType.LOAN, ACCOUNT_TRANSFER_AMOUNT_ADJUST));
 
-        OfficeHelper officeHelper = new OfficeHelper();
-        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(toOfficeId);
-
-        // Creating Loan Account to which fund to be Transferred
-        final Integer toClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(toOfficeId));
-        Assertions.assertNotNull(toClientID);
-
-        Account toTransferAccount = accountHelper.createLiabilityAccount();
-        Assertions.assertNotNull(toTransferAccount);
-
-        final Integer toLoanProductID = createLoanProduct(loanAssetAccount, loanIncomeAccount, loanExpenseAccount, overpaymentAccount);
-        Assertions.assertNotNull(toLoanProductID);
-
-        final Integer toLoanID = applyForLoanApplication(toClientID, toLoanProductID);
-        Assertions.assertNotNull(toLoanID);
-
-        HashMap toLoanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, toLoanID);
-        LoanStatusChecker.verifyLoanIsPending(toLoanStatusHashMap);
-
-        toLoanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_APPROVAL_DATE, toLoanID);
-        LoanStatusChecker.verifyLoanIsApproved(toLoanStatusHashMap);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, toLoanID);
-        toLoanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_DISBURSAL_DATE, toLoanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(toLoanStatusHashMap);
-
-        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(fromOfficeId);
-
-        // Creating Savings Account from which the Fund has to be Transferred
-        final Integer fromClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(fromOfficeId));
-        Assertions.assertNotNull(fromClientID);
-
-        final Integer fromSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
-                assetAccount, incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(fromSavingsProductID);
-
-        final Integer fromSavingsID = this.savingsAccountHelper.applyForSavingsApplication(fromClientID, fromSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(fromSavingsID);
-
-        HashMap fromSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(fromSavingsStatusHashMap);
-
-        final HashMap fromSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
-
-        Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-
-        this.accountTransferHelper.accountTransfer(fromClientID, fromSavingsID, toClientID, toLoanID, FROM_SAVINGS_ACCOUNT_TYPE,
-                TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT_ADJUST);
-
-        fromSavingsBalance -= TRANSFER_AMOUNT_ADJUST;
-
-        HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
-        assertEquals(fromSavingsBalance, fromSavingsSummaryAfter.get("accountBalance"),
+        BigDecimal transferred = new BigDecimal(ACCOUNT_TRANSFER_AMOUNT_ADJUST);
+        SavingsTestValidators.verifyAmount(new BigDecimal(MINIMUM_OPENING_BALANCE).subtract(transferred),
+                savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance(),
                 "Verifying From Savings Account Balance after Account Transfer");
-
-        HashMap toLoanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, toLoanID);
-        assertEquals(TRANSFER_AMOUNT_ADJUST, toLoanSummaryAfter.get("totalRepayment"),
+        SavingsTestValidators.verifyAmount(transferred, loanHelper.getLoanDetails(toLoanId).getSummary().getTotalRepayment(),
                 "Verifying To Loan Repayment Amount after Account Transfer");
 
-        final JournalEntry[] office1LiabilityEntries = {
-                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] office2LiabilityEntries = {
-                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.DEBIT) };
-
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
-                AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(toOfficeId, liabilityTransferAccount,
-                AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office2LiabilityEntries);
+        verifyLiabilityTransferEntries(fromOfficeId, toOfficeId, ACCOUNT_TRANSFER_AMOUNT_ADJUST);
     }
 
     @Test
     public void testFromLoanToSavingsAccountTransfer() {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
+        Long toOfficeId = createOffice();
+        Long toClientId = createClientInOffice(toOfficeId);
+        Long toSavingsId = createActiveSavingsAccount(toClientId, createCashBasedSavingsProduct());
 
-        final Account loanAssetAccount = this.accountHelper.createAssetAccount();
-        final Account loanIncomeAccount = this.accountHelper.createIncomeAccount();
-        final Account loanExpenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        Long fromOfficeId = createOffice();
+        Long fromClientId = createClientInOffice(fromOfficeId);
+        Long loanId = createActiveLoan(fromClientId);
+        Long fromSavingsId = createActiveSavingsAccount(fromClientId, createCashBasedSavingsProduct());
 
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
+        accountTransferHelper.createAccountTransfer(AccountTransferRequestBuilders.transfer(ACCOUNT_TRANSFER_DATE, fromClientId,
+                fromSavingsId, PortfolioAccountType.SAVINGS, fromClientId, loanId, PortfolioAccountType.LOAN, ACCOUNT_TRANSFER_AMOUNT));
 
-        OfficeHelper officeHelper = new OfficeHelper();
-        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(toOfficeId);
-
-        // Creating Loan Account to which fund to be Transferred
-        final Integer toClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(toOfficeId));
-        Assertions.assertNotNull(toClientID);
-
-        final Integer toSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
-                incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(toSavingsProductID);
-
-        final Integer toSavingsID = this.savingsAccountHelper.applyForSavingsApplication(toClientID, toSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(toSavingsID);
-
-        HashMap toSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, toSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(toSavingsStatusHashMap);
-
-        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(fromOfficeId);
-
-        // Creating Savings Account from which the Fund has to be Transferred
-        final Integer fromClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(fromOfficeId));
-        Assertions.assertNotNull(fromClientID);
-
-        final Integer loanProductID = createLoanProduct(loanAssetAccount, loanIncomeAccount, loanExpenseAccount, overpaymentAccount);
-        Assertions.assertNotNull(loanProductID);
-
-        final Integer loanID = applyForLoanApplication(fromClientID, loanProductID);
-        Assertions.assertNotNull(loanID);
-
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_APPROVAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_DISBURSAL_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-
-        final Integer fromSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
-                assetAccount, incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(fromSavingsProductID);
-
-        final Integer fromSavingsID = this.savingsAccountHelper.applyForSavingsApplication(fromClientID, fromSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(fromSavingsID);
-
-        HashMap fromSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(fromSavingsStatusHashMap);
-
-        final HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
-
-        Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-
-        this.accountTransferHelper.accountTransfer(fromClientID, fromSavingsID, fromClientID, loanID, FROM_SAVINGS_ACCOUNT_TYPE,
-                TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
-
-        fromSavingsBalance -= TRANSFER_AMOUNT;
-
-        HashMap fromSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
-
-        // Verifying fromSavings Account Balance after Account Transfer
-        assertEquals(fromSavingsBalance, fromSavingsSummaryAfter.get("accountBalance"),
+        SavingsTestValidators.verifyAmount(new BigDecimal(MINIMUM_OPENING_BALANCE).subtract(new BigDecimal(ACCOUNT_TRANSFER_AMOUNT)),
+                savingsHelper.getSavingsSummary(fromSavingsId).getAccountBalance(),
                 "Verifying From Savings Account Balance after Account Transfer");
 
-        Float toSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
+        accountTransferHelper.createAccountTransfer(AccountTransferRequestBuilders.transfer(ACCOUNT_TRANSFER_DATE, fromClientId, loanId,
+                PortfolioAccountType.LOAN, toClientId, toSavingsId, PortfolioAccountType.SAVINGS, ACCOUNT_TRANSFER_AMOUNT_ADJUST));
 
-        this.accountTransferHelper.accountTransfer(fromClientID, loanID, toClientID, toSavingsID, FROM_LOAN_ACCOUNT_TYPE,
-                TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT_ADJUST);
-
-        toSavingsBalance += TRANSFER_AMOUNT_ADJUST;
-
-        HashMap toSavingsSummaryAfter = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
-
-        // Verifying toSavings Account Balance after Account Transfer
-        assertEquals(toSavingsBalance, toSavingsSummaryAfter.get("accountBalance"),
+        SavingsTestValidators.verifyAmount(new BigDecimal(MINIMUM_OPENING_BALANCE).add(new BigDecimal(ACCOUNT_TRANSFER_AMOUNT_ADJUST)),
+                savingsHelper.getSavingsSummary(toSavingsId).getAccountBalance(),
                 "Verifying From Savings Account Balance after Account Transfer");
 
-        final JournalEntry[] office1LiabilityEntries = {
-                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.CREDIT) };
-        final JournalEntry[] office2LiabilityEntries = {
-                new JournalEntry(Float.parseFloat(ACCOUNT_TRANSFER_AMOUNT_ADJUST), JournalEntry.TransactionType.DEBIT) };
-
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount,
-                AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office1LiabilityEntries);
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(toOfficeId, liabilityTransferAccount,
-                AccountTransferHelper.ACCOUNT_TRANSFER_DATE, office2LiabilityEntries);
-
+        verifyLiabilityTransferEntries(fromOfficeId, toOfficeId, ACCOUNT_TRANSFER_AMOUNT_ADJUST);
     }
 
     @Test
     public void testTransferWithNegativeAmount() {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
-
-        final Account loanAssetAccount = this.accountHelper.createAssetAccount();
-        final Account loanIncomeAccount = this.accountHelper.createIncomeAccount();
-        final Account loanExpenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
-
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
-
-        OfficeHelper officeHelper = new OfficeHelper();
-        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(toOfficeId);
-
-        // Creating Loan Account to which fund to be Transferred
-        final Integer toClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(toOfficeId));
-        Assertions.assertNotNull(toClientID);
-
-        final Integer toSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
-                incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(toSavingsProductID);
-
-        final Integer toSavingsID = this.savingsAccountHelper.applyForSavingsApplication(toClientID, toSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(toSavingsID);
-
-        HashMap toSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, toSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(toSavingsStatusHashMap);
-
-        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(fromOfficeId);
-
-        // Creating Savings Account from which the Fund has to be Transferred
-        final Integer fromClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(fromOfficeId));
-        Assertions.assertNotNull(fromClientID);
-
-        final Integer loanProductID = createLoanProduct(loanAssetAccount, loanIncomeAccount, loanExpenseAccount, overpaymentAccount);
-        Assertions.assertNotNull(loanProductID);
-
-        final Integer loanID = applyForLoanApplication(fromClientID, loanProductID);
-        Assertions.assertNotNull(loanID);
-
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_APPROVAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_DISBURSAL_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-
-        final Integer fromSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
-                assetAccount, incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(fromSavingsProductID);
-
-        final Integer fromSavingsID = this.savingsAccountHelper.applyForSavingsApplication(fromClientID, fromSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(fromSavingsID);
-
-        HashMap fromSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(fromSavingsStatusHashMap);
-
-        final HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
-
-        Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-
-        Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, loanID,
-                FROM_SAVINGS_ACCOUNT_TYPE, TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_NEGATIVE_AMOUNT);
+        SavingsToLoanFixture fixture = createSavingsToLoanFixture();
+        assertNotNull(accountTransferHelper.createAccountTransferExpectingError(AccountTransferRequestBuilders.transfer(
+                ACCOUNT_TRANSFER_DATE, fixture.clientId, fixture.savingsId, PortfolioAccountType.SAVINGS, fixture.clientId, fixture.loanId,
+                PortfolioAccountType.LOAN, ACCOUNT_TRANSFER_NEGATIVE_AMOUNT)));
     }
 
     @Test
     public void testTransferWithInsufficientBalance() {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
-
-        final Account loanAssetAccount = this.accountHelper.createAssetAccount();
-        final Account loanIncomeAccount = this.accountHelper.createIncomeAccount();
-        final Account loanExpenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
-
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
-
-        OfficeHelper officeHelper = new OfficeHelper();
-        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(toOfficeId);
-
-        // Creating Loan Account to which fund to be Transferred
-        final Integer toClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(toOfficeId));
-        Assertions.assertNotNull(toClientID);
-
-        final Integer toSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
-                incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(toSavingsProductID);
-
-        final Integer toSavingsID = this.savingsAccountHelper.applyForSavingsApplication(toClientID, toSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(toSavingsID);
-
-        HashMap toSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, toSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(toSavingsStatusHashMap);
-
-        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(fromOfficeId);
-
-        // Creating Savings Account from which the Fund has to be Transferred
-        final Integer fromClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(fromOfficeId));
-        Assertions.assertNotNull(fromClientID);
-
-        final Integer loanProductID = createLoanProduct(loanAssetAccount, loanIncomeAccount, loanExpenseAccount, overpaymentAccount);
-        Assertions.assertNotNull(loanProductID);
-
-        final Integer loanID = applyForLoanApplication(fromClientID, loanProductID);
-        Assertions.assertNotNull(loanID);
-
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_APPROVAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_DISBURSAL_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-
-        final Integer fromSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
-                assetAccount, incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(fromSavingsProductID);
-
-        final Integer fromSavingsID = this.savingsAccountHelper.applyForSavingsApplication(fromClientID, fromSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(fromSavingsID);
-
-        HashMap fromSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(fromSavingsStatusHashMap);
-
-        final HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
-
-        Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-
-        Object accountTransfer = this.accountTransferHelper.insufficientBalanceAccountTransfer(fromClientID, fromSavingsID, fromClientID,
-                loanID, FROM_SAVINGS_ACCOUNT_TYPE, TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_LARGE_AMOUNT);
-
+        SavingsToLoanFixture fixture = createSavingsToLoanFixture();
+        assertNotNull(accountTransferHelper.createAccountTransferExpectingError(AccountTransferRequestBuilders.transfer(
+                ACCOUNT_TRANSFER_DATE, fixture.clientId, fixture.savingsId, PortfolioAccountType.SAVINGS, fixture.clientId, fixture.loanId,
+                PortfolioAccountType.LOAN, ACCOUNT_TRANSFER_LARGE_AMOUNT)));
     }
 
     @Test
     public void testTransferToInvalidAccountTypes() {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
-
-        final Account loanAssetAccount = this.accountHelper.createAssetAccount();
-        final Account loanIncomeAccount = this.accountHelper.createIncomeAccount();
-        final Account loanExpenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
-
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
-
-        OfficeHelper officeHelper = new OfficeHelper();
-        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(toOfficeId);
-
-        // Creating Loan Account to which fund to be Transferred
-        final Integer toClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(toOfficeId));
-        Assertions.assertNotNull(toClientID);
-
-        final Integer toSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
-                incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(toSavingsProductID);
-
-        final Integer toSavingsID = this.savingsAccountHelper.applyForSavingsApplication(toClientID, toSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(toSavingsID);
-
-        HashMap toSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, toSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(toSavingsStatusHashMap);
-
-        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(fromOfficeId);
-
-        // Creating Savings Account from which the Fund has to be Transferred
-        final Integer fromClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(fromOfficeId));
-        Assertions.assertNotNull(fromClientID);
-
-        final Integer loanProductID = createLoanProduct(loanAssetAccount, loanIncomeAccount, loanExpenseAccount, overpaymentAccount);
-        Assertions.assertNotNull(loanProductID);
-
-        final Integer loanID = applyForLoanApplication(fromClientID, loanProductID);
-        Assertions.assertNotNull(loanID);
-
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_APPROVAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_DISBURSAL_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-
-        final Integer fromSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
-                assetAccount, incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(fromSavingsProductID);
-
-        final Integer fromSavingsID = this.savingsAccountHelper.applyForSavingsApplication(fromClientID, fromSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(fromSavingsID);
-
-        HashMap fromSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(fromSavingsStatusHashMap);
-
-        final HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
-
-        Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-
-        Object accountTransfer = this.accountTransferHelper.invalidAccountTransfer(fromClientID, fromSavingsID, fromClientID, loanID,
-                INVALID_SAVINGS_ACCOUNT_TYPE, INVALID_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
-
+        SavingsToLoanFixture fixture = createSavingsToLoanFixture();
+        assertNotNull(accountTransferHelper.createAccountTransferExpectingError(
+                AccountTransferRequestBuilders.transfer(ACCOUNT_TRANSFER_DATE, fixture.clientId, fixture.savingsId, INVALID_ACCOUNT_TYPE,
+                        fixture.clientId, fixture.loanId, INVALID_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT)));
     }
 
     @Test
     public void testTransferToNonExistentAccount() {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
-
-        final Account loanAssetAccount = this.accountHelper.createAssetAccount();
-        final Account loanIncomeAccount = this.accountHelper.createIncomeAccount();
-        final Account loanExpenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
-
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
-
-        OfficeHelper officeHelper = new OfficeHelper();
-        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(toOfficeId);
-
-        // Creating Loan Account to which fund to be Transferred
-        final Integer toClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(toOfficeId));
-        Assertions.assertNotNull(toClientID);
-
-        final Integer toSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
-                incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(toSavingsProductID);
-
-        final Integer toSavingsID = this.savingsAccountHelper.applyForSavingsApplication(toClientID, toSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(toSavingsID);
-
-        HashMap toSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, toSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(toSavingsStatusHashMap);
-
-        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(fromOfficeId);
-
-        // Creating Savings Account from which the Fund has to be Transferred
-        final Integer fromClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(fromOfficeId));
-        Assertions.assertNotNull(fromClientID);
-
-        final Integer loanProductID = createLoanProduct(loanAssetAccount, loanIncomeAccount, loanExpenseAccount, overpaymentAccount);
-        Assertions.assertNotNull(loanProductID);
-
-        final Integer loanID = applyForLoanApplication(fromClientID, loanProductID);
-        Assertions.assertNotNull(loanID);
-
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(LOAN_APPROVAL_DATE, loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(LOAN_DISBURSAL_DATE, loanID,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-
-        final Integer fromSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
-                assetAccount, incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(fromSavingsProductID);
-
-        final Integer fromSavingsID = this.savingsAccountHelper.applyForSavingsApplication(fromClientID, fromSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(fromSavingsID);
-
-        HashMap fromSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(fromSavingsStatusHashMap);
-
-        final HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
-
-        Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-        Object accountTransfer = this.accountTransferHelper.nonExistentAccountTransfer(fromClientID, fromSavingsID, fromClientID,
-                INVALID_LOAN_ID, FROM_SAVINGS_ACCOUNT_TYPE, TO_LOAN_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
-
+        SavingsToLoanFixture fixture = createSavingsToLoanFixture();
+        assertNotNull(accountTransferHelper.createAccountTransferExpectingError(AccountTransferRequestBuilders.transfer(
+                ACCOUNT_TRANSFER_DATE, fixture.clientId, fixture.savingsId, PortfolioAccountType.SAVINGS, fixture.clientId, INVALID_LOAN_ID,
+                PortfolioAccountType.LOAN, ACCOUNT_TRANSFER_AMOUNT)));
     }
 
+    /**
+     * The name is a misnomer kept from the RestAssured test: the server does not reject this date. It parses
+     * {@code 01 05 2013} leniently as 1 May 2013 even though the body declares {@code dd MMMM yyyy}, and the original
+     * expected the 200 this asserts.
+     */
     @Test
     public void testFromSavingsToSavingsAccountTransferWithInvalidTransferDate() {
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.accountTransferHelper = new AccountTransferHelper(this.requestSpec, this.responseSpec);
-
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
-
-        OfficeHelper officeHelper = new OfficeHelper();
-        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(toOfficeId);
-
-        // Creating Savings Account to which fund to be Transferred
-        final Integer toClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(toOfficeId));
-        Assertions.assertNotNull(toClientID);
-
-        final Integer toSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
-                incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(toSavingsProductID);
-
-        final Integer toSavingsID = this.savingsAccountHelper.applyForSavingsApplication(toClientID, toSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(toSavingsProductID);
-
-        HashMap toSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, toSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(toSavingsStatusHashMap);
-
-        toSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(toSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(toSavingsStatusHashMap);
-
-        final HashMap toSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(toSavingsID);
-
-        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Assertions.assertNotNull(fromOfficeId);
-
-        // Creating Savings Account from which the Fund has to be Transferred
-        final Integer fromClientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(fromOfficeId));
-        Assertions.assertNotNull(fromClientID);
-
-        final Integer fromSavingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
-                assetAccount, incomeAccount, expenseAccount, liabilityAccount);
-        Assertions.assertNotNull(fromSavingsProductID);
-
-        final Integer fromSavingsID = this.savingsAccountHelper.applyForSavingsApplication(fromClientID, fromSavingsProductID,
-                ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(fromSavingsID);
-
-        HashMap fromSavingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsPending(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.approveSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsApproved(fromSavingsStatusHashMap);
-
-        fromSavingsStatusHashMap = this.savingsAccountHelper.activateSavings(fromSavingsID);
-        SavingsStatusChecker.verifySavingsIsActive(fromSavingsStatusHashMap);
-
-        final HashMap fromSavingsSummaryBefore = this.savingsAccountHelper.getSavingsSummary(fromSavingsID);
-
-        Float fromSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-        Float toSavingsBalance = Float.valueOf(MINIMUM_OPENING_BALANCE);
-
-        Object accountTransfer = this.accountTransferHelper.accountTransferWithInvalidDate(fromClientID, fromSavingsID, fromClientID,
-                toSavingsID, FROM_SAVINGS_ACCOUNT_TYPE, TO_SAVINGS_ACCOUNT_TYPE, ACCOUNT_TRANSFER_AMOUNT);
-
+        SavingsTransferFixture fixture = createSavingsTransferFixture();
+        assertNotNull(accountTransferHelper.createAccountTransfer(AccountTransferRequestBuilders.transfer(ACCOUNT_TRANSFER_INVALID_DATE,
+                fixture.fromClientId, fixture.fromSavingsId, PortfolioAccountType.SAVINGS, fixture.fromClientId, fixture.toSavingsId,
+                PortfolioAccountType.SAVINGS, ACCOUNT_TRANSFER_AMOUNT)).getResourceId());
     }
 
-    private Integer createSavingsProduct(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String minOpenningBalance, final Account... accounts) {
-        LOG.info("------------------------------CREATING NEW SAVINGS PRODUCT ---------------------------------------");
-        SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-        final String savingsProductJSON = savingsProductHelper //
-                .withInterestCompoundingPeriodTypeAsDaily() //
-                .withInterestPostingPeriodTypeAsMonthly() //
-                .withInterestCalculationPeriodTypeAsDailyBalance() //
-                .withMinimumOpenningBalance(minOpenningBalance).withAccountingRuleAsCashBased(accounts).build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+    private AccountTransferRequest savingsToSavings(Long fromClientId, Long fromSavingsId, Long toClientId, Long toSavingsId,
+            String amount) {
+        return AccountTransferRequestBuilders.transfer(ACCOUNT_TRANSFER_DATE, fromClientId, fromSavingsId, PortfolioAccountType.SAVINGS,
+                toClientId, toSavingsId, PortfolioAccountType.SAVINGS, amount);
+    }
+
+    /**
+     * Both offices post to the same liability transfer account: the sending one credits it, the receiving one debits.
+     */
+    private void verifyLiabilityTransferEntries(Long fromOfficeId, Long toOfficeId, String amount) {
+        journalEntryHelper.checkJournalEntryForLiabilityAccount(fromOfficeId, liabilityTransferAccount, ACCOUNT_TRANSFER_DATE,
+                LoanTestData.Journal.credit(liabilityTransferAccount.getAccountID().longValue(), Double.parseDouble(amount)));
+        journalEntryHelper.checkJournalEntryForLiabilityAccount(toOfficeId, liabilityTransferAccount, ACCOUNT_TRANSFER_DATE,
+                LoanTestData.Journal.debit(liabilityTransferAccount.getAccountID().longValue(), Double.parseDouble(amount)));
     }
 
     private SavingsTransferFixture createSavingsTransferFixture() {
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
-
-        OfficeHelper officeHelper = new OfficeHelper();
-        Integer fromOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-        Integer toOfficeId = officeHelper.createOffice(LocalDate.of(2011, 1, 1)).getResourceId().intValue();
-
-        final Integer savingsProductId = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE, assetAccount,
-                incomeAccount, expenseAccount, liabilityAccount);
-
-        final Integer fromClientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(fromOfficeId));
-        final Integer fromSavingsId = createActiveSavingsAccount(fromClientId, savingsProductId);
-
-        final Integer toClientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2011",
-                String.valueOf(toOfficeId));
-        final Integer toSavingsId = createActiveSavingsAccount(toClientId, savingsProductId);
-
+        Long savingsProductId = createCashBasedSavingsProduct();
+        Long fromClientId = createClientInOffice(createOffice());
+        Long fromSavingsId = createActiveSavingsAccount(fromClientId, savingsProductId);
+        Long toClientId = createClientInOffice(createOffice());
+        Long toSavingsId = createActiveSavingsAccount(toClientId, savingsProductId);
         return new SavingsTransferFixture(fromClientId, fromSavingsId, toClientId, toSavingsId);
     }
 
-    private Integer createActiveSavingsAccount(final Integer clientId, final Integer savingsProductId) {
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientId, savingsProductId, ACCOUNT_TYPE_INDIVIDUAL);
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(this.requestSpec, this.responseSpec, savingsId);
-        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
-        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
-        return savingsId;
+    /** The shape every rejection test needs: one funded savings account and one active loan of the same client. */
+    private SavingsToLoanFixture createSavingsToLoanFixture() {
+        Long clientId = createClientInOffice(createOffice());
+        Long loanId = createActiveLoan(clientId);
+        Long savingsId = createActiveSavingsAccount(clientId, createCashBasedSavingsProduct());
+        return new SavingsToLoanFixture(clientId, savingsId, loanId);
     }
 
-    private Long createPaymentType() {
-        String paymentTypeName = PaymentTypeHelper.randomNameGenerator("P_T", 5);
-        String description = PaymentTypeHelper.randomNameGenerator("PT_Desc", 15);
-        return PaymentTypeHelper
-                .createPaymentType(
-                        new PaymentTypeCreateRequest().name(paymentTypeName).description(description).isCashPayment(false).position(1L))
+    private Long createOffice() {
+        return officeHelper.createOffice(OFFICE_OPENING_DATE).getResourceId();
+    }
+
+    private Long createClientInOffice(Long officeId) {
+        return clientHelper.createClient(ClientRequestBuilders.createActivePersonClient(CLIENT_ACTIVATION_DATE).officeId(officeId))
                 .getResourceId();
     }
 
-    private Integer createLoanProduct(final Account... accounts) {
-        LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        final String loanProductJSON = new LoanProductTestBuilder() //
-                .withPrincipal("8,000.00") //
-                .withNumberOfRepayments("4") //
-                .withRepaymentAfterEvery("1") //
-                .withRepaymentTypeAsMonth() //
-                .withinterestRatePerPeriod("1") //
-                .withInterestRateFrequencyTypeAsMonths() //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withAccountingRuleAsCashBased(accounts)//
-                .withLoanScheduleType(LoanScheduleType.CUMULATIVE)//
-                .build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+    private Long createCashBasedSavingsProduct() {
+        PostSavingsProductsRequest request = SavingsRequestBuilders.withCashBasedAccounting(
+                SavingsRequestBuilders.defaultSavingsProduct().withdrawalFeeForTransfers(true).withHoldTax(false)
+                        .minRequiredOpeningBalance(new BigDecimal(MINIMUM_OPENING_BALANCE)),
+                accountHelper.createAssetAccount(), accountHelper.createLiabilityAccount(), accountHelper.createIncomeAccount(),
+                accountHelper.createExpenseAccount());
+        return savingsProductHelper.createSavingsProduct(request).getResourceId();
     }
 
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
-        LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal("8,000.00") //
-                .withLoanTermFrequency("4") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("4") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("2") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate("10 January 2013") //
-                .withSubmittedOnDate("10 January 2013") //
-                .withCollaterals(collaterals).build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+    private Long createActiveSavingsAccount(Long clientId, Long savingsProductId) {
+        Long savingsId = submitSavingsApplication(clientId, savingsProductId, SAVINGS_SUBMITTED_ON_DATE).getSavingsId();
+        SavingsTestValidators.verifySavingsIsPending(savingsHelper.getSavingsStatus(savingsId));
+        approveSavings(savingsId, SAVINGS_APPROVED_ON_DATE);
+        SavingsTestValidators.verifySavingsIsApproved(savingsHelper.getSavingsStatus(savingsId));
+        activateSavings(savingsId, SAVINGS_ACTIVATED_ON_DATE);
+        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
+        return savingsId;
     }
 
-    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
-        collaterals.add(collaterals(collateralId, quantity));
+    private Long createActiveLoan(Long clientId) {
+        Long loanProductId = loanHelper.createLoanProduct(cashBasedLoanProduct()).getResourceId();
+        Long loanId = loanHelper.applyForLoan(loanApplication(clientId, loanProductId)).getLoanId();
+
+        loanHelper.approveLoan(loanId, new PostLoansLoanIdRequest().approvedOnDate(LOAN_APPROVAL_DATE)
+                .dateFormat(LoanTestData.DATETIME_PATTERN).locale(LoanTestData.LOCALE));
+        loanHelper.disburseLoan(loanId,
+                new PostLoansLoanIdRequest().actualDisbursementDate(LOAN_DISBURSAL_DATE)
+                        .transactionAmount(loanHelper.getLoanDetails(loanId).getNetDisbursalAmount())
+                        .dateFormat(LoanTestData.DATETIME_PATTERN).locale(LoanTestData.LOCALE));
+        return loanId;
     }
 
-    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
-        HashMap<String, String> collateral = new HashMap<String, String>(2);
-        collateral.put("clientCollateralId", collateralId.toString());
-        collateral.put("quantity", quantity.toString());
-        return collateral;
+    /** Cash-based accounting maps one account per type, exactly as the RestAssured loan product builder did. */
+    private PostLoanProductsRequest cashBasedLoanProduct() {
+        Account assetAccount = accountHelper.createAssetAccount();
+        Account incomeAccount = accountHelper.createIncomeAccount();
+        Account expenseAccount = accountHelper.createExpenseAccount();
+        Account overpaymentAccount = accountHelper.createLiabilityAccount();
+        return new PostLoanProductsRequest()//
+                .name(Utils.uniqueRandomStringGenerator("LOAN_PRODUCT_", 6))//
+                .shortName(Utils.uniqueRandomStringGenerator("", 4))//
+                .description("Account transfer loan product")//
+                .currencyCode("USD")//
+                .digitsAfterDecimal(2)//
+                .inMultiplesOf(0)//
+                .principal(8000.0)//
+                .numberOfRepayments(4)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS_L)//
+                .interestRatePerPeriod(1.0)//
+                .interestRateFrequencyType(LoanTestData.InterestRateFrequencyType.MONTHS)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS)//
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                .daysInMonthType(LoanTestData.DaysInMonthType.ACTUAL)//
+                .daysInYearType(LoanTestData.DaysInYearType.ACTUAL)//
+                .isInterestRecalculationEnabled(false)//
+                .transactionProcessingStrategyCode(LoanProductTestBuilder.DEFAULT_STRATEGY)//
+                .loanScheduleType(LoanScheduleType.CUMULATIVE.toString())//
+                .accountingRule(SavingsTestData.AccountingRule.CASH_BASED)//
+                .fundSourceAccountId(SavingsRequestBuilders.accountId(assetAccount))//
+                .loanPortfolioAccountId(SavingsRequestBuilders.accountId(assetAccount))//
+                .transfersInSuspenseAccountId(SavingsRequestBuilders.accountId(assetAccount))//
+                .interestOnLoanAccountId(SavingsRequestBuilders.accountId(incomeAccount))//
+                .incomeFromFeeAccountId(SavingsRequestBuilders.accountId(incomeAccount))//
+                .incomeFromPenaltyAccountId(SavingsRequestBuilders.accountId(incomeAccount))//
+                .incomeFromRecoveryAccountId(SavingsRequestBuilders.accountId(incomeAccount))//
+                .writeOffAccountId(SavingsRequestBuilders.accountId(expenseAccount))//
+                .goodwillCreditAccountId(SavingsRequestBuilders.accountId(expenseAccount))//
+                .chargeOffExpenseAccountId(SavingsRequestBuilders.accountId(expenseAccount))//
+                .chargeOffFraudExpenseAccountId(SavingsRequestBuilders.accountId(expenseAccount))//
+                .overpaymentLiabilityAccountId(SavingsRequestBuilders.accountId(overpaymentAccount))//
+                .dateFormat(LoanTestData.DATETIME_PATTERN)//
+                .locale(LoanTestData.LOCALE);
     }
 
-    private record SavingsTransferFixture(Integer fromClientId, Integer fromSavingsId, Integer toClientId, Integer toSavingsId) {
+    private PostLoansRequest loanApplication(Long clientId, Long loanProductId) {
+        Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
+        Long clientCollateralId = collateralHelper.createClientCollateral(clientId, collateralId).getResourceId();
+        return new PostLoansRequest()//
+                .clientId(clientId)//
+                .productId(loanProductId)//
+                .loanType("individual")//
+                .principal(new BigDecimal("8000.00"))//
+                .loanTermFrequency(4)//
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .numberOfRepayments(4)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.MONTHS)//
+                .interestRatePerPeriod(new BigDecimal("2"))//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_INSTALLMENTS)//
+                .interestType(LoanTestData.InterestType.DECLINING_BALANCE)//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.SAME_AS_REPAYMENT_PERIOD)//
+                .transactionProcessingStrategyCode(LoanProductTestBuilder.DEFAULT_STRATEGY)//
+                .maxOutstandingLoanBalance(MAX_OUTSTANDING_LOAN_BALANCE)//
+                .expectedDisbursementDate(LOAN_SUBMITTED_ON_DATE)//
+                .submittedOnDate(LOAN_SUBMITTED_ON_DATE)//
+                .collateral(List.of(new PostLoansRequestCollateralData().clientCollateralId(clientCollateralId).quantity(BigDecimal.ONE)))//
+                .dateFormat(LoanTestData.DATETIME_PATTERN)//
+                .locale(LoanTestData.LOCALE);
+    }
+
+    private Long createPaymentType() {
+        return paymentTypeHelper.createPaymentType(new PaymentTypeCreateRequest()//
+                .name(Utils.uniqueRandomStringGenerator("P_T", 5))//
+                .description(Utils.uniqueRandomStringGenerator("PT_Desc", 15))//
+                .isCashPayment(false)//
+                .position(1L)).getResourceId();
+    }
+
+    private record SavingsTransferFixture(Long fromClientId, Long fromSavingsId, Long toClientId, Long toSavingsId) {
+    }
+
+    private record SavingsToLoanFixture(Long clientId, Long savingsId, Long loanId) {
     }
 }

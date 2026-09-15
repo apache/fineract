@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import org.apache.fineract.client.feign.ObjectMapperFactory;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.SavingsAccountStatusEnumData;
+import org.apache.fineract.client.models.SavingsAccountSubStatusEnumData;
 import org.apache.fineract.client.models.SavingsAccountTransactionData;
 
 public final class SavingsTestValidators {
@@ -64,6 +65,39 @@ public final class SavingsTestValidators {
     public static void verifySavingsIsClosed(final SavingsAccountStatusEnumData status) {
         assertNotNull(status, "Savings status is missing");
         assertTrue(Boolean.TRUE.equals(status.getClosed()), "Savings account is not closed, was: " + status.getValue());
+    }
+
+    public static void verifySavingsSubStatusIsNone(final SavingsAccountSubStatusEnumData subStatus) {
+        verifySubStatus(subStatus, subStatus == null ? null : subStatus.getNone(), "none");
+    }
+
+    public static void verifySavingsSubStatusIsInactive(final SavingsAccountSubStatusEnumData subStatus) {
+        verifySubStatus(subStatus, subStatus == null ? null : subStatus.getInactive(), "inactive");
+    }
+
+    public static void verifySavingsSubStatusIsDormant(final SavingsAccountSubStatusEnumData subStatus) {
+        verifySubStatus(subStatus, subStatus == null ? null : subStatus.getDormant(), "dormant");
+    }
+
+    public static void verifySavingsSubStatusIsEscheat(final SavingsAccountSubStatusEnumData subStatus) {
+        verifySubStatus(subStatus, subStatus == null ? null : subStatus.getEscheat(), "escheat");
+    }
+
+    public static void verifySavingsSubStatusIsBlocked(final SavingsAccountSubStatusEnumData subStatus) {
+        verifySubStatus(subStatus, subStatus == null ? null : subStatus.getBlock(), "block");
+    }
+
+    public static void verifySavingsSubStatusIsCreditBlocked(final SavingsAccountSubStatusEnumData subStatus) {
+        verifySubStatus(subStatus, subStatus == null ? null : subStatus.getBlockCredit(), "blockCredit");
+    }
+
+    public static void verifySavingsSubStatusIsDebitBlocked(final SavingsAccountSubStatusEnumData subStatus) {
+        verifySubStatus(subStatus, subStatus == null ? null : subStatus.getBlockDebit(), "blockDebit");
+    }
+
+    private static void verifySubStatus(final SavingsAccountSubStatusEnumData subStatus, final Boolean flag, final String expected) {
+        assertNotNull(subStatus, "Savings sub status is missing");
+        assertTrue(Boolean.TRUE.equals(flag), "Savings account sub status is not " + expected + ", was: " + subStatus.getValue());
     }
 
     public static void verifyIsInterestPosting(final SavingsAccountTransactionData transaction) {
