@@ -28,8 +28,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * WorkingCapitalLoanProductMinMaxConstraints encapsulates the min/max bounds for principal and period payment rate of a
- * {@link WorkingCapitalLoanProduct} (aligned with
+ * WorkingCapitalLoanProductMinMaxConstraints encapsulates the min/max bounds for principal, period payment rate and
+ * annual EIR of a {@link WorkingCapitalLoanProduct} (aligned with
  * {@link org.apache.fineract.portfolio.loanproduct.domain.LoanProductMinMaxConstraints} by functionality).
  */
 @Embeddable
@@ -50,4 +50,16 @@ public class WorkingCapitalLoanProductMinMaxConstraints {
 
     @Column(name = "max_period_payment_rate", scale = 6, precision = 19)
     private BigDecimal maxPeriodPaymentRate;
+
+    @Column(name = "min_annual_eir", scale = 6, precision = 19)
+    private BigDecimal minAnnualEir;
+
+    @Column(name = "max_annual_eir", scale = 6, precision = 19)
+    private BigDecimal maxAnnualEir;
+
+    @Column(name = "min_payment_amount", scale = 6, precision = 19)
+    private BigDecimal minPaymentAmount;
+
+    @Column(name = "max_payment_amount", scale = 6, precision = 19)
+    private BigDecimal maxPaymentAmount;
 }

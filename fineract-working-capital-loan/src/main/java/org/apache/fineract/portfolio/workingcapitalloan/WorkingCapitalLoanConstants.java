@@ -32,6 +32,8 @@ public final class WorkingCapitalLoanConstants {
      */
     public static final String EIR_NOT_CALCULABLE_USER_MESSAGE = "Please check the input values - unable to calculate a valid EIR.";
 
+    public static final String PAYMENT_AMOUNT_NOT_CALCULABLE_USER_MESSAGE = "Please check the input values - unable to build a repayment schedule from the configured payment amount.";
+
     // Common request parameters (locale, dateFormat, id)
     public static final String localeParameterName = "locale";
     public static final String dateFormatParameterName = "dateFormat";
@@ -47,6 +49,7 @@ public final class WorkingCapitalLoanConstants {
     public static final String expectedDisbursementDateParameterName = "expectedDisbursementDate";
     public static final String submittedOnNoteParameterName = "submittedOnNote";
     public static final String totalPaymentVolumeParamName = "totalPaymentVolume";
+    public static final String annualEirParamName = "annualEir";
     public static final String principalAmountParamName = "principalAmount";
 
     // Loan commands

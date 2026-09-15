@@ -69,11 +69,46 @@ final class AmortizationWalk {
     private final int minimumDays;
     private final int currencyScale;
     private final MathContext mc;
+    /**
+     * Product annual EIR (%). Non-null only for Annual EIR strategy — same role as {@link #basePeriodPaymentRate} for
+     * TPV.
+     */
+    private final BigDecimal annualEir;
+    /** Fixed daily payment. Non-null only for Payment Amount strategy — the plan is solved from it directly. */
+    private final BigDecimal paymentAmount;
 
     AmortizationWalk(final BigDecimal netDisbursement, final BigDecimal discountFee, final BigDecimal totalPaymentVolume,
             final BigDecimal basePeriodPaymentRate, final int npvDayCount, final LocalDate expectedDisbursementDate,
             final int firstPeriodDayOffset, final LocalDate calculatedTillDate, final Map<LocalDate, BigDecimal> paymentsByDate,
             final List<RateChange> rateChanges, final int minimumDays, final CurrencyData currency, final MathContext mc) {
+        this(netDisbursement, discountFee, totalPaymentVolume, basePeriodPaymentRate, npvDayCount, expectedDisbursementDate,
+                firstPeriodDayOffset, calculatedTillDate, paymentsByDate, rateChanges, minimumDays, currency, mc, null, null);
+    }
+
+    static AmortizationWalk forPaymentAmount(final BigDecimal netDisbursement, final BigDecimal discountFee, final BigDecimal paymentAmount,
+            final int npvDayCount, final LocalDate expectedDisbursementDate, final int firstPeriodDayOffset,
+            final LocalDate calculatedTillDate, final Map<LocalDate, BigDecimal> paymentsByDate, final int minimumDays,
+            final CurrencyData currency, final MathContext mc) {
+        return new AmortizationWalk(netDisbursement, discountFee, null, null, npvDayCount, expectedDisbursementDate, firstPeriodDayOffset,
+                calculatedTillDate, paymentsByDate, List.of(), minimumDays, currency, mc, null, paymentAmount);
+    }
+
+    /**
+     * Annual EIR walk: plan is solved from {@code annualEir} (like TPV solves from TPV × rate). Mid-life re-price keeps
+     * the contractual daily from the plan and only re-solves term / closing / IRR. Rate changes are not used.
+     */
+    AmortizationWalk(final BigDecimal netDisbursement, final BigDecimal discountFee, final BigDecimal annualEir, final int npvDayCount,
+            final LocalDate expectedDisbursementDate, final int firstPeriodDayOffset, final LocalDate calculatedTillDate,
+            final Map<LocalDate, BigDecimal> paymentsByDate, final int minimumDays, final CurrencyData currency, final MathContext mc) {
+        this(netDisbursement, discountFee, null, null, npvDayCount, expectedDisbursementDate, firstPeriodDayOffset, calculatedTillDate,
+                paymentsByDate, List.of(), minimumDays, currency, mc, annualEir, null);
+    }
+
+    private AmortizationWalk(final BigDecimal netDisbursement, final BigDecimal discountFee, final BigDecimal totalPaymentVolume,
+            final BigDecimal basePeriodPaymentRate, final int npvDayCount, final LocalDate expectedDisbursementDate,
+            final int firstPeriodDayOffset, final LocalDate calculatedTillDate, final Map<LocalDate, BigDecimal> paymentsByDate,
+            final List<RateChange> rateChanges, final int minimumDays, final CurrencyData currency, final MathContext mc,
+            final BigDecimal annualEir, final BigDecimal paymentAmount) {
         this.netDisbursement = netDisbursement;
         this.discountFee = discountFee;
         this.totalPaymentVolume = totalPaymentVolume;
@@ -88,6 +123,8 @@ final class AmortizationWalk {
                 : rateChanges.stream().sorted(Comparator.comparing(RateChange::effectiveDate)).toList();
         this.currencyScale = currency.getDecimalPlaces();
         this.mc = mc;
+        this.annualEir = annualEir;
+        this.paymentAmount = paymentAmount;
     }
 
     /**
@@ -101,6 +138,10 @@ final class AmortizationWalk {
 
     private LocalDate dateOfDay(final int dayIndex) {
         return expectedDisbursementDate.plusDays((long) dayIndex - 1 + firstPeriodDayOffset);
+    }
+
+    private boolean isPaymentDriven() {
+        return annualEir != null || paymentAmount != null;
     }
 
     /** Day the rate change takes effect on, clamped so a change dated before the first instalment lands on it. */
@@ -127,8 +168,14 @@ final class AmortizationWalk {
         final List<AmortizationDay> days = new ArrayList<>();
         final int appliedCount = paymentsByDate.size();
 
-        final PlanCursor plan = new PlanCursor(netDisbursement, discountFee, totalPaymentVolume, basePeriodPaymentRate, npvDayCount,
-                currencyScale, mc);
+        final PlanCursor plan;
+        if (paymentAmount != null) {
+            plan = PlanCursor.forPaymentAmount(netDisbursement, discountFee, paymentAmount, npvDayCount, currencyScale, mc);
+        } else if (annualEir != null) {
+            plan = new PlanCursor(netDisbursement, discountFee, annualEir, npvDayCount, currencyScale, mc);
+        } else {
+            plan = new PlanCursor(netDisbursement, discountFee, totalPaymentVolume, basePeriodPaymentRate, npvDayCount, currencyScale, mc);
+        }
 
         BigDecimal balance = netDisbursement;
         BigDecimal actualBalanceExact = netDisbursement;
@@ -194,8 +241,11 @@ final class AmortizationWalk {
                 final BigDecimal unearnedFee = discountFee.subtract(aggregatedHighPrecisionActual, mc);
                 if (balance.signum() > 0 && unearnedFee.signum() > 0) {
                     try {
-                        projection = AmortizationParams.solve(balance, unearnedFee, totalPaymentVolume, rateInForce, npvDayCount,
-                                currencyScale, mc);
+                        projection = isPaymentDriven()
+                                ? AmortizationParams.solveFromKnownPayment(balance, unearnedFee, plan.solved().dailyPayment(), mc,
+                                        npvDayCount)
+                                : AmortizationParams.solve(balance, unearnedFee, totalPaymentVolume, rateInForce, npvDayCount,
+                                        currencyScale, mc);
                     } catch (final IllegalArgumentException | IllegalStateException | ArithmeticException e) {
                         // A position no rate can be solved from keeps the one it had. The projection is then the stale
                         // one it would have been anyway, which is worse than re-priced but better than no schedule.

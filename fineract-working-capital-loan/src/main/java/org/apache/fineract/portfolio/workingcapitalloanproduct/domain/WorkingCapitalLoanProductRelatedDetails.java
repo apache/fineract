@@ -58,8 +58,18 @@ public class WorkingCapitalLoanProductRelatedDetails {
     @Column(name = "principal_amount", scale = 6, precision = 19)
     private BigDecimal principal;
 
-    @Column(name = "period_payment_rate", scale = 6, precision = 19, nullable = false)
+    @Column(name = "period_payment_rate", scale = 6, precision = 19)
     private BigDecimal periodPaymentRate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_amount_calculation_strategy", nullable = false)
+    private WorkingCapitalPaymentAmountCalculationStrategy paymentAmountCalculationStrategy = WorkingCapitalPaymentAmountCalculationStrategy.TPV;
+
+    @Column(name = "annual_eir", scale = 6, precision = 19)
+    private BigDecimal annualEir;
+
+    @Column(name = "payment_amount", scale = 6, precision = 19)
+    private BigDecimal paymentAmount;
 
     @Column(name = "repayment_every", nullable = false)
     private Integer repaymentEvery;

@@ -236,6 +236,12 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public Integer loanProductCounter;
         @Schema(example = "10500.00")
         public BigDecimal totalPaymentVolume;
+        @Schema(example = "43.7562", description = "Configured annual EIR percentage for ANNUAL_EIR strategy loans")
+        public BigDecimal annualEir;
+        @Schema(example = "47.22", description = "Configured daily payment amount for PAYMENT_AMOUNT strategy loans")
+        public BigDecimal paymentAmount;
+        @Schema(description = "Payment amount calculation strategy inherited from product")
+        public StringEnumOptionData paymentAmountCalculationStrategy;
         @Schema(example = "0.0", description = "Discount fee set during loan disbursement")
         public BigDecimal discountFee;
         @Schema(example = "0.0", description = "Proposed discount fee at loan submission time")
@@ -532,6 +538,11 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal principalAmount;
         @Schema(example = "10500.00")
         public BigDecimal totalPaymentVolume;
+        @Schema(example = "43.7562", description = "Annual EIR percentage (6 decimal places max). Required for ANNUAL_EIR strategy products.")
+        public BigDecimal annualEir;
+        @Schema(example = "47.22", description = "Daily payment amount, at most the currency's decimal precision. "
+                + "Overrides the product default on PAYMENT_AMOUNT strategy products.")
+        public BigDecimal paymentAmount;
         @Schema(example = "15 January 2024")
         public String submittedOnDate;
         @Schema(example = "1 February 2024")
@@ -670,6 +681,9 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal principalAmount;
         @Schema(example = "10500.00")
         public BigDecimal totalPaymentVolume;
+        @Schema(example = "47.22", description = "Daily payment amount, at most the currency's decimal precision. "
+                + "Overrides the product default on PAYMENT_AMOUNT strategy products.")
+        public BigDecimal paymentAmount;
         @Schema(example = "15 January 2024")
         public String submittedOnDate;
         @Schema(example = "1 February 2024")

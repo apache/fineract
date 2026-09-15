@@ -25,6 +25,8 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.Validate;
@@ -43,9 +45,13 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionAllocation;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanEirNotCalculableException;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
+import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanPaymentAmountNotCalculableException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetail;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProductRelatedDetails;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -122,19 +128,85 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
 
         final MathContext mc = MoneyHelper.getMathContext();
         final BigDecimal discount = getWorkingCapitalLoanDiscountAmount(loan);
-        final BigDecimal totalPaymentVolume = loan.getTotalPaymentVolume() != null ? loan.getTotalPaymentVolume() : BigDecimal.ZERO;
-        final Integer npvDayCount = loan.getLoanProductRelatedDetails() != null ? loan.getLoanProductRelatedDetails().getNpvDayCount()
-                : null;
+        final int npvDayCount = Objects.requireNonNull(
+                loan.getLoanProductRelatedDetails() != null ? loan.getLoanProductRelatedDetails().getNpvDayCount() : null,
+                "npvDayCount must not be null");
 
+        final WorkingCapitalPaymentAmountCalculationStrategy strategy = resolvePaymentAmountCalculationStrategy(loan);
+        if (strategy.isPaymentAmount()) {
+            final BigDecimal paymentAmount = resolvePaymentAmount(loan);
+            Validate.notNull(paymentAmount, "paymentAmount must not be null");
+            assertPaymentAmountCalculable(discount, disbursedAmount, paymentAmount, npvDayCount, mc);
+            return ProjectedAmortizationScheduleModel.generateFromPaymentAmount(discount, disbursedAmount, paymentAmount, npvDayCount,
+                    disbursementDate, mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan), DateUtils.getBusinessLocalDate());
+        }
+        if (strategy.isAnnualEir()) {
+            final BigDecimal annualEir = resolveAnnualEir(loan);
+            Validate.notNull(annualEir, "annualEir must not be null");
+            assertAnnualEirCalculable(discount, disbursedAmount, annualEir, npvDayCount, loan.getLoanProduct().getCurrency(), mc);
+            return ProjectedAmortizationScheduleModel.generateFromAnnualEir(discount, disbursedAmount, annualEir, npvDayCount,
+                    disbursementDate, mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan), DateUtils.getBusinessLocalDate());
+        }
+
+        final BigDecimal totalPaymentVolume = loan.getTotalPaymentVolume() != null ? loan.getTotalPaymentVolume() : BigDecimal.ZERO;
         Validate.isTrue(totalPaymentVolume.signum() > 0, "totalPaymentVolume must be positive");
         Validate.notNull(periodPaymentRate, "periodPaymentRate must not be null");
-        Validate.notNull(npvDayCount, "npvDayCount must not be null");
 
         assertEirCalculable(discount, disbursedAmount, totalPaymentVolume, periodPaymentRate, npvDayCount,
                 loan.getLoanProduct().getCurrency(), mc);
 
         return ProjectedAmortizationScheduleModel.generate(discount, disbursedAmount, totalPaymentVolume, periodPaymentRate, npvDayCount,
                 disbursementDate, mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan), DateUtils.getBusinessLocalDate());
+    }
+
+    private static WorkingCapitalPaymentAmountCalculationStrategy resolvePaymentAmountCalculationStrategy(final WorkingCapitalLoan loan) {
+        if (loan.getLoanProductRelatedDetails() != null
+                && loan.getLoanProductRelatedDetails().getPaymentAmountCalculationStrategy() != null) {
+            return loan.getLoanProductRelatedDetails().getPaymentAmountCalculationStrategy();
+        }
+        if (loan.getLoanProduct() != null && loan.getLoanProduct().getRelatedDetail() != null
+                && loan.getLoanProduct().getRelatedDetail().getPaymentAmountCalculationStrategy() != null) {
+            return loan.getLoanProduct().getRelatedDetail().getPaymentAmountCalculationStrategy();
+        }
+        return WorkingCapitalPaymentAmountCalculationStrategy.TPV;
+    }
+
+    private static BigDecimal resolveAnnualEir(final WorkingCapitalLoan loan) {
+        return resolveLoanOverrideOrProductDefault(loan, WorkingCapitalLoanProductRelatedDetails::getAnnualEir,
+                WorkingCapitalLoanProductRelatedDetail::getAnnualEir);
+    }
+
+    private static BigDecimal resolvePaymentAmount(final WorkingCapitalLoan loan) {
+        return resolveLoanOverrideOrProductDefault(loan, WorkingCapitalLoanProductRelatedDetails::getPaymentAmount,
+                WorkingCapitalLoanProductRelatedDetail::getPaymentAmount);
+    }
+
+    private static BigDecimal resolveLoanOverrideOrProductDefault(final WorkingCapitalLoan loan,
+            final Function<WorkingCapitalLoanProductRelatedDetails, BigDecimal> fromLoan,
+            final Function<WorkingCapitalLoanProductRelatedDetail, BigDecimal> fromProduct) {
+        if (loan.getLoanProductRelatedDetails() != null && fromLoan.apply(loan.getLoanProductRelatedDetails()) != null) {
+            return fromLoan.apply(loan.getLoanProductRelatedDetails());
+        }
+        if (loan.getLoanProduct() != null && loan.getLoanProduct().getRelatedDetail() != null) {
+            return fromProduct.apply(loan.getLoanProduct().getRelatedDetail());
+        }
+        return null;
+    }
+
+    private void assertPaymentAmountCalculable(final BigDecimal discount, final BigDecimal netDisbursementAmount,
+            final BigDecimal paymentAmount, final int npvDayCount, final MathContext mc) {
+        if (!ProjectedAmortizationScheduleModel.isPaymentAmountCalculable(discount, netDisbursementAmount, paymentAmount, npvDayCount,
+                mc)) {
+            throw new WorkingCapitalLoanPaymentAmountNotCalculableException();
+        }
+    }
+
+    private void assertAnnualEirCalculable(final BigDecimal discount, final BigDecimal netDisbursementAmount, final BigDecimal annualEir,
+            final int npvDayCount, final MonetaryCurrency currency, final MathContext mc) {
+        if (!ProjectedAmortizationScheduleModel.isAnnualEirCalculable(discount, netDisbursementAmount, annualEir, npvDayCount, currency,
+                mc)) {
+            throw new WorkingCapitalLoanEirNotCalculableException();
+        }
     }
 
     /**
@@ -244,20 +316,10 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
     private void generateAndSaveForApprovedLoanState(final WorkingCapitalLoan loan) {
         Validate.notNull(loan, "loan must not be null");
 
-        final MathContext mc = MoneyHelper.getMathContext();
-        final BigDecimal discount = getWorkingCapitalLoanDiscountAmount(loan);
-        final BigDecimal totalPaymentVolume = loan.getBalance() != null && loan.getTotalPaymentVolume() != null
-                ? loan.getTotalPaymentVolume()
-                : BigDecimal.ZERO;
-        final BigDecimal periodPaymentRate = loan.getLoanProductRelatedDetails() != null
-                ? loan.getLoanProductRelatedDetails().getPeriodPaymentRate()
-                : null;
-        final Integer npvDayCount = loan.getLoanProductRelatedDetails() != null ? loan.getLoanProductRelatedDetails().getNpvDayCount()
-                : null;
-
         final WorkingCapitalLoanDisbursementDetails detail = loan.getDisbursementDetails() != null
                 && !loan.getDisbursementDetails().isEmpty() ? loan.getDisbursementDetails().getFirst() : null;
         final LocalDate expectedDisbursementDate = detail != null ? detail.getExpectedDisbursementDate() : null;
+        Validate.notNull(expectedDisbursementDate, "expectedDisbursementDate must not be null");
 
         final BigDecimal netDisbursementAmount;
         if (loan.getApprovedPrincipal() != null && loan.getApprovedPrincipal().compareTo(BigDecimal.ZERO) > 0) {
@@ -265,20 +327,13 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         } else {
             netDisbursementAmount = detail != null && detail.getExpectedAmount() != null ? detail.getExpectedAmount() : BigDecimal.ZERO;
         }
-
-        Validate.isTrue(totalPaymentVolume.signum() > 0, "totalPaymentVolume must be positive");
-        Validate.notNull(periodPaymentRate, "periodPaymentRate must not be null");
-        Validate.notNull(npvDayCount, "npvDayCount must not be null");
-        Validate.notNull(expectedDisbursementDate, "expectedDisbursementDate must not be null");
         Validate.isTrue(netDisbursementAmount.signum() > 0, "net disbursement amount for schedule must be positive");
 
-        assertEirCalculable(discount, netDisbursementAmount, totalPaymentVolume, periodPaymentRate, npvDayCount,
-                loan.getLoanProduct().getCurrency(), mc);
-
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(discount, netDisbursementAmount,
-                totalPaymentVolume, periodPaymentRate, npvDayCount, expectedDisbursementDate, mc,
-                WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan), DateUtils.getBusinessLocalDate());
-        scheduleRepositoryWrapper.writeModel(loan, model);
+        final BigDecimal periodPaymentRate = loan.getLoanProductRelatedDetails() != null
+                ? loan.getLoanProductRelatedDetails().getPeriodPaymentRate()
+                : null;
+        scheduleRepositoryWrapper.writeModel(loan,
+                generateBaseModel(loan, netDisbursementAmount, expectedDisbursementDate, periodPaymentRate));
     }
 
     /** Guards paths that bypass request validation, before {@code generate()} materialises the full schedule. */
@@ -400,6 +455,9 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         try {
             model = reconstructScheduleModel(loan, payments, adjustments);
         } catch (final IllegalStateException | IllegalArgumentException | ArithmeticException e) {
+            if (resolvePaymentAmountCalculationStrategy(loan).isPaymentAmount()) {
+                throw new WorkingCapitalLoanPaymentAmountNotCalculableException(e);
+            }
             throw new WorkingCapitalLoanEirNotCalculableException(e);
         }
 

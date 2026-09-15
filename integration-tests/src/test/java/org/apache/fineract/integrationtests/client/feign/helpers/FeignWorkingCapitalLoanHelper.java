@@ -83,6 +83,10 @@ public class FeignWorkingCapitalLoanHelper {
         return response.getResourceId();
     }
 
+    public CallFailedRuntimeException submitApplicationExpectingFailure(PostWorkingCapitalLoansRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoans().submitWorkingCapitalLoanApplication(request));
+    }
+
     public Long approve(Long loanId, PostWorkingCapitalLoansLoanIdRequest request) {
         PostWorkingCapitalLoansLoanIdResponse result = ok(
                 () -> fineractClient.workingCapitalLoans().stateTransitionWorkingCapitalLoanById(loanId, "approve", request));
