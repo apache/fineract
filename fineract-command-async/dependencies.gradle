@@ -24,7 +24,7 @@ dependencies {
 
     implementation(
             'org.springframework.boot:spring-boot-starter',
-            'io.github.resilience4j:resilience4j-spring-boot3',
+            'io.github.resilience4j:resilience4j-spring-boot4',
 
             'org.apache.commons:commons-lang3',
 
@@ -37,6 +37,7 @@ dependencies {
     jmh 'org.openjdk.jmh:jmh-generator-annprocess'
     jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess'
 
+    testImplementation 'org.springframework.boot:spring-boot-jdbc'
     testImplementation(project(path: ':fineract-command-test'))
     testImplementation ('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'com.jayway.jsonpath', module: 'json-path'
@@ -46,7 +47,6 @@ dependencies {
         exclude group: 'org.skyscreamer'
     }
     testImplementation (
-            'org.mockito:mockito-inline',
             'org.openjdk.jmh:jmh-core',
             'org.testcontainers:junit-jupiter',
             )

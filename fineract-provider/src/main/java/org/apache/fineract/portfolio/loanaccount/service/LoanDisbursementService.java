@@ -59,7 +59,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionRepositor
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanChargeValidator;
 import org.apache.fineract.portfolio.loanaccount.serialization.LoanDisbursementValidator;
 import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 
 @Slf4j
 @RequiredArgsConstructor

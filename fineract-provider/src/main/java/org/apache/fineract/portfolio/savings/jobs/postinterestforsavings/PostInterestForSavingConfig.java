@@ -25,11 +25,10 @@ import org.apache.fineract.portfolio.savings.domain.SavingsAccountRepositoryWrap
 import org.apache.fineract.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsSchedularInterestPosterTask;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -71,6 +70,6 @@ public class PostInterestForSavingConfig {
     @Bean
     public Job postInterestForSavingJob(PostInterestForSavingTasklet postInterestForSavingTasklet) {
         return new JobBuilder(JobName.POST_INTEREST_FOR_SAVINGS.name(), jobRepository)
-                .start(postInterestForSavingStep(postInterestForSavingTasklet)).incrementer(new RunIdIncrementer()).build();
+                .start(postInterestForSavingStep(postInterestForSavingTasklet)).build();
     }
 }

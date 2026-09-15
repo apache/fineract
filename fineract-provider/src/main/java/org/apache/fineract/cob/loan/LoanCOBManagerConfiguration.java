@@ -21,6 +21,7 @@ package org.apache.fineract.cob.loan;
 import static org.apache.fineract.cob.loan.LoanCOBConstant.JOB_NAME;
 
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.common.COBStepExecutionSplitter;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.conditions.BatchManagerCondition;
 import org.apache.fineract.cob.domain.LoanAccountLock;
@@ -30,14 +31,13 @@ import org.apache.fineract.cob.service.RetrieveLoanIdService;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.JobOperator;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
+import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.batch.integration.partition.RemotePartitioningManagerStepBuilderFactory;
@@ -90,9 +90,11 @@ public class LoanCOBManagerConfiguration {
 
     @Bean("loanCOBStep")
     public Step loanCOBStep(LoanCOBPartitioner partitioner) {
+        // The remote handler needs the worker name even when an explicit splitter is supplied.
         return stepBuilderFactory.get(LoanCOBConstant.LOAN_COB_PARTITIONER_STEP)
                 .partitioner(LoanCOBConstant.LOAN_COB_WORKER_STEP, partitioner).pollInterval(propertyService.getPollInterval(JOB_NAME))
-                .outputChannel(outboundRequests).build();
+                .outputChannel(outboundRequests)
+                .splitter(new COBStepExecutionSplitter(jobRepository, LoanCOBConstant.LOAN_COB_WORKER_STEP, partitioner)).build();
     }
 
     @Bean
@@ -136,7 +138,6 @@ public class LoanCOBManagerConfiguration {
                 .next(loanCOBStep(partitioner)) //
                 .next(stayedLockedStep()) //
                 .next(unlockProcessedLoansStep()) //
-                .incrementer(new RunIdIncrementer()) //
                 .build();
     }
 

@@ -28,20 +28,20 @@ import static org.apache.fineract.infrastructure.jobs.service.JobName.WORKING_CA
 
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.COBBusinessStepService;
+import org.apache.fineract.cob.common.COBStepExecutionSplitter;
 import org.apache.fineract.cob.common.CustomJobParameterResolver;
 import org.apache.fineract.cob.conditions.BatchManagerCondition;
 import org.apache.fineract.cob.domain.WorkingCapitalLoanAccountLock;
 import org.apache.fineract.cob.listener.COBExecutionListenerRunner;
 import org.apache.fineract.cob.service.AccountLockService;
 import org.apache.fineract.infrastructure.springbatch.PropertyService;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.launch.JobOperator;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
+import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.integration.config.annotation.EnableBatchIntegration;
 import org.springframework.batch.integration.partition.RemotePartitioningManagerStepBuilderFactory;
@@ -85,7 +85,6 @@ public class WorkingCapitalLoanCOBManagerConfiguration {
                 .start(resolveCustomJobParametersForWorkingCapitalStep()) //
                 .next(workingCapitalLoanCOBStep(workingCapitalLoanCOBPartitioner)) //
                 .next(unlockProcessedWorkingCapitalLoansStep()) //
-                .incrementer(new RunIdIncrementer()) //
                 .build();
     }
 
@@ -113,9 +112,11 @@ public class WorkingCapitalLoanCOBManagerConfiguration {
 
     @Bean(WORKING_CAPITAL_LOAN_COB_STEP)
     public Step workingCapitalLoanCOBStep(WorkingCapitalLoanCOBPartitioner partitioner) {
+        // The remote handler needs the worker name even when an explicit splitter is supplied.
         return stepBuilderFactory.get(WORKING_CAPITAL_LOAN_COB_PARTITIONER_STEP)//
-                .partitioner(WORKING_CAPITAL_LOAN_COB_WORKER_STEP, partitioner)//
+                .partitioner(WORKING_CAPITAL_LOAN_COB_WORKER_STEP, partitioner)
                 .pollInterval(propertyService.getPollInterval(WORKING_CAPITAL_JOB_NAME))//
-                .outputChannel(outboundRequests).build();//
+                .outputChannel(outboundRequests)
+                .splitter(new COBStepExecutionSplitter(jobRepository, WORKING_CAPITAL_LOAN_COB_WORKER_STEP, partitioner)).build();
     }
 }

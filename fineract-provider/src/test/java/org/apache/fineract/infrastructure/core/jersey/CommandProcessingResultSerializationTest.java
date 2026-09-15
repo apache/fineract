@@ -20,6 +20,7 @@ package org.apache.fineract.infrastructure.core.jersey;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,10 +31,8 @@ import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest
@@ -41,18 +40,16 @@ import org.springframework.test.context.ContextConfiguration;
 public class CommandProcessingResultSerializationTest {
 
     @Autowired
-    private MappingJackson2HttpMessageConverter converter;
+    @Qualifier("objectMapper")
+    private ObjectMapper objectMapper;
 
     @Test
     public void testCommandProcessingResultSerialization() throws IOException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
         CommandProcessingResult commandProcessingResult = CommandProcessingResult.fromDetails(1L, null, null, null, null, null,
                 "resourceIdentifier", null, null, null, null, null, null, null, Boolean.TRUE, null, new ExternalId("externalId"),
                 ExternalId.empty(), null);
-        SimpleHttpOutputMessage outputMessage = new SimpleHttpOutputMessage(os, headers);
-        converter.write(commandProcessingResult, MediaType.APPLICATION_JSON, outputMessage);
+        objectMapper.writeValue(os, commandProcessingResult);
         Map<String, Object> result = new Gson().fromJson(os.toString(Charset.defaultCharset()), Map.class);
         assertEquals(4, result.size());
         assertEquals("resourceIdentifier", result.get("resourceIdentifier"));

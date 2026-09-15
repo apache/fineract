@@ -24,7 +24,7 @@ import static org.apache.fineract.infrastructure.jobs.service.JobName.WORKING_CA
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.cob.listener.FineractCOBBeforeJobListener;
 import org.apache.fineract.infrastructure.core.boot.FineractProfiles;
-import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.job.JobExecution;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 

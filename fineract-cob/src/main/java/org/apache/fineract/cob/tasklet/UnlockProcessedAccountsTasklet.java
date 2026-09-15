@@ -22,11 +22,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.cob.domain.AccountLock;
 import org.apache.fineract.cob.service.AccountLockService;
-import org.springframework.batch.core.StepContribution;
+import org.jspecify.annotations.NonNull;
 import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.StepContribution;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.lang.NonNull;
+import org.springframework.batch.infrastructure.repeat.RepeatStatus;
 
 /**
  * Tasklet that unlocks accounts which were successfully processed during COB but whose locks were not removed.
