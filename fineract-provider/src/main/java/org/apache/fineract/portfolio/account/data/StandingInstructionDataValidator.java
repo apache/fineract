@@ -68,7 +68,8 @@ public class StandingInstructionDataValidator {
             StandingInstructionApiConstants.validFromParamName, StandingInstructionApiConstants.validTillParamName,
             StandingInstructionApiConstants.recurrenceTypeParamName, StandingInstructionApiConstants.recurrenceFrequencyParamName,
             StandingInstructionApiConstants.recurrenceIntervalParamName, StandingInstructionApiConstants.recurrenceOnMonthDayParamName,
-            StandingInstructionApiConstants.nameParamName, StandingInstructionApiConstants.monthDayFormatParamName));
+            StandingInstructionApiConstants.nameParamName, StandingInstructionApiConstants.monthDayFormatParamName,
+            StandingInstructionApiConstants.allowPartialTransferParamName));
 
     private static final Set<String> UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<>(Arrays.asList(AccountDetailConstants.localeParamName,
             AccountDetailConstants.dateFormatParamName, StandingInstructionApiConstants.priorityParamName,
@@ -76,7 +77,8 @@ public class StandingInstructionDataValidator {
             StandingInstructionApiConstants.amountParamName, StandingInstructionApiConstants.validFromParamName,
             StandingInstructionApiConstants.validTillParamName, StandingInstructionApiConstants.recurrenceTypeParamName,
             StandingInstructionApiConstants.recurrenceFrequencyParamName, StandingInstructionApiConstants.recurrenceIntervalParamName,
-            StandingInstructionApiConstants.recurrenceOnMonthDayParamName, StandingInstructionApiConstants.monthDayFormatParamName));
+            StandingInstructionApiConstants.recurrenceOnMonthDayParamName, StandingInstructionApiConstants.monthDayFormatParamName,
+            StandingInstructionApiConstants.allowPartialTransferParamName));
 
     @Autowired
     public StandingInstructionDataValidator(final FromJsonHelper fromApiJsonHelper,
@@ -118,6 +120,11 @@ public class StandingInstructionDataValidator {
         final BigDecimal transferAmount = this.fromApiJsonHelper
                 .extractBigDecimalWithLocaleNamed(StandingInstructionApiConstants.amountParamName, element);
         baseDataValidator.reset().parameter(StandingInstructionApiConstants.amountParamName).value(transferAmount).positiveAmount();
+
+        final Boolean allowPartialTransfer = this.fromApiJsonHelper
+                .extractBooleanNamed(StandingInstructionApiConstants.allowPartialTransferParamName, element);
+        baseDataValidator.reset().parameter(StandingInstructionApiConstants.allowPartialTransferParamName).value(allowPartialTransfer)
+                .ignoreIfNull().validateForBooleanValue();
 
         final Integer transferType = this.fromApiJsonHelper.extractIntegerNamed(transferTypeParamName, element, Locale.getDefault());
         baseDataValidator.reset().parameter(transferTypeParamName).value(transferType).notNull().inMinMaxRange(1, 3);
@@ -281,6 +288,13 @@ public class StandingInstructionDataValidator {
         if (this.fromApiJsonHelper.parameterExists(StandingInstructionApiConstants.nameParamName, element)) {
             final String name = this.fromApiJsonHelper.extractStringNamed(StandingInstructionApiConstants.nameParamName, element);
             baseDataValidator.reset().parameter(StandingInstructionApiConstants.nameParamName).value(name).notNull();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(StandingInstructionApiConstants.allowPartialTransferParamName, element)) {
+            final Boolean allowPartialTransfer = this.fromApiJsonHelper
+                    .extractBooleanNamed(StandingInstructionApiConstants.allowPartialTransferParamName, element);
+            baseDataValidator.reset().parameter(StandingInstructionApiConstants.allowPartialTransferParamName).value(allowPartialTransfer)
+                    .notNull().validateForBooleanValue();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
