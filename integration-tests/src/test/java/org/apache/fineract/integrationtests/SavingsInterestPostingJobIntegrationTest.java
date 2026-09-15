@@ -31,7 +31,6 @@ import org.apache.fineract.integrationtests.client.feign.FeignSavingsTestBase;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsRequestBuilders;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestData;
 import org.apache.fineract.integrationtests.client.feign.modules.SavingsTestValidators;
-import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,17 +45,21 @@ public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBa
     private static final BigDecimal OVERDRAFT_LIMIT = new BigDecimal("10000.0");
     private static final BigDecimal OVERDRAFT_INTEREST_RATE = new BigDecimal("10");
 
+    private static final LocalDate POSTING_JOB_BUSINESS_DATE = LocalDate.of(2022, Month.JULY, 31);
+
     @Test
     public void testSavingsBalanceCheckAfterDailyInterestPostingJob() {
-        final Long savingsId = createActiveDailyPostingSavings(START_DATE);
-        deposit(savingsId, DEPOSIT_AMOUNT, START_DATE);
+        businessDateHelper.runAt(POSTING_JOB_BUSINESS_DATE.toString(), () -> {
+            final Long savingsId = createActiveDailyPostingSavings(START_DATE);
+            deposit(savingsId, DEPOSIT_AMOUNT, START_DATE);
 
-        schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-        final List<SavingsAccountTransactionData> transactions = savingsTransactionHelper.getTransactions(savingsId);
-        // The RestAssured version read this through JsonPath, which narrowed it to a float and saw "10129.582".
-        SavingsTestValidators.verifyAmount(new BigDecimal("10129.5818"), transactions.get(transactions.size() - 48).getRunningBalance(),
-                "Equality check for Balance");
+            final List<SavingsAccountTransactionData> transactions = savingsTransactionHelper.getTransactions(savingsId);
+            // The RestAssured version read this through JsonPath, which narrowed it to a float and saw "10129.582".
+            SavingsTestValidators.verifyAmount(new BigDecimal("10129.5818"), transactions.get(transactions.size() - 48).getRunningBalance(),
+                    "Equality check for Balance");
+        });
     }
 
     @Test
@@ -72,21 +75,21 @@ public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBa
 
     @Test
     public void testDuplicateOverdraftInterestPostingJob() {
-        final Long savingsId = createActiveSavings(JULY_START_DATE, overdraftDailyPostingProduct());
+        businessDateHelper.runAt(POSTING_JOB_BUSINESS_DATE.toString(), () -> {
+            final Long savingsId = createActiveSavings(JULY_START_DATE, overdraftDailyPostingProduct());
 
-        withdraw(savingsId, "1000", JULY_START_DATE);
-        schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
-        withdraw(savingsId, "1000", JULY_START_DATE);
+            withdraw(savingsId, "1000", JULY_START_DATE);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            withdraw(savingsId, "1000", JULY_START_DATE);
 
-        assertEquals(1, countActiveTransactionsOn(savingsId, LocalDate.of(2022, Month.JULY, 10)),
-                "No Duplicate Overdraft Interest Posting");
+            assertEquals(1, countActiveTransactionsOn(savingsId, LocalDate.of(2022, Month.JULY, 10)),
+                    "No Duplicate Overdraft Interest Posting");
+        });
     }
 
     @Test
     public void testSavingsDailyInterestPostingJob() {
-        final LocalDate today = Utils.getLocalDateOfTenant();
-
-        businessDateHelper.runAt(today.toString(), () -> {
+        businessDateHelper.runAt(POSTING_JOB_BUSINESS_DATE.toString(), () -> {
             final Long savingsId = createActiveDailyPostingSavings(START_DATE);
             deposit(savingsId, DEPOSIT_AMOUNT, START_DATE);
 
@@ -98,40 +101,45 @@ public class SavingsInterestPostingJobIntegrationTest extends FeignSavingsTestBa
             SavingsTestValidators.verifyAmount(new BigDecimal("2.7405"), interestPosting.getAmount(),
                     "Equality check for interest posted amount");
             assertEquals(LocalDate.of(2022, Month.APRIL, 12), interestPosting.getDate(), "Date check for Interest Posting transaction");
-            assertEquals(today, interestPosting.getSubmittedOnDate(), "Submitted On Date check for Interest Posting transaction");
+            assertEquals(POSTING_JOB_BUSINESS_DATE, interestPosting.getSubmittedOnDate(),
+                    "Submitted On Date check for Interest Posting transaction");
         });
     }
 
     @Test
     public void testSavingsDailyOverdraftInterestPostingJob() {
-        final Long savingsId = createActiveSavings(START_DATE, overdraftDailyPostingProduct());
+        businessDateHelper.runAt(POSTING_JOB_BUSINESS_DATE.toString(), () -> {
+            final Long savingsId = createActiveSavings(START_DATE, overdraftDailyPostingProduct());
 
-        withdraw(savingsId, DEPOSIT_AMOUNT, START_DATE);
-        schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            withdraw(savingsId, DEPOSIT_AMOUNT, START_DATE);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-        final List<SavingsAccountTransactionData> transactions = savingsTransactionHelper.getTransactions(savingsId);
-        final SavingsAccountTransactionData interestPosting = transactions.get(transactions.size() - 2);
+            final List<SavingsAccountTransactionData> transactions = savingsTransactionHelper.getTransactions(savingsId);
+            final SavingsAccountTransactionData interestPosting = transactions.get(transactions.size() - 2);
 
-        SavingsTestValidators.verifyAmount(new BigDecimal("2.7397"), interestPosting.getAmount(),
-                "Equality check for overdatft interest posted amount");
-        assertEquals(LocalDate.of(2022, Month.APRIL, 11), interestPosting.getDate(),
-                "Date check for overdraft Interest Posting transaction");
+            SavingsTestValidators.verifyAmount(new BigDecimal("2.7397"), interestPosting.getAmount(),
+                    "Equality check for overdatft interest posted amount");
+            assertEquals(LocalDate.of(2022, Month.APRIL, 11), interestPosting.getDate(),
+                    "Date check for overdraft Interest Posting transaction");
+        });
     }
 
     @Test
     public void testAccountBalanceWithWithdrawalFeeAfterInterestPostingJob() {
-        final Long savingsId = createActiveDailyPostingSavingsWithWithdrawalFee();
+        businessDateHelper.runAt(POSTING_JOB_BUSINESS_DATE.toString(), () -> {
+            final Long savingsId = createActiveDailyPostingSavingsWithWithdrawalFee();
 
-        deposit(savingsId, "1000", CHARGE_START_DATE);
-        withdraw(savingsId, "100", CHARGE_START_DATE);
-        SavingsTestValidators.verifyAmount(new BigDecimal("800.0"), savingsHelper.getSavingsSummary(savingsId).getAccountBalance(),
-                "Verifying account balance is 800");
+            deposit(savingsId, "1000", CHARGE_START_DATE);
+            withdraw(savingsId, "100", CHARGE_START_DATE);
+            SavingsTestValidators.verifyAmount(new BigDecimal("800.0"), savingsHelper.getSavingsSummary(savingsId).getAccountBalance(),
+                    "Verifying account balance is 800");
 
-        schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
+            schedulerHelper.executeAndAwaitJob(POST_INTEREST_JOB_NAME);
 
-        final List<SavingsAccountTransactionData> transactions = savingsTransactionHelper.getTransactions(savingsId);
-        SavingsTestValidators.verifyAmount(new BigDecimal("800.4384"), transactions.get(transactions.size() - 5).getRunningBalance(),
-                "Equality check for Balance");
+            final List<SavingsAccountTransactionData> transactions = savingsTransactionHelper.getTransactions(savingsId);
+            SavingsTestValidators.verifyAmount(new BigDecimal("800.4384"), transactions.get(transactions.size() - 5).getRunningBalance(),
+                    "Equality check for Balance");
+        });
     }
 
     @Test
