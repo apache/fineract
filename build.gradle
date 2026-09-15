@@ -95,7 +95,7 @@ buildscript {
 
     dependencies {
         classpath 'org.eclipse.persistence:eclipselink:4.0.9'
-        classpath 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
+        classpath 'jakarta.ws.rs:jakarta.ws.rs-api:4.0.0'
         classpath 'com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0'
         classpath 'org.apache.commons:commons-lang3:3.20.0'
         // Gradle 9 no longer bundles groovy-sql; keep this aligned with Gradle's embedded Groovy version.
