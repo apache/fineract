@@ -92,6 +92,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImpl implements 
         String normalizedAttributeValue = validateAndNormalizeExternalAssetOwnerLoanProductAttribute(attributeKey, attributeValue);
         validateLoanProductExists(loanProductId);
         ExternalAssetOwnerLoanProductAttributes attributeToUpdate = getLoanProductAttribute(attributeId);
+        validateLoanProductAttributeBelongsToLoanProduct(loanProductId, attributeToUpdate);
         validateLoanProductAttributeKeysMatch(attributeKey, attributeToUpdate.getAttributeKey());
         if (!attributeToUpdate.getAttributeValue().equals(normalizedAttributeValue)) {
             attributeToUpdate.setAttributeValue(normalizedAttributeValue);
