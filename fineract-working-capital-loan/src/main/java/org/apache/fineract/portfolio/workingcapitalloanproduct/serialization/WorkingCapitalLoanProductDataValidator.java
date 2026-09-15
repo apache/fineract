@@ -51,6 +51,8 @@ import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCap
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanBreachStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalPaymentAmountCalculationStrategy;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductDuplicateExternalIdException;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductDuplicateNameException;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.exception.WorkingCapitalLoanProductDuplicateShortNameException;
@@ -85,6 +87,8 @@ public class WorkingCapitalLoanProductDataValidator {
                     WorkingCapitalLoanProductConstants.digitsAfterDecimalParamName, //
                     WorkingCapitalLoanProductConstants.inMultiplesOfParamName, //
                     WorkingCapitalLoanProductConstants.amortizationTypeParamName, //
+                    WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName, //
+                    WorkingCapitalLoanProductConstants.annualEirParamName, //
                     WorkingCapitalLoanProductConstants.delinquencyBucketIdParamName, //
                     WorkingCapitalLoanProductConstants.npvDayCountParamName, //
                     WorkingCapitalLoanProductConstants.paymentAllocationParamName, //
@@ -94,6 +98,8 @@ public class WorkingCapitalLoanProductDataValidator {
                     WorkingCapitalLoanProductConstants.minPeriodPaymentRateParamName, //
                     WorkingCapitalLoanProductConstants.periodPaymentRateParamName, //
                     WorkingCapitalLoanProductConstants.maxPeriodPaymentRateParamName, //
+                    WorkingCapitalLoanProductConstants.minAnnualEirParamName, //
+                    WorkingCapitalLoanProductConstants.maxAnnualEirParamName, //
                     WorkingCapitalLoanProductConstants.discountParamName, //
                     WorkingCapitalLoanProductConstants.repaymentEveryParamName, //
                     WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName, //
@@ -174,6 +180,8 @@ public class WorkingCapitalLoanProductDataValidator {
         // Validate min/max ranges
         validateMinMaxRanges(element, baseDataValidator, principal);
 
+        validatePaymentAmountCalculationStrategy(element, baseDataValidator, true, null);
+
         // Validate configurable attributes if present
         if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.allowAttributeOverridesParamName, element)) {
             validateConfigurableAttributes(element, baseDataValidator);
@@ -204,7 +212,7 @@ public class WorkingCapitalLoanProductDataValidator {
         }
     }
 
-    public void validateForUpdate(final String json) {
+    public void validateForUpdate(final String json, final WorkingCapitalLoanProduct product) {
         if (StringUtils.isBlank(json)) {
             throw new InvalidJsonException();
         }
@@ -245,6 +253,11 @@ public class WorkingCapitalLoanProductDataValidator {
 
         // Validate min/max constraints if present
         validateMinMaxRanges(element, baseDataValidator, principal);
+
+        final WorkingCapitalPaymentAmountCalculationStrategy existingStrategy = product != null && product.getRelatedDetail() != null
+                ? product.getRelatedDetail().getPaymentAmountCalculationStrategy()
+                : null;
+        validatePaymentAmountCalculationStrategy(element, baseDataValidator, false, existingStrategy);
 
         // Validate accounting if present
         validateAccountingRule(element, baseDataValidator, false);
@@ -442,7 +455,7 @@ public class WorkingCapitalLoanProductDataValidator {
             final BigDecimal periodPaymentRateParamName = this.fromApiJsonHelper
                     .extractBigDecimalNamed(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, element, new HashSet<>());
             baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.periodPaymentRateParamName)
-                    .value(periodPaymentRateParamName).notNull().zeroOrPositiveAmount();
+                    .value(periodPaymentRateParamName).ignoreIfNull().zeroOrPositiveAmount();
         }
 
         if (required || this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.repaymentEveryParamName, element)) {
@@ -589,6 +602,48 @@ public class WorkingCapitalLoanProductDataValidator {
                         .failWithCode("must.be.less.than.or.equal.to.max");
             }
         }
+
+        final BigDecimal annualEirMin = this.fromApiJsonHelper
+                .parameterExists(WorkingCapitalLoanProductConstants.minAnnualEirParamName, element)
+                        ? this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.minAnnualEirParamName, element,
+                                new HashSet<>())
+                        : null;
+        final BigDecimal annualEirMax = this.fromApiJsonHelper
+                .parameterExists(WorkingCapitalLoanProductConstants.maxAnnualEirParamName, element)
+                        ? this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.maxAnnualEirParamName, element,
+                                new HashSet<>())
+                        : null;
+        final BigDecimal annualEir = this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.annualEirParamName, element)
+                ? this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.annualEirParamName, element,
+                        new HashSet<>())
+                : null;
+
+        if (annualEirMin != null) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.minAnnualEirParamName).value(annualEirMin).ignoreIfNull()
+                    .zeroOrPositiveAmount();
+        }
+        if (annualEirMax != null) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.maxAnnualEirParamName).value(annualEirMax).ignoreIfNull()
+                    .zeroOrPositiveAmount();
+        }
+        if (annualEirMin != null && annualEirMax != null) {
+            if (MathUtil.isGreaterThan(annualEirMin, annualEirMax)) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.minAnnualEirParamName)
+                        .failWithCode("must.be.less.than.or.equal.to.max");
+            }
+        }
+        if (annualEir != null && annualEirMin != null) {
+            if (MathUtil.isLessThan(annualEir, annualEirMin)) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.annualEirParamName)
+                        .failWithCode("must.be.greater.than.or.equal.to.min");
+            }
+        }
+        if (annualEir != null && annualEirMax != null) {
+            if (MathUtil.isGreaterThan(annualEir, annualEirMax)) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.annualEirParamName)
+                        .failWithCode("must.be.less.than.or.equal.to.max");
+            }
+        }
     }
 
     private void validateInputDates(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
@@ -674,6 +729,115 @@ public class WorkingCapitalLoanProductDataValidator {
                         .extractLongNamed(WorkingCapitalLoanProductConstants.overpaymentLiabilityAccountIdParamName, element);
                 baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.overpaymentLiabilityAccountIdParamName)
                         .value(overpaymentLiabilityAccountId).notNull().integerGreaterThanZero();
+            }
+        }
+    }
+
+    private void validatePaymentAmountCalculationStrategy(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+            final boolean isCreate, final WorkingCapitalPaymentAmountCalculationStrategy existingStrategy) {
+        final boolean strategyInRequest = this.fromApiJsonHelper
+                .parameterExists(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName, element);
+        // Partial updates often omit strategy (accounting-only, annualEir-only, …). Use the persisted strategy for
+        // conflict checks
+        if (!isCreate && !strategyInRequest) {
+            if (existingStrategy != null) {
+                validatePaymentAmountCalculationStrategyFields(element, baseDataValidator, existingStrategy, false);
+            }
+            return;
+        }
+        final String strategyValue = strategyInRequest
+                ? this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName,
+                        element)
+                : WorkingCapitalPaymentAmountCalculationStrategy.TPV.name();
+        if (strategyValue == null || strategyValue.isBlank()) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName)
+                    .value(strategyValue).notBlank();
+            return;
+        }
+        final WorkingCapitalPaymentAmountCalculationStrategy strategy = WorkingCapitalPaymentAmountCalculationStrategy
+                .fromString(strategyValue);
+        if (strategy == null) {
+            baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.paymentAmountCalculationStrategyParamName)
+                    .failWithCode("invalid.payment.amount.calculation.strategy");
+            return;
+        }
+        validatePaymentAmountCalculationStrategyFields(element, baseDataValidator, strategy, true);
+    }
+
+    private void validatePaymentAmountCalculationStrategyFields(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+            final WorkingCapitalPaymentAmountCalculationStrategy strategy, final boolean requirePairedFields) {
+        final BigDecimal annualEir = this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.annualEirParamName, element)
+                ? this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.annualEirParamName, element,
+                        new HashSet<>())
+                : null;
+        final BigDecimal periodPaymentRate = this.fromApiJsonHelper
+                .parameterExists(WorkingCapitalLoanProductConstants.periodPaymentRateParamName, element)
+                        ? this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.periodPaymentRateParamName,
+                                element, new HashSet<>())
+                        : null;
+        final BigDecimal minPeriodPaymentRate = this.fromApiJsonHelper
+                .parameterExists(WorkingCapitalLoanProductConstants.minPeriodPaymentRateParamName, element)
+                        ? this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.minPeriodPaymentRateParamName,
+                                element, new HashSet<>())
+                        : null;
+        final BigDecimal maxPeriodPaymentRate = this.fromApiJsonHelper
+                .parameterExists(WorkingCapitalLoanProductConstants.maxPeriodPaymentRateParamName, element)
+                        ? this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.maxPeriodPaymentRateParamName,
+                                element, new HashSet<>())
+                        : null;
+        final BigDecimal minAnnualEir = this.fromApiJsonHelper
+                .parameterExists(WorkingCapitalLoanProductConstants.minAnnualEirParamName, element)
+                        ? this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.minAnnualEirParamName, element,
+                                new HashSet<>())
+                        : null;
+        final BigDecimal maxAnnualEir = this.fromApiJsonHelper
+                .parameterExists(WorkingCapitalLoanProductConstants.maxAnnualEirParamName, element)
+                        ? this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.maxAnnualEirParamName, element,
+                                new HashSet<>())
+                        : null;
+        final BigDecimal discount = this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.discountParamName, element)
+                ? this.fromApiJsonHelper.extractBigDecimalNamed(WorkingCapitalLoanProductConstants.discountParamName, element,
+                        new HashSet<>())
+                : null;
+
+        if (strategy.isTpv()) {
+            if (annualEir != null) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.annualEirParamName)
+                        .failWithCode("not.allowed.for.tpv.strategy");
+            }
+            if (minAnnualEir != null) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.minAnnualEirParamName)
+                        .failWithCode("not.allowed.for.tpv.strategy");
+            }
+            if (maxAnnualEir != null) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.maxAnnualEirParamName)
+                        .failWithCode("not.allowed.for.tpv.strategy");
+            }
+            if (requirePairedFields && periodPaymentRate == null) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.periodPaymentRateParamName).value(null).notNull();
+            }
+        } else if (strategy.isAnnualEir()) {
+            if (periodPaymentRate != null) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.periodPaymentRateParamName)
+                        .failWithCode("not.allowed.for.annual.eir.strategy");
+            }
+            if (minPeriodPaymentRate != null) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.minPeriodPaymentRateParamName)
+                        .failWithCode("not.allowed.for.annual.eir.strategy");
+            }
+            if (maxPeriodPaymentRate != null) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.maxPeriodPaymentRateParamName)
+                        .failWithCode("not.allowed.for.annual.eir.strategy");
+            }
+            if (requirePairedFields && annualEir == null) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.annualEirParamName).value(null).notNull();
+            } else if (annualEir != null) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.annualEirParamName).value(annualEir).notNull()
+                        .positiveAmount();
+            }
+            if (requirePairedFields && (discount == null || discount.signum() <= 0)) {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.discountParamName)
+                        .failWithCode("must.be.greater.than.zero.for.annual.eir.strategy");
             }
         }
     }
