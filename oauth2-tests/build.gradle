@@ -24,7 +24,7 @@ description = 'Fineract Integration Tests for OAuth2'
 apply from: 'dependencies.gradle'
 
 dependencies {
-    testImplementation 'org.seleniumhq.selenium:selenium-java:4.43.0'
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.49.0'
     testImplementation 'io.github.bonigarcia:webdrivermanager:6.3.4'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
 }
