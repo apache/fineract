@@ -512,6 +512,30 @@ Feature: Working Capital Loan Charge Accrual
       | 50.0       | 50.0            | 0.0      | 30.0           | 30.0                | 0.0          |
     And Admin sets the business date to "20 October 2026"
     Then Admin closes the Working Capital loan with a full repayment on "20 October 2026"
+    And Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 October 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+      | 20 October 2026 | Repayment    | 9080.0            | 9000.0           | 50.0              | 30.0                  | false    |
+
+  Scenario: Verify no accrual or accrual adjustment is created for Working Capital loan charges in real time and on undo disbursal when product accounting rule is NONE
+    Given Admin sets the business date to "01 May 2027"
+    And Admin creates a client with random data and creates-approves-disburses a working capital loan with the following data:
+      | LoanProduct | submittedOnDate | expectedDisbursementDate | principalAmount | totalPayment | periodPaymentRate | discount |
+      | WCLP        | 01 May 2027     | 01 May 2027              | 9000            | 100000       | 18                | 0        |
+    When Global config "charge-accrual-date" value set to "submitted-date"
+    When Global config "wcl-charge-accrual-time" value set to "real-time"
+    And Admin sets the business date to "10 May 2027"
+    And Admin adds "WORKING_CAPITAL_SPECIFIED_DUE_DATE_FEE" specified due date charge to working capital loan with "20 May 2027" due date and 100.0 transaction amount
+    Then Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 May 2027     | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
+    When Admin successfully undo Working Capital disbursal
+    Then Working Capital Loan has transactions:
+      | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
+      | 01 May 2027     | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | true     |
+    And Admin successfully disburse the Working Capital loan on "10 May 2027" with "9000" EUR transaction amount
+    And Admin sets the business date to "15 May 2027"
+    Then Admin closes the Working Capital loan with a full repayment on "15 May 2027"
 
   @TestRailId:C85643
   Scenario: Verify pending charge accrual is posted at closure even when charge-accrual-date is submitted-date
