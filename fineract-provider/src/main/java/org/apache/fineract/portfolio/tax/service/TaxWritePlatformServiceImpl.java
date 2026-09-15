@@ -18,12 +18,22 @@
  */
 package org.apache.fineract.portfolio.tax.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.apache.fineract.accounting.glaccount.domain.GLAccount;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountRepositoryWrapper;
+import org.apache.fineract.accounting.glaccount.domain.GLAccountType;
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
+import org.apache.fineract.infrastructure.core.data.ApiParameterError;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.apache.fineract.infrastructure.core.data.DataValidatorBuilder;
+import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.apache.fineract.portfolio.charge.domain.ChargeRepository;
+import org.apache.fineract.portfolio.tax.api.TaxApiConstants;
 import org.apache.fineract.portfolio.tax.domain.TaxComponent;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepository;
 import org.apache.fineract.portfolio.tax.domain.TaxComponentRepositoryWrapper;
@@ -42,6 +52,8 @@ public class TaxWritePlatformServiceImpl implements TaxWritePlatformService {
     private final TaxComponentRepositoryWrapper taxComponentRepositoryWrapper;
     private final TaxGroupRepository taxGroupRepository;
     private final TaxGroupRepositoryWrapper taxGroupRepositoryWrapper;
+    private final ChargeRepository chargeRepository;
+    private final GLAccountRepositoryWrapper glAccountRepositoryWrapper;
 
     @Override
     public CommandProcessingResult createTaxComponent(final JsonCommand command) {
@@ -59,13 +71,99 @@ public class TaxWritePlatformServiceImpl implements TaxWritePlatformService {
         this.validator.validateForTaxComponentUpdate(command.json());
         final TaxComponent taxComponent = this.taxComponentRepositoryWrapper.findOneWithNotFoundDetection(id);
         this.validator.validateStartDate(taxComponent.startDate(), command);
-        Map<String, Object> changes = taxComponent.update(command);
+
+        final boolean inUse = this.chargeRepository.existsByTaxGroupContainingTaxComponent(taxComponent.getId());
+        if (inUse) {
+            validateRestrictedFieldsForInUseComponent(taxComponent, command);
+        }
+
+        GLAccountType debitAccountType = null;
+        GLAccount debitAccount = null;
+        GLAccountType creditAccountType = null;
+        GLAccount creditAccount = null;
+
+        if (!inUse) {
+            if (command.parameterExists(TaxApiConstants.debitAccountTypeParamName)) {
+                final Integer debitAccountTypeValue = command
+                        .integerValueSansLocaleOfParameterNamed(TaxApiConstants.debitAccountTypeParamName);
+                if (debitAccountTypeValue != null) {
+                    debitAccountType = GLAccountType.fromInt(debitAccountTypeValue);
+                }
+            }
+
+            if (command.parameterExists(TaxApiConstants.debitAccountIdParamName)) {
+                final Long debitAccountId = command.longValueOfParameterNamed(TaxApiConstants.debitAccountIdParamName);
+                if (debitAccountId != null) {
+                    debitAccount = this.glAccountRepositoryWrapper.findOneWithNotFoundDetection(debitAccountId);
+                }
+            }
+
+            if (command.parameterExists(TaxApiConstants.creditAccountTypeParamName)) {
+                final Integer creditAccountTypeValue = command
+                        .integerValueSansLocaleOfParameterNamed(TaxApiConstants.creditAccountTypeParamName);
+                if (creditAccountTypeValue != null) {
+                    creditAccountType = GLAccountType.fromInt(creditAccountTypeValue);
+                }
+            }
+
+            if (command.parameterExists(TaxApiConstants.creditAccountIdParamName)) {
+                final Long creditAccountId = command.longValueOfParameterNamed(TaxApiConstants.creditAccountIdParamName);
+                if (creditAccountId != null) {
+                    creditAccount = this.glAccountRepositoryWrapper.findOneWithNotFoundDetection(creditAccountId);
+                }
+            }
+        }
+
+        Map<String, Object> changes = taxComponent.update(command, debitAccountType, debitAccount, creditAccountType, creditAccount);
         this.validator.validateTaxComponentForUpdate(taxComponent);
         this.taxComponentRepository.saveAndFlush(taxComponent);
         return new CommandProcessingResultBuilder() //
                 .withEntityId(id) //
                 .with(changes) //
                 .build();
+    }
+
+    private void validateRestrictedFieldsForInUseComponent(final TaxComponent taxComponent, final JsonCommand command) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("tax.component");
+
+        if (command.isChangeInBigDecimalParameterNamed(TaxApiConstants.percentageParamName, taxComponent.getPercentage())) {
+            baseDataValidator.reset().parameter(TaxApiConstants.percentageParamName).failWithCode(
+                    "only.name.can.be.modified.once.tax.component.is.linked.or.used.in.transactions",
+                    "Only name can be modified once tax component is linked or used in transactions.");
+        }
+
+        if (command.isChangeInIntegerSansLocaleParameterNamed(TaxApiConstants.debitAccountTypeParamName,
+                taxComponent.getDebitAccountType())) {
+            baseDataValidator.reset().parameter(TaxApiConstants.debitAccountTypeParamName).failWithCode(
+                    "only.name.can.be.modified.once.tax.component.is.linked.or.used.in.transactions",
+                    "Only name can be modified once tax component is linked or used in transactions.");
+        }
+
+        final Long currentDebitAccountId = taxComponent.getDebitAccount() != null ? taxComponent.getDebitAccount().getId() : null;
+        if (command.isChangeInLongParameterNamed(TaxApiConstants.debitAccountIdParamName, currentDebitAccountId)) {
+            baseDataValidator.reset().parameter(TaxApiConstants.debitAccountIdParamName).failWithCode(
+                    "only.name.can.be.modified.once.tax.component.is.linked.or.used.in.transactions",
+                    "Only name can be modified once tax component is linked or used in transactions.");
+        }
+
+        if (command.isChangeInIntegerSansLocaleParameterNamed(TaxApiConstants.creditAccountTypeParamName,
+                taxComponent.getCreditAccountType())) {
+            baseDataValidator.reset().parameter(TaxApiConstants.creditAccountTypeParamName).failWithCode(
+                    "only.name.can.be.modified.once.tax.component.is.linked.or.used.in.transactions",
+                    "Only name can be modified once tax component is linked or used in transactions.");
+        }
+
+        final Long currentCreditAccountId = taxComponent.getCreditAccount() != null ? taxComponent.getCreditAccount().getId() : null;
+        if (command.isChangeInLongParameterNamed(TaxApiConstants.creditAccountIdParamName, currentCreditAccountId)) {
+            baseDataValidator.reset().parameter(TaxApiConstants.creditAccountIdParamName).failWithCode(
+                    "only.name.can.be.modified.once.tax.component.is.linked.or.used.in.transactions",
+                    "Only name can be modified once tax component is linked or used in transactions.");
+        }
+
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
     }
 
     @Override
