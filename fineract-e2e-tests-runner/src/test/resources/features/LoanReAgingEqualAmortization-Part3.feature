@@ -2725,6 +2725,9 @@ Feature: LoanReAgingEqualAmortization - Part3
   Scenario: Re-aging considers the down payment installment while add additional disbursement with following charge-off - UC6
     When Admin sets the business date to "21 April 2026"
     When Admin creates a client with random data
+    When Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "MERCHANT_ISSUED_REFUND" transaction type to "REAMORTIZATION" future installment allocation rule
+    When Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "PAYOUT_REFUND" transaction type to "NEXT_INSTALLMENT" future installment allocation rule
+    When Admin set "LP2_ADV_PYMNT_INTEREST_RECALCULATION_DAILY_EMI_360_30_MULTIDISBURSE_AUTO_DOWNPAYMENT" loan product "GOODWILL_CREDIT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
     When Admin set "LP2_ADV_PYMNT_INT_DAILY_EMI_360_30_INT_RECALC_DAILY_MULTIDISB_AUTO_DOWNPAYMENT_ACCELERATE_MATURITY" loan product "DEFAULT" transaction type to "LAST_INSTALLMENT" future installment allocation rule
     When Admin creates a fully customized loan with the following data:
       | LoanProduct                                                                                        | submitted on date | with Principal | ANNUAL interest rate % | interest type     | interest calculation period | amortization type  | loanTermFrequency | loanTermFrequencyType | repaymentEvery | repaymentFrequencyType | numberOfRepayments | graceOnPrincipalPayment | graceOnInterestPayment | interest free period | Payment strategy            |
@@ -2739,20 +2742,21 @@ Feature: LoanReAgingEqualAmortization - Part3
     When Admin successfully disburse the loan on "10 June 2026" with "200" EUR transaction amount
     And Admin does charge-off the loan on "10 June 2026"
     Then Loan marked as charged-off on "10 June 2026"
-#  --- NOTE: the -150.0 'Balance of loan' on installment 3 is the current behaviour, not the intended one: the
-#  --- ACCELERATE_MATURITY charge-off folds into a period ending on 10 June the principal of the tranche disbursed
-#  --- on that same 10 June, while the schedule view books that disbursement into the next period. ---
+#  --- The ACCELERATE_MATURITY charge-off shortens installment 3 so that it ends on 10 June and folds into it the
+#  --- principal of the tranche disbursed on that same 10 June, so the tranche is listed before it. ---
     Then Loan Repayment schedule has 4 periods, with the following data for periods:
       | Nr | Days | Date          | Paid date     | Balance of loan | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       |    |      | 21 April 2026 |               | 400.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
       | 1  | 0    | 21 April 2026 | 21 April 2026 | 300.0           | 100.0         | 0.0      | 0.0  | 0.0       | 100.0  | 100.0 | 0.0        | 0.0  | 0.0         |
       | 2  | 30   | 21 May 2026   | 10 June 2026  | 300.0           | 0.0           | 0.0      | 0.0  | 0.0       | 0.0    | 0.0   | 0.0        | 0.0  | 0.0         |
-      | 3  | 20   | 10 June 2026  |               | -150.0          | 450.0         | 5.54     | 0.0  | 0.0       | 455.54 | 0.0   | 0.0        | 0.0  | 455.54      |
       |    |      | 10 June 2026  |               | 200.0           |               |          | 0.0  |           | 0.0    | 0.0   |            |      |             |
+      | 3  | 20   | 10 June 2026  |               | 50.0            | 450.0         | 5.54     | 0.0  | 0.0       | 455.54 | 0.0   | 0.0        | 0.0  | 455.54      |
       | 4  | 0    | 10 June 2026  | 10 June 2026  | 0.0             | 50.0          | 0.0      | 0.0  | 0.0       | 50.0   | 50.0  | 0.0        | 0.0  | 0.0         |
     Then Loan Repayment schedule has the following data in Total row:
       | Principal due | Interest | Fees | Penalties | Due    | Paid  | In advance | Late | Outstanding |
       | 600.0         | 5.54     | 0.0  | 0.0       | 605.54 | 150.0 | 0.0        | 0.0  | 455.54      |
+    Then Loan status will be "ACTIVE"
+    Then Loan has 455.54 outstanding amount
     Then Loan Transactions tab has the following data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted |
       | 21 April 2026    | Disbursement     | 400.0  | 0.0       | 0.0      | 0.0  | 0.0       | 400.0        | false    |
