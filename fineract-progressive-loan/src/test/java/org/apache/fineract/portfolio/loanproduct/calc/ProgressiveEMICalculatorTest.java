@@ -5363,7 +5363,7 @@ class ProgressiveEMICalculatorTest {
         Assertions.assertEquals(100.0, totalPrincipal, 0.01, "All principal must be scheduled");
 
         // Grace periods are skipped when EMI is rewritten, so they must also be uncountable in the
-        // adjustment divisor (N - uncountable = 2 amortizing periods, not 8).
+        // adjustment divisor and shouldBeAdjusted() threshold (N - uncountable = 2 amortizing periods, not 8).
         final EmiAdjustment emiAdjustment = emiCalculator.getEmiAdjustment(repaymentPeriods);
         Assertions.assertEquals(6, emiAdjustment.uncountablePeriods(),
                 "Principal-grace periods must be uncountable so adjustment() matches the update loop");
@@ -5416,6 +5416,10 @@ class ProgressiveEMICalculatorTest {
 
         // Installment 8 (index 7) must carry the full principal as a single balloon payment.
         checkPeriod(interestSchedule, 7, 102.5, 2.5, 100.0, 0.0, false);
+
+        // A lone amortizing period has nothing to equalize against, so the adjustment gate stays closed.
+        Assertions.assertFalse(emiCalculator.getEmiAdjustment(interestSchedule.repaymentPeriods()).shouldBeAdjusted(),
+                "Bullet schedules must not re-equalize the balloon back onto grace periods");
     }
 
     /**
@@ -5460,11 +5464,76 @@ class ProgressiveEMICalculatorTest {
     }
 
     /**
-     * Mid-loan recalculation resets principalPaymentGrace on the full schedule model, not only the related suffix, so
-     * flags set on earlier periods during initial generation do not stay stuck.
+     * An existing N-1 balloon must stay a balloon after a mid-grace interest-rate change. The related suffix (p6/p7/p8)
+     * is shorter than graceOnPrincipalPayment, so suffix-scoped marking would have flagged the balloon period itself.
      */
     @Test
-    public void test_principalGrace_midLoanRecalc_clearsFlagsOutsideRelatedSuffix() {
+    public void test_principalGrace_nMinus1_interestRateChangeDuringGrace_staysBullet() {
+        final ProgressiveLoanInterestScheduleModel interestSchedule = generatePrincipalGraceBulletSchedule();
+
+        emiCalculator.changeInterestRate(interestSchedule, LocalDate.of(2024, 7, 1), BigDecimal.valueOf(24));
+
+        final List<RepaymentPeriod> repaymentPeriods = interestSchedule.repaymentPeriods();
+        for (int idx = 0; idx <= 6; idx++) {
+            Assertions.assertTrue(repaymentPeriods.get(idx).isPrincipalPaymentGrace(),
+                    "Period " + idx + " is in the loan grace window and must stay flagged");
+            Assertions.assertEquals(0.0, toDouble(repaymentPeriods.get(idx).getDuePrincipal()), 0.01,
+                    "Period " + idx + " must stay interest-only after the rate change");
+            Assertions.assertEquals(100.0, toDouble(repaymentPeriods.get(idx).getOutstandingLoanBalance()), 0.01);
+        }
+        Assertions.assertFalse(repaymentPeriods.get(7).isPrincipalPaymentGrace(),
+                "The balloon period must not be marked grace just because the suffix is shorter than the grace count");
+        Assertions.assertEquals(100.0, toDouble(repaymentPeriods.get(7).getDuePrincipal()), 0.01,
+                "The last installment must still carry the full principal");
+        Assertions.assertEquals(0.0, toDouble(repaymentPeriods.get(7).getOutstandingLoanBalance()), 0.01);
+
+        // Periods fully before the 30 June effective date keep the original 30% interest-only EMI.
+        checkPeriod(interestSchedule, 0, 2.5, 2.5, 0.0, 100.0, false);
+        checkPeriod(interestSchedule, 1, 2.5, 2.5, 0.0, 100.0, false);
+        checkPeriod(interestSchedule, 2, 2.5, 2.5, 0.0, 100.0, false);
+        checkPeriod(interestSchedule, 3, 2.5, 2.5, 0.0, 100.0, false);
+        checkPeriod(interestSchedule, 4, 2.5, 2.5, 0.0, 100.0, false);
+        // Periods fully after the change accrue at 24%: 100 * 0.24 / 12 = 2.00.
+        checkPeriod(interestSchedule, 6, 2.0, 2.0, 0.0, 100.0, false);
+        checkPeriod(interestSchedule, 7, 102.0, 2.0, 100.0, 0.0, false);
+
+        Assertions.assertFalse(emiCalculator.getEmiAdjustment(repaymentPeriods).shouldBeAdjusted(),
+                "A lone amortizing balloon period must not re-equalize onto grace periods");
+        final double totalPrincipal = repaymentPeriods.stream().mapToDouble(rp -> toDouble(rp.getDuePrincipal())).sum();
+        Assertions.assertEquals(100.0, totalPrincipal, 0.01, "All principal must still be scheduled");
+    }
+
+    /**
+     * Rate change whose related suffix is only the balloon installment (due 1 September). The last period must keep
+     * amortizing; it must not be re-marked interest-only from min(grace, suffixSize).
+     */
+    @Test
+    public void test_principalGrace_nMinus1_interestRateChangeOnBalloonPeriod_staysBullet() {
+        final ProgressiveLoanInterestScheduleModel interestSchedule = generatePrincipalGraceBulletSchedule();
+
+        emiCalculator.changeInterestRate(interestSchedule, LocalDate.of(2024, 9, 1), BigDecimal.valueOf(24));
+
+        final List<RepaymentPeriod> repaymentPeriods = interestSchedule.repaymentPeriods();
+        for (int idx = 0; idx <= 6; idx++) {
+            Assertions.assertTrue(repaymentPeriods.get(idx).isPrincipalPaymentGrace());
+            checkPeriod(interestSchedule, idx, 2.5, 2.5, 0.0, 100.0, false);
+        }
+        Assertions.assertFalse(repaymentPeriods.get(7).isPrincipalPaymentGrace(),
+                "The balloon period is outside the loan grace window and must keep amortizing");
+        Assertions.assertEquals(100.0, toDouble(repaymentPeriods.get(7).getDuePrincipal()), 0.01);
+        Assertions.assertEquals(0.0, toDouble(repaymentPeriods.get(7).getOutstandingLoanBalance()), 0.01);
+        Assertions.assertTrue(toDouble(repaymentPeriods.get(7).getDueInterest()) > 0.0);
+        Assertions.assertFalse(emiCalculator.getEmiAdjustment(repaymentPeriods).shouldBeAdjusted());
+        final double totalPrincipal = repaymentPeriods.stream().mapToDouble(rp -> toDouble(rp.getDuePrincipal())).sum();
+        Assertions.assertEquals(100.0, totalPrincipal, 0.01, "All principal must still be scheduled");
+    }
+
+    /**
+     * Mid-loan recalculation re-stamps principalPaymentGrace on the loan's grace window, not the related suffix. A
+     * later disbursement must keep periods 1..grace flagged and must not mark suffix periods as interest-only.
+     */
+    @Test
+    public void test_principalGrace_midLoanRecalc_marksLoanGraceWindowNotSuffix() {
         final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
         expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
         expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
@@ -5498,12 +5567,50 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 4, 15), toMoney(50.0));
 
         final List<RepaymentPeriod> afterSecond = interestSchedule.repaymentPeriods();
-        Assertions.assertFalse(afterSecond.get(0).isPrincipalPaymentGrace(),
-                "Period 0 is outside the mid-loan suffix and must not keep a stale grace flag");
-        Assertions.assertFalse(afterSecond.get(1).isPrincipalPaymentGrace(),
-                "Period 1 is outside the mid-loan suffix and must not keep a stale grace flag");
-        Assertions.assertFalse(afterSecond.get(2).isPrincipalPaymentGrace(),
-                "Period 2 is outside the mid-loan suffix and must not keep a stale grace flag");
+        Assertions.assertTrue(afterSecond.get(0).isPrincipalPaymentGrace(),
+                "Period 0 is in the loan grace window and must stay flagged after a mid-loan recalc");
+        Assertions.assertTrue(afterSecond.get(1).isPrincipalPaymentGrace(),
+                "Period 1 is in the loan grace window and must stay flagged after a mid-loan recalc");
+        Assertions.assertTrue(afterSecond.get(2).isPrincipalPaymentGrace(),
+                "Period 2 is in the loan grace window and must stay flagged after a mid-loan recalc");
+        for (int idx = 3; idx <= 7; idx++) {
+            Assertions.assertFalse(afterSecond.get(idx).isPrincipalPaymentGrace(),
+                    "Period " + idx + " is outside the loan grace window and must not be marked from the suffix");
+            Assertions.assertTrue(toDouble(afterSecond.get(idx).getDuePrincipal()) > 0.0,
+                    "Period " + idx + " must keep amortizing after the second disbursement");
+        }
+    }
+
+    /**
+     * Recalculation whose related suffix is no longer than graceOnPrincipalPayment must not re-mark that suffix as
+     * interest-only. N=8, grace=3, rate change on 1 July 2024 yields suffix p6/p7/p8; those periods must stay equal
+     * installments and keep amortizing.
+     */
+    @Test
+    public void test_principalGrace_interestRateChangeOnSuffixInsideGraceCount_doesNotBalloonTail() {
+        final ProgressiveLoanInterestScheduleModel interestSchedule = generatePrincipalGraceScheduleForReAmortProbe();
+
+        emiCalculator.changeInterestRate(interestSchedule, LocalDate.of(2024, 7, 1), BigDecimal.valueOf(24));
+
+        final List<RepaymentPeriod> repaymentPeriods = interestSchedule.repaymentPeriods();
+        Assertions.assertTrue(repaymentPeriods.get(0).isPrincipalPaymentGrace());
+        Assertions.assertTrue(repaymentPeriods.get(1).isPrincipalPaymentGrace());
+        Assertions.assertTrue(repaymentPeriods.get(2).isPrincipalPaymentGrace());
+        for (int idx = 3; idx <= 7; idx++) {
+            Assertions.assertFalse(repaymentPeriods.get(idx).isPrincipalPaymentGrace(),
+                    "Period " + idx + " is outside the loan grace window and must keep amortizing");
+        }
+
+        final double p6Emi = toDouble(repaymentPeriods.get(5).getEmi());
+        Assertions.assertEquals(p6Emi, toDouble(repaymentPeriods.get(6).getEmi()), 0.05,
+                "p7 EMI must stay aligned with p6 after the rate change");
+        Assertions.assertEquals(p6Emi, toDouble(repaymentPeriods.get(7).getEmi()), 0.05,
+                "p8 EMI must stay aligned with p6 after the rate change");
+        Assertions.assertTrue(toDouble(repaymentPeriods.get(5).getDuePrincipal()) > 0.0, "p6 must keep amortizing principal");
+        Assertions.assertTrue(toDouble(repaymentPeriods.get(6).getDuePrincipal()) > 0.0, "p7 must keep amortizing principal");
+        Assertions.assertTrue(toDouble(repaymentPeriods.get(7).getDuePrincipal()) > 0.0, "p8 must keep amortizing principal");
+        final double totalPrincipal = repaymentPeriods.stream().mapToDouble(rp -> toDouble(rp.getDuePrincipal())).sum();
+        Assertions.assertEquals(100.0, totalPrincipal, 0.01, "All principal must still be scheduled");
     }
 
     /**
@@ -5532,6 +5639,32 @@ class ProgressiveEMICalculatorTest {
         emiCalculator.updateModelRepaymentPeriodsDuringReAmortizationWithEqualInterestSplit(interestSchedule, LocalDate.of(2024, 2, 15));
 
         assertPrincipalGraceLiftedAndFutureEmisEqualized(interestSchedule);
+    }
+
+    private ProgressiveLoanInterestScheduleModel generatePrincipalGraceBulletSchedule() {
+        final List<LoanScheduleModelRepaymentPeriod> expectedRepaymentPeriods = new ArrayList<>();
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 2, 1), LocalDate.of(2024, 3, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 3, 1), LocalDate.of(2024, 4, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 4, 1), LocalDate.of(2024, 5, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 5, 1), LocalDate.of(2024, 6, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 7, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 7, 1), LocalDate.of(2024, 8, 1)));
+        expectedRepaymentPeriods.add(periodData(LocalDate.of(2024, 8, 1), LocalDate.of(2024, 9, 1)));
+
+        Mockito.when(loanProductRelatedDetail.getAnnualNominalInterestRate()).thenReturn(BigDecimal.valueOf(30.0));
+        Mockito.when(loanProductRelatedDetail.getDaysInYearType()).thenReturn(DaysInYearType.DAYS_360.getValue());
+        Mockito.when(loanProductRelatedDetail.getDaysInMonthType()).thenReturn(DaysInMonthType.DAYS_30.getValue());
+        Mockito.when(loanProductRelatedDetail.getRepaymentPeriodFrequencyType()).thenReturn(PeriodFrequencyType.MONTHS);
+        Mockito.when(loanProductRelatedDetail.getRepayEvery()).thenReturn(1);
+        Mockito.when(loanProductRelatedDetail.getNumberOfRepayments()).thenReturn(8);
+        Mockito.when(loanProductRelatedDetail.getGraceOnPrincipalPayment()).thenReturn(7);
+        Mockito.when(loanProductRelatedDetail.getGraceOnInterestPayment()).thenReturn(0);
+
+        final ProgressiveLoanInterestScheduleModel interestSchedule = emiCalculator
+                .generatePeriodInterestScheduleModel(expectedRepaymentPeriods, loanProductRelatedDetail, null, mc);
+        emiCalculator.addDisbursement(interestSchedule, LocalDate.of(2024, 1, 1), toMoney(100.0));
+        return interestSchedule;
     }
 
     private ProgressiveLoanInterestScheduleModel generatePrincipalGraceScheduleForReAmortProbe() {

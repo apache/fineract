@@ -1698,24 +1698,29 @@ public final class ProgressiveEMICalculator implements EMICalculator {
         if (repaymentPeriods.isEmpty()) {
             return;
         }
-        scheduleModel.repaymentPeriods().forEach(rp -> rp.setPrincipalPaymentGrace(false));
-        Integer graceOnPrincipalPayment = scheduleModel.loanProductRelatedDetail().getGraceOnPrincipalPayment();
+        final List<RepaymentPeriod> allPeriods = scheduleModel.repaymentPeriods();
+        allPeriods.forEach(rp -> rp.setPrincipalPaymentGrace(false));
+        final Integer graceOnPrincipalPayment = scheduleModel.loanProductRelatedDetail().getGraceOnPrincipalPayment();
         if (graceOnPrincipalPayment == null || graceOnPrincipalPayment <= 0) {
             return;
         }
-        int gracePeriods = Math.min(graceOnPrincipalPayment, repaymentPeriods.size());
-        List<RepaymentPeriod> gracePeriodsList = repaymentPeriods.subList(0, gracePeriods);
-        gracePeriodsList.forEach(period -> {
-            Money interestOnlyEmi = period.getDueInterest();
-            period.setEmi(interestOnlyEmi);
-            period.setOriginalEmi(interestOnlyEmi);
+        final int gracePeriods = Math.min(graceOnPrincipalPayment, allPeriods.size());
+        final LocalDate sliceFirstDueDate = repaymentPeriods.getFirst().getDueDate();
+        allPeriods.subList(0, gracePeriods).forEach(period -> {
             period.setPrincipalPaymentGrace(true);
+            // only rewrite EMI for periods inside the slice being recalculated
+            if (!period.getDueDate().isBefore(sliceFirstDueDate)) {
+                final Money interestOnlyEmi = period.getDueInterest();
+                period.setEmi(interestOnlyEmi);
+                period.setOriginalEmi(interestOnlyEmi);
+            }
         });
-        if (gracePeriods == repaymentPeriods.size()) {
+        final List<RepaymentPeriod> amortizingPeriods = repaymentPeriods.stream().filter(rp -> !rp.isPrincipalPaymentGrace()).toList();
+        if (amortizingPeriods.isEmpty()) {
             return;
         }
         calculateOutstandingBalance(scheduleModel);
-        calculateEMIOnActualModel(repaymentPeriods.subList(gracePeriods, repaymentPeriods.size()), scheduleModel);
+        calculateEMIOnActualModel(amortizingPeriods, scheduleModel);
     }
 
     private void applyInterestMoratoriumIfRequired(final ProgressiveLoanInterestScheduleModel scheduleModel) {
