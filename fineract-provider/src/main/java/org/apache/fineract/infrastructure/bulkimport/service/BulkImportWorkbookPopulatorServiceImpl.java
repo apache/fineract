@@ -70,6 +70,13 @@ import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRu
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.Page;
 import org.apache.fineract.infrastructure.core.service.SearchParameters;
+import org.apache.fineract.infrastructure.dataqueries.data.DatatableData;
+import org.apache.fineract.infrastructure.dataqueries.data.EntityTables;
+import org.apache.fineract.infrastructure.dataqueries.data.StatusEnum;
+import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecks;
+import org.apache.fineract.infrastructure.dataqueries.domain.EntityDatatableChecksRepository;
+import org.apache.fineract.infrastructure.dataqueries.service.DatatableReadService;
+import org.apache.fineract.infrastructure.dataqueries.service.EntityDatatableChecksReadService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
 import org.apache.fineract.organisation.monetary.service.CurrencyReadPlatformService;
@@ -137,6 +144,9 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final DepositProductReadPlatformService depositProductReadPlatformService;
     private final RoleReadPlatformService roleReadPlatformService;
+    private final EntityDatatableChecksReadService entityDatatableChecksReadService;
+    private final DatatableReadService datatableReadService;
+    private final EntityDatatableChecksRepository entityDatatableChecksRepository;
 
     @Autowired
     public BulkImportWorkbookPopulatorServiceImpl(final PlatformSecurityContext context,
@@ -153,7 +163,8 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
             final ShareProductReadPlatformService shareProductReadPlatformService,
             final ChargeReadPlatformService chargeReadPlatformService,
             final DepositProductReadPlatformService depositProductReadPlatformService,
-            final RoleReadPlatformService roleReadPlatformService) {
+            final RoleReadPlatformService roleReadPlatformService, final EntityDatatableChecksReadService entityDatatableChecksReadService,
+            final DatatableReadService datatableReadService, final EntityDatatableChecksRepository entityDatatableChecksRepository) {
         this.officeReadPlatformService = officeReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
         this.context = context;
@@ -173,6 +184,9 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.depositProductReadPlatformService = depositProductReadPlatformService;
         this.roleReadPlatformService = roleReadPlatformService;
+        this.entityDatatableChecksReadService = entityDatatableChecksReadService;
+        this.datatableReadService = datatableReadService;
+        this.entityDatatableChecksRepository = entityDatatableChecksRepository;
     }
 
     @Override
@@ -237,19 +251,53 @@ public class BulkImportWorkbookPopulatorServiceImpl implements BulkImportWorkboo
         List<CodeValueData> addressTypesCodeValues = fetchCodeValuesByCodeName("ADDRESS_TYPE");
         List<CodeValueData> stateProvinceCodeValues = fetchCodeValuesByCodeName("STATE");
         List<CodeValueData> countryCodeValues = fetchCodeValuesByCodeName("COUNTRY");
+
+        // Fetch required datatables for CLIENT entity with CREATE status
+        String entitySubtype = null;
+        if (entityType.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_PERSON.toString())) {
+            entitySubtype = "Person";
+        } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_ENTITY.toString())) {
+            entitySubtype = "Entity";
+        }
+        List<DatatableData> requiredDatatables = fetchRequiredDatatables(entitySubtype);
+
         if (entityType.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_PERSON.toString())) {
             List<CodeValueData> genderCodeValues = fetchCodeValuesByCodeName("Gender");
             return new ClientPersonWorkbookPopulator(new OfficeSheetPopulator(offices), new PersonnelSheetPopulator(staff, offices),
                     clientTypeCodeValues, genderCodeValues, clientClassification, addressTypesCodeValues, stateProvinceCodeValues,
-                    countryCodeValues);
+                    countryCodeValues, requiredDatatables);
         } else if (entityType.trim().equalsIgnoreCase(GlobalEntityType.CLIENTS_ENTITY.toString())) {
             List<CodeValueData> constitutionCodeValues = fetchCodeValuesByCodeName("Constitution");
             List<CodeValueData> mainBusinessline = fetchCodeValuesByCodeName("Main Business Line");
             return new ClientEntityWorkbookPopulator(new OfficeSheetPopulator(offices), new PersonnelSheetPopulator(staff, offices),
                     clientTypeCodeValues, constitutionCodeValues, mainBusinessline, clientClassification, addressTypesCodeValues,
-                    stateProvinceCodeValues, countryCodeValues);
+                    stateProvinceCodeValues, countryCodeValues, requiredDatatables);
         }
         return null;
+    }
+
+    private List<DatatableData> fetchRequiredDatatables(final String entitySubtype) {
+        List<DatatableData> requiredDatatables = new ArrayList<>();
+        // Get required datatables for CLIENT entity with CREATE status
+        List<EntityDatatableChecks> entityDatatableChecks;
+        if (entitySubtype != null) {
+            // Filter by entity subtype
+            entityDatatableChecks = entityDatatableChecksRepository.findByEntityAndStatusAndSubtype(EntityTables.CLIENT.getName(),
+                    StatusEnum.CREATE.getValue(), entitySubtype);
+        } else {
+            // Get all required datatables regardless of subtype
+            entityDatatableChecks = entityDatatableChecksRepository.findByEntityAndStatus(EntityTables.CLIENT.getName(),
+                    StatusEnum.CREATE.getValue());
+        }
+
+        // Convert EntityDatatableChecks to DatatableData
+        for (EntityDatatableChecks check : entityDatatableChecks) {
+            DatatableData datatable = datatableReadService.retrieveDatatable(check.getDatatableName());
+            if (datatable != null) {
+                requiredDatatables.add(datatable);
+            }
+        }
+        return requiredDatatables;
     }
 
     private Response buildResponse(final Workbook workbook, final String entity) {
