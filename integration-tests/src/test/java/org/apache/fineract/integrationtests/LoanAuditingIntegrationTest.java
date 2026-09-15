@@ -18,126 +18,122 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_BY;
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.CREATED_DATE;
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_BY;
-import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.fineract.client.feign.FineractFeignClient;
+import org.apache.fineract.client.models.LoanAuditFieldsData;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignLoanHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignStaffHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignUserHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.integrationtests.common.organisation.StaffHelper;
-import org.apache.fineract.integrationtests.useradministration.users.UserHelper;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanAuditingIntegrationTest {
+public class LoanAuditingIntegrationTest extends FeignLoanTestBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanAuditingIntegrationTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private AccountHelper accountHelper;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-    }
+    private static final String NEW_USER_PASSWORD = "A1b2c3d4e5f$";
 
     @Test
     public void checkAuditDates() throws InterruptedException {
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Long staffId = new FeignStaffHelper(FineractFeignClientHelper.getFineractFeignClient()).createStaff().getResourceId();
         String username = Utils.uniqueRandomStringGenerator("user", 8);
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "A1b2c3d4e5f$",
-                "resourceId");
+        final Long userId = FeignUserHelper.createUser(1L, staffId, username, NEW_USER_PASSWORD).getResourceId();
 
         LOG.info("-------------------------Creating Client---------------------------");
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
-        LOG.info("-------------------------Creating Loan---------------------------");
-        final Account assetAccount = this.accountHelper.createAssetAccount();
-        final Account incomeAccount = this.accountHelper.createIncomeAccount();
-        final Account expenseAccount = this.accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = this.accountHelper.createLiabilityAccount();
+        final Long clientId = createClient();
+        Assertions.assertNotNull(clientHelper.getClient(clientId));
 
-        final Integer loanProductID = this.loanTransactionHelper.createLoanProduct("0", "0", LoanProductTestBuilder.DEFAULT_STRATEGY, "2",
-                assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
+        LOG.info("-------------------------Creating Loan---------------------------");
+        final Long loanProductId = createLoanProduct("0", "0", LoanProductTestBuilder.DEFAULT_STRATEGY, "2");
         OffsetDateTime now = Utils.getAuditDateTimeToCompare();
 
-        final Integer loanID = this.loanTransactionHelper.applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID,
-                Collections.emptyList(), null, "10000", LoanApplicationTestBuilder.DEFAULT_STRATEGY, "10 July 2022", "11 July 2022");
-        Assertions.assertNotNull(loanID);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        final Long loanId = applyForLoanApplication(clientId, loanProductId, 10000.0, "10 July 2022", "11 July 2022");
+        Assertions.assertNotNull(loanId);
+        verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        Map<String, Object> auditFieldsResponse = LoanTransactionHelper.getLoanAuditFields(requestSpec, responseSpec, loanID, "");
+        LoanAuditFieldsData auditFieldsResponse = getAuditFields(loanId);
 
-        OffsetDateTime createdDate = OffsetDateTime.parse((String) auditFieldsResponse.get(CREATED_DATE),
-                DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        OffsetDateTime lastModifiedDate = OffsetDateTime.parse((String) auditFieldsResponse.get(LAST_MODIFIED_DATE),
-                DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        OffsetDateTime createdDate = auditFieldsResponse.getCreatedDate();
+        OffsetDateTime lastModifiedDate = auditFieldsResponse.getLastModifiedDate();
 
         LOG.info("-------------------------Check Audit dates---------------------------");
-        assertEquals(1, auditFieldsResponse.get(CREATED_BY));
-        assertEquals(1, auditFieldsResponse.get(LAST_MODIFIED_BY));
+        assertEquals(1L, auditFieldsResponse.getCreatedBy());
+        assertEquals(1L, auditFieldsResponse.getLastModifiedBy());
         assertTrue(DateUtils.isEqual(now, createdDate, ChronoUnit.MINUTES));
         assertTrue(DateUtils.isEqual(now, lastModifiedDate, ChronoUnit.MINUTES));
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
 
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization",
-                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, "A1b2c3d4e5f$"));
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        // approve as the newly created user, so the audit fields record a different last modifier
+        FineractFeignClient asNewUser = FineractFeignClientHelper.createNewFineractFeignClient(username, NEW_USER_PASSWORD);
+        FeignLoanHelper newUserLoanHelper = new FeignLoanHelper(asNewUser);
 
         OffsetDateTime now2 = Utils.getAuditDateTimeToCompare();
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan("11 July 2022", loanID);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        auditFieldsResponse = LoanTransactionHelper.getLoanAuditFields(requestSpec, responseSpec, loanID, "");
+        newUserLoanHelper.approveLoan(loanId, LoanRequestBuilders.approveLoan(10000.0, "11 July 2022"));
+        verifyLoanStatus(loanId, LoanStatus.APPROVED);
+        auditFieldsResponse = getAuditFields(loanId);
 
-        OffsetDateTime createdDate2 = OffsetDateTime.parse((String) auditFieldsResponse.get(CREATED_DATE),
-                DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        lastModifiedDate = OffsetDateTime.parse((String) auditFieldsResponse.get(LAST_MODIFIED_DATE),
-                DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        OffsetDateTime createdDate2 = auditFieldsResponse.getCreatedDate();
+        lastModifiedDate = auditFieldsResponse.getLastModifiedDate();
 
         LOG.info("-------------------------Check Audit dates---------------------------");
-        assertEquals(1, auditFieldsResponse.get(CREATED_BY));
+        assertEquals(1L, auditFieldsResponse.getCreatedBy());
         assertTrue(DateUtils.isEqual(now, createdDate2, ChronoUnit.MINUTES));
         assertTrue(DateUtils.isEqual(createdDate, createdDate2));
 
-        assertEquals(userId, auditFieldsResponse.get(LAST_MODIFIED_BY));
+        assertEquals(userId, auditFieldsResponse.getLastModifiedBy());
         assertTrue(DateUtils.isEqual(now2, lastModifiedDate, ChronoUnit.MINUTES));
+    }
+
+    private LoanAuditFieldsData getAuditFields(Long loanId) {
+        return ok(() -> fineractClient().defaultApi().getLoanAuditFields(loanId));
+    }
+
+    private Long applyForLoanApplication(final Long clientId, final Long loanProductId, Double principal, final String submittedOnDate,
+            final String disbursementDate) {
+        final PostLoansRequest application = LoanRequestBuilders.applyLoan(clientId, loanProductId, submittedOnDate, principal, 6)//
+                .expectedDisbursementDate(disbursementDate)//
+                .interestRatePerPeriod(BigDecimal.valueOf(2))//
+                .interestType(LoanTestData.InterestType.FLAT);
+        return applyForLoan(application);
+    }
+
+    private Long createLoanProduct(final String inMultiplesOf, final String digitsAfterDecimal, final String repaymentStrategy,
+            final String accountingRule) {
+        final Account assetAccount = accountHelper.createAssetAccount();
+        final Account incomeAccount = accountHelper.createIncomeAccount();
+        final Account expenseAccount = accountHelper.createExpenseAccount();
+        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+
+        return createLoanProduct(new LoanProductTestBuilder() //
+                .withPrincipal("10000000.00") //
+                .withNumberOfRepayments("24") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("2") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withRepaymentStrategy(repaymentStrategy) //
+                .withAmortizationTypeAsEqualPrincipalPayment() //
+                .withInterestTypeAsDecliningBalance() //
+                .currencyDetails(digitsAfterDecimal, inMultiplesOf)
+                .withAccounting(accountingRule, new Account[] { assetAccount, incomeAccount, expenseAccount, overpaymentAccount })
+                .buildRequest(null));
     }
 }

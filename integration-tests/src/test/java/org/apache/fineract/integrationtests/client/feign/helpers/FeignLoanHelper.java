@@ -187,6 +187,15 @@ public class FeignLoanHelper {
         return ok(() -> fineractClient.loanProducts().updateLoanProduct(productId, request));
     }
 
+    public GetLoanProductsProductIdResponse retrieveLoanProductByExternalId(String externalProductId) {
+        return ok(() -> fineractClient.loanProducts().retrieveLoanProductDetailsByExternalId(externalProductId));
+    }
+
+    public PutLoanProductsProductIdResponse updateLoanProductByExternalId(String externalProductId,
+            PutLoanProductsProductIdRequest request) {
+        return ok(() -> fineractClient.loanProducts().updateLoanProductByExternalId(externalProductId, request));
+    }
+
     public GetLoanProductsTemplateResponse getLoanProductTemplate(Boolean isProductMixTemplate) {
         return ok(() -> fineractClient.loanProducts().retrieveTemplateLoanProduct(isProductMixTemplate));
     }

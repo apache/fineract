@@ -1426,6 +1426,8 @@ public final class LoanProductsApiResourceSwagger {
         public Boolean useBorrowerCycle;
         @Schema(example = "loanProduct.active")
         public String status;
+        @Schema(example = "2075e308-d4a8-44d9-8203-f5a947b8c2f4")
+        public String externalId;
         public GetLoanProductsResponse.GetLoanProductsCurrency currency;
         @Schema(example = "10000.000000")
         public Double principal;
