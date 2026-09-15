@@ -215,11 +215,6 @@ public class LoanRepositoryWrapper {
         return loans;
     }
 
-    // This method is not used
-    public List<Long> getLoansDisbursedAfter(@Param("disbursalDate") LocalDate disbursalDate) {
-        return this.repository.getLoansDisbursedAfter(disbursalDate);
-    }
-
     // Repayments Schedule
     public List<Loan> findByClientOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
             @Param("loanStatuses") Collection<LoanStatus> loanStatuses) {
@@ -264,16 +259,8 @@ public class LoanRepositoryWrapper {
         return this.repository.findLoanByAccountNumberAndStatuses(accountNumber, NON_CLOSED_LOAN_STATUSES);
     }
 
-    public boolean existsNonClosedLoanByExternalLoanId(final ExternalId externalId) {
-        return this.repository.existsLoanByExternalLoanIdAndStatuses(externalId, NON_CLOSED_LOAN_STATUSES);
-    }
-
     public boolean existLoanByExternalId(final ExternalId externalId) {
         return this.repository.existsByExternalId(externalId);
-    }
-
-    public List<Long> findAllNonClosedLoanIds() {
-        return this.repository.findAllLoanIdsByStatuses(NON_CLOSED_LOAN_STATUSES);
     }
 
     // Looks like we need complete entity
