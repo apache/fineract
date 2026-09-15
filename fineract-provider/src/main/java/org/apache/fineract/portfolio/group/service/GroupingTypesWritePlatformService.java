@@ -20,6 +20,8 @@ package org.apache.fineract.portfolio.group.service;
 
 import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+import org.apache.fineract.portfolio.group.data.GroupCreateRequest;
+import org.apache.fineract.portfolio.group.data.GroupCreateResponse;
 
 public interface GroupingTypesWritePlatformService {
 
@@ -27,7 +29,7 @@ public interface GroupingTypesWritePlatformService {
 
     CommandProcessingResult updateCenter(Long entityId, JsonCommand command);
 
-    CommandProcessingResult createGroup(Long centerId, JsonCommand command);
+    GroupCreateResponse createGroup(GroupCreateRequest request);
 
     CommandProcessingResult activateGroupOrCenter(Long entityId, JsonCommand command);
 
