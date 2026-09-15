@@ -44,6 +44,7 @@ public enum TransactionType {
     INTEREST_REFUND("interestRefund"), //
     WRITE_OFF("writeOff"), //
     RECOVERY_REPAYMENT("recoveryRepayment"), //
+    WAIVE_CHARGES("waiveCharges"), //
     DISCOUNT_FEE("discountFee"), //
     DISCOUNT_FEE_ADJUSTMENT("discountFeeAdjustment"), //
     DISCOUNT_FEE_AMORTIZATION("discountFeeAmortization"), //

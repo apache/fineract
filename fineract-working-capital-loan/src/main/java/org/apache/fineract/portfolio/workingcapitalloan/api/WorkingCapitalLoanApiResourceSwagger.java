@@ -323,6 +323,8 @@ public final class WorkingCapitalLoanApiResourceSwagger {
             @Schema(example = "0")
             public BigDecimal amountWrittenOff;
             @Schema(example = "0")
+            public BigDecimal amountWaived;
+            @Schema(example = "0")
             public BigDecimal amountOutstanding;
             @Schema(example = "false")
             public boolean penalty;
@@ -448,6 +450,10 @@ public final class WorkingCapitalLoanApiResourceSwagger {
         public BigDecimal totalRecovered;
         @Schema(example = "8000.00", description = "Still recoverable (totalWrittenOff - totalRecovered); caps the next recovery payment")
         public BigDecimal writtenOffOutstanding;
+        @Schema(example = "0.00", description = "Fees moved out of the outstanding balance by a charge waiver")
+        public BigDecimal feeWaived;
+        @Schema(example = "0.00", description = "Penalties moved out of the outstanding balance by a charge waiver")
+        public BigDecimal penaltyWaived;
         @Schema(example = "10000.00")
         public BigDecimal realizedIncomeFromDiscountFee;
         @Schema(example = "10000.00")

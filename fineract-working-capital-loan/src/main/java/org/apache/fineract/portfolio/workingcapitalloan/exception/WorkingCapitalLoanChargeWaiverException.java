@@ -16,17 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.fineract.portfolio.workingcapitalloan.exception;
 
-package org.apache.fineract.portfolio.workingcapitalloan.service;
+import org.apache.fineract.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-import org.apache.fineract.infrastructure.core.api.JsonCommand;
-import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
+public class WorkingCapitalLoanChargeWaiverException extends AbstractPlatformDomainRuleException {
 
-public interface WorkingCapitalLoanChargeWritePlatformService {
-
-    CommandProcessingResult createLoanCharge(Long loanId, JsonCommand command);
-
-    CommandProcessingResult adjustmentForLoanCharge(Long loanId, Long wcLoanChargeId, JsonCommand command);
-
-    CommandProcessingResult waiveLoanCharge(Long loanId, Long wcLoanChargeId, JsonCommand command);
+    public WorkingCapitalLoanChargeWaiverException(final String errorCode, final String defaultUserMessage,
+            final Object... defaultUserMessageArgs) {
+        super(errorCode, defaultUserMessage, defaultUserMessageArgs);
+    }
 }
