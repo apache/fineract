@@ -73,7 +73,7 @@ class ProjectedAmortizationScheduleNormalizationTest {
     }
 
     private ProjectedAmortizationScheduleModel model(final String netDisbursement, final String discountFee, final String rate) {
-        return ProjectedAmortizationScheduleModel.generate(new BigDecimal(discountFee), new BigDecimal(netDisbursement), TPV,
+        return ProjectedAmortizationScheduleModel.generateEir(new BigDecimal(discountFee), new BigDecimal(netDisbursement), TPV,
                 new BigDecimal(rate), DAY_COUNT, DISBURSEMENT, MC, CURRENCY, DISBURSEMENT);
     }
 
