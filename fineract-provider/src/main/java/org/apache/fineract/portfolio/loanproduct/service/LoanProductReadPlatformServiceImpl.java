@@ -164,6 +164,77 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     }
 
     @Override
+    public Collection<LoanProductData> retrieveAllLoanProductsV2() {
+        this.context.authenticatedUser();
+
+        final LoanProductMapper rm = new LoanProductMapper(null, null, null, null, null, null);
+
+        String sql = "select " + rm.loanProductSchema();
+
+        final String inClause = this.fineractEntityAccessUtil
+                .getSQLWhereClauseForVisibleProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
+        if (inClause != null && !inClause.trim().isEmpty()) {
+            sql += " where lp.id in ( " + inClause + " ) ";
+        }
+
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
+    }
+
+    @Override
+    public Collection<LoanProductData> retrieveAllLoanProductsForLookupV2(final boolean activeOnly) {
+        this.context.authenticatedUser();
+
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
+
+        String sql = "select ";
+        if (activeOnly) {
+            sql += rm.activeOnlySchema();
+        } else {
+            sql += rm.schema();
+        }
+
+        final String inClause = this.fineractEntityAccessUtil
+                .getSQLWhereClauseForVisibleProductIDsForUserOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT);
+
+        if (inClause != null && !inClause.trim().isEmpty()) {
+            if (activeOnly) {
+                sql += " and lp.id in ( " + inClause + " )";
+            } else {
+                sql += " where lp.id in ( " + inClause + " ) ";
+            }
+        }
+
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
+    }
+
+    @Override
+    public Collection<LoanProductData> retrieveAllLoanProductsForLookupV2(final boolean activeOnly, final Long officeId) {
+        this.context.authenticatedUser();
+
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper(sqlGenerator);
+
+        String sql = "select ";
+        if (activeOnly) {
+            sql += rm.activeOnlySchema();
+        } else {
+            sql += rm.schema();
+        }
+
+        final String inClause = this.fineractEntityAccessUtil
+                .getSQLWhereClauseForVisibleProductIDsForOffice_ifGlobalConfigEnabled(FineractEntityType.LOAN_PRODUCT, officeId);
+
+        if (inClause != null && !inClause.trim().isEmpty()) {
+            if (activeOnly) {
+                sql += " and lp.id in ( " + inClause + " )";
+            } else {
+                sql += " where lp.id in ( " + inClause + " ) ";
+            }
+        }
+
+        return this.jdbcTemplate.query(sql, rm); // NOSONAR
+    }
+
+    @Override
     public Collection<LoanProductData> retrieveAllLoanProductsForLookup(String inClause) {
 
         this.context.authenticatedUser();
