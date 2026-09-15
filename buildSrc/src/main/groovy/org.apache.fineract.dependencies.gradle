@@ -135,7 +135,7 @@ dependencyManagement {
         dependency 'org.apache.httpcomponents.core5:httpcore5-h2:5.4'
         dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
         dependency 'jakarta.jms:jakarta.jms-api:3.1.0'
-        dependency 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
+        dependency 'jakarta.ws.rs:jakarta.ws.rs-api:4.0.0'
         dependency 'org.glassfish.jaxb:jaxb-runtime:2.3.6' // Swagger needs exactly this version
         dependency 'joda-time:joda-time:2.14.2'
 
