@@ -107,6 +107,20 @@ public class WorkingCapitalDelinquencyStepDef extends AbstractStepDef {
         log.info("Verified delinquency pause initiation failed with expected error for loan {}", loanId);
     }
 
+    @Then("Initiating a Working Capital loan delinquency pause without startDate and endDate {string} results an error with the following data:")
+    public void initiateDelinquencyPauseWithoutStartDateResultsAnError(String endDate, DataTable table) {
+        Long loanId = extractLoanId();
+
+        PostWorkingCapitalLoansDelinquencyActionRequest request = buildDelinquencyActionRequest("pause", null, endDate);
+
+        CallFailedRuntimeException exception = fail(
+                () -> fineractClient.workingCapitalLoanDelinquencyActions().createDelinquencyAction(loanId, request));
+
+        verifyDelinquencyPauseErrorWithTable(exception, table);
+
+        log.info("Verified delinquency pause without startDate failed with expected error for loan {}", loanId);
+    }
+
     @Then("Working Capital loan delinquency action has the following data:")
     public void verifyDelinquencyAction(DataTable dataTable) {
         Long loanId = extractLoanId();
