@@ -28,19 +28,24 @@ import java.util.List;
 import org.apache.fineract.accounting.common.AccountingConstants;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.ExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.ExternalAssetOwnerSearchRequest;
 import org.apache.fineract.client.models.ExternalOwnerJournalEntryData;
 import org.apache.fineract.client.models.ExternalOwnerTransferJournalEntryData;
 import org.apache.fineract.client.models.ExternalTransferData;
+import org.apache.fineract.client.models.ExternalTransferLoanProductAttributesTemplateData;
 import org.apache.fineract.client.models.ExternalTransferOwnerData;
 import org.apache.fineract.client.models.GetFinancialActivityAccountsResponse;
 import org.apache.fineract.client.models.PageExternalTransferData;
+import org.apache.fineract.client.models.PageExternalTransferLoanProductAttributesData;
 import org.apache.fineract.client.models.PagedRequestExternalAssetOwnerSearchRequest;
+import org.apache.fineract.client.models.PostExternalAssetOwnerLoanProductAttributeRequest;
 import org.apache.fineract.client.models.PostExternalAssetOwnerRequest;
 import org.apache.fineract.client.models.PostExternalAssetOwnerResponse;
 import org.apache.fineract.client.models.PostFinancialActivityAccountsRequest;
 import org.apache.fineract.client.models.PostInitiateTransferResponse;
+import org.apache.fineract.client.models.PutExternalAssetOwnerLoanProductAttributeRequest;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 
 public class FeignExternalAssetOwnerHelper {
@@ -62,6 +67,35 @@ public class FeignExternalAssetOwnerHelper {
 
     public PostExternalAssetOwnerResponse createExternalAssetOwner(PostExternalAssetOwnerRequest request) {
         return ok(() -> fineractClient.externalAssetOwners().createExternalAssetOwner(request));
+    }
+
+    public List<ExternalTransferLoanProductAttributesTemplateData> retrieveLoanProductAttributesTemplate() {
+        return ok(() -> fineractClient.externalAssetOwnerLoanProductAttributes().retrieveTemplateExternalAssetOwnerLoanProductAttributes());
+    }
+
+    public CommandProcessingResult createLoanProductAttribute(Long loanProductId, String attributeKey, String attributeValue) {
+        PostExternalAssetOwnerLoanProductAttributeRequest request = new PostExternalAssetOwnerLoanProductAttributeRequest()
+                .attributeKey(attributeKey).attributeValue(attributeValue);
+        return ok(() -> fineractClient.externalAssetOwnerLoanProductAttributes().createExternalAssetOwnerLoanProductAttribute(loanProductId,
+                request));
+    }
+
+    public CommandProcessingResult updateLoanProductAttribute(Long loanProductId, Long attributeId, String attributeKey,
+            String attributeValue) {
+        PutExternalAssetOwnerLoanProductAttributeRequest request = new PutExternalAssetOwnerLoanProductAttributeRequest()
+                .attributeKey(attributeKey).attributeValue(attributeValue);
+        return ok(() -> fineractClient.externalAssetOwnerLoanProductAttributes().updateExternalAssetOwnerLoanProductAttribute(loanProductId,
+                attributeId, request));
+    }
+
+    public CommandProcessingResult deleteLoanProductAttribute(Long loanProductId, Long attributeId) {
+        return ok(() -> fineractClient.externalAssetOwnerLoanProductAttributes().deleteExternalAssetOwnerLoanProductAttribute(loanProductId,
+                attributeId));
+    }
+
+    public PageExternalTransferLoanProductAttributesData retrieveLoanProductAttributes(Long loanProductId, String attributeKey) {
+        return ok(() -> fineractClient.externalAssetOwnerLoanProductAttributes()
+                .retrieveAllExternalAssetOwnerLoanProductAttributes(loanProductId, attributeKey));
     }
 
     public List<ExternalTransferOwnerData> retrieveExternalAssetOwners() {
