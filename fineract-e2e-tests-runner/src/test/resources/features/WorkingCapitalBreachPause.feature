@@ -954,3 +954,31 @@ Feature: Working Capital Breach Pause
       | periodNumber | fromDate   | toDate     | numberOfDays | minPaymentAmount | outstandingAmount | nearBreach | breach |
       | 1            | 2026-01-01 | 2026-01-09 | 9            | 90               | 90                | null       | null   |
     Then Admin closes the Working Capital loan with a full repayment on "04 January 2026"
+
+  Scenario: Verify working capital loan breach pause - backdated pause before an active breach reset is rejected
+    When Admin sets the business date to "01 January 2026"
+    And Admin creates a client with random data
+    And Admin creates a Working Capital Loan Product with custom breach config and overrides enabled:
+      | breachFrequency | breachFrequencyType | breachAmountCalculationType | breachAmount | delinquencyGraceDays |
+      | 6               | DAYS                | PERCENTAGE                  | 50           |                      |
+    And Admin creates a working capital loan using created product with the following data:
+      | submittedOnDate | expectedDisbursementDate | principalAmount | totalPaymentVolume | periodPaymentRate | discount |
+      | 01 January 2026 | 01 January 2026          | 800             | 10000              | 18                | 0        |
+    And Admin successfully approves the working capital loan on "01 January 2026" with "800" amount and expected disbursement date on "01 January 2026"
+    When Admin successfully disburse the Working Capital loan on "01 January 2026" with "800" EUR transaction amount
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    When Admin sets the business date to "08 January 2026"
+    And Admin runs inline COB job for Working Capital Loan by loanId
+    When Admin sets the business date to "12 January 2026"
+    And Admin creates WC breach reset action with restart period from reset date
+    # A pause backdated behind the reset would re-date the periods the reset already settled
+    Then Initiating a Working Capital loan breach pause with startDate "09 January 2026" and endDate "10 January 2026" results an error with the following data:
+      | httpCode | message                                                                  |
+      | 400      | Breach pause cannot start before the latest breach reset date: 2026-01-12 |
+    # A pause starting on the reset date itself is still allowed
+    And Admin initiate a Working Capital loan breach pause with startDate "12 January 2026" and endDate "13 January 2026"
+    Then Working Capital loan breach action has the following data:
+      | action | startDate  | endDate    |
+      | RESET  | 2026-01-12 |            |
+      | PAUSE  | 2026-01-12 | 2026-01-13 |
+    Then Admin closes the Working Capital loan with a full repayment on "12 January 2026"
