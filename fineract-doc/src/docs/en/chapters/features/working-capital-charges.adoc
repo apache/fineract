@@ -83,6 +83,7 @@ POST /working-capital-loans/{loanId}/charges
 
 * Accepts charge products with `chargeTimeType` `2` (`specified due date`) only. `dueDate` is mandatory, cannot be in the past, and the loan must be active, closed (obligations met) or overpaid.
 * A `disbursement` charge product is rejected with HTTP 403 and the error code `error.msg.wc.loan.charge.time.type.not.supported`. Nothing is persisted on the account.
+* Requires the `CREATE_WORKINGCAPITALLOANCHARGE` permission (grouping `transaction_loan`, entity `WORKINGCAPITALLOANCHARGE`, action `CREATE`).
 
 === Loan Account Charge Template
 

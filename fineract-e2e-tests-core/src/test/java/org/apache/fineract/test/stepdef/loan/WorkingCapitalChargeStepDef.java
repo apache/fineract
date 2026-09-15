@@ -52,6 +52,7 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesCha
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanChargeData;
+import org.apache.fineract.test.api.FineractClientConfiguration;
 import org.apache.fineract.test.data.ChargeCalculationType;
 import org.apache.fineract.test.data.ChargePaymentMode;
 import org.apache.fineract.test.data.ChargeProductAppliesTo;
@@ -82,6 +83,7 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     private final FineractFeignClient fineractClient;
     private final WorkingCapitalChargeRequestFactory chargeRequestFactory;
     private final ChargeProductResolver chargeProductResolver;
+    private final FineractClientConfiguration fineractClientConfiguration;
 
     @When("Admin creates working capital loan charge")
     public void createWorkingCapitalLoanCharge() {
@@ -190,18 +192,7 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         Long loanId = getLoanId();
         Assertions.assertNotNull(loanId);
 
-        ChargeProductType chargeProductType = ChargeProductType.valueOf(chargeType);
-        Long chargeTypeId = chargeProductResolver.resolve(chargeProductType);
-
-        LocalDate dueDateParsed = LocalDate.parse(dueDate, FORMATTER);
-        String dueDateFormatted = dueDateParsed.format(FORMATTER_API);
-
-        PostLoansLoanIdChargesRequest request = new PostLoansLoanIdChargesRequest() //
-                .chargeId(chargeTypeId)//
-                .amount(amount)//
-                .dueDate(dueDateFormatted)//
-                .dateFormat(DATE_FORMAT_API)//
-                .locale("en");//
+        final PostLoansLoanIdChargesRequest request = buildSpecifiedDueDateChargeRequest(chargeType, dueDate, amount);
         PostLoansLoanIdChargesResponse response = ok(() -> fineractClient.workingCapitalLoanCharges().createLoanCharge(loanId, request));
         Assertions.assertNotNull(response);
         Assertions.assertNotNull(response.getResourceId());
@@ -209,6 +200,34 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         log.debug("Charge response: {}", response);
 
         testContext().set(TestContextKey.ADD_DUE_DATE_CHARGE_WORKING_CAPITAL_RESPONSE, response);
+    }
+
+    @When("Created user adds {string} specified due date charge to working capital loan with {string} due date and {double} transaction amount")
+    public void addWorkingCapitalChargeWithCreatedUser(final String chargeType, final String dueDate, final Double amount) {
+        final Long loanId = getLoanId();
+        final PostLoansLoanIdChargesRequest request = buildSpecifiedDueDateChargeRequest(chargeType, dueDate, amount);
+        final FineractFeignClient userClient = userClient();
+        final PostLoansLoanIdChargesResponse response = ok(() -> userClient.workingCapitalLoanCharges().createLoanCharge(loanId, request));
+        Assertions.assertNotNull(response.getResourceId());
+        testContext().set(TestContextKey.ADD_DUE_DATE_CHARGE_WORKING_CAPITAL_RESPONSE, response);
+    }
+
+    private PostLoansLoanIdChargesRequest buildSpecifiedDueDateChargeRequest(final String chargeType, final String dueDate,
+            final Double amount) {
+        final Long chargeTypeId = chargeProductResolver.resolve(ChargeProductType.valueOf(chargeType));
+        final String dueDateFormatted = LocalDate.parse(dueDate, FORMATTER).format(FORMATTER_API);
+        return new PostLoansLoanIdChargesRequest() //
+                .chargeId(chargeTypeId) //
+                .amount(amount) //
+                .dueDate(dueDateFormatted) //
+                .dateFormat(DATE_FORMAT_API) //
+                .locale("en");
+    }
+
+    private FineractFeignClient userClient() {
+        final String username = testContext().get(TestContextKey.CREATED_SIMPLE_USER_USERNAME);
+        final String password = testContext().get(TestContextKey.CREATED_SIMPLE_USER_PASSWORD);
+        return fineractClientConfiguration.fineractFeignClientForUser(username, password);
     }
 
     @Then("Working Capital Loan has charges with the following data:")
@@ -668,18 +687,7 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     public void addWorkingCapitalChargeResultsAnError(final String chargeType, final String dueDate, final Double amount,
             final DataTable table) {
         final Long loanId = getLoanId();
-        final ChargeProductType chargeProductType = ChargeProductType.valueOf(chargeType);
-        final Long chargeTypeId = chargeProductResolver.resolve(chargeProductType);
-
-        final LocalDate dueDateParsed = LocalDate.parse(dueDate, FORMATTER);
-        final String dueDateFormatted = dueDateParsed.format(FORMATTER_API);
-
-        final PostLoansLoanIdChargesRequest request = new PostLoansLoanIdChargesRequest() //
-                .chargeId(chargeTypeId) //
-                .amount(amount) //
-                .dueDate(dueDateFormatted) //
-                .dateFormat(DATE_FORMAT_API) //
-                .locale("en");
+        final PostLoansLoanIdChargesRequest request = buildSpecifiedDueDateChargeRequest(chargeType, dueDate, amount);
 
         final CallFailedRuntimeException exception = fail(
                 () -> fineractClient.workingCapitalLoanCharges().createLoanCharge(loanId, request));
