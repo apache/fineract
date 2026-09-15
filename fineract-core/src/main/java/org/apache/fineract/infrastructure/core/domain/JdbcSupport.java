@@ -22,10 +22,13 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -63,6 +66,23 @@ public final class JdbcSupport {
             localTime = timeValue.toLocalDateTime().toLocalTime();
         }
         return localTime;
+    }
+
+    public static OffsetTime getOffsetTime(final ResultSet rs, final String columnName) throws SQLException {
+        final Object value = rs.getObject(columnName);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof OffsetTime offsetTime) {
+            return offsetTime;
+        }
+        if (value instanceof LocalTime localTime) {
+            return localTime.atOffset(ZoneOffset.UTC);
+        }
+        if (value instanceof Time time) {
+            return time.toLocalTime().atOffset(ZoneOffset.UTC);
+        }
+        throw new SQLException("Unsupported JDBC value type for OffsetTime: " + value.getClass().getName());
     }
 
     public static Long getLong(final ResultSet rs, final String columnName) throws SQLException {

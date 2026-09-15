@@ -34,6 +34,7 @@ public final class AccountTransfersApiConstants {
 
     // transaction parameters
     public static final String transferDateParamName = "transferDate";
+    public static final String transferTimeParamName = "transferTime";
     public static final String transferAmountParamName = "transferAmount";
     public static final String transferDescriptionParamName = "transferDescription";
     public static final String currencyParamName = "currency";
