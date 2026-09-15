@@ -19,12 +19,25 @@
 package org.apache.fineract.cob.service;
 
 import org.apache.fineract.cob.COBBusinessStep;
+import org.apache.fineract.cob.workingcapitalloan.WorkingCapitalLoanCOBConstant;
+import org.apache.fineract.cob.workingcapitalloan.businessstep.WorkingCapitalLoanCOBBusinessStep;
+import org.springframework.stereotype.Service;
 
-public interface BusinessStepCategoryService {
+@Service
+public class WorkingCapitalLoanBusinessStepCategoryServiceImpl implements BusinessStepCategoryService {
 
-    BusinessStepCategory getCategory();
+    @Override
+    public BusinessStepCategory getCategory() {
+        return BusinessStepCategory.WORKING_CAPITAL_LOAN;
+    }
 
-    String getCobJobName();
+    @Override
+    public String getCobJobName() {
+        return WorkingCapitalLoanCOBConstant.WORKING_CAPITAL_LOAN_COB_JOB_NAME;
+    }
 
-    Class<? extends COBBusinessStep<?>> getBusinessStepClass();
+    @Override
+    public Class<? extends COBBusinessStep<?>> getBusinessStepClass() {
+        return WorkingCapitalLoanCOBBusinessStep.class;
+    }
 }
