@@ -31,8 +31,6 @@ class SavingsHelperAnniversaryPostingTest {
 
     private static final Integer FINANCIAL_YEAR_BEGINNING_MONTH = 1;
 
-    private final SavingsHelper savingsHelper = new SavingsHelper(null);
-
     private static void assertPeriod(LocalDateInterval period, LocalDate expectedStart, LocalDate expectedEnd) {
         assertThat(period.startDate()).as("period start").isEqualTo(expectedStart);
         assertThat(period.endDate()).as("period end").isEqualTo(expectedEnd);
@@ -46,7 +44,7 @@ class SavingsHelperAnniversaryPostingTest {
         LocalDate start = LocalDate.of(2024, 1, 15);
         LocalDate end = LocalDate.of(2024, 3, 31);
 
-        List<LocalDateInterval> periods = savingsHelper.determineInterestPostingPeriods(start, end,
+        List<LocalDateInterval> periods = SavingsInterestCalculationUtil.determineInterestPostingPeriods(start, end,
                 SavingsPostingInterestPeriodType.ANNIVERSARY_MONTHLY, FINANCIAL_YEAR_BEGINNING_MONTH, Collections.emptyList());
 
         assertThat(periods).hasSize(3);
@@ -62,7 +60,7 @@ class SavingsHelperAnniversaryPostingTest {
         LocalDate start = LocalDate.of(2024, 1, 1);
         LocalDate end = LocalDate.of(2024, 3, 31);
 
-        List<LocalDateInterval> periods = savingsHelper.determineInterestPostingPeriods(start, end,
+        List<LocalDateInterval> periods = SavingsInterestCalculationUtil.determineInterestPostingPeriods(start, end,
                 SavingsPostingInterestPeriodType.ANNIVERSARY_MONTHLY, FINANCIAL_YEAR_BEGINNING_MONTH, Collections.emptyList());
 
         assertThat(periods).hasSize(3);
@@ -77,7 +75,7 @@ class SavingsHelperAnniversaryPostingTest {
         LocalDate start = LocalDate.of(2025, 1, 29);
         LocalDate end = LocalDate.of(2025, 4, 30);
 
-        List<LocalDateInterval> periods = savingsHelper.determineInterestPostingPeriods(start, end,
+        List<LocalDateInterval> periods = SavingsInterestCalculationUtil.determineInterestPostingPeriods(start, end,
                 SavingsPostingInterestPeriodType.ANNIVERSARY_MONTHLY, FINANCIAL_YEAR_BEGINNING_MONTH, Collections.emptyList());
 
         assertThat(periods).hasSize(4);
@@ -97,7 +95,7 @@ class SavingsHelperAnniversaryPostingTest {
         LocalDate start = LocalDate.of(2025, 1, 31);
         LocalDate end = LocalDate.of(2025, 5, 31);
 
-        List<LocalDateInterval> periods = savingsHelper.determineInterestPostingPeriods(start, end,
+        List<LocalDateInterval> periods = SavingsInterestCalculationUtil.determineInterestPostingPeriods(start, end,
                 SavingsPostingInterestPeriodType.ANNIVERSARY_MONTHLY, FINANCIAL_YEAR_BEGINNING_MONTH, Collections.emptyList());
 
         assertThat(periods).hasSize(5);
@@ -117,7 +115,7 @@ class SavingsHelperAnniversaryPostingTest {
         LocalDate start = LocalDate.of(2024, 1, 15);
         LocalDate end = LocalDate.of(2024, 12, 31);
 
-        List<LocalDateInterval> periods = savingsHelper.determineInterestPostingPeriods(start, end,
+        List<LocalDateInterval> periods = SavingsInterestCalculationUtil.determineInterestPostingPeriods(start, end,
                 SavingsPostingInterestPeriodType.ANNIVERSARY_QUARTERLY, FINANCIAL_YEAR_BEGINNING_MONTH, Collections.emptyList());
 
         assertThat(periods).hasSize(4);
@@ -134,7 +132,7 @@ class SavingsHelperAnniversaryPostingTest {
         LocalDate start = LocalDate.of(2024, 11, 29);
         LocalDate end = LocalDate.of(2025, 5, 31);
 
-        List<LocalDateInterval> periods = savingsHelper.determineInterestPostingPeriods(start, end,
+        List<LocalDateInterval> periods = SavingsInterestCalculationUtil.determineInterestPostingPeriods(start, end,
                 SavingsPostingInterestPeriodType.ANNIVERSARY_QUARTERLY, FINANCIAL_YEAR_BEGINNING_MONTH, Collections.emptyList());
 
         assertThat(periods).hasSize(3);
@@ -154,7 +152,7 @@ class SavingsHelperAnniversaryPostingTest {
         LocalDate start = LocalDate.of(2024, 1, 15);
         LocalDate end = LocalDate.of(2025, 1, 31);
 
-        List<LocalDateInterval> periods = savingsHelper.determineInterestPostingPeriods(start, end,
+        List<LocalDateInterval> periods = SavingsInterestCalculationUtil.determineInterestPostingPeriods(start, end,
                 SavingsPostingInterestPeriodType.ANNIVERSARY_BIANNUAL, FINANCIAL_YEAR_BEGINNING_MONTH, Collections.emptyList());
 
         assertThat(periods).hasSize(3);
@@ -172,7 +170,7 @@ class SavingsHelperAnniversaryPostingTest {
         LocalDate start = LocalDate.of(2024, 3, 15);
         LocalDate end = LocalDate.of(2026, 3, 31);
 
-        List<LocalDateInterval> periods = savingsHelper.determineInterestPostingPeriods(start, end,
+        List<LocalDateInterval> periods = SavingsInterestCalculationUtil.determineInterestPostingPeriods(start, end,
                 SavingsPostingInterestPeriodType.ANNIVERSARY_ANNUAL, FINANCIAL_YEAR_BEGINNING_MONTH, Collections.emptyList());
 
         assertThat(periods).hasSize(3);
@@ -188,7 +186,7 @@ class SavingsHelperAnniversaryPostingTest {
         LocalDate start = LocalDate.of(2024, 2, 29);
         LocalDate end = LocalDate.of(2026, 3, 31);
 
-        List<LocalDateInterval> periods = savingsHelper.determineInterestPostingPeriods(start, end,
+        List<LocalDateInterval> periods = SavingsInterestCalculationUtil.determineInterestPostingPeriods(start, end,
                 SavingsPostingInterestPeriodType.ANNIVERSARY_ANNUAL, FINANCIAL_YEAR_BEGINNING_MONTH, Collections.emptyList());
 
         assertThat(periods).hasSize(3);
