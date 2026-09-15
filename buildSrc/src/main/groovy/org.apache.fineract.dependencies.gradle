@@ -37,6 +37,7 @@ dependencyManagement {
         mavenBom 'io.github.resilience4j:resilience4j-bom:2.4.0'
         mavenBom 'org.testcontainers:testcontainers-bom:1.21.4'
         mavenBom 'org.glassfish.jersey:jersey-bom:3.1.11'
+        mavenBom 'org.springframework.modulith:spring-modulith-bom:1.4.11'
     }
 
     dependencies {
