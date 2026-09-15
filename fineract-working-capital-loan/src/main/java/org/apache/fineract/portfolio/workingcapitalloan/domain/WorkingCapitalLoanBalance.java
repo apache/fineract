@@ -157,15 +157,15 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
     }
 
     public BigDecimal getPrincipalOutstanding() {
-        return MathUtil.subtract(getTotalPrincipalDue(), getPrincipalPaid(), getPrincipalWrittenOff()).max(BigDecimal.ZERO);
+        return WorkingCapitalLoanOutstandingMath.bucketOutstanding(getTotalPrincipalDue(), getPrincipalPaid(), getPrincipalWrittenOff());
     }
 
     public BigDecimal getFeeOutstanding() {
-        return MathUtil.subtract(getFee(), getFeePaid(), getFeeWrittenOff()).max(BigDecimal.ZERO);
+        return WorkingCapitalLoanOutstandingMath.bucketOutstanding(getFee(), getFeePaid(), getFeeWrittenOff());
     }
 
     public BigDecimal getPenaltyOutstanding() {
-        return MathUtil.subtract(getPenalty(), getPenaltyPaid(), getPenaltyWrittenOff()).max(BigDecimal.ZERO);
+        return WorkingCapitalLoanOutstandingMath.bucketOutstanding(getPenalty(), getPenaltyPaid(), getPenaltyWrittenOff());
     }
 
     public BigDecimal getTotalOutstanding() {
@@ -186,7 +186,7 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
      * off.
      */
     public BigDecimal getWrittenOffOutstanding() {
-        return MathUtil.subtract(getTotalWrittenOff(), getTotalRecovered()).max(BigDecimal.ZERO);
+        return WorkingCapitalLoanOutstandingMath.writtenOffOutstanding(getTotalWrittenOff(), getTotalRecovered());
     }
 
     public BigDecimal getTotalExpectedRepayment() {

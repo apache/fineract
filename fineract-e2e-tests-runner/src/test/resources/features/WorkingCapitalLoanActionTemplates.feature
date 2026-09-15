@@ -85,7 +85,7 @@ Feature: Working Capital Loan Action Templates
       | WCLP        | 01 January 2026 | 15 January 2026          | 500             | 500          | 1                 | 0        |
     Then Working capital loan creation was successful
     When Admin successfully approves the working capital loan on "01 January 2026" with "500" amount and expected disbursement date on "15 January 2026"
-    When Admin retrieves the working capital loan action template with templateType "disburse"
+    When Admin retrieves the working capital loan transaction template with command "disburse"
     Then The working capital loan disburse template has the following data:
       | expectedAmount | expectedDisbursementDate | paymentTypeOptionsPresent |
       | 500            | 2026-01-15               | true                      |
@@ -99,7 +99,7 @@ Feature: Working Capital Loan Action Templates
       | WCLP        | 01 January 2026 | 15 January 2026          | 500             | 500          | 1                 | 0        |
     Then Working capital loan creation was successful
     When Admin successfully approves the working capital loan on "01 January 2026" with "300" amount and expected disbursement date on "15 January 2026"
-    When Admin retrieves the working capital loan action template with templateType "disburse"
+    When Admin retrieves the working capital loan transaction template with command "disburse"
     Then The working capital loan disburse template has the following data:
       | expectedAmount | expectedDisbursementDate | paymentTypeOptionsPresent |
       | 300            | 2026-01-15               | true                      |
