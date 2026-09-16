@@ -116,6 +116,7 @@ public final class WorkingCapitalLoanConstants {
 
     // Transaction Commands
     public static final String UNDO_COMMAND = "undo";
+    public static final String ADJUST_COMMAND = "adjust";
 
     // Period payment rate change parameters
     public static final String periodPaymentRateParamName = "periodPaymentRate";

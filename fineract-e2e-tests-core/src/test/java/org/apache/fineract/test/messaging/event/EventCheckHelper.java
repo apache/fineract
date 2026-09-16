@@ -1218,6 +1218,20 @@ public class EventCheckHelper {
                 .extractingData(WorkingCapitalLoanTransactionAdjustmentDataV1::getNewTransactionDetail).isEqualTo(null);
     }
 
+    public void workingCapitalLoanAdjustTransactionPartialEventCheck(final Long loanId, final BigDecimal newAmount,
+            final Long newTransactionId) {
+        waitForTransactionCommit();
+        final GetWorkingCapitalLoanTransactionIdResponse reversedTransaction = findLastWorkingCapitalLoanTransaction(loanId, "repayment",
+                true, "Reversed repayment transaction not found");
+        eventAssertion.assertEvent(WorkingCapitalLoanAdjustTransactionBusinessEvent.class, reversedTransaction.getId())//
+                .extractingData(data -> data.getTransactionToAdjust().getWcLoanId()).isEqualTo(loanId)//
+                .extractingData(data -> data.getTransactionToAdjust().getId()).isEqualTo(reversedTransaction.getId())//
+                .extractingData(data -> data.getTransactionToAdjust().getReversed()).isEqualTo(true)//
+                .extractingData(data -> data.getNewTransactionDetail().getId()).isEqualTo(newTransactionId)//
+                .extractingBigDecimal(data -> data.getNewTransactionDetail().getTransactionAmount()).isEqualTo(newAmount)//
+                .extractingData(data -> data.getNewTransactionDetail().getReversed()).isEqualTo(false);
+    }
+
     public void workingCapitalLoanAdjustTransactionReprocessEventCheck(final Long loanId, final String transactionType,
             final String transactionDate, final BigDecimal previousPrincipalPortion, final BigDecimal newPrincipalPortion,
             final BigDecimal previousFeeChargesPortion, final BigDecimal newFeeChargesPortion) {
