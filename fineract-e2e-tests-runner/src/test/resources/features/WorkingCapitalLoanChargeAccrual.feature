@@ -34,6 +34,8 @@ Feature: Working Capital Loan Charge Accrual
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 50.0  |        |
       | INCOME | 404007       | Fee Income              |       | 50.0   |
+    And In Working Capital Loan Transactions all transactions have non-blank external-id
+    And The Working Capital Loan "ACCRUAL" transaction is retrievable by its own external id
     When Admin sets the business date to "17 January 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital Loan has transactions:
@@ -67,6 +69,8 @@ Feature: Working Capital Loan Charge Accrual
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 30.0  |        |
       | INCOME | 404007       | Fee Income              |       | 30.0   |
+    And In Working Capital Loan Transactions all transactions have non-blank external-id
+    And The Working Capital Loan "ACCRUAL" transaction is retrievable by its own external id
     When Admin sets the business date to "11 February 2026"
     And Admin runs inline COB job for Working Capital Loan by loanId
     Then Working Capital Loan has transactions:
@@ -535,6 +539,8 @@ Feature: Working Capital Loan Charge Accrual
       | Type   | Account code | Account name            | Debit | Credit |
       | ASSET  | 112603       | Interest/Fee Receivable | 100.0 |        |
       | INCOME | 404007       | Fee Income              |       | 100.0  |
+    And In Working Capital Loan Transactions all transactions have non-blank external-id
+    And The Working Capital Loan "ACCRUAL" transaction is retrievable by its own external id
 
   @TestRailId:C85644
   Scenario: Verify closure does not duplicate the accrual when the charge was already accrued in real time under submitted-date
