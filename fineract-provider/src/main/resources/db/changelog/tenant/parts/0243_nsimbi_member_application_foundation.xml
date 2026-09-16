@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements. See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership. The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License. You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied. See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+    <changeSet author="nsimbi" id="create-member-application">
+        <createTable tableName="nsimbi_member_application">
+            <column name="id" type="BIGINT" autoIncrement="true"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="client_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="channel" type="VARCHAR(20)"><constraints nullable="false"/></column>
+            <column name="workflow_status" type="VARCHAR(40)"><constraints nullable="false"/></column>
+            <column name="maker_appuser_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="checker_appuser_id" type="BIGINT"/>
+            <!-- TODO: Define agency-reference idempotency/uniqueness together with agency identity in a later integration slice. -->
+            <column name="agency_reference" type="VARCHAR(100)"/>
+            <column name="submitted_on" type="TIMESTAMP"/>
+            <column name="review_started_on" type="TIMESTAMP"/>
+            <column name="decided_on" type="TIMESTAMP"/>
+            <column name="decision_reason" type="VARCHAR(500)"/>
+            <column name="version" type="BIGINT" defaultValueNumeric="0"><constraints nullable="false"/></column>
+            <column name="created_on" type="TIMESTAMP"><constraints nullable="false"/></column>
+            <column name="last_modified_on" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="nsimbi" id="constrain-member-application">
+        <addUniqueConstraint tableName="nsimbi_member_application" columnNames="client_id" constraintName="uk_nsimbi_member_application_client"/>
+        <addForeignKeyConstraint baseTableName="nsimbi_member_application" baseColumnNames="client_id" constraintName="fk_nsimbi_member_application_client" referencedTableName="m_client" referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="nsimbi_member_application" baseColumnNames="maker_appuser_id" constraintName="fk_nsimbi_member_application_maker" referencedTableName="m_appuser" referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="nsimbi_member_application" baseColumnNames="checker_appuser_id" constraintName="fk_nsimbi_member_application_checker" referencedTableName="m_appuser" referencedColumnNames="id"/>
+    </changeSet>
+    <changeSet author="nsimbi" id="index-member-application">
+        <createIndex tableName="nsimbi_member_application" indexName="idx_nsimbi_member_application_status"><column name="workflow_status"/></createIndex>
+        <createIndex tableName="nsimbi_member_application" indexName="idx_nsimbi_member_application_agency"><column name="agency_reference"/></createIndex>
+    </changeSet>
+    <changeSet author="nsimbi" id="add-member-application-permissions">
+        <insert tableName="m_permission">
+            <column name="grouping" value="nsimbi_members"/>
+            <column name="code" value="CREATE_MEMBER_APPLICATION"/>
+            <column name="entity_name" value="MEMBERAPPLICATION"/>
+            <column name="action_name" value="CREATE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="nsimbi_members"/>
+            <column name="code" value="SUBMIT_MEMBER_APPLICATION"/>
+            <column name="entity_name" value="MEMBERAPPLICATION"/>
+            <column name="action_name" value="SUBMIT"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="nsimbi_members"/>
+            <column name="code" value="REVIEW_MEMBER_APPLICATION"/>
+            <column name="entity_name" value="MEMBERAPPLICATION"/>
+            <column name="action_name" value="REVIEW"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="nsimbi_members"/>
+            <column name="code" value="APPROVE_MEMBER_APPLICATION"/>
+            <column name="entity_name" value="MEMBERAPPLICATION"/>
+            <column name="action_name" value="APPROVE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="nsimbi_members"/>
+            <column name="code" value="REJECT_MEMBER_APPLICATION"/>
+            <column name="entity_name" value="MEMBERAPPLICATION"/>
+            <column name="action_name" value="REJECT"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+        <insert tableName="m_permission">
+            <column name="grouping" value="nsimbi_members"/>
+            <column name="code" value="WITHDRAW_MEMBER_APPLICATION"/>
+            <column name="entity_name" value="MEMBERAPPLICATION"/>
+            <column name="action_name" value="WITHDRAW"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

@@ -25,4 +25,5 @@
     <include file="parts/0146_add_final_constraints.xml" relativeToChangelogFile="true"/>
     <include file="parts/0241_set_datetime_precision.xml" relativeToChangelogFile="true"/>
     <include file="parts/0242_nsimbi_user_roles_foundation.xml" relativeToChangelogFile="true"/>
+    <include file="parts/0243_nsimbi_member_application_foundation.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>
