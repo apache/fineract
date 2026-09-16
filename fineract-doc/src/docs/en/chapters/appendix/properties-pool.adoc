@@ -1,5 +1,10 @@
 = Hikari Connection Pool Properties
 
+Size the effective tenant connection pool together with scheduler concurrency.
+Jobs such as Pay Due Savings Charges use `REQUIRES_NEW` transactions: if an enclosing transaction retains a connection, the inner transaction needs another connection from the same pool.
+For `N` concurrent callers each holding one connection and requesting one more, at least `N + 1` connections are needed to avoid pool locking from this pattern alone.
+Allow additional capacity for other database activity and verify sizing under representative concurrent load; a one-connection pool cannot support this nested-transaction case.
+
 .Hikari Connection Pool Properties
 |===
 |Name |Env Variable |Default Value |Description

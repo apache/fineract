@@ -52,6 +52,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdStatus;
 import org.apache.fineract.client.models.GetLoansLoanIdSummary;
 import org.apache.fineract.client.models.GetStandingInstructionHistoryPageItemsResponse;
 import org.apache.fineract.client.models.GetStandingInstructionsStandingInstructionIdResponse;
+import org.apache.fineract.client.models.JobDetailHistoryDataSwagger;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostFixedDepositAccountsRequest;
 import org.apache.fineract.client.models.PostFixedDepositProductsRequest;
@@ -460,43 +461,74 @@ public class SchedulerJobsTestResults extends FeignLoanTestBase {
     }
 
     @Test
-    public void testApplyDueFeeChargesForSavingsJobOutcome() throws InterruptedException {
-        final Long clientID = clientHelper.createClient();
-        Assertions.assertNotNull(clientID);
+    public void testApplyDueFeeChargesForSavingsJobOutcome() {
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2013, 3, 25));
+            final Long clientID = clientHelper.createClient();
+            final Long partiallyFundedProductID = createSavingsProduct("250");
+            final Long fundedProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE);
+            final Long partiallyFundedSavingsId = savingsHelper
+                    .submitApplication(clientID, partiallyFundedProductID, SAVINGS_SUBMITTED_DATE).getSavingsId();
+            final Long fundedSavingsId = savingsHelper.submitApplication(clientID, fundedProductID, SAVINGS_SUBMITTED_DATE).getSavingsId();
 
-        final Long savingsProductID = createSavingsProduct(MINIMUM_OPENING_BALANCE);
-        Assertions.assertNotNull(savingsProductID);
+            final Long weeklyChargeDefinitionId = chargesHelper.createCharge(SavingsRequestBuilders.savingsWeeklyFeeCharge())
+                    .getResourceId();
+            final Long specifiedDueDateChargeDefinitionId = chargesHelper
+                    .createCharge(SavingsRequestBuilders.savingsSpecifiedDueDateCharge()).getResourceId();
+            final Long recurringChargeId = savingsChargeHelper
+                    .addChargeToSavings(partiallyFundedSavingsId, savingsChargeWithDueDate(weeklyChargeDefinitionId)).getResourceId();
+            final Long fundedChargeId = savingsChargeHelper
+                    .addChargeToSavings(fundedSavingsId, savingsChargeWithDueDate(specifiedDueDateChargeDefinitionId)).getResourceId();
 
-        final Long savingsId = savingsHelper.submitApplication(clientID, savingsProductID, SAVINGS_SUBMITTED_DATE).getSavingsId();
-        Assertions.assertNotNull(savingsProductID);
+            savingsHelper.approveSavings(partiallyFundedSavingsId, SAVINGS_APPROVED_DATE);
+            savingsHelper.approveSavings(fundedSavingsId, SAVINGS_APPROVED_DATE);
+            savingsHelper.activateSavings(partiallyFundedSavingsId, SAVINGS_ACTIVATED_DATE);
+            savingsHelper.activateSavings(fundedSavingsId, SAVINGS_ACTIVATED_DATE);
 
-        SavingsTestValidators.verifySavingsIsPending(savingsHelper.getSavingsStatus(savingsId));
+            LocalDate expectedRecurringDueDate = savingsHelper.getSavingsAccountCharges(partiallyFundedSavingsId).stream()
+                    .filter(charge -> recurringChargeId.equals(charge.getId())).findFirst().orElseThrow().getDueDate().plusWeeks(2);
+            int partialTransactionsBefore = savingsHelper.getSavingsDetails(partiallyFundedSavingsId, "transactions").getTransactions()
+                    .size();
+            int fundedTransactionsBefore = savingsHelper.getSavingsDetails(fundedSavingsId, "transactions").getTransactions().size();
 
-        final Long specifiedDueDateChargeId = chargesHelper.createCharge(SavingsRequestBuilders.savingsSpecifiedDueDateCharge())
-                .getResourceId();
-        Assertions.assertNotNull(specifiedDueDateChargeId);
+            String jobName = "Pay Due Savings Charges";
+            JobDetailHistoryDataSwagger firstRun = SchedulerJobHelper.executeAndAwaitJobWithResult(jobName);
 
-        savingsChargeHelper.addChargeToSavings(savingsId, savingsChargeWithDueDate(specifiedDueDateChargeId));
-        Assertions.assertEquals(1, savingsHelper.getSavingsCharges(savingsId).size());
+            Assertions.assertEquals("success", firstRun.getStatus());
 
-        savingsHelper.approveSavings(savingsId, SAVINGS_APPROVED_DATE);
-        SavingsTestValidators.verifySavingsIsApproved(savingsHelper.getSavingsStatus(savingsId));
+            var recurringChargeAfter = savingsHelper.getSavingsAccountCharges(partiallyFundedSavingsId).stream()
+                    .filter(charge -> recurringChargeId.equals(charge.getId())).findFirst().orElseThrow();
+            var fundedChargeAfter = savingsHelper.getSavingsAccountCharges(fundedSavingsId).stream()
+                    .filter(charge -> fundedChargeId.equals(charge.getId())).findFirst().orElseThrow();
+            int partialTransactionsAfter = savingsHelper.getSavingsDetails(partiallyFundedSavingsId, "transactions").getTransactions()
+                    .size();
+            int fundedTransactionsAfter = savingsHelper.getSavingsDetails(fundedSavingsId, "transactions").getTransactions().size();
 
-        savingsHelper.activateSavings(savingsId, SAVINGS_ACTIVATED_DATE);
-        SavingsTestValidators.verifySavingsIsActive(savingsHelper.getSavingsStatus(savingsId));
+            assertThat(savingsHelper.getSavingsSummary(partiallyFundedSavingsId).getAccountBalance()).isEqualByComparingTo("50");
+            assertThat(recurringChargeAfter.getAmountPaid()).isEqualByComparingTo("200");
+            assertThat(recurringChargeAfter.getAmountOutstanding()).isEqualByComparingTo("100");
+            Assertions.assertEquals(expectedRecurringDueDate, recurringChargeAfter.getDueDate());
+            Assertions.assertEquals(partialTransactionsBefore + 2, partialTransactionsAfter);
 
-        BigDecimal balanceBefore = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
+            assertThat(savingsHelper.getSavingsSummary(fundedSavingsId).getAccountBalance()).isEqualByComparingTo("900");
+            assertThat(fundedChargeAfter.getAmountPaid()).isEqualByComparingTo("100");
+            assertThat(fundedChargeAfter.getAmountOutstanding()).isEqualByComparingTo("0");
+            Assertions.assertEquals(fundedTransactionsBefore + 1, fundedTransactionsAfter);
 
-        String JobName = "Pay Due Savings Charges";
+            JobDetailHistoryDataSwagger secondRun = SchedulerJobHelper.executeAndAwaitJobWithResult(jobName);
 
-        SchedulerJobHelper.executeAndAwaitJob(JobName);
-        BigDecimal balanceAfter = savingsHelper.getSavingsSummary(savingsId).getAccountBalance();
-
-        final BigDecimal chargeAmount = BigDecimal.valueOf(chargesHelper.getCharge(specifiedDueDateChargeId).getAmount());
-
-        final BigDecimal balance = balanceBefore.subtract(chargeAmount);
-
-        assertAmount(balance, balanceAfter, "Verifying the Balance after running Pay due Savings Charges");
+            Assertions.assertEquals("success", secondRun.getStatus());
+            assertThat(savingsHelper.getSavingsSummary(partiallyFundedSavingsId).getAccountBalance()).isEqualByComparingTo("50");
+            Assertions.assertEquals(partialTransactionsAfter,
+                    savingsHelper.getSavingsDetails(partiallyFundedSavingsId, "transactions").getTransactions().size());
+            Assertions.assertEquals(fundedTransactionsAfter,
+                    savingsHelper.getSavingsDetails(fundedSavingsId, "transactions").getTransactions().size());
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
     }
 
     @Test
