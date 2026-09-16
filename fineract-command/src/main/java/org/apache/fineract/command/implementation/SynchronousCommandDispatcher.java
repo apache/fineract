@@ -19,11 +19,13 @@
 package org.apache.fineract.command.implementation;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.fineract.command.core.CommandState.PROCESSED;
 
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.command.core.CommandHandlerManager;
 import org.apache.fineract.command.core.CommandHookManager;
@@ -43,17 +45,28 @@ public class SynchronousCommandDispatcher implements CommandDispatcher {
     public <REQ, RES> Supplier<RES> dispatch(final Command<REQ> command) {
         requireNonNull(command, "Command must not be null");
 
+        final var ctx = CommandContext.<REQ, RES>builder().command(command).build();
+
         return () -> {
             try {
-                hookManager.before(command);
+                hookManager.before(ctx);
+
+                if (ctx.isSkipExecution()) {
+                    return ctx.getResponse();
+                }
 
                 RES response = handlerManager.handle(command);
 
-                hookManager.after(command, response);
+                ctx.setResponse(response);
+                ctx.setState(PROCESSED);
 
-                return response;
+                hookManager.after(ctx);
+
+                return ctx.getResponse();
             } catch (Exception e) {
-                hookManager.error(command, e);
+                ctx.setError(e);
+
+                hookManager.error(ctx);
 
                 throw e;
             }

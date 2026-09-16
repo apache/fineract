@@ -21,7 +21,6 @@ package org.apache.fineract.template.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.command.jdbc.store.mapping.CommandMapper;
 import org.apache.fineract.template.data.TemplateCreateRequest;
 import org.apache.fineract.template.data.TemplateCreateResponse;
 import org.apache.fineract.template.data.TemplateData;
@@ -46,8 +45,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @ConditionalOnMissingBean(value = TemplateDomainService.class, ignored = TemplateDomainServiceImpl.class)
 public class TemplateDomainServiceImpl implements TemplateDomainService {
-
-    private final CommandMapper commandMapper;
 
     private final TemplateRepository templateRepository;
     private final TemplateMapper templateMapper;

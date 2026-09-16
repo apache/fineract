@@ -19,7 +19,9 @@
 package org.apache.fineract.command.async.implementation;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.apache.fineract.command.async.AsyncCommandConstants.COMMAND_ASYNC_PROPERTY_ENABLED;
+import static org.apache.fineract.command.core.CommandState.PROCESSED;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -27,7 +29,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.command.async.AsyncCommandProperties;
 import org.apache.fineract.command.core.Command;
+import org.apache.fineract.command.core.CommandContext;
 import org.apache.fineract.command.core.CommandDispatcher;
 import org.apache.fineract.command.core.CommandHandlerManager;
 import org.apache.fineract.command.core.CommandHookManager;
@@ -38,34 +42,45 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-@ConditionalOnProperty(value = "fineract.command.async.enabled", havingValue = "true")
+@ConditionalOnProperty(value = COMMAND_ASYNC_PROPERTY_ENABLED, havingValue = "true")
 public class AsyncCommandDispatcher implements CommandDispatcher {
 
     private final CommandHandlerManager handlerManager;
     private final CommandHookManager hookManager;
+    private final AsyncCommandProperties properties;
 
     @Override
     public <REQ, RES> Supplier<RES> dispatch(final Command<REQ> command) {
         requireNonNull(command, "Command must not be null");
 
+        final var ctx = CommandContext.<REQ, RES>builder().command(command).build();
+
         CompletableFuture<RES> future = CompletableFuture.supplyAsync(() -> {
-            hookManager.before(command);
+            hookManager.before(ctx);
+
+            if (ctx.isSkipExecution()) {
+                return ctx.getResponse();
+            }
 
             RES response = handlerManager.handle(command);
 
-            hookManager.after(command, response);
+            ctx.setResponse(response);
+            ctx.setState(PROCESSED);
 
-            return response;
+            hookManager.after(ctx);
+
+            return ctx.getResponse();
         }).whenComplete((response, t) -> {
             if (t != null) {
-                hookManager.error(command, t);
+                ctx.setError(t);
+
+                hookManager.error(ctx);
             }
         });
 
         return () -> {
             try {
-                // TODO: make this configurable
-                return future.get(3, SECONDS);
+                return future.get(properties.getTimeout().toMillis(), MILLISECONDS);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 throw new RuntimeException(e);
             }

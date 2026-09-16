@@ -20,17 +20,15 @@ package org.apache.fineract.command.core;
 
 public interface CommandStore {
 
-    <T> T getRequestById(Long id);
+    Command<Object> getById(Long id);
 
-    <T> T getResponseById(Long id);
+    Command<Object> getByKey(String key);
 
-    CommandState getStateById(Long id);
+    boolean existsByKey(String key);
 
-    <T> T getRequestByKey(String key);
+    boolean checkRequestInstanceByKey(String key, Class<?> clazz);
 
     <T> T getResponseByKey(String key);
 
-    CommandState getStateByKey(String key);
-
-    void store(Command<?> command, Object response, CommandState state);
+    void store(CommandContext<?, ?> ctx);
 }

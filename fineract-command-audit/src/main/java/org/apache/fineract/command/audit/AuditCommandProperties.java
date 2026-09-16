@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.command.audit;
 
+import static org.apache.fineract.command.audit.AuditCommandConstants.COMMAND_AUDIT_PROPERTIES_PREFIX;
+
 import java.io.Serial;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
@@ -32,12 +34,18 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
-@ConfigurationProperties(prefix = "fineract.command.audit")
+@ConfigurationProperties(prefix = COMMAND_AUDIT_PROPERTIES_PREFIX)
 public final class AuditCommandProperties implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     @Builder.Default
-    private Boolean enabled = false;
+    private Boolean enabled = true;
+    @Builder.Default
+    private Boolean hookPreEnabled = true;
+    @Builder.Default
+    private Boolean hookPostEnabled = true;
+    @Builder.Default
+    private Boolean hookErrorEnabled = true;
 }
