@@ -458,8 +458,10 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("loanId", loanId);
         paramMap.put("chargeAppliesTo", ChargeAppliesTo.WORKING_CAPITAL_LOAN.getValue());
+        paramMap.put("chargeTimeTypes", ChargeTimeType.validWorkingCapitalLoanAccountValues());
         String sql = "select " + rm.chargeSchema() + " join m_wc_loan la on la.currency_code = c.currency_code" + " where la.id=:loanId"
-                + " and c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=:chargeAppliesTo ";
+                + " and c.is_deleted=false and c.is_active=true and c.charge_applies_to_enum=:chargeAppliesTo"
+                + " and c.charge_time_enum in (:chargeTimeTypes) ";
         sql += addInClauseToSQL_toLimitChargesMappedToOffice_ifOfficeSpecificProductsEnabled();
         sql += " order by c.name ";
         return this.namedParameterJdbcTemplate.query(sql, paramMap, rm);

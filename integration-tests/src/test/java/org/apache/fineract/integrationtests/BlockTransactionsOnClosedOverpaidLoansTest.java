@@ -18,143 +18,100 @@
  */
 package org.apache.fineract.integrationtests;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.ArrayList;
-import java.util.HashMap;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
+import java.math.BigDecimal;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetLoansLoanIdStatus;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
+import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@Slf4j
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class BlockTransactionsOnClosedOverpaidLoansTest {
+public class BlockTransactionsOnClosedOverpaidLoansTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private LoanTransactionHelper loanTransactionHelperForError;
-    private GlobalConfigurationHelper globalConfigurationHelper;
-    private AccountHelper accountHelper;
-    private ResponseSpecification responseSpecForError;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecForError = new ResponseSpecBuilder().expectStatusCode(403).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelperForError = new LoanTransactionHelper(this.requestSpec, this.responseSpecForError);
-        this.globalConfigurationHelper = new GlobalConfigurationHelper();
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-    }
+    private static final String BLOCK_TRANSACTIONS_CONFIGURATION = "block-transactions-on-closed-overpaid-loans";
+    private static final String BLOCKED_ERROR = "error.msg.loan.transaction.not.allowed.on.closed.or.overpaid";
 
     @AfterEach
     public void tearDown() {
-        this.globalConfigurationHelper.manageConfigurations("block-transactions-on-closed-overpaid-loans", false);
+        globalConfigurationHelper.manageConfigurations(BLOCK_TRANSACTIONS_CONFIGURATION, false);
     }
 
     @Test
     public void testTransactionsOnOverpaidLoan() {
-        this.globalConfigurationHelper.manageConfigurations("block-transactions-on-closed-overpaid-loans", true);
+        globalConfigurationHelper.manageConfigurations(BLOCK_TRANSACTIONS_CONFIGURATION, true);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Long clientId = createClient();
+        assertEquals(clientId, clientHelper.getClient(clientId).getId(), "ERROR IN CREATING THE CLIENT");
 
-        final Integer loanProductID = createLoanProduct();
-        final Integer loanID = createLoanApplication(clientID, loanProductID, "1000", "01 January 2024");
+        final Long loanProductId = createLoanProduct();
+        final Long loanId = createLoanApplication(clientId, loanProductId, 1000.0, "01 January 2024");
 
-        this.loanTransactionHelper.approveLoan("01 January 2024", loanID);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("01 January 2024", loanID, "1000");
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 January 2024"));
+        disburseLoan(loanId, "01 January 2024", 1000.0);
 
-        this.loanTransactionHelper.makeRepayment("01 February 2024", 2000.0f, loanID);
+        makeLoanRepayment(loanId, repaymentOf("01 February 2024", 2000.0));
+        verifyLoanStatus(getLoanDetails(loanId), GetLoansLoanIdStatus::getOverpaid);
 
-        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID,
-                "status");
-        LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
+        assertBlockedForClosedOrOverpaid("repayment", loanId, "02 February 2024", 10.0);
+        assertBlockedForClosedOrOverpaid("goodwillCredit", loanId, "02 February 2024", 10.0);
+        assertBlockedForClosedOrOverpaid("merchantIssuedRefund", loanId, "02 February 2024", 10.0);
+        assertBlockedForClosedOrOverpaid("payoutRefund", loanId, "02 February 2024", 10.0);
+        assertBlockedForClosedOrOverpaid("waiveinterest", loanId, "02 February 2024", 10.0);
 
-        ArrayList<HashMap> repaymentErrors = (ArrayList<HashMap>) this.loanTransactionHelperForError.makeRepaymentTypePayment("repayment",
-                "02 February 2024", 10.0f, loanID, CommonConstants.RESPONSE_ERROR);
-        Assertions.assertEquals("error.msg.loan.transaction.not.allowed.on.closed.or.overpaid",
-                repaymentErrors.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-        assertBlockedForClosedOrOverpaid("goodwillCredit", loanID, "02 February 2024", 10.0f);
-        assertBlockedForClosedOrOverpaid("merchantIssuedRefund", loanID, "02 February 2024", 10.0f);
-        assertBlockedForClosedOrOverpaid("payoutRefund", loanID, "02 February 2024", 10.0f);
-        assertBlockedForClosedOrOverpaid("waiveinterest", loanID, "02 February 2024", 10.0f);
-
-        Float totalOverpaid = (Float) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID,
-                "totalOverpaid");
+        final BigDecimal totalOverpaid = getLoanDetails(loanId).getTotalOverpaid();
         assertNotNull(totalOverpaid);
-        Assertions.assertTrue(totalOverpaid > 0);
+        assertTrue(totalOverpaid.compareTo(BigDecimal.ZERO) > 0);
 
-        this.loanTransactionHelper.creditBalanceRefund("03 February 2024", totalOverpaid, null, loanID, "");
+        makeCreditBalanceRefund(loanId, repaymentOf("03 February 2024", totalOverpaid.doubleValue()));
 
-        loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID, "status");
-        LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
+        verifyLoanStatus(getLoanDetails(loanId), GetLoansLoanIdStatus::getClosed);
     }
 
     @Test
     public void testTransactionsOnClosedLoan() {
-        this.globalConfigurationHelper.manageConfigurations("block-transactions-on-closed-overpaid-loans", true);
+        globalConfigurationHelper.manageConfigurations(BLOCK_TRANSACTIONS_CONFIGURATION, true);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        final Integer loanProductID = createLoanProduct();
-        final Integer loanID = createLoanApplication(clientID, loanProductID, "1000", "01 January 2024");
+        final Long clientId = createClient();
+        final Long loanProductId = createLoanProduct();
+        final Long loanId = createLoanApplication(clientId, loanProductId, 1000.0, "01 January 2024");
 
-        this.loanTransactionHelper.approveLoan("01 January 2024", loanID);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("01 January 2024", loanID, "1000");
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "01 January 2024"));
+        disburseLoan(loanId, "01 January 2024", 1000.0);
 
-        HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, loanID);
-        Float totalOutstanding = (Float) loanSummary.get("totalOutstanding");
-        HashMap repaymentTransaction = this.loanTransactionHelper.makeRepayment("01 February 2024", totalOutstanding, loanID);
-        Integer repaymentTransactionId = ((Number) repaymentTransaction.get("resourceId")).intValue();
+        final Double totalOutstanding = getLoanDetails(loanId).getSummary().getTotalOutstanding().doubleValue();
+        final PostLoansLoanIdTransactionsResponse repayment = makeLoanRepayment(loanId, repaymentOf("01 February 2024", totalOutstanding));
 
-        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanID,
-                "status");
-        LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
+        verifyLoanStatus(getLoanDetails(loanId), GetLoansLoanIdStatus::getClosed);
 
-        ArrayList<HashMap> repaymentErrors = (ArrayList<HashMap>) this.loanTransactionHelperForError.makeRepaymentTypePayment("repayment",
-                "02 February 2024", 10.0f, loanID, CommonConstants.RESPONSE_ERROR);
-        Assertions.assertEquals("error.msg.loan.transaction.not.allowed.on.closed.or.overpaid",
-                repaymentErrors.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+        assertBlockedForClosedOrOverpaid("repayment", loanId, "02 February 2024", 10.0);
 
-        this.loanTransactionHelper.reverseRepayment(loanID, repaymentTransactionId, "03 February 2024");
+        reverseRepayment(loanId, repayment.getResourceId(), "03 February 2024");
 
-        this.globalConfigurationHelper.manageConfigurations("block-transactions-on-closed-overpaid-loans", false);
-        this.loanTransactionHelper.makeRepayment("04 February 2024", 10.0f, loanID);
+        globalConfigurationHelper.manageConfigurations(BLOCK_TRANSACTIONS_CONFIGURATION, false);
+        makeLoanRepayment(loanId, repaymentOf("04 February 2024", 10.0));
     }
 
-    private void assertBlockedForClosedOrOverpaid(final String command, final Integer loanId, final String date, final Float amount) {
-        ArrayList<HashMap> errors = (ArrayList<HashMap>) this.loanTransactionHelperForError.makeRepaymentTypePayment(command, date, amount,
-                loanId, CommonConstants.RESPONSE_ERROR);
-        Assertions.assertEquals("error.msg.loan.transaction.not.allowed.on.closed.or.overpaid",
-                errors.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+    private void assertBlockedForClosedOrOverpaid(final String command, final Long loanId, final String date, final Double amount) {
+        final CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> makeLoanRepayment(loanId, command, date, amount));
+        assertEquals(403, exception.getStatus());
+        assertErrorGlobalisationCode(exception, BLOCKED_ERROR);
     }
 
-    private Integer createLoanProduct() {
-        final String principal = "1000.00";
-        LoanProductTestBuilder loanProductTestBuilder = new LoanProductTestBuilder() //
-                .withPrincipal(principal) //
+    private Long createLoanProduct() {
+        return createLoanProduct(new LoanProductTestBuilder() //
+                .withPrincipal("1000.00") //
                 .withShortName(Utils.uniqueRandomStringGenerator("", 4)) //
                 .withNumberOfRepayments("4") //
                 .withRepaymentAfterEvery("1") //
@@ -162,27 +119,18 @@ public class BlockTransactionsOnClosedOverpaidLoansTest {
                 .withinterestRatePerPeriod("1") //
                 .withInterestRateFrequencyTypeAsMonths() //
                 .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance();
-
-        final String loanProductJSON = loanProductTestBuilder.build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+                .withInterestTypeAsDecliningBalance() //
+                .buildRequest(null));
     }
 
-    private Integer createLoanApplication(final Integer clientID, final Integer loanProductID, String principal, String submitDate) {
-        final String loanApplicationJSON = new LoanApplicationTestBuilder() //
-                .withPrincipal(principal) //
-                .withLoanTermFrequency("4") //
-                .withLoanTermFrequencyAsMonths() //
-                .withNumberOfRepayments("4") //
-                .withRepaymentEveryAfter("1") //
-                .withRepaymentFrequencyTypeAsMonths() //
-                .withInterestRatePerPeriod("1") //
-                .withAmortizationTypeAsEqualInstallments() //
-                .withInterestTypeAsDecliningBalance() //
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
-                .withExpectedDisbursementDate(submitDate) //
-                .withSubmittedOnDate(submitDate) //
-                .build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+    private Long createLoanApplication(final Long clientId, final Long loanProductId, final Double principal, final String submitDate) {
+        final PostLoansRequest application = LoanRequestBuilders.applyLoan(clientId, loanProductId, submitDate, principal, 4)//
+                .interestRatePerPeriod(BigDecimal.ONE);
+        return loanHelper.applyForLoan(application).getLoanId();
+    }
+
+    private PostLoansLoanIdTransactionsRequest repaymentOf(final String transactionDate, final Double amount) {
+        return new PostLoansLoanIdTransactionsRequest().dateFormat(LoanTestData.DATETIME_PATTERN).transactionDate(transactionDate)
+                .locale(LoanTestData.LOCALE).transactionAmount(amount);
     }
 }

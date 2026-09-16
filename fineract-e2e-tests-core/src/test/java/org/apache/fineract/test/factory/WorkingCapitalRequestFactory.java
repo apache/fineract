@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.test.factory;
 
+import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.apache.fineract.test.data.DaysInYearType.DAYS365;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.CURRENCY_CODE;
 import static org.apache.fineract.test.factory.LoanProductsRequestFactory.CURRENCY_CODE_USD;
@@ -34,6 +35,8 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.DelinquencyBucketRequest;
+import org.apache.fineract.client.models.DelinquencyBucketResponse;
+import org.apache.fineract.client.models.DelinquencyRangeResponse;
 import org.apache.fineract.client.models.MinimumPaymentPeriodAndRule;
 import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostAllowAttributeOverrides;
@@ -272,11 +275,26 @@ public class WorkingCapitalRequestFactory {
         return paymentAllocationData;
     }
 
+    /**
+     * Delinquency range ids are environment specific (the global initializer creates the ranges, partly in parallel),
+     * so custom WC buckets reuse the ranges of the seeded {@link DelinquencyBucket#WC_DELINQUENCY_BUCKET} (D00..D270)
+     * instead of a hardcoded id. This keeps delinquency tag classifications (e.g. D00 for 1-30 days) deterministic.
+     */
+    public List<Long> seededWorkingCapitalDelinquencyRangeIds() {
+        final long seededBucketId = delinquencyBucketResolver.resolve(DelinquencyBucket.WC_DELINQUENCY_BUCKET);
+        final DelinquencyBucketResponse seededBucket = ok(
+                () -> fineractClient.delinquencyRangeAndBucketsManagement().getBucket(seededBucketId));
+        if (seededBucket.getRanges() == null || seededBucket.getRanges().isEmpty()) {
+            throw new IllegalStateException("Seeded WC delinquency bucket has no ranges");
+        }
+        return seededBucket.getRanges().stream().map(DelinquencyRangeResponse::getId).toList();
+    }
+
     public DelinquencyBucketRequest defaultWorkingCapitalDelinquencyBucketRequest() {
         return new DelinquencyBucketRequest() //
                 .name("DB-WCL-" + Utils.randomStringGenerator(8)) //
                 .bucketType(DelinquencyBucketType.WORKING_CAPITAL.name())//
-                .ranges(List.of(1L)) //
+                .ranges(seededWorkingCapitalDelinquencyRangeIds()) //
                 .minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule() //
                         .frequency(1) //
                         .minimumPaymentType(DelinquencyMinimumPayment.PERCENTAGE.name()) //

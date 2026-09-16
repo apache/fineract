@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership. The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License. You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied. See the License for the
+    specific language governing permissions and limitations
+    under the License.
+
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Permissions for the Working Capital Loan transaction commands -->
+    <changeSet author="fineract" id="wcl-0075-1">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'REPAYMENT_WORKINGCAPITALLOAN';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="transaction_loan"/>
+            <column name="code" value="REPAYMENT_WORKINGCAPITALLOAN"/>
+            <column name="entity_name" value="WORKINGCAPITALLOAN"/>
+            <column name="action_name" value="REPAYMENT"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <!-- The remaining transaction commands dispatched by WorkingCapitalLoanTransactionsApiResource, so that
+         they can be granted to a role the same way as the repayment above -->
+    <changeSet author="fineract" id="wcl-0075-2">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'CREDITBALANCEREFUND_WORKINGCAPITALLOAN';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="transaction_loan"/>
+            <column name="code" value="CREDITBALANCEREFUND_WORKINGCAPITALLOAN"/>
+            <column name="entity_name" value="WORKINGCAPITALLOAN"/>
+            <column name="action_name" value="CREDITBALANCEREFUND"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0075-3">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'PAYOUTREFUND_WORKINGCAPITALLOAN';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="transaction_loan"/>
+            <column name="code" value="PAYOUTREFUND_WORKINGCAPITALLOAN"/>
+            <column name="entity_name" value="WORKINGCAPITALLOAN"/>
+            <column name="action_name" value="PAYOUTREFUND"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0075-4">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'GOODWILLCREDIT_WORKINGCAPITALLOAN';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="transaction_loan"/>
+            <column name="code" value="GOODWILLCREDIT_WORKINGCAPITALLOAN"/>
+            <column name="entity_name" value="WORKINGCAPITALLOAN"/>
+            <column name="action_name" value="GOODWILLCREDIT"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0075-5">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DISCOUNTFEE_WORKINGCAPITALLOAN';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="transaction_loan"/>
+            <column name="code" value="DISCOUNTFEE_WORKINGCAPITALLOAN"/>
+            <column name="entity_name" value="WORKINGCAPITALLOAN"/>
+            <column name="action_name" value="DISCOUNTFEE"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="fineract" id="wcl-0075-6">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM m_permission WHERE code = 'DISCOUNTFEEADJUSTMENT_WORKINGCAPITALLOAN';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="m_permission">
+            <column name="grouping" value="transaction_loan"/>
+            <column name="code" value="DISCOUNTFEEADJUSTMENT_WORKINGCAPITALLOAN"/>
+            <column name="entity_name" value="WORKINGCAPITALLOAN"/>
+            <column name="action_name" value="DISCOUNTFEEADJUSTMENT"/>
+            <column name="can_maker_checker" valueBoolean="false"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

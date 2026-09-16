@@ -1,5 +1,5 @@
 @WorkingCapital
-@WorkingCapitalDelinquencyDisableFeature @WCCOBFeature
+@WorkingCapitalDelinquencyDisableFeature
 Feature: Working Capital Delinquency Disable
 
   @TestRailId:C89757

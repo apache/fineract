@@ -36,10 +36,11 @@ import org.apache.fineract.infrastructure.core.domain.AbstractPersistableCustom;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -54,40 +55,52 @@ public class COBBusinessStepServiceImpl implements COBBusinessStepService {
 
     private final ReloaderService reloaderService;
 
-    @SuppressWarnings({ "unchecked" })
     @Override
+    // Spring Batch 6's ChunkOrientedStep submits item processing to the step's task executor. The
+    // chunk transaction is bound to the step thread and wraps only the write phase, so with a task
+    // executor in play processItem() would run on a pool thread with NO transaction. The business
+    // steps below write to the DB, so processing needs a transaction of its own.
+    //
+    // The COB worker steps therefore register no task executor at all, and there is no configuration to change
+    // that: processing stays on the step thread and REQUIRED joins the chunk transaction exactly as it did under
+    // Batch 5.
+    //
+    // Were an executor ever reintroduced, this would open a NEW transaction per item on the worker thread, which
+    // commits independently of the chunk write - so a chunk-write rollback, a skip in scan mode, or a step restart
+    // would leave those process-time writes committed while the loan is not marked COB'd, and the next pass would
+    // re-run the business steps over it. Do not reintroduce one until FINERACT-2684 establishes that the business
+    // steps are idempotent under a second pass.
+    //
+    // This annotation is load-bearing even without an executor: Batch 6 swallows a skipped process failure instead
+    // of rethrowing (Batch 5's FaultTolerantChunkProcessor rolled back by default), so the participating-transaction
+    // rollback marking it produces is what stops a mid-chain failure from half-committing. Do not remove it.
+    @Transactional
     public <T extends COBBusinessStep<S>, S extends AbstractPersistableCustom<Long>> S run(TreeMap<Long, String> executionMap, S item) {
         if (executionMap == null || executionMap.isEmpty()) {
             throw new BusinessStepException("Execution map is empty! COB Business step execution skipped!");
         }
-        boolean bulkEventEnabled = configurationDomainService.isCOBBulkEventEnabled();
-        // Extra safety net to avoid event leaking
-        try {
-            if (bulkEventEnabled) {
-                businessEventNotifierService.startExternalEventRecording();
-            }
+        if (!configurationDomainService.isCOBBulkEventEnabled()) {
+            return executeBusinessSteps(executionMap, item);
+        }
+        // Everything the chain raises - including any recording window a business step opens of its own - reaches the
+        // consumer as a single bulk event.
+        return businessEventNotifierService.withExternalEventRecording(() -> executeBusinessSteps(executionMap, item));
+    }
 
-            for (String businessStep : executionMap.values()) {
-                try {
-                    ThreadLocalContextUtil.setActionContext(ActionContext.COB);
-                    COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
-                    item = reloaderService.reload(item);
-                    item = businessStepBean.execute(item);
-                } catch (Exception e) {
-                    throw new BusinessStepException("Error happened during business step execution", e);
-                } finally {
-                    // Fallback to COB action context after each business step
-                    ThreadLocalContextUtil.setActionContext(ActionContext.COB);
-                }
+    @SuppressWarnings({ "unchecked" })
+    private <S extends AbstractPersistableCustom<Long>> S executeBusinessSteps(TreeMap<Long, String> executionMap, S item) {
+        for (String businessStep : executionMap.values()) {
+            try {
+                ThreadLocalContextUtil.setActionContext(ActionContext.COB);
+                COBBusinessStep<S> businessStepBean = (COBBusinessStep<S>) applicationContext.getBean(businessStep);
+                item = reloaderService.reload(item);
+                item = businessStepBean.execute(item);
+            } catch (Exception e) {
+                throw new BusinessStepException("Error happened during business step execution", e);
+            } finally {
+                // Fallback to COB action context after each business step
+                ThreadLocalContextUtil.setActionContext(ActionContext.COB);
             }
-            if (bulkEventEnabled) {
-                businessEventNotifierService.stopExternalEventRecording();
-            }
-        } catch (Exception e) {
-            if (bulkEventEnabled) {
-                businessEventNotifierService.resetEventRecording();
-            }
-            throw e;
         }
         return item;
     }

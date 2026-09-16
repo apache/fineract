@@ -38,6 +38,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanR
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeSchedule;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeScheduleTagHistory;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransactionFinder;
 import org.apache.fineract.portfolio.workingcapitalloan.mapper.WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryMapper;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
@@ -55,6 +56,7 @@ public class WorkingCapitalLoanDelinquencyReadPlatformServiceImpl implements Wor
     private final WorkingCapitalLoanDelinquencyRangeScheduleTagHistoryRepository delinquencyRangeScheduleTagHistoryRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleRepository delinquencyRangeScheduleRepository;
     private final WorkingCapitalLoanDelinquencyActionRepository delinquencyActionRepository;
+    private final WorkingCapitalLoanTransactionFinder transactionFinder;
 
     @Override
     public WorkingCapitalLoanCollectionData getCollectionData(Long loanId, LocalDate businessDate) {
@@ -82,6 +84,18 @@ public class WorkingCapitalLoanDelinquencyReadPlatformServiceImpl implements Wor
 
         template.setInstallmentLevelDelinquency(list);
         template.setDelinquencyPausePeriods(retrieveDelinquencyPausePeriods(loanId, businessDate));
+
+        // Unlike everything above, the last payment / repayment are not evaluated as of businessDate: they answer
+        // "when was this loan last paid" over the whole ledger, the way Loan#getLastPaymentTransaction() does for
+        // core loans, rather than describing the delinquency picture on a given day.
+        transactionFinder.findLastPayment(loanId).ifPresent(lastPayment -> {
+            template.setLastPaymentDate(lastPayment.transactionDate());
+            template.setLastPaymentAmount(lastPayment.transactionAmount());
+        });
+        transactionFinder.findLastRepayment(loanId).ifPresent(lastRepayment -> {
+            template.setLastRepaymentDate(lastRepayment.transactionDate());
+            template.setLastRepaymentAmount(lastRepayment.transactionAmount());
+        });
 
         return template;
     }

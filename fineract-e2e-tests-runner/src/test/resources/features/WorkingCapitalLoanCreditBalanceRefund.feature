@@ -599,7 +599,11 @@ Feature: Working Capital Loan Credit Balance Refund
       | 05 January 2026 | Repayment             | 9100.0            | 8800.0           | 0.0               | 0.0                   | false    |
       | 10 January 2026 | Credit Balance Refund | 300.0             | 0.0              | 0.0               | 0.0                   | false    |
     And Customer undo "1"th "REPAYMENT" transaction made on "02 January 2026" on Working Capital loan
-    Then Working Capital loan status will be "ACTIVE"
+    # The replay leaves only 9000 repaid, so 200 of the refund loses its overpayment backing and becomes due principal
+    Then a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "05 January 2026" with principal portion changed from "8800.0" to "9000.0" and fee portion changed from "0.0" to "0.0"
+    And a Working Capital Loan Adjust Transaction business event is raised for the "creditBalanceRefund" transaction on "10 January 2026" with principal portion changed from "0.0" to "200.0" and fee portion changed from "0.0" to "0.0"
+    And a Working Capital Loan Adjust Transaction business event is raised for the reversed "repayment" transaction
+    And Working Capital loan status will be "ACTIVE"
     And Working capital loan account has the correct data:
       | principal | totalPaidPrincipal | realizedIncome | unrealizedIncome | overpaymentAmount |
       | 9200.0    | 9000.0             | 0.0            | 0.0              | 0.0               |

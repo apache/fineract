@@ -16,7 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import javax.inject.Inject
 import org.gradle.api.artifacts.component.ProjectComponentIdentifier
+import org.gradle.process.ExecOperations
+
+// Gradle 9 removed Project.javaexec(); ExecOperations is the supported replacement inside task actions.
+interface StaticWeavingExecOperations {
+    @Inject
+    ExecOperations getExecOperations()
+}
 
 private static List<String> findJpaManagedClasses(Project moduleProject) {
     File sourceRoot = moduleProject.file('src/main/java')
@@ -158,30 +166,33 @@ project.afterEvaluate {
         }
     }
 
+    def execOperations = objects.newInstance(StaticWeavingExecOperations).execOperations
+    def weavingClasspath = project.sourceSets.main.runtimeClasspath
+    def projectName = project.name
+
     tasks.named('compileJava') {
         dependsOn(generateStaticWeavingPersistenceXml)
 
         doLast {
             File persistenceXml = generatedPersistenceXml.get().asFile
             if (!persistenceXml.exists()) {
-                logger.info("No generated persistence.xml found for ${project.name}, skipping static weaving")
+                logger.info("No generated persistence.xml found for ${projectName}, skipping static weaving")
                 return
             }
 
             File source = destinationDirectory.get().asFile
             File weavingRoot = persistenceXml.parentFile.parentFile
 
-            project.javaexec {
-                description = 'Performs EclipseLink static weaving of entity classes'
+            execOperations.javaexec {
                 mainClass.set('org.eclipse.persistence.tools.weaving.jpa.StaticWeave')
-                classpath = project.sourceSets.main.runtimeClasspath
+                classpath = weavingClasspath
                 args = [
                     '-persistenceinfo',
                     weavingRoot.absolutePath,
                     source.absolutePath,
                     source.absolutePath
                 ]
-            }
+            }.assertNormalExitValue()
         }
     }
 

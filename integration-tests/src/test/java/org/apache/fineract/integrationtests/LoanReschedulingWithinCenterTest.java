@@ -55,7 +55,6 @@ import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.CalendarHelper;
 import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.BeforeAll;
@@ -132,7 +131,7 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
                 LoanProductTestBuilder.INTEREST_APPLICABLE_STRATEGY_ON_PRE_CLOSE_DATE, isMultiTrancheLoan);
 
         Long loanId = applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductId, disbursalDate,
-                recalculationRestFrequencyDate, LoanApplicationTestBuilder.RBI_INDIA_STRATEGY, collaterals);
+                recalculationRestFrequencyDate, LoanProductTestBuilder.RBI_INDIA_STRATEGY, collaterals);
 
         assertNotNull(loanId);
         verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
@@ -213,7 +212,7 @@ public class LoanReschedulingWithinCenterTest extends FeignLoanTestBase {
         collaterals.add(collateral(clientCollateralId, BigDecimal.valueOf(1)));
 
         Long loanId = applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductId, disbursementDate,
-                recalculationRestFrequencyDate, LoanApplicationTestBuilder.RBI_INDIA_STRATEGY, createTranches, collaterals);
+                recalculationRestFrequencyDate, LoanProductTestBuilder.RBI_INDIA_STRATEGY, createTranches, collaterals);
 
         verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 

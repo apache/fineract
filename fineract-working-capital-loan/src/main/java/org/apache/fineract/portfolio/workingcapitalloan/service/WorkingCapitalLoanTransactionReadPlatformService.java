@@ -18,15 +18,32 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
+import java.time.LocalDate;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanCommandTemplateData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionData;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanTransactionTemplateData;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface WorkingCapitalLoanTransactionReadPlatformService {
 
-    WorkingCapitalLoanCommandTemplateData retrieveLoanTransactionTemplate(Long loanId, String command);
+    /**
+     * Template for loan approval - the one loan action that posts no transaction. Returns {@code null} for anything
+     * else, which the API resource turns into an unrecognized-command error.
+     */
+    WorkingCapitalLoanCommandTemplateData retrieveLoanActionTemplate(Long loanId, String command);
+
+    /**
+     * Template for one transaction command - disbursement, repayment, goodwill credit, credit balance refund, recovery
+     * payment, discount fee, discount fee adjustment, charge-off or prepayment. Returns {@code null} for anything else,
+     * which the API resource turns into an unrecognized-command error.
+     *
+     * @param transactionDate
+     *            the date the caller intends to transact on; only the prepayment quote carries it back, and commands
+     *            that default a date of their own use the business date when it is {@code null}.
+     */
+    WorkingCapitalLoanTransactionTemplateData retrieveTransactionTemplate(Long loanId, String command, LocalDate transactionDate);
 
     /**
      * Retrieves paginated transactions of a Working Capital Loan by loan id.

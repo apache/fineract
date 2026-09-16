@@ -76,7 +76,7 @@ public class AuditsApiResource {
         context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSIONS);
         final PaginationParameters parameters = PaginationParameters.builder().paged(Boolean.TRUE.equals(paged)).limit(limit).offset(offset)
                 .orderBy(orderBy).sortOrder(sortOrder).build();
-        final SQLBuilder extraCriteria = getExtraCriteria(auditRequest);
+        final SQLBuilder extraCriteria = auditReadPlatformService.getExtraCriteria(auditRequest);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         return toApiJsonSerializer.serialize(parameters.isPaged()
@@ -105,55 +105,4 @@ public class AuditsApiResource {
         return this.auditReadPlatformService.retrieveSearchTemplate("audit");
     }
 
-    private SQLBuilder getExtraCriteria(AuditRequest auditRequest) {
-
-        SQLBuilder extraCriteria = new SQLBuilder();
-        extraCriteria.addNonNullCriteria("aud.action_name = ", auditRequest.getActionName());
-        if (auditRequest.getEntityName() != null) {
-            extraCriteria.addCriteria("aud.entity_name like", auditRequest.getEntityName() + "%");
-        }
-        extraCriteria.addNonNullCriteria("aud.resource_id = ", auditRequest.getResourceId());
-        extraCriteria.addNonNullCriteria("aud.maker_id = ", auditRequest.getMakerId());
-        extraCriteria.addNonNullCriteria("aud.checker_id = ", auditRequest.getCheckerId());
-        if (auditRequest.getMakerDateTimeFrom() != null) {
-            extraCriteria.addSubOperation((SQLBuilder criteria) -> {
-                criteria.addNonNullCriteria("aud.made_on_date >= ", auditRequest.getMakerDateTimeFrom(),
-                        SQLBuilder.WhereLogicalOperator.NONE);
-                criteria.addNonNullCriteria("aud.made_on_date_utc >= ", auditRequest.getMakerDateTimeFrom(),
-                        SQLBuilder.WhereLogicalOperator.OR);
-            });
-        }
-        if (auditRequest.getMakerDateTimeTo() != null) {
-            extraCriteria.addSubOperation((SQLBuilder criteria) -> {
-                criteria.addNonNullCriteria("aud.made_on_date <= ", auditRequest.getMakerDateTimeTo(),
-                        SQLBuilder.WhereLogicalOperator.NONE);
-                criteria.addNonNullCriteria("aud.made_on_date_utc <= ", auditRequest.getMakerDateTimeTo(),
-                        SQLBuilder.WhereLogicalOperator.OR);
-            });
-        }
-        if (auditRequest.getCheckerDateTimeFrom() != null) {
-            extraCriteria.addSubOperation((SQLBuilder criteria) -> {
-                criteria.addNonNullCriteria("aud.checked_on_date >= ", auditRequest.getCheckerDateTimeFrom(),
-                        SQLBuilder.WhereLogicalOperator.NONE);
-                criteria.addNonNullCriteria("aud.checked_on_date_utc >= ", auditRequest.getCheckerDateTimeFrom(),
-                        SQLBuilder.WhereLogicalOperator.OR);
-            });
-        }
-        if (auditRequest.getCheckerDateTimeTo() != null) {
-            extraCriteria.addSubOperation((SQLBuilder criteria) -> {
-                criteria.addNonNullCriteria("aud.checked_on_date <= ", auditRequest.getCheckerDateTimeTo(),
-                        SQLBuilder.WhereLogicalOperator.NONE);
-                criteria.addNonNullCriteria("aud.checked_on_date_utc <= ", auditRequest.getCheckerDateTimeTo(),
-                        SQLBuilder.WhereLogicalOperator.OR);
-            });
-        }
-        extraCriteria.addNonNullCriteria("aud.status = ", auditRequest.getStatus());
-        extraCriteria.addNonNullCriteria("aud.office_id = ", auditRequest.getOfficeId());
-        extraCriteria.addNonNullCriteria("aud.group_id = ", auditRequest.getGroupId());
-        extraCriteria.addNonNullCriteria("aud.client_id = ", auditRequest.getClientId());
-        extraCriteria.addNonNullCriteria("aud.loan_id = ", auditRequest.getLoanId());
-        extraCriteria.addNonNullCriteria("aud.savings_account_id = ", auditRequest.getSavingsAccountId());
-
-        return extraCriteria;
-    }
 }

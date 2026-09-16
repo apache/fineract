@@ -36,7 +36,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanFraudChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanNotFoundException;
@@ -63,7 +62,7 @@ public class WorkingCapitalLoanFraudWriteServiceImpl implements WorkingCapitalLo
         // A loan can only be marked as fraud while it is active. Clearing the flag and idempotent re-marks are
         // allowed regardless of status.
         final boolean markingAsFraud = fraud && !loan.isFraud();
-        if (markingAsFraud && loan.getLoanStatus() != LoanStatus.ACTIVE) {
+        if (markingAsFraud && !loan.isOpen()) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.mark.as.fraud.not.allowed",
                     "Marking a loan as fraud is allowed only for active loans", "loanStatus");
         }

@@ -30,6 +30,8 @@ import java.util.Comparator;
 import java.util.List;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
+import org.apache.fineract.client.models.ProjectedAmortizationScheduleData;
+import org.apache.fineract.client.models.ProjectedAmortizationSchedulePaymentData;
 import org.apache.fineract.client.models.WorkingCapitalLoanPeriodPaymentRateChangeData;
 import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
 import org.apache.fineract.integrationtests.client.feign.helpers.FeignBusinessDateHelper;
@@ -161,6 +163,67 @@ public class FeignWorkingCapitalLoanRateChangeTest extends FeignIntegrationTest 
             assertFalse(history.get(0).getReversed(), "Rate change effective 09 January should be active");
             assertFalse(history.get(1).getReversed(), "Rate change effective 01 January should stay active on its own date");
         });
+    }
+
+    /**
+     * Two changes booked a day apart can end up governing the same day of the schedule, and the one booked later must
+     * win.
+     *
+     * <p>
+     * Which calendar day the schedule starts on depends on whether anything was repaid on the disbursement date: with a
+     * repayment there the first instalment falls on the disbursement date itself, without one it falls the day after.
+     * So undoing such a repayment shifts every day of the schedule back by one, and a change effective on the
+     * disbursement date no longer has a day of its own - it lands on the first instalment, alongside the change
+     * effective the day after it.
+     *
+     * <p>
+     * The day must bill the rate in force on it, which is the later of the two. Taking the earlier one instead would
+     * have a superseded rate govern the first day and the live one start a day late, and since the schedule ahead is
+     * solved from the first day's balance, that re-prices every day after it rather than just the one.
+     */
+    @Test
+    void testRateChangesOnConsecutiveDaysCollapsingOntoOneKeepTheRateBookedLater() {
+        businessDateHelper.runAt("2026-01-01", () -> {
+            final Long clientForTest = clientHelper.createClient("01 January 2026");
+            final Long loanId = createAndDisburseLoanOnDate(clientForTest, BigDecimal.valueOf(9000), BigDecimal.valueOf(18),
+                    "01 January 2026");
+
+            // A repayment on the disbursement date is what puts the first instalment on that date.
+            final Long disbursementDateRepayment = wcLoanHelper.makeRepayment(loanId,
+                    WorkingCapitalLoanRequestBuilders.repayment(BigDecimal.valueOf(50), "01 January 2026"));
+            wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(15), "01 January 2026"));
+
+            businessDateHelper.updateBusinessDate("BUSINESS_DATE", "2026-01-02");
+            wcLoanHelper.updateRate(loanId, WorkingCapitalLoanRequestBuilders.updateRate(BigDecimal.valueOf(13), "02 January 2026"));
+
+            // While the repayment stands the two changes have a day each: rate 15 bills 41.67, rate 13 bills 36.11.
+            final List<ProjectedAmortizationSchedulePaymentData> before = instalments(wcLoanHelper.getAmortizationSchedule(loanId));
+            assertEquals(LocalDate.of(2026, 1, 1), before.getFirst().getPaymentDate(),
+                    "A repayment on the disbursement date puts the first instalment on that date");
+            assertEquals(0, new BigDecimal("41.67").compareTo(before.getFirst().getExpectedPaymentAmount()),
+                    "The first day bills the rate effective on the disbursement date");
+            assertEquals(0, new BigDecimal("36.11").compareTo(before.get(1).getExpectedPaymentAmount()),
+                    "The second day bills the rate effective the day after it");
+
+            wcLoanHelper.undoTransaction(loanId, disbursementDateRepayment, WorkingCapitalLoanRequestBuilders.undoTransaction());
+
+            assertEquals(2, wcLoanHelper.getRateChangeHistory(loanId).size(), "Undoing a repayment must not discard either change");
+            assertEquals(0, BigDecimal.valueOf(13).compareTo(rateInEffectOn(loanId, LocalDate.of(2026, 1, 2))),
+                    "The later change is still the one in force");
+
+            final List<ProjectedAmortizationSchedulePaymentData> after = instalments(wcLoanHelper.getAmortizationSchedule(loanId));
+            assertEquals(LocalDate.of(2026, 1, 2), after.getFirst().getPaymentDate(),
+                    "With nothing repaid on the disbursement date the first instalment falls the day after it");
+            assertEquals(0, new BigDecimal("36.11").compareTo(after.getFirst().getExpectedPaymentAmount()),
+                    "The first day must bill the rate booked later, not the one it superseded");
+            assertEquals(0, new BigDecimal("36.11").compareTo(after.get(1).getExpectedPaymentAmount()),
+                    "And it must go on billing it, rather than starting a day late");
+        });
+    }
+
+    private static List<ProjectedAmortizationSchedulePaymentData> instalments(final ProjectedAmortizationScheduleData schedule) {
+        assertNotNull(schedule.getPayments(), "The schedule has no payments");
+        return schedule.getPayments().stream().filter(row -> row.getPaymentNo() != null && row.getPaymentNo() > 0).toList();
     }
 
     /**

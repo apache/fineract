@@ -23,4 +23,6 @@ import org.apache.fineract.infrastructure.event.business.domain.BusinessEvent;
 public interface ExternalBusinessEventConfigurationService {
 
     boolean isExternalEventConfiguredForPosting(BusinessEvent<?> businessEvent);
+
+    boolean isExternalEventTypeConfiguredForPosting(String eventType);
 }

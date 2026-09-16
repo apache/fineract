@@ -30,7 +30,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +48,6 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyPauseUtils;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyRangeScheduleEvaluationUtils;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanPausePeriodUtils;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyRangeScheduleRepository;
@@ -180,12 +178,26 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
                 resume -> !pause.getStartDate().isAfter(resume.getStartDate()) && !resume.getStartDate().isAfter(pause.getEndDate()));
     }
 
-    private void validatePause(final WorkingCapitalLoanDelinquencyAction action, final WorkingCapitalLoan workingCapitalLoan,
+    void validatePause(final WorkingCapitalLoanDelinquencyAction action, final WorkingCapitalLoan workingCapitalLoan,
             final List<WorkingCapitalLoanDelinquencyAction> existing, final DataValidatorBuilder dataValidator) {
         validateBothDatesProvided(action, dataValidator);
         validateStartBeforeEnd(action, dataValidator);
         validateNotBeforeDisbursement(action, workingCapitalLoan, dataValidator);
         validateNoOverlap(action, existing, dataValidator);
+        validateNotBeforeReset(action, existing, dataValidator);
+    }
+
+    private void validateNotBeforeReset(WorkingCapitalLoanDelinquencyAction action, List<WorkingCapitalLoanDelinquencyAction> existing,
+            DataValidatorBuilder dataValidator) {
+        if (action.getStartDate() == null) {
+            // start date is mandatory if it is missing, validator already should fail properly.
+            return;
+        }
+        existing.stream()
+                .filter(existingAction -> existingAction.getAction().equals(DelinquencyAction.RESET) && existingAction.getEndDate() == null
+                        && existingAction.getStartDate().isAfter(action.getStartDate()))
+                .findAny().ifPresent(existingAction -> failParameterValidation(dataValidator, START_DATE, "reset.exists.after.pause",
+                        "Delinquency pause cannot start before the latest delinquency reset date: " + existingAction.getStartDate()));
     }
 
     private void validateResume(final WorkingCapitalLoanDelinquencyAction action, final List<WorkingCapitalLoanDelinquencyAction> existing,
@@ -378,7 +390,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
     }
 
     private void validateLoanIsActive(final WorkingCapitalLoan workingCapitalLoan, final DataValidatorBuilder dataValidator) {
-        if (!workingCapitalLoan.getLoanStatus().isActive()) {
+        if (!workingCapitalLoan.isOpen()) {
             failGeneralValidation(dataValidator, "invalid.loan.state",
                     "Delinquency actions can be created only for active Working Capital loans.");
         }
@@ -394,9 +406,7 @@ public class WorkingCapitalLoanDelinquencyActionParseAndValidator extends ParseA
     }
 
     private void validateLoanIsDisbursed(final WorkingCapitalLoan workingCapitalLoan, final DataValidatorBuilder dataValidator) {
-        final boolean isDisbursed = workingCapitalLoan.getDisbursementDetails().stream()
-                .map(WorkingCapitalLoanDisbursementDetails::getActualDisbursementDate).anyMatch(Objects::nonNull);
-        if (!isDisbursed) {
+        if (workingCapitalLoan.isNotDisbursed()) {
             failGeneralValidation(dataValidator, "loan.not.disbursed", "Reschedule action requires the loan to be disbursed.");
         }
     }

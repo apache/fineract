@@ -18,15 +18,12 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.util.Deque;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachSchedule;
-import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -34,43 +31,40 @@ import org.springframework.stereotype.Service;
 @Service
 public class WorkingCapitalLoanBreachResetServiceImpl implements WorkingCapitalLoanBreachResetService {
 
-    private final WorkingCapitalLoanBreachScheduleRepository breachScheduleRepository;
     private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
+    private final WorkingCapitalLoanActiveBreachResetResolver activeBreachResetResolver;
 
     @Override
     public void resetBreach(final WorkingCapitalLoan loan, final WorkingCapitalLoanBreachAction resetAction) {
-        final LocalDate actionDate = resetAction.getStartDate();
-        if (actionDate == null) {
+        if (resetAction.getStartDate() == null) {
             return;
         }
-
-        final List<WorkingCapitalLoanBreachSchedule> periods = breachScheduleRepository.findByLoanIdOrderByPeriodNumberAsc(loan.getId());
-        if (Boolean.TRUE.equals(resetAction.getRestartPeriodFromResetDate()) && !periods.isEmpty()
-                && !periods.getLast().getFromDate().isEqual(actionDate)) {
-            final WorkingCapitalLoanBreachSchedule lastPeriod = periods.getLast();
-            lastPeriod.setToDate(actionDate.minusDays(1));
-            lastPeriod.setNumberOfDays((int) ChronoUnit.DAYS.between(lastPeriod.getFromDate(), lastPeriod.getToDate()) + 1);
-            breachScheduleService.generateNextPeriodIfNeeded(loan, actionDate);
+        if (Boolean.TRUE.equals(resetAction.getRestartPeriodFromResetDate())) {
+            breachScheduleService.splitPeriodAtReset(loan, resetAction.getStartDate());
             breachScheduleService.reprocessBreachSchedule(loan);
+        } else {
+            breachScheduleService.applyActiveResetFlags(loan);
+            breachScheduleService.recalculatePastDueAmount(loan);
         }
-
-        breachScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(loan.getId(), actionDate, actionDate)
-                .filter(period -> !period.isReset()).ifPresent(period -> {
-                    period.setReset(true);
-                });
-        breachScheduleService.recalculatePastDueAmount(loan);
     }
 
     @Override
-    public void undoResetBreach(final WorkingCapitalLoan loan, final WorkingCapitalLoanBreachAction undoResetAction) {
-        final LocalDate actionDate = undoResetAction.getStartDate();
-        if (actionDate == null) {
+    public void undoResetBreach(final WorkingCapitalLoan loan, final WorkingCapitalLoanBreachAction undoResetAction,
+            final List<WorkingCapitalLoanBreachAction> priorActions) {
+        if (undoResetAction.getStartDate() == null) {
             return;
         }
-        breachScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(loan.getId(), actionDate, actionDate)
-                .filter(WorkingCapitalLoanBreachSchedule::isReset).ifPresent(period -> {
-                    period.setReset(false);
-                });
-        breachScheduleService.recalculatePastDueAmount(loan);
+        final Deque<WorkingCapitalLoanBreachAction> activeResets = activeBreachResetResolver.activeResets(priorActions);
+        final WorkingCapitalLoanBreachAction undoneReset = activeResets.poll();
+        if (undoneReset == null) {
+            log.warn("No active breach reset found to undo on working capital loan {}", loan.getId());
+        }
+        if (undoneReset != null && Boolean.TRUE.equals(undoneReset.getRestartPeriodFromResetDate())) {
+            breachScheduleService.restoreSplitPeriod(loan, undoneReset);
+            breachScheduleService.reprocessBreachSchedule(loan);
+        } else {
+            breachScheduleService.applyActiveResetFlags(loan);
+            breachScheduleService.recalculatePastDueAmount(loan);
+        }
     }
 }

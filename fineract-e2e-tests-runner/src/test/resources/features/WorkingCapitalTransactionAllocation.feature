@@ -247,6 +247,7 @@ Feature: Working Capital Transaction Allocation
       | 100.0      | 0.0             | 100.0    | 0.0            | 0.0                 | 0.0          |
 # --- backdated repayment on Jan, 10, 20206 --- #
     And Customer makes repayment on "10 January 2026" with 100.0 transaction amount on Working Capital loan
+    Then a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "20 January 2026" with principal portion changed from "0.0" to "100.0" and fee portion changed from "100.0" to "0.0"
     Then Working Capital Loan has transactions:
       | transactionDate | type              | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement      | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |

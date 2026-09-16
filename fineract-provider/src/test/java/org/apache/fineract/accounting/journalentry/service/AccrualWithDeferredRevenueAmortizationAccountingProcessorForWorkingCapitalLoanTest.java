@@ -168,6 +168,7 @@ class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorkingCapital
         lenient().when(loan.getLoanProductRelatedDetails()).thenReturn(loanProductRelatedDetails);
         lenient().when(loanProductRelatedDetails.getCurrency()).thenReturn(currency);
         lenient().when(currency.getCode()).thenReturn(CURRENCY_CODE);
+        lenient().when(loan.getCurrencyCode()).thenReturn(CURRENCY_CODE);
         lenient().when(txn.getWcLoan()).thenReturn(loan);
         lenient().when(txn.getTypeOf()).thenReturn(LoanTransactionType.REPAYMENT);
         lenient().when(loan.getId()).thenReturn(LOAN_ID);

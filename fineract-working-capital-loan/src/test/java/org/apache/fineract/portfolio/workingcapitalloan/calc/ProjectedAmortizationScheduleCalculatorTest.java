@@ -24,22 +24,32 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.domain.ActionContext;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.organisation.monetary.data.CurrencyData;
+import org.apache.fineract.organisation.monetary.domain.MonetaryCurrency;
 import org.apache.fineract.organisation.monetary.domain.Money;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 class ProjectedAmortizationScheduleCalculatorTest {
 
@@ -72,8 +82,8 @@ class ProjectedAmortizationScheduleCalculatorTest {
         final BigDecimal initialNetDisbursement = new BigDecimal("450");
         final LocalDate initialDisbursementDate = LocalDate.of(2019, 1, 1);
 
-        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generate(discountFee, initialNetDisbursement,
-                TPV, RATE, DAY_COUNT, initialDisbursementDate, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generateEir(discountFee,
+                initialNetDisbursement, TPV, RATE, DAY_COUNT, initialDisbursementDate, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         final ProjectedAmortizationScheduleModel model1 = initial.regenerate(discountFee, initialNetDisbursement, initialDisbursementDate,
                 initialDisbursementDate);
 
@@ -86,12 +96,12 @@ class ProjectedAmortizationScheduleCalculatorTest {
         checkInst(model1, 2, 2, LocalDate.of(2019, 1, 3), 2, 50.00, null, 0.96186652, 48.09, 366.86, null, 8.03, null, null, 33.14, null);
         checkInst(model1, 3, 3, LocalDate.of(2019, 1, 4), 3, 50.00, null, 0.94334860, 47.17, 324.06, null, 7.20, null, null, 25.94, null);
         checkInst(model1, 4, 4, LocalDate.of(2019, 1, 5), 4, 50.00, null, 0.92518720, 46.26, 280.42, null, 6.36, null, null, 19.58, null);
-        checkInst(model1, 5, 5, LocalDate.of(2019, 1, 6), 5, 50.00, null, 0.90737544, 45.37, 235.93, null, 5.50, null, null, 14.08, null);
-        checkInst(model1, 6, 6, LocalDate.of(2019, 1, 7), 6, 50.00, null, 0.88990659, 44.50, 190.56, null, 4.63, null, null, 9.45, null);
-        checkInst(model1, 7, 7, LocalDate.of(2019, 1, 8), 7, 50.00, null, 0.87277405, 43.64, 144.30, null, 3.74, null, null, 5.71, null);
-        checkInst(model1, 8, 8, LocalDate.of(2019, 1, 9), 8, 50.00, null, 0.85597135, 42.80, 97.13, null, 2.83, null, null, 2.88, null);
-        checkInst(model1, 9, 9, LocalDate.of(2019, 1, 10), 9, 50.00, null, 0.83949214, 41.97, 49.04, null, 1.91, null, null, 0.97, null);
-        checkInst(model1, 10, 10, LocalDate.of(2019, 1, 11), 10, 50.00, null, 0.82333018, 41.17, 0.00, null, 0.97, null, null, 0.00, null);
+        checkInst(model1, 5, 5, LocalDate.of(2019, 1, 6), 5, 50.00, null, 0.90737544, 45.37, 235.93, null, 5.51, null, null, 14.07, null);
+        checkInst(model1, 6, 6, LocalDate.of(2019, 1, 7), 6, 50.00, null, 0.88990659, 44.50, 190.56, null, 4.63, null, null, 9.44, null);
+        checkInst(model1, 7, 7, LocalDate.of(2019, 1, 8), 7, 50.00, null, 0.87277405, 43.64, 144.30, null, 3.74, null, null, 5.70, null);
+        checkInst(model1, 8, 8, LocalDate.of(2019, 1, 9), 8, 50.00, null, 0.85597135, 42.80, 97.13, null, 2.83, null, null, 2.87, null);
+        checkInst(model1, 9, 9, LocalDate.of(2019, 1, 10), 9, 50.00, null, 0.83949214, 41.97, 49.04, null, 1.91, null, null, 0.96, null);
+        checkInst(model1, 10, 10, LocalDate.of(2019, 1, 11), 10, 50.00, null, 0.82333018, 41.17, 0.00, null, 0.96, null, null, 0.00, null);
 
         final BigDecimal newNetDisbursement = new BigDecimal("430");
         final LocalDate newDisbursementDate = LocalDate.of(2019, 1, 5);
@@ -107,12 +117,12 @@ class ProjectedAmortizationScheduleCalculatorTest {
         checkInst(model2, 1, 1, LocalDate.of(2019, 1, 6), 1, 50.00, null, 0.97919271, 48.96, 389.14, null, 9.14, null, null, 40.86, null);
         checkInst(model2, 2, 2, LocalDate.of(2019, 1, 7), 2, 50.00, null, 0.95881836, 47.94, 347.41, null, 8.27, null, null, 32.59, null);
         checkInst(model2, 3, 3, LocalDate.of(2019, 1, 8), 3, 50.00, null, 0.93886795, 46.94, 304.79, null, 7.38, null, null, 25.21, null);
-        checkInst(model2, 4, 4, LocalDate.of(2019, 1, 9), 4, 50.00, null, 0.91933266, 45.97, 261.26, null, 6.48, null, null, 18.73, null);
-        checkInst(model2, 5, 5, LocalDate.of(2019, 1, 10), 5, 50.00, null, 0.90020383, 45.01, 216.82, null, 5.55, null, null, 13.18, null);
-        checkInst(model2, 6, 6, LocalDate.of(2019, 1, 11), 6, 50.00, null, 0.88147303, 44.07, 171.42, null, 4.61, null, null, 8.57, null);
-        checkInst(model2, 7, 7, LocalDate.of(2019, 1, 12), 7, 50.00, null, 0.86313197, 43.16, 125.07, null, 3.64, null, null, 4.93, null);
-        checkInst(model2, 8, 8, LocalDate.of(2019, 1, 13), 8, 50.00, null, 0.84517253, 42.26, 77.72, null, 2.66, null, null, 2.27, null);
-        checkInst(model2, 9, 9, LocalDate.of(2019, 1, 14), 9, 50.00, null, 0.82758678, 41.38, 29.38, null, 1.65, null, null, 0.62, null);
+        checkInst(model2, 4, 4, LocalDate.of(2019, 1, 9), 4, 50.00, null, 0.91933266, 45.97, 261.26, null, 6.47, null, null, 18.74, null);
+        checkInst(model2, 5, 5, LocalDate.of(2019, 1, 10), 5, 50.00, null, 0.90020383, 45.01, 216.82, null, 5.56, null, null, 13.18, null);
+        checkInst(model2, 6, 6, LocalDate.of(2019, 1, 11), 6, 50.00, null, 0.88147303, 44.07, 171.42, null, 4.60, null, null, 8.58, null);
+        checkInst(model2, 7, 7, LocalDate.of(2019, 1, 12), 7, 50.00, null, 0.86313197, 43.16, 125.07, null, 3.65, null, null, 4.93, null);
+        checkInst(model2, 8, 8, LocalDate.of(2019, 1, 13), 8, 50.00, null, 0.84517253, 42.26, 77.72, null, 2.65, null, null, 2.28, null);
+        checkInst(model2, 9, 9, LocalDate.of(2019, 1, 14), 9, 50.00, null, 0.82758678, 41.38, 29.38, null, 1.66, null, null, 0.62, null);
         checkInst(model2, 10, 10, LocalDate.of(2019, 1, 15), 10, 30.00, null, 0.81036694, 24.31, 0.00, null, 0.62, null, null, 0.00, null);
     }
 
@@ -133,399 +143,400 @@ class ProjectedAmortizationScheduleCalculatorTest {
         checkInst(model, 6, 6, LocalDate.of(2019, 1, 7), 6, 50.00, null, 0.99361699, 49.68, 8757.01, null, 9.39, null, null, 942.99, null);
         checkInst(model, 7, 7, LocalDate.of(2019, 1, 8), 7, 50.00, null, 0.99255712, 49.63, 8716.36, null, 9.35, null, null, 933.64, null);
         checkInst(model, 8, 8, LocalDate.of(2019, 1, 9), 8, 50.00, null, 0.99149839, 49.57, 8675.67, null, 9.31, null, null, 924.33, null);
-        checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 9, 50.00, null, 0.99044078, 49.52, 8634.94, null, 9.26, null, null, 915.07, null);
-        checkInst(model, 10, 10, LocalDate.of(2019, 1, 11), 10, 50.00, null, 0.98938430, 49.47, 8594.16, null, 9.22, null, null, 905.85,
+        checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 9, 50.00, null, 0.99044078, 49.52, 8634.94, null, 9.27, null, null, 915.06, null);
+        checkInst(model, 10, 10, LocalDate.of(2019, 1, 11), 10, 50.00, null, 0.98938430, 49.47, 8594.16, null, 9.22, null, null, 905.84,
                 null);
-        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 11, 50.00, null, 0.98832895, 49.42, 8553.33, null, 9.18, null, null, 896.67,
+        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 11, 50.00, null, 0.98832895, 49.42, 8553.33, null, 9.17, null, null, 896.67,
                 null);
-        checkInst(model, 12, 12, LocalDate.of(2019, 1, 13), 12, 50.00, null, 0.98727472, 49.36, 8512.47, null, 9.13, null, null, 887.54,
+        checkInst(model, 12, 12, LocalDate.of(2019, 1, 13), 12, 50.00, null, 0.98727472, 49.36, 8512.47, null, 9.14, null, null, 887.53,
                 null);
-        checkInst(model, 13, 13, LocalDate.of(2019, 1, 14), 13, 50.00, null, 0.98622162, 49.31, 8471.56, null, 9.09, null, null, 878.45,
+        checkInst(model, 13, 13, LocalDate.of(2019, 1, 14), 13, 50.00, null, 0.98622162, 49.31, 8471.56, null, 9.09, null, null, 878.44,
                 null);
-        checkInst(model, 14, 14, LocalDate.of(2019, 1, 15), 14, 50.00, null, 0.98516964, 49.26, 8430.60, null, 9.05, null, null, 869.40,
+        checkInst(model, 14, 14, LocalDate.of(2019, 1, 15), 14, 50.00, null, 0.98516964, 49.26, 8430.60, null, 9.04, null, null, 869.40,
                 null);
-        checkInst(model, 15, 15, LocalDate.of(2019, 1, 16), 15, 50.00, null, 0.98411879, 49.21, 8389.61, null, 9.00, null, null, 860.40,
+        checkInst(model, 15, 15, LocalDate.of(2019, 1, 16), 15, 50.00, null, 0.98411879, 49.21, 8389.61, null, 9.01, null, null, 860.39,
                 null);
-        checkInst(model, 16, 16, LocalDate.of(2019, 1, 17), 16, 50.00, null, 0.98306905, 49.15, 8348.56, null, 8.96, null, null, 851.44,
+        checkInst(model, 16, 16, LocalDate.of(2019, 1, 17), 16, 50.00, null, 0.98306905, 49.15, 8348.56, null, 8.95, null, null, 851.44,
                 null);
-        checkInst(model, 17, 17, LocalDate.of(2019, 1, 18), 17, 50.00, null, 0.98202044, 49.10, 8307.48, null, 8.91, null, null, 842.53,
+        checkInst(model, 17, 17, LocalDate.of(2019, 1, 18), 17, 50.00, null, 0.98202044, 49.10, 8307.48, null, 8.92, null, null, 842.52,
                 null);
-        checkInst(model, 18, 18, LocalDate.of(2019, 1, 19), 18, 50.00, null, 0.98097294, 49.05, 8266.35, null, 8.87, null, null, 833.66,
+        checkInst(model, 18, 18, LocalDate.of(2019, 1, 19), 18, 50.00, null, 0.98097294, 49.05, 8266.35, null, 8.87, null, null, 833.65,
                 null);
-        checkInst(model, 19, 19, LocalDate.of(2019, 1, 20), 19, 50.00, null, 0.97992656, 49.00, 8225.18, null, 8.83, null, null, 824.83,
+        checkInst(model, 19, 19, LocalDate.of(2019, 1, 20), 19, 50.00, null, 0.97992656, 49.00, 8225.18, null, 8.83, null, null, 824.82,
                 null);
-        checkInst(model, 20, 20, LocalDate.of(2019, 1, 21), 20, 50.00, null, 0.97888129, 48.94, 8183.96, null, 8.78, null, null, 816.05,
+        checkInst(model, 20, 20, LocalDate.of(2019, 1, 21), 20, 50.00, null, 0.97888129, 48.94, 8183.96, null, 8.78, null, null, 816.04,
                 null);
-        checkInst(model, 21, 21, LocalDate.of(2019, 1, 22), 21, 50.00, null, 0.97783715, 48.89, 8142.70, null, 8.74, null, null, 807.31,
+        checkInst(model, 21, 21, LocalDate.of(2019, 1, 22), 21, 50.00, null, 0.97783715, 48.89, 8142.70, null, 8.74, null, null, 807.30,
                 null);
-        checkInst(model, 22, 22, LocalDate.of(2019, 1, 23), 22, 50.00, null, 0.97679411, 48.84, 8101.39, null, 8.69, null, null, 798.62,
+        checkInst(model, 22, 22, LocalDate.of(2019, 1, 23), 22, 50.00, null, 0.97679411, 48.84, 8101.39, null, 8.69, null, null, 798.61,
                 null);
-        checkInst(model, 23, 23, LocalDate.of(2019, 1, 24), 23, 50.00, null, 0.97575219, 48.79, 8060.04, null, 8.65, null, null, 789.97,
+        checkInst(model, 23, 23, LocalDate.of(2019, 1, 24), 23, 50.00, null, 0.97575219, 48.79, 8060.04, null, 8.65, null, null, 789.96,
                 null);
-        checkInst(model, 24, 24, LocalDate.of(2019, 1, 25), 24, 50.00, null, 0.97471138, 48.74, 8018.65, null, 8.61, null, null, 781.36,
+        checkInst(model, 24, 24, LocalDate.of(2019, 1, 25), 24, 50.00, null, 0.97471138, 48.74, 8018.65, null, 8.61, null, null, 781.35,
                 null);
-        checkInst(model, 25, 25, LocalDate.of(2019, 1, 26), 25, 50.00, null, 0.97367168, 48.68, 7977.21, null, 8.56, null, null, 772.80,
+        checkInst(model, 25, 25, LocalDate.of(2019, 1, 26), 25, 50.00, null, 0.97367168, 48.68, 7977.21, null, 8.56, null, null, 772.79,
                 null);
-        checkInst(model, 26, 26, LocalDate.of(2019, 1, 27), 26, 50.00, null, 0.97263309, 48.63, 7935.73, null, 8.52, null, null, 764.28,
+        checkInst(model, 26, 26, LocalDate.of(2019, 1, 27), 26, 50.00, null, 0.97263309, 48.63, 7935.73, null, 8.52, null, null, 764.27,
                 null);
-        checkInst(model, 27, 27, LocalDate.of(2019, 1, 28), 27, 50.00, null, 0.97159560, 48.58, 7894.21, null, 8.47, null, null, 755.81,
+        checkInst(model, 27, 27, LocalDate.of(2019, 1, 28), 27, 50.00, null, 0.97159560, 48.58, 7894.21, null, 8.48, null, null, 755.79,
                 null);
-        checkInst(model, 28, 28, LocalDate.of(2019, 1, 29), 28, 50.00, null, 0.97055922, 48.53, 7852.63, null, 8.43, null, null, 747.38,
+        checkInst(model, 28, 28, LocalDate.of(2019, 1, 29), 28, 50.00, null, 0.97055922, 48.53, 7852.63, null, 8.42, null, null, 747.37,
                 null);
-        checkInst(model, 29, 29, LocalDate.of(2019, 1, 30), 29, 50.00, null, 0.96952395, 48.48, 7811.02, null, 8.39, null, null, 738.99,
+        checkInst(model, 29, 29, LocalDate.of(2019, 1, 30), 29, 50.00, null, 0.96952395, 48.48, 7811.02, null, 8.39, null, null, 738.98,
                 null);
-        checkInst(model, 30, 30, LocalDate.of(2019, 1, 31), 30, 50.00, null, 0.96848979, 48.42, 7769.36, null, 8.34, null, null, 730.65,
+        checkInst(model, 30, 30, LocalDate.of(2019, 1, 31), 30, 50.00, null, 0.96848979, 48.42, 7769.36, null, 8.34, null, null, 730.64,
                 null);
-        checkInst(model, 31, 31, LocalDate.of(2019, 2, 1), 31, 50.00, null, 0.96745672, 48.37, 7727.66, null, 8.30, null, null, 722.35,
+        checkInst(model, 31, 31, LocalDate.of(2019, 2, 1), 31, 50.00, null, 0.96745672, 48.37, 7727.66, null, 8.30, null, null, 722.34,
                 null);
-        checkInst(model, 32, 32, LocalDate.of(2019, 2, 2), 32, 50.00, null, 0.96642476, 48.32, 7685.91, null, 8.25, null, null, 714.10,
+        checkInst(model, 32, 32, LocalDate.of(2019, 2, 2), 32, 50.00, null, 0.96642476, 48.32, 7685.91, null, 8.25, null, null, 714.09,
                 null);
-        checkInst(model, 33, 33, LocalDate.of(2019, 2, 3), 33, 50.00, null, 0.96539390, 48.27, 7644.12, null, 8.21, null, null, 705.89,
+        checkInst(model, 33, 33, LocalDate.of(2019, 2, 3), 33, 50.00, null, 0.96539390, 48.27, 7644.12, null, 8.21, null, null, 705.88,
                 null);
-        checkInst(model, 34, 34, LocalDate.of(2019, 2, 4), 34, 50.00, null, 0.96436413, 48.22, 7602.28, null, 8.16, null, null, 697.73,
+        checkInst(model, 34, 34, LocalDate.of(2019, 2, 4), 34, 50.00, null, 0.96436414, 48.22, 7602.28, null, 8.16, null, null, 697.72,
                 null);
-        checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 35, 50.00, null, 0.96333547, 48.17, 7560.40, null, 8.12, null, null, 689.61,
+        checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 35, 50.00, null, 0.96333547, 48.17, 7560.40, null, 8.12, null, null, 689.60,
                 null);
-        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 36, 50.00, null, 0.96230790, 48.12, 7518.47, null, 8.07, null, null, 681.54,
+        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 36, 50.00, null, 0.96230791, 48.12, 7518.47, null, 8.07, null, null, 681.53,
                 null);
-        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 37, 50.00, null, 0.96128143, 48.06, 7476.50, null, 8.03, null, null, 673.51,
+        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 37, 50.00, null, 0.96128143, 48.06, 7476.50, null, 8.03, null, null, 673.50,
                 null);
-        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 38, 50.00, null, 0.96025606, 48.01, 7434.48, null, 7.98, null, null, 665.53,
+        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 38, 50.00, null, 0.96025606, 48.01, 7434.48, null, 7.98, null, null, 665.52,
                 null);
-        checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 39, 50.00, null, 0.95923178, 47.96, 7392.42, null, 7.94, null, null, 657.59,
+        checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 39, 50.00, null, 0.95923178, 47.96, 7392.42, null, 7.94, null, null, 657.58,
                 null);
-        checkInst(model, 40, 40, LocalDate.of(2019, 2, 10), 40, 50.00, null, 0.95820859, 47.91, 7350.31, null, 7.89, null, null, 649.70,
+        checkInst(model, 40, 40, LocalDate.of(2019, 2, 10), 40, 50.00, null, 0.95820859, 47.91, 7350.31, null, 7.89, null, null, 649.69,
                 null);
-        checkInst(model, 41, 41, LocalDate.of(2019, 2, 11), 41, 50.00, null, 0.95718649, 47.86, 7308.16, null, 7.85, null, null, 641.85,
+        checkInst(model, 41, 41, LocalDate.of(2019, 2, 11), 41, 50.00, null, 0.95718649, 47.86, 7308.16, null, 7.85, null, null, 641.84,
                 null);
-        checkInst(model, 42, 42, LocalDate.of(2019, 2, 12), 42, 50.00, null, 0.95616548, 47.81, 7265.97, null, 7.80, null, null, 634.05,
+        checkInst(model, 42, 42, LocalDate.of(2019, 2, 12), 42, 50.00, null, 0.95616548, 47.81, 7265.97, null, 7.81, null, null, 634.03,
                 null);
-        checkInst(model, 43, 43, LocalDate.of(2019, 2, 13), 43, 50.00, null, 0.95514557, 47.76, 7223.72, null, 7.76, null, null, 626.29,
+        checkInst(model, 43, 43, LocalDate.of(2019, 2, 13), 43, 50.00, null, 0.95514557, 47.76, 7223.72, null, 7.75, null, null, 626.28,
                 null);
-        checkInst(model, 44, 44, LocalDate.of(2019, 2, 14), 44, 50.00, null, 0.95412674, 47.71, 7181.44, null, 7.71, null, null, 618.58,
+        checkInst(model, 44, 44, LocalDate.of(2019, 2, 14), 44, 50.00, null, 0.95412674, 47.71, 7181.44, null, 7.72, null, null, 618.56,
                 null);
-        checkInst(model, 45, 45, LocalDate.of(2019, 2, 15), 45, 50.00, null, 0.95310899, 47.66, 7139.11, null, 7.67, null, null, 610.91,
+        checkInst(model, 45, 45, LocalDate.of(2019, 2, 15), 45, 50.00, null, 0.95310899, 47.66, 7139.11, null, 7.67, null, null, 610.89,
                 null);
-        checkInst(model, 46, 46, LocalDate.of(2019, 2, 16), 46, 50.00, null, 0.95209233, 47.60, 7096.73, null, 7.62, null, null, 603.29,
+        checkInst(model, 46, 46, LocalDate.of(2019, 2, 16), 46, 50.00, null, 0.95209233, 47.60, 7096.73, null, 7.62, null, null, 603.27,
                 null);
-        checkInst(model, 47, 47, LocalDate.of(2019, 2, 17), 47, 50.00, null, 0.95107676, 47.55, 7054.31, null, 7.58, null, null, 595.71,
+        checkInst(model, 47, 47, LocalDate.of(2019, 2, 17), 47, 50.00, null, 0.95107676, 47.55, 7054.31, null, 7.58, null, null, 595.69,
                 null);
-        checkInst(model, 48, 48, LocalDate.of(2019, 2, 18), 48, 50.00, null, 0.95006227, 47.50, 7011.84, null, 7.53, null, null, 588.18,
+        checkInst(model, 48, 48, LocalDate.of(2019, 2, 18), 48, 50.00, null, 0.95006227, 47.50, 7011.84, null, 7.53, null, null, 588.16,
                 null);
-        checkInst(model, 49, 49, LocalDate.of(2019, 2, 19), 49, 50.00, null, 0.94904886, 47.45, 6969.33, null, 7.49, null, null, 580.69,
+        checkInst(model, 49, 49, LocalDate.of(2019, 2, 19), 49, 50.00, null, 0.94904886, 47.45, 6969.33, null, 7.49, null, null, 580.67,
                 null);
-        checkInst(model, 50, 50, LocalDate.of(2019, 2, 20), 50, 50.00, null, 0.94803653, 47.40, 6926.77, null, 7.44, null, null, 573.25,
+        checkInst(model, 50, 50, LocalDate.of(2019, 2, 20), 50, 50.00, null, 0.94803653, 47.40, 6926.77, null, 7.44, null, null, 573.23,
                 null);
-        checkInst(model, 51, 51, LocalDate.of(2019, 2, 21), 51, 50.00, null, 0.94702529, 47.35, 6884.17, null, 7.40, null, null, 565.85,
+        checkInst(model, 51, 51, LocalDate.of(2019, 2, 21), 51, 50.00, null, 0.94702529, 47.35, 6884.17, null, 7.40, null, null, 565.83,
                 null);
-        checkInst(model, 52, 52, LocalDate.of(2019, 2, 22), 52, 50.00, null, 0.94601512, 47.30, 6841.52, null, 7.35, null, null, 558.50,
+        checkInst(model, 52, 52, LocalDate.of(2019, 2, 22), 52, 50.00, null, 0.94601512, 47.30, 6841.52, null, 7.35, null, null, 558.48,
                 null);
-        checkInst(model, 53, 53, LocalDate.of(2019, 2, 23), 53, 50.00, null, 0.94500603, 47.25, 6798.82, null, 7.31, null, null, 551.19,
+        checkInst(model, 53, 53, LocalDate.of(2019, 2, 23), 53, 50.00, null, 0.94500603, 47.25, 6798.82, null, 7.30, null, null, 551.18,
                 null);
-        checkInst(model, 54, 54, LocalDate.of(2019, 2, 24), 54, 50.00, null, 0.94399801, 47.20, 6756.08, null, 7.26, null, null, 543.93,
+        checkInst(model, 54, 54, LocalDate.of(2019, 2, 24), 54, 50.00, null, 0.94399801, 47.20, 6756.08, null, 7.26, null, null, 543.92,
                 null);
-        checkInst(model, 55, 55, LocalDate.of(2019, 2, 25), 55, 50.00, null, 0.94299107, 47.15, 6713.30, null, 7.21, null, null, 536.72,
+        checkInst(model, 55, 55, LocalDate.of(2019, 2, 25), 55, 50.00, null, 0.94299107, 47.15, 6713.30, null, 7.22, null, null, 536.70,
                 null);
-        checkInst(model, 56, 56, LocalDate.of(2019, 2, 26), 56, 50.00, null, 0.94198521, 47.10, 6670.47, null, 7.17, null, null, 529.55,
+        checkInst(model, 56, 56, LocalDate.of(2019, 2, 26), 56, 50.00, null, 0.94198521, 47.10, 6670.47, null, 7.17, null, null, 529.53,
                 null);
-        checkInst(model, 57, 57, LocalDate.of(2019, 2, 27), 57, 50.00, null, 0.94098042, 47.05, 6627.59, null, 7.12, null, null, 522.43,
+        checkInst(model, 57, 57, LocalDate.of(2019, 2, 27), 57, 50.00, null, 0.94098042, 47.05, 6627.59, null, 7.12, null, null, 522.41,
                 null);
-        checkInst(model, 58, 58, LocalDate.of(2019, 2, 28), 58, 50.00, null, 0.93997669, 47.00, 6584.67, null, 7.08, null, null, 515.35,
+        checkInst(model, 58, 58, LocalDate.of(2019, 2, 28), 58, 50.00, null, 0.93997669, 47.00, 6584.67, null, 7.08, null, null, 515.33,
                 null);
-        checkInst(model, 59, 59, LocalDate.of(2019, 3, 1), 59, 50.00, null, 0.93897404, 46.95, 6541.70, null, 7.03, null, null, 508.32,
+        checkInst(model, 59, 59, LocalDate.of(2019, 3, 1), 59, 50.00, null, 0.93897404, 46.95, 6541.70, null, 7.03, null, null, 508.30,
                 null);
-        checkInst(model, 60, 60, LocalDate.of(2019, 3, 2), 60, 50.00, null, 0.93797246, 46.90, 6498.68, null, 6.99, null, null, 501.33,
+        checkInst(model, 60, 60, LocalDate.of(2019, 3, 2), 60, 50.00, null, 0.93797246, 46.90, 6498.68, null, 6.98, null, null, 501.32,
                 null);
-        checkInst(model, 61, 61, LocalDate.of(2019, 3, 3), 61, 50.00, null, 0.93697195, 46.85, 6455.62, null, 6.94, null, null, 494.39,
+        checkInst(model, 61, 61, LocalDate.of(2019, 3, 3), 61, 50.00, null, 0.93697195, 46.85, 6455.62, null, 6.94, null, null, 494.38,
                 null);
-        checkInst(model, 62, 62, LocalDate.of(2019, 3, 4), 62, 50.00, null, 0.93597251, 46.80, 6412.51, null, 6.89, null, null, 487.50,
+        checkInst(model, 62, 62, LocalDate.of(2019, 3, 4), 62, 50.00, null, 0.93597251, 46.80, 6412.51, null, 6.89, null, null, 487.49,
                 null);
-        checkInst(model, 63, 63, LocalDate.of(2019, 3, 5), 63, 50.00, null, 0.93497413, 46.75, 6369.36, null, 6.85, null, null, 480.65,
+        checkInst(model, 63, 63, LocalDate.of(2019, 3, 5), 63, 50.00, null, 0.93497413, 46.75, 6369.36, null, 6.85, null, null, 480.64,
                 null);
-        checkInst(model, 64, 64, LocalDate.of(2019, 3, 6), 64, 50.00, null, 0.93397681, 46.70, 6326.16, null, 6.80, null, null, 473.85,
+        checkInst(model, 64, 64, LocalDate.of(2019, 3, 6), 64, 50.00, null, 0.93397681, 46.70, 6326.16, null, 6.80, null, null, 473.84,
                 null);
-        checkInst(model, 65, 65, LocalDate.of(2019, 3, 7), 65, 50.00, null, 0.93298056, 46.65, 6282.92, null, 6.76, null, null, 467.09,
+        checkInst(model, 65, 65, LocalDate.of(2019, 3, 7), 65, 50.00, null, 0.93298056, 46.65, 6282.92, null, 6.76, null, null, 467.08,
                 null);
-        checkInst(model, 66, 66, LocalDate.of(2019, 3, 8), 66, 50.00, null, 0.93198538, 46.60, 6239.63, null, 6.71, null, null, 460.38,
+        checkInst(model, 66, 66, LocalDate.of(2019, 3, 8), 66, 50.00, null, 0.93198538, 46.60, 6239.63, null, 6.71, null, null, 460.37,
                 null);
-        checkInst(model, 67, 67, LocalDate.of(2019, 3, 9), 67, 50.00, null, 0.93099125, 46.55, 6196.29, null, 6.66, null, null, 453.72,
+        checkInst(model, 67, 67, LocalDate.of(2019, 3, 9), 67, 50.00, null, 0.93099125, 46.55, 6196.29, null, 6.66, null, null, 453.71,
                 null);
-        checkInst(model, 68, 68, LocalDate.of(2019, 3, 10), 68, 50.00, null, 0.92999818, 46.50, 6152.91, null, 6.62, null, null, 447.10,
+        checkInst(model, 68, 68, LocalDate.of(2019, 3, 10), 68, 50.00, null, 0.92999819, 46.50, 6152.91, null, 6.62, null, null, 447.09,
                 null);
-        checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 69, 50.00, null, 0.92900618, 46.45, 6109.48, null, 6.57, null, null, 440.53,
+        checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 69, 50.00, null, 0.92900618, 46.45, 6109.48, null, 6.57, null, null, 440.52,
                 null);
-        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 70, 50.00, null, 0.92801523, 46.40, 6066.00, null, 6.52, null, null, 434.01,
+        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 70, 50.00, null, 0.92801523, 46.40, 6066.00, null, 6.52, null, null, 434.00,
                 null);
-        checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 71, 50.00, null, 0.92702534, 46.35, 6022.48, null, 6.48, null, null, 427.53,
+        checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 71, 50.00, null, 0.92702534, 46.35, 6022.48, null, 6.48, null, null, 427.52,
                 null);
-        checkInst(model, 72, 72, LocalDate.of(2019, 3, 14), 72, 50.00, null, 0.92603650, 46.30, 5978.91, null, 6.43, null, null, 421.10,
+        checkInst(model, 72, 72, LocalDate.of(2019, 3, 14), 72, 50.00, null, 0.92603650, 46.30, 5978.91, null, 6.43, null, null, 421.09,
                 null);
-        checkInst(model, 73, 73, LocalDate.of(2019, 3, 15), 73, 50.00, null, 0.92504872, 46.25, 5935.29, null, 6.38, null, null, 414.72,
+        checkInst(model, 73, 73, LocalDate.of(2019, 3, 15), 73, 50.00, null, 0.92504872, 46.25, 5935.29, null, 6.38, null, null, 414.71,
                 null);
-        checkInst(model, 74, 74, LocalDate.of(2019, 3, 16), 74, 50.00, null, 0.92406200, 46.20, 5891.63, null, 6.34, null, null, 408.38,
+        checkInst(model, 74, 74, LocalDate.of(2019, 3, 16), 74, 50.00, null, 0.92406200, 46.20, 5891.63, null, 6.34, null, null, 408.37,
                 null);
-        checkInst(model, 75, 75, LocalDate.of(2019, 3, 17), 75, 50.00, null, 0.92307632, 46.15, 5847.92, null, 6.29, null, null, 402.09,
+        checkInst(model, 75, 75, LocalDate.of(2019, 3, 17), 75, 50.00, null, 0.92307632, 46.15, 5847.92, null, 6.29, null, null, 402.08,
                 null);
-        checkInst(model, 76, 76, LocalDate.of(2019, 3, 18), 76, 50.00, null, 0.92209170, 46.10, 5804.17, null, 6.24, null, null, 395.85,
+        checkInst(model, 76, 76, LocalDate.of(2019, 3, 18), 76, 50.00, null, 0.92209170, 46.10, 5804.17, null, 6.25, null, null, 395.83,
                 null);
-        checkInst(model, 77, 77, LocalDate.of(2019, 3, 19), 77, 50.00, null, 0.92110813, 46.06, 5760.36, null, 6.20, null, null, 389.65,
+        checkInst(model, 77, 77, LocalDate.of(2019, 3, 19), 77, 50.00, null, 0.92110813, 46.06, 5760.36, null, 6.19, null, null, 389.64,
                 null);
-        checkInst(model, 78, 78, LocalDate.of(2019, 3, 20), 78, 50.00, null, 0.92012560, 46.01, 5716.52, null, 6.15, null, null, 383.50,
+        checkInst(model, 78, 78, LocalDate.of(2019, 3, 20), 78, 50.00, null, 0.92012560, 46.01, 5716.52, null, 6.16, null, null, 383.48,
                 null);
-        checkInst(model, 79, 79, LocalDate.of(2019, 3, 21), 79, 50.00, null, 0.91914413, 45.96, 5672.62, null, 6.10, null, null, 377.40,
+        checkInst(model, 79, 79, LocalDate.of(2019, 3, 21), 79, 50.00, null, 0.91914413, 45.96, 5672.62, null, 6.10, null, null, 377.38,
                 null);
-        checkInst(model, 80, 80, LocalDate.of(2019, 3, 22), 80, 50.00, null, 0.91816370, 45.91, 5628.68, null, 6.06, null, null, 371.34,
+        checkInst(model, 80, 80, LocalDate.of(2019, 3, 22), 80, 50.00, null, 0.91816370, 45.91, 5628.68, null, 6.06, null, null, 371.32,
                 null);
-        checkInst(model, 81, 81, LocalDate.of(2019, 3, 23), 81, 50.00, null, 0.91718432, 45.86, 5584.69, null, 6.01, null, null, 365.33,
+        checkInst(model, 81, 81, LocalDate.of(2019, 3, 23), 81, 50.00, null, 0.91718432, 45.86, 5584.69, null, 6.01, null, null, 365.31,
                 null);
-        checkInst(model, 82, 82, LocalDate.of(2019, 3, 24), 82, 50.00, null, 0.91620598, 45.81, 5540.65, null, 5.96, null, null, 359.37,
+        checkInst(model, 82, 82, LocalDate.of(2019, 3, 24), 82, 50.00, null, 0.91620598, 45.81, 5540.65, null, 5.96, null, null, 359.35,
                 null);
-        checkInst(model, 83, 83, LocalDate.of(2019, 3, 25), 83, 50.00, null, 0.91522868, 45.76, 5496.57, null, 5.92, null, null, 353.45,
+        checkInst(model, 83, 83, LocalDate.of(2019, 3, 25), 83, 50.00, null, 0.91522869, 45.76, 5496.57, null, 5.92, null, null, 353.43,
                 null);
-        checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 84, 50.00, null, 0.91425243, 45.71, 5452.44, null, 5.87, null, null, 347.58,
+        checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 84, 50.00, null, 0.91425243, 45.71, 5452.44, null, 5.87, null, null, 347.56,
                 null);
-        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 85, 50.00, null, 0.91327722, 45.66, 5408.26, null, 5.82, null, null, 341.76,
+        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 85, 50.00, null, 0.91327722, 45.66, 5408.26, null, 5.82, null, null, 341.74,
                 null);
-        checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 86, 50.00, null, 0.91230305, 45.62, 5364.03, null, 5.78, null, null, 335.98,
+        checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 86, 50.00, null, 0.91230305, 45.62, 5364.03, null, 5.77, null, null, 335.97,
                 null);
-        checkInst(model, 87, 87, LocalDate.of(2019, 3, 29), 87, 50.00, null, 0.91132992, 45.57, 5319.76, null, 5.73, null, null, 330.25,
+        checkInst(model, 87, 87, LocalDate.of(2019, 3, 29), 87, 50.00, null, 0.91132992, 45.57, 5319.76, null, 5.73, null, null, 330.24,
                 null);
-        checkInst(model, 88, 88, LocalDate.of(2019, 3, 30), 88, 50.00, null, 0.91035783, 45.52, 5275.44, null, 5.68, null, null, 324.57,
+        checkInst(model, 88, 88, LocalDate.of(2019, 3, 30), 88, 50.00, null, 0.91035783, 45.52, 5275.44, null, 5.68, null, null, 324.56,
                 null);
-        checkInst(model, 89, 89, LocalDate.of(2019, 3, 31), 89, 50.00, null, 0.90938677, 45.47, 5231.08, null, 5.63, null, null, 318.94,
+        checkInst(model, 89, 89, LocalDate.of(2019, 3, 31), 89, 50.00, null, 0.90938677, 45.47, 5231.08, null, 5.64, null, null, 318.92,
                 null);
-        checkInst(model, 90, 90, LocalDate.of(2019, 4, 1), 90, 50.00, null, 0.90841675, 45.42, 5186.66, null, 5.59, null, null, 313.35,
+        checkInst(model, 90, 90, LocalDate.of(2019, 4, 1), 90, 50.00, null, 0.90841675, 45.42, 5186.66, null, 5.58, null, null, 313.34,
                 null);
-        checkInst(model, 91, 91, LocalDate.of(2019, 4, 2), 91, 50.00, null, 0.90744776, 45.37, 5142.20, null, 5.54, null, null, 307.81,
+        checkInst(model, 91, 91, LocalDate.of(2019, 4, 2), 91, 50.00, null, 0.90744776, 45.37, 5142.20, null, 5.54, null, null, 307.80,
                 null);
-        checkInst(model, 92, 92, LocalDate.of(2019, 4, 3), 92, 50.00, null, 0.90647981, 45.32, 5097.69, null, 5.49, null, null, 302.32,
+        checkInst(model, 92, 92, LocalDate.of(2019, 4, 3), 92, 50.00, null, 0.90647981, 45.32, 5097.69, null, 5.49, null, null, 302.31,
                 null);
-        checkInst(model, 93, 93, LocalDate.of(2019, 4, 4), 93, 50.00, null, 0.90551289, 45.28, 5053.13, null, 5.44, null, null, 296.88,
+        checkInst(model, 93, 93, LocalDate.of(2019, 4, 4), 93, 50.00, null, 0.90551289, 45.28, 5053.13, null, 5.44, null, null, 296.87,
                 null);
-        checkInst(model, 94, 94, LocalDate.of(2019, 4, 5), 94, 50.00, null, 0.90454700, 45.23, 5008.53, null, 5.40, null, null, 291.48,
+        checkInst(model, 94, 94, LocalDate.of(2019, 4, 5), 94, 50.00, null, 0.90454700, 45.23, 5008.53, null, 5.40, null, null, 291.47,
                 null);
-        checkInst(model, 95, 95, LocalDate.of(2019, 4, 6), 95, 50.00, null, 0.90358215, 45.18, 4963.88, null, 5.35, null, null, 286.13,
+        checkInst(model, 95, 95, LocalDate.of(2019, 4, 6), 95, 50.00, null, 0.90358215, 45.18, 4963.88, null, 5.35, null, null, 286.12,
                 null);
-        checkInst(model, 96, 96, LocalDate.of(2019, 4, 7), 96, 50.00, null, 0.90261832, 45.13, 4919.18, null, 5.30, null, null, 280.83,
+        checkInst(model, 96, 96, LocalDate.of(2019, 4, 7), 96, 50.00, null, 0.90261832, 45.13, 4919.18, null, 5.30, null, null, 280.82,
                 null);
-        checkInst(model, 97, 97, LocalDate.of(2019, 4, 8), 97, 50.00, null, 0.90165552, 45.08, 4874.43, null, 5.25, null, null, 275.58,
+        checkInst(model, 97, 97, LocalDate.of(2019, 4, 8), 97, 50.00, null, 0.90165552, 45.08, 4874.43, null, 5.25, null, null, 275.57,
                 null);
-        checkInst(model, 98, 98, LocalDate.of(2019, 4, 9), 98, 50.00, null, 0.90069374, 45.03, 4829.64, null, 5.20, null, null, 270.38,
+        checkInst(model, 98, 98, LocalDate.of(2019, 4, 9), 98, 50.00, null, 0.90069374, 45.03, 4829.64, null, 5.21, null, null, 270.36,
                 null);
-        checkInst(model, 99, 99, LocalDate.of(2019, 4, 10), 99, 50.00, null, 0.89973299, 44.99, 4784.79, null, 5.16, null, null, 265.22,
+        checkInst(model, 99, 99, LocalDate.of(2019, 4, 10), 99, 50.00, null, 0.89973299, 44.99, 4784.79, null, 5.15, null, null, 265.21,
                 null);
-        checkInst(model, 100, 100, LocalDate.of(2019, 4, 11), 100, 50.00, null, 0.89877327, 44.94, 4739.90, null, 5.11, null, null, 260.11,
+        checkInst(model, 100, 100, LocalDate.of(2019, 4, 11), 100, 50.00, null, 0.89877327, 44.94, 4739.90, null, 5.11, null, null, 260.10,
                 null);
-        checkInst(model, 101, 101, LocalDate.of(2019, 4, 12), 101, 50.00, null, 0.89781457, 44.89, 4694.96, null, 5.06, null, null, 255.05,
+        checkInst(model, 101, 101, LocalDate.of(2019, 4, 12), 101, 50.00, null, 0.89781457, 44.89, 4694.96, null, 5.06, null, null, 255.04,
                 null);
-        checkInst(model, 102, 102, LocalDate.of(2019, 4, 13), 102, 50.00, null, 0.89685689, 44.84, 4649.98, null, 5.01, null, null, 250.04,
+        checkInst(model, 102, 102, LocalDate.of(2019, 4, 13), 102, 50.00, null, 0.89685690, 44.84, 4649.98, null, 5.02, null, null, 250.02,
                 null);
-        checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 103, 50.00, null, 0.89590024, 44.80, 4604.94, null, 4.97, null, null, 245.07,
+        checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 103, 50.00, null, 0.89590024, 44.80, 4604.94, null, 4.96, null, null, 245.06,
                 null);
-        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 104, 50.00, null, 0.89494460, 44.75, 4559.86, null, 4.92, null, null, 240.15,
+        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 104, 50.00, null, 0.89494461, 44.75, 4559.86, null, 4.92, null, null, 240.14,
                 null);
-        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 105, 50.00, null, 0.89398999, 44.70, 4514.73, null, 4.87, null, null, 235.28,
+        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 105, 50.00, null, 0.89398999, 44.70, 4514.73, null, 4.87, null, null, 235.27,
                 null);
-        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 106, 50.00, null, 0.89303639, 44.65, 4469.55, null, 4.82, null, null, 230.46,
+        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 106, 50.00, null, 0.89303639, 44.65, 4469.55, null, 4.82, null, null, 230.45,
                 null);
-        checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 107, 50.00, null, 0.89208381, 44.60, 4424.32, null, 4.77, null, null, 225.69,
+        checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 107, 50.00, null, 0.89208381, 44.60, 4424.32, null, 4.77, null, null, 225.68,
                 null);
-        checkInst(model, 108, 108, LocalDate.of(2019, 4, 19), 108, 50.00, null, 0.89113225, 44.56, 4379.05, null, 4.72, null, null, 220.97,
+        checkInst(model, 108, 108, LocalDate.of(2019, 4, 19), 108, 50.00, null, 0.89113225, 44.56, 4379.05, null, 4.73, null, null, 220.95,
                 null);
-        checkInst(model, 109, 109, LocalDate.of(2019, 4, 20), 109, 50.00, null, 0.89018170, 44.51, 4333.72, null, 4.68, null, null, 216.29,
+        checkInst(model, 109, 109, LocalDate.of(2019, 4, 20), 109, 50.00, null, 0.89018170, 44.51, 4333.72, null, 4.67, null, null, 216.28,
                 null);
-        checkInst(model, 110, 110, LocalDate.of(2019, 4, 21), 110, 50.00, null, 0.88923216, 44.46, 4288.35, null, 4.63, null, null, 211.66,
+        checkInst(model, 110, 110, LocalDate.of(2019, 4, 21), 110, 50.00, null, 0.88923216, 44.46, 4288.35, null, 4.63, null, null, 211.65,
                 null);
-        checkInst(model, 111, 111, LocalDate.of(2019, 4, 22), 111, 50.00, null, 0.88828364, 44.41, 4242.93, null, 4.58, null, null, 207.08,
+        checkInst(model, 111, 111, LocalDate.of(2019, 4, 22), 111, 50.00, null, 0.88828364, 44.41, 4242.93, null, 4.58, null, null, 207.07,
                 null);
-        checkInst(model, 112, 112, LocalDate.of(2019, 4, 23), 112, 50.00, null, 0.88733613, 44.37, 4197.46, null, 4.53, null, null, 202.55,
+        checkInst(model, 112, 112, LocalDate.of(2019, 4, 23), 112, 50.00, null, 0.88733613, 44.37, 4197.46, null, 4.53, null, null, 202.54,
                 null);
-        checkInst(model, 113, 113, LocalDate.of(2019, 4, 24), 113, 50.00, null, 0.88638963, 44.32, 4151.94, null, 4.48, null, null, 198.07,
+        checkInst(model, 113, 113, LocalDate.of(2019, 4, 24), 113, 50.00, null, 0.88638963, 44.32, 4151.94, null, 4.48, null, null, 198.06,
                 null);
-        checkInst(model, 114, 114, LocalDate.of(2019, 4, 25), 114, 50.00, null, 0.88544414, 44.27, 4106.38, null, 4.43, null, null, 193.64,
+        checkInst(model, 114, 114, LocalDate.of(2019, 4, 25), 114, 50.00, null, 0.88544414, 44.27, 4106.38, null, 4.44, null, null, 193.62,
                 null);
-        checkInst(model, 115, 115, LocalDate.of(2019, 4, 26), 115, 50.00, null, 0.88449966, 44.22, 4060.76, null, 4.38, null, null, 189.26,
+        checkInst(model, 115, 115, LocalDate.of(2019, 4, 26), 115, 50.00, null, 0.88449966, 44.22, 4060.76, null, 4.38, null, null, 189.24,
                 null);
-        checkInst(model, 116, 116, LocalDate.of(2019, 4, 27), 116, 50.00, null, 0.88355619, 44.18, 4015.10, null, 4.34, null, null, 184.92,
+        checkInst(model, 116, 116, LocalDate.of(2019, 4, 27), 116, 50.00, null, 0.88355619, 44.18, 4015.10, null, 4.34, null, null, 184.90,
                 null);
-        checkInst(model, 117, 117, LocalDate.of(2019, 4, 28), 117, 50.00, null, 0.88261372, 44.13, 3969.38, null, 4.29, null, null, 180.63,
+        checkInst(model, 117, 117, LocalDate.of(2019, 4, 28), 117, 50.00, null, 0.88261372, 44.13, 3969.38, null, 4.28, null, null, 180.62,
                 null);
-        checkInst(model, 118, 118, LocalDate.of(2019, 4, 29), 118, 50.00, null, 0.88167226, 44.08, 3923.62, null, 4.24, null, null, 176.39,
+        checkInst(model, 118, 118, LocalDate.of(2019, 4, 29), 118, 50.00, null, 0.88167226, 44.08, 3923.62, null, 4.24, null, null, 176.38,
                 null);
-        checkInst(model, 119, 119, LocalDate.of(2019, 4, 30), 119, 50.00, null, 0.88073180, 44.04, 3877.81, null, 4.19, null, null, 172.20,
+        checkInst(model, 119, 119, LocalDate.of(2019, 4, 30), 119, 50.00, null, 0.88073180, 44.04, 3877.81, null, 4.19, null, null, 172.19,
                 null);
-        checkInst(model, 120, 120, LocalDate.of(2019, 5, 1), 120, 50.00, null, 0.87979234, 43.99, 3831.95, null, 4.14, null, null, 168.06,
+        checkInst(model, 120, 120, LocalDate.of(2019, 5, 1), 120, 50.00, null, 0.87979234, 43.99, 3831.95, null, 4.14, null, null, 168.05,
                 null);
-        checkInst(model, 121, 121, LocalDate.of(2019, 5, 2), 121, 50.00, null, 0.87885389, 43.94, 3786.04, null, 4.09, null, null, 163.97,
+        checkInst(model, 121, 121, LocalDate.of(2019, 5, 2), 121, 50.00, null, 0.87885389, 43.94, 3786.04, null, 4.09, null, null, 163.96,
                 null);
-        checkInst(model, 122, 122, LocalDate.of(2019, 5, 3), 122, 50.00, null, 0.87791644, 43.90, 3740.09, null, 4.04, null, null, 159.93,
+        checkInst(model, 122, 122, LocalDate.of(2019, 5, 3), 122, 50.00, null, 0.87791644, 43.90, 3740.09, null, 4.05, null, null, 159.91,
                 null);
-        checkInst(model, 123, 123, LocalDate.of(2019, 5, 4), 123, 50.00, null, 0.87697999, 43.85, 3694.08, null, 3.99, null, null, 155.94,
+        checkInst(model, 123, 123, LocalDate.of(2019, 5, 4), 123, 50.00, null, 0.87697999, 43.85, 3694.08, null, 3.99, null, null, 155.92,
                 null);
-        checkInst(model, 124, 124, LocalDate.of(2019, 5, 5), 124, 50.00, null, 0.87604453, 43.80, 3648.03, null, 3.94, null, null, 152.00,
+        checkInst(model, 124, 124, LocalDate.of(2019, 5, 5), 124, 50.00, null, 0.87604453, 43.80, 3648.03, null, 3.95, null, null, 151.97,
                 null);
-        checkInst(model, 125, 125, LocalDate.of(2019, 5, 6), 125, 50.00, null, 0.87511008, 43.76, 3601.92, null, 3.90, null, null, 148.10,
+        checkInst(model, 125, 125, LocalDate.of(2019, 5, 6), 125, 50.00, null, 0.87511008, 43.76, 3601.92, null, 3.89, null, null, 148.08,
                 null);
-        checkInst(model, 126, 126, LocalDate.of(2019, 5, 7), 126, 50.00, null, 0.87417662, 43.71, 3555.77, null, 3.85, null, null, 144.25,
+        checkInst(model, 126, 126, LocalDate.of(2019, 5, 7), 126, 50.00, null, 0.87417662, 43.71, 3555.77, null, 3.85, null, null, 144.23,
                 null);
-        checkInst(model, 127, 127, LocalDate.of(2019, 5, 8), 127, 50.00, null, 0.87324416, 43.66, 3509.56, null, 3.80, null, null, 140.45,
+        checkInst(model, 127, 127, LocalDate.of(2019, 5, 8), 127, 50.00, null, 0.87324416, 43.66, 3509.56, null, 3.79, null, null, 140.44,
                 null);
-        checkInst(model, 128, 128, LocalDate.of(2019, 5, 9), 128, 50.00, null, 0.87231269, 43.62, 3463.31, null, 3.75, null, null, 136.70,
+        checkInst(model, 128, 128, LocalDate.of(2019, 5, 9), 128, 50.00, null, 0.87231269, 43.62, 3463.31, null, 3.75, null, null, 136.69,
                 null);
-        checkInst(model, 129, 129, LocalDate.of(2019, 5, 10), 129, 50.00, null, 0.87138221, 43.57, 3417.01, null, 3.70, null, null, 133.00,
+        checkInst(model, 129, 129, LocalDate.of(2019, 5, 10), 129, 50.00, null, 0.87138221, 43.57, 3417.01, null, 3.70, null, null, 132.99,
                 null);
-        checkInst(model, 130, 130, LocalDate.of(2019, 5, 11), 130, 50.00, null, 0.87045273, 43.52, 3370.66, null, 3.65, null, null, 129.35,
+        checkInst(model, 130, 130, LocalDate.of(2019, 5, 11), 130, 50.00, null, 0.87045273, 43.52, 3370.66, null, 3.65, null, null, 129.34,
                 null);
-        checkInst(model, 131, 131, LocalDate.of(2019, 5, 12), 131, 50.00, null, 0.86952424, 43.48, 3324.26, null, 3.60, null, null, 125.75,
+        checkInst(model, 131, 131, LocalDate.of(2019, 5, 12), 131, 50.00, null, 0.86952424, 43.48, 3324.26, null, 3.60, null, null, 125.74,
                 null);
-        checkInst(model, 132, 132, LocalDate.of(2019, 5, 13), 132, 50.00, null, 0.86859674, 43.43, 3277.81, null, 3.55, null, null, 122.20,
+        checkInst(model, 132, 132, LocalDate.of(2019, 5, 13), 132, 50.00, null, 0.86859674, 43.43, 3277.81, null, 3.55, null, null, 122.19,
                 null);
-        checkInst(model, 133, 133, LocalDate.of(2019, 5, 14), 133, 50.00, null, 0.86767023, 43.38, 3231.31, null, 3.50, null, null, 118.70,
+        checkInst(model, 133, 133, LocalDate.of(2019, 5, 14), 133, 50.00, null, 0.86767023, 43.38, 3231.31, null, 3.50, null, null, 118.69,
                 null);
-        checkInst(model, 134, 134, LocalDate.of(2019, 5, 15), 134, 50.00, null, 0.86674471, 43.34, 3184.76, null, 3.45, null, null, 115.25,
+        checkInst(model, 134, 134, LocalDate.of(2019, 5, 15), 134, 50.00, null, 0.86674471, 43.34, 3184.76, null, 3.45, null, null, 115.24,
                 null);
-        checkInst(model, 135, 135, LocalDate.of(2019, 5, 16), 135, 50.00, null, 0.86582017, 43.29, 3138.16, null, 3.40, null, null, 111.85,
+        checkInst(model, 135, 135, LocalDate.of(2019, 5, 16), 135, 50.00, null, 0.86582017, 43.29, 3138.16, null, 3.40, null, null, 111.84,
                 null);
-        checkInst(model, 136, 136, LocalDate.of(2019, 5, 17), 136, 50.00, null, 0.86489662, 43.24, 3091.51, null, 3.35, null, null, 108.50,
+        checkInst(model, 136, 136, LocalDate.of(2019, 5, 17), 136, 50.00, null, 0.86489662, 43.24, 3091.51, null, 3.35, null, null, 108.49,
                 null);
-        checkInst(model, 137, 137, LocalDate.of(2019, 5, 18), 137, 50.00, null, 0.86397406, 43.20, 3044.81, null, 3.30, null, null, 105.20,
+        checkInst(model, 137, 137, LocalDate.of(2019, 5, 18), 137, 50.00, null, 0.86397406, 43.20, 3044.81, null, 3.30, null, null, 105.19,
                 null);
-        checkInst(model, 138, 138, LocalDate.of(2019, 5, 19), 138, 50.00, null, 0.86305248, 43.15, 2998.06, null, 3.25, null, null, 101.95,
+        checkInst(model, 138, 138, LocalDate.of(2019, 5, 19), 138, 50.00, null, 0.86305248, 43.15, 2998.06, null, 3.25, null, null, 101.94,
                 null);
-        checkInst(model, 139, 139, LocalDate.of(2019, 5, 20), 139, 50.00, null, 0.86213188, 43.11, 2951.26, null, 3.20, null, null, 98.75,
+        checkInst(model, 139, 139, LocalDate.of(2019, 5, 20), 139, 50.00, null, 0.86213188, 43.11, 2951.26, null, 3.20, null, null, 98.74,
                 null);
-        checkInst(model, 140, 140, LocalDate.of(2019, 5, 21), 140, 50.00, null, 0.86121227, 43.06, 2904.42, null, 3.15, null, null, 95.60,
+        checkInst(model, 140, 140, LocalDate.of(2019, 5, 21), 140, 50.00, null, 0.86121227, 43.06, 2904.42, null, 3.16, null, null, 95.58,
                 null);
-        checkInst(model, 141, 141, LocalDate.of(2019, 5, 22), 141, 50.00, null, 0.86029363, 43.01, 2857.52, null, 3.10, null, null, 92.50,
+        checkInst(model, 141, 141, LocalDate.of(2019, 5, 22), 141, 50.00, null, 0.86029363, 43.01, 2857.52, null, 3.10, null, null, 92.48,
                 null);
-        checkInst(model, 142, 142, LocalDate.of(2019, 5, 23), 142, 50.00, null, 0.85937598, 42.97, 2810.57, null, 3.05, null, null, 89.45,
+        checkInst(model, 142, 142, LocalDate.of(2019, 5, 23), 142, 50.00, null, 0.85937598, 42.97, 2810.57, null, 3.05, null, null, 89.43,
                 null);
-        checkInst(model, 143, 143, LocalDate.of(2019, 5, 24), 143, 50.00, null, 0.85845930, 42.92, 2763.57, null, 3.00, null, null, 86.45,
+        checkInst(model, 143, 143, LocalDate.of(2019, 5, 24), 143, 50.00, null, 0.85845931, 42.92, 2763.57, null, 3.00, null, null, 86.43,
                 null);
-        checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 144, 50.00, null, 0.85754361, 42.88, 2716.52, null, 2.95, null, null, 83.50,
+        checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 144, 50.00, null, 0.85754361, 42.88, 2716.52, null, 2.95, null, null, 83.48,
                 null);
-        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 145, 50.00, null, 0.85662889, 42.83, 2669.42, null, 2.90, null, null, 80.60,
+        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 145, 50.00, null, 0.85662889, 42.83, 2669.42, null, 2.90, null, null, 80.58,
                 null);
-        checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 146, 50.00, null, 0.85571514, 42.79, 2622.27, null, 2.85, null, null, 77.75,
+        checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 146, 50.00, null, 0.85571514, 42.79, 2622.27, null, 2.85, null, null, 77.73,
                 null);
-        checkInst(model, 147, 147, LocalDate.of(2019, 5, 28), 147, 50.00, null, 0.85480237, 42.74, 2575.07, null, 2.80, null, null, 74.95,
+        checkInst(model, 147, 147, LocalDate.of(2019, 5, 28), 147, 50.00, null, 0.85480237, 42.74, 2575.07, null, 2.80, null, null, 74.93,
                 null);
-        checkInst(model, 148, 148, LocalDate.of(2019, 5, 29), 148, 50.00, null, 0.85389057, 42.69, 2527.82, null, 2.75, null, null, 72.20,
+        checkInst(model, 148, 148, LocalDate.of(2019, 5, 29), 148, 50.00, null, 0.85389057, 42.69, 2527.82, null, 2.75, null, null, 72.18,
                 null);
-        checkInst(model, 149, 149, LocalDate.of(2019, 5, 30), 149, 50.00, null, 0.85297975, 42.65, 2480.52, null, 2.70, null, null, 69.50,
+        checkInst(model, 149, 149, LocalDate.of(2019, 5, 30), 149, 50.00, null, 0.85297975, 42.65, 2480.52, null, 2.70, null, null, 69.48,
                 null);
-        checkInst(model, 150, 150, LocalDate.of(2019, 5, 31), 150, 50.00, null, 0.85206990, 42.60, 2433.17, null, 2.65, null, null, 66.85,
+        checkInst(model, 150, 150, LocalDate.of(2019, 5, 31), 150, 50.00, null, 0.85206990, 42.60, 2433.17, null, 2.65, null, null, 66.83,
                 null);
-        checkInst(model, 151, 151, LocalDate.of(2019, 6, 1), 151, 50.00, null, 0.85116101, 42.56, 2385.77, null, 2.60, null, null, 64.25,
+        checkInst(model, 151, 151, LocalDate.of(2019, 6, 1), 151, 50.00, null, 0.85116102, 42.56, 2385.77, null, 2.60, null, null, 64.23,
                 null);
-        checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 152, 50.00, null, 0.85025310, 42.51, 2338.31, null, 2.55, null, null, 61.70,
+        checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 152, 50.00, null, 0.85025310, 42.51, 2338.31, null, 2.54, null, null, 61.69,
                 null);
-        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 153, 50.00, null, 0.84934616, 42.47, 2290.81, null, 2.50, null, null, 59.20,
+        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 153, 50.00, null, 0.84934616, 42.47, 2290.81, null, 2.50, null, null, 59.19,
                 null);
-        checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 154, 50.00, null, 0.84844018, 42.42, 2243.26, null, 2.45, null, null, 56.75,
+        checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 154, 50.00, null, 0.84844018, 42.42, 2243.26, null, 2.45, null, null, 56.74,
                 null);
-        checkInst(model, 155, 155, LocalDate.of(2019, 6, 5), 155, 50.00, null, 0.84753517, 42.38, 2195.65, null, 2.40, null, null, 54.35,
+        checkInst(model, 155, 155, LocalDate.of(2019, 6, 5), 155, 50.00, null, 0.84753517, 42.38, 2195.65, null, 2.39, null, null, 54.35,
                 null);
-        checkInst(model, 156, 156, LocalDate.of(2019, 6, 6), 156, 50.00, null, 0.84663113, 42.33, 2148.00, null, 2.34, null, null, 52.01,
+        checkInst(model, 156, 156, LocalDate.of(2019, 6, 6), 156, 50.00, null, 0.84663113, 42.33, 2148.00, null, 2.35, null, null, 52.00,
                 null);
-        checkInst(model, 157, 157, LocalDate.of(2019, 6, 7), 157, 50.00, null, 0.84572805, 42.29, 2100.29, null, 2.29, null, null, 49.72,
+        checkInst(model, 157, 157, LocalDate.of(2019, 6, 7), 157, 50.00, null, 0.84572805, 42.29, 2100.29, null, 2.29, null, null, 49.71,
                 null);
-        checkInst(model, 158, 158, LocalDate.of(2019, 6, 8), 158, 50.00, null, 0.84482593, 42.24, 2052.53, null, 2.24, null, null, 47.48,
+        checkInst(model, 158, 158, LocalDate.of(2019, 6, 8), 158, 50.00, null, 0.84482593, 42.24, 2052.53, null, 2.24, null, null, 47.47,
                 null);
-        checkInst(model, 159, 159, LocalDate.of(2019, 6, 9), 159, 50.00, null, 0.84392477, 42.20, 2004.73, null, 2.19, null, null, 45.29,
+        checkInst(model, 159, 159, LocalDate.of(2019, 6, 9), 159, 50.00, null, 0.84392477, 42.20, 2004.73, null, 2.20, null, null, 45.27,
                 null);
-        checkInst(model, 160, 160, LocalDate.of(2019, 6, 10), 160, 50.00, null, 0.84302458, 42.15, 1956.87, null, 2.14, null, null, 43.15,
+        checkInst(model, 160, 160, LocalDate.of(2019, 6, 10), 160, 50.00, null, 0.84302458, 42.15, 1956.87, null, 2.14, null, null, 43.13,
                 null);
-        checkInst(model, 161, 161, LocalDate.of(2019, 6, 11), 161, 50.00, null, 0.84212535, 42.11, 1908.96, null, 2.09, null, null, 41.06,
+        checkInst(model, 161, 161, LocalDate.of(2019, 6, 11), 161, 50.00, null, 0.84212535, 42.11, 1908.96, null, 2.09, null, null, 41.04,
                 null);
-        checkInst(model, 162, 162, LocalDate.of(2019, 6, 12), 162, 50.00, null, 0.84122707, 42.06, 1860.99, null, 2.04, null, null, 39.02,
+        checkInst(model, 162, 162, LocalDate.of(2019, 6, 12), 162, 50.00, null, 0.84122707, 42.06, 1860.99, null, 2.03, null, null, 39.01,
                 null);
-        checkInst(model, 163, 163, LocalDate.of(2019, 6, 13), 163, 50.00, null, 0.84032975, 42.02, 1812.98, null, 1.99, null, null, 37.03,
+        checkInst(model, 163, 163, LocalDate.of(2019, 6, 13), 163, 50.00, null, 0.84032976, 42.02, 1812.98, null, 1.99, null, null, 37.02,
                 null);
-        checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 164, 50.00, null, 0.83943340, 41.97, 1764.92, null, 1.94, null, null, 35.09,
+        checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 164, 50.00, null, 0.83943340, 41.97, 1764.92, null, 1.94, null, null, 35.08,
                 null);
-        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 165, 50.00, null, 0.83853799, 41.93, 1716.80, null, 1.88, null, null, 33.21,
+        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 165, 50.00, null, 0.83853799, 41.93, 1716.80, null, 1.88, null, null, 33.20,
                 null);
-        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 166, 50.00, null, 0.83764354, 41.88, 1668.64, null, 1.83, null, null, 31.38,
+        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 166, 50.00, null, 0.83764355, 41.88, 1668.64, null, 1.84, null, null, 31.36,
                 null);
-        checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 167, 50.00, null, 0.83675005, 41.84, 1620.42, null, 1.78, null, null, 29.60,
+        checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 167, 50.00, null, 0.83675005, 41.84, 1620.42, null, 1.78, null, null, 29.58,
                 null);
-        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 168, 50.00, null, 0.83585751, 41.79, 1572.15, null, 1.73, null, null, 27.87,
+        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 168, 50.00, null, 0.83585751, 41.79, 1572.15, null, 1.73, null, null, 27.85,
                 null);
-        checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 169, 50.00, null, 0.83496592, 41.75, 1523.83, null, 1.68, null, null, 26.19,
+        checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 169, 50.00, null, 0.83496592, 41.75, 1523.83, null, 1.68, null, null, 26.17,
                 null);
-        checkInst(model, 170, 170, LocalDate.of(2019, 6, 20), 170, 50.00, null, 0.83407528, 41.70, 1475.45, null, 1.63, null, null, 24.56,
+        checkInst(model, 170, 170, LocalDate.of(2019, 6, 20), 170, 50.00, null, 0.83407528, 41.70, 1475.45, null, 1.62, null, null, 24.55,
                 null);
-        checkInst(model, 171, 171, LocalDate.of(2019, 6, 21), 171, 50.00, null, 0.83318560, 41.66, 1427.03, null, 1.58, null, null, 22.98,
+        checkInst(model, 171, 171, LocalDate.of(2019, 6, 21), 171, 50.00, null, 0.83318560, 41.66, 1427.03, null, 1.58, null, null, 22.97,
                 null);
-        checkInst(model, 172, 172, LocalDate.of(2019, 6, 22), 172, 50.00, null, 0.83229686, 41.61, 1378.55, null, 1.52, null, null, 21.46,
+        checkInst(model, 172, 172, LocalDate.of(2019, 6, 22), 172, 50.00, null, 0.83229686, 41.61, 1378.55, null, 1.52, null, null, 21.45,
                 null);
-        checkInst(model, 173, 173, LocalDate.of(2019, 6, 23), 173, 50.00, null, 0.83140907, 41.57, 1330.02, null, 1.47, null, null, 19.99,
+        checkInst(model, 173, 173, LocalDate.of(2019, 6, 23), 173, 50.00, null, 0.83140907, 41.57, 1330.02, null, 1.47, null, null, 19.98,
                 null);
-        checkInst(model, 174, 174, LocalDate.of(2019, 6, 24), 174, 50.00, null, 0.83052222, 41.53, 1281.45, null, 1.42, null, null, 18.57,
+        checkInst(model, 174, 174, LocalDate.of(2019, 6, 24), 174, 50.00, null, 0.83052222, 41.53, 1281.45, null, 1.43, null, null, 18.55,
                 null);
-        checkInst(model, 175, 175, LocalDate.of(2019, 6, 25), 175, 50.00, null, 0.82963633, 41.48, 1232.81, null, 1.37, null, null, 17.20,
+        checkInst(model, 175, 175, LocalDate.of(2019, 6, 25), 175, 50.00, null, 0.82963633, 41.48, 1232.81, null, 1.36, null, null, 17.19,
                 null);
-        checkInst(model, 176, 176, LocalDate.of(2019, 6, 26), 176, 50.00, null, 0.82875137, 41.44, 1184.13, null, 1.32, null, null, 15.88,
+        checkInst(model, 176, 176, LocalDate.of(2019, 6, 26), 176, 50.00, null, 0.82875137, 41.44, 1184.13, null, 1.32, null, null, 15.87,
                 null);
-        checkInst(model, 177, 177, LocalDate.of(2019, 6, 27), 177, 50.00, null, 0.82786736, 41.39, 1135.39, null, 1.26, null, null, 14.62,
+        checkInst(model, 177, 177, LocalDate.of(2019, 6, 27), 177, 50.00, null, 0.82786737, 41.39, 1135.39, null, 1.26, null, null, 14.61,
                 null);
-        checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 178, 50.00, null, 0.82698430, 41.35, 1086.61, null, 1.21, null, null, 13.41,
+        checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 178, 50.00, null, 0.82698430, 41.35, 1086.61, null, 1.22, null, null, 13.39,
                 null);
-        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 179, 50.00, null, 0.82610217, 41.31, 1037.77, null, 1.16, null, null, 12.25,
+        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 179, 50.00, null, 0.82610218, 41.31, 1037.77, null, 1.16, null, null, 12.23,
                 null);
-        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 180, 50.00, null, 0.82522099, 41.26, 988.88, null, 1.11, null, null, 11.14,
+        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 180, 50.00, null, 0.82522099, 41.26, 988.88, null, 1.11, null, null, 11.12,
                 null);
-        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 181, 50.00, null, 0.82434075, 41.22, 939.93, null, 1.06, null, null, 10.08,
+        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 181, 50.00, null, 0.82434075, 41.22, 939.93, null, 1.05, null, null, 10.07,
                 null);
-        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 182, 50.00, null, 0.82346144, 41.17, 890.93, null, 1.00, null, null, 9.08,
+        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 182, 50.00, null, 0.82346145, 41.17, 890.93, null, 1.00, null, null, 9.07,
                 null);
-        checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 183, 50.00, null, 0.82258308, 41.13, 841.89, null, 0.95, null, null, 8.13,
+        checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 183, 50.00, null, 0.82258308, 41.13, 841.89, null, 0.96, null, null, 8.11,
                 null);
-        checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 184, 50.00, null, 0.82170565, 41.09, 792.79, null, 0.90, null, null, 7.23,
+        checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 184, 50.00, null, 0.82170565, 41.09, 792.79, null, 0.90, null, null, 7.21,
                 null);
-        checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 185, 50.00, null, 0.82082916, 41.04, 743.63, null, 0.85, null, null, 6.38,
+        checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 185, 50.00, null, 0.82082916, 41.04, 743.63, null, 0.84, null, null, 6.37,
                 null);
-        checkInst(model, 186, 186, LocalDate.of(2019, 7, 6), 186, 50.00, null, 0.81995360, 41.00, 694.43, null, 0.79, null, null, 5.59,
+        checkInst(model, 186, 186, LocalDate.of(2019, 7, 6), 186, 50.00, null, 0.81995360, 41.00, 694.43, null, 0.80, null, null, 5.57,
                 null);
-        checkInst(model, 187, 187, LocalDate.of(2019, 7, 7), 187, 50.00, null, 0.81907897, 40.95, 645.17, null, 0.74, null, null, 4.85,
+        checkInst(model, 187, 187, LocalDate.of(2019, 7, 7), 187, 50.00, null, 0.81907897, 40.95, 645.17, null, 0.74, null, null, 4.83,
                 null);
-        checkInst(model, 188, 188, LocalDate.of(2019, 7, 8), 188, 50.00, null, 0.81820528, 40.91, 595.86, null, 0.69, null, null, 4.16,
+        checkInst(model, 188, 188, LocalDate.of(2019, 7, 8), 188, 50.00, null, 0.81820528, 40.91, 595.86, null, 0.69, null, null, 4.14,
                 null);
-        checkInst(model, 189, 189, LocalDate.of(2019, 7, 9), 189, 50.00, null, 0.81733252, 40.87, 546.49, null, 0.64, null, null, 3.52,
+        checkInst(model, 189, 189, LocalDate.of(2019, 7, 9), 189, 50.00, null, 0.81733252, 40.87, 546.49, null, 0.63, null, null, 3.51,
                 null);
-        checkInst(model, 190, 190, LocalDate.of(2019, 7, 10), 190, 50.00, null, 0.81646069, 40.82, 497.08, null, 0.58, null, null, 2.94,
+        checkInst(model, 190, 190, LocalDate.of(2019, 7, 10), 190, 50.00, null, 0.81646069, 40.82, 497.08, null, 0.59, null, null, 2.92,
                 null);
-        checkInst(model, 191, 191, LocalDate.of(2019, 7, 11), 191, 50.00, null, 0.81558979, 40.78, 447.61, null, 0.53, null, null, 2.41,
+        checkInst(model, 191, 191, LocalDate.of(2019, 7, 11), 191, 50.00, null, 0.81558980, 40.78, 447.61, null, 0.53, null, null, 2.39,
                 null);
-        checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 192, 50.00, null, 0.81471983, 40.74, 398.08, null, 0.48, null, null, 1.93,
+        checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 192, 50.00, null, 0.81471983, 40.74, 398.08, null, 0.47, null, null, 1.92,
                 null);
-        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 193, 50.00, null, 0.81385078, 40.69, 348.51, null, 0.43, null, null, 1.50,
+        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 193, 50.00, null, 0.81385078, 40.69, 348.51, null, 0.43, null, null, 1.49,
                 null);
-        checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 194, 50.00, null, 0.81298267, 40.65, 298.88, null, 0.37, null, null, 1.13,
+        checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 194, 50.00, null, 0.81298267, 40.65, 298.88, null, 0.37, null, null, 1.12,
                 null);
-        checkInst(model, 195, 195, LocalDate.of(2019, 7, 15), 195, 50.00, null, 0.81211548, 40.61, 249.20, null, 0.32, null, null, 0.81,
+        checkInst(model, 195, 195, LocalDate.of(2019, 7, 15), 195, 50.00, null, 0.81211548, 40.61, 249.20, null, 0.32, null, null, 0.80,
                 null);
-        checkInst(model, 196, 196, LocalDate.of(2019, 7, 16), 196, 50.00, null, 0.81124922, 40.56, 199.47, null, 0.27, null, null, 0.54,
+        checkInst(model, 196, 196, LocalDate.of(2019, 7, 16), 196, 50.00, null, 0.81124922, 40.56, 199.47, null, 0.27, null, null, 0.53,
                 null);
-        checkInst(model, 197, 197, LocalDate.of(2019, 7, 17), 197, 50.00, null, 0.81038388, 40.52, 149.68, null, 0.21, null, null, 0.33,
+        checkInst(model, 197, 197, LocalDate.of(2019, 7, 17), 197, 50.00, null, 0.81038388, 40.52, 149.68, null, 0.21, null, null, 0.32,
                 null);
-        checkInst(model, 198, 198, LocalDate.of(2019, 7, 18), 198, 50.00, null, 0.80951946, 40.48, 99.84, null, 0.16, null, null, 0.17,
+        checkInst(model, 198, 198, LocalDate.of(2019, 7, 18), 198, 50.00, null, 0.80951946, 40.48, 99.84, null, 0.16, null, null, 0.16,
                 null);
-        checkInst(model, 199, 199, LocalDate.of(2019, 7, 19), 199, 50.00, null, 0.80865597, 40.43, 49.95, null, 0.11, null, null, 0.06,
+        checkInst(model, 199, 199, LocalDate.of(2019, 7, 19), 199, 50.00, null, 0.80865597, 40.43, 49.95, null, 0.11, null, null, 0.05,
                 null);
-        checkInst(model, 200, 200, LocalDate.of(2019, 7, 20), 200, 50.00, null, 0.80779339, 40.39, 0.00, null, 0.06, null, null, 0.00,
+        checkInst(model, 200, 200, LocalDate.of(2019, 7, 20), 200, 50.00, null, 0.80779339, 40.39, 0.00, null, 0.05, null, null, 0.00,
                 null);
     }
 
     @Test
     void testNoDiscountLoan_term180_discountFee0_netDisbursement9000() {
         final BigDecimal zeroDiscount = BigDecimal.ZERO;
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(zeroDiscount, NET_DISBURSEMENT, TPV,
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateEir(zeroDiscount, NET_DISBURSEMENT, TPV,
                 RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
 
         assertEquals(180, model.originalPaymentNumber(), "loanTerm = ceil(9000/50) = 180");
-        assertEquals(BigDecimal.ZERO, model.effectiveInterestRate(), "EIR should be 0 when no discount fee");
+        assertEquals(BigDecimal.ZERO, model.effectiveInterestRate(),
+                "EIR is derived from the annual rate, which is 0 with no discount fee");
         assertEquals(181, model.projectedPayments().size(), "disbursement + 180 periods");
 
         // All discount factors should be 1.0 (EIR = 0)
@@ -568,388 +579,388 @@ class ProjectedAmortizationScheduleCalculatorTest {
         checkInst(model, 6, 6, LocalDate.of(2019, 1, 7), 4, 50.00, null, 0.99574012, 49.79, 8757.01, null, 9.39, null, null, 942.99, null);
         checkInst(model, 7, 7, LocalDate.of(2019, 1, 8), 5, 50.00, null, 0.99467799, 49.73, 8716.36, null, 9.35, null, null, 933.64, null);
         checkInst(model, 8, 8, LocalDate.of(2019, 1, 9), 6, 50.00, null, 0.99361699, 49.68, 8675.67, null, 9.31, null, null, 924.33, null);
-        checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 7, 50.00, null, 0.99255712, 49.63, 8634.94, null, 9.26, null, null, 915.07, null);
-        checkInst(model, 10, 10, LocalDate.of(2019, 1, 11), 8, 50.00, null, 0.99149839, 49.57, 8594.16, null, 9.22, null, null, 905.85,
+        checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 7, 50.00, null, 0.99255712, 49.63, 8634.94, null, 9.27, null, null, 915.06, null);
+        checkInst(model, 10, 10, LocalDate.of(2019, 1, 11), 8, 50.00, null, 0.99149839, 49.57, 8594.16, null, 9.22, null, null, 905.84,
                 null);
-        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 9, 50.00, null, 0.99044078, 49.52, 8553.33, null, 9.18, null, null, 896.67,
+        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 9, 50.00, null, 0.99044078, 49.52, 8553.33, null, 9.17, null, null, 896.67,
                 null);
-        checkInst(model, 12, 12, LocalDate.of(2019, 1, 13), 10, 50.00, null, 0.98938430, 49.47, 8512.47, null, 9.13, null, null, 887.54,
+        checkInst(model, 12, 12, LocalDate.of(2019, 1, 13), 10, 50.00, null, 0.98938430, 49.47, 8512.47, null, 9.14, null, null, 887.53,
                 null);
-        checkInst(model, 13, 13, LocalDate.of(2019, 1, 14), 11, 50.00, null, 0.98832895, 49.42, 8471.56, null, 9.09, null, null, 878.45,
+        checkInst(model, 13, 13, LocalDate.of(2019, 1, 14), 11, 50.00, null, 0.98832895, 49.42, 8471.56, null, 9.09, null, null, 878.44,
                 null);
-        checkInst(model, 14, 14, LocalDate.of(2019, 1, 15), 12, 50.00, null, 0.98727472, 49.36, 8430.60, null, 9.05, null, null, 869.40,
+        checkInst(model, 14, 14, LocalDate.of(2019, 1, 15), 12, 50.00, null, 0.98727472, 49.36, 8430.60, null, 9.04, null, null, 869.40,
                 null);
-        checkInst(model, 15, 15, LocalDate.of(2019, 1, 16), 13, 50.00, null, 0.98622162, 49.31, 8389.61, null, 9.00, null, null, 860.40,
+        checkInst(model, 15, 15, LocalDate.of(2019, 1, 16), 13, 50.00, null, 0.98622162, 49.31, 8389.61, null, 9.01, null, null, 860.39,
                 null);
-        checkInst(model, 16, 16, LocalDate.of(2019, 1, 17), 14, 50.00, null, 0.98516964, 49.26, 8348.56, null, 8.96, null, null, 851.44,
+        checkInst(model, 16, 16, LocalDate.of(2019, 1, 17), 14, 50.00, null, 0.98516964, 49.26, 8348.56, null, 8.95, null, null, 851.44,
                 null);
-        checkInst(model, 17, 17, LocalDate.of(2019, 1, 18), 15, 50.00, null, 0.98411879, 49.21, 8307.48, null, 8.91, null, null, 842.53,
+        checkInst(model, 17, 17, LocalDate.of(2019, 1, 18), 15, 50.00, null, 0.98411879, 49.21, 8307.48, null, 8.92, null, null, 842.52,
                 null);
-        checkInst(model, 18, 18, LocalDate.of(2019, 1, 19), 16, 50.00, null, 0.98306905, 49.15, 8266.35, null, 8.87, null, null, 833.66,
+        checkInst(model, 18, 18, LocalDate.of(2019, 1, 19), 16, 50.00, null, 0.98306905, 49.15, 8266.35, null, 8.87, null, null, 833.65,
                 null);
-        checkInst(model, 19, 19, LocalDate.of(2019, 1, 20), 17, 50.00, null, 0.98202044, 49.10, 8225.18, null, 8.83, null, null, 824.83,
+        checkInst(model, 19, 19, LocalDate.of(2019, 1, 20), 17, 50.00, null, 0.98202044, 49.10, 8225.18, null, 8.83, null, null, 824.82,
                 null);
-        checkInst(model, 20, 20, LocalDate.of(2019, 1, 21), 18, 50.00, null, 0.98097294, 49.05, 8183.96, null, 8.78, null, null, 816.05,
+        checkInst(model, 20, 20, LocalDate.of(2019, 1, 21), 18, 50.00, null, 0.98097294, 49.05, 8183.96, null, 8.78, null, null, 816.04,
                 null);
-        checkInst(model, 21, 21, LocalDate.of(2019, 1, 22), 19, 50.00, null, 0.97992656, 49.00, 8142.70, null, 8.74, null, null, 807.31,
+        checkInst(model, 21, 21, LocalDate.of(2019, 1, 22), 19, 50.00, null, 0.97992656, 49.00, 8142.70, null, 8.74, null, null, 807.30,
                 null);
-        checkInst(model, 22, 22, LocalDate.of(2019, 1, 23), 20, 50.00, null, 0.97888129, 48.94, 8101.39, null, 8.69, null, null, 798.62,
+        checkInst(model, 22, 22, LocalDate.of(2019, 1, 23), 20, 50.00, null, 0.97888129, 48.94, 8101.39, null, 8.69, null, null, 798.61,
                 null);
-        checkInst(model, 23, 23, LocalDate.of(2019, 1, 24), 21, 50.00, null, 0.97783715, 48.89, 8060.04, null, 8.65, null, null, 789.97,
+        checkInst(model, 23, 23, LocalDate.of(2019, 1, 24), 21, 50.00, null, 0.97783715, 48.89, 8060.04, null, 8.65, null, null, 789.96,
                 null);
-        checkInst(model, 24, 24, LocalDate.of(2019, 1, 25), 22, 50.00, null, 0.97679411, 48.84, 8018.65, null, 8.61, null, null, 781.36,
+        checkInst(model, 24, 24, LocalDate.of(2019, 1, 25), 22, 50.00, null, 0.97679411, 48.84, 8018.65, null, 8.61, null, null, 781.35,
                 null);
-        checkInst(model, 25, 25, LocalDate.of(2019, 1, 26), 23, 50.00, null, 0.97575219, 48.79, 7977.21, null, 8.56, null, null, 772.80,
+        checkInst(model, 25, 25, LocalDate.of(2019, 1, 26), 23, 50.00, null, 0.97575219, 48.79, 7977.21, null, 8.56, null, null, 772.79,
                 null);
-        checkInst(model, 26, 26, LocalDate.of(2019, 1, 27), 24, 50.00, null, 0.97471138, 48.74, 7935.73, null, 8.52, null, null, 764.28,
+        checkInst(model, 26, 26, LocalDate.of(2019, 1, 27), 24, 50.00, null, 0.97471138, 48.74, 7935.73, null, 8.52, null, null, 764.27,
                 null);
-        checkInst(model, 27, 27, LocalDate.of(2019, 1, 28), 25, 50.00, null, 0.97367168, 48.68, 7894.21, null, 8.47, null, null, 755.81,
+        checkInst(model, 27, 27, LocalDate.of(2019, 1, 28), 25, 50.00, null, 0.97367168, 48.68, 7894.21, null, 8.48, null, null, 755.79,
                 null);
-        checkInst(model, 28, 28, LocalDate.of(2019, 1, 29), 26, 50.00, null, 0.97263309, 48.63, 7852.63, null, 8.43, null, null, 747.38,
+        checkInst(model, 28, 28, LocalDate.of(2019, 1, 29), 26, 50.00, null, 0.97263309, 48.63, 7852.63, null, 8.42, null, null, 747.37,
                 null);
-        checkInst(model, 29, 29, LocalDate.of(2019, 1, 30), 27, 50.00, null, 0.97159560, 48.58, 7811.02, null, 8.39, null, null, 738.99,
+        checkInst(model, 29, 29, LocalDate.of(2019, 1, 30), 27, 50.00, null, 0.97159560, 48.58, 7811.02, null, 8.39, null, null, 738.98,
                 null);
-        checkInst(model, 30, 30, LocalDate.of(2019, 1, 31), 28, 50.00, null, 0.97055922, 48.53, 7769.36, null, 8.34, null, null, 730.65,
+        checkInst(model, 30, 30, LocalDate.of(2019, 1, 31), 28, 50.00, null, 0.97055922, 48.53, 7769.36, null, 8.34, null, null, 730.64,
                 null);
-        checkInst(model, 31, 31, LocalDate.of(2019, 2, 1), 29, 50.00, null, 0.96952395, 48.48, 7727.66, null, 8.30, null, null, 722.35,
+        checkInst(model, 31, 31, LocalDate.of(2019, 2, 1), 29, 50.00, null, 0.96952395, 48.48, 7727.66, null, 8.30, null, null, 722.34,
                 null);
-        checkInst(model, 32, 32, LocalDate.of(2019, 2, 2), 30, 50.00, null, 0.96848979, 48.42, 7685.91, null, 8.25, null, null, 714.10,
+        checkInst(model, 32, 32, LocalDate.of(2019, 2, 2), 30, 50.00, null, 0.96848979, 48.42, 7685.91, null, 8.25, null, null, 714.09,
                 null);
-        checkInst(model, 33, 33, LocalDate.of(2019, 2, 3), 31, 50.00, null, 0.96745672, 48.37, 7644.12, null, 8.21, null, null, 705.89,
+        checkInst(model, 33, 33, LocalDate.of(2019, 2, 3), 31, 50.00, null, 0.96745672, 48.37, 7644.12, null, 8.21, null, null, 705.88,
                 null);
-        checkInst(model, 34, 34, LocalDate.of(2019, 2, 4), 32, 50.00, null, 0.96642476, 48.32, 7602.28, null, 8.16, null, null, 697.73,
+        checkInst(model, 34, 34, LocalDate.of(2019, 2, 4), 32, 50.00, null, 0.96642476, 48.32, 7602.28, null, 8.16, null, null, 697.72,
                 null);
-        checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 33, 50.00, null, 0.96539390, 48.27, 7560.40, null, 8.12, null, null, 689.61,
+        checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 33, 50.00, null, 0.96539390, 48.27, 7560.40, null, 8.12, null, null, 689.60,
                 null);
-        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 34, 50.00, null, 0.96436413, 48.22, 7518.47, null, 8.07, null, null, 681.54,
+        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 34, 50.00, null, 0.96436414, 48.22, 7518.47, null, 8.07, null, null, 681.53,
                 null);
-        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 35, 50.00, null, 0.96333547, 48.17, 7476.50, null, 8.03, null, null, 673.51,
+        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 35, 50.00, null, 0.96333547, 48.17, 7476.50, null, 8.03, null, null, 673.50,
                 null);
-        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 36, 50.00, null, 0.96230790, 48.12, 7434.48, null, 7.98, null, null, 665.53,
+        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 36, 50.00, null, 0.96230791, 48.12, 7434.48, null, 7.98, null, null, 665.52,
                 null);
-        checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 37, 50.00, null, 0.96128143, 48.06, 7392.42, null, 7.94, null, null, 657.59,
+        checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 37, 50.00, null, 0.96128143, 48.06, 7392.42, null, 7.94, null, null, 657.58,
                 null);
-        checkInst(model, 40, 40, LocalDate.of(2019, 2, 10), 38, 50.00, null, 0.96025606, 48.01, 7350.31, null, 7.89, null, null, 649.70,
+        checkInst(model, 40, 40, LocalDate.of(2019, 2, 10), 38, 50.00, null, 0.96025606, 48.01, 7350.31, null, 7.89, null, null, 649.69,
                 null);
-        checkInst(model, 41, 41, LocalDate.of(2019, 2, 11), 39, 50.00, null, 0.95923178, 47.96, 7308.16, null, 7.85, null, null, 641.85,
+        checkInst(model, 41, 41, LocalDate.of(2019, 2, 11), 39, 50.00, null, 0.95923178, 47.96, 7308.16, null, 7.85, null, null, 641.84,
                 null);
-        checkInst(model, 42, 42, LocalDate.of(2019, 2, 12), 40, 50.00, null, 0.95820859, 47.91, 7265.97, null, 7.80, null, null, 634.05,
+        checkInst(model, 42, 42, LocalDate.of(2019, 2, 12), 40, 50.00, null, 0.95820859, 47.91, 7265.97, null, 7.81, null, null, 634.03,
                 null);
-        checkInst(model, 43, 43, LocalDate.of(2019, 2, 13), 41, 50.00, null, 0.95718649, 47.86, 7223.72, null, 7.76, null, null, 626.29,
+        checkInst(model, 43, 43, LocalDate.of(2019, 2, 13), 41, 50.00, null, 0.95718649, 47.86, 7223.72, null, 7.75, null, null, 626.28,
                 null);
-        checkInst(model, 44, 44, LocalDate.of(2019, 2, 14), 42, 50.00, null, 0.95616548, 47.81, 7181.44, null, 7.71, null, null, 618.58,
+        checkInst(model, 44, 44, LocalDate.of(2019, 2, 14), 42, 50.00, null, 0.95616548, 47.81, 7181.44, null, 7.72, null, null, 618.56,
                 null);
-        checkInst(model, 45, 45, LocalDate.of(2019, 2, 15), 43, 50.00, null, 0.95514557, 47.76, 7139.11, null, 7.67, null, null, 610.91,
+        checkInst(model, 45, 45, LocalDate.of(2019, 2, 15), 43, 50.00, null, 0.95514557, 47.76, 7139.11, null, 7.67, null, null, 610.89,
                 null);
-        checkInst(model, 46, 46, LocalDate.of(2019, 2, 16), 44, 50.00, null, 0.95412674, 47.71, 7096.73, null, 7.62, null, null, 603.29,
+        checkInst(model, 46, 46, LocalDate.of(2019, 2, 16), 44, 50.00, null, 0.95412674, 47.71, 7096.73, null, 7.62, null, null, 603.27,
                 null);
-        checkInst(model, 47, 47, LocalDate.of(2019, 2, 17), 45, 50.00, null, 0.95310899, 47.66, 7054.31, null, 7.58, null, null, 595.71,
+        checkInst(model, 47, 47, LocalDate.of(2019, 2, 17), 45, 50.00, null, 0.95310899, 47.66, 7054.31, null, 7.58, null, null, 595.69,
                 null);
-        checkInst(model, 48, 48, LocalDate.of(2019, 2, 18), 46, 50.00, null, 0.95209233, 47.60, 7011.84, null, 7.53, null, null, 588.18,
+        checkInst(model, 48, 48, LocalDate.of(2019, 2, 18), 46, 50.00, null, 0.95209233, 47.60, 7011.84, null, 7.53, null, null, 588.16,
                 null);
-        checkInst(model, 49, 49, LocalDate.of(2019, 2, 19), 47, 50.00, null, 0.95107676, 47.55, 6969.33, null, 7.49, null, null, 580.69,
+        checkInst(model, 49, 49, LocalDate.of(2019, 2, 19), 47, 50.00, null, 0.95107676, 47.55, 6969.33, null, 7.49, null, null, 580.67,
                 null);
-        checkInst(model, 50, 50, LocalDate.of(2019, 2, 20), 48, 50.00, null, 0.95006227, 47.50, 6926.77, null, 7.44, null, null, 573.25,
+        checkInst(model, 50, 50, LocalDate.of(2019, 2, 20), 48, 50.00, null, 0.95006227, 47.50, 6926.77, null, 7.44, null, null, 573.23,
                 null);
-        checkInst(model, 51, 51, LocalDate.of(2019, 2, 21), 49, 50.00, null, 0.94904886, 47.45, 6884.17, null, 7.40, null, null, 565.85,
+        checkInst(model, 51, 51, LocalDate.of(2019, 2, 21), 49, 50.00, null, 0.94904886, 47.45, 6884.17, null, 7.40, null, null, 565.83,
                 null);
-        checkInst(model, 52, 52, LocalDate.of(2019, 2, 22), 50, 50.00, null, 0.94803653, 47.40, 6841.52, null, 7.35, null, null, 558.50,
+        checkInst(model, 52, 52, LocalDate.of(2019, 2, 22), 50, 50.00, null, 0.94803653, 47.40, 6841.52, null, 7.35, null, null, 558.48,
                 null);
-        checkInst(model, 53, 53, LocalDate.of(2019, 2, 23), 51, 50.00, null, 0.94702529, 47.35, 6798.82, null, 7.31, null, null, 551.19,
+        checkInst(model, 53, 53, LocalDate.of(2019, 2, 23), 51, 50.00, null, 0.94702529, 47.35, 6798.82, null, 7.30, null, null, 551.18,
                 null);
-        checkInst(model, 54, 54, LocalDate.of(2019, 2, 24), 52, 50.00, null, 0.94601512, 47.30, 6756.08, null, 7.26, null, null, 543.93,
+        checkInst(model, 54, 54, LocalDate.of(2019, 2, 24), 52, 50.00, null, 0.94601512, 47.30, 6756.08, null, 7.26, null, null, 543.92,
                 null);
-        checkInst(model, 55, 55, LocalDate.of(2019, 2, 25), 53, 50.00, null, 0.94500603, 47.25, 6713.30, null, 7.21, null, null, 536.72,
+        checkInst(model, 55, 55, LocalDate.of(2019, 2, 25), 53, 50.00, null, 0.94500603, 47.25, 6713.30, null, 7.22, null, null, 536.70,
                 null);
-        checkInst(model, 56, 56, LocalDate.of(2019, 2, 26), 54, 50.00, null, 0.94399801, 47.20, 6670.47, null, 7.17, null, null, 529.55,
+        checkInst(model, 56, 56, LocalDate.of(2019, 2, 26), 54, 50.00, null, 0.94399801, 47.20, 6670.47, null, 7.17, null, null, 529.53,
                 null);
-        checkInst(model, 57, 57, LocalDate.of(2019, 2, 27), 55, 50.00, null, 0.94299107, 47.15, 6627.59, null, 7.12, null, null, 522.43,
+        checkInst(model, 57, 57, LocalDate.of(2019, 2, 27), 55, 50.00, null, 0.94299107, 47.15, 6627.59, null, 7.12, null, null, 522.41,
                 null);
-        checkInst(model, 58, 58, LocalDate.of(2019, 2, 28), 56, 50.00, null, 0.94198521, 47.10, 6584.67, null, 7.08, null, null, 515.35,
+        checkInst(model, 58, 58, LocalDate.of(2019, 2, 28), 56, 50.00, null, 0.94198521, 47.10, 6584.67, null, 7.08, null, null, 515.33,
                 null);
-        checkInst(model, 59, 59, LocalDate.of(2019, 3, 1), 57, 50.00, null, 0.94098042, 47.05, 6541.70, null, 7.03, null, null, 508.32,
+        checkInst(model, 59, 59, LocalDate.of(2019, 3, 1), 57, 50.00, null, 0.94098042, 47.05, 6541.70, null, 7.03, null, null, 508.30,
                 null);
-        checkInst(model, 60, 60, LocalDate.of(2019, 3, 2), 58, 50.00, null, 0.93997669, 47.00, 6498.68, null, 6.99, null, null, 501.33,
+        checkInst(model, 60, 60, LocalDate.of(2019, 3, 2), 58, 50.00, null, 0.93997669, 47.00, 6498.68, null, 6.98, null, null, 501.32,
                 null);
-        checkInst(model, 61, 61, LocalDate.of(2019, 3, 3), 59, 50.00, null, 0.93897404, 46.95, 6455.62, null, 6.94, null, null, 494.39,
+        checkInst(model, 61, 61, LocalDate.of(2019, 3, 3), 59, 50.00, null, 0.93897404, 46.95, 6455.62, null, 6.94, null, null, 494.38,
                 null);
-        checkInst(model, 62, 62, LocalDate.of(2019, 3, 4), 60, 50.00, null, 0.93797246, 46.90, 6412.51, null, 6.89, null, null, 487.50,
+        checkInst(model, 62, 62, LocalDate.of(2019, 3, 4), 60, 50.00, null, 0.93797246, 46.90, 6412.51, null, 6.89, null, null, 487.49,
                 null);
-        checkInst(model, 63, 63, LocalDate.of(2019, 3, 5), 61, 50.00, null, 0.93697195, 46.85, 6369.36, null, 6.85, null, null, 480.65,
+        checkInst(model, 63, 63, LocalDate.of(2019, 3, 5), 61, 50.00, null, 0.93697195, 46.85, 6369.36, null, 6.85, null, null, 480.64,
                 null);
-        checkInst(model, 64, 64, LocalDate.of(2019, 3, 6), 62, 50.00, null, 0.93597251, 46.80, 6326.16, null, 6.80, null, null, 473.85,
+        checkInst(model, 64, 64, LocalDate.of(2019, 3, 6), 62, 50.00, null, 0.93597251, 46.80, 6326.16, null, 6.80, null, null, 473.84,
                 null);
-        checkInst(model, 65, 65, LocalDate.of(2019, 3, 7), 63, 50.00, null, 0.93497413, 46.75, 6282.92, null, 6.76, null, null, 467.09,
+        checkInst(model, 65, 65, LocalDate.of(2019, 3, 7), 63, 50.00, null, 0.93497413, 46.75, 6282.92, null, 6.76, null, null, 467.08,
                 null);
-        checkInst(model, 66, 66, LocalDate.of(2019, 3, 8), 64, 50.00, null, 0.93397681, 46.70, 6239.63, null, 6.71, null, null, 460.38,
+        checkInst(model, 66, 66, LocalDate.of(2019, 3, 8), 64, 50.00, null, 0.93397681, 46.70, 6239.63, null, 6.71, null, null, 460.37,
                 null);
-        checkInst(model, 67, 67, LocalDate.of(2019, 3, 9), 65, 50.00, null, 0.93298056, 46.65, 6196.29, null, 6.66, null, null, 453.72,
+        checkInst(model, 67, 67, LocalDate.of(2019, 3, 9), 65, 50.00, null, 0.93298056, 46.65, 6196.29, null, 6.66, null, null, 453.71,
                 null);
-        checkInst(model, 68, 68, LocalDate.of(2019, 3, 10), 66, 50.00, null, 0.93198538, 46.60, 6152.91, null, 6.62, null, null, 447.10,
+        checkInst(model, 68, 68, LocalDate.of(2019, 3, 10), 66, 50.00, null, 0.93198538, 46.60, 6152.91, null, 6.62, null, null, 447.09,
                 null);
-        checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 67, 50.00, null, 0.93099125, 46.55, 6109.48, null, 6.57, null, null, 440.53,
+        checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 67, 50.00, null, 0.93099125, 46.55, 6109.48, null, 6.57, null, null, 440.52,
                 null);
-        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 68, 50.00, null, 0.92999818, 46.50, 6066.00, null, 6.52, null, null, 434.01,
+        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 68, 50.00, null, 0.92999819, 46.50, 6066.00, null, 6.52, null, null, 434.00,
                 null);
-        checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 69, 50.00, null, 0.92900618, 46.45, 6022.48, null, 6.48, null, null, 427.53,
+        checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 69, 50.00, null, 0.92900618, 46.45, 6022.48, null, 6.48, null, null, 427.52,
                 null);
-        checkInst(model, 72, 72, LocalDate.of(2019, 3, 14), 70, 50.00, null, 0.92801523, 46.40, 5978.91, null, 6.43, null, null, 421.10,
+        checkInst(model, 72, 72, LocalDate.of(2019, 3, 14), 70, 50.00, null, 0.92801523, 46.40, 5978.91, null, 6.43, null, null, 421.09,
                 null);
-        checkInst(model, 73, 73, LocalDate.of(2019, 3, 15), 71, 50.00, null, 0.92702534, 46.35, 5935.29, null, 6.38, null, null, 414.72,
+        checkInst(model, 73, 73, LocalDate.of(2019, 3, 15), 71, 50.00, null, 0.92702534, 46.35, 5935.29, null, 6.38, null, null, 414.71,
                 null);
-        checkInst(model, 74, 74, LocalDate.of(2019, 3, 16), 72, 50.00, null, 0.92603650, 46.30, 5891.63, null, 6.34, null, null, 408.38,
+        checkInst(model, 74, 74, LocalDate.of(2019, 3, 16), 72, 50.00, null, 0.92603650, 46.30, 5891.63, null, 6.34, null, null, 408.37,
                 null);
-        checkInst(model, 75, 75, LocalDate.of(2019, 3, 17), 73, 50.00, null, 0.92504872, 46.25, 5847.92, null, 6.29, null, null, 402.09,
+        checkInst(model, 75, 75, LocalDate.of(2019, 3, 17), 73, 50.00, null, 0.92504872, 46.25, 5847.92, null, 6.29, null, null, 402.08,
                 null);
-        checkInst(model, 76, 76, LocalDate.of(2019, 3, 18), 74, 50.00, null, 0.92406200, 46.20, 5804.17, null, 6.24, null, null, 395.85,
+        checkInst(model, 76, 76, LocalDate.of(2019, 3, 18), 74, 50.00, null, 0.92406200, 46.20, 5804.17, null, 6.25, null, null, 395.83,
                 null);
-        checkInst(model, 77, 77, LocalDate.of(2019, 3, 19), 75, 50.00, null, 0.92307632, 46.15, 5760.36, null, 6.20, null, null, 389.65,
+        checkInst(model, 77, 77, LocalDate.of(2019, 3, 19), 75, 50.00, null, 0.92307632, 46.15, 5760.36, null, 6.19, null, null, 389.64,
                 null);
-        checkInst(model, 78, 78, LocalDate.of(2019, 3, 20), 76, 50.00, null, 0.92209170, 46.10, 5716.52, null, 6.15, null, null, 383.50,
+        checkInst(model, 78, 78, LocalDate.of(2019, 3, 20), 76, 50.00, null, 0.92209170, 46.10, 5716.52, null, 6.16, null, null, 383.48,
                 null);
-        checkInst(model, 79, 79, LocalDate.of(2019, 3, 21), 77, 50.00, null, 0.92110813, 46.06, 5672.62, null, 6.10, null, null, 377.40,
+        checkInst(model, 79, 79, LocalDate.of(2019, 3, 21), 77, 50.00, null, 0.92110813, 46.06, 5672.62, null, 6.10, null, null, 377.38,
                 null);
-        checkInst(model, 80, 80, LocalDate.of(2019, 3, 22), 78, 50.00, null, 0.92012560, 46.01, 5628.68, null, 6.06, null, null, 371.34,
+        checkInst(model, 80, 80, LocalDate.of(2019, 3, 22), 78, 50.00, null, 0.92012560, 46.01, 5628.68, null, 6.06, null, null, 371.32,
                 null);
-        checkInst(model, 81, 81, LocalDate.of(2019, 3, 23), 79, 50.00, null, 0.91914413, 45.96, 5584.69, null, 6.01, null, null, 365.33,
+        checkInst(model, 81, 81, LocalDate.of(2019, 3, 23), 79, 50.00, null, 0.91914413, 45.96, 5584.69, null, 6.01, null, null, 365.31,
                 null);
-        checkInst(model, 82, 82, LocalDate.of(2019, 3, 24), 80, 50.00, null, 0.91816370, 45.91, 5540.65, null, 5.96, null, null, 359.37,
+        checkInst(model, 82, 82, LocalDate.of(2019, 3, 24), 80, 50.00, null, 0.91816370, 45.91, 5540.65, null, 5.96, null, null, 359.35,
                 null);
-        checkInst(model, 83, 83, LocalDate.of(2019, 3, 25), 81, 50.00, null, 0.91718432, 45.86, 5496.57, null, 5.92, null, null, 353.45,
+        checkInst(model, 83, 83, LocalDate.of(2019, 3, 25), 81, 50.00, null, 0.91718432, 45.86, 5496.57, null, 5.92, null, null, 353.43,
                 null);
-        checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 82, 50.00, null, 0.91620598, 45.81, 5452.44, null, 5.87, null, null, 347.58,
+        checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 82, 50.00, null, 0.91620598, 45.81, 5452.44, null, 5.87, null, null, 347.56,
                 null);
-        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 83, 50.00, null, 0.91522868, 45.76, 5408.26, null, 5.82, null, null, 341.76,
+        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 83, 50.00, null, 0.91522869, 45.76, 5408.26, null, 5.82, null, null, 341.74,
                 null);
-        checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 84, 50.00, null, 0.91425243, 45.71, 5364.03, null, 5.78, null, null, 335.98,
+        checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 84, 50.00, null, 0.91425243, 45.71, 5364.03, null, 5.77, null, null, 335.97,
                 null);
-        checkInst(model, 87, 87, LocalDate.of(2019, 3, 29), 85, 50.00, null, 0.91327722, 45.66, 5319.76, null, 5.73, null, null, 330.25,
+        checkInst(model, 87, 87, LocalDate.of(2019, 3, 29), 85, 50.00, null, 0.91327722, 45.66, 5319.76, null, 5.73, null, null, 330.24,
                 null);
-        checkInst(model, 88, 88, LocalDate.of(2019, 3, 30), 86, 50.00, null, 0.91230305, 45.62, 5275.44, null, 5.68, null, null, 324.57,
+        checkInst(model, 88, 88, LocalDate.of(2019, 3, 30), 86, 50.00, null, 0.91230305, 45.62, 5275.44, null, 5.68, null, null, 324.56,
                 null);
-        checkInst(model, 89, 89, LocalDate.of(2019, 3, 31), 87, 50.00, null, 0.91132992, 45.57, 5231.08, null, 5.63, null, null, 318.94,
+        checkInst(model, 89, 89, LocalDate.of(2019, 3, 31), 87, 50.00, null, 0.91132992, 45.57, 5231.08, null, 5.64, null, null, 318.92,
                 null);
-        checkInst(model, 90, 90, LocalDate.of(2019, 4, 1), 88, 50.00, null, 0.91035783, 45.52, 5186.66, null, 5.59, null, null, 313.35,
+        checkInst(model, 90, 90, LocalDate.of(2019, 4, 1), 88, 50.00, null, 0.91035783, 45.52, 5186.66, null, 5.58, null, null, 313.34,
                 null);
-        checkInst(model, 91, 91, LocalDate.of(2019, 4, 2), 89, 50.00, null, 0.90938677, 45.47, 5142.20, null, 5.54, null, null, 307.81,
+        checkInst(model, 91, 91, LocalDate.of(2019, 4, 2), 89, 50.00, null, 0.90938677, 45.47, 5142.20, null, 5.54, null, null, 307.80,
                 null);
-        checkInst(model, 92, 92, LocalDate.of(2019, 4, 3), 90, 50.00, null, 0.90841675, 45.42, 5097.69, null, 5.49, null, null, 302.32,
+        checkInst(model, 92, 92, LocalDate.of(2019, 4, 3), 90, 50.00, null, 0.90841675, 45.42, 5097.69, null, 5.49, null, null, 302.31,
                 null);
-        checkInst(model, 93, 93, LocalDate.of(2019, 4, 4), 91, 50.00, null, 0.90744776, 45.37, 5053.13, null, 5.44, null, null, 296.88,
+        checkInst(model, 93, 93, LocalDate.of(2019, 4, 4), 91, 50.00, null, 0.90744776, 45.37, 5053.13, null, 5.44, null, null, 296.87,
                 null);
-        checkInst(model, 94, 94, LocalDate.of(2019, 4, 5), 92, 50.00, null, 0.90647981, 45.32, 5008.53, null, 5.40, null, null, 291.48,
+        checkInst(model, 94, 94, LocalDate.of(2019, 4, 5), 92, 50.00, null, 0.90647981, 45.32, 5008.53, null, 5.40, null, null, 291.47,
                 null);
-        checkInst(model, 95, 95, LocalDate.of(2019, 4, 6), 93, 50.00, null, 0.90551289, 45.28, 4963.88, null, 5.35, null, null, 286.13,
+        checkInst(model, 95, 95, LocalDate.of(2019, 4, 6), 93, 50.00, null, 0.90551289, 45.28, 4963.88, null, 5.35, null, null, 286.12,
                 null);
-        checkInst(model, 96, 96, LocalDate.of(2019, 4, 7), 94, 50.00, null, 0.90454700, 45.23, 4919.18, null, 5.30, null, null, 280.83,
+        checkInst(model, 96, 96, LocalDate.of(2019, 4, 7), 94, 50.00, null, 0.90454700, 45.23, 4919.18, null, 5.30, null, null, 280.82,
                 null);
-        checkInst(model, 97, 97, LocalDate.of(2019, 4, 8), 95, 50.00, null, 0.90358215, 45.18, 4874.43, null, 5.25, null, null, 275.58,
+        checkInst(model, 97, 97, LocalDate.of(2019, 4, 8), 95, 50.00, null, 0.90358215, 45.18, 4874.43, null, 5.25, null, null, 275.57,
                 null);
-        checkInst(model, 98, 98, LocalDate.of(2019, 4, 9), 96, 50.00, null, 0.90261832, 45.13, 4829.64, null, 5.20, null, null, 270.38,
+        checkInst(model, 98, 98, LocalDate.of(2019, 4, 9), 96, 50.00, null, 0.90261832, 45.13, 4829.64, null, 5.21, null, null, 270.36,
                 null);
-        checkInst(model, 99, 99, LocalDate.of(2019, 4, 10), 97, 50.00, null, 0.90165552, 45.08, 4784.79, null, 5.16, null, null, 265.22,
+        checkInst(model, 99, 99, LocalDate.of(2019, 4, 10), 97, 50.00, null, 0.90165552, 45.08, 4784.79, null, 5.15, null, null, 265.21,
                 null);
-        checkInst(model, 100, 100, LocalDate.of(2019, 4, 11), 98, 50.00, null, 0.90069374, 45.03, 4739.90, null, 5.11, null, null, 260.11,
+        checkInst(model, 100, 100, LocalDate.of(2019, 4, 11), 98, 50.00, null, 0.90069374, 45.03, 4739.90, null, 5.11, null, null, 260.10,
                 null);
-        checkInst(model, 101, 101, LocalDate.of(2019, 4, 12), 99, 50.00, null, 0.89973299, 44.99, 4694.96, null, 5.06, null, null, 255.05,
+        checkInst(model, 101, 101, LocalDate.of(2019, 4, 12), 99, 50.00, null, 0.89973299, 44.99, 4694.96, null, 5.06, null, null, 255.04,
                 null);
-        checkInst(model, 102, 102, LocalDate.of(2019, 4, 13), 100, 50.00, null, 0.89877327, 44.94, 4649.98, null, 5.01, null, null, 250.04,
+        checkInst(model, 102, 102, LocalDate.of(2019, 4, 13), 100, 50.00, null, 0.89877327, 44.94, 4649.98, null, 5.02, null, null, 250.02,
                 null);
-        checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 101, 50.00, null, 0.89781457, 44.89, 4604.94, null, 4.97, null, null, 245.07,
+        checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 101, 50.00, null, 0.89781457, 44.89, 4604.94, null, 4.96, null, null, 245.06,
                 null);
-        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 102, 50.00, null, 0.89685689, 44.84, 4559.86, null, 4.92, null, null, 240.15,
+        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 102, 50.00, null, 0.89685690, 44.84, 4559.86, null, 4.92, null, null, 240.14,
                 null);
-        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 103, 50.00, null, 0.89590024, 44.80, 4514.73, null, 4.87, null, null, 235.28,
+        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 103, 50.00, null, 0.89590024, 44.80, 4514.73, null, 4.87, null, null, 235.27,
                 null);
-        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 104, 50.00, null, 0.89494460, 44.75, 4469.55, null, 4.82, null, null, 230.46,
+        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 104, 50.00, null, 0.89494461, 44.75, 4469.55, null, 4.82, null, null, 230.45,
                 null);
-        checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 105, 50.00, null, 0.89398999, 44.70, 4424.32, null, 4.77, null, null, 225.69,
+        checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 105, 50.00, null, 0.89398999, 44.70, 4424.32, null, 4.77, null, null, 225.68,
                 null);
-        checkInst(model, 108, 108, LocalDate.of(2019, 4, 19), 106, 50.00, null, 0.89303639, 44.65, 4379.05, null, 4.72, null, null, 220.97,
+        checkInst(model, 108, 108, LocalDate.of(2019, 4, 19), 106, 50.00, null, 0.89303639, 44.65, 4379.05, null, 4.73, null, null, 220.95,
                 null);
-        checkInst(model, 109, 109, LocalDate.of(2019, 4, 20), 107, 50.00, null, 0.89208381, 44.60, 4333.72, null, 4.68, null, null, 216.29,
+        checkInst(model, 109, 109, LocalDate.of(2019, 4, 20), 107, 50.00, null, 0.89208381, 44.60, 4333.72, null, 4.67, null, null, 216.28,
                 null);
-        checkInst(model, 110, 110, LocalDate.of(2019, 4, 21), 108, 50.00, null, 0.89113225, 44.56, 4288.35, null, 4.63, null, null, 211.66,
+        checkInst(model, 110, 110, LocalDate.of(2019, 4, 21), 108, 50.00, null, 0.89113225, 44.56, 4288.35, null, 4.63, null, null, 211.65,
                 null);
-        checkInst(model, 111, 111, LocalDate.of(2019, 4, 22), 109, 50.00, null, 0.89018170, 44.51, 4242.93, null, 4.58, null, null, 207.08,
+        checkInst(model, 111, 111, LocalDate.of(2019, 4, 22), 109, 50.00, null, 0.89018170, 44.51, 4242.93, null, 4.58, null, null, 207.07,
                 null);
-        checkInst(model, 112, 112, LocalDate.of(2019, 4, 23), 110, 50.00, null, 0.88923216, 44.46, 4197.46, null, 4.53, null, null, 202.55,
+        checkInst(model, 112, 112, LocalDate.of(2019, 4, 23), 110, 50.00, null, 0.88923216, 44.46, 4197.46, null, 4.53, null, null, 202.54,
                 null);
-        checkInst(model, 113, 113, LocalDate.of(2019, 4, 24), 111, 50.00, null, 0.88828364, 44.41, 4151.94, null, 4.48, null, null, 198.07,
+        checkInst(model, 113, 113, LocalDate.of(2019, 4, 24), 111, 50.00, null, 0.88828364, 44.41, 4151.94, null, 4.48, null, null, 198.06,
                 null);
-        checkInst(model, 114, 114, LocalDate.of(2019, 4, 25), 112, 50.00, null, 0.88733613, 44.37, 4106.38, null, 4.43, null, null, 193.64,
+        checkInst(model, 114, 114, LocalDate.of(2019, 4, 25), 112, 50.00, null, 0.88733613, 44.37, 4106.38, null, 4.44, null, null, 193.62,
                 null);
-        checkInst(model, 115, 115, LocalDate.of(2019, 4, 26), 113, 50.00, null, 0.88638963, 44.32, 4060.76, null, 4.38, null, null, 189.26,
+        checkInst(model, 115, 115, LocalDate.of(2019, 4, 26), 113, 50.00, null, 0.88638963, 44.32, 4060.76, null, 4.38, null, null, 189.24,
                 null);
-        checkInst(model, 116, 116, LocalDate.of(2019, 4, 27), 114, 50.00, null, 0.88544414, 44.27, 4015.10, null, 4.34, null, null, 184.92,
+        checkInst(model, 116, 116, LocalDate.of(2019, 4, 27), 114, 50.00, null, 0.88544414, 44.27, 4015.10, null, 4.34, null, null, 184.90,
                 null);
-        checkInst(model, 117, 117, LocalDate.of(2019, 4, 28), 115, 50.00, null, 0.88449966, 44.22, 3969.38, null, 4.29, null, null, 180.63,
+        checkInst(model, 117, 117, LocalDate.of(2019, 4, 28), 115, 50.00, null, 0.88449966, 44.22, 3969.38, null, 4.28, null, null, 180.62,
                 null);
-        checkInst(model, 118, 118, LocalDate.of(2019, 4, 29), 116, 50.00, null, 0.88355619, 44.18, 3923.62, null, 4.24, null, null, 176.39,
+        checkInst(model, 118, 118, LocalDate.of(2019, 4, 29), 116, 50.00, null, 0.88355619, 44.18, 3923.62, null, 4.24, null, null, 176.38,
                 null);
-        checkInst(model, 119, 119, LocalDate.of(2019, 4, 30), 117, 50.00, null, 0.88261372, 44.13, 3877.81, null, 4.19, null, null, 172.20,
+        checkInst(model, 119, 119, LocalDate.of(2019, 4, 30), 117, 50.00, null, 0.88261372, 44.13, 3877.81, null, 4.19, null, null, 172.19,
                 null);
-        checkInst(model, 120, 120, LocalDate.of(2019, 5, 1), 118, 50.00, null, 0.88167226, 44.08, 3831.95, null, 4.14, null, null, 168.06,
+        checkInst(model, 120, 120, LocalDate.of(2019, 5, 1), 118, 50.00, null, 0.88167226, 44.08, 3831.95, null, 4.14, null, null, 168.05,
                 null);
-        checkInst(model, 121, 121, LocalDate.of(2019, 5, 2), 119, 50.00, null, 0.88073180, 44.04, 3786.04, null, 4.09, null, null, 163.97,
+        checkInst(model, 121, 121, LocalDate.of(2019, 5, 2), 119, 50.00, null, 0.88073180, 44.04, 3786.04, null, 4.09, null, null, 163.96,
                 null);
-        checkInst(model, 122, 122, LocalDate.of(2019, 5, 3), 120, 50.00, null, 0.87979234, 43.99, 3740.09, null, 4.04, null, null, 159.93,
+        checkInst(model, 122, 122, LocalDate.of(2019, 5, 3), 120, 50.00, null, 0.87979234, 43.99, 3740.09, null, 4.05, null, null, 159.91,
                 null);
-        checkInst(model, 123, 123, LocalDate.of(2019, 5, 4), 121, 50.00, null, 0.87885389, 43.94, 3694.08, null, 3.99, null, null, 155.94,
+        checkInst(model, 123, 123, LocalDate.of(2019, 5, 4), 121, 50.00, null, 0.87885389, 43.94, 3694.08, null, 3.99, null, null, 155.92,
                 null);
-        checkInst(model, 124, 124, LocalDate.of(2019, 5, 5), 122, 50.00, null, 0.87791644, 43.90, 3648.03, null, 3.94, null, null, 152.00,
+        checkInst(model, 124, 124, LocalDate.of(2019, 5, 5), 122, 50.00, null, 0.87791644, 43.90, 3648.03, null, 3.95, null, null, 151.97,
                 null);
-        checkInst(model, 125, 125, LocalDate.of(2019, 5, 6), 123, 50.00, null, 0.87697999, 43.85, 3601.92, null, 3.90, null, null, 148.10,
+        checkInst(model, 125, 125, LocalDate.of(2019, 5, 6), 123, 50.00, null, 0.87697999, 43.85, 3601.92, null, 3.89, null, null, 148.08,
                 null);
-        checkInst(model, 126, 126, LocalDate.of(2019, 5, 7), 124, 50.00, null, 0.87604453, 43.80, 3555.77, null, 3.85, null, null, 144.25,
+        checkInst(model, 126, 126, LocalDate.of(2019, 5, 7), 124, 50.00, null, 0.87604453, 43.80, 3555.77, null, 3.85, null, null, 144.23,
                 null);
-        checkInst(model, 127, 127, LocalDate.of(2019, 5, 8), 125, 50.00, null, 0.87511008, 43.76, 3509.56, null, 3.80, null, null, 140.45,
+        checkInst(model, 127, 127, LocalDate.of(2019, 5, 8), 125, 50.00, null, 0.87511008, 43.76, 3509.56, null, 3.79, null, null, 140.44,
                 null);
-        checkInst(model, 128, 128, LocalDate.of(2019, 5, 9), 126, 50.00, null, 0.87417662, 43.71, 3463.31, null, 3.75, null, null, 136.70,
+        checkInst(model, 128, 128, LocalDate.of(2019, 5, 9), 126, 50.00, null, 0.87417662, 43.71, 3463.31, null, 3.75, null, null, 136.69,
                 null);
-        checkInst(model, 129, 129, LocalDate.of(2019, 5, 10), 127, 50.00, null, 0.87324416, 43.66, 3417.01, null, 3.70, null, null, 133.00,
+        checkInst(model, 129, 129, LocalDate.of(2019, 5, 10), 127, 50.00, null, 0.87324416, 43.66, 3417.01, null, 3.70, null, null, 132.99,
                 null);
-        checkInst(model, 130, 130, LocalDate.of(2019, 5, 11), 128, 50.00, null, 0.87231269, 43.62, 3370.66, null, 3.65, null, null, 129.35,
+        checkInst(model, 130, 130, LocalDate.of(2019, 5, 11), 128, 50.00, null, 0.87231269, 43.62, 3370.66, null, 3.65, null, null, 129.34,
                 null);
-        checkInst(model, 131, 131, LocalDate.of(2019, 5, 12), 129, 50.00, null, 0.87138221, 43.57, 3324.26, null, 3.60, null, null, 125.75,
+        checkInst(model, 131, 131, LocalDate.of(2019, 5, 12), 129, 50.00, null, 0.87138221, 43.57, 3324.26, null, 3.60, null, null, 125.74,
                 null);
-        checkInst(model, 132, 132, LocalDate.of(2019, 5, 13), 130, 50.00, null, 0.87045273, 43.52, 3277.81, null, 3.55, null, null, 122.20,
+        checkInst(model, 132, 132, LocalDate.of(2019, 5, 13), 130, 50.00, null, 0.87045273, 43.52, 3277.81, null, 3.55, null, null, 122.19,
                 null);
-        checkInst(model, 133, 133, LocalDate.of(2019, 5, 14), 131, 50.00, null, 0.86952424, 43.48, 3231.31, null, 3.50, null, null, 118.70,
+        checkInst(model, 133, 133, LocalDate.of(2019, 5, 14), 131, 50.00, null, 0.86952424, 43.48, 3231.31, null, 3.50, null, null, 118.69,
                 null);
-        checkInst(model, 134, 134, LocalDate.of(2019, 5, 15), 132, 50.00, null, 0.86859674, 43.43, 3184.76, null, 3.45, null, null, 115.25,
+        checkInst(model, 134, 134, LocalDate.of(2019, 5, 15), 132, 50.00, null, 0.86859674, 43.43, 3184.76, null, 3.45, null, null, 115.24,
                 null);
-        checkInst(model, 135, 135, LocalDate.of(2019, 5, 16), 133, 50.00, null, 0.86767023, 43.38, 3138.16, null, 3.40, null, null, 111.85,
+        checkInst(model, 135, 135, LocalDate.of(2019, 5, 16), 133, 50.00, null, 0.86767023, 43.38, 3138.16, null, 3.40, null, null, 111.84,
                 null);
-        checkInst(model, 136, 136, LocalDate.of(2019, 5, 17), 134, 50.00, null, 0.86674471, 43.34, 3091.51, null, 3.35, null, null, 108.50,
+        checkInst(model, 136, 136, LocalDate.of(2019, 5, 17), 134, 50.00, null, 0.86674471, 43.34, 3091.51, null, 3.35, null, null, 108.49,
                 null);
-        checkInst(model, 137, 137, LocalDate.of(2019, 5, 18), 135, 50.00, null, 0.86582017, 43.29, 3044.81, null, 3.30, null, null, 105.20,
+        checkInst(model, 137, 137, LocalDate.of(2019, 5, 18), 135, 50.00, null, 0.86582017, 43.29, 3044.81, null, 3.30, null, null, 105.19,
                 null);
-        checkInst(model, 138, 138, LocalDate.of(2019, 5, 19), 136, 50.00, null, 0.86489662, 43.24, 2998.06, null, 3.25, null, null, 101.95,
+        checkInst(model, 138, 138, LocalDate.of(2019, 5, 19), 136, 50.00, null, 0.86489662, 43.24, 2998.06, null, 3.25, null, null, 101.94,
                 null);
-        checkInst(model, 139, 139, LocalDate.of(2019, 5, 20), 137, 50.00, null, 0.86397406, 43.20, 2951.26, null, 3.20, null, null, 98.75,
+        checkInst(model, 139, 139, LocalDate.of(2019, 5, 20), 137, 50.00, null, 0.86397406, 43.20, 2951.26, null, 3.20, null, null, 98.74,
                 null);
-        checkInst(model, 140, 140, LocalDate.of(2019, 5, 21), 138, 50.00, null, 0.86305248, 43.15, 2904.42, null, 3.15, null, null, 95.60,
+        checkInst(model, 140, 140, LocalDate.of(2019, 5, 21), 138, 50.00, null, 0.86305248, 43.15, 2904.42, null, 3.16, null, null, 95.58,
                 null);
-        checkInst(model, 141, 141, LocalDate.of(2019, 5, 22), 139, 50.00, null, 0.86213188, 43.11, 2857.52, null, 3.10, null, null, 92.50,
+        checkInst(model, 141, 141, LocalDate.of(2019, 5, 22), 139, 50.00, null, 0.86213188, 43.11, 2857.52, null, 3.10, null, null, 92.48,
                 null);
-        checkInst(model, 142, 142, LocalDate.of(2019, 5, 23), 140, 50.00, null, 0.86121227, 43.06, 2810.57, null, 3.05, null, null, 89.45,
+        checkInst(model, 142, 142, LocalDate.of(2019, 5, 23), 140, 50.00, null, 0.86121227, 43.06, 2810.57, null, 3.05, null, null, 89.43,
                 null);
-        checkInst(model, 143, 143, LocalDate.of(2019, 5, 24), 141, 50.00, null, 0.86029363, 43.01, 2763.57, null, 3.00, null, null, 86.45,
+        checkInst(model, 143, 143, LocalDate.of(2019, 5, 24), 141, 50.00, null, 0.86029363, 43.01, 2763.57, null, 3.00, null, null, 86.43,
                 null);
-        checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 142, 50.00, null, 0.85937598, 42.97, 2716.52, null, 2.95, null, null, 83.50,
+        checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 142, 50.00, null, 0.85937598, 42.97, 2716.52, null, 2.95, null, null, 83.48,
                 null);
-        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 143, 50.00, null, 0.85845930, 42.92, 2669.42, null, 2.90, null, null, 80.60,
+        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 143, 50.00, null, 0.85845931, 42.92, 2669.42, null, 2.90, null, null, 80.58,
                 null);
-        checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 144, 50.00, null, 0.85754361, 42.88, 2622.27, null, 2.85, null, null, 77.75,
+        checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 144, 50.00, null, 0.85754361, 42.88, 2622.27, null, 2.85, null, null, 77.73,
                 null);
-        checkInst(model, 147, 147, LocalDate.of(2019, 5, 28), 145, 50.00, null, 0.85662889, 42.83, 2575.07, null, 2.80, null, null, 74.95,
+        checkInst(model, 147, 147, LocalDate.of(2019, 5, 28), 145, 50.00, null, 0.85662889, 42.83, 2575.07, null, 2.80, null, null, 74.93,
                 null);
-        checkInst(model, 148, 148, LocalDate.of(2019, 5, 29), 146, 50.00, null, 0.85571514, 42.79, 2527.82, null, 2.75, null, null, 72.20,
+        checkInst(model, 148, 148, LocalDate.of(2019, 5, 29), 146, 50.00, null, 0.85571514, 42.79, 2527.82, null, 2.75, null, null, 72.18,
                 null);
-        checkInst(model, 149, 149, LocalDate.of(2019, 5, 30), 147, 50.00, null, 0.85480237, 42.74, 2480.52, null, 2.70, null, null, 69.50,
+        checkInst(model, 149, 149, LocalDate.of(2019, 5, 30), 147, 50.00, null, 0.85480237, 42.74, 2480.52, null, 2.70, null, null, 69.48,
                 null);
-        checkInst(model, 150, 150, LocalDate.of(2019, 5, 31), 148, 50.00, null, 0.85389057, 42.69, 2433.17, null, 2.65, null, null, 66.85,
+        checkInst(model, 150, 150, LocalDate.of(2019, 5, 31), 148, 50.00, null, 0.85389057, 42.69, 2433.17, null, 2.65, null, null, 66.83,
                 null);
-        checkInst(model, 151, 151, LocalDate.of(2019, 6, 1), 149, 50.00, null, 0.85297975, 42.65, 2385.77, null, 2.60, null, null, 64.25,
+        checkInst(model, 151, 151, LocalDate.of(2019, 6, 1), 149, 50.00, null, 0.85297975, 42.65, 2385.77, null, 2.60, null, null, 64.23,
                 null);
-        checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 150, 50.00, null, 0.85206990, 42.60, 2338.31, null, 2.55, null, null, 61.70,
+        checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 150, 50.00, null, 0.85206990, 42.60, 2338.31, null, 2.54, null, null, 61.69,
                 null);
-        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 151, 50.00, null, 0.85116101, 42.56, 2290.81, null, 2.50, null, null, 59.20,
+        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 151, 50.00, null, 0.85116102, 42.56, 2290.81, null, 2.50, null, null, 59.19,
                 null);
-        checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 152, 50.00, null, 0.85025310, 42.51, 2243.26, null, 2.45, null, null, 56.75,
+        checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 152, 50.00, null, 0.85025310, 42.51, 2243.26, null, 2.45, null, null, 56.74,
                 null);
-        checkInst(model, 155, 155, LocalDate.of(2019, 6, 5), 153, 50.00, null, 0.84934616, 42.47, 2195.65, null, 2.40, null, null, 54.35,
+        checkInst(model, 155, 155, LocalDate.of(2019, 6, 5), 153, 50.00, null, 0.84934616, 42.47, 2195.65, null, 2.39, null, null, 54.35,
                 null);
-        checkInst(model, 156, 156, LocalDate.of(2019, 6, 6), 154, 50.00, null, 0.84844018, 42.42, 2148.00, null, 2.34, null, null, 52.01,
+        checkInst(model, 156, 156, LocalDate.of(2019, 6, 6), 154, 50.00, null, 0.84844018, 42.42, 2148.00, null, 2.35, null, null, 52.00,
                 null);
-        checkInst(model, 157, 157, LocalDate.of(2019, 6, 7), 155, 50.00, null, 0.84753517, 42.38, 2100.29, null, 2.29, null, null, 49.72,
+        checkInst(model, 157, 157, LocalDate.of(2019, 6, 7), 155, 50.00, null, 0.84753517, 42.38, 2100.29, null, 2.29, null, null, 49.71,
                 null);
-        checkInst(model, 158, 158, LocalDate.of(2019, 6, 8), 156, 50.00, null, 0.84663113, 42.33, 2052.53, null, 2.24, null, null, 47.48,
+        checkInst(model, 158, 158, LocalDate.of(2019, 6, 8), 156, 50.00, null, 0.84663113, 42.33, 2052.53, null, 2.24, null, null, 47.47,
                 null);
-        checkInst(model, 159, 159, LocalDate.of(2019, 6, 9), 157, 50.00, null, 0.84572805, 42.29, 2004.73, null, 2.19, null, null, 45.29,
+        checkInst(model, 159, 159, LocalDate.of(2019, 6, 9), 157, 50.00, null, 0.84572805, 42.29, 2004.73, null, 2.20, null, null, 45.27,
                 null);
-        checkInst(model, 160, 160, LocalDate.of(2019, 6, 10), 158, 50.00, null, 0.84482593, 42.24, 1956.87, null, 2.14, null, null, 43.15,
+        checkInst(model, 160, 160, LocalDate.of(2019, 6, 10), 158, 50.00, null, 0.84482593, 42.24, 1956.87, null, 2.14, null, null, 43.13,
                 null);
-        checkInst(model, 161, 161, LocalDate.of(2019, 6, 11), 159, 50.00, null, 0.84392477, 42.20, 1908.96, null, 2.09, null, null, 41.06,
+        checkInst(model, 161, 161, LocalDate.of(2019, 6, 11), 159, 50.00, null, 0.84392477, 42.20, 1908.96, null, 2.09, null, null, 41.04,
                 null);
-        checkInst(model, 162, 162, LocalDate.of(2019, 6, 12), 160, 50.00, null, 0.84302458, 42.15, 1860.99, null, 2.04, null, null, 39.02,
+        checkInst(model, 162, 162, LocalDate.of(2019, 6, 12), 160, 50.00, null, 0.84302458, 42.15, 1860.99, null, 2.03, null, null, 39.01,
                 null);
-        checkInst(model, 163, 163, LocalDate.of(2019, 6, 13), 161, 50.00, null, 0.84212535, 42.11, 1812.98, null, 1.99, null, null, 37.03,
+        checkInst(model, 163, 163, LocalDate.of(2019, 6, 13), 161, 50.00, null, 0.84212535, 42.11, 1812.98, null, 1.99, null, null, 37.02,
                 null);
-        checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 162, 50.00, null, 0.84122707, 42.06, 1764.92, null, 1.94, null, null, 35.09,
+        checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 162, 50.00, null, 0.84122707, 42.06, 1764.92, null, 1.94, null, null, 35.08,
                 null);
-        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 163, 50.00, null, 0.84032975, 42.02, 1716.80, null, 1.88, null, null, 33.21,
+        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 163, 50.00, null, 0.84032976, 42.02, 1716.80, null, 1.88, null, null, 33.20,
                 null);
-        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 164, 50.00, null, 0.83943340, 41.97, 1668.64, null, 1.83, null, null, 31.38,
+        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 164, 50.00, null, 0.83943340, 41.97, 1668.64, null, 1.84, null, null, 31.36,
                 null);
-        checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 165, 50.00, null, 0.83853799, 41.93, 1620.42, null, 1.78, null, null, 29.60,
+        checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 165, 50.00, null, 0.83853799, 41.93, 1620.42, null, 1.78, null, null, 29.58,
                 null);
-        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 166, 50.00, null, 0.83764354, 41.88, 1572.15, null, 1.73, null, null, 27.87,
+        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 166, 50.00, null, 0.83764355, 41.88, 1572.15, null, 1.73, null, null, 27.85,
                 null);
-        checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 167, 50.00, null, 0.83675005, 41.84, 1523.83, null, 1.68, null, null, 26.19,
+        checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 167, 50.00, null, 0.83675005, 41.84, 1523.83, null, 1.68, null, null, 26.17,
                 null);
-        checkInst(model, 170, 170, LocalDate.of(2019, 6, 20), 168, 50.00, null, 0.83585751, 41.79, 1475.45, null, 1.63, null, null, 24.56,
+        checkInst(model, 170, 170, LocalDate.of(2019, 6, 20), 168, 50.00, null, 0.83585751, 41.79, 1475.45, null, 1.62, null, null, 24.55,
                 null);
-        checkInst(model, 171, 171, LocalDate.of(2019, 6, 21), 169, 50.00, null, 0.83496592, 41.75, 1427.03, null, 1.58, null, null, 22.98,
+        checkInst(model, 171, 171, LocalDate.of(2019, 6, 21), 169, 50.00, null, 0.83496592, 41.75, 1427.03, null, 1.58, null, null, 22.97,
                 null);
-        checkInst(model, 172, 172, LocalDate.of(2019, 6, 22), 170, 50.00, null, 0.83407528, 41.70, 1378.55, null, 1.52, null, null, 21.46,
+        checkInst(model, 172, 172, LocalDate.of(2019, 6, 22), 170, 50.00, null, 0.83407528, 41.70, 1378.55, null, 1.52, null, null, 21.45,
                 null);
-        checkInst(model, 173, 173, LocalDate.of(2019, 6, 23), 171, 50.00, null, 0.83318560, 41.66, 1330.02, null, 1.47, null, null, 19.99,
+        checkInst(model, 173, 173, LocalDate.of(2019, 6, 23), 171, 50.00, null, 0.83318560, 41.66, 1330.02, null, 1.47, null, null, 19.98,
                 null);
-        checkInst(model, 174, 174, LocalDate.of(2019, 6, 24), 172, 50.00, null, 0.83229686, 41.61, 1281.45, null, 1.42, null, null, 18.57,
+        checkInst(model, 174, 174, LocalDate.of(2019, 6, 24), 172, 50.00, null, 0.83229686, 41.61, 1281.45, null, 1.43, null, null, 18.55,
                 null);
-        checkInst(model, 175, 175, LocalDate.of(2019, 6, 25), 173, 50.00, null, 0.83140907, 41.57, 1232.81, null, 1.37, null, null, 17.20,
+        checkInst(model, 175, 175, LocalDate.of(2019, 6, 25), 173, 50.00, null, 0.83140907, 41.57, 1232.81, null, 1.36, null, null, 17.19,
                 null);
-        checkInst(model, 176, 176, LocalDate.of(2019, 6, 26), 174, 50.00, null, 0.83052222, 41.53, 1184.13, null, 1.32, null, null, 15.88,
+        checkInst(model, 176, 176, LocalDate.of(2019, 6, 26), 174, 50.00, null, 0.83052222, 41.53, 1184.13, null, 1.32, null, null, 15.87,
                 null);
-        checkInst(model, 177, 177, LocalDate.of(2019, 6, 27), 175, 50.00, null, 0.82963633, 41.48, 1135.39, null, 1.26, null, null, 14.62,
+        checkInst(model, 177, 177, LocalDate.of(2019, 6, 27), 175, 50.00, null, 0.82963633, 41.48, 1135.39, null, 1.26, null, null, 14.61,
                 null);
-        checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 176, 50.00, null, 0.82875137, 41.44, 1086.61, null, 1.21, null, null, 13.41,
+        checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 176, 50.00, null, 0.82875137, 41.44, 1086.61, null, 1.22, null, null, 13.39,
                 null);
-        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 177, 50.00, null, 0.82786736, 41.39, 1037.77, null, 1.16, null, null, 12.25,
+        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 177, 50.00, null, 0.82786737, 41.39, 1037.77, null, 1.16, null, null, 12.23,
                 null);
-        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 178, 50.00, null, 0.82698430, 41.35, 988.88, null, 1.11, null, null, 11.14,
+        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 178, 50.00, null, 0.82698430, 41.35, 988.88, null, 1.11, null, null, 11.12,
                 null);
-        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 179, 50.00, null, 0.82610217, 41.31, 939.93, null, 1.06, null, null, 10.08,
+        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 179, 50.00, null, 0.82610218, 41.31, 939.93, null, 1.05, null, null, 10.07,
                 null);
-        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 180, 50.00, null, 0.82522099, 41.26, 890.93, null, 1.00, null, null, 9.08,
+        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 180, 50.00, null, 0.82522099, 41.26, 890.93, null, 1.00, null, null, 9.07,
                 null);
-        checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 181, 50.00, null, 0.82434075, 41.22, 841.89, null, 0.95, null, null, 8.13,
+        checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 181, 50.00, null, 0.82434075, 41.22, 841.89, null, 0.96, null, null, 8.11,
                 null);
-        checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 182, 50.00, null, 0.82346144, 41.17, 792.79, null, 0.90, null, null, 7.23,
+        checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 182, 50.00, null, 0.82346145, 41.17, 792.79, null, 0.90, null, null, 7.21,
                 null);
-        checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 183, 50.00, null, 0.82258308, 41.13, 743.63, null, 0.85, null, null, 6.38,
+        checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 183, 50.00, null, 0.82258308, 41.13, 743.63, null, 0.84, null, null, 6.37,
                 null);
-        checkInst(model, 186, 186, LocalDate.of(2019, 7, 6), 184, 50.00, null, 0.82170565, 41.09, 694.43, null, 0.79, null, null, 5.59,
+        checkInst(model, 186, 186, LocalDate.of(2019, 7, 6), 184, 50.00, null, 0.82170565, 41.09, 694.43, null, 0.80, null, null, 5.57,
                 null);
-        checkInst(model, 187, 187, LocalDate.of(2019, 7, 7), 185, 50.00, null, 0.82082916, 41.04, 645.17, null, 0.74, null, null, 4.85,
+        checkInst(model, 187, 187, LocalDate.of(2019, 7, 7), 185, 50.00, null, 0.82082916, 41.04, 645.17, null, 0.74, null, null, 4.83,
                 null);
-        checkInst(model, 188, 188, LocalDate.of(2019, 7, 8), 186, 50.00, null, 0.81995360, 41.00, 595.86, null, 0.69, null, null, 4.16,
+        checkInst(model, 188, 188, LocalDate.of(2019, 7, 8), 186, 50.00, null, 0.81995360, 41.00, 595.86, null, 0.69, null, null, 4.14,
                 null);
-        checkInst(model, 189, 189, LocalDate.of(2019, 7, 9), 187, 50.00, null, 0.81907897, 40.95, 546.49, null, 0.64, null, null, 3.52,
+        checkInst(model, 189, 189, LocalDate.of(2019, 7, 9), 187, 50.00, null, 0.81907897, 40.95, 546.49, null, 0.63, null, null, 3.51,
                 null);
-        checkInst(model, 190, 190, LocalDate.of(2019, 7, 10), 188, 50.00, null, 0.81820528, 40.91, 497.08, null, 0.58, null, null, 2.94,
+        checkInst(model, 190, 190, LocalDate.of(2019, 7, 10), 188, 50.00, null, 0.81820528, 40.91, 497.08, null, 0.59, null, null, 2.92,
                 null);
-        checkInst(model, 191, 191, LocalDate.of(2019, 7, 11), 189, 50.00, null, 0.81733252, 40.87, 447.61, null, 0.53, null, null, 2.41,
+        checkInst(model, 191, 191, LocalDate.of(2019, 7, 11), 189, 50.00, null, 0.81733252, 40.87, 447.61, null, 0.53, null, null, 2.39,
                 null);
-        checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 190, 50.00, null, 0.81646069, 40.82, 398.08, null, 0.48, null, null, 1.93,
+        checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 190, 50.00, null, 0.81646069, 40.82, 398.08, null, 0.47, null, null, 1.92,
                 null);
-        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 191, 50.00, null, 0.81558979, 40.78, 348.51, null, 0.43, null, null, 1.50,
+        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 191, 50.00, null, 0.81558980, 40.78, 348.51, null, 0.43, null, null, 1.49,
                 null);
-        checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 192, 50.00, null, 0.81471983, 40.74, 298.88, null, 0.37, null, null, 1.13,
+        checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 192, 50.00, null, 0.81471983, 40.74, 298.88, null, 0.37, null, null, 1.12,
                 null);
-        checkInst(model, 195, 195, LocalDate.of(2019, 7, 15), 193, 50.00, null, 0.81385078, 40.69, 249.20, null, 0.32, null, null, 0.81,
+        checkInst(model, 195, 195, LocalDate.of(2019, 7, 15), 193, 50.00, null, 0.81385078, 40.69, 249.20, null, 0.32, null, null, 0.80,
                 null);
-        checkInst(model, 196, 196, LocalDate.of(2019, 7, 16), 194, 50.00, null, 0.81298267, 40.65, 199.47, null, 0.27, null, null, 0.54,
+        checkInst(model, 196, 196, LocalDate.of(2019, 7, 16), 194, 50.00, null, 0.81298267, 40.65, 199.47, null, 0.27, null, null, 0.53,
                 null);
-        checkInst(model, 197, 197, LocalDate.of(2019, 7, 17), 195, 50.00, null, 0.81211548, 40.61, 149.68, null, 0.21, null, null, 0.33,
+        checkInst(model, 197, 197, LocalDate.of(2019, 7, 17), 195, 50.00, null, 0.81211548, 40.61, 149.68, null, 0.21, null, null, 0.32,
                 null);
-        checkInst(model, 198, 198, LocalDate.of(2019, 7, 18), 196, 50.00, null, 0.81124922, 40.56, 99.84, null, 0.16, null, null, 0.17,
+        checkInst(model, 198, 198, LocalDate.of(2019, 7, 18), 196, 50.00, null, 0.81124922, 40.56, 99.84, null, 0.16, null, null, 0.16,
                 null);
-        checkInst(model, 199, 199, LocalDate.of(2019, 7, 19), 197, 50.00, null, 0.81038388, 40.52, 49.95, null, 0.11, null, null, 0.06,
+        checkInst(model, 199, 199, LocalDate.of(2019, 7, 19), 197, 50.00, null, 0.81038388, 40.52, 49.95, null, 0.11, null, null, 0.05,
                 null);
-        checkInst(model, 200, 200, LocalDate.of(2019, 7, 20), 198, 50.00, null, 0.80951946, 40.48, 0.00, null, 0.06, null, null, 0.00,
+        checkInst(model, 200, 200, LocalDate.of(2019, 7, 20), 198, 50.00, null, 0.80951946, 40.48, 0.00, null, 0.05, null, null, 0.00,
                 null);
 
     }
@@ -972,388 +983,388 @@ class ProjectedAmortizationScheduleCalculatorTest {
         checkInst(model, 5, 5, LocalDate.of(2019, 1, 6), 3, 50.00, null, 0.99680339, 49.84, 8757.01, null, 9.39, null, null, 942.99, null);
         checkInst(model, 6, 6, LocalDate.of(2019, 1, 7), 4, 50.00, null, 0.99574012, 49.79, 8716.36, null, 9.35, null, null, 933.64, null);
         checkInst(model, 7, 7, LocalDate.of(2019, 1, 8), 5, 50.00, null, 0.99467799, 49.73, 8675.67, null, 9.31, null, null, 924.33, null);
-        checkInst(model, 8, 8, LocalDate.of(2019, 1, 9), 6, 50.00, null, 0.99361699, 49.68, 8634.94, null, 9.26, null, null, 915.07, null);
-        checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 7, 50.00, null, 0.99255712, 49.63, 8594.16, null, 9.22, null, null, 905.85, null);
-        checkInst(model, 10, 10, LocalDate.of(2019, 1, 11), 8, 50.00, null, 0.99149839, 49.57, 8553.33, null, 9.18, null, null, 896.67,
+        checkInst(model, 8, 8, LocalDate.of(2019, 1, 9), 6, 50.00, null, 0.99361699, 49.68, 8634.94, null, 9.27, null, null, 915.06, null);
+        checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 7, 50.00, null, 0.99255712, 49.63, 8594.16, null, 9.22, null, null, 905.84, null);
+        checkInst(model, 10, 10, LocalDate.of(2019, 1, 11), 8, 50.00, null, 0.99149839, 49.57, 8553.33, null, 9.17, null, null, 896.67,
                 null);
-        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 9, 50.00, null, 0.99044078, 49.52, 8512.47, null, 9.13, null, null, 887.54,
+        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 9, 50.00, null, 0.99044078, 49.52, 8512.47, null, 9.14, null, null, 887.53,
                 null);
-        checkInst(model, 12, 12, LocalDate.of(2019, 1, 13), 10, 50.00, null, 0.98938430, 49.47, 8471.56, null, 9.09, null, null, 878.45,
+        checkInst(model, 12, 12, LocalDate.of(2019, 1, 13), 10, 50.00, null, 0.98938430, 49.47, 8471.56, null, 9.09, null, null, 878.44,
                 null);
-        checkInst(model, 13, 13, LocalDate.of(2019, 1, 14), 11, 50.00, null, 0.98832895, 49.42, 8430.60, null, 9.05, null, null, 869.40,
+        checkInst(model, 13, 13, LocalDate.of(2019, 1, 14), 11, 50.00, null, 0.98832895, 49.42, 8430.60, null, 9.04, null, null, 869.40,
                 null);
-        checkInst(model, 14, 14, LocalDate.of(2019, 1, 15), 12, 50.00, null, 0.98727472, 49.36, 8389.61, null, 9.00, null, null, 860.40,
+        checkInst(model, 14, 14, LocalDate.of(2019, 1, 15), 12, 50.00, null, 0.98727472, 49.36, 8389.61, null, 9.01, null, null, 860.39,
                 null);
-        checkInst(model, 15, 15, LocalDate.of(2019, 1, 16), 13, 50.00, null, 0.98622162, 49.31, 8348.56, null, 8.96, null, null, 851.44,
+        checkInst(model, 15, 15, LocalDate.of(2019, 1, 16), 13, 50.00, null, 0.98622162, 49.31, 8348.56, null, 8.95, null, null, 851.44,
                 null);
-        checkInst(model, 16, 16, LocalDate.of(2019, 1, 17), 14, 50.00, null, 0.98516964, 49.26, 8307.48, null, 8.91, null, null, 842.53,
+        checkInst(model, 16, 16, LocalDate.of(2019, 1, 17), 14, 50.00, null, 0.98516964, 49.26, 8307.48, null, 8.92, null, null, 842.52,
                 null);
-        checkInst(model, 17, 17, LocalDate.of(2019, 1, 18), 15, 50.00, null, 0.98411879, 49.21, 8266.35, null, 8.87, null, null, 833.66,
+        checkInst(model, 17, 17, LocalDate.of(2019, 1, 18), 15, 50.00, null, 0.98411879, 49.21, 8266.35, null, 8.87, null, null, 833.65,
                 null);
-        checkInst(model, 18, 18, LocalDate.of(2019, 1, 19), 16, 50.00, null, 0.98306905, 49.15, 8225.18, null, 8.83, null, null, 824.83,
+        checkInst(model, 18, 18, LocalDate.of(2019, 1, 19), 16, 50.00, null, 0.98306905, 49.15, 8225.18, null, 8.83, null, null, 824.82,
                 null);
-        checkInst(model, 19, 19, LocalDate.of(2019, 1, 20), 17, 50.00, null, 0.98202044, 49.10, 8183.96, null, 8.78, null, null, 816.05,
+        checkInst(model, 19, 19, LocalDate.of(2019, 1, 20), 17, 50.00, null, 0.98202044, 49.10, 8183.96, null, 8.78, null, null, 816.04,
                 null);
-        checkInst(model, 20, 20, LocalDate.of(2019, 1, 21), 18, 50.00, null, 0.98097294, 49.05, 8142.70, null, 8.74, null, null, 807.31,
+        checkInst(model, 20, 20, LocalDate.of(2019, 1, 21), 18, 50.00, null, 0.98097294, 49.05, 8142.70, null, 8.74, null, null, 807.30,
                 null);
-        checkInst(model, 21, 21, LocalDate.of(2019, 1, 22), 19, 50.00, null, 0.97992656, 49.00, 8101.39, null, 8.69, null, null, 798.62,
+        checkInst(model, 21, 21, LocalDate.of(2019, 1, 22), 19, 50.00, null, 0.97992656, 49.00, 8101.39, null, 8.69, null, null, 798.61,
                 null);
-        checkInst(model, 22, 22, LocalDate.of(2019, 1, 23), 20, 50.00, null, 0.97888129, 48.94, 8060.04, null, 8.65, null, null, 789.97,
+        checkInst(model, 22, 22, LocalDate.of(2019, 1, 23), 20, 50.00, null, 0.97888129, 48.94, 8060.04, null, 8.65, null, null, 789.96,
                 null);
-        checkInst(model, 23, 23, LocalDate.of(2019, 1, 24), 21, 50.00, null, 0.97783715, 48.89, 8018.65, null, 8.61, null, null, 781.36,
+        checkInst(model, 23, 23, LocalDate.of(2019, 1, 24), 21, 50.00, null, 0.97783715, 48.89, 8018.65, null, 8.61, null, null, 781.35,
                 null);
-        checkInst(model, 24, 24, LocalDate.of(2019, 1, 25), 22, 50.00, null, 0.97679411, 48.84, 7977.21, null, 8.56, null, null, 772.80,
+        checkInst(model, 24, 24, LocalDate.of(2019, 1, 25), 22, 50.00, null, 0.97679411, 48.84, 7977.21, null, 8.56, null, null, 772.79,
                 null);
-        checkInst(model, 25, 25, LocalDate.of(2019, 1, 26), 23, 50.00, null, 0.97575219, 48.79, 7935.73, null, 8.52, null, null, 764.28,
+        checkInst(model, 25, 25, LocalDate.of(2019, 1, 26), 23, 50.00, null, 0.97575219, 48.79, 7935.73, null, 8.52, null, null, 764.27,
                 null);
-        checkInst(model, 26, 26, LocalDate.of(2019, 1, 27), 24, 50.00, null, 0.97471138, 48.74, 7894.21, null, 8.47, null, null, 755.81,
+        checkInst(model, 26, 26, LocalDate.of(2019, 1, 27), 24, 50.00, null, 0.97471138, 48.74, 7894.21, null, 8.48, null, null, 755.79,
                 null);
-        checkInst(model, 27, 27, LocalDate.of(2019, 1, 28), 25, 50.00, null, 0.97367168, 48.68, 7852.63, null, 8.43, null, null, 747.38,
+        checkInst(model, 27, 27, LocalDate.of(2019, 1, 28), 25, 50.00, null, 0.97367168, 48.68, 7852.63, null, 8.42, null, null, 747.37,
                 null);
-        checkInst(model, 28, 28, LocalDate.of(2019, 1, 29), 26, 50.00, null, 0.97263309, 48.63, 7811.02, null, 8.39, null, null, 738.99,
+        checkInst(model, 28, 28, LocalDate.of(2019, 1, 29), 26, 50.00, null, 0.97263309, 48.63, 7811.02, null, 8.39, null, null, 738.98,
                 null);
-        checkInst(model, 29, 29, LocalDate.of(2019, 1, 30), 27, 50.00, null, 0.97159560, 48.58, 7769.36, null, 8.34, null, null, 730.65,
+        checkInst(model, 29, 29, LocalDate.of(2019, 1, 30), 27, 50.00, null, 0.97159560, 48.58, 7769.36, null, 8.34, null, null, 730.64,
                 null);
-        checkInst(model, 30, 30, LocalDate.of(2019, 1, 31), 28, 50.00, null, 0.97055922, 48.53, 7727.66, null, 8.30, null, null, 722.35,
+        checkInst(model, 30, 30, LocalDate.of(2019, 1, 31), 28, 50.00, null, 0.97055922, 48.53, 7727.66, null, 8.30, null, null, 722.34,
                 null);
-        checkInst(model, 31, 31, LocalDate.of(2019, 2, 1), 29, 50.00, null, 0.96952395, 48.48, 7685.91, null, 8.25, null, null, 714.10,
+        checkInst(model, 31, 31, LocalDate.of(2019, 2, 1), 29, 50.00, null, 0.96952395, 48.48, 7685.91, null, 8.25, null, null, 714.09,
                 null);
-        checkInst(model, 32, 32, LocalDate.of(2019, 2, 2), 30, 50.00, null, 0.96848979, 48.42, 7644.12, null, 8.21, null, null, 705.89,
+        checkInst(model, 32, 32, LocalDate.of(2019, 2, 2), 30, 50.00, null, 0.96848979, 48.42, 7644.12, null, 8.21, null, null, 705.88,
                 null);
-        checkInst(model, 33, 33, LocalDate.of(2019, 2, 3), 31, 50.00, null, 0.96745672, 48.37, 7602.28, null, 8.16, null, null, 697.73,
+        checkInst(model, 33, 33, LocalDate.of(2019, 2, 3), 31, 50.00, null, 0.96745672, 48.37, 7602.28, null, 8.16, null, null, 697.72,
                 null);
-        checkInst(model, 34, 34, LocalDate.of(2019, 2, 4), 32, 50.00, null, 0.96642476, 48.32, 7560.40, null, 8.12, null, null, 689.61,
+        checkInst(model, 34, 34, LocalDate.of(2019, 2, 4), 32, 50.00, null, 0.96642476, 48.32, 7560.40, null, 8.12, null, null, 689.60,
                 null);
-        checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 33, 50.00, null, 0.96539390, 48.27, 7518.47, null, 8.07, null, null, 681.54,
+        checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 33, 50.00, null, 0.96539390, 48.27, 7518.47, null, 8.07, null, null, 681.53,
                 null);
-        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 34, 50.00, null, 0.96436413, 48.22, 7476.50, null, 8.03, null, null, 673.51,
+        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 34, 50.00, null, 0.96436414, 48.22, 7476.50, null, 8.03, null, null, 673.50,
                 null);
-        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 35, 50.00, null, 0.96333547, 48.17, 7434.48, null, 7.98, null, null, 665.53,
+        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 35, 50.00, null, 0.96333547, 48.17, 7434.48, null, 7.98, null, null, 665.52,
                 null);
-        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 36, 50.00, null, 0.96230790, 48.12, 7392.42, null, 7.94, null, null, 657.59,
+        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 36, 50.00, null, 0.96230791, 48.12, 7392.42, null, 7.94, null, null, 657.58,
                 null);
-        checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 37, 50.00, null, 0.96128143, 48.06, 7350.31, null, 7.89, null, null, 649.70,
+        checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 37, 50.00, null, 0.96128143, 48.06, 7350.31, null, 7.89, null, null, 649.69,
                 null);
-        checkInst(model, 40, 40, LocalDate.of(2019, 2, 10), 38, 50.00, null, 0.96025606, 48.01, 7308.16, null, 7.85, null, null, 641.85,
+        checkInst(model, 40, 40, LocalDate.of(2019, 2, 10), 38, 50.00, null, 0.96025606, 48.01, 7308.16, null, 7.85, null, null, 641.84,
                 null);
-        checkInst(model, 41, 41, LocalDate.of(2019, 2, 11), 39, 50.00, null, 0.95923178, 47.96, 7265.97, null, 7.80, null, null, 634.05,
+        checkInst(model, 41, 41, LocalDate.of(2019, 2, 11), 39, 50.00, null, 0.95923178, 47.96, 7265.97, null, 7.81, null, null, 634.03,
                 null);
-        checkInst(model, 42, 42, LocalDate.of(2019, 2, 12), 40, 50.00, null, 0.95820859, 47.91, 7223.72, null, 7.76, null, null, 626.29,
+        checkInst(model, 42, 42, LocalDate.of(2019, 2, 12), 40, 50.00, null, 0.95820859, 47.91, 7223.72, null, 7.75, null, null, 626.28,
                 null);
-        checkInst(model, 43, 43, LocalDate.of(2019, 2, 13), 41, 50.00, null, 0.95718649, 47.86, 7181.44, null, 7.71, null, null, 618.58,
+        checkInst(model, 43, 43, LocalDate.of(2019, 2, 13), 41, 50.00, null, 0.95718649, 47.86, 7181.44, null, 7.72, null, null, 618.56,
                 null);
-        checkInst(model, 44, 44, LocalDate.of(2019, 2, 14), 42, 50.00, null, 0.95616548, 47.81, 7139.11, null, 7.67, null, null, 610.91,
+        checkInst(model, 44, 44, LocalDate.of(2019, 2, 14), 42, 50.00, null, 0.95616548, 47.81, 7139.11, null, 7.67, null, null, 610.89,
                 null);
-        checkInst(model, 45, 45, LocalDate.of(2019, 2, 15), 43, 50.00, null, 0.95514557, 47.76, 7096.73, null, 7.62, null, null, 603.29,
+        checkInst(model, 45, 45, LocalDate.of(2019, 2, 15), 43, 50.00, null, 0.95514557, 47.76, 7096.73, null, 7.62, null, null, 603.27,
                 null);
-        checkInst(model, 46, 46, LocalDate.of(2019, 2, 16), 44, 50.00, null, 0.95412674, 47.71, 7054.31, null, 7.58, null, null, 595.71,
+        checkInst(model, 46, 46, LocalDate.of(2019, 2, 16), 44, 50.00, null, 0.95412674, 47.71, 7054.31, null, 7.58, null, null, 595.69,
                 null);
-        checkInst(model, 47, 47, LocalDate.of(2019, 2, 17), 45, 50.00, null, 0.95310899, 47.66, 7011.84, null, 7.53, null, null, 588.18,
+        checkInst(model, 47, 47, LocalDate.of(2019, 2, 17), 45, 50.00, null, 0.95310899, 47.66, 7011.84, null, 7.53, null, null, 588.16,
                 null);
-        checkInst(model, 48, 48, LocalDate.of(2019, 2, 18), 46, 50.00, null, 0.95209233, 47.60, 6969.33, null, 7.49, null, null, 580.69,
+        checkInst(model, 48, 48, LocalDate.of(2019, 2, 18), 46, 50.00, null, 0.95209233, 47.60, 6969.33, null, 7.49, null, null, 580.67,
                 null);
-        checkInst(model, 49, 49, LocalDate.of(2019, 2, 19), 47, 50.00, null, 0.95107676, 47.55, 6926.77, null, 7.44, null, null, 573.25,
+        checkInst(model, 49, 49, LocalDate.of(2019, 2, 19), 47, 50.00, null, 0.95107676, 47.55, 6926.77, null, 7.44, null, null, 573.23,
                 null);
-        checkInst(model, 50, 50, LocalDate.of(2019, 2, 20), 48, 50.00, null, 0.95006227, 47.50, 6884.17, null, 7.40, null, null, 565.85,
+        checkInst(model, 50, 50, LocalDate.of(2019, 2, 20), 48, 50.00, null, 0.95006227, 47.50, 6884.17, null, 7.40, null, null, 565.83,
                 null);
-        checkInst(model, 51, 51, LocalDate.of(2019, 2, 21), 49, 50.00, null, 0.94904886, 47.45, 6841.52, null, 7.35, null, null, 558.50,
+        checkInst(model, 51, 51, LocalDate.of(2019, 2, 21), 49, 50.00, null, 0.94904886, 47.45, 6841.52, null, 7.35, null, null, 558.48,
                 null);
-        checkInst(model, 52, 52, LocalDate.of(2019, 2, 22), 50, 50.00, null, 0.94803653, 47.40, 6798.82, null, 7.31, null, null, 551.19,
+        checkInst(model, 52, 52, LocalDate.of(2019, 2, 22), 50, 50.00, null, 0.94803653, 47.40, 6798.82, null, 7.30, null, null, 551.18,
                 null);
-        checkInst(model, 53, 53, LocalDate.of(2019, 2, 23), 51, 50.00, null, 0.94702529, 47.35, 6756.08, null, 7.26, null, null, 543.93,
+        checkInst(model, 53, 53, LocalDate.of(2019, 2, 23), 51, 50.00, null, 0.94702529, 47.35, 6756.08, null, 7.26, null, null, 543.92,
                 null);
-        checkInst(model, 54, 54, LocalDate.of(2019, 2, 24), 52, 50.00, null, 0.94601512, 47.30, 6713.30, null, 7.21, null, null, 536.72,
+        checkInst(model, 54, 54, LocalDate.of(2019, 2, 24), 52, 50.00, null, 0.94601512, 47.30, 6713.30, null, 7.22, null, null, 536.70,
                 null);
-        checkInst(model, 55, 55, LocalDate.of(2019, 2, 25), 53, 50.00, null, 0.94500603, 47.25, 6670.47, null, 7.17, null, null, 529.55,
+        checkInst(model, 55, 55, LocalDate.of(2019, 2, 25), 53, 50.00, null, 0.94500603, 47.25, 6670.47, null, 7.17, null, null, 529.53,
                 null);
-        checkInst(model, 56, 56, LocalDate.of(2019, 2, 26), 54, 50.00, null, 0.94399801, 47.20, 6627.59, null, 7.12, null, null, 522.43,
+        checkInst(model, 56, 56, LocalDate.of(2019, 2, 26), 54, 50.00, null, 0.94399801, 47.20, 6627.59, null, 7.12, null, null, 522.41,
                 null);
-        checkInst(model, 57, 57, LocalDate.of(2019, 2, 27), 55, 50.00, null, 0.94299107, 47.15, 6584.67, null, 7.08, null, null, 515.35,
+        checkInst(model, 57, 57, LocalDate.of(2019, 2, 27), 55, 50.00, null, 0.94299107, 47.15, 6584.67, null, 7.08, null, null, 515.33,
                 null);
-        checkInst(model, 58, 58, LocalDate.of(2019, 2, 28), 56, 50.00, null, 0.94198521, 47.10, 6541.70, null, 7.03, null, null, 508.32,
+        checkInst(model, 58, 58, LocalDate.of(2019, 2, 28), 56, 50.00, null, 0.94198521, 47.10, 6541.70, null, 7.03, null, null, 508.30,
                 null);
-        checkInst(model, 59, 59, LocalDate.of(2019, 3, 1), 57, 50.00, null, 0.94098042, 47.05, 6498.68, null, 6.99, null, null, 501.33,
+        checkInst(model, 59, 59, LocalDate.of(2019, 3, 1), 57, 50.00, null, 0.94098042, 47.05, 6498.68, null, 6.98, null, null, 501.32,
                 null);
-        checkInst(model, 60, 60, LocalDate.of(2019, 3, 2), 58, 50.00, null, 0.93997669, 47.00, 6455.62, null, 6.94, null, null, 494.39,
+        checkInst(model, 60, 60, LocalDate.of(2019, 3, 2), 58, 50.00, null, 0.93997669, 47.00, 6455.62, null, 6.94, null, null, 494.38,
                 null);
-        checkInst(model, 61, 61, LocalDate.of(2019, 3, 3), 59, 50.00, null, 0.93897404, 46.95, 6412.51, null, 6.89, null, null, 487.50,
+        checkInst(model, 61, 61, LocalDate.of(2019, 3, 3), 59, 50.00, null, 0.93897404, 46.95, 6412.51, null, 6.89, null, null, 487.49,
                 null);
-        checkInst(model, 62, 62, LocalDate.of(2019, 3, 4), 60, 50.00, null, 0.93797246, 46.90, 6369.36, null, 6.85, null, null, 480.65,
+        checkInst(model, 62, 62, LocalDate.of(2019, 3, 4), 60, 50.00, null, 0.93797246, 46.90, 6369.36, null, 6.85, null, null, 480.64,
                 null);
-        checkInst(model, 63, 63, LocalDate.of(2019, 3, 5), 61, 50.00, null, 0.93697195, 46.85, 6326.16, null, 6.80, null, null, 473.85,
+        checkInst(model, 63, 63, LocalDate.of(2019, 3, 5), 61, 50.00, null, 0.93697195, 46.85, 6326.16, null, 6.80, null, null, 473.84,
                 null);
-        checkInst(model, 64, 64, LocalDate.of(2019, 3, 6), 62, 50.00, null, 0.93597251, 46.80, 6282.92, null, 6.76, null, null, 467.09,
+        checkInst(model, 64, 64, LocalDate.of(2019, 3, 6), 62, 50.00, null, 0.93597251, 46.80, 6282.92, null, 6.76, null, null, 467.08,
                 null);
-        checkInst(model, 65, 65, LocalDate.of(2019, 3, 7), 63, 50.00, null, 0.93497413, 46.75, 6239.63, null, 6.71, null, null, 460.38,
+        checkInst(model, 65, 65, LocalDate.of(2019, 3, 7), 63, 50.00, null, 0.93497413, 46.75, 6239.63, null, 6.71, null, null, 460.37,
                 null);
-        checkInst(model, 66, 66, LocalDate.of(2019, 3, 8), 64, 50.00, null, 0.93397681, 46.70, 6196.29, null, 6.66, null, null, 453.72,
+        checkInst(model, 66, 66, LocalDate.of(2019, 3, 8), 64, 50.00, null, 0.93397681, 46.70, 6196.29, null, 6.66, null, null, 453.71,
                 null);
-        checkInst(model, 67, 67, LocalDate.of(2019, 3, 9), 65, 50.00, null, 0.93298056, 46.65, 6152.91, null, 6.62, null, null, 447.10,
+        checkInst(model, 67, 67, LocalDate.of(2019, 3, 9), 65, 50.00, null, 0.93298056, 46.65, 6152.91, null, 6.62, null, null, 447.09,
                 null);
-        checkInst(model, 68, 68, LocalDate.of(2019, 3, 10), 66, 50.00, null, 0.93198538, 46.60, 6109.48, null, 6.57, null, null, 440.53,
+        checkInst(model, 68, 68, LocalDate.of(2019, 3, 10), 66, 50.00, null, 0.93198538, 46.60, 6109.48, null, 6.57, null, null, 440.52,
                 null);
-        checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 67, 50.00, null, 0.93099125, 46.55, 6066.00, null, 6.52, null, null, 434.01,
+        checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 67, 50.00, null, 0.93099125, 46.55, 6066.00, null, 6.52, null, null, 434.00,
                 null);
-        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 68, 50.00, null, 0.92999818, 46.50, 6022.48, null, 6.48, null, null, 427.53,
+        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 68, 50.00, null, 0.92999819, 46.50, 6022.48, null, 6.48, null, null, 427.52,
                 null);
-        checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 69, 50.00, null, 0.92900618, 46.45, 5978.91, null, 6.43, null, null, 421.10,
+        checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 69, 50.00, null, 0.92900618, 46.45, 5978.91, null, 6.43, null, null, 421.09,
                 null);
-        checkInst(model, 72, 72, LocalDate.of(2019, 3, 14), 70, 50.00, null, 0.92801523, 46.40, 5935.29, null, 6.38, null, null, 414.72,
+        checkInst(model, 72, 72, LocalDate.of(2019, 3, 14), 70, 50.00, null, 0.92801523, 46.40, 5935.29, null, 6.38, null, null, 414.71,
                 null);
-        checkInst(model, 73, 73, LocalDate.of(2019, 3, 15), 71, 50.00, null, 0.92702534, 46.35, 5891.63, null, 6.34, null, null, 408.38,
+        checkInst(model, 73, 73, LocalDate.of(2019, 3, 15), 71, 50.00, null, 0.92702534, 46.35, 5891.63, null, 6.34, null, null, 408.37,
                 null);
-        checkInst(model, 74, 74, LocalDate.of(2019, 3, 16), 72, 50.00, null, 0.92603650, 46.30, 5847.92, null, 6.29, null, null, 402.09,
+        checkInst(model, 74, 74, LocalDate.of(2019, 3, 16), 72, 50.00, null, 0.92603650, 46.30, 5847.92, null, 6.29, null, null, 402.08,
                 null);
-        checkInst(model, 75, 75, LocalDate.of(2019, 3, 17), 73, 50.00, null, 0.92504872, 46.25, 5804.17, null, 6.24, null, null, 395.85,
+        checkInst(model, 75, 75, LocalDate.of(2019, 3, 17), 73, 50.00, null, 0.92504872, 46.25, 5804.17, null, 6.25, null, null, 395.83,
                 null);
-        checkInst(model, 76, 76, LocalDate.of(2019, 3, 18), 74, 50.00, null, 0.92406200, 46.20, 5760.36, null, 6.20, null, null, 389.65,
+        checkInst(model, 76, 76, LocalDate.of(2019, 3, 18), 74, 50.00, null, 0.92406200, 46.20, 5760.36, null, 6.19, null, null, 389.64,
                 null);
-        checkInst(model, 77, 77, LocalDate.of(2019, 3, 19), 75, 50.00, null, 0.92307632, 46.15, 5716.52, null, 6.15, null, null, 383.50,
+        checkInst(model, 77, 77, LocalDate.of(2019, 3, 19), 75, 50.00, null, 0.92307632, 46.15, 5716.52, null, 6.16, null, null, 383.48,
                 null);
-        checkInst(model, 78, 78, LocalDate.of(2019, 3, 20), 76, 50.00, null, 0.92209170, 46.10, 5672.62, null, 6.10, null, null, 377.40,
+        checkInst(model, 78, 78, LocalDate.of(2019, 3, 20), 76, 50.00, null, 0.92209170, 46.10, 5672.62, null, 6.10, null, null, 377.38,
                 null);
-        checkInst(model, 79, 79, LocalDate.of(2019, 3, 21), 77, 50.00, null, 0.92110813, 46.06, 5628.68, null, 6.06, null, null, 371.34,
+        checkInst(model, 79, 79, LocalDate.of(2019, 3, 21), 77, 50.00, null, 0.92110813, 46.06, 5628.68, null, 6.06, null, null, 371.32,
                 null);
-        checkInst(model, 80, 80, LocalDate.of(2019, 3, 22), 78, 50.00, null, 0.92012560, 46.01, 5584.69, null, 6.01, null, null, 365.33,
+        checkInst(model, 80, 80, LocalDate.of(2019, 3, 22), 78, 50.00, null, 0.92012560, 46.01, 5584.69, null, 6.01, null, null, 365.31,
                 null);
-        checkInst(model, 81, 81, LocalDate.of(2019, 3, 23), 79, 50.00, null, 0.91914413, 45.96, 5540.65, null, 5.96, null, null, 359.37,
+        checkInst(model, 81, 81, LocalDate.of(2019, 3, 23), 79, 50.00, null, 0.91914413, 45.96, 5540.65, null, 5.96, null, null, 359.35,
                 null);
-        checkInst(model, 82, 82, LocalDate.of(2019, 3, 24), 80, 50.00, null, 0.91816370, 45.91, 5496.57, null, 5.92, null, null, 353.45,
+        checkInst(model, 82, 82, LocalDate.of(2019, 3, 24), 80, 50.00, null, 0.91816370, 45.91, 5496.57, null, 5.92, null, null, 353.43,
                 null);
-        checkInst(model, 83, 83, LocalDate.of(2019, 3, 25), 81, 50.00, null, 0.91718432, 45.86, 5452.44, null, 5.87, null, null, 347.58,
+        checkInst(model, 83, 83, LocalDate.of(2019, 3, 25), 81, 50.00, null, 0.91718432, 45.86, 5452.44, null, 5.87, null, null, 347.56,
                 null);
-        checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 82, 50.00, null, 0.91620598, 45.81, 5408.26, null, 5.82, null, null, 341.76,
+        checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 82, 50.00, null, 0.91620598, 45.81, 5408.26, null, 5.82, null, null, 341.74,
                 null);
-        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 83, 50.00, null, 0.91522868, 45.76, 5364.03, null, 5.78, null, null, 335.98,
+        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 83, 50.00, null, 0.91522869, 45.76, 5364.03, null, 5.77, null, null, 335.97,
                 null);
-        checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 84, 50.00, null, 0.91425243, 45.71, 5319.76, null, 5.73, null, null, 330.25,
+        checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 84, 50.00, null, 0.91425243, 45.71, 5319.76, null, 5.73, null, null, 330.24,
                 null);
-        checkInst(model, 87, 87, LocalDate.of(2019, 3, 29), 85, 50.00, null, 0.91327722, 45.66, 5275.44, null, 5.68, null, null, 324.57,
+        checkInst(model, 87, 87, LocalDate.of(2019, 3, 29), 85, 50.00, null, 0.91327722, 45.66, 5275.44, null, 5.68, null, null, 324.56,
                 null);
-        checkInst(model, 88, 88, LocalDate.of(2019, 3, 30), 86, 50.00, null, 0.91230305, 45.62, 5231.08, null, 5.63, null, null, 318.94,
+        checkInst(model, 88, 88, LocalDate.of(2019, 3, 30), 86, 50.00, null, 0.91230305, 45.62, 5231.08, null, 5.64, null, null, 318.92,
                 null);
-        checkInst(model, 89, 89, LocalDate.of(2019, 3, 31), 87, 50.00, null, 0.91132992, 45.57, 5186.66, null, 5.59, null, null, 313.35,
+        checkInst(model, 89, 89, LocalDate.of(2019, 3, 31), 87, 50.00, null, 0.91132992, 45.57, 5186.66, null, 5.58, null, null, 313.34,
                 null);
-        checkInst(model, 90, 90, LocalDate.of(2019, 4, 1), 88, 50.00, null, 0.91035783, 45.52, 5142.20, null, 5.54, null, null, 307.81,
+        checkInst(model, 90, 90, LocalDate.of(2019, 4, 1), 88, 50.00, null, 0.91035783, 45.52, 5142.20, null, 5.54, null, null, 307.80,
                 null);
-        checkInst(model, 91, 91, LocalDate.of(2019, 4, 2), 89, 50.00, null, 0.90938677, 45.47, 5097.69, null, 5.49, null, null, 302.32,
+        checkInst(model, 91, 91, LocalDate.of(2019, 4, 2), 89, 50.00, null, 0.90938677, 45.47, 5097.69, null, 5.49, null, null, 302.31,
                 null);
-        checkInst(model, 92, 92, LocalDate.of(2019, 4, 3), 90, 50.00, null, 0.90841675, 45.42, 5053.13, null, 5.44, null, null, 296.88,
+        checkInst(model, 92, 92, LocalDate.of(2019, 4, 3), 90, 50.00, null, 0.90841675, 45.42, 5053.13, null, 5.44, null, null, 296.87,
                 null);
-        checkInst(model, 93, 93, LocalDate.of(2019, 4, 4), 91, 50.00, null, 0.90744776, 45.37, 5008.53, null, 5.40, null, null, 291.48,
+        checkInst(model, 93, 93, LocalDate.of(2019, 4, 4), 91, 50.00, null, 0.90744776, 45.37, 5008.53, null, 5.40, null, null, 291.47,
                 null);
-        checkInst(model, 94, 94, LocalDate.of(2019, 4, 5), 92, 50.00, null, 0.90647981, 45.32, 4963.88, null, 5.35, null, null, 286.13,
+        checkInst(model, 94, 94, LocalDate.of(2019, 4, 5), 92, 50.00, null, 0.90647981, 45.32, 4963.88, null, 5.35, null, null, 286.12,
                 null);
-        checkInst(model, 95, 95, LocalDate.of(2019, 4, 6), 93, 50.00, null, 0.90551289, 45.28, 4919.18, null, 5.30, null, null, 280.83,
+        checkInst(model, 95, 95, LocalDate.of(2019, 4, 6), 93, 50.00, null, 0.90551289, 45.28, 4919.18, null, 5.30, null, null, 280.82,
                 null);
-        checkInst(model, 96, 96, LocalDate.of(2019, 4, 7), 94, 50.00, null, 0.90454700, 45.23, 4874.43, null, 5.25, null, null, 275.58,
+        checkInst(model, 96, 96, LocalDate.of(2019, 4, 7), 94, 50.00, null, 0.90454700, 45.23, 4874.43, null, 5.25, null, null, 275.57,
                 null);
-        checkInst(model, 97, 97, LocalDate.of(2019, 4, 8), 95, 50.00, null, 0.90358215, 45.18, 4829.64, null, 5.20, null, null, 270.38,
+        checkInst(model, 97, 97, LocalDate.of(2019, 4, 8), 95, 50.00, null, 0.90358215, 45.18, 4829.64, null, 5.21, null, null, 270.36,
                 null);
-        checkInst(model, 98, 98, LocalDate.of(2019, 4, 9), 96, 50.00, null, 0.90261832, 45.13, 4784.79, null, 5.16, null, null, 265.22,
+        checkInst(model, 98, 98, LocalDate.of(2019, 4, 9), 96, 50.00, null, 0.90261832, 45.13, 4784.79, null, 5.15, null, null, 265.21,
                 null);
-        checkInst(model, 99, 99, LocalDate.of(2019, 4, 10), 97, 50.00, null, 0.90165552, 45.08, 4739.90, null, 5.11, null, null, 260.11,
+        checkInst(model, 99, 99, LocalDate.of(2019, 4, 10), 97, 50.00, null, 0.90165552, 45.08, 4739.90, null, 5.11, null, null, 260.10,
                 null);
-        checkInst(model, 100, 100, LocalDate.of(2019, 4, 11), 98, 50.00, null, 0.90069374, 45.03, 4694.96, null, 5.06, null, null, 255.05,
+        checkInst(model, 100, 100, LocalDate.of(2019, 4, 11), 98, 50.00, null, 0.90069374, 45.03, 4694.96, null, 5.06, null, null, 255.04,
                 null);
-        checkInst(model, 101, 101, LocalDate.of(2019, 4, 12), 99, 50.00, null, 0.89973299, 44.99, 4649.98, null, 5.01, null, null, 250.04,
+        checkInst(model, 101, 101, LocalDate.of(2019, 4, 12), 99, 50.00, null, 0.89973299, 44.99, 4649.98, null, 5.02, null, null, 250.02,
                 null);
-        checkInst(model, 102, 102, LocalDate.of(2019, 4, 13), 100, 50.00, null, 0.89877327, 44.94, 4604.94, null, 4.97, null, null, 245.07,
+        checkInst(model, 102, 102, LocalDate.of(2019, 4, 13), 100, 50.00, null, 0.89877327, 44.94, 4604.94, null, 4.96, null, null, 245.06,
                 null);
-        checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 101, 50.00, null, 0.89781457, 44.89, 4559.86, null, 4.92, null, null, 240.15,
+        checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 101, 50.00, null, 0.89781457, 44.89, 4559.86, null, 4.92, null, null, 240.14,
                 null);
-        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 102, 50.00, null, 0.89685689, 44.84, 4514.73, null, 4.87, null, null, 235.28,
+        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 102, 50.00, null, 0.89685690, 44.84, 4514.73, null, 4.87, null, null, 235.27,
                 null);
-        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 103, 50.00, null, 0.89590024, 44.80, 4469.55, null, 4.82, null, null, 230.46,
+        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 103, 50.00, null, 0.89590024, 44.80, 4469.55, null, 4.82, null, null, 230.45,
                 null);
-        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 104, 50.00, null, 0.89494460, 44.75, 4424.32, null, 4.77, null, null, 225.69,
+        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 104, 50.00, null, 0.89494461, 44.75, 4424.32, null, 4.77, null, null, 225.68,
                 null);
-        checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 105, 50.00, null, 0.89398999, 44.70, 4379.05, null, 4.72, null, null, 220.97,
+        checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 105, 50.00, null, 0.89398999, 44.70, 4379.05, null, 4.73, null, null, 220.95,
                 null);
-        checkInst(model, 108, 108, LocalDate.of(2019, 4, 19), 106, 50.00, null, 0.89303639, 44.65, 4333.72, null, 4.68, null, null, 216.29,
+        checkInst(model, 108, 108, LocalDate.of(2019, 4, 19), 106, 50.00, null, 0.89303639, 44.65, 4333.72, null, 4.67, null, null, 216.28,
                 null);
-        checkInst(model, 109, 109, LocalDate.of(2019, 4, 20), 107, 50.00, null, 0.89208381, 44.60, 4288.35, null, 4.63, null, null, 211.66,
+        checkInst(model, 109, 109, LocalDate.of(2019, 4, 20), 107, 50.00, null, 0.89208381, 44.60, 4288.35, null, 4.63, null, null, 211.65,
                 null);
-        checkInst(model, 110, 110, LocalDate.of(2019, 4, 21), 108, 50.00, null, 0.89113225, 44.56, 4242.93, null, 4.58, null, null, 207.08,
+        checkInst(model, 110, 110, LocalDate.of(2019, 4, 21), 108, 50.00, null, 0.89113225, 44.56, 4242.93, null, 4.58, null, null, 207.07,
                 null);
-        checkInst(model, 111, 111, LocalDate.of(2019, 4, 22), 109, 50.00, null, 0.89018170, 44.51, 4197.46, null, 4.53, null, null, 202.55,
+        checkInst(model, 111, 111, LocalDate.of(2019, 4, 22), 109, 50.00, null, 0.89018170, 44.51, 4197.46, null, 4.53, null, null, 202.54,
                 null);
-        checkInst(model, 112, 112, LocalDate.of(2019, 4, 23), 110, 50.00, null, 0.88923216, 44.46, 4151.94, null, 4.48, null, null, 198.07,
+        checkInst(model, 112, 112, LocalDate.of(2019, 4, 23), 110, 50.00, null, 0.88923216, 44.46, 4151.94, null, 4.48, null, null, 198.06,
                 null);
-        checkInst(model, 113, 113, LocalDate.of(2019, 4, 24), 111, 50.00, null, 0.88828364, 44.41, 4106.38, null, 4.43, null, null, 193.64,
+        checkInst(model, 113, 113, LocalDate.of(2019, 4, 24), 111, 50.00, null, 0.88828364, 44.41, 4106.38, null, 4.44, null, null, 193.62,
                 null);
-        checkInst(model, 114, 114, LocalDate.of(2019, 4, 25), 112, 50.00, null, 0.88733613, 44.37, 4060.76, null, 4.38, null, null, 189.26,
+        checkInst(model, 114, 114, LocalDate.of(2019, 4, 25), 112, 50.00, null, 0.88733613, 44.37, 4060.76, null, 4.38, null, null, 189.24,
                 null);
-        checkInst(model, 115, 115, LocalDate.of(2019, 4, 26), 113, 50.00, null, 0.88638963, 44.32, 4015.10, null, 4.34, null, null, 184.92,
+        checkInst(model, 115, 115, LocalDate.of(2019, 4, 26), 113, 50.00, null, 0.88638963, 44.32, 4015.10, null, 4.34, null, null, 184.90,
                 null);
-        checkInst(model, 116, 116, LocalDate.of(2019, 4, 27), 114, 50.00, null, 0.88544414, 44.27, 3969.38, null, 4.29, null, null, 180.63,
+        checkInst(model, 116, 116, LocalDate.of(2019, 4, 27), 114, 50.00, null, 0.88544414, 44.27, 3969.38, null, 4.28, null, null, 180.62,
                 null);
-        checkInst(model, 117, 117, LocalDate.of(2019, 4, 28), 115, 50.00, null, 0.88449966, 44.22, 3923.62, null, 4.24, null, null, 176.39,
+        checkInst(model, 117, 117, LocalDate.of(2019, 4, 28), 115, 50.00, null, 0.88449966, 44.22, 3923.62, null, 4.24, null, null, 176.38,
                 null);
-        checkInst(model, 118, 118, LocalDate.of(2019, 4, 29), 116, 50.00, null, 0.88355619, 44.18, 3877.81, null, 4.19, null, null, 172.20,
+        checkInst(model, 118, 118, LocalDate.of(2019, 4, 29), 116, 50.00, null, 0.88355619, 44.18, 3877.81, null, 4.19, null, null, 172.19,
                 null);
-        checkInst(model, 119, 119, LocalDate.of(2019, 4, 30), 117, 50.00, null, 0.88261372, 44.13, 3831.95, null, 4.14, null, null, 168.06,
+        checkInst(model, 119, 119, LocalDate.of(2019, 4, 30), 117, 50.00, null, 0.88261372, 44.13, 3831.95, null, 4.14, null, null, 168.05,
                 null);
-        checkInst(model, 120, 120, LocalDate.of(2019, 5, 1), 118, 50.00, null, 0.88167226, 44.08, 3786.04, null, 4.09, null, null, 163.97,
+        checkInst(model, 120, 120, LocalDate.of(2019, 5, 1), 118, 50.00, null, 0.88167226, 44.08, 3786.04, null, 4.09, null, null, 163.96,
                 null);
-        checkInst(model, 121, 121, LocalDate.of(2019, 5, 2), 119, 50.00, null, 0.88073180, 44.04, 3740.09, null, 4.04, null, null, 159.93,
+        checkInst(model, 121, 121, LocalDate.of(2019, 5, 2), 119, 50.00, null, 0.88073180, 44.04, 3740.09, null, 4.05, null, null, 159.91,
                 null);
-        checkInst(model, 122, 122, LocalDate.of(2019, 5, 3), 120, 50.00, null, 0.87979234, 43.99, 3694.08, null, 3.99, null, null, 155.94,
+        checkInst(model, 122, 122, LocalDate.of(2019, 5, 3), 120, 50.00, null, 0.87979234, 43.99, 3694.08, null, 3.99, null, null, 155.92,
                 null);
-        checkInst(model, 123, 123, LocalDate.of(2019, 5, 4), 121, 50.00, null, 0.87885389, 43.94, 3648.03, null, 3.94, null, null, 152.00,
+        checkInst(model, 123, 123, LocalDate.of(2019, 5, 4), 121, 50.00, null, 0.87885389, 43.94, 3648.03, null, 3.95, null, null, 151.97,
                 null);
-        checkInst(model, 124, 124, LocalDate.of(2019, 5, 5), 122, 50.00, null, 0.87791644, 43.90, 3601.92, null, 3.90, null, null, 148.10,
+        checkInst(model, 124, 124, LocalDate.of(2019, 5, 5), 122, 50.00, null, 0.87791644, 43.90, 3601.92, null, 3.89, null, null, 148.08,
                 null);
-        checkInst(model, 125, 125, LocalDate.of(2019, 5, 6), 123, 50.00, null, 0.87697999, 43.85, 3555.77, null, 3.85, null, null, 144.25,
+        checkInst(model, 125, 125, LocalDate.of(2019, 5, 6), 123, 50.00, null, 0.87697999, 43.85, 3555.77, null, 3.85, null, null, 144.23,
                 null);
-        checkInst(model, 126, 126, LocalDate.of(2019, 5, 7), 124, 50.00, null, 0.87604453, 43.80, 3509.56, null, 3.80, null, null, 140.45,
+        checkInst(model, 126, 126, LocalDate.of(2019, 5, 7), 124, 50.00, null, 0.87604453, 43.80, 3509.56, null, 3.79, null, null, 140.44,
                 null);
-        checkInst(model, 127, 127, LocalDate.of(2019, 5, 8), 125, 50.00, null, 0.87511008, 43.76, 3463.31, null, 3.75, null, null, 136.70,
+        checkInst(model, 127, 127, LocalDate.of(2019, 5, 8), 125, 50.00, null, 0.87511008, 43.76, 3463.31, null, 3.75, null, null, 136.69,
                 null);
-        checkInst(model, 128, 128, LocalDate.of(2019, 5, 9), 126, 50.00, null, 0.87417662, 43.71, 3417.01, null, 3.70, null, null, 133.00,
+        checkInst(model, 128, 128, LocalDate.of(2019, 5, 9), 126, 50.00, null, 0.87417662, 43.71, 3417.01, null, 3.70, null, null, 132.99,
                 null);
-        checkInst(model, 129, 129, LocalDate.of(2019, 5, 10), 127, 50.00, null, 0.87324416, 43.66, 3370.66, null, 3.65, null, null, 129.35,
+        checkInst(model, 129, 129, LocalDate.of(2019, 5, 10), 127, 50.00, null, 0.87324416, 43.66, 3370.66, null, 3.65, null, null, 129.34,
                 null);
-        checkInst(model, 130, 130, LocalDate.of(2019, 5, 11), 128, 50.00, null, 0.87231269, 43.62, 3324.26, null, 3.60, null, null, 125.75,
+        checkInst(model, 130, 130, LocalDate.of(2019, 5, 11), 128, 50.00, null, 0.87231269, 43.62, 3324.26, null, 3.60, null, null, 125.74,
                 null);
-        checkInst(model, 131, 131, LocalDate.of(2019, 5, 12), 129, 50.00, null, 0.87138221, 43.57, 3277.81, null, 3.55, null, null, 122.20,
+        checkInst(model, 131, 131, LocalDate.of(2019, 5, 12), 129, 50.00, null, 0.87138221, 43.57, 3277.81, null, 3.55, null, null, 122.19,
                 null);
-        checkInst(model, 132, 132, LocalDate.of(2019, 5, 13), 130, 50.00, null, 0.87045273, 43.52, 3231.31, null, 3.50, null, null, 118.70,
+        checkInst(model, 132, 132, LocalDate.of(2019, 5, 13), 130, 50.00, null, 0.87045273, 43.52, 3231.31, null, 3.50, null, null, 118.69,
                 null);
-        checkInst(model, 133, 133, LocalDate.of(2019, 5, 14), 131, 50.00, null, 0.86952424, 43.48, 3184.76, null, 3.45, null, null, 115.25,
+        checkInst(model, 133, 133, LocalDate.of(2019, 5, 14), 131, 50.00, null, 0.86952424, 43.48, 3184.76, null, 3.45, null, null, 115.24,
                 null);
-        checkInst(model, 134, 134, LocalDate.of(2019, 5, 15), 132, 50.00, null, 0.86859674, 43.43, 3138.16, null, 3.40, null, null, 111.85,
+        checkInst(model, 134, 134, LocalDate.of(2019, 5, 15), 132, 50.00, null, 0.86859674, 43.43, 3138.16, null, 3.40, null, null, 111.84,
                 null);
-        checkInst(model, 135, 135, LocalDate.of(2019, 5, 16), 133, 50.00, null, 0.86767023, 43.38, 3091.51, null, 3.35, null, null, 108.50,
+        checkInst(model, 135, 135, LocalDate.of(2019, 5, 16), 133, 50.00, null, 0.86767023, 43.38, 3091.51, null, 3.35, null, null, 108.49,
                 null);
-        checkInst(model, 136, 136, LocalDate.of(2019, 5, 17), 134, 50.00, null, 0.86674471, 43.34, 3044.81, null, 3.30, null, null, 105.20,
+        checkInst(model, 136, 136, LocalDate.of(2019, 5, 17), 134, 50.00, null, 0.86674471, 43.34, 3044.81, null, 3.30, null, null, 105.19,
                 null);
-        checkInst(model, 137, 137, LocalDate.of(2019, 5, 18), 135, 50.00, null, 0.86582017, 43.29, 2998.06, null, 3.25, null, null, 101.95,
+        checkInst(model, 137, 137, LocalDate.of(2019, 5, 18), 135, 50.00, null, 0.86582017, 43.29, 2998.06, null, 3.25, null, null, 101.94,
                 null);
-        checkInst(model, 138, 138, LocalDate.of(2019, 5, 19), 136, 50.00, null, 0.86489662, 43.24, 2951.26, null, 3.20, null, null, 98.75,
+        checkInst(model, 138, 138, LocalDate.of(2019, 5, 19), 136, 50.00, null, 0.86489662, 43.24, 2951.26, null, 3.20, null, null, 98.74,
                 null);
-        checkInst(model, 139, 139, LocalDate.of(2019, 5, 20), 137, 50.00, null, 0.86397406, 43.20, 2904.42, null, 3.15, null, null, 95.60,
+        checkInst(model, 139, 139, LocalDate.of(2019, 5, 20), 137, 50.00, null, 0.86397406, 43.20, 2904.42, null, 3.16, null, null, 95.58,
                 null);
-        checkInst(model, 140, 140, LocalDate.of(2019, 5, 21), 138, 50.00, null, 0.86305248, 43.15, 2857.52, null, 3.10, null, null, 92.50,
+        checkInst(model, 140, 140, LocalDate.of(2019, 5, 21), 138, 50.00, null, 0.86305248, 43.15, 2857.52, null, 3.10, null, null, 92.48,
                 null);
-        checkInst(model, 141, 141, LocalDate.of(2019, 5, 22), 139, 50.00, null, 0.86213188, 43.11, 2810.57, null, 3.05, null, null, 89.45,
+        checkInst(model, 141, 141, LocalDate.of(2019, 5, 22), 139, 50.00, null, 0.86213188, 43.11, 2810.57, null, 3.05, null, null, 89.43,
                 null);
-        checkInst(model, 142, 142, LocalDate.of(2019, 5, 23), 140, 50.00, null, 0.86121227, 43.06, 2763.57, null, 3.00, null, null, 86.45,
+        checkInst(model, 142, 142, LocalDate.of(2019, 5, 23), 140, 50.00, null, 0.86121227, 43.06, 2763.57, null, 3.00, null, null, 86.43,
                 null);
-        checkInst(model, 143, 143, LocalDate.of(2019, 5, 24), 141, 50.00, null, 0.86029363, 43.01, 2716.52, null, 2.95, null, null, 83.50,
+        checkInst(model, 143, 143, LocalDate.of(2019, 5, 24), 141, 50.00, null, 0.86029363, 43.01, 2716.52, null, 2.95, null, null, 83.48,
                 null);
-        checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 142, 50.00, null, 0.85937598, 42.97, 2669.42, null, 2.90, null, null, 80.60,
+        checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 142, 50.00, null, 0.85937598, 42.97, 2669.42, null, 2.90, null, null, 80.58,
                 null);
-        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 143, 50.00, null, 0.85845930, 42.92, 2622.27, null, 2.85, null, null, 77.75,
+        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 143, 50.00, null, 0.85845931, 42.92, 2622.27, null, 2.85, null, null, 77.73,
                 null);
-        checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 144, 50.00, null, 0.85754361, 42.88, 2575.07, null, 2.80, null, null, 74.95,
+        checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 144, 50.00, null, 0.85754361, 42.88, 2575.07, null, 2.80, null, null, 74.93,
                 null);
-        checkInst(model, 147, 147, LocalDate.of(2019, 5, 28), 145, 50.00, null, 0.85662889, 42.83, 2527.82, null, 2.75, null, null, 72.20,
+        checkInst(model, 147, 147, LocalDate.of(2019, 5, 28), 145, 50.00, null, 0.85662889, 42.83, 2527.82, null, 2.75, null, null, 72.18,
                 null);
-        checkInst(model, 148, 148, LocalDate.of(2019, 5, 29), 146, 50.00, null, 0.85571514, 42.79, 2480.52, null, 2.70, null, null, 69.50,
+        checkInst(model, 148, 148, LocalDate.of(2019, 5, 29), 146, 50.00, null, 0.85571514, 42.79, 2480.52, null, 2.70, null, null, 69.48,
                 null);
-        checkInst(model, 149, 149, LocalDate.of(2019, 5, 30), 147, 50.00, null, 0.85480237, 42.74, 2433.17, null, 2.65, null, null, 66.85,
+        checkInst(model, 149, 149, LocalDate.of(2019, 5, 30), 147, 50.00, null, 0.85480237, 42.74, 2433.17, null, 2.65, null, null, 66.83,
                 null);
-        checkInst(model, 150, 150, LocalDate.of(2019, 5, 31), 148, 50.00, null, 0.85389057, 42.69, 2385.77, null, 2.60, null, null, 64.25,
+        checkInst(model, 150, 150, LocalDate.of(2019, 5, 31), 148, 50.00, null, 0.85389057, 42.69, 2385.77, null, 2.60, null, null, 64.23,
                 null);
-        checkInst(model, 151, 151, LocalDate.of(2019, 6, 1), 149, 50.00, null, 0.85297975, 42.65, 2338.31, null, 2.55, null, null, 61.70,
+        checkInst(model, 151, 151, LocalDate.of(2019, 6, 1), 149, 50.00, null, 0.85297975, 42.65, 2338.31, null, 2.54, null, null, 61.69,
                 null);
-        checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 150, 50.00, null, 0.85206990, 42.60, 2290.81, null, 2.50, null, null, 59.20,
+        checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 150, 50.00, null, 0.85206990, 42.60, 2290.81, null, 2.50, null, null, 59.19,
                 null);
-        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 151, 50.00, null, 0.85116101, 42.56, 2243.26, null, 2.45, null, null, 56.75,
+        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 151, 50.00, null, 0.85116102, 42.56, 2243.26, null, 2.45, null, null, 56.74,
                 null);
-        checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 152, 50.00, null, 0.85025310, 42.51, 2195.65, null, 2.40, null, null, 54.35,
+        checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 152, 50.00, null, 0.85025310, 42.51, 2195.65, null, 2.39, null, null, 54.35,
                 null);
-        checkInst(model, 155, 155, LocalDate.of(2019, 6, 5), 153, 50.00, null, 0.84934616, 42.47, 2148.00, null, 2.34, null, null, 52.01,
+        checkInst(model, 155, 155, LocalDate.of(2019, 6, 5), 153, 50.00, null, 0.84934616, 42.47, 2148.00, null, 2.35, null, null, 52.00,
                 null);
-        checkInst(model, 156, 156, LocalDate.of(2019, 6, 6), 154, 50.00, null, 0.84844018, 42.42, 2100.29, null, 2.29, null, null, 49.72,
+        checkInst(model, 156, 156, LocalDate.of(2019, 6, 6), 154, 50.00, null, 0.84844018, 42.42, 2100.29, null, 2.29, null, null, 49.71,
                 null);
-        checkInst(model, 157, 157, LocalDate.of(2019, 6, 7), 155, 50.00, null, 0.84753517, 42.38, 2052.53, null, 2.24, null, null, 47.48,
+        checkInst(model, 157, 157, LocalDate.of(2019, 6, 7), 155, 50.00, null, 0.84753517, 42.38, 2052.53, null, 2.24, null, null, 47.47,
                 null);
-        checkInst(model, 158, 158, LocalDate.of(2019, 6, 8), 156, 50.00, null, 0.84663113, 42.33, 2004.73, null, 2.19, null, null, 45.29,
+        checkInst(model, 158, 158, LocalDate.of(2019, 6, 8), 156, 50.00, null, 0.84663113, 42.33, 2004.73, null, 2.20, null, null, 45.27,
                 null);
-        checkInst(model, 159, 159, LocalDate.of(2019, 6, 9), 157, 50.00, null, 0.84572805, 42.29, 1956.87, null, 2.14, null, null, 43.15,
+        checkInst(model, 159, 159, LocalDate.of(2019, 6, 9), 157, 50.00, null, 0.84572805, 42.29, 1956.87, null, 2.14, null, null, 43.13,
                 null);
-        checkInst(model, 160, 160, LocalDate.of(2019, 6, 10), 158, 50.00, null, 0.84482593, 42.24, 1908.96, null, 2.09, null, null, 41.06,
+        checkInst(model, 160, 160, LocalDate.of(2019, 6, 10), 158, 50.00, null, 0.84482593, 42.24, 1908.96, null, 2.09, null, null, 41.04,
                 null);
-        checkInst(model, 161, 161, LocalDate.of(2019, 6, 11), 159, 50.00, null, 0.84392477, 42.20, 1860.99, null, 2.04, null, null, 39.02,
+        checkInst(model, 161, 161, LocalDate.of(2019, 6, 11), 159, 50.00, null, 0.84392477, 42.20, 1860.99, null, 2.03, null, null, 39.01,
                 null);
-        checkInst(model, 162, 162, LocalDate.of(2019, 6, 12), 160, 50.00, null, 0.84302458, 42.15, 1812.98, null, 1.99, null, null, 37.03,
+        checkInst(model, 162, 162, LocalDate.of(2019, 6, 12), 160, 50.00, null, 0.84302458, 42.15, 1812.98, null, 1.99, null, null, 37.02,
                 null);
-        checkInst(model, 163, 163, LocalDate.of(2019, 6, 13), 161, 50.00, null, 0.84212535, 42.11, 1764.92, null, 1.94, null, null, 35.09,
+        checkInst(model, 163, 163, LocalDate.of(2019, 6, 13), 161, 50.00, null, 0.84212535, 42.11, 1764.92, null, 1.94, null, null, 35.08,
                 null);
-        checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 162, 50.00, null, 0.84122707, 42.06, 1716.80, null, 1.88, null, null, 33.21,
+        checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 162, 50.00, null, 0.84122707, 42.06, 1716.80, null, 1.88, null, null, 33.20,
                 null);
-        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 163, 50.00, null, 0.84032975, 42.02, 1668.64, null, 1.83, null, null, 31.38,
+        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 163, 50.00, null, 0.84032976, 42.02, 1668.64, null, 1.84, null, null, 31.36,
                 null);
-        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 164, 50.00, null, 0.83943340, 41.97, 1620.42, null, 1.78, null, null, 29.60,
+        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 164, 50.00, null, 0.83943340, 41.97, 1620.42, null, 1.78, null, null, 29.58,
                 null);
-        checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 165, 50.00, null, 0.83853799, 41.93, 1572.15, null, 1.73, null, null, 27.87,
+        checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 165, 50.00, null, 0.83853799, 41.93, 1572.15, null, 1.73, null, null, 27.85,
                 null);
-        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 166, 50.00, null, 0.83764354, 41.88, 1523.83, null, 1.68, null, null, 26.19,
+        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 166, 50.00, null, 0.83764355, 41.88, 1523.83, null, 1.68, null, null, 26.17,
                 null);
-        checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 167, 50.00, null, 0.83675005, 41.84, 1475.45, null, 1.63, null, null, 24.56,
+        checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 167, 50.00, null, 0.83675005, 41.84, 1475.45, null, 1.62, null, null, 24.55,
                 null);
-        checkInst(model, 170, 170, LocalDate.of(2019, 6, 20), 168, 50.00, null, 0.83585751, 41.79, 1427.03, null, 1.58, null, null, 22.98,
+        checkInst(model, 170, 170, LocalDate.of(2019, 6, 20), 168, 50.00, null, 0.83585751, 41.79, 1427.03, null, 1.58, null, null, 22.97,
                 null);
-        checkInst(model, 171, 171, LocalDate.of(2019, 6, 21), 169, 50.00, null, 0.83496592, 41.75, 1378.55, null, 1.52, null, null, 21.46,
+        checkInst(model, 171, 171, LocalDate.of(2019, 6, 21), 169, 50.00, null, 0.83496592, 41.75, 1378.55, null, 1.52, null, null, 21.45,
                 null);
-        checkInst(model, 172, 172, LocalDate.of(2019, 6, 22), 170, 50.00, null, 0.83407528, 41.70, 1330.02, null, 1.47, null, null, 19.99,
+        checkInst(model, 172, 172, LocalDate.of(2019, 6, 22), 170, 50.00, null, 0.83407528, 41.70, 1330.02, null, 1.47, null, null, 19.98,
                 null);
-        checkInst(model, 173, 173, LocalDate.of(2019, 6, 23), 171, 50.00, null, 0.83318560, 41.66, 1281.45, null, 1.42, null, null, 18.57,
+        checkInst(model, 173, 173, LocalDate.of(2019, 6, 23), 171, 50.00, null, 0.83318560, 41.66, 1281.45, null, 1.43, null, null, 18.55,
                 null);
-        checkInst(model, 174, 174, LocalDate.of(2019, 6, 24), 172, 50.00, null, 0.83229686, 41.61, 1232.81, null, 1.37, null, null, 17.20,
+        checkInst(model, 174, 174, LocalDate.of(2019, 6, 24), 172, 50.00, null, 0.83229686, 41.61, 1232.81, null, 1.36, null, null, 17.19,
                 null);
-        checkInst(model, 175, 175, LocalDate.of(2019, 6, 25), 173, 50.00, null, 0.83140907, 41.57, 1184.13, null, 1.32, null, null, 15.88,
+        checkInst(model, 175, 175, LocalDate.of(2019, 6, 25), 173, 50.00, null, 0.83140907, 41.57, 1184.13, null, 1.32, null, null, 15.87,
                 null);
-        checkInst(model, 176, 176, LocalDate.of(2019, 6, 26), 174, 50.00, null, 0.83052222, 41.53, 1135.39, null, 1.26, null, null, 14.62,
+        checkInst(model, 176, 176, LocalDate.of(2019, 6, 26), 174, 50.00, null, 0.83052222, 41.53, 1135.39, null, 1.26, null, null, 14.61,
                 null);
-        checkInst(model, 177, 177, LocalDate.of(2019, 6, 27), 175, 50.00, null, 0.82963633, 41.48, 1086.61, null, 1.21, null, null, 13.41,
+        checkInst(model, 177, 177, LocalDate.of(2019, 6, 27), 175, 50.00, null, 0.82963633, 41.48, 1086.61, null, 1.22, null, null, 13.39,
                 null);
-        checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 176, 50.00, null, 0.82875137, 41.44, 1037.77, null, 1.16, null, null, 12.25,
+        checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 176, 50.00, null, 0.82875137, 41.44, 1037.77, null, 1.16, null, null, 12.23,
                 null);
-        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 177, 50.00, null, 0.82786736, 41.39, 988.88, null, 1.11, null, null, 11.14,
+        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 177, 50.00, null, 0.82786737, 41.39, 988.88, null, 1.11, null, null, 11.12,
                 null);
-        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 178, 50.00, null, 0.82698430, 41.35, 939.93, null, 1.06, null, null, 10.08,
+        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 178, 50.00, null, 0.82698430, 41.35, 939.93, null, 1.05, null, null, 10.07,
                 null);
-        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 179, 50.00, null, 0.82610217, 41.31, 890.93, null, 1.00, null, null, 9.08,
+        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 179, 50.00, null, 0.82610218, 41.31, 890.93, null, 1.00, null, null, 9.07,
                 null);
-        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 180, 50.00, null, 0.82522099, 41.26, 841.89, null, 0.95, null, null, 8.13,
+        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 180, 50.00, null, 0.82522099, 41.26, 841.89, null, 0.96, null, null, 8.11,
                 null);
-        checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 181, 50.00, null, 0.82434075, 41.22, 792.79, null, 0.90, null, null, 7.23,
+        checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 181, 50.00, null, 0.82434075, 41.22, 792.79, null, 0.90, null, null, 7.21,
                 null);
-        checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 182, 50.00, null, 0.82346144, 41.17, 743.63, null, 0.85, null, null, 6.38,
+        checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 182, 50.00, null, 0.82346145, 41.17, 743.63, null, 0.84, null, null, 6.37,
                 null);
-        checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 183, 50.00, null, 0.82258308, 41.13, 694.43, null, 0.79, null, null, 5.59,
+        checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 183, 50.00, null, 0.82258308, 41.13, 694.43, null, 0.80, null, null, 5.57,
                 null);
-        checkInst(model, 186, 186, LocalDate.of(2019, 7, 6), 184, 50.00, null, 0.82170565, 41.09, 645.17, null, 0.74, null, null, 4.85,
+        checkInst(model, 186, 186, LocalDate.of(2019, 7, 6), 184, 50.00, null, 0.82170565, 41.09, 645.17, null, 0.74, null, null, 4.83,
                 null);
-        checkInst(model, 187, 187, LocalDate.of(2019, 7, 7), 185, 50.00, null, 0.82082916, 41.04, 595.86, null, 0.69, null, null, 4.16,
+        checkInst(model, 187, 187, LocalDate.of(2019, 7, 7), 185, 50.00, null, 0.82082916, 41.04, 595.86, null, 0.69, null, null, 4.14,
                 null);
-        checkInst(model, 188, 188, LocalDate.of(2019, 7, 8), 186, 50.00, null, 0.81995360, 41.00, 546.49, null, 0.64, null, null, 3.52,
+        checkInst(model, 188, 188, LocalDate.of(2019, 7, 8), 186, 50.00, null, 0.81995360, 41.00, 546.49, null, 0.63, null, null, 3.51,
                 null);
-        checkInst(model, 189, 189, LocalDate.of(2019, 7, 9), 187, 50.00, null, 0.81907897, 40.95, 497.08, null, 0.58, null, null, 2.94,
+        checkInst(model, 189, 189, LocalDate.of(2019, 7, 9), 187, 50.00, null, 0.81907897, 40.95, 497.08, null, 0.59, null, null, 2.92,
                 null);
-        checkInst(model, 190, 190, LocalDate.of(2019, 7, 10), 188, 50.00, null, 0.81820528, 40.91, 447.61, null, 0.53, null, null, 2.41,
+        checkInst(model, 190, 190, LocalDate.of(2019, 7, 10), 188, 50.00, null, 0.81820528, 40.91, 447.61, null, 0.53, null, null, 2.39,
                 null);
-        checkInst(model, 191, 191, LocalDate.of(2019, 7, 11), 189, 50.00, null, 0.81733252, 40.87, 398.08, null, 0.48, null, null, 1.93,
+        checkInst(model, 191, 191, LocalDate.of(2019, 7, 11), 189, 50.00, null, 0.81733252, 40.87, 398.08, null, 0.47, null, null, 1.92,
                 null);
-        checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 190, 50.00, null, 0.81646069, 40.82, 348.51, null, 0.43, null, null, 1.50,
+        checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 190, 50.00, null, 0.81646069, 40.82, 348.51, null, 0.43, null, null, 1.49,
                 null);
-        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 191, 50.00, null, 0.81558979, 40.78, 298.88, null, 0.37, null, null, 1.13,
+        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 191, 50.00, null, 0.81558980, 40.78, 298.88, null, 0.37, null, null, 1.12,
                 null);
-        checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 192, 50.00, null, 0.81471983, 40.74, 249.20, null, 0.32, null, null, 0.81,
+        checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 192, 50.00, null, 0.81471983, 40.74, 249.20, null, 0.32, null, null, 0.80,
                 null);
-        checkInst(model, 195, 195, LocalDate.of(2019, 7, 15), 193, 50.00, null, 0.81385078, 40.69, 199.47, null, 0.27, null, null, 0.54,
+        checkInst(model, 195, 195, LocalDate.of(2019, 7, 15), 193, 50.00, null, 0.81385078, 40.69, 199.47, null, 0.27, null, null, 0.53,
                 null);
-        checkInst(model, 196, 196, LocalDate.of(2019, 7, 16), 194, 50.00, null, 0.81298267, 40.65, 149.68, null, 0.21, null, null, 0.33,
+        checkInst(model, 196, 196, LocalDate.of(2019, 7, 16), 194, 50.00, null, 0.81298267, 40.65, 149.68, null, 0.21, null, null, 0.32,
                 null);
-        checkInst(model, 197, 197, LocalDate.of(2019, 7, 17), 195, 50.00, null, 0.81211548, 40.61, 99.84, null, 0.16, null, null, 0.17,
+        checkInst(model, 197, 197, LocalDate.of(2019, 7, 17), 195, 50.00, null, 0.81211548, 40.61, 99.84, null, 0.16, null, null, 0.16,
                 null);
-        checkInst(model, 198, 198, LocalDate.of(2019, 7, 18), 196, 50.00, null, 0.81124922, 40.56, 49.95, null, 0.11, null, null, 0.06,
+        checkInst(model, 198, 198, LocalDate.of(2019, 7, 18), 196, 50.00, null, 0.81124922, 40.56, 49.95, null, 0.11, null, null, 0.05,
                 null);
         // Same reason: what is left to close, not a full instalment, which had driven the balance to -16.49.
-        checkInst(model, 199, 199, LocalDate.of(2019, 7, 19), 197, 50.00, null, 0.81038388, 40.52, 0.00, null, 0.05, null, null, 0.01,
+        checkInst(model, 199, 199, LocalDate.of(2019, 7, 19), 197, 50.00, null, 0.81038388, 40.52, 0.00, null, 0.05, null, null, 0.00,
                 null);
 
         assertEquals(200, model.projectedPayments().size(), "disbursement + 199 regular (period 200 removed, forecast was 0)");
@@ -1368,367 +1379,367 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 1000.00, 1000.00);
         checkInst(model, 1, 1, LocalDate.of(2019, 1, 2), 0, 50.00, 40.00, 1.00000000, 40.00, 8959.61, 8967.69, 9.61, 7.69, -1.92, 990.39,
                 992.31);
-        checkInst(model, 2, 2, LocalDate.of(2019, 1, 3), 1, 50.00, null, 0.99893332, 49.95, 8927.26, null, 9.58, null, null, 982.73, null);
-        checkInst(model, 3, 3, LocalDate.of(2019, 1, 4), 2, 50.00, null, 0.99786779, 49.89, 8886.80, null, 9.53, null, null, 973.20, null);
+        checkInst(model, 2, 2, LocalDate.of(2019, 1, 3), 1, 50.00, null, 0.99893332, 49.95, 8927.26, null, 9.57, null, null, 982.74, null);
+        checkInst(model, 3, 3, LocalDate.of(2019, 1, 4), 2, 50.00, null, 0.99786779, 49.89, 8886.80, null, 9.54, null, null, 973.20, null);
         checkInst(model, 4, 4, LocalDate.of(2019, 1, 5), 3, 50.00, null, 0.99680339, 49.84, 8846.29, null, 9.49, null, null, 963.71, null);
-        checkInst(model, 5, 5, LocalDate.of(2019, 1, 6), 4, 50.00, null, 0.99574012, 49.79, 8805.73, null, 9.45, null, null, 954.26, null);
-        checkInst(model, 6, 6, LocalDate.of(2019, 1, 7), 5, 50.00, null, 0.99467799, 49.73, 8765.14, null, 9.40, null, null, 944.86, null);
-        checkInst(model, 7, 7, LocalDate.of(2019, 1, 8), 6, 50.00, null, 0.99361699, 49.68, 8724.49, null, 9.36, null, null, 935.50, null);
-        checkInst(model, 8, 8, LocalDate.of(2019, 1, 9), 7, 50.00, null, 0.99255712, 49.63, 8683.81, null, 9.32, null, null, 926.18, null);
-        checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 8, 50.00, null, 0.99149839, 49.57, 8643.08, null, 9.27, null, null, 916.91, null);
-        checkInst(model, 10, 10, LocalDate.of(2019, 1, 11), 9, 50.00, null, 0.99044078, 49.52, 8602.31, null, 9.23, null, null, 907.68,
+        checkInst(model, 5, 5, LocalDate.of(2019, 1, 6), 4, 50.00, null, 0.99574012, 49.79, 8805.73, null, 9.44, null, null, 954.27, null);
+        checkInst(model, 6, 6, LocalDate.of(2019, 1, 7), 5, 50.00, null, 0.99467799, 49.73, 8765.14, null, 9.41, null, null, 944.86, null);
+        checkInst(model, 7, 7, LocalDate.of(2019, 1, 8), 6, 50.00, null, 0.99361699, 49.68, 8724.49, null, 9.35, null, null, 935.51, null);
+        checkInst(model, 8, 8, LocalDate.of(2019, 1, 9), 7, 50.00, null, 0.99255712, 49.63, 8683.81, null, 9.32, null, null, 926.19, null);
+        checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 8, 50.00, null, 0.99149839, 49.57, 8643.08, null, 9.27, null, null, 916.92, null);
+        checkInst(model, 10, 10, LocalDate.of(2019, 1, 11), 9, 50.00, null, 0.99044078, 49.52, 8602.31, null, 9.23, null, null, 907.69,
                 null);
-        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 10, 50.00, null, 0.98938430, 49.47, 8561.50, null, 9.19, null, null, 898.49,
+        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 10, 50.00, null, 0.98938430, 49.47, 8561.50, null, 9.19, null, null, 898.50,
                 null);
-        checkInst(model, 12, 12, LocalDate.of(2019, 1, 13), 11, 50.00, null, 0.98832895, 49.42, 8520.64, null, 9.14, null, null, 889.35,
+        checkInst(model, 12, 12, LocalDate.of(2019, 1, 13), 11, 50.00, null, 0.98832895, 49.42, 8520.64, null, 9.14, null, null, 889.36,
                 null);
-        checkInst(model, 13, 13, LocalDate.of(2019, 1, 14), 12, 50.00, null, 0.98727472, 49.36, 8479.74, null, 9.10, null, null, 880.25,
+        checkInst(model, 13, 13, LocalDate.of(2019, 1, 14), 12, 50.00, null, 0.98727472, 49.36, 8479.74, null, 9.10, null, null, 880.26,
                 null);
-        checkInst(model, 14, 14, LocalDate.of(2019, 1, 15), 13, 50.00, null, 0.98622162, 49.31, 8438.79, null, 9.05, null, null, 871.20,
+        checkInst(model, 14, 14, LocalDate.of(2019, 1, 15), 13, 50.00, null, 0.98622162, 49.31, 8438.79, null, 9.05, null, null, 871.21,
                 null);
-        checkInst(model, 15, 15, LocalDate.of(2019, 1, 16), 14, 50.00, null, 0.98516964, 49.26, 8397.80, null, 9.01, null, null, 862.19,
+        checkInst(model, 15, 15, LocalDate.of(2019, 1, 16), 14, 50.00, null, 0.98516964, 49.26, 8397.80, null, 9.01, null, null, 862.20,
                 null);
-        checkInst(model, 16, 16, LocalDate.of(2019, 1, 17), 15, 50.00, null, 0.98411879, 49.21, 8356.77, null, 8.97, null, null, 853.22,
+        checkInst(model, 16, 16, LocalDate.of(2019, 1, 17), 15, 50.00, null, 0.98411879, 49.21, 8356.77, null, 8.97, null, null, 853.23,
                 null);
-        checkInst(model, 17, 17, LocalDate.of(2019, 1, 18), 16, 50.00, null, 0.98306905, 49.15, 8315.70, null, 8.92, null, null, 844.30,
+        checkInst(model, 17, 17, LocalDate.of(2019, 1, 18), 16, 50.00, null, 0.98306905, 49.15, 8315.70, null, 8.93, null, null, 844.30,
                 null);
         checkInst(model, 18, 18, LocalDate.of(2019, 1, 19), 17, 50.00, null, 0.98202044, 49.10, 8274.58, null, 8.88, null, null, 835.42,
                 null);
-        checkInst(model, 19, 19, LocalDate.of(2019, 1, 20), 18, 50.00, null, 0.98097294, 49.05, 8233.41, null, 8.84, null, null, 826.58,
+        checkInst(model, 19, 19, LocalDate.of(2019, 1, 20), 18, 50.00, null, 0.98097294, 49.05, 8233.41, null, 8.83, null, null, 826.59,
                 null);
-        checkInst(model, 20, 20, LocalDate.of(2019, 1, 21), 19, 50.00, null, 0.97992656, 49.00, 8192.20, null, 8.79, null, null, 817.79,
+        checkInst(model, 20, 20, LocalDate.of(2019, 1, 21), 19, 50.00, null, 0.97992656, 49.00, 8192.20, null, 8.79, null, null, 817.80,
                 null);
-        checkInst(model, 21, 21, LocalDate.of(2019, 1, 22), 20, 50.00, null, 0.97888129, 48.94, 8150.95, null, 8.75, null, null, 809.04,
+        checkInst(model, 21, 21, LocalDate.of(2019, 1, 22), 20, 50.00, null, 0.97888129, 48.94, 8150.95, null, 8.75, null, null, 809.05,
                 null);
-        checkInst(model, 22, 22, LocalDate.of(2019, 1, 23), 21, 50.00, null, 0.97783715, 48.89, 8109.65, null, 8.70, null, null, 800.34,
+        checkInst(model, 22, 22, LocalDate.of(2019, 1, 23), 21, 50.00, null, 0.97783715, 48.89, 8109.65, null, 8.70, null, null, 800.35,
                 null);
-        checkInst(model, 23, 23, LocalDate.of(2019, 1, 24), 22, 50.00, null, 0.97679411, 48.84, 8068.31, null, 8.66, null, null, 791.68,
+        checkInst(model, 23, 23, LocalDate.of(2019, 1, 24), 22, 50.00, null, 0.97679411, 48.84, 8068.31, null, 8.66, null, null, 791.69,
                 null);
-        checkInst(model, 24, 24, LocalDate.of(2019, 1, 25), 23, 50.00, null, 0.97575219, 48.79, 8026.93, null, 8.62, null, null, 783.06,
+        checkInst(model, 24, 24, LocalDate.of(2019, 1, 25), 23, 50.00, null, 0.97575219, 48.79, 8026.93, null, 8.62, null, null, 783.07,
                 null);
-        checkInst(model, 25, 25, LocalDate.of(2019, 1, 26), 24, 50.00, null, 0.97471138, 48.74, 7985.50, null, 8.57, null, null, 774.49,
+        checkInst(model, 25, 25, LocalDate.of(2019, 1, 26), 24, 50.00, null, 0.97471138, 48.74, 7985.50, null, 8.57, null, null, 774.50,
                 null);
-        checkInst(model, 26, 26, LocalDate.of(2019, 1, 27), 25, 50.00, null, 0.97367168, 48.68, 7944.03, null, 8.53, null, null, 765.96,
+        checkInst(model, 26, 26, LocalDate.of(2019, 1, 27), 25, 50.00, null, 0.97367168, 48.68, 7944.03, null, 8.53, null, null, 765.97,
                 null);
-        checkInst(model, 27, 27, LocalDate.of(2019, 1, 28), 26, 50.00, null, 0.97263309, 48.63, 7902.51, null, 8.48, null, null, 757.48,
+        checkInst(model, 27, 27, LocalDate.of(2019, 1, 28), 26, 50.00, null, 0.97263309, 48.63, 7902.51, null, 8.48, null, null, 757.49,
                 null);
-        checkInst(model, 28, 28, LocalDate.of(2019, 1, 29), 27, 50.00, null, 0.97159560, 48.58, 7860.95, null, 8.44, null, null, 749.04,
+        checkInst(model, 28, 28, LocalDate.of(2019, 1, 29), 27, 50.00, null, 0.97159560, 48.58, 7860.95, null, 8.44, null, null, 749.05,
                 null);
-        checkInst(model, 29, 29, LocalDate.of(2019, 1, 30), 28, 50.00, null, 0.97055922, 48.53, 7819.34, null, 8.39, null, null, 740.65,
+        checkInst(model, 29, 29, LocalDate.of(2019, 1, 30), 28, 50.00, null, 0.97055922, 48.53, 7819.34, null, 8.39, null, null, 740.66,
                 null);
-        checkInst(model, 30, 30, LocalDate.of(2019, 1, 31), 29, 50.00, null, 0.96952395, 48.48, 7777.69, null, 8.35, null, null, 732.30,
+        checkInst(model, 30, 30, LocalDate.of(2019, 1, 31), 29, 50.00, null, 0.96952395, 48.48, 7777.69, null, 8.35, null, null, 732.31,
                 null);
-        checkInst(model, 31, 31, LocalDate.of(2019, 2, 1), 30, 50.00, null, 0.96848979, 48.42, 7736.00, null, 8.31, null, null, 723.99,
+        checkInst(model, 31, 31, LocalDate.of(2019, 2, 1), 30, 50.00, null, 0.96848979, 48.42, 7736.00, null, 8.31, null, null, 724.00,
                 null);
-        checkInst(model, 32, 32, LocalDate.of(2019, 2, 2), 31, 50.00, null, 0.96745672, 48.37, 7694.26, null, 8.26, null, null, 715.73,
+        checkInst(model, 32, 32, LocalDate.of(2019, 2, 2), 31, 50.00, null, 0.96745672, 48.37, 7694.26, null, 8.26, null, null, 715.74,
                 null);
-        checkInst(model, 33, 33, LocalDate.of(2019, 2, 3), 32, 50.00, null, 0.96642476, 48.32, 7652.47, null, 8.22, null, null, 707.51,
+        checkInst(model, 33, 33, LocalDate.of(2019, 2, 3), 32, 50.00, null, 0.96642476, 48.32, 7652.47, null, 8.21, null, null, 707.53,
                 null);
-        checkInst(model, 34, 34, LocalDate.of(2019, 2, 4), 33, 50.00, null, 0.96539390, 48.27, 7610.65, null, 8.17, null, null, 699.34,
+        checkInst(model, 34, 34, LocalDate.of(2019, 2, 4), 33, 50.00, null, 0.96539390, 48.27, 7610.65, null, 8.18, null, null, 699.35,
                 null);
-        checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 34, 50.00, null, 0.96436413, 48.22, 7568.77, null, 8.13, null, null, 691.21,
+        checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 34, 50.00, null, 0.96436414, 48.22, 7568.77, null, 8.12, null, null, 691.23,
                 null);
-        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 35, 50.00, null, 0.96333547, 48.17, 7526.85, null, 8.08, null, null, 683.13,
+        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 35, 50.00, null, 0.96333547, 48.17, 7526.85, null, 8.08, null, null, 683.15,
                 null);
-        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 36, 50.00, null, 0.96230790, 48.12, 7484.89, null, 8.04, null, null, 675.09,
+        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 36, 50.00, null, 0.96230791, 48.12, 7484.89, null, 8.04, null, null, 675.11,
                 null);
-        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 37, 50.00, null, 0.96128143, 48.06, 7442.88, null, 7.99, null, null, 667.10,
+        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 37, 50.00, null, 0.96128143, 48.06, 7442.88, null, 7.99, null, null, 667.12,
                 null);
-        checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 38, 50.00, null, 0.96025606, 48.01, 7400.83, null, 7.95, null, null, 659.15,
+        checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 38, 50.00, null, 0.96025606, 48.01, 7400.83, null, 7.95, null, null, 659.17,
                 null);
-        checkInst(model, 40, 40, LocalDate.of(2019, 2, 10), 39, 50.00, null, 0.95923178, 47.96, 7358.73, null, 7.90, null, null, 651.25,
+        checkInst(model, 40, 40, LocalDate.of(2019, 2, 10), 39, 50.00, null, 0.95923178, 47.96, 7358.73, null, 7.90, null, null, 651.27,
                 null);
-        checkInst(model, 41, 41, LocalDate.of(2019, 2, 11), 40, 50.00, null, 0.95820859, 47.91, 7316.59, null, 7.86, null, null, 643.39,
+        checkInst(model, 41, 41, LocalDate.of(2019, 2, 11), 40, 50.00, null, 0.95820859, 47.91, 7316.59, null, 7.86, null, null, 643.41,
                 null);
-        checkInst(model, 42, 42, LocalDate.of(2019, 2, 12), 41, 50.00, null, 0.95718649, 47.86, 7274.41, null, 7.81, null, null, 635.58,
+        checkInst(model, 42, 42, LocalDate.of(2019, 2, 12), 41, 50.00, null, 0.95718649, 47.86, 7274.41, null, 7.82, null, null, 635.59,
                 null);
-        checkInst(model, 43, 43, LocalDate.of(2019, 2, 13), 42, 50.00, null, 0.95616548, 47.81, 7232.17, null, 7.77, null, null, 627.81,
+        checkInst(model, 43, 43, LocalDate.of(2019, 2, 13), 42, 50.00, null, 0.95616548, 47.81, 7232.17, null, 7.76, null, null, 627.83,
                 null);
-        checkInst(model, 44, 44, LocalDate.of(2019, 2, 14), 43, 50.00, null, 0.95514557, 47.76, 7189.90, null, 7.72, null, null, 620.09,
+        checkInst(model, 44, 44, LocalDate.of(2019, 2, 14), 43, 50.00, null, 0.95514557, 47.76, 7189.90, null, 7.73, null, null, 620.10,
                 null);
-        checkInst(model, 45, 45, LocalDate.of(2019, 2, 15), 44, 50.00, null, 0.95412674, 47.71, 7147.57, null, 7.68, null, null, 612.41,
+        checkInst(model, 45, 45, LocalDate.of(2019, 2, 15), 44, 50.00, null, 0.95412674, 47.71, 7147.57, null, 7.67, null, null, 612.43,
                 null);
-        checkInst(model, 46, 46, LocalDate.of(2019, 2, 16), 45, 50.00, null, 0.95310899, 47.66, 7105.21, null, 7.63, null, null, 604.78,
+        checkInst(model, 46, 46, LocalDate.of(2019, 2, 16), 45, 50.00, null, 0.95310899, 47.66, 7105.21, null, 7.64, null, null, 604.79,
                 null);
-        checkInst(model, 47, 47, LocalDate.of(2019, 2, 17), 46, 50.00, null, 0.95209233, 47.60, 7062.79, null, 7.59, null, null, 597.19,
+        checkInst(model, 47, 47, LocalDate.of(2019, 2, 17), 46, 50.00, null, 0.95209233, 47.60, 7062.79, null, 7.58, null, null, 597.21,
                 null);
-        checkInst(model, 48, 48, LocalDate.of(2019, 2, 18), 47, 50.00, null, 0.95107676, 47.55, 7020.33, null, 7.54, null, null, 589.65,
+        checkInst(model, 48, 48, LocalDate.of(2019, 2, 18), 47, 50.00, null, 0.95107676, 47.55, 7020.33, null, 7.54, null, null, 589.67,
                 null);
-        checkInst(model, 49, 49, LocalDate.of(2019, 2, 19), 48, 50.00, null, 0.95006227, 47.50, 6977.83, null, 7.50, null, null, 582.15,
+        checkInst(model, 49, 49, LocalDate.of(2019, 2, 19), 48, 50.00, null, 0.95006227, 47.50, 6977.83, null, 7.50, null, null, 582.17,
                 null);
-        checkInst(model, 50, 50, LocalDate.of(2019, 2, 20), 49, 50.00, null, 0.94904886, 47.45, 6935.28, null, 7.45, null, null, 574.70,
+        checkInst(model, 50, 50, LocalDate.of(2019, 2, 20), 49, 50.00, null, 0.94904886, 47.45, 6935.28, null, 7.45, null, null, 574.72,
                 null);
-        checkInst(model, 51, 51, LocalDate.of(2019, 2, 21), 50, 50.00, null, 0.94803653, 47.40, 6892.69, null, 7.41, null, null, 567.29,
+        checkInst(model, 51, 51, LocalDate.of(2019, 2, 21), 50, 50.00, null, 0.94803653, 47.40, 6892.69, null, 7.41, null, null, 567.31,
                 null);
-        checkInst(model, 52, 52, LocalDate.of(2019, 2, 22), 51, 50.00, null, 0.94702529, 47.35, 6850.05, null, 7.36, null, null, 559.93,
+        checkInst(model, 52, 52, LocalDate.of(2019, 2, 22), 51, 50.00, null, 0.94702529, 47.35, 6850.05, null, 7.36, null, null, 559.95,
                 null);
-        checkInst(model, 53, 53, LocalDate.of(2019, 2, 23), 52, 50.00, null, 0.94601512, 47.30, 6807.36, null, 7.31, null, null, 552.62,
+        checkInst(model, 53, 53, LocalDate.of(2019, 2, 23), 52, 50.00, null, 0.94601512, 47.30, 6807.36, null, 7.31, null, null, 552.64,
                 null);
-        checkInst(model, 54, 54, LocalDate.of(2019, 2, 24), 53, 50.00, null, 0.94500603, 47.25, 6764.63, null, 7.27, null, null, 545.35,
+        checkInst(model, 54, 54, LocalDate.of(2019, 2, 24), 53, 50.00, null, 0.94500603, 47.25, 6764.63, null, 7.27, null, null, 545.37,
                 null);
-        checkInst(model, 55, 55, LocalDate.of(2019, 2, 25), 54, 50.00, null, 0.94399801, 47.20, 6721.85, null, 7.22, null, null, 538.13,
+        checkInst(model, 55, 55, LocalDate.of(2019, 2, 25), 54, 50.00, null, 0.94399801, 47.20, 6721.85, null, 7.22, null, null, 538.15,
                 null);
-        checkInst(model, 56, 56, LocalDate.of(2019, 2, 26), 55, 50.00, null, 0.94299107, 47.15, 6679.03, null, 7.18, null, null, 530.95,
+        checkInst(model, 56, 56, LocalDate.of(2019, 2, 26), 55, 50.00, null, 0.94299107, 47.15, 6679.03, null, 7.18, null, null, 530.97,
                 null);
-        checkInst(model, 57, 57, LocalDate.of(2019, 2, 27), 56, 50.00, null, 0.94198521, 47.10, 6636.16, null, 7.13, null, null, 523.82,
+        checkInst(model, 57, 57, LocalDate.of(2019, 2, 27), 56, 50.00, null, 0.94198521, 47.10, 6636.16, null, 7.13, null, null, 523.84,
                 null);
-        checkInst(model, 58, 58, LocalDate.of(2019, 2, 28), 57, 50.00, null, 0.94098042, 47.05, 6593.25, null, 7.09, null, null, 516.73,
+        checkInst(model, 58, 58, LocalDate.of(2019, 2, 28), 57, 50.00, null, 0.94098042, 47.05, 6593.25, null, 7.09, null, null, 516.75,
                 null);
-        checkInst(model, 59, 59, LocalDate.of(2019, 3, 1), 58, 50.00, null, 0.93997669, 47.00, 6550.29, null, 7.04, null, null, 509.69,
+        checkInst(model, 59, 59, LocalDate.of(2019, 3, 1), 58, 50.00, null, 0.93997669, 47.00, 6550.29, null, 7.04, null, null, 509.71,
                 null);
-        checkInst(model, 60, 60, LocalDate.of(2019, 3, 2), 59, 50.00, null, 0.93897404, 46.95, 6507.28, null, 6.99, null, null, 502.70,
+        checkInst(model, 60, 60, LocalDate.of(2019, 3, 2), 59, 50.00, null, 0.93897404, 46.95, 6507.28, null, 6.99, null, null, 502.72,
                 null);
-        checkInst(model, 61, 61, LocalDate.of(2019, 3, 3), 60, 50.00, null, 0.93797246, 46.90, 6464.23, null, 6.95, null, null, 495.75,
+        checkInst(model, 61, 61, LocalDate.of(2019, 3, 3), 60, 50.00, null, 0.93797246, 46.90, 6464.23, null, 6.95, null, null, 495.77,
                 null);
-        checkInst(model, 62, 62, LocalDate.of(2019, 3, 4), 61, 50.00, null, 0.93697195, 46.85, 6421.14, null, 6.90, null, null, 488.85,
+        checkInst(model, 62, 62, LocalDate.of(2019, 3, 4), 61, 50.00, null, 0.93697195, 46.85, 6421.14, null, 6.91, null, null, 488.86,
                 null);
-        checkInst(model, 63, 63, LocalDate.of(2019, 3, 5), 62, 50.00, null, 0.93597251, 46.80, 6377.99, null, 6.86, null, null, 481.99,
+        checkInst(model, 63, 63, LocalDate.of(2019, 3, 5), 62, 50.00, null, 0.93597251, 46.80, 6377.99, null, 6.85, null, null, 482.01,
                 null);
-        checkInst(model, 64, 64, LocalDate.of(2019, 3, 6), 63, 50.00, null, 0.93497413, 46.75, 6334.80, null, 6.81, null, null, 475.18,
+        checkInst(model, 64, 64, LocalDate.of(2019, 3, 6), 63, 50.00, null, 0.93497413, 46.75, 6334.80, null, 6.81, null, null, 475.20,
                 null);
-        checkInst(model, 65, 65, LocalDate.of(2019, 3, 7), 64, 50.00, null, 0.93397681, 46.70, 6291.57, null, 6.76, null, null, 468.42,
+        checkInst(model, 65, 65, LocalDate.of(2019, 3, 7), 64, 50.00, null, 0.93397681, 46.70, 6291.57, null, 6.77, null, null, 468.43,
                 null);
-        checkInst(model, 66, 66, LocalDate.of(2019, 3, 8), 65, 50.00, null, 0.93298056, 46.65, 6248.29, null, 6.72, null, null, 461.70,
+        checkInst(model, 66, 66, LocalDate.of(2019, 3, 8), 65, 50.00, null, 0.93298056, 46.65, 6248.29, null, 6.72, null, null, 461.71,
                 null);
-        checkInst(model, 67, 67, LocalDate.of(2019, 3, 9), 66, 50.00, null, 0.93198538, 46.60, 6204.96, null, 6.67, null, null, 455.03,
+        checkInst(model, 67, 67, LocalDate.of(2019, 3, 9), 66, 50.00, null, 0.93198538, 46.60, 6204.96, null, 6.67, null, null, 455.04,
                 null);
-        checkInst(model, 68, 68, LocalDate.of(2019, 3, 10), 67, 50.00, null, 0.93099125, 46.55, 6161.58, null, 6.63, null, null, 448.40,
+        checkInst(model, 68, 68, LocalDate.of(2019, 3, 10), 67, 50.00, null, 0.93099125, 46.55, 6161.58, null, 6.62, null, null, 448.42,
                 null);
-        checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 68, 50.00, null, 0.92999818, 46.50, 6118.16, null, 6.58, null, null, 441.82,
+        checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 68, 50.00, null, 0.92999819, 46.50, 6118.16, null, 6.58, null, null, 441.84,
                 null);
-        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 69, 50.00, null, 0.92900618, 46.45, 6074.70, null, 6.53, null, null, 435.29,
+        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 69, 50.00, null, 0.92900618, 46.45, 6074.70, null, 6.54, null, null, 435.30,
                 null);
-        checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 70, 50.00, null, 0.92801523, 46.40, 6031.18, null, 6.49, null, null, 428.80,
+        checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 70, 50.00, null, 0.92801523, 46.40, 6031.18, null, 6.48, null, null, 428.82,
                 null);
-        checkInst(model, 72, 72, LocalDate.of(2019, 3, 14), 71, 50.00, null, 0.92702534, 46.35, 5987.62, null, 6.44, null, null, 422.36,
+        checkInst(model, 72, 72, LocalDate.of(2019, 3, 14), 71, 50.00, null, 0.92702534, 46.35, 5987.62, null, 6.44, null, null, 422.38,
                 null);
-        checkInst(model, 73, 73, LocalDate.of(2019, 3, 15), 72, 50.00, null, 0.92603650, 46.30, 5944.02, null, 6.39, null, null, 415.97,
+        checkInst(model, 73, 73, LocalDate.of(2019, 3, 15), 72, 50.00, null, 0.92603650, 46.30, 5944.02, null, 6.40, null, null, 415.98,
                 null);
-        checkInst(model, 74, 74, LocalDate.of(2019, 3, 16), 73, 50.00, null, 0.92504872, 46.25, 5900.36, null, 6.35, null, null, 409.62,
+        checkInst(model, 74, 74, LocalDate.of(2019, 3, 16), 73, 50.00, null, 0.92504872, 46.25, 5900.36, null, 6.34, null, null, 409.64,
                 null);
-        checkInst(model, 75, 75, LocalDate.of(2019, 3, 17), 74, 50.00, null, 0.92406200, 46.20, 5856.66, null, 6.30, null, null, 403.32,
+        checkInst(model, 75, 75, LocalDate.of(2019, 3, 17), 74, 50.00, null, 0.92406200, 46.20, 5856.66, null, 6.30, null, null, 403.34,
                 null);
-        checkInst(model, 76, 76, LocalDate.of(2019, 3, 18), 75, 50.00, null, 0.92307632, 46.15, 5812.92, null, 6.25, null, null, 397.07,
+        checkInst(model, 76, 76, LocalDate.of(2019, 3, 18), 75, 50.00, null, 0.92307632, 46.15, 5812.92, null, 6.26, null, null, 397.08,
                 null);
-        checkInst(model, 77, 77, LocalDate.of(2019, 3, 19), 76, 50.00, null, 0.92209170, 46.10, 5769.12, null, 6.21, null, null, 390.86,
+        checkInst(model, 77, 77, LocalDate.of(2019, 3, 19), 76, 50.00, null, 0.92209170, 46.10, 5769.12, null, 6.20, null, null, 390.88,
                 null);
-        checkInst(model, 78, 78, LocalDate.of(2019, 3, 20), 77, 50.00, null, 0.92110813, 46.06, 5725.29, null, 6.16, null, null, 384.70,
+        checkInst(model, 78, 78, LocalDate.of(2019, 3, 20), 77, 50.00, null, 0.92110813, 46.06, 5725.29, null, 6.17, null, null, 384.71,
                 null);
-        checkInst(model, 79, 79, LocalDate.of(2019, 3, 21), 78, 50.00, null, 0.92012560, 46.01, 5681.40, null, 6.11, null, null, 378.59,
+        checkInst(model, 79, 79, LocalDate.of(2019, 3, 21), 78, 50.00, null, 0.92012560, 46.01, 5681.40, null, 6.11, null, null, 378.60,
                 null);
-        checkInst(model, 80, 80, LocalDate.of(2019, 3, 22), 79, 50.00, null, 0.91914413, 45.96, 5637.47, null, 6.07, null, null, 372.52,
+        checkInst(model, 80, 80, LocalDate.of(2019, 3, 22), 79, 50.00, null, 0.91914413, 45.96, 5637.47, null, 6.07, null, null, 372.53,
                 null);
-        checkInst(model, 81, 81, LocalDate.of(2019, 3, 23), 80, 50.00, null, 0.91816370, 45.91, 5593.49, null, 6.02, null, null, 366.50,
+        checkInst(model, 81, 81, LocalDate.of(2019, 3, 23), 80, 50.00, null, 0.91816370, 45.91, 5593.49, null, 6.02, null, null, 366.51,
                 null);
-        checkInst(model, 82, 82, LocalDate.of(2019, 3, 24), 81, 50.00, null, 0.91718432, 45.86, 5549.46, null, 5.97, null, null, 360.53,
+        checkInst(model, 82, 82, LocalDate.of(2019, 3, 24), 81, 50.00, null, 0.91718432, 45.86, 5549.46, null, 5.97, null, null, 360.54,
                 null);
-        checkInst(model, 83, 83, LocalDate.of(2019, 3, 25), 82, 50.00, null, 0.91620598, 45.81, 5505.38, null, 5.93, null, null, 354.60,
+        checkInst(model, 83, 83, LocalDate.of(2019, 3, 25), 82, 50.00, null, 0.91620598, 45.81, 5505.38, null, 5.92, null, null, 354.62,
                 null);
-        checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 83, 50.00, null, 0.91522868, 45.76, 5461.26, null, 5.88, null, null, 348.72,
+        checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 83, 50.00, null, 0.91522869, 45.76, 5461.26, null, 5.88, null, null, 348.74,
                 null);
-        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 84, 50.00, null, 0.91425243, 45.71, 5417.09, null, 5.83, null, null, 342.89,
+        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 84, 50.00, null, 0.91425243, 45.71, 5417.09, null, 5.83, null, null, 342.91,
                 null);
-        checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 85, 50.00, null, 0.91327722, 45.66, 5372.88, null, 5.78, null, null, 337.11,
+        checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 85, 50.00, null, 0.91327722, 45.66, 5372.88, null, 5.79, null, null, 337.12,
                 null);
-        checkInst(model, 87, 87, LocalDate.of(2019, 3, 29), 86, 50.00, null, 0.91230305, 45.62, 5328.62, null, 5.74, null, null, 331.37,
+        checkInst(model, 87, 87, LocalDate.of(2019, 3, 29), 86, 50.00, null, 0.91230305, 45.62, 5328.62, null, 5.74, null, null, 331.38,
                 null);
-        checkInst(model, 88, 88, LocalDate.of(2019, 3, 30), 87, 50.00, null, 0.91132992, 45.57, 5284.31, null, 5.69, null, null, 325.68,
+        checkInst(model, 88, 88, LocalDate.of(2019, 3, 30), 87, 50.00, null, 0.91132992, 45.57, 5284.31, null, 5.69, null, null, 325.69,
                 null);
-        checkInst(model, 89, 89, LocalDate.of(2019, 3, 31), 88, 50.00, null, 0.91035783, 45.52, 5239.95, null, 5.64, null, null, 320.04,
+        checkInst(model, 89, 89, LocalDate.of(2019, 3, 31), 88, 50.00, null, 0.91035783, 45.52, 5239.95, null, 5.64, null, null, 320.05,
                 null);
-        checkInst(model, 90, 90, LocalDate.of(2019, 4, 1), 89, 50.00, null, 0.90938677, 45.47, 5195.54, null, 5.60, null, null, 314.44,
+        checkInst(model, 90, 90, LocalDate.of(2019, 4, 1), 89, 50.00, null, 0.90938677, 45.47, 5195.54, null, 5.59, null, null, 314.46,
                 null);
-        checkInst(model, 91, 91, LocalDate.of(2019, 4, 2), 90, 50.00, null, 0.90841675, 45.42, 5151.09, null, 5.55, null, null, 308.89,
+        checkInst(model, 91, 91, LocalDate.of(2019, 4, 2), 90, 50.00, null, 0.90841675, 45.42, 5151.09, null, 5.55, null, null, 308.91,
                 null);
-        checkInst(model, 92, 92, LocalDate.of(2019, 4, 3), 91, 50.00, null, 0.90744776, 45.37, 5106.59, null, 5.50, null, null, 303.39,
+        checkInst(model, 92, 92, LocalDate.of(2019, 4, 3), 91, 50.00, null, 0.90744776, 45.37, 5106.59, null, 5.50, null, null, 303.41,
                 null);
-        checkInst(model, 93, 93, LocalDate.of(2019, 4, 4), 92, 50.00, null, 0.90647981, 45.32, 5062.05, null, 5.45, null, null, 297.94,
+        checkInst(model, 93, 93, LocalDate.of(2019, 4, 4), 92, 50.00, null, 0.90647981, 45.32, 5062.05, null, 5.46, null, null, 297.95,
                 null);
-        checkInst(model, 94, 94, LocalDate.of(2019, 4, 5), 93, 50.00, null, 0.90551289, 45.28, 5017.45, null, 5.41, null, null, 292.53,
+        checkInst(model, 94, 94, LocalDate.of(2019, 4, 5), 93, 50.00, null, 0.90551289, 45.28, 5017.45, null, 5.40, null, null, 292.55,
                 null);
-        checkInst(model, 95, 95, LocalDate.of(2019, 4, 6), 94, 50.00, null, 0.90454700, 45.23, 4972.81, null, 5.36, null, null, 287.17,
+        checkInst(model, 95, 95, LocalDate.of(2019, 4, 6), 94, 50.00, null, 0.90454700, 45.23, 4972.81, null, 5.36, null, null, 287.19,
                 null);
-        checkInst(model, 96, 96, LocalDate.of(2019, 4, 7), 95, 50.00, null, 0.90358215, 45.18, 4928.12, null, 5.31, null, null, 281.86,
+        checkInst(model, 96, 96, LocalDate.of(2019, 4, 7), 95, 50.00, null, 0.90358215, 45.18, 4928.12, null, 5.31, null, null, 281.88,
                 null);
-        checkInst(model, 97, 97, LocalDate.of(2019, 4, 8), 96, 50.00, null, 0.90261832, 45.13, 4883.38, null, 5.26, null, null, 276.60,
+        checkInst(model, 97, 97, LocalDate.of(2019, 4, 8), 96, 50.00, null, 0.90261832, 45.13, 4883.38, null, 5.26, null, null, 276.62,
                 null);
-        checkInst(model, 98, 98, LocalDate.of(2019, 4, 9), 97, 50.00, null, 0.90165552, 45.08, 4838.59, null, 5.21, null, null, 271.39,
+        checkInst(model, 98, 98, LocalDate.of(2019, 4, 9), 97, 50.00, null, 0.90165552, 45.08, 4838.59, null, 5.21, null, null, 271.41,
                 null);
-        checkInst(model, 99, 99, LocalDate.of(2019, 4, 10), 98, 50.00, null, 0.90069374, 45.03, 4793.76, null, 5.17, null, null, 266.22,
+        checkInst(model, 99, 99, LocalDate.of(2019, 4, 10), 98, 50.00, null, 0.90069374, 45.03, 4793.76, null, 5.17, null, null, 266.24,
                 null);
-        checkInst(model, 100, 100, LocalDate.of(2019, 4, 11), 99, 50.00, null, 0.89973299, 44.99, 4748.88, null, 5.12, null, null, 261.10,
+        checkInst(model, 100, 100, LocalDate.of(2019, 4, 11), 99, 50.00, null, 0.89973299, 44.99, 4748.88, null, 5.12, null, null, 261.12,
                 null);
-        checkInst(model, 101, 101, LocalDate.of(2019, 4, 12), 100, 50.00, null, 0.89877327, 44.94, 4703.95, null, 5.07, null, null, 256.03,
+        checkInst(model, 101, 101, LocalDate.of(2019, 4, 12), 100, 50.00, null, 0.89877327, 44.94, 4703.95, null, 5.07, null, null, 256.05,
                 null);
-        checkInst(model, 102, 102, LocalDate.of(2019, 4, 13), 101, 50.00, null, 0.89781457, 44.89, 4658.97, null, 5.02, null, null, 251.01,
+        checkInst(model, 102, 102, LocalDate.of(2019, 4, 13), 101, 50.00, null, 0.89781457, 44.89, 4658.97, null, 5.02, null, null, 251.03,
                 null);
-        checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 102, 50.00, null, 0.89685689, 44.84, 4613.95, null, 4.97, null, null, 246.04,
+        checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 102, 50.00, null, 0.89685690, 44.84, 4613.95, null, 4.98, null, null, 246.05,
                 null);
-        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 103, 50.00, null, 0.89590024, 44.80, 4568.88, null, 4.93, null, null, 241.11,
+        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 103, 50.00, null, 0.89590024, 44.80, 4568.88, null, 4.93, null, null, 241.12,
                 null);
-        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 104, 50.00, null, 0.89494460, 44.75, 4523.75, null, 4.88, null, null, 236.23,
+        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 104, 50.00, null, 0.89494461, 44.75, 4523.75, null, 4.87, null, null, 236.25,
                 null);
-        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 105, 50.00, null, 0.89398999, 44.70, 4478.59, null, 4.83, null, null, 231.40,
+        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 105, 50.00, null, 0.89398999, 44.70, 4478.59, null, 4.84, null, null, 231.41,
                 null);
-        checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 106, 50.00, null, 0.89303639, 44.65, 4433.37, null, 4.78, null, null, 226.62,
+        checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 106, 50.00, null, 0.89303639, 44.65, 4433.37, null, 4.78, null, null, 226.63,
                 null);
-        checkInst(model, 108, 108, LocalDate.of(2019, 4, 19), 107, 50.00, null, 0.89208381, 44.60, 4388.10, null, 4.73, null, null, 221.89,
+        checkInst(model, 108, 108, LocalDate.of(2019, 4, 19), 107, 50.00, null, 0.89208381, 44.60, 4388.10, null, 4.73, null, null, 221.90,
                 null);
-        checkInst(model, 109, 109, LocalDate.of(2019, 4, 20), 108, 50.00, null, 0.89113225, 44.56, 4342.79, null, 4.69, null, null, 217.20,
+        checkInst(model, 109, 109, LocalDate.of(2019, 4, 20), 108, 50.00, null, 0.89113225, 44.56, 4342.79, null, 4.69, null, null, 217.21,
                 null);
-        checkInst(model, 110, 110, LocalDate.of(2019, 4, 21), 109, 50.00, null, 0.89018170, 44.51, 4297.42, null, 4.64, null, null, 212.56,
+        checkInst(model, 110, 110, LocalDate.of(2019, 4, 21), 109, 50.00, null, 0.89018170, 44.51, 4297.42, null, 4.63, null, null, 212.58,
                 null);
-        checkInst(model, 111, 111, LocalDate.of(2019, 4, 22), 110, 50.00, null, 0.88923216, 44.46, 4252.01, null, 4.59, null, null, 207.97,
+        checkInst(model, 111, 111, LocalDate.of(2019, 4, 22), 110, 50.00, null, 0.88923216, 44.46, 4252.01, null, 4.59, null, null, 207.99,
                 null);
-        checkInst(model, 112, 112, LocalDate.of(2019, 4, 23), 111, 50.00, null, 0.88828364, 44.41, 4206.55, null, 4.54, null, null, 203.43,
+        checkInst(model, 112, 112, LocalDate.of(2019, 4, 23), 111, 50.00, null, 0.88828364, 44.41, 4206.55, null, 4.54, null, null, 203.45,
                 null);
-        checkInst(model, 113, 113, LocalDate.of(2019, 4, 24), 112, 50.00, null, 0.88733613, 44.37, 4161.05, null, 4.49, null, null, 198.94,
+        checkInst(model, 113, 113, LocalDate.of(2019, 4, 24), 112, 50.00, null, 0.88733613, 44.37, 4161.05, null, 4.50, null, null, 198.95,
                 null);
-        checkInst(model, 114, 114, LocalDate.of(2019, 4, 25), 113, 50.00, null, 0.88638963, 44.32, 4115.49, null, 4.44, null, null, 194.50,
+        checkInst(model, 114, 114, LocalDate.of(2019, 4, 25), 113, 50.00, null, 0.88638963, 44.32, 4115.49, null, 4.44, null, null, 194.51,
                 null);
-        checkInst(model, 115, 115, LocalDate.of(2019, 4, 26), 114, 50.00, null, 0.88544414, 44.27, 4069.88, null, 4.39, null, null, 190.11,
+        checkInst(model, 115, 115, LocalDate.of(2019, 4, 26), 114, 50.00, null, 0.88544414, 44.27, 4069.88, null, 4.39, null, null, 190.12,
                 null);
-        checkInst(model, 116, 116, LocalDate.of(2019, 4, 27), 115, 50.00, null, 0.88449966, 44.22, 4024.23, null, 4.35, null, null, 185.76,
+        checkInst(model, 116, 116, LocalDate.of(2019, 4, 27), 115, 50.00, null, 0.88449966, 44.22, 4024.23, null, 4.35, null, null, 185.77,
                 null);
-        checkInst(model, 117, 117, LocalDate.of(2019, 4, 28), 116, 50.00, null, 0.88355619, 44.18, 3978.53, null, 4.30, null, null, 181.46,
+        checkInst(model, 117, 117, LocalDate.of(2019, 4, 28), 116, 50.00, null, 0.88355619, 44.18, 3978.53, null, 4.30, null, null, 181.47,
                 null);
-        checkInst(model, 118, 118, LocalDate.of(2019, 4, 29), 117, 50.00, null, 0.88261372, 44.13, 3932.77, null, 4.25, null, null, 177.21,
+        checkInst(model, 118, 118, LocalDate.of(2019, 4, 29), 117, 50.00, null, 0.88261372, 44.13, 3932.77, null, 4.24, null, null, 177.23,
                 null);
-        checkInst(model, 119, 119, LocalDate.of(2019, 4, 30), 118, 50.00, null, 0.88167226, 44.08, 3886.97, null, 4.20, null, null, 173.01,
+        checkInst(model, 119, 119, LocalDate.of(2019, 4, 30), 118, 50.00, null, 0.88167226, 44.08, 3886.97, null, 4.20, null, null, 173.03,
                 null);
-        checkInst(model, 120, 120, LocalDate.of(2019, 5, 1), 119, 50.00, null, 0.88073180, 44.04, 3841.12, null, 4.15, null, null, 168.86,
+        checkInst(model, 120, 120, LocalDate.of(2019, 5, 1), 119, 50.00, null, 0.88073180, 44.04, 3841.12, null, 4.15, null, null, 168.88,
                 null);
-        checkInst(model, 121, 121, LocalDate.of(2019, 5, 2), 120, 50.00, null, 0.87979234, 43.99, 3795.23, null, 4.10, null, null, 164.76,
+        checkInst(model, 121, 121, LocalDate.of(2019, 5, 2), 120, 50.00, null, 0.87979234, 43.99, 3795.23, null, 4.11, null, null, 164.77,
                 null);
-        checkInst(model, 122, 122, LocalDate.of(2019, 5, 3), 121, 50.00, null, 0.87885389, 43.94, 3749.28, null, 4.05, null, null, 160.71,
+        checkInst(model, 122, 122, LocalDate.of(2019, 5, 3), 121, 50.00, null, 0.87885389, 43.94, 3749.28, null, 4.05, null, null, 160.72,
                 null);
-        checkInst(model, 123, 123, LocalDate.of(2019, 5, 4), 122, 50.00, null, 0.87791644, 43.90, 3703.28, null, 4.00, null, null, 156.71,
+        checkInst(model, 123, 123, LocalDate.of(2019, 5, 4), 122, 50.00, null, 0.87791644, 43.90, 3703.28, null, 4.00, null, null, 156.72,
                 null);
-        checkInst(model, 124, 124, LocalDate.of(2019, 5, 5), 123, 50.00, null, 0.87697999, 43.85, 3657.24, null, 3.95, null, null, 152.76,
+        checkInst(model, 124, 124, LocalDate.of(2019, 5, 5), 123, 50.00, null, 0.87697999, 43.85, 3657.24, null, 3.96, null, null, 152.76,
                 null);
-        checkInst(model, 125, 125, LocalDate.of(2019, 5, 6), 124, 50.00, null, 0.87604453, 43.80, 3611.14, null, 3.91, null, null, 148.85,
+        checkInst(model, 125, 125, LocalDate.of(2019, 5, 6), 124, 50.00, null, 0.87604453, 43.80, 3611.14, null, 3.90, null, null, 148.86,
                 null);
-        checkInst(model, 126, 126, LocalDate.of(2019, 5, 7), 125, 50.00, null, 0.87511008, 43.76, 3565.00, null, 3.86, null, null, 144.99,
+        checkInst(model, 126, 126, LocalDate.of(2019, 5, 7), 125, 50.00, null, 0.87511008, 43.76, 3565.00, null, 3.86, null, null, 145.00,
                 null);
-        checkInst(model, 127, 127, LocalDate.of(2019, 5, 8), 126, 50.00, null, 0.87417662, 43.71, 3518.81, null, 3.81, null, null, 141.18,
+        checkInst(model, 127, 127, LocalDate.of(2019, 5, 8), 126, 50.00, null, 0.87417662, 43.71, 3518.81, null, 3.81, null, null, 141.19,
                 null);
-        checkInst(model, 128, 128, LocalDate.of(2019, 5, 9), 127, 50.00, null, 0.87324416, 43.66, 3472.56, null, 3.76, null, null, 137.42,
+        checkInst(model, 128, 128, LocalDate.of(2019, 5, 9), 127, 50.00, null, 0.87324416, 43.66, 3472.56, null, 3.75, null, null, 137.44,
                 null);
-        checkInst(model, 129, 129, LocalDate.of(2019, 5, 10), 128, 50.00, null, 0.87231269, 43.62, 3426.27, null, 3.71, null, null, 133.71,
+        checkInst(model, 129, 129, LocalDate.of(2019, 5, 10), 128, 50.00, null, 0.87231269, 43.62, 3426.27, null, 3.71, null, null, 133.73,
                 null);
-        checkInst(model, 130, 130, LocalDate.of(2019, 5, 11), 129, 50.00, null, 0.87138221, 43.57, 3379.93, null, 3.66, null, null, 130.05,
+        checkInst(model, 130, 130, LocalDate.of(2019, 5, 11), 129, 50.00, null, 0.87138221, 43.57, 3379.93, null, 3.66, null, null, 130.07,
                 null);
-        checkInst(model, 131, 131, LocalDate.of(2019, 5, 12), 130, 50.00, null, 0.87045273, 43.52, 3333.54, null, 3.61, null, null, 126.44,
+        checkInst(model, 131, 131, LocalDate.of(2019, 5, 12), 130, 50.00, null, 0.87045273, 43.52, 3333.54, null, 3.61, null, null, 126.46,
                 null);
-        checkInst(model, 132, 132, LocalDate.of(2019, 5, 13), 131, 50.00, null, 0.86952424, 43.48, 3287.10, null, 3.56, null, null, 122.88,
+        checkInst(model, 132, 132, LocalDate.of(2019, 5, 13), 131, 50.00, null, 0.86952424, 43.48, 3287.10, null, 3.56, null, null, 122.90,
                 null);
-        checkInst(model, 133, 133, LocalDate.of(2019, 5, 14), 132, 50.00, null, 0.86859674, 43.43, 3240.61, null, 3.51, null, null, 119.37,
+        checkInst(model, 133, 133, LocalDate.of(2019, 5, 14), 132, 50.00, null, 0.86859674, 43.43, 3240.61, null, 3.51, null, null, 119.39,
                 null);
-        checkInst(model, 134, 134, LocalDate.of(2019, 5, 15), 133, 50.00, null, 0.86767023, 43.38, 3194.07, null, 3.46, null, null, 115.91,
+        checkInst(model, 134, 134, LocalDate.of(2019, 5, 15), 133, 50.00, null, 0.86767023, 43.38, 3194.07, null, 3.46, null, null, 115.93,
                 null);
-        checkInst(model, 135, 135, LocalDate.of(2019, 5, 16), 134, 50.00, null, 0.86674471, 43.34, 3147.48, null, 3.41, null, null, 112.50,
+        checkInst(model, 135, 135, LocalDate.of(2019, 5, 16), 134, 50.00, null, 0.86674471, 43.34, 3147.48, null, 3.41, null, null, 112.52,
                 null);
-        checkInst(model, 136, 136, LocalDate.of(2019, 5, 17), 135, 50.00, null, 0.86582017, 43.29, 3100.84, null, 3.36, null, null, 109.14,
+        checkInst(model, 136, 136, LocalDate.of(2019, 5, 17), 135, 50.00, null, 0.86582017, 43.29, 3100.84, null, 3.36, null, null, 109.16,
                 null);
-        checkInst(model, 137, 137, LocalDate.of(2019, 5, 18), 136, 50.00, null, 0.86489662, 43.24, 3054.15, null, 3.31, null, null, 105.83,
+        checkInst(model, 137, 137, LocalDate.of(2019, 5, 18), 136, 50.00, null, 0.86489662, 43.24, 3054.15, null, 3.31, null, null, 105.85,
                 null);
-        checkInst(model, 138, 138, LocalDate.of(2019, 5, 19), 137, 50.00, null, 0.86397406, 43.20, 3007.41, null, 3.26, null, null, 102.57,
+        checkInst(model, 138, 138, LocalDate.of(2019, 5, 19), 137, 50.00, null, 0.86397406, 43.20, 3007.41, null, 3.26, null, null, 102.59,
                 null);
-        checkInst(model, 139, 139, LocalDate.of(2019, 5, 20), 138, 50.00, null, 0.86305248, 43.15, 2960.62, null, 3.21, null, null, 99.36,
+        checkInst(model, 139, 139, LocalDate.of(2019, 5, 20), 138, 50.00, null, 0.86305248, 43.15, 2960.62, null, 3.21, null, null, 99.38,
                 null);
-        checkInst(model, 140, 140, LocalDate.of(2019, 5, 21), 139, 50.00, null, 0.86213188, 43.11, 2913.79, null, 3.16, null, null, 96.20,
+        checkInst(model, 140, 140, LocalDate.of(2019, 5, 21), 139, 50.00, null, 0.86213188, 43.11, 2913.79, null, 3.17, null, null, 96.21,
                 null);
-        checkInst(model, 141, 141, LocalDate.of(2019, 5, 22), 140, 50.00, null, 0.86121227, 43.06, 2866.90, null, 3.11, null, null, 93.09,
+        checkInst(model, 141, 141, LocalDate.of(2019, 5, 22), 140, 50.00, null, 0.86121227, 43.06, 2866.90, null, 3.11, null, null, 93.10,
                 null);
-        checkInst(model, 142, 142, LocalDate.of(2019, 5, 23), 141, 50.00, null, 0.86029363, 43.01, 2819.96, null, 3.06, null, null, 90.03,
+        checkInst(model, 142, 142, LocalDate.of(2019, 5, 23), 141, 50.00, null, 0.86029363, 43.01, 2819.96, null, 3.06, null, null, 90.04,
                 null);
-        checkInst(model, 143, 143, LocalDate.of(2019, 5, 24), 142, 50.00, null, 0.85937598, 42.97, 2772.97, null, 3.01, null, null, 87.02,
+        checkInst(model, 143, 143, LocalDate.of(2019, 5, 24), 142, 50.00, null, 0.85937598, 42.97, 2772.97, null, 3.01, null, null, 87.03,
                 null);
-        checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 143, 50.00, null, 0.85845930, 42.92, 2725.93, null, 2.96, null, null, 84.06,
+        checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 143, 50.00, null, 0.85845931, 42.92, 2725.93, null, 2.96, null, null, 84.07,
                 null);
-        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 144, 50.00, null, 0.85754361, 42.88, 2678.84, null, 2.91, null, null, 81.15,
+        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 144, 50.00, null, 0.85754361, 42.88, 2678.84, null, 2.91, null, null, 81.16,
                 null);
-        checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 145, 50.00, null, 0.85662889, 42.83, 2631.70, null, 2.86, null, null, 78.29,
+        checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 145, 50.00, null, 0.85662889, 42.83, 2631.70, null, 2.86, null, null, 78.30,
                 null);
-        checkInst(model, 147, 147, LocalDate.of(2019, 5, 28), 146, 50.00, null, 0.85571514, 42.79, 2584.51, null, 2.81, null, null, 75.48,
+        checkInst(model, 147, 147, LocalDate.of(2019, 5, 28), 146, 50.00, null, 0.85571514, 42.79, 2584.51, null, 2.81, null, null, 75.49,
                 null);
-        checkInst(model, 148, 148, LocalDate.of(2019, 5, 29), 147, 50.00, null, 0.85480237, 42.74, 2537.27, null, 2.76, null, null, 72.72,
+        checkInst(model, 148, 148, LocalDate.of(2019, 5, 29), 147, 50.00, null, 0.85480237, 42.74, 2537.27, null, 2.76, null, null, 72.73,
                 null);
-        checkInst(model, 149, 149, LocalDate.of(2019, 5, 30), 148, 50.00, null, 0.85389057, 42.69, 2489.98, null, 2.71, null, null, 70.01,
+        checkInst(model, 149, 149, LocalDate.of(2019, 5, 30), 148, 50.00, null, 0.85389057, 42.69, 2489.98, null, 2.71, null, null, 70.02,
                 null);
-        checkInst(model, 150, 150, LocalDate.of(2019, 5, 31), 149, 50.00, null, 0.85297975, 42.65, 2442.64, null, 2.66, null, null, 67.35,
+        checkInst(model, 150, 150, LocalDate.of(2019, 5, 31), 149, 50.00, null, 0.85297975, 42.65, 2442.64, null, 2.66, null, null, 67.36,
                 null);
-        checkInst(model, 151, 151, LocalDate.of(2019, 6, 1), 150, 50.00, null, 0.85206990, 42.60, 2395.25, null, 2.61, null, null, 64.74,
+        checkInst(model, 151, 151, LocalDate.of(2019, 6, 1), 150, 50.00, null, 0.85206990, 42.60, 2395.25, null, 2.61, null, null, 64.75,
                 null);
-        checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 151, 50.00, null, 0.85116101, 42.56, 2347.81, null, 2.56, null, null, 62.18,
+        checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 151, 50.00, null, 0.85116102, 42.56, 2347.81, null, 2.56, null, null, 62.19,
                 null);
-        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 152, 50.00, null, 0.85025310, 42.51, 2300.31, null, 2.51, null, null, 59.67,
+        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 152, 50.00, null, 0.85025310, 42.51, 2300.31, null, 2.50, null, null, 59.69,
                 null);
-        checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 153, 50.00, null, 0.84934616, 42.47, 2252.77, null, 2.46, null, null, 57.21,
+        checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 153, 50.00, null, 0.84934616, 42.47, 2252.77, null, 2.46, null, null, 57.23,
                 null);
-        checkInst(model, 155, 155, LocalDate.of(2019, 6, 5), 154, 50.00, null, 0.84844018, 42.42, 2205.17, null, 2.41, null, null, 54.80,
+        checkInst(model, 155, 155, LocalDate.of(2019, 6, 5), 154, 50.00, null, 0.84844018, 42.42, 2205.17, null, 2.40, null, null, 54.83,
                 null);
-        checkInst(model, 156, 156, LocalDate.of(2019, 6, 6), 155, 50.00, null, 0.84753517, 42.38, 2157.53, null, 2.35, null, null, 52.45,
+        checkInst(model, 156, 156, LocalDate.of(2019, 6, 6), 155, 50.00, null, 0.84753517, 42.38, 2157.53, null, 2.36, null, null, 52.47,
                 null);
-        checkInst(model, 157, 157, LocalDate.of(2019, 6, 7), 156, 50.00, null, 0.84663113, 42.33, 2109.83, null, 2.30, null, null, 50.15,
+        checkInst(model, 157, 157, LocalDate.of(2019, 6, 7), 156, 50.00, null, 0.84663113, 42.33, 2109.83, null, 2.30, null, null, 50.17,
                 null);
-        checkInst(model, 158, 158, LocalDate.of(2019, 6, 8), 157, 50.00, null, 0.84572805, 42.29, 2062.09, null, 2.25, null, null, 47.90,
+        checkInst(model, 158, 158, LocalDate.of(2019, 6, 8), 157, 50.00, null, 0.84572805, 42.29, 2062.09, null, 2.26, null, null, 47.91,
                 null);
-        checkInst(model, 159, 159, LocalDate.of(2019, 6, 9), 158, 50.00, null, 0.84482593, 42.24, 2014.29, null, 2.20, null, null, 45.70,
+        checkInst(model, 159, 159, LocalDate.of(2019, 6, 9), 158, 50.00, null, 0.84482593, 42.24, 2014.29, null, 2.20, null, null, 45.71,
                 null);
-        checkInst(model, 160, 160, LocalDate.of(2019, 6, 10), 159, 50.00, null, 0.84392477, 42.20, 1966.44, null, 2.15, null, null, 43.55,
+        checkInst(model, 160, 160, LocalDate.of(2019, 6, 10), 159, 50.00, null, 0.84392477, 42.20, 1966.44, null, 2.15, null, null, 43.56,
                 null);
-        checkInst(model, 161, 161, LocalDate.of(2019, 6, 11), 160, 50.00, null, 0.84302458, 42.15, 1918.54, null, 2.10, null, null, 41.45,
+        checkInst(model, 161, 161, LocalDate.of(2019, 6, 11), 160, 50.00, null, 0.84302458, 42.15, 1918.54, null, 2.10, null, null, 41.46,
                 null);
-        checkInst(model, 162, 162, LocalDate.of(2019, 6, 12), 161, 50.00, null, 0.84212535, 42.11, 1870.59, null, 2.05, null, null, 39.40,
+        checkInst(model, 162, 162, LocalDate.of(2019, 6, 12), 161, 50.00, null, 0.84212535, 42.11, 1870.59, null, 2.05, null, null, 39.41,
                 null);
-        checkInst(model, 163, 163, LocalDate.of(2019, 6, 13), 162, 50.00, null, 0.84122707, 42.06, 1822.58, null, 2.00, null, null, 37.40,
+        checkInst(model, 163, 163, LocalDate.of(2019, 6, 13), 162, 50.00, null, 0.84122707, 42.06, 1822.58, null, 1.99, null, null, 37.42,
                 null);
-        checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 163, 50.00, null, 0.84032975, 42.02, 1774.53, null, 1.95, null, null, 35.45,
+        checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 163, 50.00, null, 0.84032976, 42.02, 1774.53, null, 1.95, null, null, 35.47,
                 null);
-        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 164, 50.00, null, 0.83943340, 41.97, 1726.43, null, 1.89, null, null, 33.56,
+        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 164, 50.00, null, 0.83943340, 41.97, 1726.43, null, 1.90, null, null, 33.57,
                 null);
-        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 165, 50.00, null, 0.83853799, 41.93, 1678.27, null, 1.84, null, null, 31.72,
+        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 165, 50.00, null, 0.83853799, 41.93, 1678.27, null, 1.84, null, null, 31.73,
                 null);
-        checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 166, 50.00, null, 0.83764354, 41.88, 1630.06, null, 1.79, null, null, 29.93,
+        checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 166, 50.00, null, 0.83764355, 41.88, 1630.06, null, 1.79, null, null, 29.94,
                 null);
-        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 167, 50.00, null, 0.83675005, 41.84, 1581.80, null, 1.74, null, null, 28.19,
+        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 167, 50.00, null, 0.83675005, 41.84, 1581.80, null, 1.74, null, null, 28.20,
                 null);
-        checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 168, 50.00, null, 0.83585751, 41.79, 1533.49, null, 1.69, null, null, 26.50,
+        checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 168, 50.00, null, 0.83585751, 41.79, 1533.49, null, 1.69, null, null, 26.51,
                 null);
-        checkInst(model, 170, 170, LocalDate.of(2019, 6, 20), 169, 50.00, null, 0.83496592, 41.75, 1485.13, null, 1.64, null, null, 24.86,
+        checkInst(model, 170, 170, LocalDate.of(2019, 6, 20), 169, 50.00, null, 0.83496592, 41.75, 1485.13, null, 1.64, null, null, 24.87,
                 null);
-        checkInst(model, 171, 171, LocalDate.of(2019, 6, 21), 170, 50.00, null, 0.83407528, 41.70, 1436.71, null, 1.59, null, null, 23.27,
+        checkInst(model, 171, 171, LocalDate.of(2019, 6, 21), 170, 50.00, null, 0.83407528, 41.70, 1436.71, null, 1.58, null, null, 23.29,
                 null);
-        checkInst(model, 172, 172, LocalDate.of(2019, 6, 22), 171, 50.00, null, 0.83318560, 41.66, 1388.25, null, 1.53, null, null, 21.74,
+        checkInst(model, 172, 172, LocalDate.of(2019, 6, 22), 171, 50.00, null, 0.83318560, 41.66, 1388.25, null, 1.54, null, null, 21.75,
                 null);
-        checkInst(model, 173, 173, LocalDate.of(2019, 6, 23), 172, 50.00, null, 0.83229686, 41.61, 1339.73, null, 1.48, null, null, 20.26,
+        checkInst(model, 173, 173, LocalDate.of(2019, 6, 23), 172, 50.00, null, 0.83229686, 41.61, 1339.73, null, 1.48, null, null, 20.27,
                 null);
-        checkInst(model, 174, 174, LocalDate.of(2019, 6, 24), 173, 50.00, null, 0.83140907, 41.57, 1291.16, null, 1.43, null, null, 18.83,
+        checkInst(model, 174, 174, LocalDate.of(2019, 6, 24), 173, 50.00, null, 0.83140907, 41.57, 1291.16, null, 1.43, null, null, 18.84,
                 null);
-        checkInst(model, 175, 175, LocalDate.of(2019, 6, 25), 174, 50.00, null, 0.83052222, 41.53, 1242.54, null, 1.38, null, null, 17.45,
+        checkInst(model, 175, 175, LocalDate.of(2019, 6, 25), 174, 50.00, null, 0.83052222, 41.53, 1242.54, null, 1.38, null, null, 17.46,
                 null);
-        checkInst(model, 176, 176, LocalDate.of(2019, 6, 26), 175, 50.00, null, 0.82963633, 41.48, 1193.87, null, 1.33, null, null, 16.12,
+        checkInst(model, 176, 176, LocalDate.of(2019, 6, 26), 175, 50.00, null, 0.82963633, 41.48, 1193.87, null, 1.33, null, null, 16.13,
                 null);
-        checkInst(model, 177, 177, LocalDate.of(2019, 6, 27), 176, 50.00, null, 0.82875137, 41.44, 1145.14, null, 1.27, null, null, 14.85,
+        checkInst(model, 177, 177, LocalDate.of(2019, 6, 27), 176, 50.00, null, 0.82875137, 41.44, 1145.14, null, 1.27, null, null, 14.86,
                 null);
-        checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 177, 50.00, null, 0.82786736, 41.39, 1096.36, null, 1.22, null, null, 13.63,
+        checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 177, 50.00, null, 0.82786737, 41.39, 1096.36, null, 1.22, null, null, 13.64,
                 null);
-        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 178, 50.00, null, 0.82698430, 41.35, 1047.54, null, 1.17, null, null, 12.46,
+        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 178, 50.00, null, 0.82698430, 41.35, 1047.53, null, 1.17, null, null, 12.47,
                 null);
-        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 179, 50.00, null, 0.82610217, 41.31, 998.65, null, 1.12, null, null, 11.34,
+        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 179, 50.00, null, 0.82610218, 41.31, 998.65, null, 1.12, null, null, 11.35,
                 null);
-        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 180, 50.00, null, 0.82522099, 41.26, 949.72, null, 1.07, null, null, 10.27,
+        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 180, 50.00, null, 0.82522099, 41.26, 949.72, null, 1.07, null, null, 10.28,
                 null);
-        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 181, 50.00, null, 0.82434075, 41.22, 900.73, null, 1.01, null, null, 9.26,
+        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 181, 50.00, null, 0.82434075, 41.22, 900.73, null, 1.01, null, null, 9.27,
                 null);
-        checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 182, 50.00, null, 0.82346144, 41.17, 851.70, null, 0.96, null, null, 8.30,
+        checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 182, 50.00, null, 0.82346145, 41.17, 851.70, null, 0.97, null, null, 8.30,
                 null);
         checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 183, 50.00, null, 0.82258308, 41.13, 802.61, null, 0.91, null, null, 7.39,
                 null);
-        checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 184, 50.00, null, 0.82170565, 41.09, 753.46, null, 0.86, null, null, 6.53,
+        checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 184, 50.00, null, 0.82170565, 41.09, 753.46, null, 0.85, null, null, 6.54,
                 null);
-        checkInst(model, 186, 186, LocalDate.of(2019, 7, 6), 185, 50.00, null, 0.82082916, 41.04, 704.27, null, 0.80, null, null, 5.73,
+        checkInst(model, 186, 186, LocalDate.of(2019, 7, 6), 185, 50.00, null, 0.82082916, 41.04, 704.27, null, 0.81, null, null, 5.73,
                 null);
         checkInst(model, 187, 187, LocalDate.of(2019, 7, 7), 186, 50.00, null, 0.81995360, 41.00, 655.02, null, 0.75, null, null, 4.98,
                 null);
@@ -1740,17 +1751,17 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 null);
         checkInst(model, 191, 191, LocalDate.of(2019, 7, 11), 190, 50.00, null, 0.81646069, 40.82, 457.50, null, 0.54, null, null, 2.50,
                 null);
-        checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 191, 50.00, null, 0.81558979, 40.78, 407.99, null, 0.49, null, null, 2.01,
+        checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 191, 50.00, null, 0.81558980, 40.78, 407.99, null, 0.49, null, null, 2.01,
                 null);
-        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 192, 50.00, null, 0.81471983, 40.74, 358.42, null, 0.44, null, null, 1.57,
+        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 192, 50.00, null, 0.81471983, 40.74, 358.42, null, 0.43, null, null, 1.58,
                 null);
-        checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 193, 50.00, null, 0.81385078, 40.69, 308.81, null, 0.38, null, null, 1.19,
+        checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 193, 50.00, null, 0.81385078, 40.69, 308.81, null, 0.39, null, null, 1.19,
                 null);
         checkInst(model, 195, 195, LocalDate.of(2019, 7, 15), 194, 50.00, null, 0.81298267, 40.65, 259.14, null, 0.33, null, null, 0.86,
                 null);
-        checkInst(model, 196, 196, LocalDate.of(2019, 7, 16), 195, 50.00, null, 0.81211548, 40.61, 209.41, null, 0.28, null, null, 0.58,
+        checkInst(model, 196, 196, LocalDate.of(2019, 7, 16), 195, 50.00, null, 0.81211548, 40.61, 209.41, null, 0.27, null, null, 0.59,
                 null);
-        checkInst(model, 197, 197, LocalDate.of(2019, 7, 17), 196, 50.00, null, 0.81124922, 40.56, 159.64, null, 0.22, null, null, 0.36,
+        checkInst(model, 197, 197, LocalDate.of(2019, 7, 17), 196, 50.00, null, 0.81124922, 40.56, 159.64, null, 0.23, null, null, 0.36,
                 null);
         checkInst(model, 198, 198, LocalDate.of(2019, 7, 18), 197, 50.00, null, 0.81038388, 40.52, 109.81, null, 0.17, null, null, 0.19,
                 null);
@@ -1786,385 +1797,385 @@ class ProjectedAmortizationScheduleCalculatorTest {
         checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 6, 50.00, null, 0.99361699, 49.68, 8716.36, null, 9.35, null, null, 933.64, null);
         checkInst(model, 10, 10, LocalDate.of(2019, 1, 11), 7, 50.00, null, 0.99255712, 49.63, 8675.67, null, 9.31, null, null, 924.33,
                 null);
-        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 8, 50.00, null, 0.99149839, 49.57, 8634.94, null, 9.26, null, null, 915.07,
+        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 8, 50.00, null, 0.99149839, 49.57, 8634.94, null, 9.27, null, null, 915.06,
                 null);
-        checkInst(model, 12, 12, LocalDate.of(2019, 1, 13), 9, 50.00, null, 0.99044078, 49.52, 8594.16, null, 9.22, null, null, 905.85,
+        checkInst(model, 12, 12, LocalDate.of(2019, 1, 13), 9, 50.00, null, 0.99044078, 49.52, 8594.16, null, 9.22, null, null, 905.84,
                 null);
-        checkInst(model, 13, 13, LocalDate.of(2019, 1, 14), 10, 50.00, null, 0.98938430, 49.47, 8553.33, null, 9.18, null, null, 896.67,
+        checkInst(model, 13, 13, LocalDate.of(2019, 1, 14), 10, 50.00, null, 0.98938430, 49.47, 8553.33, null, 9.17, null, null, 896.67,
                 null);
-        checkInst(model, 14, 14, LocalDate.of(2019, 1, 15), 11, 50.00, null, 0.98832895, 49.42, 8512.47, null, 9.13, null, null, 887.54,
+        checkInst(model, 14, 14, LocalDate.of(2019, 1, 15), 11, 50.00, null, 0.98832895, 49.42, 8512.47, null, 9.14, null, null, 887.53,
                 null);
-        checkInst(model, 15, 15, LocalDate.of(2019, 1, 16), 12, 50.00, null, 0.98727472, 49.36, 8471.56, null, 9.09, null, null, 878.45,
+        checkInst(model, 15, 15, LocalDate.of(2019, 1, 16), 12, 50.00, null, 0.98727472, 49.36, 8471.56, null, 9.09, null, null, 878.44,
                 null);
-        checkInst(model, 16, 16, LocalDate.of(2019, 1, 17), 13, 50.00, null, 0.98622162, 49.31, 8430.60, null, 9.05, null, null, 869.40,
+        checkInst(model, 16, 16, LocalDate.of(2019, 1, 17), 13, 50.00, null, 0.98622162, 49.31, 8430.60, null, 9.04, null, null, 869.40,
                 null);
-        checkInst(model, 17, 17, LocalDate.of(2019, 1, 18), 14, 50.00, null, 0.98516964, 49.26, 8389.61, null, 9.00, null, null, 860.40,
+        checkInst(model, 17, 17, LocalDate.of(2019, 1, 18), 14, 50.00, null, 0.98516964, 49.26, 8389.61, null, 9.01, null, null, 860.39,
                 null);
-        checkInst(model, 18, 18, LocalDate.of(2019, 1, 19), 15, 50.00, null, 0.98411879, 49.21, 8348.56, null, 8.96, null, null, 851.44,
+        checkInst(model, 18, 18, LocalDate.of(2019, 1, 19), 15, 50.00, null, 0.98411879, 49.21, 8348.56, null, 8.95, null, null, 851.44,
                 null);
-        checkInst(model, 19, 19, LocalDate.of(2019, 1, 20), 16, 50.00, null, 0.98306905, 49.15, 8307.48, null, 8.91, null, null, 842.53,
+        checkInst(model, 19, 19, LocalDate.of(2019, 1, 20), 16, 50.00, null, 0.98306905, 49.15, 8307.48, null, 8.92, null, null, 842.52,
                 null);
-        checkInst(model, 20, 20, LocalDate.of(2019, 1, 21), 17, 50.00, null, 0.98202044, 49.10, 8266.35, null, 8.87, null, null, 833.66,
+        checkInst(model, 20, 20, LocalDate.of(2019, 1, 21), 17, 50.00, null, 0.98202044, 49.10, 8266.35, null, 8.87, null, null, 833.65,
                 null);
-        checkInst(model, 21, 21, LocalDate.of(2019, 1, 22), 18, 50.00, null, 0.98097294, 49.05, 8225.18, null, 8.83, null, null, 824.83,
+        checkInst(model, 21, 21, LocalDate.of(2019, 1, 22), 18, 50.00, null, 0.98097294, 49.05, 8225.18, null, 8.83, null, null, 824.82,
                 null);
-        checkInst(model, 22, 22, LocalDate.of(2019, 1, 23), 19, 50.00, null, 0.97992656, 49.00, 8183.96, null, 8.78, null, null, 816.05,
+        checkInst(model, 22, 22, LocalDate.of(2019, 1, 23), 19, 50.00, null, 0.97992656, 49.00, 8183.96, null, 8.78, null, null, 816.04,
                 null);
-        checkInst(model, 23, 23, LocalDate.of(2019, 1, 24), 20, 50.00, null, 0.97888129, 48.94, 8142.70, null, 8.74, null, null, 807.31,
+        checkInst(model, 23, 23, LocalDate.of(2019, 1, 24), 20, 50.00, null, 0.97888129, 48.94, 8142.70, null, 8.74, null, null, 807.30,
                 null);
-        checkInst(model, 24, 24, LocalDate.of(2019, 1, 25), 21, 50.00, null, 0.97783715, 48.89, 8101.39, null, 8.69, null, null, 798.62,
+        checkInst(model, 24, 24, LocalDate.of(2019, 1, 25), 21, 50.00, null, 0.97783715, 48.89, 8101.39, null, 8.69, null, null, 798.61,
                 null);
-        checkInst(model, 25, 25, LocalDate.of(2019, 1, 26), 22, 50.00, null, 0.97679411, 48.84, 8060.04, null, 8.65, null, null, 789.97,
+        checkInst(model, 25, 25, LocalDate.of(2019, 1, 26), 22, 50.00, null, 0.97679411, 48.84, 8060.04, null, 8.65, null, null, 789.96,
                 null);
-        checkInst(model, 26, 26, LocalDate.of(2019, 1, 27), 23, 50.00, null, 0.97575219, 48.79, 8018.65, null, 8.61, null, null, 781.36,
+        checkInst(model, 26, 26, LocalDate.of(2019, 1, 27), 23, 50.00, null, 0.97575219, 48.79, 8018.65, null, 8.61, null, null, 781.35,
                 null);
-        checkInst(model, 27, 27, LocalDate.of(2019, 1, 28), 24, 50.00, null, 0.97471138, 48.74, 7977.21, null, 8.56, null, null, 772.80,
+        checkInst(model, 27, 27, LocalDate.of(2019, 1, 28), 24, 50.00, null, 0.97471138, 48.74, 7977.21, null, 8.56, null, null, 772.79,
                 null);
-        checkInst(model, 28, 28, LocalDate.of(2019, 1, 29), 25, 50.00, null, 0.97367168, 48.68, 7935.73, null, 8.52, null, null, 764.28,
+        checkInst(model, 28, 28, LocalDate.of(2019, 1, 29), 25, 50.00, null, 0.97367168, 48.68, 7935.73, null, 8.52, null, null, 764.27,
                 null);
-        checkInst(model, 29, 29, LocalDate.of(2019, 1, 30), 26, 50.00, null, 0.97263309, 48.63, 7894.21, null, 8.47, null, null, 755.81,
+        checkInst(model, 29, 29, LocalDate.of(2019, 1, 30), 26, 50.00, null, 0.97263309, 48.63, 7894.21, null, 8.48, null, null, 755.79,
                 null);
-        checkInst(model, 30, 30, LocalDate.of(2019, 1, 31), 27, 50.00, null, 0.97159560, 48.58, 7852.63, null, 8.43, null, null, 747.38,
+        checkInst(model, 30, 30, LocalDate.of(2019, 1, 31), 27, 50.00, null, 0.97159560, 48.58, 7852.63, null, 8.42, null, null, 747.37,
                 null);
-        checkInst(model, 31, 31, LocalDate.of(2019, 2, 1), 28, 50.00, null, 0.97055922, 48.53, 7811.02, null, 8.39, null, null, 738.99,
+        checkInst(model, 31, 31, LocalDate.of(2019, 2, 1), 28, 50.00, null, 0.97055922, 48.53, 7811.02, null, 8.39, null, null, 738.98,
                 null);
-        checkInst(model, 32, 32, LocalDate.of(2019, 2, 2), 29, 50.00, null, 0.96952395, 48.48, 7769.36, null, 8.34, null, null, 730.65,
+        checkInst(model, 32, 32, LocalDate.of(2019, 2, 2), 29, 50.00, null, 0.96952395, 48.48, 7769.36, null, 8.34, null, null, 730.64,
                 null);
-        checkInst(model, 33, 33, LocalDate.of(2019, 2, 3), 30, 50.00, null, 0.96848979, 48.42, 7727.66, null, 8.30, null, null, 722.35,
+        checkInst(model, 33, 33, LocalDate.of(2019, 2, 3), 30, 50.00, null, 0.96848979, 48.42, 7727.66, null, 8.30, null, null, 722.34,
                 null);
-        checkInst(model, 34, 34, LocalDate.of(2019, 2, 4), 31, 50.00, null, 0.96745672, 48.37, 7685.91, null, 8.25, null, null, 714.10,
+        checkInst(model, 34, 34, LocalDate.of(2019, 2, 4), 31, 50.00, null, 0.96745672, 48.37, 7685.91, null, 8.25, null, null, 714.09,
                 null);
-        checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 32, 50.00, null, 0.96642476, 48.32, 7644.12, null, 8.21, null, null, 705.89,
+        checkInst(model, 35, 35, LocalDate.of(2019, 2, 5), 32, 50.00, null, 0.96642476, 48.32, 7644.12, null, 8.21, null, null, 705.88,
                 null);
-        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 33, 50.00, null, 0.96539390, 48.27, 7602.28, null, 8.16, null, null, 697.73,
+        checkInst(model, 36, 36, LocalDate.of(2019, 2, 6), 33, 50.00, null, 0.96539390, 48.27, 7602.28, null, 8.16, null, null, 697.72,
                 null);
-        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 34, 50.00, null, 0.96436413, 48.22, 7560.40, null, 8.12, null, null, 689.61,
+        checkInst(model, 37, 37, LocalDate.of(2019, 2, 7), 34, 50.00, null, 0.96436414, 48.22, 7560.40, null, 8.12, null, null, 689.60,
                 null);
-        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 35, 50.00, null, 0.96333547, 48.17, 7518.47, null, 8.07, null, null, 681.54,
+        checkInst(model, 38, 38, LocalDate.of(2019, 2, 8), 35, 50.00, null, 0.96333547, 48.17, 7518.47, null, 8.07, null, null, 681.53,
                 null);
-        checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 36, 50.00, null, 0.96230790, 48.12, 7476.50, null, 8.03, null, null, 673.51,
+        checkInst(model, 39, 39, LocalDate.of(2019, 2, 9), 36, 50.00, null, 0.96230791, 48.12, 7476.50, null, 8.03, null, null, 673.50,
                 null);
-        checkInst(model, 40, 40, LocalDate.of(2019, 2, 10), 37, 50.00, null, 0.96128143, 48.06, 7434.48, null, 7.98, null, null, 665.53,
+        checkInst(model, 40, 40, LocalDate.of(2019, 2, 10), 37, 50.00, null, 0.96128143, 48.06, 7434.48, null, 7.98, null, null, 665.52,
                 null);
-        checkInst(model, 41, 41, LocalDate.of(2019, 2, 11), 38, 50.00, null, 0.96025606, 48.01, 7392.42, null, 7.94, null, null, 657.59,
+        checkInst(model, 41, 41, LocalDate.of(2019, 2, 11), 38, 50.00, null, 0.96025606, 48.01, 7392.42, null, 7.94, null, null, 657.58,
                 null);
-        checkInst(model, 42, 42, LocalDate.of(2019, 2, 12), 39, 50.00, null, 0.95923178, 47.96, 7350.31, null, 7.89, null, null, 649.70,
+        checkInst(model, 42, 42, LocalDate.of(2019, 2, 12), 39, 50.00, null, 0.95923178, 47.96, 7350.31, null, 7.89, null, null, 649.69,
                 null);
-        checkInst(model, 43, 43, LocalDate.of(2019, 2, 13), 40, 50.00, null, 0.95820859, 47.91, 7308.16, null, 7.85, null, null, 641.85,
+        checkInst(model, 43, 43, LocalDate.of(2019, 2, 13), 40, 50.00, null, 0.95820859, 47.91, 7308.16, null, 7.85, null, null, 641.84,
                 null);
-        checkInst(model, 44, 44, LocalDate.of(2019, 2, 14), 41, 50.00, null, 0.95718649, 47.86, 7265.97, null, 7.80, null, null, 634.05,
+        checkInst(model, 44, 44, LocalDate.of(2019, 2, 14), 41, 50.00, null, 0.95718649, 47.86, 7265.97, null, 7.81, null, null, 634.03,
                 null);
-        checkInst(model, 45, 45, LocalDate.of(2019, 2, 15), 42, 50.00, null, 0.95616548, 47.81, 7223.72, null, 7.76, null, null, 626.29,
+        checkInst(model, 45, 45, LocalDate.of(2019, 2, 15), 42, 50.00, null, 0.95616548, 47.81, 7223.72, null, 7.75, null, null, 626.28,
                 null);
-        checkInst(model, 46, 46, LocalDate.of(2019, 2, 16), 43, 50.00, null, 0.95514557, 47.76, 7181.44, null, 7.71, null, null, 618.58,
+        checkInst(model, 46, 46, LocalDate.of(2019, 2, 16), 43, 50.00, null, 0.95514557, 47.76, 7181.44, null, 7.72, null, null, 618.56,
                 null);
-        checkInst(model, 47, 47, LocalDate.of(2019, 2, 17), 44, 50.00, null, 0.95412674, 47.71, 7139.11, null, 7.67, null, null, 610.91,
+        checkInst(model, 47, 47, LocalDate.of(2019, 2, 17), 44, 50.00, null, 0.95412674, 47.71, 7139.11, null, 7.67, null, null, 610.89,
                 null);
-        checkInst(model, 48, 48, LocalDate.of(2019, 2, 18), 45, 50.00, null, 0.95310899, 47.66, 7096.73, null, 7.62, null, null, 603.29,
+        checkInst(model, 48, 48, LocalDate.of(2019, 2, 18), 45, 50.00, null, 0.95310899, 47.66, 7096.73, null, 7.62, null, null, 603.27,
                 null);
-        checkInst(model, 49, 49, LocalDate.of(2019, 2, 19), 46, 50.00, null, 0.95209233, 47.60, 7054.31, null, 7.58, null, null, 595.71,
+        checkInst(model, 49, 49, LocalDate.of(2019, 2, 19), 46, 50.00, null, 0.95209233, 47.60, 7054.31, null, 7.58, null, null, 595.69,
                 null);
-        checkInst(model, 50, 50, LocalDate.of(2019, 2, 20), 47, 50.00, null, 0.95107676, 47.55, 7011.84, null, 7.53, null, null, 588.18,
+        checkInst(model, 50, 50, LocalDate.of(2019, 2, 20), 47, 50.00, null, 0.95107676, 47.55, 7011.84, null, 7.53, null, null, 588.16,
                 null);
-        checkInst(model, 51, 51, LocalDate.of(2019, 2, 21), 48, 50.00, null, 0.95006227, 47.50, 6969.33, null, 7.49, null, null, 580.69,
+        checkInst(model, 51, 51, LocalDate.of(2019, 2, 21), 48, 50.00, null, 0.95006227, 47.50, 6969.33, null, 7.49, null, null, 580.67,
                 null);
-        checkInst(model, 52, 52, LocalDate.of(2019, 2, 22), 49, 50.00, null, 0.94904886, 47.45, 6926.77, null, 7.44, null, null, 573.25,
+        checkInst(model, 52, 52, LocalDate.of(2019, 2, 22), 49, 50.00, null, 0.94904886, 47.45, 6926.77, null, 7.44, null, null, 573.23,
                 null);
-        checkInst(model, 53, 53, LocalDate.of(2019, 2, 23), 50, 50.00, null, 0.94803653, 47.40, 6884.17, null, 7.40, null, null, 565.85,
+        checkInst(model, 53, 53, LocalDate.of(2019, 2, 23), 50, 50.00, null, 0.94803653, 47.40, 6884.17, null, 7.40, null, null, 565.83,
                 null);
-        checkInst(model, 54, 54, LocalDate.of(2019, 2, 24), 51, 50.00, null, 0.94702529, 47.35, 6841.52, null, 7.35, null, null, 558.50,
+        checkInst(model, 54, 54, LocalDate.of(2019, 2, 24), 51, 50.00, null, 0.94702529, 47.35, 6841.52, null, 7.35, null, null, 558.48,
                 null);
-        checkInst(model, 55, 55, LocalDate.of(2019, 2, 25), 52, 50.00, null, 0.94601512, 47.30, 6798.82, null, 7.31, null, null, 551.19,
+        checkInst(model, 55, 55, LocalDate.of(2019, 2, 25), 52, 50.00, null, 0.94601512, 47.30, 6798.82, null, 7.30, null, null, 551.18,
                 null);
-        checkInst(model, 56, 56, LocalDate.of(2019, 2, 26), 53, 50.00, null, 0.94500603, 47.25, 6756.08, null, 7.26, null, null, 543.93,
+        checkInst(model, 56, 56, LocalDate.of(2019, 2, 26), 53, 50.00, null, 0.94500603, 47.25, 6756.08, null, 7.26, null, null, 543.92,
                 null);
-        checkInst(model, 57, 57, LocalDate.of(2019, 2, 27), 54, 50.00, null, 0.94399801, 47.20, 6713.30, null, 7.21, null, null, 536.72,
+        checkInst(model, 57, 57, LocalDate.of(2019, 2, 27), 54, 50.00, null, 0.94399801, 47.20, 6713.30, null, 7.22, null, null, 536.70,
                 null);
-        checkInst(model, 58, 58, LocalDate.of(2019, 2, 28), 55, 50.00, null, 0.94299107, 47.15, 6670.47, null, 7.17, null, null, 529.55,
+        checkInst(model, 58, 58, LocalDate.of(2019, 2, 28), 55, 50.00, null, 0.94299107, 47.15, 6670.47, null, 7.17, null, null, 529.53,
                 null);
-        checkInst(model, 59, 59, LocalDate.of(2019, 3, 1), 56, 50.00, null, 0.94198521, 47.10, 6627.59, null, 7.12, null, null, 522.43,
+        checkInst(model, 59, 59, LocalDate.of(2019, 3, 1), 56, 50.00, null, 0.94198521, 47.10, 6627.59, null, 7.12, null, null, 522.41,
                 null);
-        checkInst(model, 60, 60, LocalDate.of(2019, 3, 2), 57, 50.00, null, 0.94098042, 47.05, 6584.67, null, 7.08, null, null, 515.35,
+        checkInst(model, 60, 60, LocalDate.of(2019, 3, 2), 57, 50.00, null, 0.94098042, 47.05, 6584.67, null, 7.08, null, null, 515.33,
                 null);
-        checkInst(model, 61, 61, LocalDate.of(2019, 3, 3), 58, 50.00, null, 0.93997669, 47.00, 6541.70, null, 7.03, null, null, 508.32,
+        checkInst(model, 61, 61, LocalDate.of(2019, 3, 3), 58, 50.00, null, 0.93997669, 47.00, 6541.70, null, 7.03, null, null, 508.30,
                 null);
-        checkInst(model, 62, 62, LocalDate.of(2019, 3, 4), 59, 50.00, null, 0.93897404, 46.95, 6498.68, null, 6.99, null, null, 501.33,
+        checkInst(model, 62, 62, LocalDate.of(2019, 3, 4), 59, 50.00, null, 0.93897404, 46.95, 6498.68, null, 6.98, null, null, 501.32,
                 null);
-        checkInst(model, 63, 63, LocalDate.of(2019, 3, 5), 60, 50.00, null, 0.93797246, 46.90, 6455.62, null, 6.94, null, null, 494.39,
+        checkInst(model, 63, 63, LocalDate.of(2019, 3, 5), 60, 50.00, null, 0.93797246, 46.90, 6455.62, null, 6.94, null, null, 494.38,
                 null);
-        checkInst(model, 64, 64, LocalDate.of(2019, 3, 6), 61, 50.00, null, 0.93697195, 46.85, 6412.51, null, 6.89, null, null, 487.50,
+        checkInst(model, 64, 64, LocalDate.of(2019, 3, 6), 61, 50.00, null, 0.93697195, 46.85, 6412.51, null, 6.89, null, null, 487.49,
                 null);
-        checkInst(model, 65, 65, LocalDate.of(2019, 3, 7), 62, 50.00, null, 0.93597251, 46.80, 6369.36, null, 6.85, null, null, 480.65,
+        checkInst(model, 65, 65, LocalDate.of(2019, 3, 7), 62, 50.00, null, 0.93597251, 46.80, 6369.36, null, 6.85, null, null, 480.64,
                 null);
-        checkInst(model, 66, 66, LocalDate.of(2019, 3, 8), 63, 50.00, null, 0.93497413, 46.75, 6326.16, null, 6.80, null, null, 473.85,
+        checkInst(model, 66, 66, LocalDate.of(2019, 3, 8), 63, 50.00, null, 0.93497413, 46.75, 6326.16, null, 6.80, null, null, 473.84,
                 null);
-        checkInst(model, 67, 67, LocalDate.of(2019, 3, 9), 64, 50.00, null, 0.93397681, 46.70, 6282.92, null, 6.76, null, null, 467.09,
+        checkInst(model, 67, 67, LocalDate.of(2019, 3, 9), 64, 50.00, null, 0.93397681, 46.70, 6282.92, null, 6.76, null, null, 467.08,
                 null);
-        checkInst(model, 68, 68, LocalDate.of(2019, 3, 10), 65, 50.00, null, 0.93298056, 46.65, 6239.63, null, 6.71, null, null, 460.38,
+        checkInst(model, 68, 68, LocalDate.of(2019, 3, 10), 65, 50.00, null, 0.93298056, 46.65, 6239.63, null, 6.71, null, null, 460.37,
                 null);
-        checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 66, 50.00, null, 0.93198538, 46.60, 6196.29, null, 6.66, null, null, 453.72,
+        checkInst(model, 69, 69, LocalDate.of(2019, 3, 11), 66, 50.00, null, 0.93198538, 46.60, 6196.29, null, 6.66, null, null, 453.71,
                 null);
-        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 67, 50.00, null, 0.93099125, 46.55, 6152.91, null, 6.62, null, null, 447.10,
+        checkInst(model, 70, 70, LocalDate.of(2019, 3, 12), 67, 50.00, null, 0.93099125, 46.55, 6152.91, null, 6.62, null, null, 447.09,
                 null);
-        checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 68, 50.00, null, 0.92999818, 46.50, 6109.48, null, 6.57, null, null, 440.53,
+        checkInst(model, 71, 71, LocalDate.of(2019, 3, 13), 68, 50.00, null, 0.92999819, 46.50, 6109.48, null, 6.57, null, null, 440.52,
                 null);
-        checkInst(model, 72, 72, LocalDate.of(2019, 3, 14), 69, 50.00, null, 0.92900618, 46.45, 6066.00, null, 6.52, null, null, 434.01,
+        checkInst(model, 72, 72, LocalDate.of(2019, 3, 14), 69, 50.00, null, 0.92900618, 46.45, 6066.00, null, 6.52, null, null, 434.00,
                 null);
-        checkInst(model, 73, 73, LocalDate.of(2019, 3, 15), 70, 50.00, null, 0.92801523, 46.40, 6022.48, null, 6.48, null, null, 427.53,
+        checkInst(model, 73, 73, LocalDate.of(2019, 3, 15), 70, 50.00, null, 0.92801523, 46.40, 6022.48, null, 6.48, null, null, 427.52,
                 null);
-        checkInst(model, 74, 74, LocalDate.of(2019, 3, 16), 71, 50.00, null, 0.92702534, 46.35, 5978.91, null, 6.43, null, null, 421.10,
+        checkInst(model, 74, 74, LocalDate.of(2019, 3, 16), 71, 50.00, null, 0.92702534, 46.35, 5978.91, null, 6.43, null, null, 421.09,
                 null);
-        checkInst(model, 75, 75, LocalDate.of(2019, 3, 17), 72, 50.00, null, 0.92603650, 46.30, 5935.29, null, 6.38, null, null, 414.72,
+        checkInst(model, 75, 75, LocalDate.of(2019, 3, 17), 72, 50.00, null, 0.92603650, 46.30, 5935.29, null, 6.38, null, null, 414.71,
                 null);
-        checkInst(model, 76, 76, LocalDate.of(2019, 3, 18), 73, 50.00, null, 0.92504872, 46.25, 5891.63, null, 6.34, null, null, 408.38,
+        checkInst(model, 76, 76, LocalDate.of(2019, 3, 18), 73, 50.00, null, 0.92504872, 46.25, 5891.63, null, 6.34, null, null, 408.37,
                 null);
-        checkInst(model, 77, 77, LocalDate.of(2019, 3, 19), 74, 50.00, null, 0.92406200, 46.20, 5847.92, null, 6.29, null, null, 402.09,
+        checkInst(model, 77, 77, LocalDate.of(2019, 3, 19), 74, 50.00, null, 0.92406200, 46.20, 5847.92, null, 6.29, null, null, 402.08,
                 null);
-        checkInst(model, 78, 78, LocalDate.of(2019, 3, 20), 75, 50.00, null, 0.92307632, 46.15, 5804.17, null, 6.24, null, null, 395.85,
+        checkInst(model, 78, 78, LocalDate.of(2019, 3, 20), 75, 50.00, null, 0.92307632, 46.15, 5804.17, null, 6.25, null, null, 395.83,
                 null);
-        checkInst(model, 79, 79, LocalDate.of(2019, 3, 21), 76, 50.00, null, 0.92209170, 46.10, 5760.36, null, 6.20, null, null, 389.65,
+        checkInst(model, 79, 79, LocalDate.of(2019, 3, 21), 76, 50.00, null, 0.92209170, 46.10, 5760.36, null, 6.19, null, null, 389.64,
                 null);
-        checkInst(model, 80, 80, LocalDate.of(2019, 3, 22), 77, 50.00, null, 0.92110813, 46.06, 5716.52, null, 6.15, null, null, 383.50,
+        checkInst(model, 80, 80, LocalDate.of(2019, 3, 22), 77, 50.00, null, 0.92110813, 46.06, 5716.52, null, 6.16, null, null, 383.48,
                 null);
-        checkInst(model, 81, 81, LocalDate.of(2019, 3, 23), 78, 50.00, null, 0.92012560, 46.01, 5672.62, null, 6.10, null, null, 377.40,
+        checkInst(model, 81, 81, LocalDate.of(2019, 3, 23), 78, 50.00, null, 0.92012560, 46.01, 5672.62, null, 6.10, null, null, 377.38,
                 null);
-        checkInst(model, 82, 82, LocalDate.of(2019, 3, 24), 79, 50.00, null, 0.91914413, 45.96, 5628.68, null, 6.06, null, null, 371.34,
+        checkInst(model, 82, 82, LocalDate.of(2019, 3, 24), 79, 50.00, null, 0.91914413, 45.96, 5628.68, null, 6.06, null, null, 371.32,
                 null);
-        checkInst(model, 83, 83, LocalDate.of(2019, 3, 25), 80, 50.00, null, 0.91816370, 45.91, 5584.69, null, 6.01, null, null, 365.33,
+        checkInst(model, 83, 83, LocalDate.of(2019, 3, 25), 80, 50.00, null, 0.91816370, 45.91, 5584.69, null, 6.01, null, null, 365.31,
                 null);
-        checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 81, 50.00, null, 0.91718432, 45.86, 5540.65, null, 5.96, null, null, 359.37,
+        checkInst(model, 84, 84, LocalDate.of(2019, 3, 26), 81, 50.00, null, 0.91718432, 45.86, 5540.65, null, 5.96, null, null, 359.35,
                 null);
-        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 82, 50.00, null, 0.91620598, 45.81, 5496.57, null, 5.92, null, null, 353.45,
+        checkInst(model, 85, 85, LocalDate.of(2019, 3, 27), 82, 50.00, null, 0.91620598, 45.81, 5496.57, null, 5.92, null, null, 353.43,
                 null);
-        checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 83, 50.00, null, 0.91522868, 45.76, 5452.44, null, 5.87, null, null, 347.58,
+        checkInst(model, 86, 86, LocalDate.of(2019, 3, 28), 83, 50.00, null, 0.91522869, 45.76, 5452.44, null, 5.87, null, null, 347.56,
                 null);
-        checkInst(model, 87, 87, LocalDate.of(2019, 3, 29), 84, 50.00, null, 0.91425243, 45.71, 5408.26, null, 5.82, null, null, 341.76,
+        checkInst(model, 87, 87, LocalDate.of(2019, 3, 29), 84, 50.00, null, 0.91425243, 45.71, 5408.26, null, 5.82, null, null, 341.74,
                 null);
-        checkInst(model, 88, 88, LocalDate.of(2019, 3, 30), 85, 50.00, null, 0.91327722, 45.66, 5364.03, null, 5.78, null, null, 335.98,
+        checkInst(model, 88, 88, LocalDate.of(2019, 3, 30), 85, 50.00, null, 0.91327722, 45.66, 5364.03, null, 5.77, null, null, 335.97,
                 null);
-        checkInst(model, 89, 89, LocalDate.of(2019, 3, 31), 86, 50.00, null, 0.91230305, 45.62, 5319.76, null, 5.73, null, null, 330.25,
+        checkInst(model, 89, 89, LocalDate.of(2019, 3, 31), 86, 50.00, null, 0.91230305, 45.62, 5319.76, null, 5.73, null, null, 330.24,
                 null);
-        checkInst(model, 90, 90, LocalDate.of(2019, 4, 1), 87, 50.00, null, 0.91132992, 45.57, 5275.44, null, 5.68, null, null, 324.57,
+        checkInst(model, 90, 90, LocalDate.of(2019, 4, 1), 87, 50.00, null, 0.91132992, 45.57, 5275.44, null, 5.68, null, null, 324.56,
                 null);
-        checkInst(model, 91, 91, LocalDate.of(2019, 4, 2), 88, 50.00, null, 0.91035783, 45.52, 5231.08, null, 5.63, null, null, 318.94,
+        checkInst(model, 91, 91, LocalDate.of(2019, 4, 2), 88, 50.00, null, 0.91035783, 45.52, 5231.08, null, 5.64, null, null, 318.92,
                 null);
-        checkInst(model, 92, 92, LocalDate.of(2019, 4, 3), 89, 50.00, null, 0.90938677, 45.47, 5186.66, null, 5.59, null, null, 313.35,
+        checkInst(model, 92, 92, LocalDate.of(2019, 4, 3), 89, 50.00, null, 0.90938677, 45.47, 5186.66, null, 5.58, null, null, 313.34,
                 null);
-        checkInst(model, 93, 93, LocalDate.of(2019, 4, 4), 90, 50.00, null, 0.90841675, 45.42, 5142.20, null, 5.54, null, null, 307.81,
+        checkInst(model, 93, 93, LocalDate.of(2019, 4, 4), 90, 50.00, null, 0.90841675, 45.42, 5142.20, null, 5.54, null, null, 307.80,
                 null);
-        checkInst(model, 94, 94, LocalDate.of(2019, 4, 5), 91, 50.00, null, 0.90744776, 45.37, 5097.69, null, 5.49, null, null, 302.32,
+        checkInst(model, 94, 94, LocalDate.of(2019, 4, 5), 91, 50.00, null, 0.90744776, 45.37, 5097.69, null, 5.49, null, null, 302.31,
                 null);
-        checkInst(model, 95, 95, LocalDate.of(2019, 4, 6), 92, 50.00, null, 0.90647981, 45.32, 5053.13, null, 5.44, null, null, 296.88,
+        checkInst(model, 95, 95, LocalDate.of(2019, 4, 6), 92, 50.00, null, 0.90647981, 45.32, 5053.13, null, 5.44, null, null, 296.87,
                 null);
-        checkInst(model, 96, 96, LocalDate.of(2019, 4, 7), 93, 50.00, null, 0.90551289, 45.28, 5008.53, null, 5.40, null, null, 291.48,
+        checkInst(model, 96, 96, LocalDate.of(2019, 4, 7), 93, 50.00, null, 0.90551289, 45.28, 5008.53, null, 5.40, null, null, 291.47,
                 null);
-        checkInst(model, 97, 97, LocalDate.of(2019, 4, 8), 94, 50.00, null, 0.90454700, 45.23, 4963.88, null, 5.35, null, null, 286.13,
+        checkInst(model, 97, 97, LocalDate.of(2019, 4, 8), 94, 50.00, null, 0.90454700, 45.23, 4963.88, null, 5.35, null, null, 286.12,
                 null);
-        checkInst(model, 98, 98, LocalDate.of(2019, 4, 9), 95, 50.00, null, 0.90358215, 45.18, 4919.18, null, 5.30, null, null, 280.83,
+        checkInst(model, 98, 98, LocalDate.of(2019, 4, 9), 95, 50.00, null, 0.90358215, 45.18, 4919.18, null, 5.30, null, null, 280.82,
                 null);
-        checkInst(model, 99, 99, LocalDate.of(2019, 4, 10), 96, 50.00, null, 0.90261832, 45.13, 4874.43, null, 5.25, null, null, 275.58,
+        checkInst(model, 99, 99, LocalDate.of(2019, 4, 10), 96, 50.00, null, 0.90261832, 45.13, 4874.43, null, 5.25, null, null, 275.57,
                 null);
-        checkInst(model, 100, 100, LocalDate.of(2019, 4, 11), 97, 50.00, null, 0.90165552, 45.08, 4829.64, null, 5.20, null, null, 270.38,
+        checkInst(model, 100, 100, LocalDate.of(2019, 4, 11), 97, 50.00, null, 0.90165552, 45.08, 4829.64, null, 5.21, null, null, 270.36,
                 null);
-        checkInst(model, 101, 101, LocalDate.of(2019, 4, 12), 98, 50.00, null, 0.90069374, 45.03, 4784.79, null, 5.16, null, null, 265.22,
+        checkInst(model, 101, 101, LocalDate.of(2019, 4, 12), 98, 50.00, null, 0.90069374, 45.03, 4784.79, null, 5.15, null, null, 265.21,
                 null);
-        checkInst(model, 102, 102, LocalDate.of(2019, 4, 13), 99, 50.00, null, 0.89973299, 44.99, 4739.90, null, 5.11, null, null, 260.11,
+        checkInst(model, 102, 102, LocalDate.of(2019, 4, 13), 99, 50.00, null, 0.89973299, 44.99, 4739.90, null, 5.11, null, null, 260.10,
                 null);
-        checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 100, 50.00, null, 0.89877327, 44.94, 4694.96, null, 5.06, null, null, 255.05,
+        checkInst(model, 103, 103, LocalDate.of(2019, 4, 14), 100, 50.00, null, 0.89877327, 44.94, 4694.96, null, 5.06, null, null, 255.04,
                 null);
-        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 101, 50.00, null, 0.89781457, 44.89, 4649.98, null, 5.01, null, null, 250.04,
+        checkInst(model, 104, 104, LocalDate.of(2019, 4, 15), 101, 50.00, null, 0.89781457, 44.89, 4649.98, null, 5.02, null, null, 250.02,
                 null);
-        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 102, 50.00, null, 0.89685689, 44.84, 4604.94, null, 4.97, null, null, 245.07,
+        checkInst(model, 105, 105, LocalDate.of(2019, 4, 16), 102, 50.00, null, 0.89685690, 44.84, 4604.94, null, 4.96, null, null, 245.06,
                 null);
-        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 103, 50.00, null, 0.89590024, 44.80, 4559.86, null, 4.92, null, null, 240.15,
+        checkInst(model, 106, 106, LocalDate.of(2019, 4, 17), 103, 50.00, null, 0.89590024, 44.80, 4559.86, null, 4.92, null, null, 240.14,
                 null);
-        checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 104, 50.00, null, 0.89494460, 44.75, 4514.73, null, 4.87, null, null, 235.28,
+        checkInst(model, 107, 107, LocalDate.of(2019, 4, 18), 104, 50.00, null, 0.89494461, 44.75, 4514.73, null, 4.87, null, null, 235.27,
                 null);
-        checkInst(model, 108, 108, LocalDate.of(2019, 4, 19), 105, 50.00, null, 0.89398999, 44.70, 4469.55, null, 4.82, null, null, 230.46,
+        checkInst(model, 108, 108, LocalDate.of(2019, 4, 19), 105, 50.00, null, 0.89398999, 44.70, 4469.55, null, 4.82, null, null, 230.45,
                 null);
-        checkInst(model, 109, 109, LocalDate.of(2019, 4, 20), 106, 50.00, null, 0.89303639, 44.65, 4424.32, null, 4.77, null, null, 225.69,
+        checkInst(model, 109, 109, LocalDate.of(2019, 4, 20), 106, 50.00, null, 0.89303639, 44.65, 4424.32, null, 4.77, null, null, 225.68,
                 null);
-        checkInst(model, 110, 110, LocalDate.of(2019, 4, 21), 107, 50.00, null, 0.89208381, 44.60, 4379.05, null, 4.72, null, null, 220.97,
+        checkInst(model, 110, 110, LocalDate.of(2019, 4, 21), 107, 50.00, null, 0.89208381, 44.60, 4379.05, null, 4.73, null, null, 220.95,
                 null);
-        checkInst(model, 111, 111, LocalDate.of(2019, 4, 22), 108, 50.00, null, 0.89113225, 44.56, 4333.72, null, 4.68, null, null, 216.29,
+        checkInst(model, 111, 111, LocalDate.of(2019, 4, 22), 108, 50.00, null, 0.89113225, 44.56, 4333.72, null, 4.67, null, null, 216.28,
                 null);
-        checkInst(model, 112, 112, LocalDate.of(2019, 4, 23), 109, 50.00, null, 0.89018170, 44.51, 4288.35, null, 4.63, null, null, 211.66,
+        checkInst(model, 112, 112, LocalDate.of(2019, 4, 23), 109, 50.00, null, 0.89018170, 44.51, 4288.35, null, 4.63, null, null, 211.65,
                 null);
-        checkInst(model, 113, 113, LocalDate.of(2019, 4, 24), 110, 50.00, null, 0.88923216, 44.46, 4242.93, null, 4.58, null, null, 207.08,
+        checkInst(model, 113, 113, LocalDate.of(2019, 4, 24), 110, 50.00, null, 0.88923216, 44.46, 4242.93, null, 4.58, null, null, 207.07,
                 null);
-        checkInst(model, 114, 114, LocalDate.of(2019, 4, 25), 111, 50.00, null, 0.88828364, 44.41, 4197.46, null, 4.53, null, null, 202.55,
+        checkInst(model, 114, 114, LocalDate.of(2019, 4, 25), 111, 50.00, null, 0.88828364, 44.41, 4197.46, null, 4.53, null, null, 202.54,
                 null);
-        checkInst(model, 115, 115, LocalDate.of(2019, 4, 26), 112, 50.00, null, 0.88733613, 44.37, 4151.94, null, 4.48, null, null, 198.07,
+        checkInst(model, 115, 115, LocalDate.of(2019, 4, 26), 112, 50.00, null, 0.88733613, 44.37, 4151.94, null, 4.48, null, null, 198.06,
                 null);
-        checkInst(model, 116, 116, LocalDate.of(2019, 4, 27), 113, 50.00, null, 0.88638963, 44.32, 4106.38, null, 4.43, null, null, 193.64,
+        checkInst(model, 116, 116, LocalDate.of(2019, 4, 27), 113, 50.00, null, 0.88638963, 44.32, 4106.38, null, 4.44, null, null, 193.62,
                 null);
-        checkInst(model, 117, 117, LocalDate.of(2019, 4, 28), 114, 50.00, null, 0.88544414, 44.27, 4060.76, null, 4.38, null, null, 189.26,
+        checkInst(model, 117, 117, LocalDate.of(2019, 4, 28), 114, 50.00, null, 0.88544414, 44.27, 4060.76, null, 4.38, null, null, 189.24,
                 null);
-        checkInst(model, 118, 118, LocalDate.of(2019, 4, 29), 115, 50.00, null, 0.88449966, 44.22, 4015.10, null, 4.34, null, null, 184.92,
+        checkInst(model, 118, 118, LocalDate.of(2019, 4, 29), 115, 50.00, null, 0.88449966, 44.22, 4015.10, null, 4.34, null, null, 184.90,
                 null);
-        checkInst(model, 119, 119, LocalDate.of(2019, 4, 30), 116, 50.00, null, 0.88355619, 44.18, 3969.38, null, 4.29, null, null, 180.63,
+        checkInst(model, 119, 119, LocalDate.of(2019, 4, 30), 116, 50.00, null, 0.88355619, 44.18, 3969.38, null, 4.28, null, null, 180.62,
                 null);
-        checkInst(model, 120, 120, LocalDate.of(2019, 5, 1), 117, 50.00, null, 0.88261372, 44.13, 3923.62, null, 4.24, null, null, 176.39,
+        checkInst(model, 120, 120, LocalDate.of(2019, 5, 1), 117, 50.00, null, 0.88261372, 44.13, 3923.62, null, 4.24, null, null, 176.38,
                 null);
-        checkInst(model, 121, 121, LocalDate.of(2019, 5, 2), 118, 50.00, null, 0.88167226, 44.08, 3877.81, null, 4.19, null, null, 172.20,
+        checkInst(model, 121, 121, LocalDate.of(2019, 5, 2), 118, 50.00, null, 0.88167226, 44.08, 3877.81, null, 4.19, null, null, 172.19,
                 null);
-        checkInst(model, 122, 122, LocalDate.of(2019, 5, 3), 119, 50.00, null, 0.88073180, 44.04, 3831.95, null, 4.14, null, null, 168.06,
+        checkInst(model, 122, 122, LocalDate.of(2019, 5, 3), 119, 50.00, null, 0.88073180, 44.04, 3831.95, null, 4.14, null, null, 168.05,
                 null);
-        checkInst(model, 123, 123, LocalDate.of(2019, 5, 4), 120, 50.00, null, 0.87979234, 43.99, 3786.04, null, 4.09, null, null, 163.97,
+        checkInst(model, 123, 123, LocalDate.of(2019, 5, 4), 120, 50.00, null, 0.87979234, 43.99, 3786.04, null, 4.09, null, null, 163.96,
                 null);
-        checkInst(model, 124, 124, LocalDate.of(2019, 5, 5), 121, 50.00, null, 0.87885389, 43.94, 3740.09, null, 4.04, null, null, 159.93,
+        checkInst(model, 124, 124, LocalDate.of(2019, 5, 5), 121, 50.00, null, 0.87885389, 43.94, 3740.09, null, 4.05, null, null, 159.91,
                 null);
-        checkInst(model, 125, 125, LocalDate.of(2019, 5, 6), 122, 50.00, null, 0.87791644, 43.90, 3694.08, null, 3.99, null, null, 155.94,
+        checkInst(model, 125, 125, LocalDate.of(2019, 5, 6), 122, 50.00, null, 0.87791644, 43.90, 3694.08, null, 3.99, null, null, 155.92,
                 null);
-        checkInst(model, 126, 126, LocalDate.of(2019, 5, 7), 123, 50.00, null, 0.87697999, 43.85, 3648.03, null, 3.94, null, null, 152.00,
+        checkInst(model, 126, 126, LocalDate.of(2019, 5, 7), 123, 50.00, null, 0.87697999, 43.85, 3648.03, null, 3.95, null, null, 151.97,
                 null);
-        checkInst(model, 127, 127, LocalDate.of(2019, 5, 8), 124, 50.00, null, 0.87604453, 43.80, 3601.92, null, 3.90, null, null, 148.10,
+        checkInst(model, 127, 127, LocalDate.of(2019, 5, 8), 124, 50.00, null, 0.87604453, 43.80, 3601.92, null, 3.89, null, null, 148.08,
                 null);
-        checkInst(model, 128, 128, LocalDate.of(2019, 5, 9), 125, 50.00, null, 0.87511008, 43.76, 3555.77, null, 3.85, null, null, 144.25,
+        checkInst(model, 128, 128, LocalDate.of(2019, 5, 9), 125, 50.00, null, 0.87511008, 43.76, 3555.77, null, 3.85, null, null, 144.23,
                 null);
-        checkInst(model, 129, 129, LocalDate.of(2019, 5, 10), 126, 50.00, null, 0.87417662, 43.71, 3509.56, null, 3.80, null, null, 140.45,
+        checkInst(model, 129, 129, LocalDate.of(2019, 5, 10), 126, 50.00, null, 0.87417662, 43.71, 3509.56, null, 3.79, null, null, 140.44,
                 null);
-        checkInst(model, 130, 130, LocalDate.of(2019, 5, 11), 127, 50.00, null, 0.87324416, 43.66, 3463.31, null, 3.75, null, null, 136.70,
+        checkInst(model, 130, 130, LocalDate.of(2019, 5, 11), 127, 50.00, null, 0.87324416, 43.66, 3463.31, null, 3.75, null, null, 136.69,
                 null);
-        checkInst(model, 131, 131, LocalDate.of(2019, 5, 12), 128, 50.00, null, 0.87231269, 43.62, 3417.01, null, 3.70, null, null, 133.00,
+        checkInst(model, 131, 131, LocalDate.of(2019, 5, 12), 128, 50.00, null, 0.87231269, 43.62, 3417.01, null, 3.70, null, null, 132.99,
                 null);
-        checkInst(model, 132, 132, LocalDate.of(2019, 5, 13), 129, 50.00, null, 0.87138221, 43.57, 3370.66, null, 3.65, null, null, 129.35,
+        checkInst(model, 132, 132, LocalDate.of(2019, 5, 13), 129, 50.00, null, 0.87138221, 43.57, 3370.66, null, 3.65, null, null, 129.34,
                 null);
-        checkInst(model, 133, 133, LocalDate.of(2019, 5, 14), 130, 50.00, null, 0.87045273, 43.52, 3324.26, null, 3.60, null, null, 125.75,
+        checkInst(model, 133, 133, LocalDate.of(2019, 5, 14), 130, 50.00, null, 0.87045273, 43.52, 3324.26, null, 3.60, null, null, 125.74,
                 null);
-        checkInst(model, 134, 134, LocalDate.of(2019, 5, 15), 131, 50.00, null, 0.86952424, 43.48, 3277.81, null, 3.55, null, null, 122.20,
+        checkInst(model, 134, 134, LocalDate.of(2019, 5, 15), 131, 50.00, null, 0.86952424, 43.48, 3277.81, null, 3.55, null, null, 122.19,
                 null);
-        checkInst(model, 135, 135, LocalDate.of(2019, 5, 16), 132, 50.00, null, 0.86859674, 43.43, 3231.31, null, 3.50, null, null, 118.70,
+        checkInst(model, 135, 135, LocalDate.of(2019, 5, 16), 132, 50.00, null, 0.86859674, 43.43, 3231.31, null, 3.50, null, null, 118.69,
                 null);
-        checkInst(model, 136, 136, LocalDate.of(2019, 5, 17), 133, 50.00, null, 0.86767023, 43.38, 3184.76, null, 3.45, null, null, 115.25,
+        checkInst(model, 136, 136, LocalDate.of(2019, 5, 17), 133, 50.00, null, 0.86767023, 43.38, 3184.76, null, 3.45, null, null, 115.24,
                 null);
-        checkInst(model, 137, 137, LocalDate.of(2019, 5, 18), 134, 50.00, null, 0.86674471, 43.34, 3138.16, null, 3.40, null, null, 111.85,
+        checkInst(model, 137, 137, LocalDate.of(2019, 5, 18), 134, 50.00, null, 0.86674471, 43.34, 3138.16, null, 3.40, null, null, 111.84,
                 null);
-        checkInst(model, 138, 138, LocalDate.of(2019, 5, 19), 135, 50.00, null, 0.86582017, 43.29, 3091.51, null, 3.35, null, null, 108.50,
+        checkInst(model, 138, 138, LocalDate.of(2019, 5, 19), 135, 50.00, null, 0.86582017, 43.29, 3091.51, null, 3.35, null, null, 108.49,
                 null);
-        checkInst(model, 139, 139, LocalDate.of(2019, 5, 20), 136, 50.00, null, 0.86489662, 43.24, 3044.81, null, 3.30, null, null, 105.20,
+        checkInst(model, 139, 139, LocalDate.of(2019, 5, 20), 136, 50.00, null, 0.86489662, 43.24, 3044.81, null, 3.30, null, null, 105.19,
                 null);
-        checkInst(model, 140, 140, LocalDate.of(2019, 5, 21), 137, 50.00, null, 0.86397406, 43.20, 2998.06, null, 3.25, null, null, 101.95,
+        checkInst(model, 140, 140, LocalDate.of(2019, 5, 21), 137, 50.00, null, 0.86397406, 43.20, 2998.06, null, 3.25, null, null, 101.94,
                 null);
-        checkInst(model, 141, 141, LocalDate.of(2019, 5, 22), 138, 50.00, null, 0.86305248, 43.15, 2951.26, null, 3.20, null, null, 98.75,
+        checkInst(model, 141, 141, LocalDate.of(2019, 5, 22), 138, 50.00, null, 0.86305248, 43.15, 2951.26, null, 3.20, null, null, 98.74,
                 null);
-        checkInst(model, 142, 142, LocalDate.of(2019, 5, 23), 139, 50.00, null, 0.86213188, 43.11, 2904.42, null, 3.15, null, null, 95.60,
+        checkInst(model, 142, 142, LocalDate.of(2019, 5, 23), 139, 50.00, null, 0.86213188, 43.11, 2904.42, null, 3.16, null, null, 95.58,
                 null);
-        checkInst(model, 143, 143, LocalDate.of(2019, 5, 24), 140, 50.00, null, 0.86121227, 43.06, 2857.52, null, 3.10, null, null, 92.50,
+        checkInst(model, 143, 143, LocalDate.of(2019, 5, 24), 140, 50.00, null, 0.86121227, 43.06, 2857.52, null, 3.10, null, null, 92.48,
                 null);
-        checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 141, 50.00, null, 0.86029363, 43.01, 2810.57, null, 3.05, null, null, 89.45,
+        checkInst(model, 144, 144, LocalDate.of(2019, 5, 25), 141, 50.00, null, 0.86029363, 43.01, 2810.57, null, 3.05, null, null, 89.43,
                 null);
-        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 142, 50.00, null, 0.85937598, 42.97, 2763.57, null, 3.00, null, null, 86.45,
+        checkInst(model, 145, 145, LocalDate.of(2019, 5, 26), 142, 50.00, null, 0.85937598, 42.97, 2763.57, null, 3.00, null, null, 86.43,
                 null);
-        checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 143, 50.00, null, 0.85845930, 42.92, 2716.52, null, 2.95, null, null, 83.50,
+        checkInst(model, 146, 146, LocalDate.of(2019, 5, 27), 143, 50.00, null, 0.85845931, 42.92, 2716.52, null, 2.95, null, null, 83.48,
                 null);
-        checkInst(model, 147, 147, LocalDate.of(2019, 5, 28), 144, 50.00, null, 0.85754361, 42.88, 2669.42, null, 2.90, null, null, 80.60,
+        checkInst(model, 147, 147, LocalDate.of(2019, 5, 28), 144, 50.00, null, 0.85754361, 42.88, 2669.42, null, 2.90, null, null, 80.58,
                 null);
-        checkInst(model, 148, 148, LocalDate.of(2019, 5, 29), 145, 50.00, null, 0.85662889, 42.83, 2622.27, null, 2.85, null, null, 77.75,
+        checkInst(model, 148, 148, LocalDate.of(2019, 5, 29), 145, 50.00, null, 0.85662889, 42.83, 2622.27, null, 2.85, null, null, 77.73,
                 null);
-        checkInst(model, 149, 149, LocalDate.of(2019, 5, 30), 146, 50.00, null, 0.85571514, 42.79, 2575.07, null, 2.80, null, null, 74.95,
+        checkInst(model, 149, 149, LocalDate.of(2019, 5, 30), 146, 50.00, null, 0.85571514, 42.79, 2575.07, null, 2.80, null, null, 74.93,
                 null);
-        checkInst(model, 150, 150, LocalDate.of(2019, 5, 31), 147, 50.00, null, 0.85480237, 42.74, 2527.82, null, 2.75, null, null, 72.20,
+        checkInst(model, 150, 150, LocalDate.of(2019, 5, 31), 147, 50.00, null, 0.85480237, 42.74, 2527.82, null, 2.75, null, null, 72.18,
                 null);
-        checkInst(model, 151, 151, LocalDate.of(2019, 6, 1), 148, 50.00, null, 0.85389057, 42.69, 2480.52, null, 2.70, null, null, 69.50,
+        checkInst(model, 151, 151, LocalDate.of(2019, 6, 1), 148, 50.00, null, 0.85389057, 42.69, 2480.52, null, 2.70, null, null, 69.48,
                 null);
-        checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 149, 50.00, null, 0.85297975, 42.65, 2433.17, null, 2.65, null, null, 66.85,
+        checkInst(model, 152, 152, LocalDate.of(2019, 6, 2), 149, 50.00, null, 0.85297975, 42.65, 2433.17, null, 2.65, null, null, 66.83,
                 null);
-        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 150, 50.00, null, 0.85206990, 42.60, 2385.77, null, 2.60, null, null, 64.25,
+        checkInst(model, 153, 153, LocalDate.of(2019, 6, 3), 150, 50.00, null, 0.85206990, 42.60, 2385.77, null, 2.60, null, null, 64.23,
                 null);
-        checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 151, 50.00, null, 0.85116101, 42.56, 2338.31, null, 2.55, null, null, 61.70,
+        checkInst(model, 154, 154, LocalDate.of(2019, 6, 4), 151, 50.00, null, 0.85116102, 42.56, 2338.31, null, 2.54, null, null, 61.69,
                 null);
-        checkInst(model, 155, 155, LocalDate.of(2019, 6, 5), 152, 50.00, null, 0.85025310, 42.51, 2290.81, null, 2.50, null, null, 59.20,
+        checkInst(model, 155, 155, LocalDate.of(2019, 6, 5), 152, 50.00, null, 0.85025310, 42.51, 2290.81, null, 2.50, null, null, 59.19,
                 null);
-        checkInst(model, 156, 156, LocalDate.of(2019, 6, 6), 153, 50.00, null, 0.84934616, 42.47, 2243.26, null, 2.45, null, null, 56.75,
+        checkInst(model, 156, 156, LocalDate.of(2019, 6, 6), 153, 50.00, null, 0.84934616, 42.47, 2243.26, null, 2.45, null, null, 56.74,
                 null);
-        checkInst(model, 157, 157, LocalDate.of(2019, 6, 7), 154, 50.00, null, 0.84844018, 42.42, 2195.65, null, 2.40, null, null, 54.35,
+        checkInst(model, 157, 157, LocalDate.of(2019, 6, 7), 154, 50.00, null, 0.84844018, 42.42, 2195.65, null, 2.39, null, null, 54.35,
                 null);
-        checkInst(model, 158, 158, LocalDate.of(2019, 6, 8), 155, 50.00, null, 0.84753517, 42.38, 2148.00, null, 2.34, null, null, 52.01,
+        checkInst(model, 158, 158, LocalDate.of(2019, 6, 8), 155, 50.00, null, 0.84753517, 42.38, 2148.00, null, 2.35, null, null, 52.00,
                 null);
-        checkInst(model, 159, 159, LocalDate.of(2019, 6, 9), 156, 50.00, null, 0.84663113, 42.33, 2100.29, null, 2.29, null, null, 49.72,
+        checkInst(model, 159, 159, LocalDate.of(2019, 6, 9), 156, 50.00, null, 0.84663113, 42.33, 2100.29, null, 2.29, null, null, 49.71,
                 null);
-        checkInst(model, 160, 160, LocalDate.of(2019, 6, 10), 157, 50.00, null, 0.84572805, 42.29, 2052.53, null, 2.24, null, null, 47.48,
+        checkInst(model, 160, 160, LocalDate.of(2019, 6, 10), 157, 50.00, null, 0.84572805, 42.29, 2052.53, null, 2.24, null, null, 47.47,
                 null);
-        checkInst(model, 161, 161, LocalDate.of(2019, 6, 11), 158, 50.00, null, 0.84482593, 42.24, 2004.73, null, 2.19, null, null, 45.29,
+        checkInst(model, 161, 161, LocalDate.of(2019, 6, 11), 158, 50.00, null, 0.84482593, 42.24, 2004.73, null, 2.20, null, null, 45.27,
                 null);
-        checkInst(model, 162, 162, LocalDate.of(2019, 6, 12), 159, 50.00, null, 0.84392477, 42.20, 1956.87, null, 2.14, null, null, 43.15,
+        checkInst(model, 162, 162, LocalDate.of(2019, 6, 12), 159, 50.00, null, 0.84392477, 42.20, 1956.87, null, 2.14, null, null, 43.13,
                 null);
-        checkInst(model, 163, 163, LocalDate.of(2019, 6, 13), 160, 50.00, null, 0.84302458, 42.15, 1908.96, null, 2.09, null, null, 41.06,
+        checkInst(model, 163, 163, LocalDate.of(2019, 6, 13), 160, 50.00, null, 0.84302458, 42.15, 1908.96, null, 2.09, null, null, 41.04,
                 null);
-        checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 161, 50.00, null, 0.84212535, 42.11, 1860.99, null, 2.04, null, null, 39.02,
+        checkInst(model, 164, 164, LocalDate.of(2019, 6, 14), 161, 50.00, null, 0.84212535, 42.11, 1860.99, null, 2.03, null, null, 39.01,
                 null);
-        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 162, 50.00, null, 0.84122707, 42.06, 1812.98, null, 1.99, null, null, 37.03,
+        checkInst(model, 165, 165, LocalDate.of(2019, 6, 15), 162, 50.00, null, 0.84122707, 42.06, 1812.98, null, 1.99, null, null, 37.02,
                 null);
-        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 163, 50.00, null, 0.84032975, 42.02, 1764.92, null, 1.94, null, null, 35.09,
+        checkInst(model, 166, 166, LocalDate.of(2019, 6, 16), 163, 50.00, null, 0.84032976, 42.02, 1764.92, null, 1.94, null, null, 35.08,
                 null);
-        checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 164, 50.00, null, 0.83943340, 41.97, 1716.80, null, 1.88, null, null, 33.21,
+        checkInst(model, 167, 167, LocalDate.of(2019, 6, 17), 164, 50.00, null, 0.83943340, 41.97, 1716.80, null, 1.88, null, null, 33.20,
                 null);
-        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 165, 50.00, null, 0.83853799, 41.93, 1668.64, null, 1.83, null, null, 31.38,
+        checkInst(model, 168, 168, LocalDate.of(2019, 6, 18), 165, 50.00, null, 0.83853799, 41.93, 1668.64, null, 1.84, null, null, 31.36,
                 null);
-        checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 166, 50.00, null, 0.83764354, 41.88, 1620.42, null, 1.78, null, null, 29.60,
+        checkInst(model, 169, 169, LocalDate.of(2019, 6, 19), 166, 50.00, null, 0.83764355, 41.88, 1620.42, null, 1.78, null, null, 29.58,
                 null);
-        checkInst(model, 170, 170, LocalDate.of(2019, 6, 20), 167, 50.00, null, 0.83675005, 41.84, 1572.15, null, 1.73, null, null, 27.87,
+        checkInst(model, 170, 170, LocalDate.of(2019, 6, 20), 167, 50.00, null, 0.83675005, 41.84, 1572.15, null, 1.73, null, null, 27.85,
                 null);
-        checkInst(model, 171, 171, LocalDate.of(2019, 6, 21), 168, 50.00, null, 0.83585751, 41.79, 1523.83, null, 1.68, null, null, 26.19,
+        checkInst(model, 171, 171, LocalDate.of(2019, 6, 21), 168, 50.00, null, 0.83585751, 41.79, 1523.83, null, 1.68, null, null, 26.17,
                 null);
-        checkInst(model, 172, 172, LocalDate.of(2019, 6, 22), 169, 50.00, null, 0.83496592, 41.75, 1475.45, null, 1.63, null, null, 24.56,
+        checkInst(model, 172, 172, LocalDate.of(2019, 6, 22), 169, 50.00, null, 0.83496592, 41.75, 1475.45, null, 1.62, null, null, 24.55,
                 null);
-        checkInst(model, 173, 173, LocalDate.of(2019, 6, 23), 170, 50.00, null, 0.83407528, 41.70, 1427.03, null, 1.58, null, null, 22.98,
+        checkInst(model, 173, 173, LocalDate.of(2019, 6, 23), 170, 50.00, null, 0.83407528, 41.70, 1427.03, null, 1.58, null, null, 22.97,
                 null);
-        checkInst(model, 174, 174, LocalDate.of(2019, 6, 24), 171, 50.00, null, 0.83318560, 41.66, 1378.55, null, 1.52, null, null, 21.46,
+        checkInst(model, 174, 174, LocalDate.of(2019, 6, 24), 171, 50.00, null, 0.83318560, 41.66, 1378.55, null, 1.52, null, null, 21.45,
                 null);
-        checkInst(model, 175, 175, LocalDate.of(2019, 6, 25), 172, 50.00, null, 0.83229686, 41.61, 1330.02, null, 1.47, null, null, 19.99,
+        checkInst(model, 175, 175, LocalDate.of(2019, 6, 25), 172, 50.00, null, 0.83229686, 41.61, 1330.02, null, 1.47, null, null, 19.98,
                 null);
-        checkInst(model, 176, 176, LocalDate.of(2019, 6, 26), 173, 50.00, null, 0.83140907, 41.57, 1281.45, null, 1.42, null, null, 18.57,
+        checkInst(model, 176, 176, LocalDate.of(2019, 6, 26), 173, 50.00, null, 0.83140907, 41.57, 1281.45, null, 1.43, null, null, 18.55,
                 null);
-        checkInst(model, 177, 177, LocalDate.of(2019, 6, 27), 174, 50.00, null, 0.83052222, 41.53, 1232.81, null, 1.37, null, null, 17.20,
+        checkInst(model, 177, 177, LocalDate.of(2019, 6, 27), 174, 50.00, null, 0.83052222, 41.53, 1232.81, null, 1.36, null, null, 17.19,
                 null);
-        checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 175, 50.00, null, 0.82963633, 41.48, 1184.13, null, 1.32, null, null, 15.88,
+        checkInst(model, 178, 178, LocalDate.of(2019, 6, 28), 175, 50.00, null, 0.82963633, 41.48, 1184.13, null, 1.32, null, null, 15.87,
                 null);
-        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 176, 50.00, null, 0.82875137, 41.44, 1135.39, null, 1.26, null, null, 14.62,
+        checkInst(model, 179, 179, LocalDate.of(2019, 6, 29), 176, 50.00, null, 0.82875137, 41.44, 1135.39, null, 1.26, null, null, 14.61,
                 null);
-        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 177, 50.00, null, 0.82786736, 41.39, 1086.61, null, 1.21, null, null, 13.41,
+        checkInst(model, 180, 180, LocalDate.of(2019, 6, 30), 177, 50.00, null, 0.82786737, 41.39, 1086.61, null, 1.22, null, null, 13.39,
                 null);
-        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 178, 50.00, null, 0.82698430, 41.35, 1037.77, null, 1.16, null, null, 12.25,
+        checkInst(model, 181, 181, LocalDate.of(2019, 7, 1), 178, 50.00, null, 0.82698430, 41.35, 1037.77, null, 1.16, null, null, 12.23,
                 null);
-        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 179, 50.00, null, 0.82610217, 41.31, 988.88, null, 1.11, null, null, 11.14,
+        checkInst(model, 182, 182, LocalDate.of(2019, 7, 2), 179, 50.00, null, 0.82610218, 41.31, 988.88, null, 1.11, null, null, 11.12,
                 null);
-        checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 180, 50.00, null, 0.82522099, 41.26, 939.93, null, 1.06, null, null, 10.08,
+        checkInst(model, 183, 183, LocalDate.of(2019, 7, 3), 180, 50.00, null, 0.82522099, 41.26, 939.93, null, 1.05, null, null, 10.07,
                 null);
-        checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 181, 50.00, null, 0.82434075, 41.22, 890.93, null, 1.00, null, null, 9.08,
+        checkInst(model, 184, 184, LocalDate.of(2019, 7, 4), 181, 50.00, null, 0.82434075, 41.22, 890.93, null, 1.00, null, null, 9.07,
                 null);
-        checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 182, 50.00, null, 0.82346144, 41.17, 841.89, null, 0.95, null, null, 8.13,
+        checkInst(model, 185, 185, LocalDate.of(2019, 7, 5), 182, 50.00, null, 0.82346145, 41.17, 841.89, null, 0.96, null, null, 8.11,
                 null);
-        checkInst(model, 186, 186, LocalDate.of(2019, 7, 6), 183, 50.00, null, 0.82258308, 41.13, 792.79, null, 0.90, null, null, 7.23,
+        checkInst(model, 186, 186, LocalDate.of(2019, 7, 6), 183, 50.00, null, 0.82258308, 41.13, 792.79, null, 0.90, null, null, 7.21,
                 null);
-        checkInst(model, 187, 187, LocalDate.of(2019, 7, 7), 184, 50.00, null, 0.82170565, 41.09, 743.63, null, 0.85, null, null, 6.38,
+        checkInst(model, 187, 187, LocalDate.of(2019, 7, 7), 184, 50.00, null, 0.82170565, 41.09, 743.63, null, 0.84, null, null, 6.37,
                 null);
-        checkInst(model, 188, 188, LocalDate.of(2019, 7, 8), 185, 50.00, null, 0.82082916, 41.04, 694.43, null, 0.79, null, null, 5.59,
+        checkInst(model, 188, 188, LocalDate.of(2019, 7, 8), 185, 50.00, null, 0.82082916, 41.04, 694.43, null, 0.80, null, null, 5.57,
                 null);
-        checkInst(model, 189, 189, LocalDate.of(2019, 7, 9), 186, 50.00, null, 0.81995360, 41.00, 645.17, null, 0.74, null, null, 4.85,
+        checkInst(model, 189, 189, LocalDate.of(2019, 7, 9), 186, 50.00, null, 0.81995360, 41.00, 645.17, null, 0.74, null, null, 4.83,
                 null);
-        checkInst(model, 190, 190, LocalDate.of(2019, 7, 10), 187, 50.00, null, 0.81907897, 40.95, 595.86, null, 0.69, null, null, 4.16,
+        checkInst(model, 190, 190, LocalDate.of(2019, 7, 10), 187, 50.00, null, 0.81907897, 40.95, 595.86, null, 0.69, null, null, 4.14,
                 null);
-        checkInst(model, 191, 191, LocalDate.of(2019, 7, 11), 188, 50.00, null, 0.81820528, 40.91, 546.49, null, 0.64, null, null, 3.52,
+        checkInst(model, 191, 191, LocalDate.of(2019, 7, 11), 188, 50.00, null, 0.81820528, 40.91, 546.49, null, 0.63, null, null, 3.51,
                 null);
-        checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 189, 50.00, null, 0.81733252, 40.87, 497.08, null, 0.58, null, null, 2.94,
+        checkInst(model, 192, 192, LocalDate.of(2019, 7, 12), 189, 50.00, null, 0.81733252, 40.87, 497.08, null, 0.59, null, null, 2.92,
                 null);
-        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 190, 50.00, null, 0.81646069, 40.82, 447.61, null, 0.53, null, null, 2.41,
+        checkInst(model, 193, 193, LocalDate.of(2019, 7, 13), 190, 50.00, null, 0.81646069, 40.82, 447.61, null, 0.53, null, null, 2.39,
                 null);
-        checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 191, 50.00, null, 0.81558979, 40.78, 398.08, null, 0.48, null, null, 1.93,
+        checkInst(model, 194, 194, LocalDate.of(2019, 7, 14), 191, 50.00, null, 0.81558980, 40.78, 398.08, null, 0.47, null, null, 1.92,
                 null);
-        checkInst(model, 195, 195, LocalDate.of(2019, 7, 15), 192, 50.00, null, 0.81471983, 40.74, 348.51, null, 0.43, null, null, 1.50,
+        checkInst(model, 195, 195, LocalDate.of(2019, 7, 15), 192, 50.00, null, 0.81471983, 40.74, 348.51, null, 0.43, null, null, 1.49,
                 null);
-        checkInst(model, 196, 196, LocalDate.of(2019, 7, 16), 193, 50.00, null, 0.81385078, 40.69, 298.88, null, 0.37, null, null, 1.13,
+        checkInst(model, 196, 196, LocalDate.of(2019, 7, 16), 193, 50.00, null, 0.81385078, 40.69, 298.88, null, 0.37, null, null, 1.12,
                 null);
-        checkInst(model, 197, 197, LocalDate.of(2019, 7, 17), 194, 50.00, null, 0.81298267, 40.65, 249.20, null, 0.32, null, null, 0.81,
+        checkInst(model, 197, 197, LocalDate.of(2019, 7, 17), 194, 50.00, null, 0.81298267, 40.65, 249.20, null, 0.32, null, null, 0.80,
                 null);
-        checkInst(model, 198, 198, LocalDate.of(2019, 7, 18), 195, 50.00, null, 0.81211548, 40.61, 199.47, null, 0.27, null, null, 0.54,
+        checkInst(model, 198, 198, LocalDate.of(2019, 7, 18), 195, 50.00, null, 0.81211548, 40.61, 199.47, null, 0.27, null, null, 0.53,
                 null);
-        checkInst(model, 199, 199, LocalDate.of(2019, 7, 19), 196, 50.00, null, 0.81124922, 40.56, 149.68, null, 0.21, null, null, 0.33,
+        checkInst(model, 199, 199, LocalDate.of(2019, 7, 19), 196, 50.00, null, 0.81124922, 40.56, 149.68, null, 0.21, null, null, 0.32,
                 null);
-        checkInst(model, 200, 200, LocalDate.of(2019, 7, 20), 197, 50.00, null, 0.81038388, 40.52, 99.84, null, 0.17, null, null, 0.16,
+        checkInst(model, 200, 200, LocalDate.of(2019, 7, 20), 197, 50.00, null, 0.81038388, 40.52, 99.84, null, 0.16, null, null, 0.16,
                 null);
         checkInst(model, 201, 201, LocalDate.of(2019, 7, 21), 198, 50.00, null, 0.80951946, 40.48, 49.95, null, 0.11, null, null, 0.05,
                 null);
@@ -2178,7 +2189,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
     void testLessPayment_term10_discountFee50_netDisbursement450_pay40() {
         final BigDecimal smallDiscountFee = new BigDecimal("50");
         final BigDecimal smallNetDisbursement = new BigDecimal("450");
-        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generate(smallDiscountFee,
+        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generateEir(smallDiscountFee,
                 smallNetDisbursement, TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         final ProjectedAmortizationScheduleModel model = initial.regenerate(smallDiscountFee, smallNetDisbursement,
                 EXPECTED_DISBURSEMENT_DATE, EXPECTED_DISBURSEMENT_DATE);
@@ -2191,19 +2202,19 @@ class ProjectedAmortizationScheduleCalculatorTest {
                 50.00);
         checkInst(model, 1, 1, LocalDate.of(2019, 1, 2), 0, 50.00, 40.00, 1.00000000, 40.00, 408.83, 417.07, 8.83, 7.07, -1.76, 41.17,
                 42.93);
-        checkInst(model, 2, 2, LocalDate.of(2019, 1, 3), 1, 50.00, null, 0.98074794, 49.04, 375.25, null, 8.19, null, null, 34.74, null);
-        checkInst(model, 3, 3, LocalDate.of(2019, 1, 4), 2, 50.00, null, 0.96186652, 48.09, 332.62, null, 7.37, null, null, 27.37, null);
-        checkInst(model, 4, 4, LocalDate.of(2019, 1, 5), 3, 50.00, null, 0.94334860, 47.17, 289.15, null, 6.53, null, null, 20.84, null);
-        checkInst(model, 5, 5, LocalDate.of(2019, 1, 6), 4, 50.00, null, 0.92518720, 46.26, 244.83, null, 5.68, null, null, 15.16, null);
-        checkInst(model, 6, 6, LocalDate.of(2019, 1, 7), 5, 50.00, null, 0.90737544, 45.37, 199.63, null, 4.81, null, null, 10.35, null);
-        checkInst(model, 7, 7, LocalDate.of(2019, 1, 8), 6, 50.00, null, 0.88990659, 44.50, 153.55, null, 3.92, null, null, 6.43, null);
-        checkInst(model, 8, 8, LocalDate.of(2019, 1, 9), 7, 50.00, null, 0.87277405, 43.64, 106.56, null, 3.01, null, null, 3.42, null);
-        checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 8, 50.00, null, 0.85597135, 42.80, 58.66, null, 2.09, null, null, 1.33, null);
-        checkInst(model, 10, 10, LocalDate.of(2019, 1, 11), 9, 50.00, null, 0.83949214, 41.97, 9.81, null, 1.14, null, null, 0.19, null);
+        checkInst(model, 2, 2, LocalDate.of(2019, 1, 3), 1, 50.00, null, 0.98074794, 49.04, 375.25, null, 8.18, null, null, 34.75, null);
+        checkInst(model, 3, 3, LocalDate.of(2019, 1, 4), 2, 50.00, null, 0.96186652, 48.09, 332.62, null, 7.37, null, null, 27.38, null);
+        checkInst(model, 4, 4, LocalDate.of(2019, 1, 5), 3, 50.00, null, 0.94334860, 47.17, 289.15, null, 6.53, null, null, 20.85, null);
+        checkInst(model, 5, 5, LocalDate.of(2019, 1, 6), 4, 50.00, null, 0.92518720, 46.26, 244.83, null, 5.68, null, null, 15.17, null);
+        checkInst(model, 6, 6, LocalDate.of(2019, 1, 7), 5, 50.00, null, 0.90737544, 45.37, 199.63, null, 4.80, null, null, 10.37, null);
+        checkInst(model, 7, 7, LocalDate.of(2019, 1, 8), 6, 50.00, null, 0.88990659, 44.50, 153.55, null, 3.92, null, null, 6.45, null);
+        checkInst(model, 8, 8, LocalDate.of(2019, 1, 9), 7, 50.00, null, 0.87277405, 43.64, 106.56, null, 3.01, null, null, 3.44, null);
+        checkInst(model, 9, 9, LocalDate.of(2019, 1, 10), 8, 50.00, null, 0.85597135, 42.80, 58.66, null, 2.10, null, null, 1.34, null);
+        checkInst(model, 10, 10, LocalDate.of(2019, 1, 11), 9, 50.00, null, 0.83949214, 41.97, 9.81, null, 1.15, null, null, 0.19, null);
         // The catch-up period earns exactly the 0.20 of fee the term left unearned, so the deferred balance closes on
         // it
         // rather than a cent short.
-        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 10, 10.00, null, 0.82333018, 8.24, 0.00, null, 0.19, null, null, 0.00, null);
+        checkInst(model, 11, 11, LocalDate.of(2019, 1, 12), 10, 10.00, null, 0.82333018, 8.23, 0.00, null, 0.19, null, null, 0.00, null);
 
     }
 
@@ -2211,7 +2222,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
     void testExcessPayment_term10_discountFee50_netDisbursement450_pay110() {
         final BigDecimal smallDiscountFee = new BigDecimal("50");
         final BigDecimal smallNetDisbursement = new BigDecimal("450");
-        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generate(smallDiscountFee,
+        final ProjectedAmortizationScheduleModel initial = ProjectedAmortizationScheduleModel.generateEir(smallDiscountFee,
                 smallNetDisbursement, TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         final ProjectedAmortizationScheduleModel model = initial.regenerate(smallDiscountFee, smallNetDisbursement,
                 EXPECTED_DISBURSEMENT_DATE, EXPECTED_DISBURSEMENT_DATE);
@@ -2227,8 +2238,8 @@ class ProjectedAmortizationScheduleCalculatorTest {
         checkInst(model, 2, 2, LocalDate.of(2019, 1, 3), 1, 50.00, null, 0.98074794, 49.04, 315.33, null, 7.03, null, null, 24.67, null);
         checkInst(model, 3, 3, LocalDate.of(2019, 1, 4), 2, 50.00, null, 0.96186652, 48.09, 271.52, null, 6.19, null, null, 18.48, null);
         checkInst(model, 4, 4, LocalDate.of(2019, 1, 5), 3, 50.00, null, 0.94334860, 47.17, 226.85, null, 5.33, null, null, 13.15, null);
-        checkInst(model, 5, 5, LocalDate.of(2019, 1, 6), 4, 50.00, null, 0.92518720, 46.26, 181.31, null, 4.45, null, null, 8.70, null);
-        checkInst(model, 6, 6, LocalDate.of(2019, 1, 7), 5, 50.00, null, 0.90737544, 45.37, 134.86, null, 3.56, null, null, 5.14, null);
+        checkInst(model, 5, 5, LocalDate.of(2019, 1, 6), 4, 50.00, null, 0.92518720, 46.26, 181.31, null, 4.46, null, null, 8.69, null);
+        checkInst(model, 6, 6, LocalDate.of(2019, 1, 7), 5, 50.00, null, 0.90737544, 45.37, 134.86, null, 3.55, null, null, 5.14, null);
         checkInst(model, 7, 7, LocalDate.of(2019, 1, 8), 6, 50.00, null, 0.88990659, 44.50, 87.51, null, 2.65, null, null, 2.49, null);
         checkInst(model, 8, 8, LocalDate.of(2019, 1, 9), 7, 50.00, null, 0.87277405, 43.64, 39.23, null, 1.72, null, null, 0.77, null);
         // An overpaid loan has less left to close, so the final period bills only the 28.94 still outstanding.
@@ -2246,7 +2257,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
         final ProjectedAmortizationScheduleModel model = generateModel();
         model.applyRateChange(new BigDecimal("15"), EXPECTED_DISBURSEMENT_DATE, EXPECTED_DISBURSEMENT_DATE);
 
-        assertFalse(model.rateSegments().isEmpty());
+        assertFalse(model.rateChanges().isEmpty());
         assertTrue(model.effectiveTotalTerm() > 0, "effective total term should be positive");
     }
 
@@ -2256,7 +2267,7 @@ class ProjectedAmortizationScheduleCalculatorTest {
         final LocalDate rateChangeDate = EXPECTED_DISBURSEMENT_DATE.plusDays(8);
         model.applyRateChange(new BigDecimal("15"), rateChangeDate, rateChangeDate);
 
-        assertFalse(model.rateSegments().isEmpty());
+        assertFalse(model.rateChanges().isEmpty());
         assertTrue(model.effectiveTotalTerm() > 0, "effective total term should be positive");
     }
 
@@ -2265,8 +2276,8 @@ class ProjectedAmortizationScheduleCalculatorTest {
         final ProjectedAmortizationScheduleModel model = generateModel();
 
         model.applyRateChange(new BigDecimal("15"), EXPECTED_DISBURSEMENT_DATE, EXPECTED_DISBURSEMENT_DATE);
-        assertNotNull(model.rateSegments());
-        assertFalse(model.rateSegments().isEmpty());
+        assertNotNull(model.rateChanges());
+        assertFalse(model.rateChanges().isEmpty());
 
         final LocalDate secondChangeDate = EXPECTED_DISBURSEMENT_DATE.plusDays(8);
         model.applyRateChange(new BigDecimal("11"), secondChangeDate, secondChangeDate);
@@ -2305,9 +2316,45 @@ class ProjectedAmortizationScheduleCalculatorTest {
 
         // The schedule runs as far as the day reached, so a change dated past the original term takes effect on its own
         // period rather than being clamped back onto the term's last day, where it would have re-rated nothing.
-        assertFalse(model.rateSegments().isEmpty(), "should have a rate segment");
-        assertEquals(250, model.rateSegments().getFirst().startDayIndex(), "segment must start on the period its effective date falls on");
+        assertFalse(model.rateChanges().isEmpty(), "should have a rate change");
+        assertEquals(EXPECTED_DISBURSEMENT_DATE.plusDays(250), model.rateChanges().getFirst().effectiveDate(),
+                "rate change must take effect on the day its effective date falls on");
         assertTrue(model.effectiveTotalTerm() > originalTerm, "effective term should extend beyond base term");
+    }
+
+    /**
+     * A change cannot be slotted in ahead of ones already recorded: each is sized against the balance and unearned fee
+     * reached on its own day, so an earlier one moves both for every change after it. The caller is told rather than
+     * quietly handed a schedule with the later changes deleted, which is what dropping them used to do.
+     */
+    @Test
+    void testApplyRateChange_backdatedBehindAnExistingChangeIsRejected() {
+        final ProjectedAmortizationScheduleModel model = generateModel();
+        final LocalDate later = EXPECTED_DISBURSEMENT_DATE.plusDays(40);
+        model.applyRateChange(new BigDecimal("15"), later, later);
+
+        final LocalDate backdated = EXPECTED_DISBURSEMENT_DATE.plusDays(10);
+        final IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> model.applyRateChange(new BigDecimal("11"), backdated, later));
+        assertTrue(thrown.getMessage().contains("ascending effective-date order"), "the message must name the precondition broken");
+
+        assertEquals(1, model.rateChanges().size(), "the change already recorded must survive the rejected call");
+        assertEquals(later, model.rateChanges().getFirst().effectiveDate());
+        assertEquals(0, model.rateChanges().getFirst().periodPaymentRate().compareTo(new BigDecimal("15")));
+    }
+
+    /** Booking twice on one day overwrites, rather than leaving the day carrying two rates. */
+    @Test
+    void testApplyRateChange_twiceOnTheSameDateOverwrites() {
+        final ProjectedAmortizationScheduleModel model = generateModel();
+        final LocalDate changeDate = EXPECTED_DISBURSEMENT_DATE.plusDays(10);
+
+        model.applyRateChange(new BigDecimal("15"), changeDate, changeDate);
+        model.applyRateChange(new BigDecimal("11"), changeDate, changeDate);
+
+        assertEquals(1, model.rateChanges().size(), "the day must carry one rate, not two");
+        assertEquals(0, model.rateChanges().getFirst().periodPaymentRate().compareTo(new BigDecimal("11")),
+                "the rate booked last is the one in force");
     }
 
     @Test
@@ -2318,8 +2365,218 @@ class ProjectedAmortizationScheduleCalculatorTest {
         });
     }
 
+    // ----------------------------------------------------------------------------------------------------------------
+    // FLAT amortization: ratio = fee / (net + fee) = 1000 / 10000 = 10 %; every payment earns 10 % of itself.
+    // ----------------------------------------------------------------------------------------------------------------
+
+    @Test
+    void testFlat_projectedSchedule_earnsTenPercentOfEveryPayment() {
+        final ProjectedAmortizationScheduleModel model = generateFlatModel();
+
+        assertNull(model.effectiveInterestRate(), "a FLAT schedule solves no rate");
+        assertEquals(WorkingCapitalAmortizationType.FLAT, model.amortizationType());
+        assertTrue(model.isFlat());
+        assertEquals(TERM, model.originalPaymentNumber(), "10000 gross at 50 a day");
+        assertEquals(TERM + 1, model.projectedPayments().size(), "disbursement row + 200 periods, no tail");
+
+        checkInst(model, 0, 0, EXPECTED_DISBURSEMENT_DATE, 0, -9000.00, null, 1.00000000, -9000.00, 9000.00, 9000.00, null, null, null,
+                1000.00, 1000.00);
+        // balance_n = 9000 - 45n ; feeBalance_n = 1000 - 5n ; DF = 1 throughout, so NPV is the payment itself
+        checkInst(model, 1, 1, EXPECTED_DISBURSEMENT_DATE.plusDays(1), 1, 50.00, null, 1.00000000, 50.00, 8955.00, null, 5.00, null, null,
+                995.00, null);
+        checkInst(model, 100, 100, EXPECTED_DISBURSEMENT_DATE.plusDays(100), 100, 50.00, null, 1.00000000, 50.00, 4500.00, null, 5.00, null,
+                null, 500.00, null);
+        checkInst(model, 200, 200, EXPECTED_DISBURSEMENT_DATE.plusDays(200), 200, 50.00, null, 1.00000000, 50.00, 0.00, null, 5.00, null,
+                null, 0.00, null);
+
+        BigDecimal totalExpected = BigDecimal.ZERO;
+        for (int i = 1; i <= TERM; i++) {
+            final ProjectedPayment p = model.projectedPayments().get(i);
+            assertMoneyValue(5.00, p.expectedAmortizationAmount(), 2, "period " + i + " earns 10% of 50");
+            totalExpected = totalExpected.add(p.expectedAmortizationAmount().getAmount());
+        }
+        assertEquals(0, DISCOUNT_FEE.compareTo(totalExpected), "the plan earns exactly the fee, no rounding settle needed");
+    }
+
+    @Test
+    void testFlat_partialPayments_roundTheCumulativeOnce() {
+        final ProjectedAmortizationScheduleModel model = generateFlatModel();
+
+        // 10 % x 33.33 = 3.333 -> 3.33
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("33.33"));
+        checkInst(model, 1, 1, EXPECTED_DISBURSEMENT_DATE.plusDays(1), 0, 50.00, 33.33, 1.00000000, 33.33, 8955.00, 8970.00, 5.00, 3.33,
+                -1.67, 995.00, 996.67);
+
+        // cumulative 10 % x 99.99 = 9.999 -> 10.00 ; this period shows 10.00 - 3.33
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(2), new BigDecimal("66.66"));
+        final ProjectedPayment second = model.projectedPayments().get(2);
+        assertMoneyValue(6.67, second.actualAmortizationAmount(), 2, "second payment earns the once-rounded cumulative delta");
+        assertMoneyValue(990.00, second.actualDiscountFeeBalance(), 2, "1000 - 10.00");
+        assertMoneyValue(8910.01, second.actualBalance(), 2, "9000 - 99.99 + 10.00");
+        assertEquals(0, new BigDecimal("10.00").compareTo(model.totalActualAmortization()), "10 % of 99.99, rounded once");
+    }
+
+    @Test
+    void testFlat_fullPayoffInUnevenInstalments_earnsExactlyTheFee() {
+        final ProjectedAmortizationScheduleModel model = generateFlatModel();
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("3333.33"));
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(2), new BigDecimal("3333.33"));
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(3), new BigDecimal("3333.34"));
+
+        // 333.333 -> 333.33 ; 666.666 -> 666.67 -> 333.34 ; 1000.00 -> 333.33
+        assertMoneyValue(333.33, model.projectedPayments().get(1).actualAmortizationAmount(), 2, "first");
+        assertMoneyValue(333.34, model.projectedPayments().get(2).actualAmortizationAmount(), 2, "second");
+        assertMoneyValue(333.33, model.projectedPayments().get(3).actualAmortizationAmount(), 2, "closing");
+        assertEquals(0, DISCOUNT_FEE.compareTo(model.totalActualAmortization()), "fully paid: aggregated amortization equals the fee");
+        assertMoneyValue(0.00, model.projectedPayments().get(3).actualBalance(), 2, "nothing left owed");
+        assertMoneyValue(0.00, model.projectedPayments().get(3).actualDiscountFeeBalance(), 2, "nothing left unearned");
+    }
+
+    @Test
+    void testFlat_rateChange_resizesPaymentsButKeepsTheRatio() {
+        final ProjectedAmortizationScheduleModel model = generateFlatModel();
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("50"));
+        model.applyRateChange(new BigDecimal("25"), EXPECTED_DISBURSEMENT_DATE.plusDays(2), EXPECTED_DISBURSEMENT_DATE.plusDays(2));
+
+        // (100000 x 25 %) / 360 = 69.44 ; 10 % x 69.44 = 6.944 a day, reported as the movement of the rounded running
+        // total: 5.00 + 6.944 = 11.944 -> 11.94 ; 18.888 -> 18.89 ; 25.832 -> 25.83
+        final double[] reportedFee = { 6.94, 6.95, 6.94 };
+        for (int i = 2; i <= 4; i++) {
+            final ProjectedPayment p = model.projectedPayments().get(i);
+            assertMoneyValue(69.44, p.expectedPaymentAmount(), 2, "period " + i + " bills the raised daily payment");
+            assertMoneyValue(reportedFee[i - 2], p.expectedAmortizationAmount(), 2, "period " + i + " still earns 10 %");
+        }
+        assertMoneyValue(1000 - 25.83, model.projectedPayments().get(4).expectedDiscountFeeBalance(), 2, "10 % of 258.32 earned in all");
+        assertNull(model.rateChangeSolveOn(EXPECTED_DISBURSEMENT_DATE.plusDays(2)).eir(), "the rate change solves no rate either");
+
+        // cumulative 10 % x 119.44 = 11.944 -> 11.94 ; 11.94 - 5.00 = 6.94
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(2), new BigDecimal("69.44"));
+        assertMoneyValue(6.94, model.projectedPayments().get(2).actualAmortizationAmount(), 2, "10 % of 69.44");
+    }
+
+    @Test
+    void testFlat_noDiscount_earnsNothingAndStaysCalculable() {
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT,
+                BigDecimal.ZERO, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
+                EXPECTED_DISBURSEMENT_DATE);
+
+        assertEquals(180, model.originalPaymentNumber(), "ceil(9000 / 50)");
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("50"));
+        for (int i = 1; i < model.projectedPayments().size(); i++) {
+            final ProjectedPayment p = model.projectedPayments().get(i);
+            assertMoneyValue(0.00, p.expectedAmortizationAmount(), 2, "period " + i + " earns nothing");
+        }
+        assertMoneyValue(0.00, model.projectedPayments().get(1).actualAmortizationAmount(), 2, "a payment earns nothing");
+        assertMoneyValue(8950.00, model.projectedPayments().get(1).actualBalance(), 2, "the payment comes straight off the balance");
+    }
+
+    @Test
+    void testFlat_overpayment_capsTheEarnedFeeAtTheDiscount() {
+        final ProjectedAmortizationScheduleModel model = generateFlatModel();
+
+        // 12000 against a 10000 gross payable: 10 % of it would be 1200, but there is only 1000 of fee to earn
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("12000"));
+
+        assertEquals(0, DISCOUNT_FEE.compareTo(model.totalActualAmortization()), "the earned fee is capped at the discount fee");
+        final ProjectedPayment paid = model.projectedPayments().get(1);
+        assertMoneyValue(1000.00, paid.actualAmortizationAmount(), 2, "the overpaying period earns the whole fee");
+        assertMoneyValue(0.00, paid.actualDiscountFeeBalance(), 2, "nothing is left unearned");
+        for (int i = 2; i < model.projectedPayments().size(); i++) {
+            final ProjectedPayment later = model.projectedPayments().get(i);
+            assertMoneyValue(0.00, later.actualAmortizationAmount(), 2, "period " + i + " must not earn fee after the loan is overpaid");
+            assertMoneyValue(0.00, later.expectedDiscountFeeBalance(), 2, "period " + i + " has no fee left to defer");
+        }
+    }
+
+    @Test
+    void testFlat_subCentInputs_sizeTheTermFromTheStoredAmounts() {
+        // 9000.004 + 1000.004 = 10000.008 raw would need a 201st period for a 0.01 remainder; stored as 9000.00 /
+        // 1000.00
+        // the plan closes on the 200th, so the term must be sized from what the model actually carries
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT,
+                new BigDecimal("1000.004"), new BigDecimal("9000.004"), TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
+                EXPECTED_DISBURSEMENT_DATE);
+
+        assertEquals(TERM, model.originalPaymentNumber(), "the term is sized from the currency-rounded gross payable");
+        assertEquals(TERM + 1, model.projectedPayments().size(), "no zero-payment period after the plan closes");
+        assertMoneyValue(50.00, model.finalPaymentAmount(), 2, "the final payment is a full instalment");
+        assertMoneyValue(0.00, model.projectedPayments().get(TERM).expectedBalance(), 2, "the plan closes on the last period");
+        assertMoneyValue(1000.00, model.discountFeeAmount(), 2, "the fee is stored in the currency");
+        assertEquals(0,
+                model.projectedPayments().stream().filter(p -> p.paymentNo() > 0).filter(p -> p.expectedPaymentAmount().isZero()).count(),
+                "every period bills something");
+
+        final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
+        assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, new BigDecimal("1000.004"),
+                new BigDecimal("9000.004"), TPV, RATE, DAY_COUNT, usd, MC), "the pre-check sizes the term the same way");
+        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                new BigDecimal("0.004"), TPV, RATE, DAY_COUNT, usd, MC), "a sub-cent disbursement is nothing to disburse");
+    }
+
+    @Test
+    void testFlat_subCentPaymentVolume_billsWhatTheStoredVolumeBills() {
+        // 100010.004 x 18% / 360 = 50.005002 -> 50.01 raw, but the model stores 100010.00, which bills 50.005 -> 50.00
+        // (half-even); a plan written from the raw figure would restate itself on the first regeneration
+        final BigDecimal subCentVolume = new BigDecimal("100010.004");
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT,
+                DISCOUNT_FEE, NET_DISBURSEMENT, subCentVolume, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
+                EXPECTED_DISBURSEMENT_DATE);
+
+        assertMoneyValue(100010.00, model.totalPaymentVolume(), 2, "the volume is stored in the currency");
+        assertMoneyValue(50.00, model.expectedPaymentAmount(), 2, "the daily payment is derived from the stored volume");
+
+        final ProjectedAmortizationScheduleModel regenerated = model.regenerate(DISCOUNT_FEE, NET_DISBURSEMENT, EXPECTED_DISBURSEMENT_DATE,
+                EXPECTED_DISBURSEMENT_DATE);
+        assertMoneyValue(50.00, regenerated.expectedPaymentAmount(), 2, "regeneration bills the same instalment");
+        assertEquals(model.originalPaymentNumber(), regenerated.originalPaymentNumber(), "and runs the same term");
+
+        final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
+        assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                NET_DISBURSEMENT, subCentVolume, RATE, DAY_COUNT, usd, MC), "the pre-check accepts what generate() accepts");
+        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                NET_DISBURSEMENT, new BigDecimal("0.004"), RATE, DAY_COUNT, usd, MC), "a sub-cent volume bills nothing");
+    }
+
+    @Test
+    void testFlat_neverSolvesTheIrr() {
+        try (MockedStatic<TvmFunctions> tvm = mockStatic(TvmFunctions.class, CALLS_REAL_METHODS)) {
+            final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
+            final ProjectedAmortizationScheduleModel flat = generateFlatModel();
+            flat.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("50"));
+            flat.applyRateChange(new BigDecimal("25"), EXPECTED_DISBURSEMENT_DATE.plusDays(2), EXPECTED_DISBURSEMENT_DATE.plusDays(2));
+            flat.projectedPayments();
+            assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                    NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, usd, MC));
+            tvm.verify(() -> TvmFunctions.irr(anyList(), any(MathContext.class)), never());
+            tvm.verify(() -> TvmFunctions.irr(anyList(), any(BigDecimal.class), any(MathContext.class)), never());
+
+            generateModel();
+            tvm.verify(() -> TvmFunctions.irr(anyList(), any(MathContext.class)), atLeastOnce());
+        }
+    }
+
+    @Test
+    void testFlat_calculabilityGate_keepsStructuralChecksOnly() {
+        final MonetaryCurrency usd = new MonetaryCurrency("USD", 2, null);
+        assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, usd, MC));
+        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                BigDecimal.ZERO, TPV, RATE, DAY_COUNT, usd, MC), "a FLAT schedule still needs something to disburse");
+        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                NET_DISBURSEMENT, TPV, BigDecimal.ZERO, DAY_COUNT, usd, MC), "a FLAT schedule still needs a positive daily payment");
+        assertFalse(ProjectedAmortizationScheduleModel.isScheduleCalculable(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE,
+                new BigDecimal("100000000"), TPV, new BigDecimal("0.01"), DAY_COUNT, usd, MC), "the term cap still applies");
+        assertTrue(ProjectedAmortizationScheduleModel.isScheduleCalculable(null, DISCOUNT_FEE, NET_DISBURSEMENT, TPV, RATE, DAY_COUNT, usd,
+                MC), "a missing type is EIR, and the standard inputs admit an IRR");
+    }
+
+    private ProjectedAmortizationScheduleModel generateFlatModel() {
+        return ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT, DISCOUNT_FEE, NET_DISBURSEMENT, TPV, RATE,
+                DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
+    }
+
     private ProjectedAmortizationScheduleModel generateModel() {
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateEir(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
                 RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY, EXPECTED_DISBURSEMENT_DATE);
         return model.regenerate(DISCOUNT_FEE, NET_DISBURSEMENT, EXPECTED_DISBURSEMENT_DATE, EXPECTED_DISBURSEMENT_DATE);
     }
@@ -2348,6 +2605,126 @@ class ProjectedAmortizationScheduleCalculatorTest {
         assertMoneyValue(expectedIncomeModification, inst.incomeModification(), 2, p + "incomeModification");
         assertMoneyValue(expectedExpectedDiscountFeeBalance, inst.expectedDiscountFeeBalance(), 2, p + "expectedDiscountFeeBalance");
         assertMoneyValue(expectedActualDiscountFeeBalance, inst.actualDiscountFeeBalance(), 2, p + "actualDiscountFeeBalance");
+    }
+
+    /**
+     * An instalment paid in full and on time tells the projection nothing it did not already assume, so recording one
+     * must leave every period after it exactly where it was.
+     *
+     * <p>
+     * The settled-period rewind is what puts that at risk: it assigns the fee the payments have really earned onto the
+     * expected column, and the two are only the same number if they are measured the same way. The expected column adds
+     * up periods that are each rounded to the currency first; a total that is instead kept exact and rounded once sits
+     * a cent away from it, and assigning that across shifts the deferred fee balance of every remaining period. It
+     * takes a few dozen periods of rounding to accumulate, which is why the fixed-schedule tests above do not see it -
+     * at 25 on-time payments it moves 175 periods.
+     */
+    @Test
+    void testOnTimePayments_doNotMoveTheProjectionOfLaterPeriods() {
+        for (final int paidDays : new int[] { 5, 25, 50, 100, 150 }) {
+            final List<ProjectedPayment> untouched = generateModel().projectedPayments();
+
+            final ProjectedAmortizationScheduleModel model = generateModel();
+            for (int day = 1; day <= paidDays; day++) {
+                model.acknowledgeElapsedPeriods(EXPECTED_DISBURSEMENT_DATE.plusDays(day));
+                model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(day), new BigDecimal("50"));
+            }
+            final List<ProjectedPayment> afterPaying = model.projectedPayments();
+
+            assertEquals(untouched.size(), afterPaying.size(), "paying on time should not change the number of periods");
+            for (int i = paidDays + 1; i < untouched.size(); i++) {
+                final ProjectedPayment before = untouched.get(i);
+                final ProjectedPayment after = afterPaying.get(i);
+                final String where = "period " + i + " after " + paidDays + " on-time payments";
+                assertMoneyValue(
+                        before.expectedAmortizationAmount() == null ? null : before.expectedAmortizationAmount().getAmount().doubleValue(),
+                        after.expectedAmortizationAmount(), 2, where + " expectedAmortizationAmount");
+                assertMoneyValue(before.expectedBalance() == null ? null : before.expectedBalance().getAmount().doubleValue(),
+                        after.expectedBalance(), 2, where + " expectedBalance");
+                assertMoneyValue(
+                        before.expectedDiscountFeeBalance() == null ? null : before.expectedDiscountFeeBalance().getAmount().doubleValue(),
+                        after.expectedDiscountFeeBalance(), 2, where + " expectedDiscountFeeBalance");
+            }
+        }
+    }
+
+    /**
+     * A borrower who hands over more than the payable owes nothing, and the periods after that must project nothing -
+     * not a balance growing further below zero.
+     *
+     * <p>
+     * The projection re-bases on the borrower's actual balance at every settled period. Left unfloored, an overpaid
+     * balance accrues away from zero and each later period amortizes a <em>negative</em> amount, which reads as a
+     * period un-earning fee the payments have already earned. Gathered back up as the fee still outstanding, that
+     * phantom is settled onto the closing period and takes the deferred fee balance below zero - a loan reporting that
+     * it has un-earned nine euros of income it holds.
+     *
+     * <p>
+     * The transaction allocator caps the principal it hands the schedule at what is actually owed, so a loan booked
+     * through the platform does not reach this. The projection should not have to rely on that to stay coherent.
+     */
+    @Test
+    void testOverpaidLoanProjectsNothingRatherThanUnEarningFee() {
+        for (final String overpayment : new String[] { "9950", "9990", "10000", "10500", "11000" }) {
+            final ProjectedAmortizationScheduleModel model = generateModel();
+            model.acknowledgeElapsedPeriods(EXPECTED_DISBURSEMENT_DATE.plusDays(2));
+            model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(2), new BigDecimal("46"));
+            model.acknowledgeElapsedPeriods(EXPECTED_DISBURSEMENT_DATE.plusDays(3));
+            model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(3), new BigDecimal("46"));
+            model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal(overpayment));
+
+            final List<ProjectedPayment> payments = model.projectedPayments();
+            BigDecimal earned = BigDecimal.ZERO;
+            for (final ProjectedPayment payment : payments) {
+                final String where = "overpaid by " + overpayment + ", period " + payment.paymentNo();
+                assertNonNegative(payment.expectedDiscountFeeBalance(), where + " expectedDiscountFeeBalance");
+                assertNonNegative(payment.expectedAmortizationAmount(), where + " expectedAmortizationAmount");
+                assertNonNegative(payment.expectedBalance(), where + " expectedBalance");
+                if (payment.actualAmortizationAmount() != null) {
+                    earned = earned.add(payment.actualAmortizationAmount().getAmount());
+                }
+            }
+            assertMoneyValue(0.00, payments.getLast().expectedDiscountFeeBalance(), 2,
+                    "overpaid by " + overpayment + ": deferred fee should close at zero");
+            assertEquals(0, DISCOUNT_FEE.compareTo(earned),
+                    "overpaid by " + overpayment + ": the whole fee should be earned, was " + earned);
+        }
+    }
+
+    private void assertNonNegative(final Money value, final String msg) {
+        if (value == null) {
+            return;
+        }
+        assertTrue(value.getAmount().signum() >= 0, msg + " should not be negative, was " + value.getAmount());
+    }
+
+    @Test
+    void testFlat_rateChange_nonTerminatingRatio_sizesTheTermFromTheCurrencyRoundedGross() {
+        // 1000 / 10500 = 2/21; 50 paid earns 4.7619.. so the change re-prices 9454.7619.. against 995.2380.. unearned.
+        // The exact gross is 10450 give or take the last decimal place, so a raw ceil(gross / 25) can claim a 419th day
+        // billing nothing; sized from the currency-rounded 10450.00 the plan closes on the 418th with a full
+        // instalment.
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(WorkingCapitalAmortizationType.FLAT,
+                new BigDecimal("1000"), new BigDecimal("9500"), TPV, RATE, DAY_COUNT, EXPECTED_DISBURSEMENT_DATE, MC, CURRENCY,
+                EXPECTED_DISBURSEMENT_DATE);
+        model.applyPayment(EXPECTED_DISBURSEMENT_DATE.plusDays(1), new BigDecimal("50"));
+        final LocalDate changeDate = EXPECTED_DISBURSEMENT_DATE.plusDays(2);
+        model.applyRateChange(new BigDecimal("9"), changeDate, changeDate);
+
+        final ProjectedAmortizationScheduleModel.RateChangeSolve solve = model.rateChangeSolveOn(changeDate);
+        assertMoneyValue(25.00, solve.dailyPayment(), 2, "(100000 x 9 %) / 360");
+        assertEquals(418, solve.term(), "ceil(10450.00 / 25)");
+        assertNull(solve.eir(), "no rate is solved");
+
+        final List<ProjectedPayment> payments = model.projectedPayments();
+        final ProjectedPayment last = payments.getLast();
+        assertEquals(model.effectiveTotalTerm(), last.paymentNo(), "the term ends on the last projected payment");
+        assertEquals(419, last.paymentNo(), "2 + 418 - 1");
+        assertMoneyValue(25.00, last.expectedPaymentAmount(), 2, "the closing day bills a full instalment");
+        assertMoneyValue(0.00, last.expectedBalance(), 2, "and closes the balance");
+        assertMoneyValue(0.00, last.expectedDiscountFeeBalance(), 2, "with nothing left unearned");
+        assertEquals(0, payments.stream().filter(p -> p.paymentNo() > 0).filter(p -> p.expectedPaymentAmount().isZero()).count(),
+                "every day bills something");
     }
 
     private void assertMoneyValue(final Double expected, final Money actual, final int scale, final String msg) {

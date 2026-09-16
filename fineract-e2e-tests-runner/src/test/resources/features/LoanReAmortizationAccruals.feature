@@ -2638,11 +2638,13 @@ Feature: LoanReAmortizationAccruals
       | 01 February 2024 | Repayment        | 17.01  | 16.43     | 0.58     | 0.0  | 0.0       | 83.57        | false    | false    |
       | 15 March 2024    | Re-amortize      | 17.01  | 16.52     | 0.49     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 01 February 2024 | Accrual Activity | 0.58   | 0.0       | 0.58     | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan has 0.27 total unpaid payable not due interest
     When Admin sets the business date to "16 March 2024"
     When Admin runs inline COB job for Loan
     Then Loan Transactions tab has the following new accrual data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 15 March 2024    | Accrual Adjustment | 0.42   | 0.0       | 0.42     | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan has 0.3 total unpaid payable not due interest
     When Admin sets the business date to "01 April 2024"
     When Admin runs inline COB job for Loan
     Then Loan Transactions tab has the following new accrual data:
@@ -2663,6 +2665,7 @@ Feature: LoanReAmortizationAccruals
       | 29 March 2024    | Accrual          | 0.03   | 0.0       | 0.03     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 March 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 31 March 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan has 0.0 total unpaid payable not due interest
     And Customer makes "AUTOPAY" repayment on "01 April 2024" with 21.32 EUR transaction amount
     Then Loan Repayment schedule has 6 periods, with the following data for periods:
       | Nr | Days | Date             | Paid date        | Balance of loan | Principal due | Interest | Fees | Penalties | Due   | Paid  | In advance | Late | Outstanding |
@@ -2717,6 +2720,7 @@ Feature: LoanReAmortizationAccruals
       | 28 April 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 29 April 2024    | Accrual          | 0.01   | 0.0       | 0.01     | 0.0  | 0.0       | 0.0          | false    | false    |
       | 30 April 2024    | Accrual          | 0.02   | 0.0       | 0.02     | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan has 0.0 total unpaid payable not due interest
     When Loan Pay-off is made on "01 May 2024"
     Then Loan is closed with zero outstanding balance and it's all installments have obligations met
     Then Loan Transactions tab has the following new accrual data:

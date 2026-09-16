@@ -36,8 +36,9 @@ public class CashierTransactionsHelper {
     private final ResponseSpecification responseSpecification;
     private final RequestSpecification requestSpecification;
 
-    private static final String CREATE_CASHIER_URL = "/fineract-provider/api/v1/tellers/1/cashiers";
+    private static final String CREATE_CASHIER_URL = "/fineract-provider/api/v1/tellers/%d/cashiers";
     private static final String CREATE_TELLER_URL = "/fineract-provider/api/v1/tellers";
+    private static final String ALLOCATE_CASH_TO_CASHIER_URL = "/fineract-provider/api/v1/tellers/%d/cashiers/%d/allocate";
     private static final Logger LOG = LoggerFactory.getLogger(CashierTransactionsHelper.class);
 
     // TODO: Rewrite to use fineract-client instead!
@@ -116,12 +117,21 @@ public class CashierTransactionsHelper {
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
     public static Integer createCashier(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return (Integer) createCashierWithJson(requestSpec, responseSpec, createCashierAsJSON()).get("resourceId");
+        return createCashier(requestSpec, responseSpec, 1L, 1L);
+    }
+
+    // TODO: Rewrite to use fineract-client instead!
+    // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
+    // org.apache.fineract.client.models.PostLoansLoanIdRequest)
+    @Deprecated(forRemoval = true)
+    public static Integer createCashier(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Long tellerId, final Long staffId) {
+        return (Integer) createCashierWithJson(requestSpec, responseSpec, tellerId, createCashierAsJSON(staffId)).get("resourceId");
     }
 
     public static Map<String, Object> createCashierWithJson(final RequestSpecification requestSpec,
-            final ResponseSpecification responseSpec, final String json) {
-        final String url = CREATE_CASHIER_URL + "?" + Utils.TENANT_IDENTIFIER;
+            final ResponseSpecification responseSpec, final Long tellerId, final String json) {
+        final String url = String.format(CREATE_CASHIER_URL, tellerId) + "?" + Utils.TENANT_IDENTIFIER;
         return Utils.performServerPost(requestSpec, responseSpec, url, json, "");
     }
 
@@ -129,11 +139,11 @@ public class CashierTransactionsHelper {
     // Example: org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper.disburseLoan(java.lang.Long,
     // org.apache.fineract.client.models.PostLoansLoanIdRequest)
     @Deprecated(forRemoval = true)
-    public static String createCashierAsJSON() {
+    public static String createCashierAsJSON(final Long staffId) {
 
         final Map<String, Object> map = getMapWithDates();
 
-        map.put("staffId", 1);
+        map.put("staffId", staffId);
         map.put("description", Utils.uniqueRandomStringGenerator("test__", 4));
         LOG.info("map :  {}", map);
         return new Gson().toJson(map);
@@ -153,6 +163,25 @@ public class CashierTransactionsHelper {
         map.put("isFullDay", true);
 
         return map;
+    }
+
+    public static Map<String, Object> allocateCashToCashierRequestMap(final Object txnAmount) {
+        final Map<String, Object> map = new HashMap<>();
+
+        map.put("locale", "en");
+        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("txnDate", "01 January 2023");
+        map.put("currencyCode", "USD");
+        map.put("txnAmount", txnAmount);
+        map.put("txnNote", Utils.uniqueRandomStringGenerator("Allocate cash ", 4));
+
+        return map;
+    }
+
+    public static String allocateCashToCashierRaw(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Long tellerId, final Long cashierId, final String json) {
+        final String url = String.format(ALLOCATE_CASH_TO_CASHIER_URL, tellerId, cashierId) + "?" + Utils.TENANT_IDENTIFIER;
+        return Utils.performServerPost(requestSpec, responseSpec, url, json);
     }
 
 }

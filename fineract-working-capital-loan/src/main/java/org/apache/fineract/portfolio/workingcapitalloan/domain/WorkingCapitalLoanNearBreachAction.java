@@ -59,7 +59,7 @@ public class WorkingCapitalLoanNearBreachAction extends AbstractAuditableWithUTC
     @Column(name = "frequency_type")
     private WorkingCapitalLoanPeriodFrequencyType frequencyType;
 
-    @Column(name = "submitted_on_date")
+    @Column(name = "submitted_on_date", nullable = false)
     private LocalDate submittedOnDate;
 
     public static WorkingCapitalLoanNearBreachAction create(final WorkingCapitalLoan loan, final NearBreachActionType action,

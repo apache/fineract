@@ -27,6 +27,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.LoanRepositoryWrapper;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.loanaccount.repository.ProgressiveLoanModelRepository;
 import org.apache.fineract.portfolio.loanproduct.calc.data.ProgressiveLoanInterestScheduleModel;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,16 +59,29 @@ public class ProgressiveLoanModelProcessingService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void recalculateModelAndSave(Long loanId) {
-        Loan loan = loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
-        ProgressiveLoanInterestScheduleModel recalculatedModel = modelProcessingService.getRecalculatedModel(loan.getId(),
-                ThreadLocalContextUtil.getBusinessDate());
-        if (recalculatedModel != null) {
-            modelRepositoryWrapper.writeInterestScheduleModel(loan, recalculatedModel);
-        }
+        recalculate(loanRepositoryWrapper.findOneWithNotFoundDetection(loanId));
     }
 
     @Transactional(readOnly = true)
     public boolean allowedLoanStatuses(Long loanId) {
         return loanRepositoryWrapper.isLoanInAllowedStatus(loanId, allowedLoanStatuses);
+    }
+
+    /**
+     * Recalculates against a loan the caller already holds, joining the caller's transaction so that the loan stays the
+     * one instance its persistence context manages. Callers that only have an id and no transaction of their own want
+     * {@link #recalculateModelAndSave(Long)} instead.
+     */
+    @Transactional
+    public void recalculateModelAndSave(@NonNull Loan loan) {
+        recalculate(loan);
+    }
+
+    private void recalculate(Loan loan) {
+        ProgressiveLoanInterestScheduleModel recalculatedModel = modelProcessingService.getRecalculatedModel(loan.getId(),
+                ThreadLocalContextUtil.getBusinessDate());
+        if (recalculatedModel != null) {
+            modelRepositoryWrapper.writeInterestScheduleModel(loan, recalculatedModel);
+        }
     }
 }

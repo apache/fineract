@@ -253,7 +253,8 @@ Feature: Working Capital Transaction Reprocessing
     # Backdated Txn#2 on day 5 takes the fee; Txn#1 is reprocessed to 30 principal
     When Admin sets the business date to "15 January 2026"
     And Customer makes repayment on "05 January 2026" with 25 transaction amount on Working Capital loan
-    Then Working Capital Loan has transactions:
+    Then a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "10 January 2026" with principal portion changed from "25.0" to "30.0" and fee portion changed from "5.0" to "0.0"
+    And Working Capital Loan has transactions:
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Repayment    | 25.0              | 20.0             | 5.0               | 0.0                   | false    |
@@ -285,7 +286,9 @@ Feature: Working Capital Transaction Reprocessing
     And Customer makes repayment on "10 January 2026" with 25 transaction amount on Working Capital loan
     # Reverse Txn#1 (the day-5 repayment) -> Txn#2 must be reprocessed to take the fee
     When Customer undo "1"th "REPAYMENT" transaction made on "05 January 2026" on Working Capital loan
-    Then Working Capital Loan has transactions:
+    Then a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "10 January 2026" with principal portion changed from "25.0" to "20.0" and fee portion changed from "0.0" to "5.0"
+    And a Working Capital Loan Adjust Transaction business event is raised for the reversed "repayment" transaction
+    And Working Capital Loan has transactions:
       | transactionDate | type         | transactionAmount | principalPortion | feeChargesPortion | penaltyChargesPortion | reversed |
       | 01 January 2026 | Disbursement | 9000.0            | 9000.0           | 0.0               | 0.0                   | false    |
       | 05 January 2026 | Repayment    | 30.0              | 25.0             | 5.0               | 0.0                   | true     |
@@ -385,7 +388,8 @@ Feature: Working Capital Transaction Reprocessing
     And Customer makes repayment on "10 January 2026" with 7000 transaction amount on Working Capital loan
     When Admin sets the business date to "15 January 2026"
     And Customer makes repayment on "05 January 2026" with 5000 transaction amount on Working Capital loan
-    Then Working Capital loan balance payload contains the following fields:
+    Then a Working Capital Loan Adjust Transaction business event is raised for the "repayment" transaction on "10 January 2026" with principal portion changed from "7000.0" to "4000.0" and fee portion changed from "0.0" to "0.0"
+    And Working Capital loan balance payload contains the following fields:
       | field                | value  |
       | principalOutstanding | 0.0    |
       | totalPaidPrincipal   | 9000.0 |

@@ -46,6 +46,13 @@
         <property name="format" value="(?s:\r\n.*)"/>
         <property name="message" value="File has Windows (CR+LF) instead of UNIX (LF) end of line (EOL) delimiters."/>
     </module>
+    <!-- Limit the FeignNoRestAssured check to the shared Feign integration test machinery:
+         the client/feign package tree, the FeignIntegrationTest root base class one level
+         above it, and the FineractFeignClientHelper client factory in common. -->
+    <module name="SuppressionSingleFilter">
+        <property name="id" value="FeignNoRestAssured"/>
+        <property name="files" value="^(?!.*[\\/]integrationtests[\\/](?:client[\\/]feign[\\/]|client[\\/]FeignIntegrationTest\.java|common[\\/]FineractFeignClientHelper\.java)).*$"/>
+    </module>
     <module name="SuppressWarningsFilter"/>
 
 
@@ -100,6 +107,15 @@
             <property name="forbiddenImportsRegexp" value="com.google.common.base.Charsets" />
             <property name="forbiddenImportsExcludesRegexp" value="" />
             <message key="forbid.certain.imports" value="Use ''java.nio.charset.StandardCharsets'' instead of ''{0}''" />
+        </module>
+        <!-- Forbid REST Assured in the Feign integration tests; use the generated Feign client.
+             Scoped to that package tree by the FeignNoRestAssured SuppressionSingleFilter above. -->
+        <module name="IllegalImport">
+            <property name="id" value="FeignNoRestAssured" />
+            <property name="regexp" value="true" />
+            <property name="illegalPkgs" value="^io\.restassured" />
+            <message key="import.illegal"
+                     value="Feign integration tests must call the server through the generated Feign client, not REST Assured: ''{0}''" />
         </module>
         <!-- Forbid JetBrains annotations in Java sources; prefer Jakarta or Spring annotations -->
         <module name="com.github.sevntu.checkstyle.checks.coding.ForbidCertainImportsCheck">

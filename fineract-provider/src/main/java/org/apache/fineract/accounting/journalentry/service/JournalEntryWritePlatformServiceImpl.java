@@ -355,6 +355,9 @@ public class JournalEntryWritePlatformServiceImpl implements JournalEntryWritePl
     }
 
     public String revertJournalEntry(final List<JournalEntry> journalEntries, String reversalComment) {
+        if (journalEntries == null || journalEntries.isEmpty()) {
+            return null;
+        }
         final Long officeId = journalEntries.get(0).getOffice().getId();
         final String reversalTransactionId = generateTransactionId(officeId);
         final boolean manualEntry = true;

@@ -2,7 +2,7 @@
 
 == Overview
 
-Working Capital Loans with `amortizationType = EIR` derive an Effective Interest Rate (EIR) from the contractual payment structure using a Newton-Raphson solver and project a full amortization schedule with per-payment discount factors, NPV values, and deferred income tracking. The schedule is serialized to JSON and persisted in `m_wc_loan_amortization_model` for efficient reads. Mid-lifecycle rate changes add a `RateSegment` covering only the remaining term, preserving historical payment data while recalculating future payments under the new EIR.
+Working Capital Loans with `amortizationType = EIR` derive an Effective Interest Rate (EIR) from the contractual payment structure using a Newton-Raphson solver and project a full amortization schedule with per-payment discount factors, NPV values, and deferred income tracking. The schedule is serialized to JSON and persisted in `m_wc_loan_amortization_model` for efficient reads. Mid-lifecycle rate changes are recorded as an effective date and a rate; the schedule re-solves from the balance and unearned fee it is carrying on that day, preserving historical payment data while recalculating future payments under the new EIR.
 
 === Purpose
 
@@ -17,7 +17,7 @@ The scope of this document includes:
 * Payment and balance recurrence formulas
 * Discount factor and NPV computation per payment
 * Amortization model persistence and versioning
-* Mid-lifecycle rate changes and rate segments
+* Mid-lifecycle rate changes
 * Projected amortization schedule API
 * Rate change management API
 
@@ -29,7 +29,7 @@ The scope of this document includes:
 
 === Definitions and Key Concepts
 
-*Effective Interest Rate (EIR):* The periodic interest rate that equates the present value of all projected payments to the net disbursement amount. Computed via Newton-Raphson, equivalent to Excel's `RATE(nper, pmt, pv)`.
+*Effective Interest Rate (EIR):* The periodic interest rate that equates the present value of all projected payments to the net disbursement amount. Solved by Newton-Raphson over the payment series itself, equivalent to Excel's `IRR(values)` rather than its `RATE(nper, pmt, pv)`: the closing day pays a smaller remainder than the days before it, so the series is not a uniform annuity and solving it as one would not close the balance on nothing.
 
 *Net Disbursement Amount:* Principal disbursed after deducting any upfront discount fee: `netDisbursement = totalLoanAmount − discountFeeAmount`.
 
@@ -39,23 +39,32 @@ The scope of this document includes:
 
 *Original Payment Number:* `ceil((netDisbursementAmount + discountFeeAmount) / expectedPayment)` — the total number of payment periods.
 
-*Discount Factor:* `1 / (1 + EIR)^paymentsLeft` — the time-value multiplier applied to a future payment.
+*Discount Factor:* `1 / (1 + EIR)^paymentsLeft` — the time-value multiplier applied to a future payment. Held in the model, not returned by the API.
 
-*NPV Value:* The present value of a scheduled payment: `npvValue = forecastPayment × discountFactor`.
+*NPV Value:* The present value of a scheduled payment: `npvValue = npvSource × discountFactor`. Held in the model, not returned by the API.
 
 *Amortization Amount:* The portion of each payment that reduces the outstanding deferred income (`deferredBalance`).
 
-*Deferred Balance:* Unrecognized discount fee income remaining at each period: starts at `discountFeeAmount`, decreases monotonically to zero.
+*Deferred Balance:* Unrecognized discount fee income remaining at each period: starts at `discountFeeAmount` and closes on exactly zero. The projected figure falls for as long as the rate it is projected at stands still - it is a one-day-ahead projection, so a rate cut deducts a smaller day's accrual from the same balance and reports more still deferred on the day it takes effect. What the money received has really earned is `actualDiscountFeeBalance`, which is a ledger and only ever falls.
 
-*Rate Segment:* A contiguous block of periods sharing the same EIR and expected payment amount. Created when a rate change modifies payment terms mid-lifecycle.
+*Rate Segment:* The run of days one rate governs - from the day a change takes effect until the next one does. Nothing stores it: a rate change records only its effective date and rate, and the walk switches rate when it reaches that date, so a segment describes what comes out rather than an entity that is kept.
 
 == Design Decisions and Considerations
 
 === Newton-Raphson Solver for EIR
 
-The EIR is solved via `TvmFunctions.rate(nper, pmt, pv, mc)` which finds `r` satisfying:
+The EIR is solved via `TvmFunctions.irr(cashFlows, mc)`, which finds `r` satisfying:
 
-`pv × (1+r)^n + pmt × ((1+r)^n − 1) / r = 0`
+`Σ cf[k] / (1+r)^k = 0` for `k = 0 .. n`
+
+where `cf[0]` is the negated balance being solved from, `cf[1..n-1]` are the daily payments
+and `cf[n]` is the closing remainder.
+
+The series is solved as it stands rather than as a uniform annuity. The closing day pays only
+what is left of the gross payable after the full daily payments, which is smaller than a daily
+payment whenever the two do not divide evenly — and it is solving against that exact series
+that makes the recurrence close on exactly zero on its last day, with the daily accruals
+summing to exactly the discount fee. An annuity solve would leave both a little out.
 
 Key solver parameters:
 
@@ -65,15 +74,15 @@ Key solver parameters:
 
 The initial guess takes the absolute value of the linear approximation to avoid catastrophic divergence when `nper` is large (e.g., daily-payment loans with thousands of periods), where a fixed default of 0.01 would cause `(1.01)^nper` to overflow the `MathContext`.
 
-=== Mid-Lifecycle Rate Segments
+=== Mid-Lifecycle Rate Changes
 
-Rather than rebuilding the entire schedule on a rate change, the model appends a `RateSegment` covering only the remaining term from the change date forward. Each segment stores: `startDayIndex`, `expectedPaymentAmount`, `segmentTerm`, `effectiveInterestRate`, `netDisbursementAtSplit`, and `discountAtSplit`. Historical actuals before the split point are preserved; only future payments are recalculated.
+A rate change stores only what it was booked with: an `effectiveDate` and a `periodPaymentRate`. Everything the new rate needs — the balance still outstanding and the fee not yet earned against it — is what the schedule walk is already carrying when it reaches that day, so the figure a change is sized against and the figure the schedule is showing cannot disagree. Historical actuals before the effective date are preserved; only the days from it forward are recalculated.
 
-When a new rate change is applied, any existing segment at or after the split point is removed first, making rate changes idempotent on the same date.
+A change already recorded on the same effective date is replaced, making rate changes idempotent on a date. Changes can only be appended, though: a date preceding a change already recorded is rejected, because each change is sized against the balance and unearned fee reached on its own day and an earlier one moves both for every change after it. A backdated change is applied by replaying the whole history in effective-date order onto a fresh model, which is what `regenerateAmortizationScheduleOnRateChange` does.
 
 === Amortization Model Persistence
 
-The full `ProjectedAmortizationScheduleModel` is serialized to JSON (version `"4"` as of this writing) and stored in `m_wc_loan_amortization_model` (one row per loan, uniquely constrained on `loan_id`). This avoids recomputing the schedule from scratch on every read while still supporting incremental updates via rate segments. Optimistic locking via the `version` column prevents concurrent overwrites.
+The full `ProjectedAmortizationScheduleModel` is serialized to JSON (version `"7"` as of this writing) and stored in `m_wc_loan_amortization_model` (one row per loan, uniquely constrained on `loan_id`). This avoids recomputing the schedule from scratch on every read while still supporting incremental updates as payments and rate changes are recorded. Optimistic locking via the `version` column prevents concurrent overwrites.
 
 === Payment Date Normalization
 
@@ -93,7 +102,7 @@ The amortization model is persisted as a JSON snapshot in `m_wc_loan_amortizatio
 
 === Table: m_wc_loan_amortization_model
 
-The `m_wc_loan_amortization_model` table persists the serialized amortization model for each loan. One row per loan; updated in place when rate segments are added or payments are applied.
+The `m_wc_loan_amortization_model` table persists the serialized amortization model for each loan. One row per loan; updated in place when a rate change or a payment is recorded.
 
 [cols="1,2,1,3",options="header"]
 |===
@@ -168,7 +177,7 @@ Required GL account mappings when `accounting_type` is not `NONE`:
 
 ==== Retrieve Projected Amortization Schedule
 
-Returns the full projected amortization schedule for a Working Capital Loan, including EIR, per-payment discount factors, NPV values, balances, amortization amounts, and deferred balance.
+Returns the full projected amortization schedule for a Working Capital Loan: the loan's EIR, and per day the amount billed, both balances, both amortization amounts, and both deferred fee balances. The discount factor, NPV value, payments-left count and income modification are carried inside the model for the calculation but are not part of the response.
 
 [source]
 ----
@@ -194,14 +203,13 @@ GET /v1/working-capital-loans/{loanId}/amortization-schedule
       "paymentNo": 1,
       "paymentDate": "2024-01-16",
       "expectedPaymentAmount": 291.67,
-      "discountFactor": 0.999705,
-      "npvValue": 291.58,
-      "balance": 94709.00,
+      "expectedBalance": 94709.00,
       "expectedAmortizationAmount": 13.89,
+      "expectedDiscountFeeBalance": 4986.11,
       "actualPaymentAmount": null,
+      "actualBalance": null,
       "actualAmortizationAmount": null,
-      "incomeModification": null,
-      "deferredBalance": 5000.00
+      "actualDiscountFeeBalance": null
     }
   ]
 }
@@ -209,12 +217,12 @@ GET /v1/working-capital-loans/{loanId}/amortization-schedule
 
 [NOTE]
 ====
-Payment row 0 (disbursement) is also included in the `payments` array with a negative `expectedPaymentAmount` equal to the net disbursement. `actualPaymentAmount`, `actualAmortizationAmount`, and `incomeModification` are `null` for unpaid periods.
+Payment row 0 (disbursement) is also included in the `payments` array with a negative `expectedPaymentAmount` equal to the net disbursement. The four actual columns are `null` for a day that carries no record at all; a day that elapsed with nothing paid reports nil rather than `null`, because a missed instalment is a fact about the loan.
 ====
 
 ==== Update Period Payment Rate
 
-Modifies the `periodPaymentRate` for an active Working Capital Loan. The operation reverses any existing active rate change, records a new `m_wc_loan_period_payment_rate_change` entry, and triggers recalculation of the amortization schedule from the rate change date forward via a new `RateSegment`.
+Modifies the `periodPaymentRate` for an active Working Capital Loan. The operation reverses any existing active rate change, records a new `m_wc_loan_period_payment_rate_change` entry, and triggers recalculation of the amortization schedule from the rate change date forward.
 
 [source]
 ----
@@ -278,31 +286,31 @@ GET /v1/working-capital-loans/external-id/{loanExternalId}/rate-changes
 
 * `expectedPayment = (totalPaymentVolume × periodPaymentRate / 100) / npvDayCount`
 * `originalPaymentNumber = ceil((netDisbursementAmount + discountFeeAmount) / expectedPayment)`
-* `EIR = TvmFunctions.rate(originalPaymentNumber, −expectedPayment, netDisbursementAmount)`
+* `finalPayment = (netDisbursementAmount + discountFeeAmount) − expectedPayment × (originalPaymentNumber − 1)`
+* `EIR = TvmFunctions.irr([−netDisbursementAmount, expectedPayment × (originalPaymentNumber − 1), finalPayment])`
 * The Newton-Raphson solver converges to a tolerance of `1E-12` with a maximum of 500 iterations.
 * Product validation currently rejects non-EIR amortization types.
 * `netDisbursementAmount` must be positive; `npvDayCount` must be positive.
 
 === Balance and Discount Factor Recurrence
 
-For each payment period `i` (1-based):
+For each day `i` (1-based):
 
-* `balance[i] = balance[i−1] × (1 + EIR) − expectedPayment`
+* `balance[i] = balance[i−1] × (1 + EIR) − billedInstalment[i]`, where `billedInstalment[i]` is the instalment in force capped at the balance it has to close
 * `discountFactor[i] = 1 / (1 + EIR)^paymentsLeft[i]`
-* `npvValue[i] = forecastPayment[i] × discountFactor[i]`
-* `expectedAmortizationAmount[i] = balance[i] + expectedPayment − balance[i−1]` (equivalent to `balance[i−1] × EIR`)
-* `deferredBalance` decreases monotonically from `discountFeeAmount` to 0 over the loan term.
+* `npvValue[i] = npvSource[i] × discountFactor[i]`
+* the day's high-precision accrual is `balance[i−1] × EIR`, and what it *reports* is `round(aggregateAccrual[i]) − round(aggregateAccrual[i−1])` — the running total is rounded, not the day
+* `deferredBalance[i] = discountFee − round(aggregateAccrual[i])`, closing on exactly 0 and never drifting more than half a minor unit from the exact figure it shadows. It falls for as long as one rate governs the days it is projected at; the day a rate cut takes effect reports more still deferred than the day before, because the same balance is being projected one day forward at a smaller accrual
 
-=== Rate Segments
+=== Rate Changes
 
-* A rate change at date `D` resolves to `splitDayIndex = days(disbursementDate, D)`.
-* The balance at the split is derived from the base schedule recurrence up to `splitDayIndex − 1`.
-* The new expected payment for the segment: `newPayment = (TPV × newPeriodPaymentRate / 100) / npvDayCount`.
-* The new segment term: `floor((balanceAtSplit + discountAtSplit) / newPayment)`.
-* The new EIR: `TvmFunctions.rate(segmentTerm, −newPayment, balanceAtSplit)`.
-* The `RateSegment` stores: `startDayIndex`, `expectedPaymentAmount`, `segmentTerm`, `effectiveInterestRate`, `netDisbursementAtSplit`, `discountAtSplit`.
-* All payments before `startDayIndex` retain their original EIR-based values.
-* Any existing segment at or after `splitDayIndex` is removed before adding the new one (idempotent overwrite).
+* A `RateChange` stores only what it was booked with: `effectiveDate` and `periodPaymentRate`. Everything else is derived by the walk when it reaches that day, so the balance a change is sized against and the balance the schedule is showing cannot disagree.
+* On the effective day the walk holds `balanceAtSplit` (reality where it is known) and `unearnedFee = discountFee − feeEarnedSoFar`, and re-solves the sub-schedule from them exactly as the original was solved: `newPayment = round((TPV × newPeriodPaymentRate / 100) / npvDayCount)`, `term = roundUp((balanceAtSplit + unearnedFee) / newPayment)`, and the EIR as the IRR of that cash flow.
+* The plan cursor is repositioned onto the same reality, so fee already earned under the old rate stays earned — a rate change re-prices what is still to come, it does not reach backwards.
+* Days before the effective date keep every figure they had.
+* A change already recorded on the same effective date is replaced, so booking twice on one day overwrites rather than leaving the day with two rates. A date that precedes a change already recorded is rejected rather than dropping the later ones: `applyRateChange` appends, and a backdated change is applied by replaying the history in order onto a fresh model.
+* A change dated at or past the day the schedule currently runs to takes effect on that day; a change against an already-square loan is rejected.
+* Several changes compose without any extra machinery: each one re-bases both cursors and the walk carries on.
 
 === Rate Change Reversal
 
@@ -316,7 +324,7 @@ The `ProjectedAmortizationScheduleModel` progresses through four operations:
 . `generate()` — creates the initial schedule when the loan reaches approval/disbursement processing with the resolved product and loan parameters.
 . `regenerate()` — recalculates with updated amounts at approval or disbursement, preserving already applied payments.
 . `applyPayment()` — records a payment and rebuilds the payment list using the payment-date mapping rules described above.
-. `applyRateChange()` — adds a `RateSegment` and rebuilds the payment list from `startDayIndex` forward.
+. `applyRateChange()` — records the effective date and the new rate, and rebuilds. The walk switches rate on that day and re-solves from the balance and unearned fee it is carrying.
 
 == Example Scenarios
 
@@ -327,13 +335,13 @@ The `ProjectedAmortizationScheduleModel` progresses through four operations:
 * `periodPaymentRate = 27.77`, `npvDayCount = 360`, `totalPaymentVolume = 105,000`
 
 **Action:**
-The system computes `expectedPayment = (105,000 × 27 / 100) / 360 ≈ 291.67` and `originalPaymentNumber = ceil(100,000 / 291.67) = 343`. EIR is solved via Newton-Raphson: `EIR = RATE(343, −291.67, 95,000)`. The schedule is stored in `m_wc_loan_amortization_model` with one row per day (343 payment rows plus the disbursement row).
+The system computes `expectedPayment = (105,000 × 27 / 100) / 360 ≈ 291.67` and `originalPaymentNumber = ceil(100,000 / 291.67) = 343`. EIR is solved via Newton-Raphson as the IRR of `[−95,000, 291.67 × 342, finalPayment]`, where `finalPayment` is the remainder of the gross payable after those 342 full payments. The schedule is stored in `m_wc_loan_amortization_model` with one row per day (343 payment rows plus the disbursement row).
 
 **Expected Behavior:**
 
 * `effectiveInterestRate` is returned in the amortization schedule API response.
-* Each `payments[]` entry includes `discountFactor`, `npvValue`, `expectedAmortizationAmount`, and `deferredBalance`.
-* `deferredBalance` decreases from 5,000 to 0 over the 344 periods.
+* Each `payments[]` entry includes `expectedPaymentAmount`, `expectedBalance`, `expectedAmortizationAmount`, and `expectedDiscountFeeBalance`.
+* `expectedDiscountFeeBalance` decreases from 5,000 to exactly 0 over the 344 days.
 * First payment date is `disbursementDate + 1 day`.
 
 === Scenario #2: Mid-Lifecycle Rate Change
@@ -344,7 +352,7 @@ The system computes `expectedPayment = (105,000 × 27 / 100) / 360 ≈ 291.67` a
 * New `periodPaymentRate = 30`.
 
 **Action:**
-`applyRateChange()` is called with `newPeriodPaymentRate = 30` and `rateChangeDate = businessDate`. `splitDayIndex = 145`. `newPayment = (105,000 × 30 / 100) / 360 = 350.00`. `newDiscount = remainingTotal − balanceAtSplit`. `segmentTerm = floor((60,000 + newDiscount) / 350)`. `EIR_new = RATE(segmentTerm, −350.00, 60,000)`. A `RateSegment` with `startDayIndex = 145` is appended. The prior active `m_wc_loan_period_payment_rate_change` entry is reversed and a new one is saved.
+`applyRateChange()` is called with `newPeriodPaymentRate = 30` and `rateChangeDate = businessDate`, which falls on day 145. `newPayment = round((105,000 × 30 / 100) / 360) = 350.00`. `balanceAtSplit = 60,000` and `unearnedFee = discountFee − feeEarnedSoFar`, both read off the walk. `term = roundUp((60,000 + unearnedFee) / 350)`, and `EIR_new` is the IRR of that cash flow. The prior active `m_wc_loan_period_payment_rate_change` entry is reversed and a new one is saved.
 
 **Expected Behavior:**
 
@@ -359,5 +367,5 @@ Working Capital Loan EIR calculation provides time-value-of-money-based income r
 * EIR is solved numerically using Newton-Raphson from `totalPaymentVolume`, `periodPaymentRate`, `npvDayCount`, and `discountFeeAmount`.
 * The full amortization schedule is serialized to JSON in `m_wc_loan_amortization_model` for efficient retrieval without recomputation.
 * Each scheduled payment carries a `discountFactor` and `npvValue`, enabling present-value-based income recognition through the `deferredBalance` amortization mechanism.
-* Mid-lifecycle rate changes are handled via `RateSegment` splits, preserving historical actuals while recalculating only future payments with the new EIR.
+* Mid-lifecycle rate changes are recorded as a date and a rate, and re-solved during the walk from the balance and unearned fee reached on that day, preserving historical actuals while recalculating only future payments with the new EIR.
 * Rate change history is maintained in `m_wc_loan_period_payment_rate_change` with full reversal support.

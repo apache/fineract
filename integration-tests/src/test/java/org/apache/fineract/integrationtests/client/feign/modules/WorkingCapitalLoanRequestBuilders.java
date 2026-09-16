@@ -21,8 +21,11 @@ package org.apache.fineract.integrationtests.client.feign.modules;
 import java.math.BigDecimal;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
+import org.apache.fineract.client.models.MarkWorkingCapitalLoanAsFraudRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansBreachActionRequest;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActionRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdNearBreachActionsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdNearBreachActionsRequest.NearBreachFrequencyTypeEnum;
@@ -38,6 +41,7 @@ public final class WorkingCapitalLoanRequestBuilders {
     private static final String DATE_FORMAT = "dd MMMM yyyy";
 
     private static final Integer CHARGE_APPLIES_TO_WORKING_CAPITAL_LOAN = 5;
+    private static final Integer CHARGE_TIME_TYPE_DISBURSEMENT = 1;
     private static final Integer CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE = 2;
     private static final Integer CHARGE_CALCULATION_TYPE_FLAT = 1;
     private static final String CHARGE_CURRENCY_CODE = "USD";
@@ -116,6 +120,19 @@ public final class WorkingCapitalLoanRequestBuilders {
                 .locale(LOCALE);
     }
 
+    public static PostWorkingCapitalLoansBreachActionRequest breachResetWithRestartPeriod() {
+        return breachReset().restartPeriodFromResetDate(true);
+    }
+
+    public static PostWorkingCapitalLoansBreachActionRequest breachReschedule(Integer frequency, String frequencyType) {
+        return new PostWorkingCapitalLoansBreachActionRequest().action("reschedule").frequency(frequency).frequencyType(frequencyType)
+                .locale(LOCALE).dateFormat(DATE_FORMAT);
+    }
+
+    public static PostWorkingCapitalLoansBreachActionRequest breachUndoReset() {
+        return new PostWorkingCapitalLoansBreachActionRequest().action("undo_reset").locale(LOCALE).dateFormat(DATE_FORMAT);
+    }
+
     public static PostWorkingCapitalLoanTransactionsRequest repayment(BigDecimal amount, String transactionDate) {
         return new PostWorkingCapitalLoanTransactionsRequest().transactionAmount(amount).transactionDate(transactionDate).locale(LOCALE)
                 .dateFormat(DATE_FORMAT);
@@ -142,10 +159,54 @@ public final class WorkingCapitalLoanRequestBuilders {
     }
 
     public static ChargeRequest specifiedDueDateCharge(boolean penalty, double amount) {
-        return new ChargeRequest().chargeAppliesTo(CHARGE_APPLIES_TO_WORKING_CAPITAL_LOAN)
-                .chargeTimeType(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE).chargeCalculationType(CHARGE_CALCULATION_TYPE_FLAT)
-                .name(Utils.uniqueRandomStringGenerator("WCL_CHARGE_", 8)).amount(amount).active(true).currencyCode(CHARGE_CURRENCY_CODE)
-                .locale(LOCALE).penalty(penalty);
+        return workingCapitalCharge(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE, CHARGE_CALCULATION_TYPE_FLAT, penalty, amount);
+    }
+
+    public static ChargeRequest specifiedDueDateCharge(Integer chargeCalculationType, boolean penalty, double amount) {
+        return workingCapitalCharge(CHARGE_TIME_TYPE_SPECIFIED_DUE_DATE, chargeCalculationType, penalty, amount);
+    }
+
+    public static ChargeRequest disbursementCharge(boolean penalty, double amount) {
+        return workingCapitalCharge(CHARGE_TIME_TYPE_DISBURSEMENT, CHARGE_CALCULATION_TYPE_FLAT, penalty, amount);
+    }
+
+    public static ChargeRequest disbursementCharge(Integer chargeCalculationType, boolean penalty, double amount) {
+        return workingCapitalCharge(CHARGE_TIME_TYPE_DISBURSEMENT, chargeCalculationType, penalty, amount);
+    }
+
+    public static ChargeRequest disbursementChargeWithPaymentMode(Integer chargePaymentMode, boolean penalty, double amount) {
+        return disbursementCharge(penalty, amount).chargePaymentMode(chargePaymentMode);
+    }
+
+    public static ChargeRequest workingCapitalCharge(Integer chargeTimeType, Integer chargeCalculationType, boolean penalty,
+            double amount) {
+        return new ChargeRequest().chargeAppliesTo(CHARGE_APPLIES_TO_WORKING_CAPITAL_LOAN).chargeTimeType(chargeTimeType)
+                .chargeCalculationType(chargeCalculationType).name(Utils.uniqueRandomStringGenerator("WCL_CHARGE_", 8)).amount(amount)
+                .active(true).currencyCode(CHARGE_CURRENCY_CODE).penalty(penalty).locale(LOCALE);
+    }
+
+    public static ChargeRequest updateChargeAmount(double amount) {
+        return new ChargeRequest().amount(amount).locale(LOCALE);
+    }
+
+    public static ChargeRequest updateChargeTimeType(Integer chargeTimeType) {
+        return new ChargeRequest().chargeTimeType(chargeTimeType).locale(LOCALE);
+    }
+
+    public static ChargeRequest updateChargePaymentMode(Integer chargePaymentMode) {
+        return new ChargeRequest().chargePaymentMode(chargePaymentMode).locale(LOCALE);
+    }
+
+    public static ChargeRequest updateChargeCalculationType(Integer chargeCalculationType) {
+        return new ChargeRequest().chargeCalculationType(chargeCalculationType).locale(LOCALE);
+    }
+
+    public static ChargeRequest updateChargeTimeAndCalculationType(Integer chargeTimeType, Integer chargeCalculationType) {
+        return new ChargeRequest().chargeTimeType(chargeTimeType).chargeCalculationType(chargeCalculationType).locale(LOCALE);
+    }
+
+    public static PostLoansLoanIdChargesRequest addChargeWithoutDueDate(Long chargeId, double amount) {
+        return new PostLoansLoanIdChargesRequest().chargeId(chargeId).amount(amount).locale(LOCALE).dateFormat(DATE_FORMAT);
     }
 
     public static PostLoansLoanIdChargesRequest addCharge(Long chargeId, double amount, String dueDate) {
@@ -161,7 +222,62 @@ public final class WorkingCapitalLoanRequestBuilders {
         return repayment(amount, transactionDate);
     }
 
+    public static PostWorkingCapitalLoanTransactionsRequest discountFeeAdjustment(Long relatedDiscountTransactionId, BigDecimal amount,
+            String transactionDate) {
+        return new PostWorkingCapitalLoanTransactionsRequest().relatedResourceId(relatedDiscountTransactionId).transactionAmount(amount)
+                .transactionDate(transactionDate).locale(LOCALE).dateFormat(DATE_FORMAT);
+    }
+
+    public static PostWorkingCapitalLoanTransactionsRequest payoutRefund(BigDecimal amount, String transactionDate) {
+        return repayment(amount, transactionDate);
+    }
+
+    public static PostWorkingCapitalLoanTransactionsRequest chargeOff(String transactionDate, String note) {
+        final PostWorkingCapitalLoanTransactionsRequest request = new PostWorkingCapitalLoanTransactionsRequest()
+                .transactionDate(transactionDate).locale(LOCALE).dateFormat(DATE_FORMAT);
+        if (note != null) {
+            request.note(note);
+        }
+        return request;
+    }
+
+    public static PostWorkingCapitalLoanTransactionsRequest undoChargeOff(String note) {
+        final PostWorkingCapitalLoanTransactionsRequest request = new PostWorkingCapitalLoanTransactionsRequest().locale(LOCALE);
+        if (note != null) {
+            request.note(note);
+        }
+        return request;
+    }
+
     public static ExecuteWorkingCapitalLoanTransactionCommandRequest reversal() {
         return new ExecuteWorkingCapitalLoanTransactionCommandRequest();
+    }
+
+    public static PostWorkingCapitalLoansDelinquencyActionRequest delinquencyPause(String startDate, String endDate) {
+        return new PostWorkingCapitalLoansDelinquencyActionRequest().action("pause").startDate(startDate).endDate(endDate).locale(LOCALE)
+                .dateFormat(DATE_FORMAT);
+    }
+
+    public static PostWorkingCapitalLoansDelinquencyActionRequest delinquencyReschedule(Integer frequency, String frequencyType) {
+        return new PostWorkingCapitalLoansDelinquencyActionRequest().action("reschedule").frequency(frequency).frequencyType(frequencyType)
+                .locale(LOCALE).dateFormat(DATE_FORMAT);
+    }
+
+    public static PostWorkingCapitalLoansBreachActionRequest breachPause(String startDate, String endDate) {
+        return new PostWorkingCapitalLoansBreachActionRequest().action("pause").startDate(startDate).endDate(endDate).locale(LOCALE)
+                .dateFormat(DATE_FORMAT);
+    }
+
+    public static PostWorkingCapitalLoansBreachActionRequest breachReset() {
+        return new PostWorkingCapitalLoansBreachActionRequest().action("reset").restartPeriodFromResetDate(Boolean.FALSE).locale(LOCALE)
+                .dateFormat(DATE_FORMAT);
+    }
+
+    public static MarkWorkingCapitalLoanAsFraudRequest markAsFraud(boolean fraud) {
+        return new MarkWorkingCapitalLoanAsFraudRequest().fraud(fraud);
+    }
+
+    public static PostWorkingCapitalLoanTransactionsRequest undoWriteOff() {
+        return new PostWorkingCapitalLoanTransactionsRequest().locale(LOCALE).dateFormat(DATE_FORMAT);
     }
 }

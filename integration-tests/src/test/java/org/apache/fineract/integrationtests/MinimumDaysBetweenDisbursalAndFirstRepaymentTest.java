@@ -19,58 +19,45 @@
 package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetLoansLoanIdStatus;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansRequestCollateralData;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.CalendarHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.GroupHelper;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Test the creation, approval and rejection of a loan reschedule request
  **/
-@SuppressWarnings({ "rawtypes" })
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
+public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest extends FeignLoanTestBase {
 
-    private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpecForStatusCode403;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private Integer clientId;
-    private Integer groupId;
-    private Long groupCalendarId;
-    private Integer loanProductId;
-    private Integer loanId;
-    private final String loanPrincipalAmount = "100000.00";
-    private final String numberOfRepayments = "12";
-    private final String interestRatePerPeriod = "18";
-    private final String groupActivationDate = "01 August 2014";
+    private static final String LOAN_PRINCIPAL_AMOUNT = "100000.00";
+    private static final String NUMBER_OF_REPAYMENTS = "12";
+    private static final String INTEREST_RATE_PER_PERIOD = "18";
+    private static final String GROUP_ACTIVATION_DATE = "01 August 2014";
+    private static final String MINIMUM_DAYS_BETWEEN_DISBURSAL_AND_FIRST_REPAYMENT = "7";
+    private static final String DISBURSAL_DATE = "04 September 2014";
 
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-    }
+    private final FeignGroupHelper groupHelper = new FeignGroupHelper(FineractFeignClientHelper.getFineractFeignClient());
+    private final FeignCollateralHelper collateralHelper = new FeignCollateralHelper(FineractFeignClientHelper.getFineractFeignClient());
+
+    private Long clientId;
+    private Long loanProductId;
 
     /*
      * MinimumDaysBetweenDisbursalAndFirstRepayment is set to 7 days and days between disbursal date and first repayment
@@ -78,175 +65,97 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
      */
     @Test
     public void createLoanEntity_WITH_DAY_BETWEEN_DISB_DATE_AND_REPAY_START_DATE_GREATER_THAN_MIN_DAY_CRITERIA() {
+        createRequiredEntities();
 
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        final Long loanId = applyForLoan("11 September 2014");
+        assertNotNull(loanId);
+        verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        // create all required entities
-        this.createRequiredEntities();
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(Double.parseDouble(LOAN_PRINCIPAL_AMOUNT), DISBURSAL_DATE));
+        verifyLoanStatus(loanId, LoanStatus.APPROVED);
 
-        final String disbursalDate = "04 September 2014";
-        final String firstRepaymentDate = "11 September 2014";
-
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                this.clientId.toString(), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(loanPrincipalAmount)
-                .withLoanTermFrequency(numberOfRepayments).withLoanTermFrequencyAsWeeks().withNumberOfRepayments(numberOfRepayments)
-                .withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments()
-                .withInterestCalculationPeriodTypeAsDays().withInterestRatePerPeriod(interestRatePerPeriod)
-                .withRepaymentFrequencyTypeAsWeeks().withSubmittedOnDate(disbursalDate).withExpectedDisbursementDate(disbursalDate)
-                .withPrincipalGrace("2").withInterestGrace("2").withFirstRepaymentDate(firstRepaymentDate).withCollaterals(collaterals)
-                .build(this.clientId.toString(), this.loanProductId.toString(), null);
-
-        this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
-
-        // Test for loan account is created
-        Assertions.assertNotNull(this.loanId);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-
-        // Test for loan account is created, can be approved
-        this.loanTransactionHelper.approveLoan(disbursalDate, this.loanId);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-
-        // Test for loan account approved can be disbursed
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, this.loanId);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, this.loanId,
-                JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
-        LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
-
-    }
-
-    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
-        collaterals.add(collaterals(collateralId, quantity));
-    }
-
-    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
-        HashMap<String, String> collateral = new HashMap<String, String>(2);
-        collateral.put("clientCollateralId", collateralId.toString());
-        collateral.put("quantity", quantity.toString());
-        return collateral;
+        disburseLoan(loanId, new PostLoansLoanIdRequest()//
+                .actualDisbursementDate(DISBURSAL_DATE)//
+                .netDisbursalAmount(getLoanDetails(loanId).getNetDisbursalAmount())//
+                .note("DISBURSE NOTE")//
+                .locale(LoanTestData.LOCALE)//
+                .dateFormat(LoanTestData.DATETIME_PATTERN));
+        verifyLoanStatus(getLoanDetails(loanId), GetLoansLoanIdStatus::getActive);
     }
 
     /*
      * MinimumDaysBetweenDisbursalAndFirstRepayment is set to 7 days and days between disbursal date and first repayment
-     * is set as 7. system should allow to create this loan and allow to disburse
+     * is set as 1. system should reject the loan application
      */
-    @SuppressWarnings("unchecked")
     @Test
     public void createLoanEntity_WITH_DAY_BETWEEN_DISB_DATE_AND_REPAY_START_DATE_LESS_THAN_MIN_DAY_CRITERIA() {
+        createRequiredEntities();
 
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecForStatusCode403 = new ResponseSpecBuilder().expectStatusCode(403).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        // create all required entities
-        this.createRequiredEntities();
+        final CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> applyForLoan("05 September 2014"));
 
-        // loanTransactionHelper is reassigned to accept 403 status code from
-        // server
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpecForStatusCode403);
+        assertEquals(403, exception.getStatus());
+        assertErrorGlobalisationCode(exception, "error.msg.loan.days.between.first.repayment.and.disbursal.are.less.than.minimum.allowed");
+    }
 
-        final String disbursalDate = "04 September 2014";
-        final String firstRepaymentDate = "05 September 2014";
+    private Long applyForLoan(final String firstRepaymentDate) {
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
+        assertNotNull(collateralId);
+        final Long clientCollateralId = collateralHelper.createClientCollateral(clientId, collateralId).getResourceId();
+        assertNotNull(clientCollateralId);
 
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                this.clientId.toString(), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
+        final PostLoansRequest application = LoanRequestBuilders
+                .applyLoan(clientId, loanProductId, DISBURSAL_DATE, Double.parseDouble(LOAN_PRINCIPAL_AMOUNT),
+                        Integer.parseInt(NUMBER_OF_REPAYMENTS))//
+                .loanTermFrequencyType(LoanTestData.RepaymentFrequencyType.WEEKS)//
+                .repaymentEvery(1)//
+                .repaymentFrequencyType(LoanTestData.RepaymentFrequencyType.WEEKS)//
+                .interestRatePerPeriod(BigDecimal.valueOf(Double.parseDouble(INTEREST_RATE_PER_PERIOD)))//
+                .interestCalculationPeriodType(LoanTestData.InterestCalculationPeriodType.DAILY)//
+                .graceOnPrincipalPayment(2)//
+                .graceOnInterestPayment(2)//
+                .repaymentsStartingFromDate(firstRepaymentDate)//
+                .collateral(List.of(new PostLoansRequestCollateralData().clientCollateralId(clientCollateralId).quantity(BigDecimal.ONE)));
 
-        final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(loanPrincipalAmount)
-                .withLoanTermFrequency(numberOfRepayments).withLoanTermFrequencyAsWeeks().withNumberOfRepayments(numberOfRepayments)
-                .withRepaymentEveryAfter("1").withRepaymentFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments()
-                .withInterestCalculationPeriodTypeAsDays().withInterestRatePerPeriod(interestRatePerPeriod)
-                .withRepaymentFrequencyTypeAsWeeks().withSubmittedOnDate(disbursalDate).withExpectedDisbursementDate(disbursalDate)
-                .withPrincipalGrace("2").withInterestGrace("2").withFirstRepaymentDate(firstRepaymentDate).withCollaterals(collaterals)
-                .build(this.clientId.toString(), this.loanProductId.toString(), null);
-
-        List<HashMap> error = (List<HashMap>) this.loanTransactionHelper.createLoanAccount(loanApplicationJSON,
-                CommonConstants.RESPONSE_ERROR);
-        assertEquals("error.msg.loan.days.between.first.repayment.and.disbursal.are.less.than.minimum.allowed",
-                error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
-
+        return loanHelper.applyForLoan(application).getLoanId();
     }
 
     /**
-     * Creates the client, loan product, and loan entities
+     * Creates the group with its meeting calendar, the client and the loan product.
      **/
     private void createRequiredEntities() {
-        final String minimumDaysBetweenDisbursalAndFirstRepayment = "7"; // &
-                                                                         // days
-        this.createGroupEntityWithCalendar();
-        this.createClientEntity();
-        this.associateClientToGroup(this.groupId, this.clientId);
-        this.createLoanProductEntity(minimumDaysBetweenDisbursalAndFirstRepayment);
-
+        final Long groupId = createGroupEntityWithCalendar();
+        clientId = createClientEntity();
+        associateClientToGroup(groupId, clientId);
+        loanProductId = createLoanProductEntity(MINIMUM_DAYS_BETWEEN_DISBURSAL_AND_FIRST_REPAYMENT);
     }
 
-    /*
-     * Associate client to the group
-     */
-
-    private void associateClientToGroup(final Integer groupId, final Integer clientId) {
-        GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupId.toString(), clientId.toString());
-        GroupHelper.verifyGroupMembers(this.requestSpec, this.responseSpec, groupId, clientId);
+    private void associateClientToGroup(final Long groupId, final Long clientId) {
+        groupHelper.associateClient(groupId, clientId);
+        assertTrue(groupHelper.retrieveGroupMemberIds(groupId).contains(clientId), "ERROR IN GROUP MEMBER");
     }
 
-    /*
-     * Create a new group
-     */
+    private Long createGroupEntityWithCalendar() {
+        final Long groupId = groupHelper.createActiveGroup(FeignGroupHelper.DEFAULT_OFFICE_ID, GROUP_ACTIVATION_DATE).getGroupId();
+        assertEquals(groupId, groupHelper.retrieveGroup(groupId).getId(), "ERROR IN CREATING THE GROUP");
 
-    private void createGroupEntityWithCalendar() {
-        this.groupId = GroupHelper.createGroup(this.requestSpec, this.responseSpec, this.groupActivationDate);
-        GroupHelper.verifyGroupCreatedOnServer(this.requestSpec, this.responseSpec, this.groupId);
-
-        final String startDate = this.groupActivationDate;
-        final String frequency = "2"; // 2:Weekly
-        final String interval = "1"; // Every one week
-        final String repeatsOnDay = "1"; // 1:Monday
-
-        this.setGroupCalendarId(CalendarHelper
-                .createMeetingCalendarForGroup(this.groupId.longValue(), startDate, frequency, interval, repeatsOnDay).getResourceId());
+        final String weeklyFrequency = "2";
+        final String everyOneWeek = "1";
+        final String repeatsOnMonday = "1";
+        CalendarHelper.createMeetingCalendarForGroup(groupId, GROUP_ACTIVATION_DATE, weeklyFrequency, everyOneWeek, repeatsOnMonday);
+        return groupId;
     }
 
-    /**
-     * create a new client
-     **/
-    private void createClientEntity() {
-        this.clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, this.clientId);
+    private Long createClientEntity() {
+        final Long createdClientId = createClient();
+        assertEquals(createdClientId, clientHelper.getClient(createdClientId).getId(), "ERROR IN CREATING THE CLIENT");
+        return createdClientId;
     }
 
-    /**
-     * create a new loan product
-     **/
-    private void createLoanProductEntity(final String minimumDaysBetweenDisbursalAndFirstRepayment) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal(loanPrincipalAmount)
-                .withNumberOfRepayments(numberOfRepayments).withinterestRatePerPeriod(interestRatePerPeriod)
-                .withInterestRateFrequencyTypeAsYear()
-                .withMinimumDaysBetweenDisbursalAndFirstRepayment(minimumDaysBetweenDisbursalAndFirstRepayment).build(null);
-        this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
-    }
-
-    public Long getGroupCalendarId() {
-        return groupCalendarId;
-    }
-
-    public void setGroupCalendarId(Long groupCalendarId) {
-        this.groupCalendarId = groupCalendarId;
+    private Long createLoanProductEntity(final String minimumDaysBetweenDisbursalAndFirstRepayment) {
+        return createLoanProduct(
+                new LoanProductTestBuilder().withPrincipal(LOAN_PRINCIPAL_AMOUNT).withNumberOfRepayments(NUMBER_OF_REPAYMENTS)
+                        .withinterestRatePerPeriod(INTEREST_RATE_PER_PERIOD).withInterestRateFrequencyTypeAsYear()
+                        .withMinimumDaysBetweenDisbursalAndFirstRepayment(minimumDaysBetweenDisbursalAndFirstRepayment).buildRequest(null));
     }
 }

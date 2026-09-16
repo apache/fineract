@@ -130,6 +130,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             case LoanTransactionType.ACCRUAL -> chargeAccrualPostings(feesPortion, penaltiesPortion);
             case LoanTransactionType.CHARGE_OFF -> chargeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion);
             case LoanTransactionType.WRITEOFF -> writeOffPostings(loan, principalPortion, feesPortion, penaltiesPortion, isChargedOff);
+            case LoanTransactionType.RECOVERY_REPAYMENT -> recoveryPaymentPostings(txn);
             default -> throw new NotImplementedException(
                     "Post Journal Entries is not implemented yet for " + txn.getTypeOf().getCode() + " for Working Capital Loan");
         };
@@ -202,6 +203,16 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     }
 
     /**
+     * Money collected after the loan was written off. The portfolio and receivables were already relieved by the
+     * write-off, so there is nothing to credit back: the whole amount is recognized as recovery income against the fund
+     * source. No split by principal, fee or penalty - the transaction carries no allocation.
+     */
+    private List<LedgerPosting> recoveryPaymentPostings(final WorkingCapitalLoanTransaction txn) {
+        return List.of(LedgerPosting.debit(CashAccountsForLoan.FUND_SOURCE, txn.getTransactionAmount()),
+                LedgerPosting.creditWithoutPaymentDetail(CashAccountsForLoan.INCOME_FROM_RECOVERY, txn.getTransactionAmount()));
+    }
+
+    /**
      * Terminal write-off: debit the write-off loss account for the whole outstanding, credit the portfolio and
      * receivable accounts per portion (mirrors the accrual term-loan treatment, without the interest leg WC does not
      * have). The loss debits the expense account the product maps to the loan's write-off reason when such a mapping
@@ -237,15 +248,20 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
      * product does not map it.
      */
     private LedgerPosting writeOffLossDebit(final WorkingCapitalLoan loan, final BigDecimal amount) {
+        return LedgerPosting.debit(writeOffExpenseAccount(loan), amount);
+    }
+
+    private GLAccount writeOffExpenseAccount(final WorkingCapitalLoan loan) {
         final CodeValue writeOffReason = loan.getWriteOffReason();
         if (writeOffReason != null) {
             final ProductToGLAccountMapping mapping = helper.getWriteOffMappingByCodeValue(loan.getLoanProduct().getId(),
                     PortfolioProductType.WORKING_CAPITAL_LOAN, writeOffReason.getId());
             if (mapping != null) {
-                return LedgerPosting.debit(mapping.getGlAccount(), amount);
+                return mapping.getGlAccount();
             }
         }
-        return LedgerPosting.debit(CashAccountsForLoan.LOSSES_WRITTEN_OFF, amount);
+        return helper.getLinkedGLAccountForWorkingCapitalLoanProduct(loan.getLoanProduct().getId(),
+                CashAccountsForLoan.LOSSES_WRITTEN_OFF.getValue(), null);
     }
 
     private boolean isAdjustedChargeAPenalty(final WorkingCapitalLoanTransaction txn) {
@@ -445,10 +461,10 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
 
     @Override
     public void postJournalEntriesForDiscountFeeAmortization(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
-            final boolean isChargedOff) {
+            final boolean routeToExpense) {
         final Office office = loan.getClient().getOffice();
         final Long productId = loan.getLoanProduct().getId();
-        final String currencyCode = loan.getLoanProductRelatedDetails().getCurrency().getCode();
+        final String currencyCode = loan.getCurrencyCode();
         final LocalDate transactionDate = txn.getTransactionDate();
         final Long loanId = loan.getId();
         final Long txnId = txn.getId();
@@ -462,20 +478,75 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             helper.createDebitJournalEntryForWorkingCapitalLoan(office, currencyCode, deferredIncomeAccount, loanId, txnId, transactionDate,
                     amount, null);
 
-            final CashAccountsForLoan creditAccountType = resolveChargeOffExpenseAccount(loan, isChargedOff);
-            final GLAccount creditAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, creditAccountType.getValue(),
-                    null);
+            final GLAccount creditAccount = resolveAmortizationCreditAccount(loan, productId, routeToExpense);
             helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, creditAccount, loanId, txnId, transactionDate,
                     amount, null);
         }
     }
 
     @Override
-    public void postJournalEntriesForDiscountFeeAmortizationAdjustment(final WorkingCapitalLoan loan,
+    public void restateJournalEntriesForDiscountFeeAmortization(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final boolean isChargedOff) {
+        final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
+        if (!discountFeeAmortizationSplitDiffersFromLedger(loan, txn, effectiveEntries, isChargedOff, false)) {
+            // The ledger already reflects the recomputed amount; re-posting would only add cancelling noise.
+            return;
+        }
+        reverseExistingEntries(loan, txn, true);
+        postJournalEntriesForDiscountFeeAmortization(loan, txn, isChargedOff);
+    }
+
+    @Override
+    public void restateJournalEntriesForDiscountFeeAmortizationAdjustment(final WorkingCapitalLoan loan,
             final WorkingCapitalLoanTransaction txn, final boolean isChargedOff) {
+        final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
+        if (!discountFeeAmortizationSplitDiffersFromLedger(loan, txn, effectiveEntries, isChargedOff, true)) {
+            return;
+        }
+        reverseExistingEntries(loan, txn, true);
+        postJournalEntriesForDiscountFeeAmortizationAdjustment(loan, txn, isChargedOff);
+    }
+
+    /**
+     * {@link #splitDiffersFromLedger}'s counterpart for the fixed debit/credit pair a discount-fee amortization (or its
+     * adjustment mirror) posts.
+     */
+    private boolean discountFeeAmortizationSplitDiffersFromLedger(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
+            final List<JournalEntry> effectiveEntries, final boolean routeToExpense, final boolean amortizationAdjustment) {
+        if (effectiveEntries.isEmpty()) {
+            return true;
+        }
+        final Long productId = loan.getLoanProduct().getId();
+        final BigDecimal amount = txn.getTransactionAmount();
+
+        final Map<PostingKey, BigDecimal> planned = new HashMap<>();
+        if (MathUtil.isGreaterThanZero(amount)) {
+            final GLAccount deferredIncomeAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId,
+                    CashAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), null);
+            final GLAccount expenseOrIncomeAccount = resolveAmortizationCreditAccount(loan, productId, routeToExpense);
+            if (amortizationAdjustment) {
+                // Adjustment mirrors amortization: credit deferred income, debit expense/income.
+                planned.merge(new PostingKey(deferredIncomeAccount.getId(), false), amount, BigDecimal::add);
+                planned.merge(new PostingKey(expenseOrIncomeAccount.getId(), true), amount, BigDecimal::add);
+            } else {
+                planned.merge(new PostingKey(deferredIncomeAccount.getId(), true), amount, BigDecimal::add);
+                planned.merge(new PostingKey(expenseOrIncomeAccount.getId(), false), amount, BigDecimal::add);
+            }
+        }
+
+        final Map<PostingKey, BigDecimal> posted = postedAmountsByPosition(effectiveEntries);
+        if (!planned.keySet().equals(posted.keySet())) {
+            return true;
+        }
+        return planned.entrySet().stream().anyMatch(entry -> entry.getValue().compareTo(posted.get(entry.getKey())) != 0);
+    }
+
+    @Override
+    public void postJournalEntriesForDiscountFeeAmortizationAdjustment(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction txn, final boolean routeToExpense) {
         final Office office = loan.getClient().getOffice();
         final Long productId = loan.getLoanProduct().getId();
-        final String currencyCode = loan.getLoanProductRelatedDetails().getCurrency().getCode();
+        final String currencyCode = loan.getCurrencyCode();
         final LocalDate transactionDate = txn.getTransactionDate();
         final Long loanId = loan.getId();
         final Long txnId = txn.getId();
@@ -489,9 +560,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             helper.createCreditJournalEntryForWorkingCapitalLoan(office, currencyCode, deferredIncomeAccount, loanId, txnId,
                     transactionDate, amount, null);
 
-            final CashAccountsForLoan debitAccountType = resolveChargeOffExpenseAccount(loan, isChargedOff);
-            final GLAccount debitAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, debitAccountType.getValue(),
-                    null);
+            final GLAccount debitAccount = resolveAmortizationCreditAccount(loan, productId, routeToExpense);
             helper.createDebitJournalEntryForWorkingCapitalLoan(office, currencyCode, debitAccount, loanId, txnId, transactionDate, amount,
                     null);
         }
@@ -511,7 +580,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
             final CashAccountsForLoan debitAccountType, final CashAccountsForLoan creditAccountType) {
         final Office office = loan.getClient().getOffice();
         final Long productId = loan.getLoanProduct().getId();
-        final String currencyCode = loan.getLoanProductRelatedDetails().getCurrency().getCode();
+        final String currencyCode = loan.getCurrencyCode();
         final LocalDate transactionDate = txn.getTransactionDate();
         final Long loanId = loan.getId();
         final Long txnId = txn.getId();
@@ -539,11 +608,21 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         return null;
     }
 
-    private CashAccountsForLoan resolveChargeOffExpenseAccount(final WorkingCapitalLoan loan, final boolean isChargedOff) {
-        if (!isChargedOff) {
-            return CashAccountsForLoan.INCOME_FROM_DISCOUNT_FEE;
+    /**
+     * Credit (or debit, for amortization adjustments) destination for discount-fee amortization. Periodic amortization
+     * credits discount-fee income; a terminal charge-off / write-off credits the matching expense so deferred income is
+     * not left parked on a loan that COB will never touch again. Written-off takes precedence over charged-off because
+     * a final amort on write-off runs after the loan is already {@code CLOSED_WRITTEN_OFF}.
+     */
+    private GLAccount resolveAmortizationCreditAccount(final WorkingCapitalLoan loan, final Long productId, final boolean routeToExpense) {
+        if (!routeToExpense) {
+            return helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, CashAccountsForLoan.INCOME_FROM_DISCOUNT_FEE.getValue(),
+                    null);
         }
-        return chargeOffExpenseAccount(loan);
+        if (loan.isClosedWrittenOff()) {
+            return writeOffExpenseAccount(loan);
+        }
+        return helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId, chargeOffExpenseAccount(loan).getValue(), null);
     }
 
     private class JournalEntryPostingHelper {
@@ -560,7 +639,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         JournalEntryPostingHelper(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction txn) {
             paymentTypeId = extractPaymentTypeId(txn);
             transactionDate = txn.getTransactionDate();
-            currencyCode = loan.getLoanProductRelatedDetails().getCurrency().getCode();
+            currencyCode = loan.getCurrencyCode();
             productId = loan.getLoanProduct().getId();
             office = loan.getClient().getOffice();
             loanId = loan.getId();

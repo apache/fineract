@@ -188,7 +188,12 @@ public class LoanChargeBackStepDef extends AbstractStepDef {
                 .setWaiveCharges(transactionType.getWaiveCharges()).setAccrual(false).setWriteOff(transactionType.getWriteOff())
                 .setRecoveryRepayment(transactionType.getRecoveryRepayment()).setInitiateTransfer(false).setApproveTransfer(false)
                 .setWithdrawTransfer(false).setRejectTransfer(false).setChargePayment(false).setRefund(false).setRefundForActiveLoans(false)
-                .setCreditBalanceRefund(false).setChargeback(true).build();
+                .setCreditBalanceRefund(false).setChargeback(true).setInterestPaymentWaiver(false).setChargeAdjustment(false)
+                .setChargeoff(false).setDownPayment(false).setReAge(false).setReAmortize(false).setAccrualActivity(false)
+                .setInterestRefund(false).setAccrualAdjustment(false).setCapitalizedIncome(false).setCapitalizedIncomeAmortization(false)
+                .setCapitalizedIncomeAdjustment(false).setCapitalizedIncomeAmortizationAdjustment(false).setContractTermination(false)
+                .setBuyDownFee(false).setBuyDownFeeAdjustment(false).setBuyDownFeeAmortization(false)
+                .setBuyDownFeeAmortizationAdjustment(false).build();
 
         // verify payload for loanId, transactionId, transactionType, amount
         eventAssertion.assertEvent(LoanChargebackTransactionEvent.class, transactionId).extractingData(LoanTransactionDataV1::getLoanId)

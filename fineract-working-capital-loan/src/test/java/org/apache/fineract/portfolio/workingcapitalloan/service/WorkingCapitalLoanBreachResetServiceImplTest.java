@@ -18,24 +18,22 @@
  */
 package org.apache.fineract.portfolio.workingcapitalloan.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.List;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachAction;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachActionType;
-import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBreachSchedule;
-import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachScheduleRepository;
+import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanBreachActionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -45,10 +43,10 @@ class WorkingCapitalLoanBreachResetServiceImplTest {
     private static final Long LOAN_ID = 1L;
 
     @Mock
-    private WorkingCapitalLoanBreachScheduleRepository breachScheduleRepository;
+    private WorkingCapitalLoanBreachScheduleService breachScheduleService;
 
     @Mock
-    private WorkingCapitalLoanBreachScheduleService breachScheduleService;
+    private WorkingCapitalLoanBreachActionRepository breachActionRepository;
 
     private WorkingCapitalLoanBreachResetServiceImpl underTest;
 
@@ -56,102 +54,116 @@ class WorkingCapitalLoanBreachResetServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new WorkingCapitalLoanBreachResetServiceImpl(breachScheduleRepository, breachScheduleService);
+        underTest = new WorkingCapitalLoanBreachResetServiceImpl(breachScheduleService,
+                new WorkingCapitalLoanActiveBreachResetResolver(breachActionRepository));
         loan = new WorkingCapitalLoan();
         loan.setId(LOAN_ID);
     }
 
-    @Test
-    void resetBreach_setsResetFlagOnActionDatePeriodAndKeepsValues() {
-        final WorkingCapitalLoanBreachAction resetAction = new WorkingCapitalLoanBreachAction();
-        resetAction.setAction(WorkingCapitalLoanBreachActionType.RESET);
-        resetAction.setStartDate(LocalDate.of(2026, 4, 15));
+    private WorkingCapitalLoanBreachAction action(final long id, final WorkingCapitalLoanBreachActionType type, final LocalDate startDate) {
+        final WorkingCapitalLoanBreachAction action = new WorkingCapitalLoanBreachAction();
+        action.setId(id);
+        action.setAction(type);
+        action.setStartDate(startDate);
+        return action;
+    }
 
-        final WorkingCapitalLoanBreachSchedule pastPeriod = new WorkingCapitalLoanBreachSchedule();
-        pastPeriod.setLoan(loan);
-        pastPeriod.setPeriodNumber(1);
-        pastPeriod.setFromDate(LocalDate.of(2026, 1, 1));
-        pastPeriod.setToDate(LocalDate.of(2026, 3, 1));
+    private WorkingCapitalLoanBreachAction reset(final long id, final LocalDate date) {
+        return action(id, WorkingCapitalLoanBreachActionType.RESET, date);
+    }
 
-        final WorkingCapitalLoanBreachSchedule actionDatePeriod = new WorkingCapitalLoanBreachSchedule();
-        actionDatePeriod.setLoan(loan);
-        actionDatePeriod.setPeriodNumber(2);
-        actionDatePeriod.setFromDate(LocalDate.of(2026, 4, 1));
-        actionDatePeriod.setToDate(LocalDate.of(2026, 4, 30));
-        actionDatePeriod.setMinPaymentAmount(BigDecimal.valueOf(100));
-        actionDatePeriod.setPaidAmount(BigDecimal.valueOf(40));
-        actionDatePeriod.setOutstandingAmount(BigDecimal.valueOf(60));
-        actionDatePeriod.setBreach(Boolean.TRUE);
-        actionDatePeriod.setNearBreach(Boolean.FALSE);
+    private WorkingCapitalLoanBreachAction restartReset(final long id, final LocalDate date) {
+        final WorkingCapitalLoanBreachAction reset = reset(id, date);
+        reset.setRestartPeriodFromResetDate(true);
+        return reset;
+    }
 
-        final WorkingCapitalLoanBreachSchedule futurePeriod = new WorkingCapitalLoanBreachSchedule();
-        futurePeriod.setLoan(loan);
-        futurePeriod.setPeriodNumber(3);
-        futurePeriod.setFromDate(LocalDate.of(2026, 5, 1));
-        futurePeriod.setToDate(LocalDate.of(2026, 5, 31));
+    private WorkingCapitalLoanBreachAction undo(final long id, final LocalDate date) {
+        return action(id, WorkingCapitalLoanBreachActionType.UNDO_RESET, date);
+    }
 
-        when(breachScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, resetAction.getStartDate(),
-                resetAction.getStartDate())).thenReturn(Optional.of(actionDatePeriod));
-
-        underTest.resetBreach(loan, resetAction);
-
-        assertFalse(pastPeriod.isReset());
-        assertTrue(actionDatePeriod.isReset());
-        assertFalse(futurePeriod.isReset());
-        assertEquals(0, BigDecimal.valueOf(100).compareTo(actionDatePeriod.getMinPaymentAmount()));
-        assertEquals(0, BigDecimal.valueOf(40).compareTo(actionDatePeriod.getPaidAmount()));
-        assertEquals(0, BigDecimal.valueOf(60).compareTo(actionDatePeriod.getOutstandingAmount()));
-        assertEquals(Boolean.TRUE, actionDatePeriod.getBreach());
-        assertEquals(Boolean.FALSE, actionDatePeriod.getNearBreach());
-        verify(breachScheduleService).recalculatePastDueAmount(loan);
+    private void assertFlagOnlyPath() {
+        final InOrder inOrder = inOrder(breachScheduleService);
+        inOrder.verify(breachScheduleService).applyActiveResetFlags(loan);
+        inOrder.verify(breachScheduleService).recalculatePastDueAmount(loan);
+        verify(breachScheduleService, never()).splitPeriodAtReset(any(), any());
+        verify(breachScheduleService, never()).restoreSplitPeriod(any(), any());
+        verify(breachScheduleService, never()).reprocessBreachSchedule(any());
     }
 
     @Test
-    void undoResetBreach_liftsResetFlagOnActionDatePeriodOnly() {
-        final WorkingCapitalLoanBreachAction undoResetAction = new WorkingCapitalLoanBreachAction();
-        undoResetAction.setAction(WorkingCapitalLoanBreachActionType.UNDO_RESET);
-        undoResetAction.setStartDate(LocalDate.of(2026, 4, 15));
+    void resetBreach_ofAPlainReset_derivesTheFlagsAndRecalculatesThePastDueAmount() {
+        underTest.resetBreach(loan, reset(1L, LocalDate.of(2026, 4, 15)));
 
-        final WorkingCapitalLoanBreachSchedule pastPeriod = new WorkingCapitalLoanBreachSchedule();
-        pastPeriod.setLoan(loan);
-        pastPeriod.setPeriodNumber(1);
-        pastPeriod.setFromDate(LocalDate.of(2026, 1, 1));
-        pastPeriod.setToDate(LocalDate.of(2026, 3, 1));
-        pastPeriod.setReset(true);
+        assertFlagOnlyPath();
+    }
 
-        final WorkingCapitalLoanBreachSchedule actionDatePeriod = new WorkingCapitalLoanBreachSchedule();
-        actionDatePeriod.setLoan(loan);
-        actionDatePeriod.setPeriodNumber(2);
-        actionDatePeriod.setFromDate(LocalDate.of(2026, 4, 1));
-        actionDatePeriod.setToDate(LocalDate.of(2026, 4, 30));
-        actionDatePeriod.setMinPaymentAmount(BigDecimal.valueOf(100));
-        actionDatePeriod.setPaidAmount(BigDecimal.valueOf(40));
-        actionDatePeriod.setOutstandingAmount(BigDecimal.valueOf(60));
-        actionDatePeriod.setBreach(Boolean.TRUE);
-        actionDatePeriod.setNearBreach(Boolean.FALSE);
-        actionDatePeriod.setReset(true);
+    @Test
+    void resetBreach_withRestartPeriodOption_splitsThenReprocesses() {
+        final LocalDate resetDate = LocalDate.of(2026, 4, 15);
 
-        final WorkingCapitalLoanBreachSchedule futurePeriod = new WorkingCapitalLoanBreachSchedule();
-        futurePeriod.setLoan(loan);
-        futurePeriod.setPeriodNumber(3);
-        futurePeriod.setFromDate(LocalDate.of(2026, 5, 1));
-        futurePeriod.setToDate(LocalDate.of(2026, 5, 31));
-        futurePeriod.setReset(true);
+        underTest.resetBreach(loan, restartReset(1L, resetDate));
 
-        when(breachScheduleRepository.findByLoanIdAndFromDateLessThanEqualAndToDateGreaterThanEqual(LOAN_ID, undoResetAction.getStartDate(),
-                undoResetAction.getStartDate())).thenReturn(Optional.of(actionDatePeriod));
+        final InOrder inOrder = inOrder(breachScheduleService);
+        inOrder.verify(breachScheduleService).splitPeriodAtReset(loan, resetDate);
+        inOrder.verify(breachScheduleService).reprocessBreachSchedule(loan);
+        verify(breachScheduleService, never()).applyActiveResetFlags(any());
+        verify(breachScheduleService, never()).recalculatePastDueAmount(any());
+    }
 
-        underTest.undoResetBreach(loan, undoResetAction);
+    @Test
+    void undoResetBreach_ofAPlainReset_derivesTheFlagsAndRecalculatesThePastDueAmount() {
+        underTest.undoResetBreach(loan, undo(2L, LocalDate.of(2026, 4, 20)), List.of(reset(1L, LocalDate.of(2026, 4, 15))));
 
-        assertTrue(pastPeriod.isReset());
-        assertFalse(actionDatePeriod.isReset());
-        assertTrue(futurePeriod.isReset());
-        assertEquals(0, BigDecimal.valueOf(100).compareTo(actionDatePeriod.getMinPaymentAmount()));
-        assertEquals(0, BigDecimal.valueOf(40).compareTo(actionDatePeriod.getPaidAmount()));
-        assertEquals(0, BigDecimal.valueOf(60).compareTo(actionDatePeriod.getOutstandingAmount()));
-        assertEquals(Boolean.TRUE, actionDatePeriod.getBreach());
-        assertEquals(Boolean.FALSE, actionDatePeriod.getNearBreach());
-        verify(breachScheduleService).recalculatePastDueAmount(loan);
-        verify(breachScheduleService, never()).reprocessBreachSchedule(loan);
+        assertFlagOnlyPath();
+    }
+
+    @Test
+    void undoResetBreach_ofARestartReset_restoresTheSplitThenReprocesses() {
+        final WorkingCapitalLoanBreachAction undoneReset = restartReset(1L, LocalDate.of(2026, 4, 15));
+
+        underTest.undoResetBreach(loan, undo(2L, LocalDate.of(2026, 4, 15)), List.of(undoneReset));
+
+        final InOrder inOrder = inOrder(breachScheduleService);
+        inOrder.verify(breachScheduleService).restoreSplitPeriod(loan, undoneReset);
+        inOrder.verify(breachScheduleService).reprocessBreachSchedule(loan);
+        verify(breachScheduleService, never()).applyActiveResetFlags(any());
+        verify(breachScheduleService, never()).recalculatePastDueAmount(any());
+    }
+
+    @Test
+    void undoResetBreach_undoesTheLatestActiveReset() {
+        final WorkingCapitalLoanBreachAction earlierRestartReset = restartReset(1L, LocalDate.of(2026, 2, 20));
+        final WorkingCapitalLoanBreachAction latestReset = reset(2L, LocalDate.of(2026, 4, 15));
+
+        underTest.undoResetBreach(loan, undo(3L, LocalDate.of(2026, 4, 15)), List.of(earlierRestartReset, latestReset));
+
+        assertFlagOnlyPath();
+    }
+
+    @Test
+    void undoResetBreach_skipsAnAlreadyUndoneReset() {
+        final WorkingCapitalLoanBreachAction restartReset = restartReset(1L, LocalDate.of(2026, 2, 20));
+
+        underTest.undoResetBreach(loan, undo(4L, LocalDate.of(2026, 4, 20)),
+                List.of(restartReset, reset(2L, LocalDate.of(2026, 4, 15)), undo(3L, LocalDate.of(2026, 4, 16))));
+
+        verify(breachScheduleService).restoreSplitPeriod(loan, restartReset);
+        verify(breachScheduleService).reprocessBreachSchedule(loan);
+    }
+
+    @Test
+    void undoResetBreach_withoutAnActiveReset_onlyDerivesTheFlagsAndRecalculatesThePastDueAmount() {
+        underTest.undoResetBreach(loan, undo(1L, LocalDate.of(2026, 4, 20)), List.of());
+
+        assertFlagOnlyPath();
+    }
+
+    @Test
+    void actionsWithoutADate_leaveTheScheduleAlone() {
+        underTest.resetBreach(loan, reset(1L, null));
+        underTest.undoResetBreach(loan, undo(2L, null), List.of(reset(1L, LocalDate.of(2026, 4, 15))));
+
+        verifyNoInteractions(breachScheduleService);
     }
 }

@@ -113,7 +113,7 @@ public class WorkingCapitalDelinquencyRescheduleStepDef extends AbstractStepDef 
     public void createWcDelinquencyBucket(final int frequency, final String frequencyType, final int minimumPayment,
             final String minimumPaymentType) {
         final DelinquencyBucketRequest request = new DelinquencyBucketRequest().name("DB-WCL-" + Utils.randomStringGenerator(12))
-                .bucketType("WORKING_CAPITAL").ranges(List.of(1L))
+                .bucketType("WORKING_CAPITAL").ranges(workingCapitalRequestFactory.seededWorkingCapitalDelinquencyRangeIds())
                 .minimumPaymentPeriodAndRule(new MinimumPaymentPeriodAndRule().frequency(frequency).frequencyType(frequencyType)
                         .minimumPayment(new BigDecimal(minimumPayment)).minimumPaymentType(minimumPaymentType));
 

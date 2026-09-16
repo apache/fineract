@@ -157,7 +157,7 @@ public class FineractEntityAccessWriteServiceImpl implements FineractEntityAcces
                     "EntityMapping from " + fromId + " to " + toId + " already exist");
         }
 
-        LOG.error("Error occured.", dve);
+        LOG.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.entity.mapping", "Unknown data integrity issue with resource.");
     }
 

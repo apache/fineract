@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.domain.LoanTransactionType;
+import org.apache.fineract.portfolio.workingcapitalloan.data.TransactionDateAndAmountHolder;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,16 @@ public class WorkingCapitalLoanTransactionFinder {
     private static final List<LoanTransactionType> SYSTEM_GENERATED_TYPES = List.of(LoanTransactionType.ACCRUAL,
             LoanTransactionType.ACCRUAL_ADJUSTMENT, LoanTransactionType.DISCOUNT_FEE_AMORTIZATION,
             LoanTransactionType.DISCOUNT_FEE_AMORTIZATION_ADJUSTMENT);
+
+    /**
+     * Transaction types that count as a payment on the loan: repayment, goodwill credit, payout refund and charge
+     * adjustment are the ones a working capital loan actually books. {@code getRepaymentLikeTransactionTypes()} streams
+     * and filters the whole enum, so it is resolved once here rather than on every lookup.
+     */
+    private static final List<LoanTransactionType> PAYMENT_TYPES = LoanTransactionType.getRepaymentLikeTransactionTypes();
+
+    /** Repayment proper, as opposed to the wider {@link #PAYMENT_TYPES}. */
+    private static final List<LoanTransactionType> REPAYMENT_TYPES = List.of(LoanTransactionType.REPAYMENT);
 
     private final WorkingCapitalLoanTransactionRepository transactionRepository;
 
@@ -101,10 +112,39 @@ public class WorkingCapitalLoanTransactionFinder {
     }
 
     /**
+     * Returns the date and amount of the loan's last payment - the latest non-reversed transaction of any payment-like
+     * type ({@link #PAYMENT_TYPES}) - if any. Mirrors {@code Loan#getLastPaymentTransaction()}, so a goodwill credit or
+     * payout refund counts here just as a repayment does.
+     */
+    public Optional<TransactionDateAndAmountHolder> findLastPayment(final Long loanId) {
+        return findLastActiveTransactionOfTypes(loanId, PAYMENT_TYPES);
+    }
+
+    /**
+     * Returns the date and amount of the loan's last repayment - the latest non-reversed
+     * {@link LoanTransactionType#REPAYMENT} - if any. Deliberately narrower than {@link #findLastPayment(Long)}: a
+     * goodwill credit moves the last payment but not the last repayment.
+     */
+    public Optional<TransactionDateAndAmountHolder> findLastRepayment(final Long loanId) {
+        return findLastActiveTransactionOfTypes(loanId, REPAYMENT_TYPES);
+    }
+
+    /**
      * Returns the most recent non-reversed transaction of the given type, if any.
      */
     private Optional<WorkingCapitalLoanTransaction> findLatestActiveTransactionOfType(final WorkingCapitalLoan loan,
             final LoanTransactionType transactionType) {
         return transactionRepository.findActiveByTypeOrderByIdDesc(loan.getId(), transactionType).stream().findFirst();
+    }
+
+    /**
+     * The latest non-reversed transaction of any of the given types in (transaction date, id) order. The query is
+     * capped at one row, so the ordering in the query - not the caller - decides which transaction wins a same-date
+     * tie.
+     */
+    private Optional<TransactionDateAndAmountHolder> findLastActiveTransactionOfTypes(final Long loanId,
+            final List<LoanTransactionType> transactionTypes) {
+        return transactionRepository.findActiveByTypesOrderByDateDesc(loanId, transactionTypes, PageRequest.of(0, 1)) //
+                .stream().findFirst();
     }
 }

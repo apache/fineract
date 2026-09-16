@@ -40,7 +40,6 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.domain.DelinquencyBucket;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDelinquencyAction;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanDelinquencyActionRepository;
@@ -91,7 +90,7 @@ class WorkingCapitalLoanDelinquencyDisableValidatorTest {
         businessDates.put(BusinessDateType.COB_DATE, today.minusDays(1));
         ThreadLocalContextUtil.setBusinessDates(businessDates);
         when(loan.getId()).thenReturn(LOAN_ID);
-        when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
+        when(loan.isOpen()).thenReturn(true);
         when(loan.getLoanProductRelatedDetails()).thenReturn(productRelatedDetails);
         when(productRelatedDetails.getDelinquencyBucket()).thenReturn(delinquencyBucket);
     }

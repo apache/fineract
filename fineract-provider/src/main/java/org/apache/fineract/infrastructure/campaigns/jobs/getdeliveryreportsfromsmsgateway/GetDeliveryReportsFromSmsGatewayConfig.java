@@ -22,11 +22,10 @@ import org.apache.fineract.infrastructure.campaigns.helper.SmsConfigUtils;
 import org.apache.fineract.infrastructure.jobs.service.JobName;
 import org.apache.fineract.infrastructure.sms.domain.SmsMessageRepository;
 import org.apache.fineract.infrastructure.sms.service.SmsReadPlatformService;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.Step;
+import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -56,7 +55,7 @@ public class GetDeliveryReportsFromSmsGatewayConfig {
     @Bean
     public Job getDeliveryReportsFromSmsGatewayJob() {
         return new JobBuilder(JobName.GET_DELIVERY_REPORTS_FROM_SMS_GATEWAY.name(), jobRepository)
-                .start(getDeliveryReportsFromSmsGatewayStep()).incrementer(new RunIdIncrementer()).build();
+                .start(getDeliveryReportsFromSmsGatewayStep()).build();
     }
 
     @Bean

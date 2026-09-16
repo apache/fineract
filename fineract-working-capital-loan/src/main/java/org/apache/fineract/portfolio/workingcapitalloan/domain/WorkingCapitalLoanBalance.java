@@ -97,6 +97,15 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
     @Setter
     private BigDecimal penaltyWrittenOff = BigDecimal.ZERO;
 
+    /**
+     * Money collected on the loan after it was written off. It is recovery income, not a repayment: it never lowers the
+     * outstanding balance (already zero) and never touches the paid columns. Its only balance-side role is to cap how
+     * much more can still be recovered - see {@link #getWrittenOffOutstanding()}.
+     */
+    @Column(name = "total_recovered", scale = 6, precision = 19, nullable = false)
+    @Setter
+    private BigDecimal totalRecovered = BigDecimal.ZERO;
+
     @Column(name = "realized_income_from_discount_fee", scale = 6, precision = 19, nullable = false)
     @Setter
     private BigDecimal realizedIncomeFromDiscountFee = BigDecimal.ZERO;
@@ -148,19 +157,36 @@ public class WorkingCapitalLoanBalance extends AbstractAuditableWithUTCDateTimeC
     }
 
     public BigDecimal getPrincipalOutstanding() {
-        return MathUtil.subtract(getTotalPrincipalDue(), getPrincipalPaid(), getPrincipalWrittenOff()).max(BigDecimal.ZERO);
+        return WorkingCapitalLoanOutstandingMath.bucketOutstanding(getTotalPrincipalDue(), getPrincipalPaid(), getPrincipalWrittenOff());
     }
 
     public BigDecimal getFeeOutstanding() {
-        return MathUtil.subtract(getFee(), getFeePaid(), getFeeWrittenOff()).max(BigDecimal.ZERO);
+        return WorkingCapitalLoanOutstandingMath.bucketOutstanding(getFee(), getFeePaid(), getFeeWrittenOff());
     }
 
     public BigDecimal getPenaltyOutstanding() {
-        return MathUtil.subtract(getPenalty(), getPenaltyPaid(), getPenaltyWrittenOff()).max(BigDecimal.ZERO);
+        return WorkingCapitalLoanOutstandingMath.bucketOutstanding(getPenalty(), getPenaltyPaid(), getPenaltyWrittenOff());
     }
 
     public BigDecimal getTotalOutstanding() {
         return MathUtil.add(getPrincipalOutstanding()).add(getFeeOutstanding()).add(getPenaltyOutstanding());
+    }
+
+    /**
+     * Everything the write-off moved out of the outstanding balance. This is the gross amount that was written off; it
+     * is not reduced by recoveries.
+     */
+    public BigDecimal getTotalWrittenOff() {
+        return MathUtil.add(getPrincipalWrittenOff(), getFeeWrittenOff(), getPenaltyWrittenOff());
+    }
+
+    /**
+     * How much of the written-off amount is still recoverable: the gross written off less what has already been
+     * collected. A recovery payment may not exceed this, so successive recoveries cannot add up past what was written
+     * off.
+     */
+    public BigDecimal getWrittenOffOutstanding() {
+        return WorkingCapitalLoanOutstandingMath.writtenOffOutstanding(getTotalWrittenOff(), getTotalRecovered());
     }
 
     public BigDecimal getTotalExpectedRepayment() {

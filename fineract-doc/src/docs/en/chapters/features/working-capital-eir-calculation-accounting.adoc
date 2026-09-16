@@ -4,7 +4,7 @@
 
 Working Capital Loans amortize discount fee income across the loan term using an Effective Interest Rate (EIR) schedule. When the COB business step `WC_DISCOUNT_FEE_AMORTIZATION` advances the realized income figure, the accounting processor posts a balanced pair of journal entries that move the newly recognized amount out of the *Deferred Income Liability* placeholder and into income (or, when the loan is charged off, into the charge-off expense placeholder).
 
-The EIR calculation itself — solver, schedule shape, rate segments — is documented in `working-capital-eir-calculation.adoc`. This document focuses on the journal entries derived from the schedule.
+The EIR calculation itself — solver, schedule shape, rate changes — is documented in `working-capital-eir-calculation.adoc`. This document focuses on the journal entries derived from the schedule.
 
 === Purpose
 

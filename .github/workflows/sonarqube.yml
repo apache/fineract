@@ -39,7 +39,7 @@ jobs:
         JAVA_BINARIES: .
     steps:
       - name: Set up JDK 25
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
         with:
           java-version: '25'
           distribution: 'zulu'
@@ -69,8 +69,20 @@ jobs:
         with:
           cache-read-only: false
       - name: Setup Gradle and Validate Wrapper
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
         with:
           validate-wrappers: true
+
+      # The sonar task resolves every subproject's compileClasspath inside one build JVM, so
+      # it needs more headroom than the other jobs. It runs alone, with nothing to share with.
+      - name: Apply Gradle memory budget
+        uses: ./.github/actions/gradle-memory-budget
+        with:
+          max-heap: '6g'
+          workers-max: '2'
+
       - name: Sonar
-        run: ./gradlew --no-daemon --console=plain -Dsonar.verbose=true -Dsonar.token=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.organization=$SONAR_ORGANIZATION -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.java.binaries=$JAVA_BINARIES --info --stacktrace sonar -x buildJavaSdk
+        # --no-parallel is required: the sonar task resolves every subproject's
+        # compileClasspath, and Gradle 9 rejects that cross-project resolution
+        # unless the task holds the lock of all projects (parallel execution off).
+        run: ./gradlew --no-daemon --no-parallel --console=plain -Dsonar.verbose=true -Dsonar.token=$SONAR_TOKEN -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.organization=$SONAR_ORGANIZATION -Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.java.binaries=$JAVA_BINARIES --info --stacktrace sonar -x buildJavaSdk

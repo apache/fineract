@@ -40,7 +40,6 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.exception.UnsupportedParameterException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
-import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
@@ -88,7 +87,7 @@ class WorkingCapitalLoanDataValidatorUpdateRateTest {
         // changes on record the loan's
         // own rate is the one in effect, so "10" is still the rate a request has to differ from.
         lenient().when(rateChangeRepository.findByWorkingCapitalLoanIdAndReversedFalse(any())).thenReturn(List.of());
-        lenient().when(loan.getLoanStatus()).thenReturn(LoanStatus.ACTIVE);
+        lenient().when(loan.isOpen()).thenReturn(true);
         lenient().when(loan.getLoanProductRelatedDetails()).thenReturn(relatedDetails);
         lenient().when(relatedDetails.getPeriodPaymentRate()).thenReturn(BigDecimal.TEN);
         lenient().when(loan.getLoanProduct()).thenReturn(product);
@@ -114,7 +113,7 @@ class WorkingCapitalLoanDataValidatorUpdateRateTest {
 
     @Test
     void shouldRejectNonActiveLoan() {
-        when(loan.getLoanStatus()).thenReturn(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
+        when(loan.isOpen()).thenReturn(false);
         PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,
                 () -> validator.validateUpdatePeriodPaymentRate(validJson("20"), loan));
         assertThat(ex.getErrors()).anyMatch(e -> e.getUserMessageGlobalisationCode().contains("rate.change.not.allowed.for.non.active.loan"));
@@ -212,7 +211,7 @@ class WorkingCapitalLoanDataValidatorUpdateRateTest {
     @Test
     void shouldCollectMultipleErrors() {
         // Non-active loan + missing rate = at least 2 errors
-        when(loan.getLoanStatus()).thenReturn(LoanStatus.APPROVED);
+        when(loan.isOpen()).thenReturn(false);
         final JsonObject json = new JsonObject();
         json.addProperty("locale", "en");
         PlatformApiDataValidationException ex = assertThrows(PlatformApiDataValidationException.class,

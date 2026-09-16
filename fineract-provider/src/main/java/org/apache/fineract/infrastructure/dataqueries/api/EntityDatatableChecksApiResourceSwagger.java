@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Collection;
 import java.util.List;
 import org.apache.fineract.infrastructure.core.data.EnumOptionData;
+import org.apache.fineract.infrastructure.core.data.StringEnumOptionData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableCheckStatusData;
 import org.apache.fineract.infrastructure.dataqueries.data.DatatableChecksData;
 import org.apache.fineract.portfolio.loanproduct.data.LoanProductData;
@@ -42,7 +43,9 @@ final class EntityDatatableChecksApiResourceSwagger {
         private GetEntityDatatableChecksResponse() {}
 
         public long id;
+        @Schema(example = "m_loan")
         public String entity;
+        public StringEnumOptionData entityData;
         public EnumOptionData status;
         public String datatableName;
         public boolean systemDefined;

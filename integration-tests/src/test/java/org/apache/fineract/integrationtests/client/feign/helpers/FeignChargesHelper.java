@@ -23,6 +23,7 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ChargeData;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.DeleteChargesChargeIdResponse;
 import org.apache.fineract.client.models.DeleteClientsClientIdChargesChargeIdResponse;
@@ -42,9 +43,11 @@ public class FeignChargesHelper {
     private static final String PAY_COMMAND = "paycharge";
 
     private final FineractFeignClient fineractClient;
+    private final ChargeTemplateApi chargeTemplateApi;
 
     public FeignChargesHelper(FineractFeignClient fineractClient) {
         this.fineractClient = fineractClient;
+        this.chargeTemplateApi = fineractClient.create(ChargeTemplateApi.class);
     }
 
     public PostChargesResponse createCharge(ChargeRequest request) {
@@ -65,6 +68,22 @@ public class FeignChargesHelper {
 
     public CallFailedRuntimeException getChargeExpectingError(Long chargeId) {
         return fail(() -> fineractClient.charges().retrieveOneCharge(chargeId));
+    }
+
+    public CallFailedRuntimeException createChargeExpectingError(ChargeRequest request) {
+        return fail(() -> fineractClient.charges().createCharge(request));
+    }
+
+    public CallFailedRuntimeException updateChargeExpectingError(Long chargeId, ChargeRequest request) {
+        return fail(() -> fineractClient.charges().updateCharge(chargeId, request));
+    }
+
+    public ChargeData getChargeTemplate(Long chargeAppliesTo, Long chargeTimeType) {
+        return ok(() -> fineractClient.charges().retrieveTemplateCharge(chargeAppliesTo, chargeTimeType));
+    }
+
+    public ChargeData getChargeWithTemplate(Long chargeId) {
+        return ok(() -> chargeTemplateApi.retrieveChargeWithTemplate(chargeId));
     }
 
     public PostChargesResponse createLoanSpecifiedDueDateCharge(double amount) {

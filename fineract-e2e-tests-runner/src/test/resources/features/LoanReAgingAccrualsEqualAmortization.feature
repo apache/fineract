@@ -167,6 +167,7 @@ Feature: LoanReAgingAccrualsEqualAmortization
       | 15 March 2024    | Re-age           | 84.28  | 83.57     | 0.71     | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan Transactions tab has the following new accrual data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+    Then Loan has 0.0 total unpaid payable not due interest
 
     When Admin sets the business date to "16 March 2024"
     When Admin runs inline COB job for Loan
@@ -179,12 +180,19 @@ Feature: LoanReAgingAccrualsEqualAmortization
     Then Loan Transactions tab has the following new accrual data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 15 March 2024    | Accrual Adjustment | 0.69   | 0.0       | 0.69     | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan has 0.01 total unpaid payable not due interest
+
+    When Admin sets the business date to "25 March 2024"
+    When Admin runs inline COB job for Loan
+    Then Loan has 0.07 total unpaid payable not due interest
 
     When Admin sets the business date to "01 May 2024"
     When Admin runs inline COB job for Loan
+    Then Loan has 0.0 total unpaid payable not due interest
 
     When Admin sets the business date to "02 September 2024"
     When Admin runs inline COB job for Loan
+    Then Loan has 0.0 total unpaid payable not due interest
 
   @TestRailId:C4441 @AdvancedPaymentAllocation
   Scenario: Verify Accrual Posting and Accrual Activity Posting on re-aged loan - interest bearing loan with equal amortization; outstanding full interest - UC2
@@ -351,12 +359,18 @@ Feature: LoanReAgingAccrualsEqualAmortization
       | 15 March 2024    | Re-age           | 85.08  | 83.57     | 1.51     | 0.0  | 0.0       | 0.0          | false    | false    |
     Then Loan Transactions tab has the following new accrual data:
       | Transaction date | Transaction Type | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
+    Then Loan has 0.0 total unpaid payable not due interest
 
     When Admin sets the business date to "16 March 2024"
     When Admin runs inline COB job for Loan
     Then Loan Transactions tab has the following new accrual data:
       | Transaction date | Transaction Type   | Amount | Principal | Interest | Fees | Penalties | Loan Balance | Reverted | Replayed |
       | 15 March 2024    | Accrual Adjustment | 0.69   | 0.0       | 0.69     | 0.0  | 0.0       | 0.0          | false    | false    |
+    Then Loan has 0.01 total unpaid payable not due interest
+
+    When Admin sets the business date to "25 March 2024"
+    When Admin runs inline COB job for Loan
+    Then Loan has 0.15 total unpaid payable not due interest
 
   @TestRailId:C4442 @AdvancedPaymentAllocation
   Scenario: Verify Accrual Posting and Accrual Activity Posting on re-aged loan - outstanding payable interest + outstanding principal, backdated re-age with dueDate change

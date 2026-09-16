@@ -1711,7 +1711,7 @@ public class LoanStepDef extends AbstractStepDef {
 
         GetLoansLoanIdResponse loanDetails = ok(
                 () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false", "associations", "all")));
-        Set<GetLoansLoanIdDisbursementDetails> disbursementDetailsList = loanDetails.getDisbursementDetails();
+        List<GetLoansLoanIdDisbursementDetails> disbursementDetailsList = loanDetails.getDisbursementDetails();
 
         List<DisbursementDetail> disbursementData = new ArrayList<>();
 
@@ -1751,7 +1751,7 @@ public class LoanStepDef extends AbstractStepDef {
 
         GetLoansLoanIdResponse loanDetailsResponse = ok(
                 () -> fineractClient.loans().retrieveOneLoan(loanId, Map.of("staffInSelectedOfficeOnly", "false", "associations", "all")));
-        Set<GetLoansLoanIdDisbursementDetails> disbursementDetails = loanDetailsResponse.getDisbursementDetails();
+        List<GetLoansLoanIdDisbursementDetails> disbursementDetails = loanDetailsResponse.getDisbursementDetails();
         List<List<String>> data = table.asLists();
         for (int i = 1; i < data.size(); i++) {
             List<String> expectedValues = data.get(i);

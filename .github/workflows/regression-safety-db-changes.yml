@@ -107,6 +107,9 @@ jobs:
       TEST_TENANT_ID: default
       INITIALIZATION_ENABLED: true
       EVENT_VERIFICATION_ENABLED: false
+      # The scenarios this workflow gates on. Kept in one place so the guard's error message and
+      # the three instances cannot drift apart.
+      REGRESSION_SAFETY_TAGS: "@RegressionSafety"
       # devRun connection args (reused across instances)
       DEVRUN_ARGS: >-
         --spring.datasource.hikari.driverClassName=org.postgresql.Driver
@@ -132,7 +135,7 @@ jobs:
           path: baseline
 
       - name: Set up JDK 25
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
         with:
           distribution: 'zulu'
           java-version: '25'
@@ -164,7 +167,17 @@ jobs:
           cache-read-only: false
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+
+      # This job holds two Gradle build JVMs plus a backend and a test JVM at the same time.
+      # The build JVMs only configure the project and launch forked processes, so 2g is
+      # ample; every gradlew call here also uses --no-daemon so idle build JVMs cannot
+      # accumulate across the three instances (org.gradle.daemon.idletimeout is 3h).
+      - name: Apply Gradle memory budget
+        uses: ./.github/actions/gradle-memory-budget
+        with:
+          max-heap: '2g'
+          workers-max: '2'
 
       - name: Wait for PostgreSQL
         run: |
@@ -172,6 +185,14 @@ jobs:
             echo "Waiting for postgres..."
             sleep 2
           done
+
+      - name: Compile baseline backend
+        working-directory: baseline
+        env:
+          # The baseline checkout predates the compiler-daemon heap cap in build.gradle,
+          # so bound its forked javac processes here.
+          JAVA_TOOL_OPTIONS: -Xmx2g
+        run: ./gradlew --no-daemon :fineract-provider:classes
 
       - name: Print checked out revisions
         run: |
@@ -194,8 +215,10 @@ jobs:
 
       - name: "Instance #1: Start baseline backend"
         working-directory: baseline
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx3g
         run: |
-          ./gradlew :fineract-provider:devRun --args="${DEVRUN_ARGS}" &
+          ./gradlew --no-daemon :fineract-provider:devRun --args="${DEVRUN_ARGS}" &
           BACKEND_PID=$!
           echo $BACKEND_PID > backend.pid
 
@@ -225,11 +248,22 @@ jobs:
       - name: "Instance #1: Run regression safety E2E test"
         id: instance1
         continue-on-error: true
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx2g
         run: |
+          set -o pipefail
           ./gradlew --no-daemon --console=plain \
             :fineract-e2e-tests-runner:cucumber \
-            -Pcucumber.tags="@RegressionSafety" \
-            -x spotlessCheck
+            -Pcucumber.tags="$REGRESSION_SAFETY_TAGS" \
+            -x spotlessCheck \
+            -x buildJavaSdk \
+            -x :fineract-e2e-tests-runner:allureReport \
+            2>&1 | tee cucumber-instance1.log
+
+          # Cucumber exits 0 when its tag expression matches nothing, so without this the
+          # instance would report success having executed no scenario at all.
+          .github/scripts/assert-cucumber-ran.sh cucumber-instance1.log \
+            "Check that some scenario still carries REGRESSION_SAFETY_TAGS ($REGRESSION_SAFETY_TAGS)."
 
       - name: "Instance #1: Stop backend"
         if: always()
@@ -257,6 +291,8 @@ jobs:
             -c "CREATE DATABASE $DB_NAME;"
 
       - name: "Instance #2: Apply PR Liquibase migrations (schema only)"
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx3g
         run: |
           echo "Applying all Liquibase changesets (base + PR) using PR code..."
           # The liquibase-only profile sets web-application-type=none, so Spring Boot
@@ -285,9 +321,11 @@ jobs:
 
       - name: "Instance #2: Start baseline backend (old code, new schema)"
         working-directory: baseline
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx3g
         run: |
           echo "Starting baseline code against DB with PR schema (Liquibase disabled)..."
-          ./gradlew :fineract-provider:devRun --args="\
+          ./gradlew --no-daemon :fineract-provider:devRun --args="\
           ${DEVRUN_ARGS} \
           --spring.liquibase.enabled=false" &
           BACKEND_PID=$!
@@ -320,11 +358,22 @@ jobs:
       - name: "Instance #2: Run regression safety E2E test"
         id: instance2
         continue-on-error: true
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx2g
         run: |
+          set -o pipefail
           ./gradlew --no-daemon --console=plain \
             :fineract-e2e-tests-runner:cucumber \
-            -Pcucumber.tags="@RegressionSafety" \
-            -x spotlessCheck
+            -Pcucumber.tags="$REGRESSION_SAFETY_TAGS" \
+            -x spotlessCheck \
+            -x buildJavaSdk \
+            -x :fineract-e2e-tests-runner:allureReport \
+            2>&1 | tee cucumber-instance2.log
+
+          # Cucumber exits 0 when its tag expression matches nothing, so without this the
+          # instance would report success having executed no scenario at all.
+          .github/scripts/assert-cucumber-ran.sh cucumber-instance2.log \
+            "Check that some scenario still carries REGRESSION_SAFETY_TAGS ($REGRESSION_SAFETY_TAGS)."
 
       - name: "Instance #2: Stop backend"
         if: always()
@@ -351,8 +400,10 @@ jobs:
             -c "CREATE DATABASE $DB_NAME;"
 
       - name: "Instance #3: Start PR backend"
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx3g
         run: |
-          ./gradlew :fineract-provider:devRun --args="${DEVRUN_ARGS}" &
+          ./gradlew --no-daemon :fineract-provider:devRun --args="${DEVRUN_ARGS}" &
           BACKEND_PID=$!
           echo $BACKEND_PID > backend.pid
 
@@ -382,11 +433,22 @@ jobs:
       - name: "Instance #3: Run regression safety E2E test"
         id: instance3
         continue-on-error: true
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx2g
         run: |
+          set -o pipefail
           ./gradlew --no-daemon --console=plain \
             :fineract-e2e-tests-runner:cucumber \
-            -Pcucumber.tags="@RegressionSafety" \
-            -x spotlessCheck
+            -Pcucumber.tags="$REGRESSION_SAFETY_TAGS" \
+            -x spotlessCheck \
+            -x buildJavaSdk \
+            -x :fineract-e2e-tests-runner:allureReport \
+            2>&1 | tee cucumber-instance3.log
+
+          # Cucumber exits 0 when its tag expression matches nothing, so without this the
+          # instance would report success having executed no scenario at all.
+          .github/scripts/assert-cucumber-ran.sh cucumber-instance3.log \
+            "Check that some scenario still carries REGRESSION_SAFETY_TAGS ($REGRESSION_SAFETY_TAGS)."
 
       - name: "Instance #3: Stop backend"
         if: always()
@@ -433,6 +495,7 @@ jobs:
         with:
           name: regression-safety-results
           path: |
+            cucumber-instance*.log
             fineract-e2e-tests-runner/build/reports/
           retention-days: 5
           compression-level: 9

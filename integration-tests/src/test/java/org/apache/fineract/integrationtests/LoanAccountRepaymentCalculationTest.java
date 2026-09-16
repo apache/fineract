@@ -21,50 +21,22 @@ package org.apache.fineract.integrationtests;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdRepaymentPeriod;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
-
-    protected RequestSpecification requestSpec;
-    protected ResponseSpecification responseSpec;
-    protected LoanTransactionHelper loanTransactionHelper;
-    protected JournalEntryHelper journalEntryHelper;
-
-    @BeforeEach
-    @SuppressWarnings("removal")
-    public void setupREST() {
-        Utils.initializeRESTAssured();
-
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
-    }
 
     @Test
     public void loanAccountWithEnableDownPaymentWithInstallmentsInMultipleOfNullRepaymentScheduleCalculationTest() {
@@ -75,7 +47,7 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
+            updateBusinessDate(disbursementDate.toString());
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -85,11 +57,11 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
             Boolean enableAutoRepaymentForDownPayment = false;
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Long clientId = createClient();
 
             // Loan Product creation with down-payment configuration and installmentAmountInMultiplesOf as null
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithEnableDownPaymentAndMultipleDisbursements(
-                    loanTransactionHelper, enableDownPayment, "25", enableAutoRepaymentForDownPayment, null);
+                    enableDownPayment, "25", enableAutoRepaymentForDownPayment, null);
 
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
@@ -99,12 +71,12 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
 
             // create loan account with amount 1250
 
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(), "1250",
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(), 1250.0,
                     loanExternalIdStr, LoanProductTestBuilder.DEFAULT_STRATEGY);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             // verify down-payment details for Loan
             assertNotNull(loanDetails);
@@ -132,9 +104,9 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
                     LocalDate.of(2023, 6, 3), false);
 
             // disbursement
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1250");
+            disburseLoan(loanId, "03 March 2023", 1250.0);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -170,7 +142,7 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
+            updateBusinessDate(disbursementDate.toString());
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -180,11 +152,11 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
             Boolean enableAutoRepaymentForDownPayment = false;
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Long clientId = createClient();
 
             // Loan Product creation with down-payment configuration and installmentAmountInMultiplesOf as 1
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithEnableDownPaymentAndMultipleDisbursements(
-                    loanTransactionHelper, enableDownPayment, "25", enableAutoRepaymentForDownPayment, "1");
+                    enableDownPayment, "25", enableAutoRepaymentForDownPayment, "1");
 
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
@@ -194,12 +166,12 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
 
             // create loan account with amount 1250
 
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(), "1250",
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(), 1250.0,
                     loanExternalIdStr, LoanProductTestBuilder.DEFAULT_STRATEGY);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             // verify down-payment details for Loan
             assertNotNull(loanDetails);
@@ -227,9 +199,9 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
                     LocalDate.of(2023, 6, 3), false);
 
             // disbursement
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1250");
+            disburseLoan(loanId, "03 March 2023", 1250.0);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -265,7 +237,7 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
+            updateBusinessDate(disbursementDate.toString());
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -273,23 +245,23 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
             // down-payment configuration
             Boolean enableDownPayment = false;
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Long clientId = createClient();
 
             // Loan Product creation with down-payment configuration and installmentAmountInMultiplesOf as null
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithEnableDownPaymentAndMultipleDisbursements(
-                    loanTransactionHelper, enableDownPayment, null, false, null);
+                    enableDownPayment, null, false, null);
 
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
 
             // create loan account with amount 1250
 
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(), "1250",
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(), 1250.0,
                     loanExternalIdStr, LoanProductTestBuilder.DEFAULT_STRATEGY);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             // verify down-payment details for Loan
             assertNotNull(loanDetails);
@@ -311,9 +283,9 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
                     LocalDate.of(2023, 6, 3), false);
 
             // disbursement
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1250");
+            disburseLoan(loanId, "03 March 2023", 1250.0);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -345,7 +317,7 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, disbursementDate);
+            updateBusinessDate(disbursementDate.toString());
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -353,23 +325,23 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
             // down-payment configuration
             Boolean enableDownPayment = false;
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Long clientId = createClient();
 
             // Loan Product creation with down-payment configuration and installmentAmountInMultiplesOf as 1
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithEnableDownPaymentAndMultipleDisbursements(
-                    loanTransactionHelper, enableDownPayment, null, false, "1");
+                    enableDownPayment, null, false, "1");
 
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
 
             // create loan account with amount 1250
 
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(), "1250",
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(), 1250.0,
                     loanExternalIdStr, LoanProductTestBuilder.DEFAULT_STRATEGY);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             // verify down-payment details for Loan
             assertNotNull(loanDetails);
@@ -391,9 +363,9 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
                     LocalDate.of(2023, 6, 3), false);
 
             // disbursement
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1250");
+            disburseLoan(loanId, "03 March 2023", 1250.0);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -425,34 +397,29 @@ public class LoanAccountRepaymentCalculationTest extends FeignLoanTestBase {
         assertEquals(isComplete, period.getComplete());
     }
 
-    private Integer createLoanAccountMultipleRepaymentsDisbursement(final Integer clientID, final Long loanProductID,
-            final String principalAmount, final String externalId, final String repaymentStartegy) {
+    private Long createLoanAccountMultipleRepaymentsDisbursement(final Long clientId, final Long loanProductId,
+            final Double principalAmount, final String externalId, final String repaymentStrategy) {
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(principalAmount).withLoanTermFrequency("3")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("3").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance()
-                .withAmortizationTypeAsEqualInstallments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("03 March 2023").withSubmittedOnDate("03 March 2023").withLoanType("individual")
-                .withExternalId(externalId).withRepaymentStrategy(repaymentStartegy)
-                .build(clientID.toString(), loanProductID.toString(), null);
+        final PostLoansRequest application = LoanRequestBuilders.applyLoan(clientId, loanProductId, "03 March 2023", principalAmount, 3)//
+                .externalId(externalId)//
+                .transactionProcessingStrategyCode(repaymentStrategy);
 
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan("03 March 2023", "1250", loanId, null);
+        final Long loanId = loanHelper.applyForLoan(application).getLoanId();
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(1250.0, "03 March 2023"));
         return loanId;
     }
 
-    private GetLoanProductsProductIdResponse createLoanProductWithEnableDownPaymentAndMultipleDisbursements(
-            LoanTransactionHelper loanTransactionHelper, Boolean enableDownPayment, String disbursedAmountPercentageForDownPayment,
-            boolean enableAutoRepaymentForDownPayment, String installmentAmountInMultiplesOf) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+    private GetLoanProductsProductIdResponse createLoanProductWithEnableDownPaymentAndMultipleDisbursements(Boolean enableDownPayment,
+            String disbursedAmountPercentageForDownPayment, boolean enableAutoRepaymentForDownPayment,
+            String installmentAmountInMultiplesOf) {
+        final Long loanProductId = createLoanProduct(new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("3").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withInterestTypeAsDecliningBalance().withAmortizationTypeAsEqualInstallments()
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30").withDaysInYear("365")
                 .withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment)
-                .withInstallmentAmountInMultiplesOf(installmentAmountInMultiplesOf).build(null);
-        final Integer loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
-        return loanTransactionHelper.getLoanProduct(loanProductId);
+                .withInstallmentAmountInMultiplesOf(installmentAmountInMultiplesOf).buildRequest(null));
+        return retrieveLoanProduct(loanProductId);
     }
 
 }

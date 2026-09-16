@@ -252,6 +252,18 @@ public class WorkingCapitalLoanTransaction extends AbstractAuditableWithUTCDateT
         return txn;
     }
 
+    /**
+     * A recovery payment collects money on a loan that was already written off. It carries no allocation: the balance
+     * was zeroed by the write-off and stays that way, so the amount is recognized as recovery income rather than
+     * applied against principal, fees or penalties. The loan keeps its {@code CLOSED_WRITTEN_OFF} status.
+     */
+    public static WorkingCapitalLoanTransaction recoveryPayment(final WorkingCapitalLoan loan, final BigDecimal amount,
+            final PaymentDetail paymentDetail, final LocalDate transactionDate, final ExternalId externalId) {
+        final WorkingCapitalLoanTransaction txn = new WorkingCapitalLoanTransaction();
+        txn.initialize(loan, LoanTransactionType.RECOVERY_REPAYMENT, transactionDate, amount, paymentDetail, null, externalId);
+        return txn;
+    }
+
     private void initialize(final WorkingCapitalLoan loan, final LoanTransactionType transactionType, final LocalDate transactionDate,
             final BigDecimal amount, final PaymentDetail paymentDetail, final CodeValue classification, final ExternalId externalId) {
         this.wcLoan = loan;

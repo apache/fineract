@@ -25,10 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.fineract.portfolio.loanaccount.data.DelinquencyPausePeriod;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class WorkingCapitalLoanCollectionData {
 
     private Long pastDueDays;
@@ -41,7 +43,19 @@ public class WorkingCapitalLoanCollectionData {
 
     private BigDecimal delinquentPrincipal;
 
+    private LocalDate lastPaymentDate;
+    private BigDecimal lastPaymentAmount;
+    private LocalDate lastRepaymentDate;
+    private BigDecimal lastRepaymentAmount;
+
     public static WorkingCapitalLoanCollectionData initializeEmptyData() {
-        return new WorkingCapitalLoanCollectionData(0L, 0L, null, BigDecimal.ZERO, new ArrayList<>(), new ArrayList<>(), BigDecimal.ZERO);
+        final WorkingCapitalLoanCollectionData data = new WorkingCapitalLoanCollectionData();
+        data.setPastDueDays(0L);
+        data.setDelinquentDays(0L);
+        data.setDelinquentAmount(BigDecimal.ZERO);
+        data.setDelinquentPrincipal(BigDecimal.ZERO);
+        data.setDelinquencyPausePeriods(new ArrayList<>());
+        data.setInstallmentLevelDelinquency(new ArrayList<>());
+        return data;
     }
 }

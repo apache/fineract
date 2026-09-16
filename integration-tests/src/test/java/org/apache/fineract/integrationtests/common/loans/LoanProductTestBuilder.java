@@ -378,10 +378,7 @@ public class LoanProductTestBuilder {
     /**
      * Typed counterpart of {@link #build(String, Long)}, for callers on the Feign client.
      *
-     * Six keys the map carries have no counterpart on {@link PostLoanProductsRequest}:
-     * {@code syncExpectedWithDisbursementDate}, {@code mandatoryGuarantee}, {@code minimumGuaranteeFromGuarantor},
-     * {@code minimumGuaranteeFromOwnFunds}, {@code minimumGap} and {@code maximumGap}. Deserialising the map's JSON
-     * into the request model dropped them as unknown properties, so leaving them unset here sends the same body.
+     * Every key the map carries has a counterpart on {@link PostLoanProductsRequest}, so both paths send the same body.
      */
     public PostLoanProductsRequest buildRequest(final String chargeId, final Long delinquencyBucketId) {
         final PostLoanProductsRequest request = new PostLoanProductsRequest();
@@ -472,6 +469,11 @@ public class LoanProductTestBuilder {
         }
         if (this.holdGuaranteeFunds != null) {
             request.holdGuaranteeFunds(this.holdGuaranteeFunds);
+            if (this.holdGuaranteeFunds) {
+                request.mandatoryGuarantee(toBigDecimal(this.mandatoryGuarantee));
+                request.minimumGuaranteeFromGuarantor(toBigDecimal(this.minimumGuaranteeFromGuarantor));
+                request.minimumGuaranteeFromOwnFunds(toBigDecimal(this.minimumGuaranteeFromOwnFunds));
+            }
         }
         request.graceOnPrincipalPayment(toInteger(this.graceOnPrincipalPayment));
         request.graceOnInterestPayment(toInteger(this.graceOnInterestPayment));
@@ -480,6 +482,11 @@ public class LoanProductTestBuilder {
         }
         request.allowPartialPeriodInterestCalculation(this.allowPartialPeriodInterestCalculation);
         request.allowVariableInstallments(this.allowVariableInstallments);
+        if (this.allowVariableInstallments) {
+            request.minimumGap(this.minimumGap);
+            request.maximumGap(this.maximumGap);
+        }
+        request.syncExpectedWithDisbursementDate(this.syncExpectedWithDisbursementDate);
         if (this.installmentAmountInMultiplesOf != null) {
             request.installmentAmountInMultiplesOf(toInteger(this.installmentAmountInMultiplesOf));
         }
@@ -536,11 +543,12 @@ public class LoanProductTestBuilder {
     }
 
     /**
-     * The map form carries every amount as a string, sometimes with thousands separators ("15,000.00"). Strip them the
-     * way the JSON path used to before parsing.
+     * The map form carries every amount as a string, the way a user types it ("15,000.00"). The builder's locale is
+     * always English, so every comma is a grouping separator - including the lakh grouping of "1,00,000.00", which is
+     * not in groups of three.
      */
     private static String stripThousandsSeparators(final String value) {
-        return value.replaceAll("(?<=\\d),(?=\\d{3}(?!\\d))", "");
+        return value.replace(",", "");
     }
 
     private static boolean isBlank(final String value) {

@@ -18,120 +18,76 @@
  */
 package org.apache.fineract.integrationtests;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
-import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.GetLoansLoanIdStatus;
+import org.apache.fineract.client.models.PostLoansLoanIdRequest;
+import org.apache.fineract.client.models.PostLoansRequest;
+import org.apache.fineract.client.models.PostLoansRequestCollateralData;
+import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignCollateralHelper;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
+import org.apache.fineract.integrationtests.common.FineractFeignClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
-import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.fineract.portfolio.loanaccount.domain.LoanStatus;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("rawtypes")
-@ExtendWith(LoanTestLifecycleExtension.class)
-public class LoanDisbursalDateValidationTest {
+public class LoanDisbursalDateValidationTest extends FeignLoanTestBase {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LoanDisbursalDateValidationTest.class);
-    private ResponseSpecification responseSpec;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private ResponseSpecification responseForbiddenError;
-
-    @BeforeEach
-    public void setup() {
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.responseForbiddenError = new ResponseSpecBuilder().expectStatusCode(403).build();
-    }
+    private final FeignCollateralHelper collateralHelper = new FeignCollateralHelper(FineractFeignClientHelper.getFineractFeignClient());
 
     @Test
     public void loanApplicationValidateDisbursalDate() {
 
-        final String proposedAmount = "5000";
+        final Double proposedAmount = 5000.0;
         final String approveDate = "01 March 2014";
         final String disbursalDate = "02 March 2014";
 
-        // CREATE CLIENT
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
-        LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}", clientID);
+        final Long clientId = createClient("01 January 2014");
 
-        // CREATE LOAN PRODUCT
-        final Integer loanProductID = this.loanTransactionHelper
-                .getLoanProductId(new LoanProductTestBuilder().withSyncExpectedWithDisbursementDate(true).build(null));
-        LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
-                loanProductID);
+        final Long loanProductId = createLoanProduct(
+                new LoanProductTestBuilder().withSyncExpectedWithDisbursementDate(true).buildRequest(null));
 
-        // APPLY FOR LOAN
-        final Integer loanID = applyForLoanApplication(clientID, loanProductID, proposedAmount);
-        LOG.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}", loanID);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        final Long loanId = applyForLoanApplication(clientId, loanProductId, proposedAmount);
+        verifyLoanStatus(loanId, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL);
 
-        // VALIDATE THE LOAN STATUS
-        LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(proposedAmount, approveDate));
+        verifyLoanStatus(loanId, LoanStatus.APPROVED);
+        verifyLoanStatus(getLoanDetails(loanId), GetLoansLoanIdStatus::getWaitingForDisbursal);
 
-        LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(approveDate, loanID);
+        final BigDecimal netDisbursalAmount = getLoanDetails(loanId).getNetDisbursalAmount();
+        final PostLoansLoanIdRequest disbursement = new PostLoansLoanIdRequest()//
+                .actualDisbursementDate(disbursalDate)//
+                .netDisbursalAmount(netDisbursalAmount)//
+                .note("DISBURSE NOTE")//
+                .locale(LoanTestData.LOCALE)//
+                .dateFormat(LoanTestData.DATETIME_PATTERN);
 
-        // VALIDATE THE LOAN IS APPROVED
-        LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
+        final CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                () -> disburseLoan(loanId, disbursement));
 
-        // DISBURSE A LOAN
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        @SuppressWarnings("unchecked")
-        List<HashMap> disbursalError = (List<HashMap>) this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, loanID,
-                this.responseForbiddenError, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-
-        Assertions.assertEquals(disbursalError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE),
-                "error.msg.actual.disbursement.date.does.not.match.with.expected.disbursal.date");
-
+        assertEquals(403, exception.getStatus());
+        assertErrorGlobalisationCode(exception, "error.msg.actual.disbursement.date.does.not.match.with.expected.disbursal.date");
     }
 
-    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String proposedAmount) {
-        List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
-        Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
-        Assertions.assertNotNull(clientCollateralId);
-        addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
-        final String loanApplication = new LoanApplicationTestBuilder().withPrincipal(proposedAmount).withLoanTermFrequency("5")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("5").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withExpectedDisbursementDate("01 March 2014")
-                .withCollaterals(collaterals).withSubmittedOnDate("26 February 2014")
-                .build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplication);
-    }
+    private Long applyForLoanApplication(final Long clientId, final Long loanProductId, final Double proposedAmount) {
+        final Long collateralId = collateralHelper.createCollateralProduct().getResourceId();
+        assertNotNull(collateralId);
+        final Long clientCollateralId = collateralHelper.createClientCollateral(clientId, collateralId).getResourceId();
+        assertNotNull(clientCollateralId);
 
-    private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
-        collaterals.add(collaterals(collateralId, quantity));
+        final PostLoansRequest application = LoanRequestBuilders.applyLoan(clientId, loanProductId, "26 February 2014", proposedAmount, 5)//
+                .expectedDisbursementDate("01 March 2014")//
+                .interestRatePerPeriod(BigDecimal.valueOf(2))//
+                .interestType(LoanTestData.InterestType.FLAT)//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .collateral(List.of(new PostLoansRequestCollateralData().clientCollateralId(clientCollateralId).quantity(BigDecimal.ONE)));
+        return loanHelper.applyForLoan(application).getLoanId();
     }
-
-    private HashMap<String, String> collaterals(Integer collateralId, BigDecimal quantity) {
-        HashMap<String, String> collateral = new HashMap<String, String>(2);
-        collateral.put("clientCollateralId", collateralId.toString());
-        collateral.put("quantity", quantity.toString());
-        return collateral;
-    }
-
 }

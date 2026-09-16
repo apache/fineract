@@ -20,10 +20,37 @@ package org.apache.fineract.portfolio.workingcapitalloan.service;
 
 import java.time.LocalDate;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanTransaction;
 
 public interface WorkingCapitalLoanDiscountFeeAmortizationService {
 
     void processDiscountFeeAmortization(WorkingCapitalLoan loan, LocalDate transactionDate);
+
+    /**
+     * Recognizes the entire unreleased discount-fee deferred income balance in one shot as of a terminal event
+     * (charge-off or write-off), crediting the matching expense account instead of discount-fee income, and links the
+     * resulting transaction to {@code relatedTransaction} so it can be found and reversed on undo. No-op if there is
+     * nothing left to recognize.
+     */
+    void processFinalDiscountFeeAmortization(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction relatedTransaction);
+
+    /**
+     * Reverses the discount-fee amortization or amortization-adjustment transaction (and its journal entries) created
+     * by {@link #processFinalDiscountFeeAmortization} for {@code relatedTransaction}, if any.
+     */
+    void undoFinalDiscountFeeAmortization(WorkingCapitalLoan loan, WorkingCapitalLoanTransaction relatedTransaction);
+
+    /**
+     * Replays the terminal discount-fee correction linked to {@code relatedTransaction} (charge-off or write-off)
+     * against the current net discount pool. Handles both positive amortizations and negative amortization adjustments,
+     * including sign flips when a backdated discount-fee adjustment (or its undo) changes which side is required. No-op
+     * when nothing has ever been linked and the pool is already aligned; otherwise creates the missing correction via
+     * {@link #processFinalDiscountFeeAmortization}. Caller supplies the already-loaded {@code balance} and whether
+     * accounting posting is enabled.
+     */
+    void restateFinalDiscountFeeAmortization(WorkingCapitalLoan loan, WorkingCapitalLoanBalance balance,
+            WorkingCapitalLoanTransaction relatedTransaction, boolean accountingEnabled);
 
     /**
      * Recomputes {@code realizedIncomeFromDiscountFee} on the loan balance from the database aggregate of non-reversed

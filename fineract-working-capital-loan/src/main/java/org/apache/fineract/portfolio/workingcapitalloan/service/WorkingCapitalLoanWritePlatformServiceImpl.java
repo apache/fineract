@@ -38,6 +38,7 @@ import org.apache.fineract.infrastructure.core.api.JsonCommand;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResult;
 import org.apache.fineract.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
+import org.apache.fineract.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
@@ -53,6 +54,7 @@ import org.apache.fineract.infrastructure.event.business.domain.workingcapitallo
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanStatusChangedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanUndoApprovalBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.loan.WorkingCapitalLoanUndoDisbursalBusinessEvent;
+import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanCreditBalanceRefundTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanDisbursalTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanDiscountFeeAdjustmentTransactionBusinessEvent;
@@ -60,7 +62,6 @@ import org.apache.fineract.infrastructure.event.business.domain.workingcapitallo
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanGoodwillCreditTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanPayoutRefundTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanRepaymentTransactionBusinessEvent;
-import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanTransactionReversedBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.domain.workingcapitalloan.transaction.WorkingCapitalLoanUndoDisbursalTransactionBusinessEvent;
 import org.apache.fineract.infrastructure.event.business.service.BusinessEventNotifierService;
 import org.apache.fineract.infrastructure.security.service.PlatformSecurityContext;
@@ -72,8 +73,11 @@ import org.apache.fineract.portfolio.paymentdetail.domain.PaymentDetail;
 import org.apache.fineract.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.apache.fineract.portfolio.workingcapitalloan.WorkingCapitalLoanConstants;
 import org.apache.fineract.portfolio.workingcapitalloan.accounting.WorkingCapitalLoanAccountingProcessor;
+import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel;
+import org.apache.fineract.portfolio.workingcapitalloan.calc.ProjectedAmortizationScheduleModel.RateChangeSolve;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoan;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanBalance;
+import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanCharge;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanDisbursementDetails;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanEvent;
 import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoanLifecycleStateMachine;
@@ -114,6 +118,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     private final WorkingCapitalLoanTransactionAllocationRepository allocationRepository;
     private final PaymentDetailWritePlatformService paymentDetailService;
     private final WorkingCapitalLoanBalanceRepository balanceRepository;
+    private final WorkingCapitalLoanRecoveryPaymentWriteService recoveryPaymentWriteService;
     private final WorkingCapitalLoanAmortizationScheduleWriteService amortizationScheduleWriteService;
     private final CodeValueRepository codeValueRepository;
     private final BusinessEventNotifierService businessEventNotifierService;
@@ -122,6 +127,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
     private final WorkingCapitalLoanPeriodPaymentRateChangeRepository rateChangeRepository;
     private final WorkingCapitalLoanDiscountFeeAmortizationService discountFeeAmortizationService;
     private final WorkingCapitalLoanTransactionReprocessingService transactionReprocessingService;
+    private final WorkingCapitalLoanAdjustTransactionEventPublisher adjustTransactionEventPublisher;
     private final WorkingCapitalLoanChargeRepository chargeRepository;
     private final WorkingCapitalLoanDelinquencyRangeScheduleService delinquencyRangeScheduleService;
     private final WorkingCapitalLoanBreachScheduleService breachScheduleService;
@@ -520,9 +526,14 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
         final String note = this.fromApiJsonHelper.extractStringNamed(WorkingCapitalLoanConstants.noteParamName, command.parsedJson());
 
+        if (loan.isChargedOff()) {
+            throw new GeneralPlatformDomainRuleException("error.msg.wc.loan.is.charged.off",
+                    "Discount fee on Working Capital Loan " + loanId + " is not allowed. The loan is charged off.", loanId);
+        }
+
         validator.validateDiscountTransaction(loan, command.json(), amount, note);
 
-        if (loan.getLoanStatus() != LoanStatus.ACTIVE) {
+        if (!loan.isOpen()) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
                     "Add discount is allowed only for disbursed (active) loans", "loanStatus");
         }
@@ -533,12 +544,19 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
 
         final WorkingCapitalLoanTransaction relatedDisbursementTransaction = transactionRepository
-                .findById(relatedDisbursementTransactionId)
+                .findByIdAndWcLoan_Id(relatedDisbursementTransactionId, loanId)
                 .orElseThrow(() -> new PlatformApiDataValidationException("validation.msg.wc.loan.disbursement.transaction.not.found",
-                        "Disbursement transaction not found", "disbursementTransaction"));
+                        "Disbursement transaction not found", WorkingCapitalLoanConstants.relatedResourceIdParamName));
+        if (!relatedDisbursementTransaction.getTypeOf().isDisbursement() || relatedDisbursementTransaction.isReversed()) {
+            throw new PlatformApiDataValidationException("validation.msg.wc.loan.disbursement.transaction.invalid",
+                    "Related transaction must be an active disbursement transaction of the same loan",
+                    WorkingCapitalLoanConstants.relatedResourceIdParamName);
+        }
 
-        boolean alreadyHasDiscount = relationRepository.findByToTransactionAndFromTransactionReversedAndFromTransactionTransactionType(
-                relatedDisbursementTransaction, false, LoanTransactionType.DISCOUNT_FEE).isPresent();
+        // Loan-scoped, not disbursement-scoped: the discount, the amortization schedule and the unrealized income are
+        // all held on the loan, so a second discount fee against any disbursement would desynchronize them for good.
+        final boolean alreadyHasDiscount = !transactionRepository.findActiveByTypeOrderByIdDesc(loanId, LoanTransactionType.DISCOUNT_FEE)
+                .isEmpty();
         if (alreadyHasDiscount) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.discount.already.set.before.disbursement",
                     "Discount was already set before disbursement and cannot be added again",
@@ -613,6 +631,16 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 .localDateValueOfParameterNamed(WorkingCapitalLoanConstants.transactionDateParamName);
         final LocalDate transactionDate = requestedTransactionDate != null ? requestedTransactionDate
                 : relatedDiscountTransaction.getTransactionDate();
+        // Charge-off is a terminal write-off: a discount-fee adjustment dated on or after the charge-off date is
+        // rejected. Only a backdated adjustment (before the charge-off date) is allowed, since it corrects something
+        // that happened before the loan was written off -- the charge-off's final amortization is restated below to
+        // account for it.
+        if (loan.isChargedOff() && loan.getChargedOffOnDate() != null && !transactionDate.isBefore(loan.getChargedOffOnDate())) {
+            throw new GeneralPlatformDomainRuleException("error.msg.wc.loan.is.charged.off",
+                    "Discount fee adjustment on Working Capital Loan " + loanId
+                            + " is not allowed on or after the charge-off date. The loan is charged off.",
+                    loanId);
+        }
         validator.validateDiscountAdjustmentTransaction(loan, command.json(), amount, relatedDiscountTransaction, remainingDiscountAmount,
                 transactionDate);
         final Long classificationId = command.longValueOfParameterNamed(WorkingCapitalLoanConstants.classificationIdParamName);
@@ -648,9 +676,22 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived.
         delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
+        // Backdated adjustment on an already charged-off loan (validated above to predate the charge-off): reprocess
+        // to replay the charge-off's final lump-sum amortization against the reduced discount pool, the same way a
+        // backdated repayment reprocess replays the charge-off transaction itself.
+        // if the loan has active charges, then reprocess is mandatory to properly allocate transactions
+        // if the loan has an overpayment amount, then partial reprocess is mandatory to properly allocate transactions
+        // to overpayment
+        final List<WorkingCapitalLoanCharge> charges = chargeRepository.findByLoanIdAndActiveTrueOrderByDueDateAscIdAsc(loanId);
+        if (!charges.isEmpty() || loan.isChargedOff()
+                || (loan.getBalance() != null && MathUtil.isGreaterThanZero(loan.getBalance().getOverpaymentAmount()))) {
+            transactionReprocessingService.reprocessTransactions(loan);
+        }
+
         final LoanStatus oldStatus = loan.getLoanStatus();
 
         stateMachine.determineAndTransition(loan, transactionDate);
+        transactionProcessor.recalculateOverpaidOnDate(loan, adjustmentTransaction);
         transactionProcessor.triggerInlineAmortizationIfLoanClosed(loan, transactionDate);
         // A discount-fee adjustment can pay down principal and close the loan, so accrue any pending charge income.
         chargeAccrualService.accrueOnClosure(loan, transactionDate);
@@ -686,6 +727,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                         "Working capital loan transaction not found", WorkingCapitalLoanConstants.transactionIdParamName));
         return switch (transaction.getTypeOf()) {
             case DISCOUNT_FEE_ADJUSTMENT -> undoDiscountFeeAdjustment(loan, transaction, command);
+            // A recovery payment never entered the balance, so the generic undo (which rewinds an allocation and
+            // replays the schedule) does not apply: it has its own reversal, allowed while the loan is written off.
+            case RECOVERY_REPAYMENT -> recoveryPaymentWriteService.undoRecoveryPayment(loan, transaction, command);
             case REPAYMENT, GOODWILL_CREDIT, CHARGE_ADJUSTMENT, PAYOUT_REFUND -> undoTransaction(loan, transaction, command);
             default -> throw new PlatformApiDataValidationException("validation.msg.wc.loan.transaction.undo.not.supported",
                     "Undo is not supported for transaction type " + transaction.getTypeOf(),
@@ -709,6 +753,20 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // The principal change moves the remaining-balance cap, so the delinquency schedule must be re-derived.
         delinquencyRangeScheduleService.reprocessDelinquencySchedule(loan);
 
+        // Undoing a backdated adjustment on an already charged-off loan must reprocess, so the charge-off's final
+        // lump-sum amortization is replayed back up against the restored discount pool instead of being left stranded
+        // at the smaller, adjusted amount.
+        //
+        // Deliberately narrower than makeDiscountFeeAdjustment, which also reprocesses when the loan has active
+        // charges or an overpayment. An undo restores the discount, so it only ever raises the amount due: it cannot
+        // reallocate money into an overpayment, and validateUndoDiscountAdjustmentTransaction rejects an OVERPAID loan
+        // outright, so neither of those two cases has anything to correct here. By the same argument the transition
+        // below can only reopen the loan to ACTIVE and never leave it OVERPAID, which is why this path -- unlike the
+        // repayment undo -- needs no overpaidOnDate recalculation: the ACTIVE transition already clears the date.
+        if (loan.isChargedOff()) {
+            transactionReprocessingService.reprocessTransactions(loan);
+        }
+
         // Restoring the outstanding can reopen a loan the adjustment had closed, so re-run the status transition.
         final LocalDate reversedOnDate = adjustmentTransaction.getReversedOnDate();
         final LoanStatus oldStatus = loan.getLoanStatus();
@@ -720,8 +778,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName);
         createNote(noteText, loan);
 
-        businessEventNotifierService
-                .notifyPostBusinessEvent(new WorkingCapitalLoanTransactionReversedBusinessEvent(adjustmentTransaction, loan.getId()));
+        adjustTransactionEventPublisher.publishReversal(loan.getId(), adjustmentTransaction);
         notifyBalanceChanged(loan);
         notifyStatusChanged(loan, oldStatus);
 
@@ -843,7 +900,7 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         this.validator.validateCreditBalanceRefund(command.json(), loan);
 
         final LoanStatus oldStatus = loan.getLoanStatus();
-        if (loan.getLoanStatus() != LoanStatus.OVERPAID) {
+        if (!loan.isOverpaid()) {
             throw new PlatformApiDataValidationException("validation.msg.wc.loan.transition.not.allowed",
                     "Credit balance refund is allowed only for overpaid loans", "loanStatus");
         }
@@ -990,7 +1047,9 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // The rate on the loan's product-related details is deliberately left alone. It records the rate the loan was
         // created with - the base every schedule rebuild starts from - and is a loan-product-level value, not a
         // running "current rate". What is in force on any given date is derived from the history above.
-        this.amortizationScheduleWriteService.regenerateAmortizationScheduleOnRateChange(loan);
+        final ProjectedAmortizationScheduleModel model = this.amortizationScheduleWriteService
+                .regenerateAmortizationScheduleOnRateChange(loan);
+        recordCalculatedValues(rateChange, model);
 
         final String noteText = command.stringValueOfParameterNamed(WorkingCapitalLoanConstants.noteParamName);
         createNote(noteText, loan);
@@ -1010,6 +1069,18 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(rateChange.getId())
                 .withOfficeId(loan.getOfficeId()).withClientId(loan.getClientId()).withLoanId(loanId).with(changes).build();
+    }
+
+    void recordCalculatedValues(final WorkingCapitalLoanPeriodPaymentRateChange rateChange,
+            final ProjectedAmortizationScheduleModel model) {
+        final RateChangeSolve solve = model.rateChangeSolveOn(rateChange.getEffectiveDate());
+        if (solve == null) {
+            log.warn("Rebuilt schedule solved no rate change on the effective date of rate change {} ({}); calculated values left unset",
+                    rateChange.getId(), rateChange.getEffectiveDate());
+            return;
+        }
+        rateChange.applyCalculatedValues(solve.calculatedAnnualEir(), solve.dailyPayment().getAmount(), solve.term());
+        this.rateChangeRepository.save(rateChange);
     }
 
     public CommandProcessingResult undoTransaction(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction transaction,
@@ -1065,13 +1136,14 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         }
 
         stateMachine.determineAndTransition(loan, DateUtils.getBusinessLocalDate());
+        transactionProcessor.recalculateOverpaidOnDate(loan, transaction);
+
         changes.put("status", loan.getLoanStatus());
 
         handleNote(loan, command, changes);
 
         this.loanRepository.saveAndFlush(loan);
-        businessEventNotifierService
-                .notifyPostBusinessEvent(new WorkingCapitalLoanTransactionReversedBusinessEvent(transaction, loan.getId()));
+        adjustTransactionEventPublisher.publishReversal(loan.getId(), transaction);
         notifyBalanceChanged(loan);
         notifyStatusChanged(loan, oldStatus);
 
@@ -1238,6 +1310,8 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         // Reverse the journal entries of any charge accrual so the recognized income/receivable is backed out with the
         // disbursement; marking the transaction reversed alone would leave the GL postings in place.
         accrualsToReverse.forEach(accrual -> accountingProcessor.postReversalJournalEntries(loan, accrual));
+        accrualsToReverse.forEach(accrual -> businessEventNotifierService
+                .notifyPostBusinessEvent(new WorkingCapitalLoanAccrualAdjustmentTransactionBusinessEvent(accrual, loan.getId())));
 
         // Operate on loan.getBalance() directly: it is the single managed balance instance that
         // recalculateRealizedIncome writes to, so all updates here apply to the same object that gets persisted.

@@ -37,10 +37,7 @@ public class ReplayedTransactionBusinessEventServiceImpl implements ReplayedTran
         if (changedTransactionDetail == null || changedTransactionDetail.getTransactionChanges().isEmpty()) {
             return;
         }
-        // Extra safety net to avoid event leaking
-        try {
-            businessEventNotifierService.startExternalEventRecording();
-
+        businessEventNotifierService.withExternalEventRecording(() -> {
             for (TransactionChangeData change : changedTransactionDetail.getTransactionChanges()) {
                 final LoanTransaction newTransaction = change.getNewTransaction();
                 final LoanTransaction oldTransaction = change.getOldTransaction();
@@ -53,10 +50,6 @@ public class ReplayedTransactionBusinessEventServiceImpl implements ReplayedTran
                     businessEventNotifierService.notifyPostBusinessEvent(new LoanAdjustTransactionBusinessEvent(data));
                 }
             }
-            businessEventNotifierService.stopExternalEventRecording();
-        } catch (Exception e) {
-            businessEventNotifierService.resetEventRecording();
-            throw e;
-        }
+        });
     }
 }

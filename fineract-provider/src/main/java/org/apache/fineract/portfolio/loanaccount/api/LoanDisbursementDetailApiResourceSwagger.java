@@ -26,6 +26,25 @@ public final class LoanDisbursementDetailApiResourceSwagger {
 
     private LoanDisbursementDetailApiResourceSwagger() {}
 
+    @Schema(description = "PutLoansLoanIdDisbursementsDisbursementIdRequest")
+    public static final class PutLoansLoanIdDisbursementsDisbursementIdRequest {
+
+        private PutLoansLoanIdDisbursementsDisbursementIdRequest() {}
+
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "en")
+        public String locale;
+        @Schema(example = "5000")
+        public BigDecimal approvedLoanAmount;
+        @Schema(example = "01 March 2014")
+        public String expectedDisbursementDate;
+        @Schema(example = "01 March 2014", description = "The new expected disbursement date of the tranche")
+        public String updatedExpectedDisbursementDate;
+        @Schema(example = "900", description = "The new principal of the tranche")
+        public BigDecimal updatedPrincipal;
+    }
+
     @Schema(description = "PostAddAndDeleteDisbursementDetailRequest")
     public static final class PostAddAndDeleteDisbursementDetailRequest {
 

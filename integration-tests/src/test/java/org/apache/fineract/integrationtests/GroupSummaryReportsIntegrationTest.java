@@ -18,38 +18,30 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
-import java.util.Locale;
-import org.apache.fineract.integrationtests.common.GroupHelper;
-import org.apache.fineract.integrationtests.common.Utils;
+import java.util.List;
+import java.util.Map;
+import org.apache.fineract.integrationtests.client.FeignIntegrationTest;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignGroupHelper;
+import org.apache.fineract.integrationtests.client.feign.helpers.FeignReportHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class GroupSummaryReportsIntegrationTest extends BaseLoanIntegrationTest {
+public class GroupSummaryReportsIntegrationTest extends FeignIntegrationTest {
 
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
+    private FeignGroupHelper groupHelper;
+    private FeignReportHelper reportHelper;
 
     @BeforeEach
     public void setup() {
-        Locale.setDefault(Locale.ENGLISH);
-        Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        groupHelper = new FeignGroupHelper(fineractClient());
+        reportHelper = new FeignReportHelper(fineractClient());
     }
 
     @Test
     public void shouldRunGroupSummaryReportsWithNumericGroupIdParameter() {
-        final Integer groupId = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
+        final Long groupId = groupHelper.createActiveGroup().getGroupId();
         assertNotNull(groupId);
 
         assertGroupSummaryReportRuns("GroupSummaryCounts", groupId);
@@ -57,11 +49,15 @@ public class GroupSummaryReportsIntegrationTest extends BaseLoanIntegrationTest 
         assertGroupSummaryReportRuns("GroupSavingSummary", groupId);
     }
 
-    private void assertGroupSummaryReportRuns(final String reportName, final Integer groupId) {
-        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, "/fineract-provider/api/v1/runreports/"
-                + reportName + "?R_groupId=" + groupId + "&genericResultSet=false&" + Utils.TENANT_IDENTIFIER, null);
+    /**
+     * The reports compare {@code R_groupId} against a {@code bigint} column, so the parameter has to be registered as
+     * numeric (FINERACT-2691). Registered as a string, PostgreSQL rejects the comparison with "operator does not exist:
+     * bigint = character varying" and the report never produces rows - so running it is the assertion. The error
+     * surfaces either as a failure status or as a body that is not the array of rows; neither decodes here.
+     */
+    private void assertGroupSummaryReportRuns(final String reportName, final Long groupId) {
+        final List<Map<String, Object>> rows = reportHelper.runReportRows(reportName, Map.of("R_groupId", groupId.toString()));
 
-        assertNotNull(response);
-        assertFalse(response.toLowerCase(Locale.ROOT).contains("operator does not exist"));
+        assertNotNull(rows, reportName + " returned no result set");
     }
 }

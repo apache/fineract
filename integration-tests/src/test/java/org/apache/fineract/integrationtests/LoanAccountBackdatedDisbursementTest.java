@@ -20,55 +20,28 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
+import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
 import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
+import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PutGlobalConfigurationsRequest;
-import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.configuration.api.GlobalConfigurationConstants;
 import org.apache.fineract.integrationtests.client.feign.FeignLoanTestBase;
-import org.apache.fineract.integrationtests.common.BusinessDateHelper;
-import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.CommonConstants;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanRequestBuilders;
+import org.apache.fineract.integrationtests.client.feign.modules.LoanTestData;
 import org.apache.fineract.integrationtests.common.Utils;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
-import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
-
-    protected RequestSpecification requestSpec;
-    protected ResponseSpecification responseSpec;
-    protected LoanTransactionHelper loanTransactionHelper;
-    protected JournalEntryHelper journalEntryHelper;
-
-    @BeforeEach
-    @SuppressWarnings("removal")
-    public void setupREST() {
-        Utils.initializeRESTAssured();
-
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
-    }
 
     @Test
     public void loanAccountBackDatedDisbursementForLoanProductWithEnableDownPaymentAndScheduleStartDateTypeAsDisbursementDateTest() {
@@ -79,12 +52,12 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(businessDate.toString());
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Long clientId = createClient();
 
             // set repayment start date type as disbursement date
             final Integer repaymentStartDateType = 1;
@@ -97,7 +70,7 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
             // Loan Product creation with repayment start date type and down payment configuration with multi
             // disbursement
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithRepaymentStartDateTypeConfigurationAndMultipleDisbursements(
-                    loanTransactionHelper, repaymentStartDateType, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
+                    repaymentStartDateType, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
 
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(repaymentStartDateType, getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
@@ -109,12 +82,12 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             // create loan account with submitted date as business date (03 March 2023) and expected disbursement date
             // as future date (07 March 2023)
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
                     loanExternalIdStr);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails);
             assertNotNull(loanDetails.getRepaymentSchedule());
@@ -153,11 +126,11 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             businessDate = LocalDate.of(2023, 3, 7);
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(businessDate.toString());
 
-            loanTransactionHelper.disburseLoanWithTransactionAmount("07 March 2023", loanId, "500");
+            disburseLoan(loanId, "07 March 2023", 500.0);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             // verify loan schedule is according to disbursement date after first disbursement
             assertNotNull(loanDetails);
@@ -195,11 +168,11 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // make repayment on 7 March to pay down payment installment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 March 2023").locale("en")
                             .transactionAmount(125.00));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails);
             assertNotNull(loanDetails.getRepaymentSchedule());
@@ -243,13 +216,13 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             businessDate = LocalDate.of(2023, 3, 8);
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(businessDate.toString());
 
             // second disbursement backdated 5 March
 
-            loanTransactionHelper.disburseLoanWithTransactionAmount("05 March 2023", loanId, "500");
+            disburseLoan(loanId, "05 March 2023", 500.0);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             // verify loan schedule is according to backdated disbursement date after second disbursement
 
@@ -317,12 +290,12 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(businessDate.toString());
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Long clientId = createClient();
 
             // set repayment start date type as submitted on date
             final Integer repaymentStartDateType = 2;
@@ -335,7 +308,7 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
             // Loan Product creation with repayment start date type and down payment configuration with multi
             // disbursement
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithRepaymentStartDateTypeConfigurationAndMultipleDisbursements(
-                    loanTransactionHelper, repaymentStartDateType, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
+                    repaymentStartDateType, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
 
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(repaymentStartDateType, getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
@@ -347,12 +320,12 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             // create loan account with submitted date as business date (03 March 2023) and expected disbursement date
             // as future date (07 March 2023)
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
                     loanExternalIdStr);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails);
 
@@ -395,11 +368,11 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             businessDate = LocalDate.of(2023, 3, 7);
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(businessDate.toString());
 
-            loanTransactionHelper.disburseLoanWithTransactionAmount("07 March 2023", loanId, "500");
+            disburseLoan(loanId, "07 March 2023", 500.0);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             // verify loan schedule is according to submitted date after first disbursement
             assertNotNull(loanDetails);
@@ -437,11 +410,11 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // make repayment on 7 March to pay downpayment insatllment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 March 2023").locale("en")
                             .transactionAmount(125.00));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails);
             assertNotNull(loanDetails.getRepaymentSchedule());
@@ -479,12 +452,12 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             businessDate = LocalDate.of(2023, 3, 8);
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(businessDate.toString());
 
             // second disbursement backdated 5 March
-            loanTransactionHelper.disburseLoanWithTransactionAmount("05 March 2023", loanId, "500");
+            disburseLoan(loanId, "05 March 2023", 500.0);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             // verify loan schedule is according to submitted date after second disbursement
 
@@ -548,12 +521,12 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(businessDate.toString());
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Long clientId = createClient();
 
             // set repayment start date type as disbursement date
             final Integer repaymentStartDateType = 1;
@@ -566,7 +539,7 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
             // Loan Product creation with repayment start date type and down payment configuration with multi
             // disbursement
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithRepaymentStartDateTypeConfigurationAndMultipleDisbursements(
-                    loanTransactionHelper, repaymentStartDateType, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
+                    repaymentStartDateType, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
 
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(repaymentStartDateType, getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
@@ -578,12 +551,12 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             // create loan account with submitted date as business date (03 March 2023) and expected disbursement date
             // as future date (07 March 2023)
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
                     loanExternalIdStr);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails);
 
@@ -626,11 +599,11 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             businessDate = LocalDate.of(2023, 3, 7);
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(businessDate.toString());
 
-            loanTransactionHelper.disburseLoanWithTransactionAmount("07 March 2023", loanId, "500");
+            disburseLoan(loanId, "07 March 2023", 500.0);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             // verify loan schedule is according to disbursement date after first disbursement
             assertNotNull(loanDetails);
@@ -668,11 +641,11 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
 
             // make repayment on 7 March to pay downpayment insatllment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 March 2023").locale("en")
                             .transactionAmount(125.00));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails);
             assertNotNull(loanDetails.getRepaymentSchedule());
@@ -716,14 +689,14 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
             // set business date to next repayment due business date
             businessDate = LocalDate.of(2023, 4, 7);
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(businessDate.toString());
 
             // make 2nd repayment on 7 April to pay installment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 April 2023").locale("en")
                             .transactionAmount(125.00));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails);
             assertNotNull(loanDetails.getRepaymentSchedule());
@@ -765,9 +738,9 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             // make backdate disbursement for 5 march with business date 7 April
 
-            loanTransactionHelper.disburseLoanWithTransactionAmount("05 March 2023", loanId, "500");
+            disburseLoan(loanId, "05 March 2023", 500.0);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             // verify loan schedule is according to backdated disbursement date after second disbursement
 
@@ -829,20 +802,17 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
     @Test
     public void loanAccountBackDatedDisbursementWithDisbursementDateBeforeLoanSubmittedOnDateValidationTest() {
         try {
-            final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
-            final LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(this.requestSpec, errorResponse);
-
             // Set business date
             LocalDate businessDate = LocalDate.of(2023, 3, 3);
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(businessDate.toString());
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Long clientId = createClient();
 
             // set repayment start date type as disbursement date
             final Integer repaymentStartDateType = 1;
@@ -855,7 +825,7 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
             // Loan Product creation with repayment start date type and down payment configuration with multi
             // disbursement
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithRepaymentStartDateTypeConfigurationAndMultipleDisbursements(
-                    loanTransactionHelper, repaymentStartDateType, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
+                    repaymentStartDateType, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
 
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(repaymentStartDateType, getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
@@ -867,12 +837,12 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             // create loan account with submitted date as business date (03 March 2023) and expected disbursement date
             // as future date (07 March 2023)
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
                     loanExternalIdStr);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
             assertNotNull(loanDetails);
             assertNotNull(loanDetails.getRepaymentSchedule());
 
@@ -907,10 +877,10 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(4).getTotalInstallmentAmountForPeriod()));
             // first disbursement on a future date (7 March 2023)
             businessDate = LocalDate.of(2023, 3, 7);
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
-            loanTransactionHelper.disburseLoanWithTransactionAmount("07 March 2023", loanId, "500");
+            updateBusinessDate(businessDate.toString());
+            disburseLoan(loanId, "07 March 2023", 500.0);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails);
             assertNotNull(loanDetails.getRepaymentSchedule());
@@ -925,12 +895,11 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
             assertEquals(LocalDate.of(2023, 4, 7), loanDetails.getRepaymentSchedule().getPeriods().get(2).getDueDate());
 
             // second disbursement backdated for 2 nd March 2023 before loan submission date
-            List<HashMap<String, Object>> loanErrorData = (List<HashMap<String, Object>>) validationErrorHelper
-                    .disburseLoanWithTransactionAmountWithError("02 March 2023", loanId, "500", CommonConstants.RESPONSE_ERROR);
-            assertNotNull(loanErrorData);
-            assertEquals("Loan can't be disbursed before 2023-03-03", loanErrorData.get(0).get("defaultUserMessage"));
-            assertEquals("error.msg.loan.actualdisbursementdate.before.submittedDate",
-                    loanErrorData.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
+            CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
+                    () -> disburseLoan(loanId, "02 March 2023", 500.0));
+            assertEquals(403, exception.getStatus());
+            assertErrorGlobalisationCode(exception, "error.msg.loan.actualdisbursementdate.before.submittedDate");
+            assertTrue(exception.getResponseBody().contains("Loan can't be disbursed before 2023-03-03"));
 
         } finally {
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
@@ -947,12 +916,12 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
                     new PutGlobalConfigurationsRequest().enabled(true));
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(businessDate.toString());
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Long clientId = createClient();
 
             // set repayment start date type as disbursement date
             final Integer repaymentStartDateType = 1;
@@ -964,7 +933,7 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
             // Loan Product creation with repayment start date type and down payment configuration with multi
             // disbursement
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithRepaymentStartDateTypeConfigurationAndMultipleDisbursements(
-                    loanTransactionHelper, repaymentStartDateType, enableDownPayment, null, enableAutoRepaymentForDownPayment);
+                    repaymentStartDateType, enableDownPayment, null, enableAutoRepaymentForDownPayment);
 
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(repaymentStartDateType, getLoanProductsProductResponse.getRepaymentStartDateType().getId().intValue());
@@ -973,12 +942,12 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             // create loan account with submitted date as business date (03 March 2023) and expected disbursement date
             // as future date (07 March 2023)
-            final Integer loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
+            final Long loanId = createLoanAccountMultipleRepaymentsDisbursement(clientId, getLoanProductsProductResponse.getId(),
                     loanExternalIdStr);
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails);
             assertNotNull(loanDetails.getRepaymentSchedule());
@@ -1011,11 +980,11 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             businessDate = LocalDate.of(2023, 3, 7);
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(businessDate.toString());
 
-            loanTransactionHelper.disburseLoanWithTransactionAmount("07 March 2023", loanId, "500");
+            disburseLoan(loanId, "07 March 2023", 500.0);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             // verify loan schedule is according to disbursement date after first disbursement
             assertNotNull(loanDetails);
@@ -1049,11 +1018,11 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
                     Utils.getDoubleValue(loanDetails.getRepaymentSchedule().getPeriods().get(3).getTotalInstallmentAmountForPeriod()));
 
             // make repayment on 7 March to pay installment
-            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+            final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = makeLoanRepayment(loanExternalIdStr,
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 March 2023").locale("en")
                             .transactionAmount(166.67));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             assertNotNull(loanDetails);
             assertNotNull(loanDetails.getRepaymentSchedule());
@@ -1089,13 +1058,13 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
 
             businessDate = LocalDate.of(2023, 3, 8);
 
-            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, businessDate);
+            updateBusinessDate(businessDate.toString());
 
             // second disbursement backdated 5 March
 
-            loanTransactionHelper.disburseLoanWithTransactionAmount("05 March 2023", loanId, "500");
+            disburseLoan(loanId, "05 March 2023", 500.0);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = getLoanDetails(loanId);
 
             // verify loan schedule is according to backdated disbursement date after second disbursement
 
@@ -1141,34 +1110,29 @@ public class LoanAccountBackdatedDisbursementTest extends FeignLoanTestBase {
         }
     }
 
-    private Integer createLoanAccountMultipleRepaymentsDisbursement(final Integer clientID, final Long loanProductID,
-            final String externalId) {
+    private Long createLoanAccountMultipleRepaymentsDisbursement(final Long clientId, final Long loanProductId, final String externalId) {
+        final PostLoansRequest application = LoanRequestBuilders.applyLoan(clientId, loanProductId, "03 March 2023", 1000.0, 3)//
+                .expectedDisbursementDate("07 March 2023")//
+                .amortizationType(LoanTestData.AmortizationType.EQUAL_PRINCIPAL)//
+                .externalId(externalId);
 
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("3")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("3").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsDecliningBalance()
-                .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
-                .withExpectedDisbursementDate("07 March 2023").withSubmittedOnDate("03 March 2023").withLoanType("individual")
-                .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
-
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan("03 March 2023", "1000", loanId, null);
+        final Long loanId = loanHelper.applyForLoan(application).getLoanId();
+        approveLoan(loanId, LoanRequestBuilders.approveLoan(1000.0, "03 March 2023"));
         return loanId;
     }
 
     private GetLoanProductsProductIdResponse createLoanProductWithRepaymentStartDateTypeConfigurationAndMultipleDisbursements(
-            LoanTransactionHelper loanTransactionHelper, final Integer repaymentStartDateType, final Boolean enableDownPayment,
-            final String disbursedAmountPercentageForDownPayment, final boolean enableAutoRepaymentForDownPayment) {
-        final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
+            final Integer repaymentStartDateType, final Boolean enableDownPayment, final String disbursedAmountPercentageForDownPayment,
+            final boolean enableAutoRepaymentForDownPayment) {
+        final Long loanProductId = createLoanProduct(new LoanProductTestBuilder().withPrincipal("1000").withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery("1").withNumberOfRepayments("3").withRepaymentTypeAsMonth().withinterestRatePerPeriod("0")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsDecliningBalance()
                 .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).withDaysInMonth("30").withDaysInYear("365")
                 .withMoratorium("0", "0").withMultiDisburse().withDisallowExpectedDisbursements(true)
                 .withRepaymentStartDateType(repaymentStartDateType)
                 .withEnableDownPayment(enableDownPayment, disbursedAmountPercentageForDownPayment, enableAutoRepaymentForDownPayment)
-                .build(null);
-        final Integer loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
-        return loanTransactionHelper.getLoanProduct(loanProductId);
+                .buildRequest(null));
+        return retrieveLoanProduct(loanProductId);
     }
 
 }

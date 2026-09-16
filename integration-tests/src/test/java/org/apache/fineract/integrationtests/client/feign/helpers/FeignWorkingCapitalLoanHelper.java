@@ -23,11 +23,18 @@ import static org.apache.fineract.client.feign.util.FeignCalls.ok;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.feign.util.CallFailedRuntimeException;
+import org.apache.fineract.client.models.ChargeData;
 import org.apache.fineract.client.models.ChargeRequest;
 import org.apache.fineract.client.models.CommandProcessingResult;
 import org.apache.fineract.client.models.ExecuteWorkingCapitalLoanTransactionCommandRequest;
@@ -36,11 +43,15 @@ import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionIdRespo
 import org.apache.fineract.client.models.GetWorkingCapitalLoanTransactionsResponse;
 import org.apache.fineract.client.models.GetWorkingCapitalLoansLoanIdResponse;
 import org.apache.fineract.client.models.InlineJobRequest;
+import org.apache.fineract.client.models.MarkWorkingCapitalLoanAsFraudRequest;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdChargesResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoanTransactionsResponse;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansBreachActionRequest;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansBreachActionResponse;
+import org.apache.fineract.client.models.PostWorkingCapitalLoansDelinquencyActionRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesChargeIdRequest;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesChargeIdResponse;
 import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdRequest;
@@ -52,12 +63,17 @@ import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdDiscountReq
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRateRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdRequest;
 import org.apache.fineract.client.models.PutWorkingCapitalLoansLoanIdResponse;
+import org.apache.fineract.client.models.WorkingCapitalLoanBreachActionData;
 import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.client.models.WorkingCapitalLoanChargeData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.client.models.WorkingCapitalLoanPeriodPaymentRateChangeData;
+import org.apache.fineract.client.models.WorkingCapitalLoanTransactionTemplateResponse;
 
 public class FeignWorkingCapitalLoanHelper {
+
+    private static final String TEMPLATE_DATE_FORMAT = "dd MMMM yyyy";
+    private static final String TEMPLATE_LOCALE = "en";
 
     private final FineractFeignClient fineractClient;
 
@@ -140,6 +156,10 @@ public class FeignWorkingCapitalLoanHelper {
         return response.getResourceId();
     }
 
+    public void undoTransaction(Long loanId, Long transactionId) {
+        undoTransaction(loanId, transactionId, new ExecuteWorkingCapitalLoanTransactionCommandRequest());
+    }
+
     public Long makeGoodwillCredit(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
         PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionById(loanId, "goodwillCredit", request));
@@ -152,10 +172,52 @@ public class FeignWorkingCapitalLoanHelper {
         return response.getResourceId();
     }
 
+    public CallFailedRuntimeException makeDiscountFeeExpectingFailure(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId, "discountFee",
+                request));
+    }
+
     public Long makeDiscountFeeAdjustment(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
         PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
                 .executeWorkingCapitalLoanTransactionById(loanId, "discountFeeAdjustment", request));
         return response.getResourceId();
+    }
+
+    public Long payoutRefund(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "payoutRefund", request));
+        return response.getResourceId();
+    }
+
+    public Long chargeOff(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "chargeOff", request));
+        return response.getResourceId();
+    }
+
+    public Long undoChargeOff(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        PostWorkingCapitalLoanTransactionsResponse response = ok(() -> fineractClient.workingCapitalLoanTransactions()
+                .executeWorkingCapitalLoanTransactionById(loanId, "undoChargeOff", request));
+        return response.getResourceId();
+    }
+
+    public CallFailedRuntimeException chargeOffExpectingFailure(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId, "chargeOff",
+                request));
+    }
+
+    /**
+     * Fetches the transaction template for one command. Pass {@code transactionDate} to quote the amount as of that
+     * date, or null to let the server default it to the business date - the date carries its format and locale with it,
+     * so a caller that does not care about the date can omit all three.
+     */
+    public WorkingCapitalLoanTransactionTemplateResponse getTransactionTemplate(Long loanId, String command, String transactionDate) {
+        return ok(() -> fineractClient.workingCapitalLoanTransactions().getWorkingCapitalLoanTransactionTemplateById(loanId, command,
+                transactionDate == null ? null : TEMPLATE_DATE_FORMAT, transactionDate, transactionDate == null ? null : TEMPLATE_LOCALE));
+    }
+
+    public GetWorkingCapitalLoanTransactionIdResponse getTransaction(Long loanId, Long transactionId) {
+        return ok(() -> fineractClient.workingCapitalLoanTransactions().retrieveWorkingCapitalLoanTransactionById(loanId, transactionId));
     }
 
     public Long creditBalanceRefund(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
@@ -202,12 +264,38 @@ public class FeignWorkingCapitalLoanHelper {
         return response.getResourceId();
     }
 
+    public CallFailedRuntimeException addChargeExpectingFailure(Long loanId, PostLoansLoanIdChargesRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoanCharges().createLoanCharge(loanId, request));
+    }
+
+    public List<ChargeData> getChargeTemplateOptions(Long loanId) {
+        WorkingCapitalLoanChargeData template = ok(
+                () -> fineractClient.workingCapitalLoanCharges().retrieveTemplateWorkingCapitalLoanCharge(loanId));
+        return template.getChargeOptions() != null ? template.getChargeOptions() : List.of();
+    }
+
     public List<WorkingCapitalLoanChargeData> getCharges(Long loanId) {
         return ok(() -> fineractClient.workingCapitalLoanCharges().retrieveAllWorkingCapitalLoanChargesByLoanId(loanId));
     }
 
     public List<WorkingCapitalLoanBreachScheduleData> getBreachSchedule(Long loanId) {
         return ok(() -> fineractClient.workingCapitalLoanBreachSchedule().retrieveBreachSchedule(loanId));
+    }
+
+    public Long createBreachAction(Long loanId, PostWorkingCapitalLoansBreachActionRequest request) {
+        PostWorkingCapitalLoansBreachActionResponse response = ok(
+                () -> fineractClient.workingCapitalLoanBreachActions().createBreachAction(loanId, request));
+        return response.getResourceId();
+    }
+
+    public List<WorkingCapitalLoanBreachActionData> getBreachActions(Long loanId) {
+        return ok(() -> fineractClient.workingCapitalLoanBreachActions().retrieveBreachActions(loanId));
+    }
+
+    public BigDecimal getBreachPastDueAmount(Long loanId) {
+        GetWorkingCapitalLoansLoanIdResponse loan = getLoanDetails(loanId);
+        assertNotNull(loan.getBalance(), "Balance section must be present on WC loan " + loanId);
+        return loan.getBalance().getBreachPastDueAmount();
     }
 
     public Long adjustCharge(Long loanId, Long loanChargeId, PostWorkingCapitalLoansLoanIdChargesChargeIdRequest request) {
@@ -219,6 +307,67 @@ public class FeignWorkingCapitalLoanHelper {
     public void undoLoanTransaction(Long loanId, Long transactionId, ExecuteWorkingCapitalLoanTransactionCommandRequest request) {
         ok(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionCommandByLoanIdTransactionId(loanId,
                 transactionId, "undo", request));
+    }
+
+    public CallFailedRuntimeException createDelinquencyActionExpectingFailure(Long loanId,
+            PostWorkingCapitalLoansDelinquencyActionRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoanDelinquencyActions().createDelinquencyAction(loanId, request));
+    }
+
+    public CallFailedRuntimeException createBreachActionExpectingFailure(Long loanId, PostWorkingCapitalLoansBreachActionRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoanBreachActions().createBreachAction(loanId, request));
+    }
+
+    public CallFailedRuntimeException markAsFraudExpectingFailure(Long loanId, MarkWorkingCapitalLoanAsFraudRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoans().markWorkingCapitalLoanAsFraudById(loanId, request));
+    }
+
+    public CallFailedRuntimeException deleteApplicationExpectingFailure(Long loanId) {
+        return fail(() -> fineractClient.workingCapitalLoans().deleteWorkingCapitalLoanApplication(loanId));
+    }
+
+    public CallFailedRuntimeException modifyApplicationExpectingFailure(Long loanId, PutWorkingCapitalLoansLoanIdRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoans().modifyWorkingCapitalLoanApplicationById(loanId, request,
+                Map.<String, Object>of()));
+    }
+
+    public CallFailedRuntimeException undoWriteOffExpectingFailure(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
+        return fail(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId, "undoWriteOff",
+                request));
+    }
+
+    /**
+     * Extracts every {@code userMessageGlobalisationCode} from a Fineract validation error body, in response order.
+     * Fineract's {@code DataValidatorBuilder} accumulates all failures for a request and reports them together, so a
+     * single rejection frequently carries more than one code; asserting on the exact list is what makes an error-code
+     * regression guard discriminating rather than "some 4xx happened".
+     */
+    public static List<String> errorCodesOf(final CallFailedRuntimeException exception) {
+        final String body = exception.getResponseBody();
+        assertNotNull(body, "expected an error response body");
+        final JsonElement root = JsonParser.parseString(body);
+        if (!root.isJsonObject()) {
+            throw new AssertionError("expected a JSON object error body but got: " + body);
+        }
+        final List<String> codes = new ArrayList<>();
+        final JsonObject rootObject = root.getAsJsonObject();
+        final JsonElement errors = rootObject.get("errors");
+        if (errors != null && errors.isJsonArray()) {
+            final JsonArray errorArray = errors.getAsJsonArray();
+            for (final JsonElement error : errorArray) {
+                final JsonElement code = error.getAsJsonObject().get("userMessageGlobalisationCode");
+                if (code != null && !code.isJsonNull()) {
+                    codes.add(code.getAsString());
+                }
+            }
+        }
+        if (codes.isEmpty()) {
+            final JsonElement topLevelCode = rootObject.get("userMessageGlobalisationCode");
+            if (topLevelCode != null && !topLevelCode.isJsonNull()) {
+                codes.add(topLevelCode.getAsString());
+            }
+        }
+        return codes;
     }
 
     public List<WorkingCapitalLoanDelinquencyRangeScheduleData> getDelinquencyRangeSchedule(Long loanId) {
