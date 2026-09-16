@@ -488,7 +488,7 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
     public void restateJournalEntriesForDiscountFeeAmortization(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
             final boolean isChargedOff) {
         final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
-        if (!discountFeeAmortizationSplitDiffersFromLedger(loan, txn, effectiveEntries, isChargedOff)) {
+        if (!discountFeeAmortizationSplitDiffersFromLedger(loan, txn, effectiveEntries, isChargedOff, false)) {
             // The ledger already reflects the recomputed amount; re-posting would only add cancelling noise.
             return;
         }
@@ -496,11 +496,23 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         postJournalEntriesForDiscountFeeAmortization(loan, txn, isChargedOff);
     }
 
+    @Override
+    public void restateJournalEntriesForDiscountFeeAmortizationAdjustment(final WorkingCapitalLoan loan,
+            final WorkingCapitalLoanTransaction txn, final boolean isChargedOff) {
+        final List<JournalEntry> effectiveEntries = effectiveJournalEntries(txn);
+        if (!discountFeeAmortizationSplitDiffersFromLedger(loan, txn, effectiveEntries, isChargedOff, true)) {
+            return;
+        }
+        reverseExistingEntries(loan, txn, true);
+        postJournalEntriesForDiscountFeeAmortizationAdjustment(loan, txn, isChargedOff);
+    }
+
     /**
-     * {@link #splitDiffersFromLedger}'s counterpart for the fixed debit/credit pair a discount-fee-amortization posts.
+     * {@link #splitDiffersFromLedger}'s counterpart for the fixed debit/credit pair a discount-fee amortization (or its
+     * adjustment mirror) posts.
      */
     private boolean discountFeeAmortizationSplitDiffersFromLedger(final WorkingCapitalLoan loan, final WorkingCapitalLoanTransaction txn,
-            final List<JournalEntry> effectiveEntries, final boolean routeToExpense) {
+            final List<JournalEntry> effectiveEntries, final boolean routeToExpense, final boolean amortizationAdjustment) {
         if (effectiveEntries.isEmpty()) {
             return true;
         }
@@ -511,9 +523,15 @@ public class AccrualWithDeferredRevenueAmortizationAccountingProcessorForWorking
         if (MathUtil.isGreaterThanZero(amount)) {
             final GLAccount deferredIncomeAccount = helper.getLinkedGLAccountForWorkingCapitalLoanProduct(productId,
                     CashAccountsForLoan.DEFERRED_INCOME_LIABILITY.getValue(), null);
-            final GLAccount creditAccount = resolveAmortizationCreditAccount(loan, productId, routeToExpense);
-            planned.merge(new PostingKey(deferredIncomeAccount.getId(), true), amount, BigDecimal::add);
-            planned.merge(new PostingKey(creditAccount.getId(), false), amount, BigDecimal::add);
+            final GLAccount expenseOrIncomeAccount = resolveAmortizationCreditAccount(loan, productId, routeToExpense);
+            if (amortizationAdjustment) {
+                // Adjustment mirrors amortization: credit deferred income, debit expense/income.
+                planned.merge(new PostingKey(deferredIncomeAccount.getId(), false), amount, BigDecimal::add);
+                planned.merge(new PostingKey(expenseOrIncomeAccount.getId(), true), amount, BigDecimal::add);
+            } else {
+                planned.merge(new PostingKey(deferredIncomeAccount.getId(), true), amount, BigDecimal::add);
+                planned.merge(new PostingKey(expenseOrIncomeAccount.getId(), false), amount, BigDecimal::add);
+            }
         }
 
         final Map<PostingKey, BigDecimal> posted = postedAmountsByPosition(effectiveEntries);
