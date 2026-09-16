@@ -24,6 +24,7 @@ import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsCons
 import static org.apache.fineract.infrastructure.core.domain.AuditableFieldsConstants.LAST_MODIFIED_DATE_DB_FIELD;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -70,8 +71,8 @@ public class GenerateRdScheduleTasklet implements Tasklet {
             final Long savingsId = (Long) details.get("savingsId");
             final BigDecimal amount = (BigDecimal) details.get("amount");
             final String recurrence = (String) details.get("recurrence");
-            LocalDate lastDepositDate = (LocalDate) details.get("dueDate");
-            Integer installmentNumber = (Integer) details.get("installment");
+            LocalDate lastDepositDate = ((Date) details.get("dueDate")).toLocalDate();
+            Integer installmentNumber = ((Number) details.get("installment")).intValue();
             while (count < DepositAccountUtils.GENERATE_MINIMUM_NUMBER_OF_FUTURE_INSTALMENTS) {
                 count++;
                 installmentNumber++;
