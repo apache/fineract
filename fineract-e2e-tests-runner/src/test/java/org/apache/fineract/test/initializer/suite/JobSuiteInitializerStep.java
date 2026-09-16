@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.feign.FineractFeignClient;
 import org.apache.fineract.client.models.ExecuteJobRequest;
 import org.apache.fineract.client.models.GetJobsResponse;
-import org.apache.fineract.client.models.PutJobsJobIDRequest;
+import org.apache.fineract.client.models.JobUpdateRequest;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -126,7 +126,7 @@ public class JobSuiteInitializerStep implements FineractSuiteInitializerStep {
                 .filter(r -> r.getDisplayName().equals(SEND_ASYNCHRONOUS_EVENTS_JOB_NAME)).findAny()
                 .orElseThrow(() -> new IllegalStateException(SEND_ASYNCHRONOUS_EVENTS_JOB_NAME + " is not found"));
         Long jobId = externalEventJobResponse.getJobId();
-        executeVoid(() -> fineractClient.schedulerJob().updateJobDetail(jobId, new PutJobsJobIDRequest().cronExpression(cronExpression)));
+        executeVoid(() -> fineractClient.schedulerJob().updateJobDetail(jobId, new JobUpdateRequest().cronExpression(cronExpression)));
         return jobId;
     }
 }
