@@ -21,6 +21,7 @@ package org.apache.fineract.portfolio.workingcapitalloan.repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.apache.fineract.infrastructure.core.domain.ExternalId;
@@ -75,6 +76,20 @@ public interface WorkingCapitalLoanTransactionRepository extends JpaRepository<W
             """)
     BigDecimal sumDiscountFeeAdjustmentsAfter(@Param("wcLoanId") Long wcLoanId,
             @Param("transactionType") LoanTransactionType transactionType, @Param("date") LocalDate date);
+
+    /**
+     * Total of the non-reversed transactions of the given types dated on or before {@code date}. Used to rebuild the
+     * charged side of the balance as of a past date: the stored balance is a running snapshot with no date dimension,
+     * so it cannot answer what had been disbursed or discounted by then.
+     */
+    @Query("""
+            select coalesce(sum(t.transactionAmount), 0)
+            from WorkingCapitalLoanTransaction t
+            where t.wcLoan.id = :wcLoanId and t.reversed = false
+              and t.transactionType in :transactionTypes and t.transactionDate <= :date
+            """)
+    BigDecimal sumAmountsOfTypesUpTo(@Param("wcLoanId") Long wcLoanId,
+            @Param("transactionTypes") Collection<LoanTransactionType> transactionTypes, @Param("date") LocalDate date);
 
     Optional<WorkingCapitalLoanTransaction> findByWcLoan_IdAndExternalId(Long wcLoanId, ExternalId externalId);
 

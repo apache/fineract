@@ -68,8 +68,12 @@ import org.apache.fineract.client.models.WorkingCapitalLoanBreachScheduleData;
 import org.apache.fineract.client.models.WorkingCapitalLoanChargeData;
 import org.apache.fineract.client.models.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.client.models.WorkingCapitalLoanPeriodPaymentRateChangeData;
+import org.apache.fineract.client.models.WorkingCapitalLoanTransactionTemplateResponse;
 
 public class FeignWorkingCapitalLoanHelper {
+
+    private static final String TEMPLATE_DATE_FORMAT = "dd MMMM yyyy";
+    private static final String TEMPLATE_LOCALE = "en";
 
     private final FineractFeignClient fineractClient;
 
@@ -200,6 +204,16 @@ public class FeignWorkingCapitalLoanHelper {
     public CallFailedRuntimeException chargeOffExpectingFailure(Long loanId, PostWorkingCapitalLoanTransactionsRequest request) {
         return fail(() -> fineractClient.workingCapitalLoanTransactions().executeWorkingCapitalLoanTransactionById(loanId, "chargeOff",
                 request));
+    }
+
+    /**
+     * Fetches the transaction template for one command. Pass {@code transactionDate} to quote the amount as of that
+     * date, or null to let the server default it to the business date - the date carries its format and locale with it,
+     * so a caller that does not care about the date can omit all three.
+     */
+    public WorkingCapitalLoanTransactionTemplateResponse getTransactionTemplate(Long loanId, String command, String transactionDate) {
+        return ok(() -> fineractClient.workingCapitalLoanTransactions().getWorkingCapitalLoanTransactionTemplateById(loanId, command,
+                transactionDate == null ? null : TEMPLATE_DATE_FORMAT, transactionDate, transactionDate == null ? null : TEMPLATE_LOCALE));
     }
 
     public GetWorkingCapitalLoanTransactionIdResponse getTransaction(Long loanId, Long transactionId) {
