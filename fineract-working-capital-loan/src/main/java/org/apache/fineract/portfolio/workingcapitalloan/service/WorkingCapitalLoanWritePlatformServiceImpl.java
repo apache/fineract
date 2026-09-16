@@ -398,6 +398,10 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
         amortizationScheduleWriteService.generateAndSaveAmortizationScheduleOnDisbursement(loan, transactionAmount, actualDisbursementDate);
         generateInitialDelinquencyAndBreachPeriods(loan);
 
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            accountingProcessor.postJournalEntries(loan, disbursementTransaction, allocation, false);
+        }
+
         this.loanRepository.saveAndFlush(loan);
         changes.put("status", loan.getLoanStatus());
         handleNote(loan, command, changes);
@@ -1304,6 +1308,11 @@ public class WorkingCapitalLoanWritePlatformServiceImpl implements WorkingCapita
                 .filter(t -> t.getTypeOf() == LoanTransactionType.ACCRUAL && !t.isReversed()).toList();
 
         transactions.forEach(this::markReversed);
+
+        if (loan.getLoanProduct().getAccountingRule().isAccrualWithDeferredRevenueAmortization()) {
+            accountingProcessor.postReversalJournalEntries(loan, txn);
+        }
+
         this.transactionRepository.saveAll(transactions);
         this.transactionRepository.flush();
 
