@@ -65,6 +65,7 @@ import org.apache.fineract.organisation.office.domain.Office;
 import org.apache.fineract.portfolio.account.data.PortfolioAccountData;
 import org.apache.fineract.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.apache.fineract.portfolio.account.service.AccountTransfersWritePlatformService;
+import org.apache.fineract.portfolio.charge.domain.Charge;
 import org.apache.fineract.portfolio.charge.domain.ChargePaymentMode;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.loanaccount.api.LoanApiConstants;
@@ -352,6 +353,8 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
         // Charges with this mode are collected from the linked savings account via transferFunds().
         // After that loop, the LoanSummary must be refreshed — that's the bug fix under test.
         LoanCharge disbursementCharge = mock(LoanCharge.class);
+        Charge charge = mock(Charge.class);
+        when(disbursementCharge.getCharge()).thenReturn(charge);
         when(disbursementCharge.isDueAtDisbursement()).thenReturn(true);
         when(disbursementCharge.getChargePaymentMode()).thenReturn(ChargePaymentMode.ACCOUNT_TRANSFER);
         when(disbursementCharge.isChargePending()).thenReturn(true);
@@ -436,6 +439,8 @@ public class LoanWritePlatformServiceJpaRepositoryImplTest {
 
         // A disbursement charge payable by ACCOUNT_TRANSFER — requires a linked savings account.
         LoanCharge disbursementCharge = mock(LoanCharge.class);
+        Charge charge = mock(Charge.class);
+        when(disbursementCharge.getCharge()).thenReturn(charge);
         when(disbursementCharge.isDueAtDisbursement()).thenReturn(true);
         when(disbursementCharge.getChargePaymentMode()).thenReturn(ChargePaymentMode.ACCOUNT_TRANSFER);
         when(disbursementCharge.isChargePending()).thenReturn(true);
