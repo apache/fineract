@@ -131,7 +131,7 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
             this.accountingProcessor.postJournalEntries(loan, chargeOffTransaction, allocation, loan.isChargedOff());
         }
 
-        this.discountFeeAmortizationService.processFinalDiscountFeeAmortizationOnChargeOff(loan, chargeOffTransaction);
+        this.discountFeeAmortizationService.processFinalDiscountFeeAmortization(loan, chargeOffTransaction);
 
         final Map<String, Object> changes = new LinkedHashMap<>();
         changes.put(WorkingCapitalLoanConstants.transactionDateParamName, transactionDate);
@@ -164,7 +164,7 @@ public class WorkingCapitalLoanChargeOffWriteServiceImpl implements WorkingCapit
                 .orElseThrow(() -> new GeneralPlatformDomainRuleException("error.msg.wc.loan.charge.off.transaction.not.found",
                         "No active charge-off transaction found for loan " + loanId, loanId));
 
-        this.discountFeeAmortizationService.undoDiscountFeeAmortizationOnChargeOff(loan, chargeOffTransaction);
+        this.discountFeeAmortizationService.undoFinalDiscountFeeAmortization(loan, chargeOffTransaction);
 
         final ExternalId reversalExternalId = this.externalIdFactory
                 .create(command.stringValueOfParameterNamedAllowingNull(WorkingCapitalLoanConstants.reversalExternalIdParamName));

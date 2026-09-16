@@ -62,6 +62,12 @@ jobs:
         with:
           validate-wrappers: true
 
+      - name: Apply Gradle memory budget
+        uses: ./.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
       - name: Run Cucumber
         run: ./gradlew --no-daemon cucumber -x :fineract-e2e-tests-runner:cucumber -x checkstyleJmh -x checkstyleMain -x checkstyleTest -x spotlessCheck -x spotlessApply -x spotbugsMain -x spotbugsTest -x javadoc -x javadocJar -x modernizer -x buildJavaSdk
 
@@ -72,14 +78,5 @@ jobs:
           name: test-results-cucumber
           path: '**/build/reports/'
           if-no-files-found: ignore
-          retention-days: 5
-          compression-level: 9
-
-      - name: Archive server logs
-        if: ${{ failure() || inputs.upload_artifacts }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: server-logs-cucumber
-          path: '**/build/cargo/'
           retention-days: 5
           compression-level: 9

@@ -299,6 +299,16 @@ public class WorkingCapitalLoanDataValidator {
             baseDataValidator.reset().parameter(WorkingCapitalLoanConstants.loanProductRelatedDetailsParamName)
                     .failWithCode("discount.not.available");
         }
+        // OVERPAID is excluded on purpose, and the exclusion is load-bearing rather than cosmetic. The overpayment on a
+        // discount-adjusted loan is produced by the clamp in WorkingCapitalLoanWritePlatformServiceImpl's
+        // updateBalanceForDiscountChange, which is one-directional: it only adds to the overpayment, only when the
+        // principal due has fallen to or below what is already paid, and has no inverse for the undo direction.
+        // Undoing an adjustment on an OVERPAID loan would therefore leave a stale overpayment and a clamped
+        // principalPaid behind, and that path does not reprocess, so nothing would re-derive them. Widen this only
+        // together with that clamp.
+        //
+        // Contrast validateUndoTransaction, which does allow OVERPAID: undoing a repayment always rewinds or replays
+        // the allocations, so the balance is re-derived rather than patched.
         final LoanStatus loanStatus = loan.getLoanStatus();
         final boolean undoAllowedForStatus = LoanStatus.ACTIVE.equals(loanStatus) || LoanStatus.CLOSED_OBLIGATIONS_MET.equals(loanStatus);
         if (!undoAllowedForStatus) {

@@ -52,6 +52,13 @@ public class WorkingCapitalLoanLifecycleStateMachine {
             loan.setClosedOnDate(null);
             loan.setClosedBy(null);
         }
+        if (newStatus.isOverpaid()) {
+            if (loan.getOverpaidOnDate() == null) {
+                loan.setOverpaidOnDate(transitionDate);
+            }
+        } else {
+            loan.setOverpaidOnDate(null);
+        }
     }
 
     public boolean canTransition(final WorkingCapitalLoanEvent event, final WorkingCapitalLoan loan) {

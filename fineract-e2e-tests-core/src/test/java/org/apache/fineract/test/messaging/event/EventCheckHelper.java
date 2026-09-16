@@ -821,6 +821,11 @@ public class EventCheckHelper {
         });
     }
 
+    public void workingCapitalLoanBalanceChangedEventAnnualEirCheck(final Long loanId, final String expectedAnnualEir) {
+        workingCapitalLoanEventPayloadCheck(WorkingCapitalLoanBalanceChangedEvent.class, loanId,
+                event -> assertAmountEquals("calculatedAnnualEir", event.getCalculatedAnnualEir(), new BigDecimal(expectedAnnualEir)));
+    }
+
     public void workingCapitalLoanDelinquencyRangeChangeEventCheck(final Long loanId) {
         workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanDelinquencyRangeChangeEvent.class, loanId, (event, body) -> {
             assertWorkingCapitalLoanAccountData(event, body);
@@ -999,6 +1004,11 @@ public class EventCheckHelper {
             assertWorkingCapitalLoanAccountData(event, body);
             assertWorkingCapitalLoanTimelineData(event.getTimeline(), body.getTimeline());
         });
+    }
+
+    public void workingCapitalLoanStatusChangedEventOverpaidOnDateCheck(final Long loanId) {
+        workingCapitalLoanEventMatchesApiCheck(WorkingCapitalLoanStatusChangedEvent.class, loanId,
+                (event, body) -> assertEventDateEqualsApiDate("overpaidOnDate", event.getOverpaidOnDate(), body.getOverpaidOnDate()));
     }
 
     public void workingCapitalLoanBalanceChangedEventPausePeriodsCheck(final Long loanId) {

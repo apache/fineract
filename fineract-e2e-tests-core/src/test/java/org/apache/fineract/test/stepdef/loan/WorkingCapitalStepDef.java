@@ -32,6 +32,7 @@ import io.cucumber.java.en.When;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -368,15 +369,21 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
                 : null;
         final String breachStartTypeStr = data.get(BREACH_START_TYPE_FIELD_NAME);
         final String breachStartType = breachStartTypeStr != null && !breachStartTypeStr.isEmpty() ? breachStartTypeStr : null;
+        final String delinquencyStartTypeStr = data.get(DELINQUENCY_START_TYPE_FIELD_NAME);
+        final String delinquencyStartType = delinquencyStartTypeStr != null && !delinquencyStartTypeStr.isEmpty() ? delinquencyStartTypeStr
+                : null;
 
         final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH);
-        final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory
+        PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory
                 .defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest() //
                 .name(name) //
                 .breachId(breachId) //
                 .delinquencyGraceDays(graceDays) //
                 .breachGraceDays(breachGraceDays) //
                 .breachStartType(breachStartType);
+        if (delinquencyStartType != null) {
+            request.delinquencyStartType(delinquencyStartType);
+        }
 
         final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
@@ -782,6 +789,54 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
         final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+    }
+
+    @When("Admin creates a new Working Capital Loan Product with the following matrix data:")
+    public void createWorkingCapitalLoanProductWithMatrixData(final DataTable table) {
+        final Map<String, String> data = table.asMaps().getFirst();
+        final String name = Optional.ofNullable(data.get(NAME_FIELD_NAME)).filter(s -> !s.isEmpty()).orElseGet(
+                () -> DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", RANDOM_NAME_SUFFIX_LENGTH));
+
+        final String accountingRule = Optional.ofNullable(data.get("accountingRule")).orElse("NONE");
+        final PostWorkingCapitalLoanProductsRequest request = baseWorkingCapitalLoanProductRequest(accountingRule, name);
+        applyMatrixOverrides(request, data);
+
+        final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+        checkWorkingCapitalLoanProductCreate();
+    }
+
+    private PostWorkingCapitalLoanProductsRequest baseWorkingCapitalLoanProductRequest(final String accountingRule, final String name) {
+        return switch (accountingRule) {
+            case "NONE" -> workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest().name(name);
+            case "ACC_DEF_REV_AM" -> workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequestWithAccrualAccounting().name(name);
+            default -> throw new IllegalArgumentException("Unsupported accountingRule: " + accountingRule);
+        };
+    }
+
+    private void applyMatrixOverrides(final PostWorkingCapitalLoanProductsRequest request, final Map<String, String> data) {
+        Optional.ofNullable(data.get("npvDayCount")).filter(s -> !s.isEmpty()).map(Integer::valueOf).ifPresent(request::npvDayCount);
+        Optional.ofNullable(data.get("repaymentFrequencyType")).filter(s -> !s.isEmpty())
+                .map(PostWorkingCapitalLoanProductsRequest.RepaymentFrequencyTypeEnum::valueOf).ifPresent(request::repaymentFrequencyType);
+        Optional.ofNullable(data.get("repaymentEvery")).filter(s -> !s.isEmpty()).map(Integer::valueOf).ifPresent(request::repaymentEvery);
+        Optional.ofNullable(data.get("discount")).filter(s -> !s.isEmpty()).map(BigDecimal::new).ifPresent(request::discount);
+        Optional.ofNullable(data.get("digitsAfterDecimal")).filter(s -> !s.isEmpty()).map(Integer::valueOf)
+                .ifPresent(request::digitsAfterDecimal);
+        Optional.ofNullable(data.get("allowAttributeOverrides")).filter(s -> !s.isEmpty()).map(Boolean::valueOf)
+                .ifPresent(allow -> request.allowAttributeOverrides(new PostAllowAttributeOverrides().delinquencyBucketClassification(allow)
+                        .breach(allow).discountDefault(allow).periodPaymentFrequencyType(allow).periodPaymentFrequency(allow)));
+        if (request.getAllowAttributeOverrides() == null) {
+            request.allowAttributeOverrides(new PostAllowAttributeOverrides().delinquencyBucketClassification(true).breach(true)
+                    .discountDefault(true).periodPaymentFrequencyType(true).periodPaymentFrequency(true));
+        }
+        Optional.ofNullable(data.get("paymentAllocation")).filter(s -> !s.isEmpty()).ifPresent(allocation -> request.paymentAllocation(
+                List.of(WorkingCapitalRequestFactory.createPaymentAllocation(PostPaymentAllocation.TransactionTypeEnum.DEFAULT.getValue(),
+                        parseAllocationRules(allocation)))));
+    }
+
+    private List<String> parseAllocationRules(final String allocation) {
+        return List.of(allocation.split(",", -1));
     }
 
     @When("Admin creates a new Working Capital Loan Product with {int} decimal places and NPV day count {int}")

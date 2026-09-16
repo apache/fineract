@@ -19,8 +19,10 @@
 package org.apache.fineract.portfolio.workingcapitalloan.domain;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class WorkingCapitalLoanBreachScheduleEvaluationUtils {
@@ -39,6 +41,19 @@ public final class WorkingCapitalLoanBreachScheduleEvaluationUtils {
         }
         return periods.stream().filter(p -> p.getToDate() != null && !p.getToDate().isAfter(actionDate))
                 .max(Comparator.comparingInt(period -> period.getPeriodNumber() != null ? period.getPeriodNumber() : Integer.MIN_VALUE));
+    }
+
+    public static void applyResetFlags(final List<WorkingCapitalLoanBreachSchedule> periods,
+            final Collection<WorkingCapitalLoanBreachAction> activeResets) {
+        if (periods == null) {
+            return;
+        }
+        periods.forEach(period -> period.setReset(false));
+        if (activeResets == null) {
+            return;
+        }
+        activeResets.stream().filter(Objects::nonNull)
+                .forEach(reset -> resolveEvaluationPeriod(periods, reset.getStartDate()).ifPresent(period -> period.setReset(true)));
     }
 
     public static LocalDate calculateToDate(final LocalDate fromDate, final Integer frequency,

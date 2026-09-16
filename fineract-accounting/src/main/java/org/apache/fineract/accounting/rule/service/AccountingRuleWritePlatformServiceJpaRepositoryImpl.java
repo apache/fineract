@@ -77,7 +77,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
             throw new AccountingRuleDuplicateException();
         }
 
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.accounting.rule.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Accounting Rule: " + realCause.getMessage());
     }

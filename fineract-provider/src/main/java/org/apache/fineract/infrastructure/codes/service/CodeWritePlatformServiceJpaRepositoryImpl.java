@@ -155,7 +155,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
                     "name", name);
         }
 
-        LOG.error("Error occured.", dve);
+        LOG.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.cund.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

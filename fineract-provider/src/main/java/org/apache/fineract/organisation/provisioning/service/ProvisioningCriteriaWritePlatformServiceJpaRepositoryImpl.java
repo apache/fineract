@@ -167,7 +167,7 @@ public class ProvisioningCriteriaWritePlatformServiceJpaRepositoryImpl implement
             throw new PlatformDataIntegrityException("error.msg.provisioning.product.id(s).already.associated.existing.criteria",
                     "The selected products already associated with another Provisioning Criteria");
         }
-        log.error("Error occured.", dve);
+        log.error("Error occurred.", dve);
         throw ErrorHandler.getMappable(dve, "error.msg.provisioning.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }

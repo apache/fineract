@@ -81,7 +81,9 @@ the outstanding).
 waiver or adjustment of *existing* charges remain allowed afterwards, so the balance can still be cured.
 Only their accounting treatment changes (see <<wc-charge-off-accounting>>); the loan otherwise behaves like
 a loan that is not charged off.
-* Adding a *new* charge is the single action blocked while the loan is charged off.
+* Three actions are blocked while the loan is charged off: adding a *new* charge, adding a discount
+fee, and a discount fee adjustment dated on or after the charge-off date. All three raise or restate
+an amount the charge-off has already written off.
 
 .Charge-off request/response flow
 [plantuml,format=svg]
@@ -168,6 +170,8 @@ The Working Capital Loan resource exposes the charged-off state:
 |Charge-off |The charge-off date must not be earlier than the last user transaction date. |`cannot.be.before.last.transaction.date`
 |Charge-off |The charge-off date must not be in the future. |`cannot.be.a.future.date`
 |Add charge |New charges cannot be added once the loan is charged off. |`error.msg.wc.loan.is.charged.off`
+|Discount fee |A discount fee cannot be added once the loan is charged off. |`error.msg.wc.loan.is.charged.off`
+|Discount fee adjustment |An adjustment dated on or after the charge-off date is rejected. |`error.msg.wc.loan.is.charged.off`
 |Undo charge-off |The loan must be charged off. |`error.msg.wc.loan.is.not.charged.off`
 |Undo charge-off |Undo is not allowed if any user transaction was posted after the charge-off. |`error.msg.wc.loan.charge.off.is.not.the.last.user.transaction`
 |===

@@ -95,7 +95,11 @@ public class ProgressiveLoanSummaryDataProvider extends CommonLoanSummaryDataPro
 
                 ProgressiveLoanInterestScheduleModel model = savedModel.orElse(null);
                 if (model != null) {
-                    OutstandingDetails outstandingDetails = emiCalculator.getOutstandingAmountsTillDate(model, businessDate);
+                    // This bucket reports interest accrued so far in the current, not yet due period, so fixed
+                    // interest (equal-amortization re-aged periods) has to be counted only till the business date
+                    // as well. Otherwise the whole period's fixed interest lands in the bucket on day one and then
+                    // never moves, while daily accrual transactions keep posting underneath it.
+                    OutstandingDetails outstandingDetails = emiCalculator.getOutstandingAmountsTillDate(model, businessDate, true);
                     if (!loan.isInterestRecalculationEnabled()) {
                         BigDecimal interestPaid = periods.stream().map(LoanSchedulePeriodData::getInterestPaid).reduce(BigDecimal.ZERO,
                                 BigDecimal::add);

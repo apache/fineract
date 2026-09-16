@@ -31,6 +31,7 @@ public enum DefaultWorkingCapitalLoanProduct implements WorkingCapitalLoanProduc
     WCLP_BREACH_DISALLOW_ATTRIBUTES_OVERRIDE, //
     WCLP_BREACH_NEAR_BREACH_DISALLOW_ATTRIBUTES_OVERRIDE, //
     WCLP_ADVANCED_ACCOUNTING, //
+    WCLP_FLAT_ADVANCED_ACCOUNTING, //
     WCLP_ACC_DEF_REV_AM, //
     WCLP_PERIOD_PAYMENT_RATE, //
     WCLP_DUE_FEE_PENALTY_PRINCIPAL, //
@@ -38,7 +39,8 @@ public enum DefaultWorkingCapitalLoanProduct implements WorkingCapitalLoanProduc
     WCLP_DUE_FEE_PRINCIPAL_PENALTY, //
     WCLP_DUE_PRINCIPAL_FEE_PENALTY, //
     WCLP_GOODWILL_CREDIT_ALLOCATION, //
-    WCLP_REPAYMENT_DIFF_DEFAULT; //
+    WCLP_REPAYMENT_DIFF_DEFAULT, //
+    WCLP_365; //
 
     @Override
     public String getName() {

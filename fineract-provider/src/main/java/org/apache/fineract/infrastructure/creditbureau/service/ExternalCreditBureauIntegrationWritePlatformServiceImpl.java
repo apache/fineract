@@ -128,7 +128,7 @@ public class ExternalCreditBureauIntegrationWritePlatformServiceImpl implements 
             responseMessage = response.body().string();
         } catch (IOException e) {
 
-            log.error("error occured in HTTP request-response method.", e);
+            log.error("error occurred in HTTP request-response method.", e);
         }
 
         if (responseCode != HttpURLConnection.HTTP_OK) {

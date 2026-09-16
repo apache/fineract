@@ -147,6 +147,29 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
                                                 .writeOffReasonCodeValueId(codeValueResolver.resolve(writeOffReasonCodeId,
                                                         DefaultCodeValue.valueOf("BAD_DEBT")))
                                                 .expenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT)))))),
+                () -> TestContext.INSTANCE.set(
+                        TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_FLAT_ADVANCED_ACCOUNTING,
+                        createWorkingCapitalLoanProductIdempotent(workingCapitalRequestFactory
+                                .defaultWorkingCapitalLoanProductRequestWithAccrualAccounting()
+                                .name(DefaultWorkingCapitalLoanProduct.WCLP_FLAT_ADVANCED_ACCOUNTING.getName())
+                                .amortizationType(PostWorkingCapitalLoanProductsRequest.AmortizationTypeEnum.FLAT)
+                                .allowAttributeOverrides(allowAttributeOverrides)
+                                .overpaymentLiabilityAccountId(accountTypeResolver.resolve(DefaultAccountType.OTHER_CREDIT_LIABILITY))
+                                .paymentChannelToFundSourceMappings(
+                                        List.of(new org.apache.fineract.client.models.WorkingCapitalLoanPaymentChannelToFundSourceMappings()
+                                                .paymentTypeId(paymentTypeResolver.resolve(DefaultPaymentType.MONEY_TRANSFER))
+                                                .fundSourceAccountId(accountTypeResolver.resolve(DefaultAccountType.FUND_RECEIVABLES))))
+                                .chargeOffReasonToExpenseAccountMappings(List.of(
+                                        new org.apache.fineract.client.models.WorkingCapitalPostChargeOffReasonToExpenseAccountMappings()
+                                                .chargeOffReasonCodeValueId(
+                                                        codeValueResolver.resolve(chargeOffReasonCodeId, DefaultCodeValue.valueOf("FRAUD")))
+                                                .expenseAccountId(
+                                                        accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT_FRAUD))))
+                                .writeOffReasonsToExpenseMappings(List
+                                        .of(new org.apache.fineract.client.models.WorkingCapitalPostWriteOffReasonToExpenseAccountMappings()
+                                                .writeOffReasonCodeValueId(codeValueResolver.resolve(writeOffReasonCodeId,
+                                                        DefaultCodeValue.valueOf("BAD_DEBT")))
+                                                .expenseAccountId(accountTypeResolver.resolve(DefaultAccountType.CREDIT_LOSS_BAD_DEBT)))))),
                 () -> TestContext.INSTANCE.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_ACC_DEF_REV_AM,
                         createWorkingCapitalLoanProductIdempotent(
                                 workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequestWithAccrualAccounting()
@@ -158,6 +181,10 @@ public class WorkingCapitalInitializerStep implements FineractGlobalInitializerS
                                 .defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest().minPeriodPaymentRate(new BigDecimal(1))
                                 .maxPeriodPaymentRate(new BigDecimal(95)).periodPaymentRate(new BigDecimal(10))
                                 .name(DefaultWorkingCapitalLoanProduct.WCLP_PERIOD_PAYMENT_RATE.getName()))),
+                () -> TestContext.INSTANCE.set(TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_365,
+                        createWorkingCapitalLoanProductIdempotent(
+                                workingCapitalRequestFactory.defaultWorkingCapitalLoanProductAllowAttributesOverrideRequest()
+                                        .npvDayCount(365).name(DefaultWorkingCapitalLoanProduct.WCLP_365.getName()))),
                 () -> TestContext.INSTANCE.set(
                         TestContextKey.DEFAULT_WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE_WCLP_DUE_FEE_PENALTY_PRINCIPAL,
                         createWorkingCapitalLoanProductIdempotent(workingCapitalRequestFactory

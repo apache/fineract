@@ -80,6 +80,12 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
+      - name: Apply Gradle memory budget
+        uses: ./.github/actions/gradle-memory-budget
+        with:
+          max-heap: '4g'
+          workers-max: '2'
+
       - name: Make scripts executable
         run: chmod +x scripts/split-features.sh
 

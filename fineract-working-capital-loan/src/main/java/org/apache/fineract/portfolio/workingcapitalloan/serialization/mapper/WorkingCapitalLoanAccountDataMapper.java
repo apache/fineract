@@ -29,6 +29,7 @@ import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanCollecti
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencySchedulePeriodDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDelinquencyScheduleTagDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanDisbursementDetailDataV1;
+import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanPeriodPaymentRateChangeDataV1;
 import org.apache.fineract.avro.workingcapitalloan.v1.WorkingCapitalLoanSummaryDataV1;
 import org.apache.fineract.infrastructure.core.service.MathUtil;
 import org.apache.fineract.infrastructure.event.external.service.serialization.mapper.support.AvroMapperConfig;
@@ -38,6 +39,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanC
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDelinquencyRangeScheduleData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanDisbursementDetailData;
+import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanPeriodPaymentRateChangeData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanRangeScheduleDelinquencyData;
 import org.apache.fineract.portfolio.workingcapitalloan.data.WorkingCapitalLoanSummaryData;
 import org.mapstruct.Mapper;
@@ -51,7 +53,6 @@ public interface WorkingCapitalLoanAccountDataMapper {
 
     @Mapping(source = "delinquencyGraceDays", target = "graceOnArrearsAgeing")
     @Mapping(source = "summary.overpayment", target = "totalOverpaid")
-    @Mapping(source = "dailyEir", target = "dailyEir", qualifiedByName = "toAvroDecimalScale")
     @Mapping(source = "calculatedAnnualEir", target = "calculatedAnnualEir", qualifiedByName = "toAvroDecimalScale")
     @Mapping(source = "numberOfRepayments", target = "actualNoTerm")
     @Mapping(source = "delinquencyStartType", target = "delinquency.delinquencyStartType")
@@ -67,9 +68,15 @@ public interface WorkingCapitalLoanAccountDataMapper {
     @Mapping(source = "nearBreach", target = "breach.nearBreach")
     @Mapping(target = "breach.breachSchedule", ignore = true)
     @Mapping(target = "breach.breachPastDueAmount", ignore = true)
-    @Mapping(target = "overpaidOnDate", ignore = true)
+    @Mapping(target = "overpaidOnDate", source = "overpaidOnDate")
     @Mapping(target = "customData", ignore = true)
     WorkingCapitalLoanAccountDataV1 map(WorkingCapitalLoanData source);
+
+    @Mapping(source = "calculatedAnnualEir", target = "calculatedAnnualEir", qualifiedByName = "toAvroDecimalScale")
+    WorkingCapitalLoanPeriodPaymentRateChangeDataV1 map(WorkingCapitalLoanPeriodPaymentRateChangeData source);
+
+    List<WorkingCapitalLoanPeriodPaymentRateChangeDataV1> mapPeriodPaymentRateHistory(
+            List<WorkingCapitalLoanPeriodPaymentRateChangeData> source);
 
     @Mapping(source = "principal", target = "totalPrincipal")
     @Mapping(source = "totalDisbursement", target = "principalDisbursed")

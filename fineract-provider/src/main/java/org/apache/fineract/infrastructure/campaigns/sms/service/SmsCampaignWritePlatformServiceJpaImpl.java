@@ -296,7 +296,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException | RuntimeException e) {
-            log.error("Error occured.", e);
+            log.error("Error occurred.", e);
         }
     }
 
@@ -338,7 +338,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException | RuntimeException e) {
-            log.error("Error occured.", e);
+            log.error("Error occurred.", e);
         }
     }
 
@@ -379,7 +379,7 @@ public class SmsCampaignWritePlatformServiceJpaImpl implements SmsCampaignWriteP
                 }
             }
         } catch (final IOException | RuntimeException e) {
-            log.error("Error occured.", e);
+            log.error("Error occurred.", e);
         }
     }
 

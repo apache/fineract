@@ -53,6 +53,7 @@ import org.apache.fineract.client.models.PostWorkingCapitalLoansLoanIdChargesCha
 import org.apache.fineract.client.models.PostWorkingCapitalLoansResponse;
 import org.apache.fineract.client.models.WorkingCapitalLoanChargeData;
 import org.apache.fineract.test.data.ChargeCalculationType;
+import org.apache.fineract.test.data.ChargePaymentMode;
 import org.apache.fineract.test.data.ChargeProductAppliesTo;
 import org.apache.fineract.test.data.ChargeProductResolver;
 import org.apache.fineract.test.data.ChargeProductType;
@@ -73,8 +74,10 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
     private static final DateTimeFormatter FORMATTER_API = DateTimeFormatter.ofPattern(DATE_FORMAT_API);
     private static final Long REGULAR_PAYMENT_MODE_ID = 0L;
+    private static final Long DISBURSEMENT_ID = 1L;
     private static final Long SPECIFIED_DUE_DATE_ID = 2L;
     private static final Long FLAT_CALCULATION_TYPE_ID = 1L;
+    private static final Long PERCENTAGE_AMOUNT_CALCULATION_TYPE_ID = 2L;
 
     private final FineractFeignClient fineractClient;
     private final WorkingCapitalChargeRequestFactory chargeRequestFactory;
@@ -88,6 +91,14 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
     @When("Admin creates working capital loan charge as penalty")
     public void createWorkingCapitalLoanChargeAsPenalty() {
         createChargeAndStore(chargeRequestFactory.defaultWorkingCapitalChargeRequest().penalty(true).amount(15.0D));
+    }
+
+    @When("Admin creates working capital loan charge with {string} charge time type as penalty")
+    public void createWorkingCapitalLoanChargeWithTimeTypeAsPenalty(String chargeTimeTypeName) {
+        final ChargeTimeType timeType = ChargeTimeType.valueOf(chargeTimeTypeName);
+        createChargeAndStore(chargeRequestFactory.defaultWorkingCapitalChargeRequest() //
+                .chargeTimeType(timeType.value) //
+                .penalty(true).amount(15.0D));
     }
 
     @When("Admin creates working capital loan charge without payment mode")
@@ -379,21 +390,28 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         log.info("Retrieved charge template for Working Capital Loan with chargeTimeType={}", chargeTimeTypeName);
     }
 
-    @Then("The charge template chargeTimeTypeOptions contains only Specified due date")
+    @Then("The charge template chargeTimeTypeOptions contains only Disbursement and Specified due date")
     public void verifyTemplateChargeTimeTypeOptions() {
-        assertSingleOption(getChargeTemplate().getChargeTimeTypeOptions(), "chargeTimeTypeOptions", SPECIFIED_DUE_DATE_ID);
-        log.info("Verified charge template chargeTimeTypeOptions contains only Specified due date");
+        assertExactOptions(getChargeTemplate().getChargeTimeTypeOptions(), "chargeTimeTypeOptions", DISBURSEMENT_ID, SPECIFIED_DUE_DATE_ID);
+        log.info("Verified charge template chargeTimeTypeOptions contains only Disbursement and Specified due date");
     }
 
     @Then("The charge template chargeCalculationTypeOptions contains only Flat")
     public void verifyTemplateChargeCalculationTypeOptions() {
-        assertSingleOption(getChargeTemplate().getChargeCalculationTypeOptions(), "chargeCalculationTypeOptions", FLAT_CALCULATION_TYPE_ID);
+        assertExactOptions(getChargeTemplate().getChargeCalculationTypeOptions(), "chargeCalculationTypeOptions", FLAT_CALCULATION_TYPE_ID);
         log.info("Verified charge template chargeCalculationTypeOptions contains only Flat");
+    }
+
+    @Then("The charge template chargeCalculationTypeOptions contains only Flat and % Amount")
+    public void verifyTemplateChargeCalculationTypeOptionsFlatAndPercentageAmount() {
+        assertExactOptions(getChargeTemplate().getChargeCalculationTypeOptions(), "chargeCalculationTypeOptions", FLAT_CALCULATION_TYPE_ID,
+                PERCENTAGE_AMOUNT_CALCULATION_TYPE_ID);
+        log.info("Verified charge template chargeCalculationTypeOptions contains only Flat and % Amount");
     }
 
     @Then("The charge template chargePaymentModeOptions contains only Regular")
     public void verifyTemplateChargePaymentModeOptions() {
-        assertSingleOption(getChargeTemplate().getChargePaymetModeOptions(), "chargePaymentModeOptions", REGULAR_PAYMENT_MODE_ID);
+        assertExactOptions(getChargeTemplate().getChargePaymetModeOptions(), "chargePaymentModeOptions", REGULAR_PAYMENT_MODE_ID);
         log.info("Verified charge template chargePaymentModeOptions contains only Regular");
     }
 
@@ -414,6 +432,41 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         assertErrorMessage(exception, expectedErrorMessage);
         log.info("Verified creating WCL charge with chargeTimeType={} and calcType={} failed with status {} and message: {}",
                 chargeTimeTypeName, chargeCalcTypeName, exception.getStatus(), expectedErrorMessage);
+    }
+
+    @Then("Creating working capital loan charge with {string} chargePaymentMode results an error with the following data:")
+    public void createWclChargeWithInvalidPaymentModeFails(String chargePaymentModeName, DataTable table) {
+        final ChargePaymentMode paymentMode = ChargePaymentMode.valueOf(chargePaymentModeName);
+        final ChargeRequest request = chargeRequestFactory.defaultWorkingCapitalChargeRequest() //
+                .chargePaymentMode(paymentMode.value);
+
+        final Map<String, String> expectedData = table.asMaps().get(0);
+        final int expectedHttpCode = Integer.parseInt(expectedData.get("httpCode"));
+        final String expectedErrorMessage = expectedData.get("errorMessage").trim();
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.charges().createCharge(request));
+        assertHttpStatus(exception, expectedHttpCode);
+        assertErrorMessage(exception, expectedErrorMessage);
+        log.info("Verified creating WCL charge with chargePaymentMode={} failed with status {} and message: {}", chargePaymentModeName,
+                exception.getStatus(), expectedErrorMessage);
+    }
+
+    @Then("Updating working capital loan charge chargeTimeType to {string} results an error with the following data:")
+    public void updateWclChargeTimeTypeFails(String chargeTimeTypeName, DataTable table) {
+        final Long id = getChargeId();
+        final ChargeTimeType timeType = ChargeTimeType.valueOf(chargeTimeTypeName);
+        final ChargeRequest request = new ChargeRequest().chargeTimeType(timeType.value)
+                .locale(WorkingCapitalChargeRequestFactory.DEFAULT_LOCALE);
+
+        final Map<String, String> expectedData = table.asMaps().get(0);
+        final int expectedHttpCode = Integer.parseInt(expectedData.get("httpCode"));
+        final String expectedErrorMessage = expectedData.get("errorMessage").trim();
+
+        final CallFailedRuntimeException exception = fail(() -> fineractClient.charges().updateCharge(id, request));
+        assertHttpStatus(exception, expectedHttpCode);
+        assertErrorMessage(exception, expectedErrorMessage);
+        log.info("Verified updating WCL charge chargeTimeType to {} failed with status {} and message: {}", chargeTimeTypeName,
+                exception.getStatus(), expectedErrorMessage);
     }
 
     @When("Admin makes a charge adjustment for the last added charge with {double} amount on working capital loan")
@@ -642,10 +695,9 @@ public class WorkingCapitalChargeStepDef extends AbstractStepDef {
         log.info("Verified adding charge {} after charge-off failed for loan {}", chargeType, loanId);
     }
 
-    private void assertSingleOption(final List<EnumOptionData> options, final String optionName, final Long expectedId) {
-        assertThat(options).as(optionName + " should not be null or empty").isNotNull().isNotEmpty();
-        assertThat(options).hasSize(1);
-        assertThat(options.get(0).getId()).as("Only " + optionName + " with ID " + expectedId + " should be available")
-                .isEqualTo(expectedId);
+    private void assertExactOptions(final List<EnumOptionData> options, final String optionName, final Long... expectedIds) {
+        assertThat(options).as(optionName + " should not be null").isNotNull();
+        assertThat(options.stream().map(EnumOptionData::getId).toList()).as(optionName + " should offer exactly the expected options")
+                .containsExactly(expectedIds);
     }
 }

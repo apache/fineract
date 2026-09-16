@@ -2216,6 +2216,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
             final List<LoanRepaymentScheduleInstallment> installmentsUpToTransactionDate = loan
                     .getInstallmentsUpToTransactionDate(transactionDate);
+            keepInstallmentsStartingOnTransactionDate(installments, installmentsUpToTransactionDate, transactionDate);
 
             final List<LoanTransaction> transactionsToBeReprocessed = loan.getLoanTransactions().stream()
                     .filter(transaction -> transaction.getTransactionDate().isBefore(transactionDate))
@@ -2262,6 +2263,32 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             }
             loanBalanceService.updateLoanSummaryDerivedFields(loan);
         }
+    }
+
+    /**
+     * Adds back the installments that both start and fall due on the charge-off date.
+     * <p>
+     * {@link Loan#getInstallmentsUpToTransactionDate(LocalDate)} keeps an installment only when the transaction date is
+     * strictly after its start date, so a zero-length installment starting on the charge-off date is left out and gets
+     * dropped from the rebuilt schedule. That is exactly the shape of the down payment installment of a tranche
+     * disbursed on the charge-off date: removing it strands the down payment already allocated to it, which the loan
+     * summary then reports as a phantom overpayment.
+     */
+    private void keepInstallmentsStartingOnTransactionDate(final List<LoanRepaymentScheduleInstallment> installments,
+            final List<LoanRepaymentScheduleInstallment> installmentsUpToTransactionDate, final LocalDate transactionDate) {
+        final List<LoanRepaymentScheduleInstallment> missingInstallments = installments.stream().filter(
+                installment -> transactionDate.equals(installment.getFromDate()) && transactionDate.equals(installment.getDueDate()))
+                .filter(installment -> installmentsUpToTransactionDate.stream()
+                        .noneMatch(i -> i.getInstallmentNumber().equals(installment.getInstallmentNumber())))
+                .toList();
+
+        if (missingInstallments.isEmpty()) {
+            return;
+        }
+
+        installmentsUpToTransactionDate.addAll(missingInstallments);
+        // Callers rely on the list being ordered by installment number to derive the next free number.
+        installmentsUpToTransactionDate.sort(Comparator.comparing(LoanRepaymentScheduleInstallment::getInstallmentNumber));
     }
 
     private void handleZeroInterestChargeOff(final LoanTransaction loanTransaction, final TransactionCtx transactionCtx) {
@@ -2717,10 +2744,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
             // Clear any previously skipped installments before re-evaluating
             ProgressiveTransactionCtx progressiveTransactionCtx = (ProgressiveTransactionCtx) ctx;
             progressiveTransactionCtx.getSkipRepaymentScheduleInstallments().clear();
+            // The skip list must exclude an installment from re-selection in both branches: a not-fully-paid
+            // installment which could not absorb any amount in a previous iteration (e.g. its model dues diverge
+            // from the schedule by a rounding cent, or it is not represented in the interest schedule model) would
+            // otherwise be selected again forever with zero allocation progress until the LoopGuard aborts.
             paymentAllocationContext
                     .setInAdvanceInstallmentsFilteringRules(installment -> loanTransaction.isBefore(installment.getDueDate())
-                            && (installment.isNotFullyPaidOff() || (installment.isDueBalanceZero()
-                                    && !progressiveTransactionCtx.getSkipRepaymentScheduleInstallments().contains(installment))));
+                            && !progressiveTransactionCtx.getSkipRepaymentScheduleInstallments().contains(installment)
+                            && (installment.isNotFullyPaidOff() || installment.isDueBalanceZero()));
         } else {
             paymentAllocationContext.setInAdvanceInstallmentsFilteringRules(
                     installment -> loanTransaction.isBefore(installment.getDueDate()) && installment.isNotFullyPaidOff());
@@ -2731,6 +2762,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                         && context.getCtx().getInstallments().stream().anyMatch(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
                         && context.getTransactionAmountUnprocessed().isGreaterThanZero(), //
                 context -> {
+                    final Money unprocessedAtIterationStart = context.getTransactionAmountUnprocessed();
                     LoanRepaymentScheduleInstallment oldestPastDueInstallment = context.getCtx().getInstallments().stream()
                             .filter(LoanRepaymentScheduleInstallment::isNotFullyPaidOff)
                             .filter(e -> context.getLoanTransaction().isAfter(e.getDueDate()))
@@ -2886,6 +2918,14 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                 }
                             }
                         }
+                    }
+                    if (isInterestRecalculationSupported(ctx, loanTransaction.getLoan()) && !inAdvanceInstallments.isEmpty() && context
+                            .getTransactionAmountUnprocessed().getAmount().compareTo(unprocessedAtIterationStart.getAmount()) == 0) {
+                        // Nothing could be allocated to the selected in-advance installments in this iteration. The
+                        // selection is deterministic, so re-running the same iteration would allocate nothing again;
+                        // mark them as skipped to let the selector move on to the remaining installments instead of
+                        // spinning until the LoopGuard aborts the whole transaction.
+                        ((ProgressiveTransactionCtx) ctx).getSkipRepaymentScheduleInstallments().addAll(inAdvanceInstallments);
                     }
                 });
         return paymentAllocationContext.getTransactionAmountUnprocessed();

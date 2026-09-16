@@ -84,11 +84,29 @@ jobs:
             sleep 2
           done
 
+      # This job runs a Gradle build JVM alongside a backend started by devRun. The build JVM
+      # only configures the project and forks that backend, so 2g is ample.
+      - name: Apply Gradle memory budget
+        uses: ./.github/actions/gradle-memory-budget
+        with:
+          max-heap: '2g'
+          workers-max: '2'
+
       - name: Init base schema
         working-directory: baseline
         run: |
           ./gradlew --no-daemon createPGDB -PdbName=fineract_tenants
           ./gradlew --no-daemon createPGDB -PdbName=$DB_NAME
+
+      # Compile the baseline up front. Otherwise devRun compiles it inside its own build
+      # session and Gradle keeps those forked compiler daemons alive for the whole time the
+      # backend runs. The baseline checkout also predates the compiler heap cap in
+      # build.gradle, so bound its javac processes here.
+      - name: Compile baseline backend
+        working-directory: baseline
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx2g
+        run: ./gradlew --no-daemon :fineract-provider:classes
 
       - name: Print checked out revisions
         env:
@@ -113,6 +131,8 @@ jobs:
 
       - name: Start backend on base commit
         working-directory: baseline
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx3g
         run: |
           ./gradlew --no-daemon :fineract-provider:devRun --args="\
           --spring.datasource.hikari.driverClassName=org.postgresql.Driver \
@@ -162,6 +182,8 @@ jobs:
           sleep 10
 
       - name: Start backend on merged PR commit
+        env:
+          JAVA_TOOL_OPTIONS: -Xmx3g
         run: |
           ./gradlew --no-daemon :fineract-provider:devRun --args="\
           --spring.datasource.hikari.driverClassName=org.postgresql.Driver \

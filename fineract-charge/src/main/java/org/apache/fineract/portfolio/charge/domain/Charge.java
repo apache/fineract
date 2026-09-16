@@ -313,6 +313,10 @@ public class Charge extends AbstractPersistableCustom<Long> {
         return ChargeAppliesTo.fromInt(this.chargeAppliesTo).isLoanCharge();
     }
 
+    public boolean isWorkingCapitalLoanCharge() {
+        return ChargeAppliesTo.fromInt(this.chargeAppliesTo).isWorkingCapitalLoanCharge();
+    }
+
     public boolean isAllowedLoanChargeTime() {
         return ChargeTimeType.fromInt(this.chargeTimeType).isAllowedLoanChargeTime();
     }
@@ -424,17 +428,9 @@ public class Charge extends AbstractPersistableCustom<Long> {
                     baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
                             .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
                 }
-            } else if (ChargeAppliesTo.WORKING_CAPITAL_LOAN.getValue().equals(this.chargeAppliesTo)) {
+            } else if (isWorkingCapitalLoanCharge()) {
                 baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(chargeTimeType).notNull()
-                        .isOneOfTheseValues(ChargeTimeType.validWorkingCapitalLoanValues());
-
-                Object[] validCalculationTypeValues = new Object[] {};
-                if (ChargeTimeType.SPECIFIED_DUE_DATE.getValue().equals(chargeTimeType)) {
-                    validCalculationTypeValues = ChargeCalculationType.validValuesForWorkingCapitalLoanSpecifiedDueDate();
-                }
-                baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(chargeCalculation).notNull()
-                        .isOneOfTheseValues(validCalculationTypeValues);
-
+                        .isOneOfTheseValues(ChargeTimeType.validWorkingCapitalLoanProductValues());
             } else if (isClientCharge() && !isAllowedLoanChargeTime()) {
                 baseDataValidator.reset().parameter(CHARGE_TIME_PARAM_NAME).value(this.chargeTimeType)
                         .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.client");
@@ -523,14 +519,29 @@ public class Charge extends AbstractPersistableCustom<Long> {
             }
         }
 
-        // validate only for loan charge
-        if (isLoanCharge()) {
-            final String paymentModeParamName = "chargePaymentMode";
-            if (command.isChangeInIntegerParameterNamed(paymentModeParamName, this.chargePaymentMode)) {
-                final Integer newValue = command.integerValueOfParameterNamed(paymentModeParamName);
+        if (isWorkingCapitalLoanCharge()
+                && (actualChanges.containsKey(CHARGE_TIME_PARAM_NAME) || actualChanges.containsKey(CHARGE_CALCULATION_TYPE_PARAM_NAME))) {
+            baseDataValidator.reset().parameter(CHARGE_CALCULATION_TYPE_PARAM_NAME).value(this.chargeCalculation).notNull()
+                    .isOneOfTheseValues(ChargeCalculationType.validValuesForWorkingCapitalLoan(this.chargeTimeType));
+        }
+
+        final String paymentModeParamName = "chargePaymentMode";
+        if ((isLoanCharge() || isWorkingCapitalLoanCharge()) && command.hasParameter(paymentModeParamName)) {
+            Integer newValue = command.integerValueOfParameterNamed(paymentModeParamName);
+            final int errorsBefore = dataValidationErrors.size();
+            if (isWorkingCapitalLoanCharge()) {
+                // The charges API drops JSON nulls before the command is built, so a null only arrives from another
+                // caller; it is treated as the create default rather than rejected.
+                newValue = newValue == null ? ChargePaymentMode.REGULAR.getValue() : newValue;
+                baseDataValidator.reset().parameter(paymentModeParamName).value(newValue)
+                        .isOneOfTheseValues(ChargePaymentMode.validValuesForWorkingCapitalLoan());
+            } else {
+                baseDataValidator.reset().parameter(paymentModeParamName).value(newValue).notNull();
+            }
+            if (dataValidationErrors.size() == errorsBefore && !newValue.equals(this.chargePaymentMode)) {
                 actualChanges.put(paymentModeParamName, newValue);
                 actualChanges.put(LOCALE_PARAM_NAME, locale.getLanguage());
-                this.chargePaymentMode = ChargePaymentMode.fromInt(newValue).getValue();
+                this.chargePaymentMode = newValue;
             }
         }
 
@@ -602,10 +613,10 @@ public class Charge extends AbstractPersistableCustom<Long> {
 
         }
 
-        if (this.penalty && ChargeTimeType.fromInt(this.chargeTimeType).isTimeOfDisbursement()) {
+        if (!isWorkingCapitalLoanCharge() && this.penalty && ChargeTimeType.fromInt(this.chargeTimeType).isTimeOfDisbursement()) {
             throw new ChargeDueAtDisbursementCannotBePenaltyException(this.name);
         }
-        if (!penalty && ChargeTimeType.fromInt(this.chargeTimeType).isOverdueInstallment()) {
+        if (!isWorkingCapitalLoanCharge() && !penalty && ChargeTimeType.fromInt(this.chargeTimeType).isOverdueInstallment()) {
             throw new ChargeMustBePenaltyException(name);
         }
 

@@ -352,11 +352,11 @@ Feature: Working Capital Loan Charge-off
     Then Working Capital loan status will be "ACTIVE"
     Given A code value "Fraud" exists for code name "ChargeOffReasons"
     And Admin sets the business date to "10 January 2026"
-    When Admin retrieves the working capital loan action template with templateType "chargeOff"
-    # chargeOffAmount is the current outstanding balance; chargeOffDate defaults to the business date.
+    When Admin retrieves the working capital loan transaction template with command "chargeOff"
+    # expectedAmount is the current outstanding balance; chargeOffDate defaults to the business date.
     Then The working capital loan charge-off template has the following data:
-      | chargeOffAmount | chargeOffDate | currency | chargeOffReasonOptionsPresent |
-      | 100.0           | 2026-01-10    | EUR      | true                          |
+      | expectedAmount | chargeOffDate | currency | chargeOffReasonOptionsPresent |
+      | 100.0          | 2026-01-10    | EUR      | true                          |
 
   @TestRailId:C93940
   Scenario: Verify Working Capital Charge-off transactions - UC18: cannot undo charge-off when a charge adjustment is posted on the same day after the charge-off (Negative)
