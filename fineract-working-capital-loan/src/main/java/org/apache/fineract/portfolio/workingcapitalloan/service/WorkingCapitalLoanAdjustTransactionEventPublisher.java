@@ -53,6 +53,19 @@ public class WorkingCapitalLoanAdjustTransactionEventPublisher {
                 WorkingCapitalLoanAdjustTransactionBusinessEvent.Data.reversal(snapshot), wcLoanId));
     }
 
+    public void publishAdjustment(final Long wcLoanId, final WorkingCapitalLoanTransaction reversedTransaction,
+            final WorkingCapitalLoanTransaction newTransaction) {
+        if (!isPostingEnabled()) {
+            return;
+        }
+        businessEventNotifierService
+                .notifyPostBusinessEvent(
+                        new WorkingCapitalLoanAdjustTransactionBusinessEvent(
+                                new WorkingCapitalLoanAdjustTransactionBusinessEvent.Data(
+                                        transactionDataFactory.create(reversedTransaction), transactionDataFactory.create(newTransaction)),
+                                wcLoanId));
+    }
+
     private boolean isPostingEnabled() {
         return businessEventNotifierService.isExternalEventPostingEnabled(WorkingCapitalLoanAdjustTransactionBusinessEvent.TYPE);
     }
