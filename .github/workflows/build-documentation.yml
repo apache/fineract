@@ -52,7 +52,7 @@ jobs:
           max-heap: '4g'
           workers-max: '2'
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: 22
       - name: Configure vega-cli
