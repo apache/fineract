@@ -229,6 +229,7 @@ public abstract class TestContextKey {
     public static final String CHARGE_FOR_WORKING_CAPITAL_SPECIFIED_DUE_DATE_PENALTY_CREATE_RESPONSE = "ChargeForWorkingCapitalSpecifiedDueDatePenaltyCreateResponse";
     public static final String LOAN_RESPONSE = "loanResponse";
     public static final String LOAN_REPAYMENT_UNDO_RESPONSE = "loanRepaymentUndoResponse";
+    public static final String WORKING_CAPITAL_LOAN_ADJUST_TRANSACTION_RESPONSE = "workingCapitalLoanAdjustTransactionResponse";
     public static final String LOAN_CAPITALIZED_INCOME_ADJUSTMENT_UNDO_RESPONSE = "loanCapitalizedIncomeAdjustmentUndoResponse";
     public static final String LOAN_TRANSACTION_UNDO_RESPONSE = "loanTransactionUndoResponse";
     public static final String LOAN_CHARGEBACK_RESPONSE = "loanChargebackResponse";

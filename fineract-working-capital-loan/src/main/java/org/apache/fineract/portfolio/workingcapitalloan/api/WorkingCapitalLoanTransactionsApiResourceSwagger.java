@@ -238,13 +238,33 @@ public final class WorkingCapitalLoanTransactionsApiResourceSwagger {
         public String resourceExternalId;
     }
 
-    @Schema(description = "Request for working capital loan transaction command execution")
+    @Schema(description = "Request for working capital loan transaction execution (undo / adjust). "
+            + "For command=undo use only note and reversalExternalId "
+            + "(transactionDate / transactionAmount / externalId / paymentDetails are ignored if sent).")
     public static final class ExecuteWorkingCapitalLoanTransactionCommandRequest {
 
         private ExecuteWorkingCapitalLoanTransactionCommandRequest() {}
 
-        @Schema(example = "loan-ext-001")
+        @Schema(example = "en")
+        public String locale;
+        @Schema(example = "dd MMMM yyyy")
+        public String dateFormat;
+        @Schema(example = "10 January 2026", description = "Required when transactionAmount > 0: date of the replacement transaction. "
+                + "Optional when transactionAmount is 0 (undo). For CHARGE_ADJUSTMENT must not be before the charge due date.")
+        public String transactionDate;
+        @Schema(example = "0", description = "Zero reverses the existing transaction (same as undo). A positive amount reverses it and creates a replacement")
+        public BigDecimal transactionAmount;
+        @Schema(example = "random text")
+        public String note;
+        @Schema(example = "replacement-ext-001", description = "Optional external id for the replacement transaction when transactionAmount > 0 "
+                + "(same as term-loan adjust). The reversed transaction keeps its original external id. "
+                + "If omitted and auto-generation is enabled, a new id is generated for the replacement.")
+        public String externalId;
+        @Schema(example = "loan-ext-001", description = "Optional external id stamped on the reversal of the adjusted transaction")
         public String reversalExternalId;
+        @Schema(description = "Optional nested payment details for the replacement when transactionAmount > 0. "
+                + "If omitted, values are copied into a new PaymentDetail row from the original transaction.")
+        public PostWorkingCapitalLoanTransactionsPaymentDetailRequest paymentDetails;
     }
 
     @Schema(description = "Response for working capital loan transaction command execution")
