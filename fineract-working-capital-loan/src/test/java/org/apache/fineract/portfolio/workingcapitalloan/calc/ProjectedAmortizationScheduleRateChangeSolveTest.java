@@ -65,7 +65,7 @@ class ProjectedAmortizationScheduleRateChangeSolveTest {
     }
 
     private ProjectedAmortizationScheduleModel modelWithRateChange() {
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateEir(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
                 RATE, DAY_COUNT, DISBURSEMENT_DATE, MC, CURRENCY, DISBURSEMENT_DATE);
         model.applyRateChange(NEW_RATE, RATE_CHANGE_DATE, RATE_CHANGE_DATE);
         return model;
@@ -98,7 +98,7 @@ class ProjectedAmortizationScheduleRateChangeSolveTest {
 
     @Test
     void rateChangeSolveOn_changeDatedPastTheScheduleEnd_isRecordedOnTheLastScheduledDay() {
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateEir(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
                 RATE, DAY_COUNT, DISBURSEMENT_DATE, MC, CURRENCY, DISBURSEMENT_DATE);
         final LocalDate lastScheduledDay = model.scheduledMaturityDate();
         final LocalDate pastTheEnd = lastScheduledDay.plusDays(30);
@@ -116,7 +116,7 @@ class ProjectedAmortizationScheduleRateChangeSolveTest {
 
     @Test
     void rateChangeSolveOn_scheduleWithNoRateChange_returnsNull() {
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generateEir(DISCOUNT_FEE, NET_DISBURSEMENT, TPV,
                 RATE, DAY_COUNT, DISBURSEMENT_DATE, MC, CURRENCY, DISBURSEMENT_DATE);
 
         assertNull(model.rateChangeSolveOn(RATE_CHANGE_DATE));

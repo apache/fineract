@@ -23,6 +23,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 
 /**
  * The amortization parameters of a schedule: what the borrower is billed each day, how many days that takes, what the
@@ -34,9 +35,11 @@ import java.util.List;
  * left at the day it starts.
  *
  * <p>
- * The rate starts as the IRR of the exact cash flow the borrower will pay, closing remainder included, and is then put
- * through the annual rate the loan is published at: rounded to the reported scale a year and spread back over the day
- * count. The schedule therefore discounts on the rate the loan reports rather than on one a few digits away from it.
+ * Under EIR the rate starts as the IRR of the exact cash flow the borrower will pay, closing remainder included, and is
+ * then put through the annual rate the loan is published at: rounded to the reported scale a year and spread back over
+ * the day count. The schedule therefore discounts on the rate the loan reports rather than on one a few digits away
+ * from it. A FLAT schedule earns a fixed share of every payment instead and solves no rate: it is sized the same way
+ * and both its rates are {@code null}.
  */
 final class AmortizationParams {
 
@@ -94,19 +97,42 @@ final class AmortizationParams {
         return rounded;
     }
 
+    static boolean isFlat(final WorkingCapitalAmortizationType amortizationType) {
+        return amortizationType != null && amortizationType.isFlat();
+    }
+
+    /**
+     * {@code discountFee / (netDisbursement + discountFee)}: the share of every payment a FLAT schedule earns as fee;
+     * {@code null} for any other type.
+     */
+    static BigDecimal flatRatio(final WorkingCapitalAmortizationType amortizationType, final BigDecimal netDisbursement,
+            final BigDecimal discountFee, final MathContext mc) {
+        if (!isFlat(amortizationType)) {
+            return null;
+        }
+        final BigDecimal grossPayable = netDisbursement.add(discountFee, mc);
+        return grossPayable.signum() == 0 ? BigDecimal.ZERO : discountFee.divide(grossPayable, mc);
+    }
+
     /**
      * Solves the parameters for a balance and the fee still unearned against it.
      *
      * @throws IllegalArgumentException
      *             when the inputs cannot produce a payable schedule
      */
-    static Solved solve(final BigDecimal balance, final BigDecimal unearnedFee, final BigDecimal totalPaymentVolume,
-            final BigDecimal periodPaymentRate, final int npvDayCount, final int currencyScale, final MathContext mc) {
+    static Solved solve(final WorkingCapitalAmortizationType amortizationType, final BigDecimal balance, final BigDecimal unearnedFee,
+            final BigDecimal totalPaymentVolume, final BigDecimal periodPaymentRate, final int npvDayCount, final int currencyScale,
+            final MathContext mc) {
         final BigDecimal daily = dailyPayment(totalPaymentVolume, periodPaymentRate, npvDayCount, currencyScale, mc);
         if (daily.signum() <= 0) {
             throw new IllegalArgumentException("daily payment must be positive (check totalPaymentVolume and periodPaymentRate)");
         }
-        final BigDecimal grossPayable = balance.add(unearnedFee, mc);
+        final boolean flat = isFlat(amortizationType);
+        // A FLAT schedule closes on the day the money collected, rounded to the currency, reaches the gross payable, so
+        // its term is sized from the same rounded figure: a residual in the last decimal place of an exact balance
+        // must not claim a closing day that bills nothing.
+        final BigDecimal exactGross = balance.add(unearnedFee, mc);
+        final BigDecimal grossPayable = flat ? exactGross.setScale(currencyScale, mc.getRoundingMode()) : exactGross;
         final BigDecimal fractionalTerm = grossPayable.divide(daily, mc);
         // Checked on the BigDecimal so int overflow cannot slip past the cap; the rate solver may still succeed on an
         // over-cap term via its zero-rate shortcut, so relying on that call to fail is not enough.
@@ -121,6 +147,9 @@ final class AmortizationParams {
         // The closing day pays only the remainder of the gross payable after the (term - 1) full daily payments. When
         // the schedule divides evenly this equals the daily payment.
         final BigDecimal closing = grossPayable.subtract(daily.multiply(BigDecimal.valueOf(term - 1L), mc), mc);
+        if (flat) {
+            return new Solved(daily, closing, term, null, null);
+        }
         final BigDecimal solvedEir = TvmFunctions.irr(cashFlows(balance, daily, closing, term), mc);
         final BigDecimal calculatedAnnualEir = calculatedAnnualEir(solvedEir, npvDayCount, mc);
         return new Solved(daily, closing, term, periodicRateFrom(calculatedAnnualEir, npvDayCount, mc), calculatedAnnualEir);
@@ -149,10 +178,10 @@ final class AmortizationParams {
      *            how many days the solve takes to close, and so how long the rate is solved over
      * @param eir
      *            the periodic effective rate the schedule discounts on: {@code calculatedAnnualEir} spread back over
-     *            the day count
+     *            the day count; {@code null} for a FLAT schedule
      * @param calculatedAnnualEir
      *            the annual rate the schedule was priced at, compounded over the day count rather than a calendar year
-     *            and held as a percentage
+     *            and held as a percentage; {@code null} for a FLAT schedule
      */
     record Solved(BigDecimal dailyPayment, BigDecimal closingPayment, int term, BigDecimal eir, BigDecimal calculatedAnnualEir) {
     }

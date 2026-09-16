@@ -46,6 +46,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapital
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanPeriodPaymentRateChangeRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanTransactionRepository;
+import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalAmortizationType;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,6 +86,7 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         final MathContext mc = MoneyHelper.getMathContext();
 
         final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(//
+                amortizationTypeOf(loan), //
                 request.getDiscountFeeAmount(), //
                 request.getNetDisbursementAmount(), //
                 request.getTotalPaymentVolume(), //
@@ -130,11 +132,17 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         Validate.notNull(periodPaymentRate, "periodPaymentRate must not be null");
         Validate.notNull(npvDayCount, "npvDayCount must not be null");
 
-        assertEirCalculable(discount, disbursedAmount, totalPaymentVolume, periodPaymentRate, npvDayCount,
+        final WorkingCapitalAmortizationType amortizationType = amortizationTypeOf(loan);
+        assertScheduleCalculable(amortizationType, discount, disbursedAmount, totalPaymentVolume, periodPaymentRate, npvDayCount,
                 loan.getLoanProduct().getCurrency(), mc);
 
-        return ProjectedAmortizationScheduleModel.generate(discount, disbursedAmount, totalPaymentVolume, periodPaymentRate, npvDayCount,
-                disbursementDate, mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan), DateUtils.getBusinessLocalDate());
+        return ProjectedAmortizationScheduleModel.generate(amortizationType, discount, disbursedAmount, totalPaymentVolume,
+                periodPaymentRate, npvDayCount, disbursementDate, mc, WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan),
+                DateUtils.getBusinessLocalDate());
+    }
+
+    private static WorkingCapitalAmortizationType amortizationTypeOf(final WorkingCapitalLoan loan) {
+        return loan.getLoanProductRelatedDetails() != null ? loan.getLoanProductRelatedDetails().getAmortizationType() : null;
     }
 
     /**
@@ -272,21 +280,23 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         Validate.notNull(expectedDisbursementDate, "expectedDisbursementDate must not be null");
         Validate.isTrue(netDisbursementAmount.signum() > 0, "net disbursement amount for schedule must be positive");
 
-        assertEirCalculable(discount, netDisbursementAmount, totalPaymentVolume, periodPaymentRate, npvDayCount,
+        final WorkingCapitalAmortizationType amortizationType = amortizationTypeOf(loan);
+        assertScheduleCalculable(amortizationType, discount, netDisbursementAmount, totalPaymentVolume, periodPaymentRate, npvDayCount,
                 loan.getLoanProduct().getCurrency(), mc);
 
-        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(discount, netDisbursementAmount,
-                totalPaymentVolume, periodPaymentRate, npvDayCount, expectedDisbursementDate, mc,
+        final ProjectedAmortizationScheduleModel model = ProjectedAmortizationScheduleModel.generate(amortizationType, discount,
+                netDisbursementAmount, totalPaymentVolume, periodPaymentRate, npvDayCount, expectedDisbursementDate, mc,
                 WorkingCapitalLoanCurrencyResolver.resolveCurrency(loan), DateUtils.getBusinessLocalDate());
         scheduleRepositoryWrapper.writeModel(loan, model);
     }
 
     /** Guards paths that bypass request validation, before {@code generate()} materialises the full schedule. */
-    private void assertEirCalculable(final BigDecimal discount, final BigDecimal netDisbursementAmount, final BigDecimal totalPaymentVolume,
-            final BigDecimal periodPaymentRate, final int npvDayCount, final MonetaryCurrency currency, final MathContext mc) {
-        if (!ProjectedAmortizationScheduleModel.isEirCalculable(discount, netDisbursementAmount, totalPaymentVolume, periodPaymentRate,
-                npvDayCount, currency, mc)) {
-            throw new WorkingCapitalLoanEirNotCalculableException();
+    private void assertScheduleCalculable(final WorkingCapitalAmortizationType amortizationType, final BigDecimal discount,
+            final BigDecimal netDisbursementAmount, final BigDecimal totalPaymentVolume, final BigDecimal periodPaymentRate,
+            final int npvDayCount, final MonetaryCurrency currency, final MathContext mc) {
+        if (!ProjectedAmortizationScheduleModel.isScheduleCalculable(amortizationType, discount, netDisbursementAmount, totalPaymentVolume,
+                periodPaymentRate, npvDayCount, currency, mc)) {
+            throw WorkingCapitalLoanEirNotCalculableException.forType(amortizationType);
         }
     }
 
@@ -400,7 +410,7 @@ public class WorkingCapitalLoanAmortizationScheduleWriteServiceImpl implements W
         try {
             model = reconstructScheduleModel(loan, payments, adjustments);
         } catch (final IllegalStateException | IllegalArgumentException | ArithmeticException e) {
-            throw new WorkingCapitalLoanEirNotCalculableException(e);
+            throw WorkingCapitalLoanEirNotCalculableException.forType(amortizationTypeOf(loan), e);
         }
 
         scheduleRepositoryWrapper.writeModel(loan, model);
