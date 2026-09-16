@@ -45,14 +45,6 @@ public class CollateralCommand {
         return this.collateralTypeId;
     }
 
-    public BigDecimal getValue() {
-        return this.value;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
     public void validateForCreate() {
         final List<ApiParameterError> dataValidationErrors = new ArrayList<>();
 
