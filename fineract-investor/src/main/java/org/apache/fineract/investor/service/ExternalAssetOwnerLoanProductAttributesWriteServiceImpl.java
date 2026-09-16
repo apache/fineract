@@ -63,6 +63,7 @@ public class ExternalAssetOwnerLoanProductAttributesWriteServiceImpl implements 
     private final ExternalAssetOwnerLoanProductAttributeProvider attributeProvider;
 
     @Override
+    @CacheEvict(cacheNames = "externalAssetOwnerLoanProductAttributes", allEntries = true)
     public CommandProcessingResult createExternalAssetOwnerLoanProductAttribute(JsonCommand command) {
         final JsonElement json = fromApiJsonHelper.parse(command.json());
         String attributeKey = fromApiJsonHelper.extractStringNamed(ExternalAssetOwnerLoanProductAttributeRequestParameters.ATTRIBUTE_KEY,
