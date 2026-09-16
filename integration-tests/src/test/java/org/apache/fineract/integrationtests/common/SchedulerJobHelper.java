@@ -144,7 +144,16 @@ public final class SchedulerJobHelper {
      */
     public static void executeAndAwaitJob(String jobName) {
         int jobId = getSchedulerJobIdByName(jobName);
-        executeAndAwaitJob(jobId, jobId, SchedulerJobHelper::runSchedulerJob);
+        JobDetailHistoryDataSwagger finalRunHistory = executeAndAwaitJob(jobId, jobId, SchedulerJobHelper::runSchedulerJob);
+        String status = finalRunHistory.getStatus();
+        if (!"success".equals(status)) {
+            fail("Job status is not success for jobId=" + jobId + ": " + finalRunHistory);
+        }
+    }
+
+    public static JobDetailHistoryDataSwagger executeAndAwaitJobWithResult(String jobName) {
+        int jobId = getSchedulerJobIdByName(jobName);
+        return executeAndAwaitJob(jobId, jobId, SchedulerJobHelper::runSchedulerJob);
     }
 
     /**
@@ -157,10 +166,14 @@ public final class SchedulerJobHelper {
      */
     public static void executeAndAwaitJobByShortName(String shortName) {
         Long jobId = getSchedulerJobIdByShortName(shortName);
-        executeAndAwaitJob(jobId, shortName, SchedulerJobHelper::runSchedulerJobByShortName);
+        JobDetailHistoryDataSwagger finalRunHistory = executeAndAwaitJob(jobId, shortName, SchedulerJobHelper::runSchedulerJobByShortName);
+        String status = finalRunHistory.getStatus();
+        if (!"success".equals(status)) {
+            fail("Job status is not success for jobId=" + jobId + ": " + finalRunHistory);
+        }
     }
 
-    private static <T> void executeAndAwaitJob(long jobId, T jobParam, Consumer<T> runSchedulerJob) {
+    private static <T> JobDetailHistoryDataSwagger executeAndAwaitJob(long jobId, T jobParam, Consumer<T> runSchedulerJob) {
         // Stop the Scheduler while we manually trigger execution of job, to
         // avoid side effects and simplify debugging when readings logs
         updateSchedulerStatus(false);
@@ -169,10 +182,10 @@ public final class SchedulerJobHelper {
         // Executing Scheduler Job
         runSchedulerJob.accept(jobParam);
 
-        awaitJob(jobId, previousRunHistoryId);
+        return awaitJob(jobId, previousRunHistoryId);
     }
 
-    private static void awaitJob(long jobId, Long previousRunHistoryId) {
+    private static JobDetailHistoryDataSwagger awaitJob(long jobId, Long previousRunHistoryId) {
         final Duration timeout = Duration.ofMinutes(2);
         final Duration pause = Duration.ofSeconds(1);
         // Await a new completed run-history entry for this job. The history id is
@@ -194,13 +207,7 @@ public final class SchedulerJobHelper {
 
         // Verify triggerType
         MatcherAssert.assertThat(finalRunHistory.getTriggerType(), is("application"));
-
-        // Verify status & propagate jobRunErrorMessage and/or jobRunErrorLog
-        // (if any)
-        String status = finalRunHistory.getStatus();
-        if (!"success".equals(status)) {
-            fail("Job status is not success for jobId=" + jobId + ": " + finalRunHistory);
-        }
+        return finalRunHistory;
     }
 
     private static Long getRunHistoryId(JobDetailHistoryDataSwagger runHistory) {

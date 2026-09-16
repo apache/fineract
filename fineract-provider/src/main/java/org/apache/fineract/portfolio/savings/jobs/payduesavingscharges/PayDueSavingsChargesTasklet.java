@@ -18,6 +18,7 @@
  */
 package org.apache.fineract.portfolio.savings.jobs.payduesavingscharges;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.apache.fineract.infrastructure.core.exception.PlatformApiDataValidati
 import org.apache.fineract.infrastructure.core.service.ThreadLocalContextUtil;
 import org.apache.fineract.infrastructure.jobs.exception.JobExecutionException;
 import org.apache.fineract.portfolio.savings.data.SavingsAccountAnnualFeeData;
+import org.apache.fineract.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.apache.fineract.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.springframework.batch.core.StepContribution;
@@ -47,17 +49,30 @@ public class PayDueSavingsChargesTasklet implements Tasklet {
         final Collection<SavingsAccountAnnualFeeData> chargesDueData = savingsAccountChargeReadPlatformService.retrieveChargesWithDue();
         List<Throwable> exceptions = new ArrayList<>();
         for (final SavingsAccountAnnualFeeData savingsAccountReference : chargesDueData) {
+            LocalDate installmentDueDate = savingsAccountReference.getNextAnnualFeeDueDate();
             try {
-                savingsAccountWritePlatformService.applyChargeDue(savingsAccountReference.getId(), savingsAccountReference.getAccountId());
+                LocalDate nextInstallmentDueDate;
+                do {
+                    nextInstallmentDueDate = savingsAccountWritePlatformService.applyChargeDue(savingsAccountReference.getId(),
+                            savingsAccountReference.getAccountId());
+                    if (nextInstallmentDueDate != null) {
+                        installmentDueDate = nextInstallmentDueDate;
+                    }
+                } while (nextInstallmentDueDate != null);
+            } catch (final InsufficientAccountBalanceException e) {
+                contribution.incrementWriteSkipCount();
+                log.warn("Skipped due savings charge {} for account {} ({}), installment due {}, because of insufficient balance: {}",
+                        savingsAccountReference.getId(), savingsAccountReference.getAccountId(), savingsAccountReference.getAccountNo(),
+                        installmentDueDate, e.getMessage());
             } catch (final PlatformApiDataValidationException e) {
-                exceptions.add(e);
+                exceptions.add(withChargeContext(savingsAccountReference, installmentDueDate, e));
                 final List<ApiParameterError> errors = e.getErrors();
                 for (final ApiParameterError error : errors) {
                     log.error("Apply Charges due for savings failed for account {} with message: {}",
                             savingsAccountReference.getAccountNo(), error.getDeveloperMessage(), e);
                 }
             } catch (final Exception ex) {
-                exceptions.add(ex);
+                exceptions.add(withChargeContext(savingsAccountReference, installmentDueDate, ex));
                 log.error("Apply Charges due for savings failed for account: {}", savingsAccountReference.getAccountNo(), ex);
             }
         }
@@ -67,5 +82,10 @@ public class PayDueSavingsChargesTasklet implements Tasklet {
             throw new JobExecutionException(exceptions);
         }
         return RepeatStatus.FINISHED;
+    }
+
+    private RuntimeException withChargeContext(SavingsAccountAnnualFeeData charge, LocalDate installmentDueDate, Exception cause) {
+        return new RuntimeException("Failed to process due savings charge " + charge.getId() + " for account " + charge.getAccountId()
+                + " (" + charge.getAccountNo() + "), installment due " + installmentDueDate + ": " + cause.getMessage(), cause);
     }
 }

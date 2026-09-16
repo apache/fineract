@@ -56,6 +56,7 @@ import org.apache.fineract.client.models.GetJournalEntriesTransactionIdResponse;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.GetStandingInstructionHistoryPageItemsResponse;
 import org.apache.fineract.client.models.GetStandingInstructionsStandingInstructionIdResponse;
+import org.apache.fineract.client.models.JobDetailHistoryDataSwagger;
 import org.apache.fineract.client.models.JournalEntryTransactionItem;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
@@ -546,52 +547,74 @@ public class SchedulerJobsTestResults extends IntegrationTest {
     }
 
     @Test
-    public void testApplyDueFeeChargesForSavingsJobOutcome() throws InterruptedException {
-        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+    public void testApplyDueFeeChargesForSavingsJobOutcome() {
+        try {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(true));
+            BusinessDateHelper.updateBusinessDate(BusinessDateType.BUSINESS_DATE, LocalDate.of(2013, 3, 25));
+            this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
 
-        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
-        Assertions.assertNotNull(clientID);
+            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+            final Integer partiallyFundedProductID = createSavingsProduct(requestSpec, responseSpec, "250");
+            final Integer fundedProductID = createSavingsProduct(requestSpec, responseSpec,
+                    ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
+            final Integer partiallyFundedSavingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID,
+                    partiallyFundedProductID, ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
+            final Integer fundedSavingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, fundedProductID,
+                    ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
 
-        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec,
-                ClientSavingsIntegrationTest.MINIMUM_OPENING_BALANCE);
-        Assertions.assertNotNull(savingsProductID);
+            final Integer weeklyChargeDefinitionId = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getSavingsWeeklyFeeJSON());
+            final Integer specifiedDueDateChargeDefinitionId = ChargesHelper.createCharges(requestSpec, responseSpec,
+                    ChargesHelper.getSavingsSpecifiedDueDateJSON());
+            final Integer recurringChargeId = this.savingsAccountHelper.addChargesForSavings(partiallyFundedSavingsId,
+                    weeklyChargeDefinitionId, true);
+            final Integer fundedChargeId = this.savingsAccountHelper.addChargesForSavings(fundedSavingsId,
+                    specifiedDueDateChargeDefinitionId, true);
 
-        final Integer savingsId = this.savingsAccountHelper.applyForSavingsApplication(clientID, savingsProductID,
-                ClientSavingsIntegrationTest.ACCOUNT_TYPE_INDIVIDUAL);
-        Assertions.assertNotNull(savingsProductID);
+            SavingsStatusChecker.verifySavingsIsApproved(this.savingsAccountHelper.approveSavings(partiallyFundedSavingsId));
+            SavingsStatusChecker.verifySavingsIsApproved(this.savingsAccountHelper.approveSavings(fundedSavingsId));
+            SavingsStatusChecker.verifySavingsIsActive(this.savingsAccountHelper.activateSavings(partiallyFundedSavingsId));
+            SavingsStatusChecker.verifySavingsIsActive(this.savingsAccountHelper.activateSavings(fundedSavingsId));
 
-        HashMap savingsStatusHashMap = SavingsStatusChecker.getStatusOfSavings(requestSpec, responseSpec, savingsId);
-        SavingsStatusChecker.verifySavingsIsPending(savingsStatusHashMap);
+            List<HashMap> partialTransactionsBefore = this.savingsAccountHelper.getSavingsTransactions(partiallyFundedSavingsId);
+            List<HashMap> fundedTransactionsBefore = this.savingsAccountHelper.getSavingsTransactions(fundedSavingsId);
 
-        final Integer specifiedDueDateChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
-                ChargesHelper.getSavingsSpecifiedDueDateJSON());
-        Assertions.assertNotNull(specifiedDueDateChargeId);
+            String jobName = "Pay Due Savings Charges";
+            JobDetailHistoryDataSwagger firstRun = SchedulerJobHelper.executeAndAwaitJobWithResult(jobName);
 
-        this.savingsAccountHelper.addChargesForSavings(savingsId, specifiedDueDateChargeId, true);
-        ArrayList<HashMap> chargesPendingState = this.savingsAccountHelper.getSavingsCharges(savingsId);
-        Assertions.assertEquals(1, chargesPendingState.size());
+            Assertions.assertEquals("success", firstRun.getStatus());
 
-        savingsStatusHashMap = this.savingsAccountHelper.approveSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsApproved(savingsStatusHashMap);
+            HashMap recurringChargeAfter = this.savingsAccountHelper.getSavingsCharge(partiallyFundedSavingsId, recurringChargeId);
+            HashMap fundedChargeAfter = this.savingsAccountHelper.getSavingsCharge(fundedSavingsId, fundedChargeId);
+            List<HashMap> partialTransactionsAfter = this.savingsAccountHelper.getSavingsTransactions(partiallyFundedSavingsId);
+            List<HashMap> fundedTransactionsAfter = this.savingsAccountHelper.getSavingsTransactions(fundedSavingsId);
 
-        savingsStatusHashMap = this.savingsAccountHelper.activateSavings(savingsId);
-        SavingsStatusChecker.verifySavingsIsActive(savingsStatusHashMap);
+            Assertions.assertEquals(50.0F,
+                    (Float) this.savingsAccountHelper.getSavingsSummary(partiallyFundedSavingsId).get("accountBalance"));
+            Assertions.assertEquals(200.0F, (Float) recurringChargeAfter.get("amountPaid"));
+            Assertions.assertEquals(100.0F, (Float) recurringChargeAfter.get("amountOutstanding"));
+            Assertions.assertEquals(List.of(2013, 1, 24), recurringChargeAfter.get("dueDate"));
+            Assertions.assertEquals(partialTransactionsBefore.size() + 2, partialTransactionsAfter.size());
 
-        HashMap summaryBefore = this.savingsAccountHelper.getSavingsSummary(savingsId);
+            Assertions.assertEquals(900.0F, (Float) this.savingsAccountHelper.getSavingsSummary(fundedSavingsId).get("accountBalance"));
+            Assertions.assertEquals(100.0F, (Float) fundedChargeAfter.get("amountPaid"));
+            Assertions.assertEquals(0.0F, (Float) fundedChargeAfter.get("amountOutstanding"));
+            Assertions.assertEquals(fundedTransactionsBefore.size() + 1, fundedTransactionsAfter.size());
 
-        String JobName = "Pay Due Savings Charges";
+            JobDetailHistoryDataSwagger secondRun = SchedulerJobHelper.executeAndAwaitJobWithResult(jobName);
 
-        SchedulerJobHelper.executeAndAwaitJob(JobName);
-        HashMap summaryAfter = this.savingsAccountHelper.getSavingsSummary(savingsId);
-
-        final HashMap chargeData = ChargesHelper.getChargeById(requestSpec, responseSpec, specifiedDueDateChargeId);
-
-        Float chargeAmount = (Float) chargeData.get("amount");
-
-        final Float balance = (Float) summaryBefore.get("accountBalance") - chargeAmount;
-
-        Assertions.assertEquals(balance, (Float) summaryAfter.get("accountBalance"),
-                "Verifying the Balance after running Pay due Savings Charges");
+            Assertions.assertEquals("success", secondRun.getStatus());
+            Assertions.assertEquals(50.0F,
+                    (Float) this.savingsAccountHelper.getSavingsSummary(partiallyFundedSavingsId).get("accountBalance"));
+            Assertions.assertEquals(partialTransactionsAfter.size(),
+                    this.savingsAccountHelper.getSavingsTransactions(partiallyFundedSavingsId).size());
+            Assertions.assertEquals(fundedTransactionsAfter.size(),
+                    this.savingsAccountHelper.getSavingsTransactions(fundedSavingsId).size());
+        } finally {
+            globalConfigurationHelper.updateGlobalConfiguration(GlobalConfigurationConstants.ENABLE_BUSINESS_DATE,
+                    new PutGlobalConfigurationsRequest().enabled(false));
+        }
     }
 
     @Test
