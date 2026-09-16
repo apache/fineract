@@ -257,6 +257,7 @@ jobs:
             -Pcucumber.tags="$REGRESSION_SAFETY_TAGS" \
             -x spotlessCheck \
             -x buildJavaSdk \
+            -x :fineract-e2e-tests-runner:allureReport \
             2>&1 | tee cucumber-instance1.log
 
           # Cucumber exits 0 when its tag expression matches nothing, so without this the
@@ -366,6 +367,7 @@ jobs:
             -Pcucumber.tags="$REGRESSION_SAFETY_TAGS" \
             -x spotlessCheck \
             -x buildJavaSdk \
+            -x :fineract-e2e-tests-runner:allureReport \
             2>&1 | tee cucumber-instance2.log
 
           # Cucumber exits 0 when its tag expression matches nothing, so without this the
@@ -440,6 +442,7 @@ jobs:
             -Pcucumber.tags="$REGRESSION_SAFETY_TAGS" \
             -x spotlessCheck \
             -x buildJavaSdk \
+            -x :fineract-e2e-tests-runner:allureReport \
             2>&1 | tee cucumber-instance3.log
 
           # Cucumber exits 0 when its tag expression matches nothing, so without this the
